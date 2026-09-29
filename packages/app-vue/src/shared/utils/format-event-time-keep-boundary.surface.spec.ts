@@ -10,8 +10,9 @@ describe('Planner event time formatting retirement (PLAN-4304)', () => {
     'utf8',
   );
 
-  it('uses one 24-hour FullCalendar event time contract for Day/Week/Month', () => {
-    expect(planner).toContain("eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false }");
+  it('keeps Planner time presentation on FullCalendar configuration instead of local formatters', () => {
+    expect(planner).toContain("slotHeaderFormat: { hour: '2-digit', minute: '2-digit', hour12: false }");
+    expect(planner).toContain('displayEventTime: false');
     expect(planner).not.toContain('function formatEventTime');
     expect(planner).not.toContain('formatLocalHHmm');
   });

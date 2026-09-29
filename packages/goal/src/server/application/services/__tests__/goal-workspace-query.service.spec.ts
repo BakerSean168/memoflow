@@ -12,7 +12,7 @@ function createGoal() {
     identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440001' as never,
     name: 'Ship Goal Workspace',
     summary: 'Compose owner-controlled context',
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
   });

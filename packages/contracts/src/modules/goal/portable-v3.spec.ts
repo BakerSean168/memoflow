@@ -12,7 +12,7 @@ function goal(
     name: ref,
     summary: null,
     status: GoalStatus.Planned,
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
     archived: false,
@@ -44,6 +44,17 @@ describe('Goal portable V3 contracts', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('decodes legacy V3 startDate exports as day-precision semantic starts', () => {
+    const value = goal('goals:1', 'goals:2', 'labels:1');
+    const { start: _start, ...legacy } = value;
+    const parsed = GoalPortablePayloadV3Schema.parse({
+      goals: [{ ...legacy, startDate: '2026-09-27' }],
+    });
+
+    expect(parsed.goals[0]?.start).toEqual({ kind: 'day', date: '2026-09-27' });
+    expect('startDate' in (parsed.goals[0] as object)).toBe(false);
   });
 
   it('requires Goal records and reviews to use owned Key Result references', () => {

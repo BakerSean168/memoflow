@@ -1,81 +1,144 @@
 <template>
-  <article
-    class="group border-b border-border/70 px-1 py-4 last:border-b-0"
-    data-testid="goal-progress-row"
-    :data-goal-id="goal.id"
+  <ActionableWrapper
+    :actions="actions"
+    wrapper-class="w-full"
+    more-button-position="center-right"
+    menu-width="w-40"
+    more-button-test-id="goal-row-more-actions"
+    :more-button-label="t('goal.list.moreActions')"
+    more-button-class="!border-transparent !bg-transparent !shadow-none !backdrop-blur-none hover:!bg-muted/70"
   >
-    <div class="flex items-start gap-3">
-      <button type="button" class="min-w-0 flex-1 text-left" @click="emit('view')">
-        <div class="flex items-start justify-between gap-4">
+    <article
+      class="border-b border-border/70 last:border-b-0"
+      data-testid="goal-progress-row"
+      :data-goal-id="goal.id"
+    >
+      <button
+        type="button"
+        class="w-full text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+        @click="emit('view')"
+      >
+        <div
+          class="hidden min-h-14 grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 px-3 py-2.5 pr-12 @2xl/panel:grid"
+          data-testid="goal-row-desktop"
+        >
           <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="truncate text-sm font-medium text-foreground" data-testid="goal-row-title">
+            <div class="flex min-w-0 items-center gap-2">
+              <h3
+                class="min-w-0 truncate text-sm font-medium text-foreground"
+                data-testid="goal-row-title"
+              >
                 {{ goal.name }}
               </h3>
               <Badge
                 v-if="statusLabel"
-                :variant="statusVariant"
-                class="h-5 px-1.5 py-0 text-[10px]"
+                variant="secondary"
+                class="h-5 shrink-0 px-1.5 py-0 text-[10px]"
               >
                 {{ statusLabel }}
               </Badge>
             </div>
+
             <div
-              class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"
+              v-if="goal.summary || visibleLabels.length"
+              class="mt-1 flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground"
             >
-              <template v-for="label in goal.labels" :key="label.id">
-                <span class="inline-flex items-center gap-1">
-                  <span
-                    v-if="label.color"
-                    class="h-2 w-2 rounded-full border border-border"
-                    :style="{ backgroundColor: label.color }"
-                    aria-hidden="true"
-                  />
-                  #{{ label.name }}
-                </span>
-              </template>
-              <span v-if="dateRangeText">{{ dateRangeText }}</span>
+              <span v-if="goal.summary" class="min-w-0 truncate">{{ goal.summary }}</span>
+              <span
+                v-for="label in visibleLabels"
+                :key="label.id"
+                class="inline-flex shrink-0 items-center gap-1"
+              >
+                <span
+                  v-if="label.color"
+                  class="h-1.5 w-1.5 rounded-full border border-border/70"
+                  :style="{ backgroundColor: label.color }"
+                  aria-hidden="true"
+                />
+                #{{ label.name }}
+              </span>
+              <span v-if="hiddenLabelCount" class="shrink-0">+{{ hiddenLabelCount }}</span>
             </div>
           </div>
-          <span class="shrink-0 text-sm font-semibold tabular-nums">{{ progress }}%</span>
+
+          <div
+            class="text-sm tabular-nums text-muted-foreground"
+            data-testid="goal-row-key-results"
+          >
+            {{ goal.completedKeyResults }} / {{ goal.totalKeyResults }}
+          </div>
+
+          <div
+            class="truncate text-sm tabular-nums"
+            :class="isPastTarget ? 'text-destructive/85' : 'text-muted-foreground'"
+            data-testid="goal-row-target"
+          >
+            {{ targetText || '—' }}
+            <span v-if="isPastTarget" class="sr-only"> {{ t('goal.list.pastTarget') }}</span>
+          </div>
+
+          <div
+            class="grid min-w-0 grid-cols-[2.5rem_5rem] items-center gap-2"
+            data-testid="goal-row-progress"
+          >
+            <span class="text-right text-sm font-medium tabular-nums text-foreground">
+              {{ progress }}%
+            </span>
+            <Progress :model-value="progress" class="h-1 w-full" />
+          </div>
         </div>
-        <Progress :model-value="progress" class="mt-3 h-1.5" />
-        <div class="mt-2 text-xs text-muted-foreground">
-          {{
-            t('goal.cards.keyResultsCount', {
-              done: goal.completedKeyResults,
-              total: goal.totalKeyResults,
-            })
-          }}
+
+        <div class="px-1 py-4 pr-12 @2xl/panel:hidden" data-testid="goal-row-compact">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <div class="flex min-w-0 items-center gap-2">
+                <h3 class="truncate text-sm font-medium text-foreground">{{ goal.name }}</h3>
+                <Badge
+                  v-if="statusLabel"
+                  variant="secondary"
+                  class="h-5 shrink-0 px-1.5 py-0 text-[10px]"
+                >
+                  {{ statusLabel }}
+                </Badge>
+              </div>
+              <p v-if="goal.summary" class="mt-1 truncate text-xs text-muted-foreground">
+                {{ goal.summary }}
+              </p>
+            </div>
+            <span class="shrink-0 text-sm font-semibold tabular-nums">{{ progress }}%</span>
+          </div>
+
+          <Progress :model-value="progress" class="mt-3 h-1.5" />
+
+          <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <span
+              >{{ goal.completedKeyResults }}/{{ goal.totalKeyResults }}
+              {{ t('goal.list.keyResultsColumn') }}</span
+            >
+            <span v-if="targetText" aria-hidden="true">·</span>
+            <span
+              v-if="targetText"
+              class="truncate tabular-nums"
+              :class="isPastTarget ? 'text-destructive/85' : ''"
+            >
+              {{ targetText }}
+              <span v-if="isPastTarget" class="sr-only"> {{ t('goal.list.pastTarget') }}</span>
+            </span>
+          </div>
         </div>
       </button>
-
-      <div
-        class="flex shrink-0 items-center gap-1 opacity-100 @2xl/panel:opacity-0 @2xl/panel:transition-opacity @2xl/panel:group-hover:opacity-100 @2xl/panel:group-focus-within:opacity-100"
-      >
-        <Button variant="ghost" size="xs" :aria-label="t('common.edit')" @click="emit('edit')">
-          {{ t('common.edit') }}
-        </Button>
-        <Button
-          variant="ghost"
-          size="xs"
-          class="text-destructive hover:text-destructive"
-          :aria-label="t('common.delete')"
-          @click="emit('delete')"
-        >
-          {{ t('common.delete') }}
-        </Button>
-      </div>
-    </div>
-  </article>
+    </article>
+  </ActionableWrapper>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Pencil, Trash2 } from '@lucide/vue';
 import { goalTimeframeLabel, isPastGoalTarget, type GoalClientDTO } from '@memoflow/contracts/goal';
-import { Badge, Button, Progress } from '@memoflow/ui-vue-shadcn';
-import { formatProductYmd, getProductTodayYmd } from '../../../shared/utils/product-time';
+import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
+import { ActionableWrapper, type MenuAction } from '../../../components/shared';
+import { getProductTodayYmd } from '../../../shared/utils/product-time';
 import { getGoalOverallProgress } from '../utils/progress';
 
 const props = defineProps<{ goal: GoalClientDTO }>();
@@ -89,22 +152,29 @@ const isPastTarget = computed(
     isPastGoalTarget(props.goal.target, getProductTodayYmd()),
 );
 const statusLabel = computed(() => {
-  if (isPastTarget.value) return t('goal.list.pastTarget');
   if (props.goal.status === 'Completed') return t('goal.list.completed');
   if (props.goal.status === 'Abandoned') return t('goal.list.abandoned');
   return '';
 });
-const statusVariant = computed<'secondary' | 'destructive'>(() =>
-  isPastTarget.value ? 'destructive' : 'secondary',
+const targetText = computed(() =>
+  props.goal.target ? goalTimeframeLabel(props.goal.target, locale.value) : '',
 );
-const dateRangeText = computed(() => {
-  const target = props.goal.target ? goalTimeframeLabel(props.goal.target, locale.value) : '';
-  if (props.goal.startDate != null && target) {
-    return `${formatProductYmd(props.goal.startDate)} → ${target}`;
-  }
-  if (target) return `${t('goal.list.target')} ${target}`;
-  if (props.goal.startDate != null)
-    return `${t('goal.list.from')} ${formatProductYmd(props.goal.startDate)}`;
-  return '';
-});
+const visibleLabels = computed(() => (props.goal.labels ?? []).slice(0, 2));
+const hiddenLabelCount = computed(() => Math.max(0, (props.goal.labels?.length ?? 0) - 2));
+const actions = computed<MenuAction[]>(() => [
+  {
+    key: 'edit',
+    label: t('common.edit'),
+    icon: Pencil,
+    handler: () => emit('edit'),
+  },
+  {
+    key: 'delete',
+    label: t('common.delete'),
+    icon: Trash2,
+    destructive: true,
+    separator: true,
+    handler: () => emit('delete'),
+  },
+]);
 </script>

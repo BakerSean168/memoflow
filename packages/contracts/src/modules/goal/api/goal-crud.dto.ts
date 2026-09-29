@@ -47,7 +47,7 @@ export const CreateGoalSchema = z
     name: GoalNameSchema,
     summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').optional(),
     description: z.string().max(10000, '目标描述不能超过 10000 字符').optional(),
-    startDate: YmdSchema.optional(),
+    start: GoalTimeframeSchema.optional(),
     target: GoalTimeframeSchema.optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     reminderConfig: GoalReminderConfigRequestSchema.nullable().optional(),
@@ -71,7 +71,7 @@ export const UpdateGoalSchema = z
     name: GoalNameSchema.optional(),
     summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').nullable().optional(),
     description: z.string().max(10000, '目标描述不能超过 10000 字符').nullable().optional(),
-    startDate: YmdSchema.nullable().optional(),
+    start: GoalTimeframeSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     reminderConfig: GoalReminderConfigRequestSchema.nullable().optional(),
@@ -79,7 +79,6 @@ export const UpdateGoalSchema = z
       .array(
         KeyResultInputSchema.extend({
           id: brandedId<KeyResultId>().optional(),
-          description: z.string().max(2000).nullable().optional(),
         }).strict(),
       )
       .max(50)

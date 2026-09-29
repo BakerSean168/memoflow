@@ -17,6 +17,7 @@ describe('rawDataToGoalState', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
+      startKind: 'day',
       startDate: '2026-01-15',
       targetKind: 'quarter',
       targetEndDate: '2026-12-31',
@@ -99,7 +100,7 @@ describe('rawDataToGoalState', () => {
 
     const state = rawDataToGoalState(raw);
 
-    expect(state.startDate).toBe('2026-01-15');
+    expect(state.start).toEqual({ kind: 'day', date: '2026-01-15' });
     expect(state.target).toEqual({ kind: 'quarter', year: 2026, quarter: 4 });
     expect('tags' in state).toBe(false);
     expect('folderId' in state).toBe(false);
@@ -123,6 +124,7 @@ describe('rawDataToGoalState', () => {
       name: 'Goal2',
       summary: 'desc',
       status: 'Completed',
+      startKind: null,
       startDate: null,
       targetKind: null,
       targetEndDate: null,
@@ -161,6 +163,7 @@ describe('rawDataToGoalState', () => {
       name: 'Broken target',
       summary: null,
       status: 'Planned',
+      startKind: null,
       startDate: null,
       targetKind: 'quarter',
       targetEndDate: null,
@@ -187,6 +190,7 @@ describe('rawDataToGoalState', () => {
       name: 'Broken KR target',
       summary: null,
       status: 'Planned',
+      startKind: null,
       startDate: null,
       targetKind: null,
       targetEndDate: null,
@@ -234,6 +238,7 @@ describe('rawDataToGoalState', () => {
       name: 'Broken KR quarter',
       summary: null,
       status: 'Planned',
+      startKind: null,
       startDate: null,
       targetKind: null,
       targetEndDate: null,
@@ -281,6 +286,7 @@ describe('rawDataToGoalState', () => {
       name: 'Broken quarter',
       summary: null,
       status: 'Planned',
+      startKind: null,
       startDate: null,
       targetKind: 'quarter',
       targetEndDate: '2026-11-30',

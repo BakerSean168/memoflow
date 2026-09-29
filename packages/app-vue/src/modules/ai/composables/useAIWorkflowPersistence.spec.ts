@@ -28,7 +28,7 @@ function makeDraft(revision: number, name = 'Canonical goal'): GoalPlanDraft {
       name,
       summary: 'Canonical summary',
       status: 'Planned',
-      startDate: null,
+      start: null,
       target: null,
       labels: [],
     },
@@ -60,7 +60,7 @@ function projectDraft(state: TestState, run: GoalRun, draft: GoalPlanDraft): voi
     name: draft.goal.name,
     summary: draft.goal.summary ?? '',
     status: draft.goal.status,
-    startDate: draft.goal.startDate ?? null,
+    start: draft.goal.start ?? null,
     target: draft.goal.target ?? null,
   };
   state.editableKeyResults.value = [];

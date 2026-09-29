@@ -7,13 +7,14 @@ import type {
 import {
   GoalStatus,
   ReminderTriggerType,
+  goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
 } from '@memoflow/contracts/goal';
-import type { Ymd } from '@memoflow/contracts/primitives';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import {
   addYmdDays,
+  asInstant,
   createTimeFacade,
   type TimeFacade,
   type UserTimeContextPort,
@@ -29,26 +30,29 @@ export interface GoalReminderScheduledPayload {
   readonly goalTitle: string;
   readonly triggerType: ReminderTriggerType;
   readonly triggerValue: number;
-  readonly startDate: Ymd | null;
+  readonly start: GoalTimeframe | null;
   readonly target: GoalTimeframe | null;
   readonly reminderTime: number;
 }
 
 /**
  * Residual 1177 keep-boundary: goal schedule-projection buildIntentName — Goal + ReminderTrigger domain.
- * RemainingDays / TimeProgressPercentage wording; not task template Relative/Absolute naming.
+ * AbsoluteAt / RemainingDays / legacy TimeProgressPercentage wording stays goal-owned.
  * Soft residual 1177: task schedule-projection buildIntentName stays template+trigger domain-specific (no force-merge).
  */
 function buildIntentName(goal: GoalServerDTO, trigger: ReminderTrigger): string {
+  if (trigger.type === ReminderTriggerType.AbsoluteAt) {
+    return `${goal.name} · 定时提醒`;
+  }
   if (trigger.type === ReminderTriggerType.RemainingDays) {
-    return `${goal.name} · 剩余 ${trigger.value} 天提醒`;
+    return `${goal.name} · 目标日前 ${trigger.value} 天提醒`;
   }
   return `${goal.name} · 进度 ${trigger.value}% 提醒`;
 }
 
 function shouldScheduleGoal(goal: GoalServerDTO): boolean {
   return (
-    goal.status === GoalStatus.InProgress &&
+    (goal.status === GoalStatus.Planned || goal.status === GoalStatus.InProgress) &&
     !goal.archivedAt &&
     !goal.completedAt &&
     !goal.deletedAt &&
@@ -63,16 +67,21 @@ function calculateTriggerAt(
   trigger: ReminderTrigger,
   time: TimeFacade,
 ): number | null {
+  if (trigger.type === ReminderTriggerType.AbsoluteAt) {
+    return Number.isFinite(trigger.value) ? asInstant(trigger.value) : null;
+  }
+
   if (!goal.target) return null;
   const targetEnd = goalTimeframeEndBoundary(goal.target);
 
   if (trigger.type === ReminderTriggerType.RemainingDays) {
-    return time.codec.startOfYmd(addYmdDays(targetEnd, -trigger.value));
+    const reminderDay = addYmdDays(targetEnd, -trigger.value);
+    return time.input.combine(reminderDay, '09:00');
   }
 
   if (trigger.type === ReminderTriggerType.TimeProgressPercentage) {
-    if (!goal.startDate) return null;
-    const startAt = time.codec.startOfYmd(goal.startDate);
+    if (!goal.start) return null;
+    const startAt = time.codec.startOfYmd(goalTimeframeStartBoundary(goal.start));
     const targetEndAt = time.codec.startOfYmd(targetEnd);
     if (targetEndAt <= startAt) return null;
     const totalCalendarDays = time.calendar.diffCalendarDays(targetEndAt, startAt);
@@ -88,6 +97,9 @@ function goalOwner(goalId: string, identityId: string): SchedulingOwner {
 }
 
 function reminderIdentity(trigger: ReminderTrigger): string {
+  if (trigger.type === ReminderTriggerType.AbsoluteAt) {
+    return `absolute:${String(trigger.value)}`;
+  }
   if (trigger.type === ReminderTriggerType.RemainingDays) {
     return `remaining:${String(trigger.value)}`;
   }
@@ -194,7 +206,7 @@ export function createGoalScheduleProjectionSource(deps: {
             goalTitle: goalDTO.name,
             triggerType: trigger.type,
             triggerValue: trigger.value,
-            startDate: goalDTO.startDate,
+            start: goalDTO.start,
             target: goalDTO.target,
             reminderTime: triggerAt,
           },

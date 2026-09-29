@@ -24,6 +24,17 @@ export class RescheduleTaskOccurrenceUseCase {
         return error(
           'CONFLICT',
           `TaskOccurrence ${id} version conflict: expected ${request.expectedVersion}, current ${occurrence.version}`,
+          [
+            {
+              field: 'expectedVersion',
+              code: 'TASK_OCCURRENCE_VERSION_CONFLICT',
+              message: 'Task occurrence revision is stale',
+              value: {
+                expected: request.expectedVersion,
+                current: occurrence.version,
+              },
+            },
+          ],
         );
       }
       if (!occurrence.canReschedule()) {
@@ -43,7 +54,18 @@ export class RescheduleTaskOccurrenceUseCase {
         (candidate) => candidate.id !== occurrence.id && candidate.occurrenceKey === targetKey,
       );
       if (collision) {
-        return error('CONFLICT', `Task occurrence already exists on target day (${collision.id})`);
+        return error(
+          'CONFLICT',
+          `Task occurrence already exists on target day (${collision.id})`,
+          [
+            {
+              field: 'scheduleSnapshot.date',
+              code: 'TASK_OCCURRENCE_TARGET_DATE_CONFLICT',
+              message: 'Another occurrence from this task plan already exists on the target day',
+              value: targetDate,
+            },
+          ],
+        );
       }
 
       const changed = occurrence.reschedule(nextSchedule, timeContext);

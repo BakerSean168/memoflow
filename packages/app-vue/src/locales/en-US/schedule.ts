@@ -13,7 +13,8 @@ export default {
   "source": {
     "schedule": "Schedule",
     "task": "Task",
-    "goal": "Goal"
+    "goal": "Goal",
+    "routine": "Routine"
   },
   "dayDetail": {
     "subtitle": "{count} items",
@@ -21,12 +22,22 @@ export default {
     "viewInDayView": "View in Day View"
   },
   "eventDetail": {
-    "subtitle": "Schedule details",
+    "subtitle": "Planner details",
     "time": "Time",
     "allDay": "All day",
     "source": "Source",
-    "conflictHint": "This time slot has a schedule conflict",
-    "readOnlyHint": "Editing schedule events will arrive in a later release."
+    "kind": "Type",
+    "status": "Status",
+    "note": "Details",
+    "semantic": {
+      "calendarEntry": "Schedule event",
+      "taskOccurrence": "Task occurrence",
+      "goalStart": "Goal start",
+      "goalTarget": "Goal target",
+      "routineWallClock": "Routine occurrence"
+    },
+    "conflictHint": "This time slot has a planner conflict",
+    "readOnlyHint": "The calendar is a time projection; editing remains owned by the related goal, task, routine, or schedule object."
   },
   "planning": {
     "title": "Schedule",
@@ -46,6 +57,16 @@ export default {
     "taskDeleted": "Schedule task deleted",
     "scheduleCreated": "Schedule created",
     "scheduleCreatedRefreshFailed": "Schedule created, but the planner could not refresh. Refresh the page to reload the latest view."
+  },
+  "plannerMutation": {
+    "taskTargetDayConflict": "That day already has an occurrence from the same task plan. The item was restored to its previous position.",
+    "staleConflict": "This planner item was updated elsewhere. It was restored and the latest state is being reloaded.",
+    "conflict": "This time change conflicts with existing data. The item was restored to its previous position.",
+    "readOnly": "This planner item cannot currently be moved or resized.",
+    "invalid": "That drag cannot be represented as a valid time assignment. The item was restored.",
+    "unsupported": "This type of planner item does not support that adjustment yet.",
+    "failed": "The time adjustment failed and the item was restored.",
+    "refreshFailed": "The conflict was rolled back, but the latest planner state could not be refreshed. Refresh the page manually."
   },
   "confirm": {
     "deleteTask": "Delete schedule \"{name}\"?",
@@ -93,9 +114,9 @@ export default {
     "emptyTitle": "No reminder module tasks"
   },
   "createDialog": {
-    "titleCreate": "Create Schedule Event",
-    "titleEdit": "Edit Schedule Event",
-    "description": "Set the schedule title, time, and optional details.",
+    "titleCreate": "New Schedule",
+    "titleEdit": "Edit Schedule",
+    "description": "Set the time first, then add location or attendees if needed.",
     "fieldTitle": "Title *",
     "fieldTitlePlaceholder": "Enter schedule title",
     "fieldDescription": "Description",
@@ -124,6 +145,25 @@ export default {
     "fieldAttendees": "Attendees",
     "fieldAttendeePlaceholder": "Enter email or username",
     "addAttendee": "Add",
+    "timeSection": "Time",
+    "optionalDetails": "Optional details",
+    "addLocation": "Add location",
+    "addAttendees": "Add attendees",
+    "attendeeCount": "{count} attendees",
+    "startPickerTitle": "Set start time",
+    "startPickerDescription": "Choose the date and exact time when this schedule begins.",
+    "endPickerTitle": "Set end time",
+    "endPickerDescription": "Choose the date and exact time when this schedule ends.",
+    "clockTime": "Exact time",
+    "hour": "Hour",
+    "minute": "Minute",
+    "returnToToday": "Return to today",
+    "invalidClockTime": "Enter a valid time.",
+    "endAfterStart": "End time must be later than start time.",
+    "invalidRange": "Start time must be earlier than end time.",
+    "exactDateInputPlaceholder": "e.g. 2026/09/29",
+    "exactDateInputHint": "Choose or enter an exact date.",
+    "exactDateInputInvalid": "Enter an exact date, for example 2026/09/29.",
     "submitFailed": "Schedule could not be saved. Your changes are still here."
   },
   "calendar": {

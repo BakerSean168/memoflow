@@ -18,6 +18,8 @@ import type { Result } from '@memoflow/contracts/result';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
 import { executeDesktopAuthenticatedResult } from '../../../shared/utils/execute-desktop-authenticated-result';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { taskOccurrenceQueryKeys } from '../../../platform/server-state/query-keys';
+import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { patchTaskPlanEverywhere } from './taskPlanCache';
 
 type TaskOccurrenceDTO = ReturnType<typeof useTaskStore>['instances'][number];
@@ -43,6 +45,7 @@ export function useTaskOccurrences() {
   async function executeTaskOperation<T>(
     operation: () => Promise<Result<T>>,
     fallbackKey: string,
+    options: { suppressErrorReport?: boolean } = {},
   ): Promise<Result<T>> {
     return executeDesktopAuthenticatedResult({
       operation,
@@ -50,9 +53,11 @@ export function useTaskOccurrences() {
       t,
       fallbackKey,
       desktopApi,
-      onError: (error) => {
-        handleError(error, fallbackKey);
-      },
+      onError: options.suppressErrorReport
+        ? undefined
+        : (error) => {
+            handleError(error, fallbackKey);
+          },
     });
   }
 
@@ -76,6 +81,11 @@ export function useTaskOccurrences() {
   ): Promise<TaskOccurrenceDTO> {
     const dto = entity.toDTO();
     store.updateInstance(dto);
+    runtime.queryClient.setQueriesData<TaskOccurrenceDTO[]>(
+      { queryKey: taskOccurrenceQueryKeys.ranges(resolveIdentityScope()) },
+      (current) =>
+        current?.map((item) => (String(item.id) === String(dto.id) ? dto : item)) ?? current,
+    );
     await refreshTemplateProjection(String(dto.planId));
     return dto;
   }
@@ -100,20 +110,35 @@ export function useTaskOccurrences() {
     }
   }
 
-  async function fetchInstancesByDateRange(startDate: number, endDate: number) {
-    store.setLoading(true);
+  async function fetchInstancesByDateRange(
+    startDate: number,
+    endDate: number,
+    options: { force?: boolean } = {},
+  ) {
+    const identityScope = resolveIdentityScope();
+    const queryKey = taskOccurrenceQueryKeys.range(identityScope, startDate, endDate);
+    const cachedInstances = runtime.queryClient.getQueryData<TaskOccurrenceDTO[]>(queryKey);
+    if (cachedInstances) store.setInstances(cachedInstances);
+    store.setLoading(cachedInstances === undefined);
     store.setError(null);
     try {
-      const result = await executeTaskOperation(
-        () => service.listOccurrencesByDateRange(startDate, endDate),
-        'task.error.loadInstancesFailed',
-      );
-
-      if (result.ok) {
-        store.setInstances(
-          (result.data ?? []).map((instance) => (instance as TaskOccurrenceEntityLike).toDTO()),
-        );
-      }
+      const instances = await runtime.queryClient.fetchQuery<TaskOccurrenceDTO[]>({
+        queryKey,
+        staleTime: options.force ? 0 : TASK_OCCURRENCE_STALE_TIME_MS,
+        queryFn: async () => {
+          const result = await executeTaskOperation(
+            () => service.listOccurrencesByDateRange(startDate, endDate),
+            'task.error.loadInstancesFailed',
+          );
+          if (!result.ok) throw result.error;
+          return (result.data ?? []).map((instance) =>
+            (instance as TaskOccurrenceEntityLike).toDTO(),
+          );
+        },
+      });
+      store.setInstances(instances);
+    } catch {
+      // executeTaskOperation already translated/reported the Result failure.
     } finally {
       store.setLoading(false);
     }
@@ -169,10 +194,15 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function rescheduleOccurrence(id: string, request: RescheduleTaskInput) {
+  async function rescheduleOccurrence(
+    id: string,
+    request: RescheduleTaskInput,
+    options: { suppressErrorReport?: boolean } = {},
+  ) {
     const result = await executeTaskOperation(
       () => service.rescheduleOccurrence(id, sanitizeForIpc(request) as RescheduleTaskInput),
       'task.error.operationFailed',
+      options,
     );
     if (result.ok) {
       await updateInstanceProjection(result.data);

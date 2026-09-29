@@ -47,7 +47,13 @@ export type TimeDateStyle = 'short' | 'medium' | 'long';
 export type TimeHourStyle = '12h' | '24h';
 
 /** Named display slot keys for format.slot */
-export type TimeDisplaySlot = 'periodDay' | 'periodMonth' | 'periodWeekDay' | 'chartMonthDay';
+export type TimeDisplaySlot =
+  | 'periodDay'
+  | 'periodMonth'
+  | 'periodWeekDay'
+  | 'periodRangeDay'
+  | 'chartMonthDay'
+  | 'monthDayWeekday';
 
 export interface TimeStyleRelative {
   enabled: boolean;

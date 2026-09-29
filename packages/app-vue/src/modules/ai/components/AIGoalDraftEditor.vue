@@ -16,16 +16,17 @@
       </div>
 
       <div class="grid gap-3 @sm/ai:grid-cols-2">
-        <label class="grid gap-2 text-xs text-muted-foreground">
-          {{ t('goal.dialog.startDate') }}
-          <Input
-            type="date"
-            :model-value="toProductYmdInputValue(goal.startDate)"
-            @update:model-value="
-              updateGoalField('startDate', fromProductYmdInputValue(String($event ?? '')))
-            "
+        <div class="grid gap-2 text-xs text-muted-foreground">
+          <span>{{ t('goal.dialog.startDate') }}</span>
+          <GoalTimeframePicker
+            :model-value="goal.start ?? null"
+            :label="t('goal.dialog.startDate')"
+            :placeholder="t('goal.dialog.startDate')"
+            test-id="ai-goal-start-timeframe"
+            :aria-label="t('goal.dialog.startDate')"
+            @update:model-value="updateGoalField('start', $event)"
           />
-        </label>
+        </div>
         <div class="grid gap-2 text-xs text-muted-foreground">
           {{ t('goal.detail.status') }}
           <Select
@@ -47,15 +48,14 @@
 
       <div class="grid gap-2">
         <p class="text-xs text-muted-foreground">{{ t('goal.dialog.targetDate') }}</p>
-        <Input
-          v-if="goal.target == null || goal.target.kind === 'day'"
-          type="date"
-          :model-value="goal.target?.kind === 'day' ? toProductYmdInputValue(goal.target.date) : ''"
-          @update:model-value="updateExactTarget(String($event ?? ''))"
+        <GoalTimeframePicker
+          :model-value="goal.target ?? null"
+          :label="t('goal.dialog.target')"
+          :placeholder="t('goal.dialog.target')"
+          test-id="ai-goal-target-timeframe"
+          :aria-label="t('goal.dialog.target')"
+          @update:model-value="updateGoalField('target', $event)"
         />
-        <div v-else class="rounded-xl border bg-background/70 px-3 py-2 text-sm text-foreground">
-          {{ goalTimeframeLabel(goal.target, locale) }}
-        </div>
       </div>
 
       <div
@@ -166,7 +166,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { goalTimeframeLabel, KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import {
   Button,
   Input,
@@ -177,10 +177,7 @@ import {
   SelectValue,
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
-import {
-  fromProductYmdInputValue,
-  toProductYmdInputValue,
-} from '../../../shared/utils/product-time';
+import GoalTimeframePicker from '../../goal/components/GoalTimeframePicker.vue';
 import type { EditableGoal, EditableKeyResult } from '../composables';
 
 const props = defineProps<{
@@ -196,7 +193,7 @@ const emit = defineEmits<{
   'update-goal': [EditableGoal];
   'update-key-result': [{ index: number; value: EditableKeyResult }];
 }>();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const hasDraft = computed(() =>
   Boolean(props.goal.name || props.goal.summary || props.keyResults.length),
 );
@@ -205,11 +202,6 @@ const methods = Object.values(KeyResultCalculationMethod);
 
 function updateGoalField<K extends keyof EditableGoal>(key: K, value: EditableGoal[K]) {
   emit('update-goal', { ...props.goal, [key]: value });
-}
-
-function updateExactTarget(raw: string) {
-  const date = fromProductYmdInputValue(raw);
-  updateGoalField('target', date ? { kind: 'day', date } : null);
 }
 
 function updateKeyResult(index: number, patch: Partial<EditableKeyResult>) {

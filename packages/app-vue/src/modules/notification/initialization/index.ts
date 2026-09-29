@@ -27,6 +27,11 @@ export interface NotificationStartupHookOptions {
   dispatcher: ServerStateInvalidationDispatcher;
   /** Current identity resolver for fail-closed checks. 当前 identity 解析器（用于 fail-closed 校验）。 */
   identityScope: () => string;
+  /**
+   * Optional host-owned device presentation. Web uses this for a browser OS
+   * notification while keeping the Notification Fact/InApp event canonical.
+   */
+  presentInAppDispatch?: (event: NotificationDispatchInAppEvent) => void;
 }
 
 /**
@@ -47,6 +52,12 @@ export function createNotificationStartupHook(options: NotificationStartupHookOp
       // Identity mismatch / empty → fail closed；不 invalidate 其它 identity（§3.3）。
       return;
     }
+    try {
+      options.presentInAppDispatch?.(event);
+    } catch (error) {
+      logger.warn('Notification device presentation failed', { error });
+    }
+
     void options.dispatcher.invalidate({
       target: 'notification',
       identityScope: currentIdentity,

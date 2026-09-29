@@ -9,6 +9,7 @@ import { asInstant } from '@memoflow/time';
 import {
   ProfileMembership,
   RoutineDefinition,
+  RoutinePreferences,
   RoutineProfile,
   createElapsedTrigger,
   createSnoozeOverride,
@@ -22,6 +23,7 @@ import type {
 import type {
   RoutineOccurrenceFact,
   RoutineOccurrenceTruthStore,
+  RoutinePreferencesStore,
   RoutineProfileStore,
   RoutineTemporaryOverrideStore,
 } from '../domain/ports';
@@ -82,21 +84,28 @@ function makeStores() {
       definitions = [...definitions, definition];
       memberships = [...memberships, ...next];
     }),
-    findDefinition: vi.fn(async ({ routineId }) => definitions.find((item) => item.id === routineId) ?? null),
+    findDefinition: vi.fn(
+      async ({ routineId }) => definitions.find((item) => item.id === routineId) ?? null,
+    ),
     listDefinitions: vi.fn(async () => [...definitions]),
     deleteDefinition: vi.fn(async () => {}),
     upsertProfile: vi.fn(async (profile) => {
       profiles = [...profiles.filter((item) => item.id !== profile.id), profile];
     }),
     updateProfile: vi.fn(async () => {}),
-    findProfile: vi.fn(async ({ profileId }) => profiles.find((item) => item.id === profileId) ?? null),
+    findProfile: vi.fn(
+      async ({ profileId }) => profiles.find((item) => item.id === profileId) ?? null,
+    ),
     listProfiles: vi.fn(async () => [...profiles]),
-    findProfilesByIds: vi.fn(async ({ profileIds }) => profiles.filter((item) => profileIds.includes(item.id))),
+    findProfilesByIds: vi.fn(async ({ profileIds }) =>
+      profiles.filter((item) => profileIds.includes(item.id)),
+    ),
     deleteProfile: vi.fn(async () => {}),
     upsertMembership: vi.fn(async (membership) => {
       memberships = [
         ...memberships.filter(
-          (item) => item.routineId !== membership.routineId || item.profileId !== membership.profileId,
+          (item) =>
+            item.routineId !== membership.routineId || item.profileId !== membership.profileId,
         ),
         membership,
       ];
@@ -152,13 +161,14 @@ function makeStores() {
       occurrences = [...occurrences, created];
       return created;
     }),
-    findOccurrence: vi.fn(async (input) =>
-      occurrences.find(
-        (item) =>
-          item.identityId === input.identityId &&
-          item.routineId === input.routineId &&
-          item.occurrenceKey === input.occurrenceKey,
-      ) ?? null,
+    findOccurrence: vi.fn(
+      async (input) =>
+        occurrences.find(
+          (item) =>
+            item.identityId === input.identityId &&
+            item.routineId === input.routineId &&
+            item.occurrenceKey === input.occurrenceKey,
+        ) ?? null,
     ),
     listOccurrences: vi.fn(async () => [...occurrences]),
     resolveOccurrence: vi.fn(async (input) => {
@@ -183,7 +193,8 @@ function makeStores() {
       const existing = interactions.find((item) => item.idempotencyKey === input.idempotencyKey);
       if (existing) {
         const occurrence = occurrences.find(
-          (item) => item.routineId === input.routineId && item.occurrenceKey === input.occurrenceKey,
+          (item) =>
+            item.routineId === input.routineId && item.occurrenceKey === input.occurrenceKey,
         );
         if (!occurrence) throw new Error('missing interaction occurrence');
         return { interaction: existing, occurrence, replayed: true };
@@ -208,7 +219,9 @@ function makeStores() {
       return { interaction, occurrence, replayed: false };
     }),
     listInteractions: vi.fn(async ({ routineId, occurrenceKey }) =>
-      interactions.filter((item) => item.routineId === routineId && item.occurrenceKey === occurrenceKey),
+      interactions.filter(
+        (item) => item.routineId === routineId && item.occurrenceKey === occurrenceKey,
+      ),
     ),
     listInteractionsForIdentity: vi.fn(async ({ identityId }) =>
       interactions.filter((item) => item.identityId === identityId),
@@ -239,6 +252,31 @@ function makeStores() {
         return interactions;
       },
     },
+  };
+}
+
+function makePreferencesStore(initialGlobalEnabled?: boolean): RoutinePreferencesStore {
+  let current =
+    initialGlobalEnabled === undefined
+      ? null
+      : RoutinePreferences.create({
+          identityId: 'identity-routine',
+          globalEnabled: initialGlobalEnabled,
+          now: new Date(1_758_000_000_000),
+        });
+
+  return {
+    find: vi.fn(async () => (current ? RoutinePreferences.load(current.snapshot()) : null)),
+    create: vi.fn(async ({ preferences }) => {
+      if (current) throw new Error('preferences already exist');
+      current = RoutinePreferences.load(preferences.snapshot());
+    }),
+    update: vi.fn(async ({ preferences, expectedVersion }) => {
+      if (!current || current.version !== expectedVersion) {
+        throw new Error('preferences version conflict');
+      }
+      current = RoutinePreferences.load(preferences.snapshot());
+    }),
   };
 }
 
@@ -308,23 +346,27 @@ function seedSource(stores: ReturnType<typeof makeStores>): void {
     routineId: definition.id,
     override,
   });
-  void stores.occurrenceStore.ensureOpenOccurrence({
-    identityId: occurrence.identityId,
-    routineId: occurrence.routineId,
-    occurrenceKey: occurrence.occurrenceKey,
-    triggerKind: occurrence.triggerKind,
-    scheduledFor: occurrence.scheduledFor,
-    becameDueAt: occurrence.becameDueAt,
-    sourceRevision: occurrence.sourceRevision,
-  }).then(() => stores.occurrenceStore.resolveOccurrence({
-    identityId: occurrence.identityId,
-    routineId: occurrence.routineId,
-    occurrenceKey: occurrence.occurrenceKey,
-    state: occurrence.resolutionState === 'Open' ? 'Satisfied' : occurrence.resolutionState,
-    resolutionKind: occurrence.resolutionKind ?? 'ExplicitComplete',
-    resolvedAt: occurrence.resolvedAt ?? occurrence.becameDueAt,
-    reason: occurrence.resolutionReason,
-  }));
+  void stores.occurrenceStore
+    .ensureOpenOccurrence({
+      identityId: occurrence.identityId,
+      routineId: occurrence.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      triggerKind: occurrence.triggerKind,
+      scheduledFor: occurrence.scheduledFor,
+      becameDueAt: occurrence.becameDueAt,
+      sourceRevision: occurrence.sourceRevision,
+    })
+    .then(() =>
+      stores.occurrenceStore.resolveOccurrence({
+        identityId: occurrence.identityId,
+        routineId: occurrence.routineId,
+        occurrenceKey: occurrence.occurrenceKey,
+        state: occurrence.resolutionState === 'Open' ? 'Satisfied' : occurrence.resolutionState,
+        resolutionKind: occurrence.resolutionKind ?? 'ExplicitComplete',
+        resolvedAt: occurrence.resolvedAt ?? occurrence.becameDueAt,
+        reason: occurrence.resolutionReason,
+      }),
+    );
   void stores.occurrenceStore.applyInteraction({
     idempotencyKey: interaction.idempotencyKey,
     identityId: interaction.identityId,
@@ -339,6 +381,40 @@ function seedSource(stores: ReturnType<typeof makeStores>): void {
 }
 
 describe('RoutinePortableCapability', () => {
+  it('round-trips the persistent global Routine gate', async () => {
+    const source = makeStores();
+    const sourcePreferences = makePreferencesStore(false);
+    const sourceCapability = new RoutinePortableCapability(
+      source.profileStore,
+      source.overrideStore,
+      source.occurrenceStore,
+      sourcePreferences,
+    );
+
+    const payload = await sourceCapability.export(context(new FakeReferences()));
+    expect(payload.preferences).toEqual({ globalEnabled: false });
+
+    const target = makeStores();
+    const targetPreferences = makePreferencesStore();
+    const targetCapability = new RoutinePortableCapability(
+      target.profileStore,
+      target.overrideStore,
+      target.occurrenceStore,
+      targetPreferences,
+    );
+
+    await expect(
+      targetCapability.dryRun(payload, context(new FakeReferences())),
+    ).resolves.toMatchObject({ created: 1, updated: 0 });
+
+    await targetCapability.apply(payload, context(new FakeReferences()));
+    await expect(targetPreferences.find({ identityId: 'identity-routine' })).resolves.toMatchObject(
+      {
+        globalEnabled: false,
+      },
+    );
+  });
+
   it('round-trips owner facts while omitting RuntimeContext and scheduler reliability state', async () => {
     const source = makeStores();
     seedSource(source);
@@ -364,7 +440,9 @@ describe('RoutinePortableCapability', () => {
       target.overrideStore,
       target.occurrenceStore,
     );
-    await expect(targetCapability.dryRun(payload, context(new FakeReferences()))).resolves.toMatchObject({
+    await expect(
+      targetCapability.dryRun(payload, context(new FakeReferences())),
+    ).resolves.toMatchObject({
       created: 6,
       updated: 0,
       skipped: 0,

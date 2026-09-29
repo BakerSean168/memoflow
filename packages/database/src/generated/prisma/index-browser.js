@@ -297,6 +297,7 @@ exports.Prisma.GoalScalarFieldEnum = {
   summary: 'summary',
   description: 'description',
   status: 'status',
+  startKind: 'startKind',
   startDate: 'startDate',
   targetKind: 'targetKind',
   targetEndDate: 'targetEndDate',
@@ -652,6 +653,16 @@ exports.Prisma.RoutineDefinitionScalarFieldEnum = {
   description: 'description',
   enabled: 'enabled',
   triggerJson: 'triggerJson',
+  activatedAt: 'activatedAt',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RoutinePreferenceScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  globalEnabled: 'globalEnabled',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1241,6 +1252,7 @@ exports.Prisma.ModelName = {
   AccountClosureOperation: 'AccountClosureOperation',
   OperationAuditLog: 'OperationAuditLog',
   RoutineDefinition: 'RoutineDefinition',
+  RoutinePreference: 'RoutinePreference',
   RoutineProfile: 'RoutineProfile',
   RoutineProfileMembership: 'RoutineProfileMembership',
   RoutineProtocolDefinition: 'RoutineProtocolDefinition',

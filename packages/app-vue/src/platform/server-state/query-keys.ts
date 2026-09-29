@@ -143,6 +143,54 @@ export const taskPlanQueryKeys = {
     [...taskPlanQueryKeys.detail(identityScope, id), 'workspace', recentLimit] as const,
 };
 
+/**
+ * Shared server-read keys used by lightweight shell workspaces and Planner.
+ * These reads are identity-scoped and survive Popover component unmounts.
+ */
+export const taskOccurrenceQueryKeys = {
+  all: ['server-state', 'task-occurrence'] as const,
+  identity: (identityScope: string) => [...taskOccurrenceQueryKeys.all, identityScope] as const,
+  ranges: (identityScope: string) =>
+    [...taskOccurrenceQueryKeys.identity(identityScope), 'range'] as const,
+  range: (identityScope: string, start: number, end: number) =>
+    [...taskOccurrenceQueryKeys.ranges(identityScope), start, end] as const,
+};
+
+export const scheduleCalendarQueryKeys = {
+  all: ['server-state', 'schedule-calendar'] as const,
+  identity: (identityScope: string) => [...scheduleCalendarQueryKeys.all, identityScope] as const,
+  entries: (identityScope: string) =>
+    [...scheduleCalendarQueryKeys.identity(identityScope), 'entries'] as const,
+};
+
+export const plannerOwnerQueryKeys = {
+  all: ['server-state', 'planner-owner'] as const,
+  identity: (identityScope: string) => [...plannerOwnerQueryKeys.all, identityScope] as const,
+  goals: (identityScope: string) =>
+    [...plannerOwnerQueryKeys.identity(identityScope), 'goals'] as const,
+};
+
+export const goalHomeQueryKeys = {
+  all: ['server-state', 'goal-home'] as const,
+  identity: (identityScope: string) => [...goalHomeQueryKeys.all, identityScope] as const,
+  summary: (identityScope: string) =>
+    [...goalHomeQueryKeys.identity(identityScope), 'summary'] as const,
+};
+
+export const recentKnowledgeQueryKeys = {
+  all: ['server-state', 'recent-knowledge'] as const,
+  identity: (identityScope: string) => [...recentKnowledgeQueryKeys.all, identityScope] as const,
+  recent: (identityScope: string, source: 'projection' | 'local-vault', limit: number) =>
+    [...recentKnowledgeQueryKeys.identity(identityScope), source, limit] as const,
+};
+
+export const routineUpcomingQueryKeys = {
+  all: ['server-state', 'routine-upcoming'] as const,
+  identity: (identityScope: string) => [...routineUpcomingQueryKeys.all, identityScope] as const,
+  range: (identityScope: string, start: number, end: number, limit: number) =>
+    [...routineUpcomingQueryKeys.identity(identityScope), 'range', start, end, limit] as const,
+};
+
 // ─── Governance ───────────────────────────────────────────────────────────────
 
 /**
@@ -207,11 +255,21 @@ export type NotificationQueryKeys = typeof notificationQueryKeys;
 export type TaskPlanQueryKeys = typeof taskPlanQueryKeys;
 export type GovernanceQueryKeys = typeof governanceQueryKeys;
 
-/** Type guard for identity-scoped pilot query keys. */
+/** Type guard for identity-scoped server-state keys owned by this renderer. */
 export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boolean {
   return (
     key.length >= 2 &&
     key[0] === 'server-state' &&
-    (key[1] === 'notification' || key[1] === 'task-plan' || key[1] === 'governance')
+    [
+      'notification',
+      'task-plan',
+      'task-occurrence',
+      'schedule-calendar',
+      'planner-owner',
+      'goal-home',
+      'recent-knowledge',
+      'routine-upcoming',
+      'governance',
+    ].includes(String(key[1]))
   );
 }

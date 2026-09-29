@@ -4,7 +4,14 @@ import type { RoutineOccurrenceTransactionHandle } from './routine-occurrence-st
 export interface RoutineOccurrenceNotificationRequestInput {
   readonly identityId: string;
   readonly routineId: string;
+  /** Canonical business occurrence targeted by Complete/Snooze actions. */
   readonly occurrenceKey: string;
+  /**
+   * Optional presentation-instance key used only for NotificationRequested
+   * idempotency. Snooze wake-ups reuse the same business occurrence but must
+   * create a new notification presentation exactly once.
+   */
+  readonly notificationOccurrenceKey?: string;
   readonly scheduledFor: number;
   readonly sourceRevision: string | number | null;
   readonly title: string;
@@ -16,8 +23,11 @@ export interface RoutineOccurrenceNotificationRequestInput {
  * Durable notification intent for a committed routine occurrence.
  *
  * The writer must enqueue a `notification.requested` envelope (NOTIF-3301)
- * idempotently keyed by (identityId/source='routine'/occurrenceKey) so a
- * crash/retry replay never surfaces a duplicate notification. In production the
+ * idempotently keyed by
+ * (identityId/source='routine'/notificationOccurrenceKey ?? occurrenceKey) so
+ * a crash/retry replay never surfaces a duplicate notification while an
+ * explicit snooze wake-up can present the SAME business occurrence again.
+ * In production the
  * write joins the occurrence commit transaction via the shared transaction
  * handle (ROUTINE-3401 crash-window guard).
  */

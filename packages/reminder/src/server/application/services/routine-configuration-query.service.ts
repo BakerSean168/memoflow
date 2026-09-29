@@ -11,6 +11,7 @@ import type {
 import { asInstant, createRecurrenceEngine, type RecurrenceEnginePort } from '@memoflow/time';
 import type {
   RoutineProfileStore,
+  RoutinePreferencesStore,
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
@@ -32,6 +33,7 @@ export interface RoutineConfigurationQueryPort {
 
 export interface CreateRoutineConfigurationQueryServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routinePreferencesStore?: RoutinePreferencesStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly recurrenceEngine?: RecurrenceEnginePort;
@@ -104,6 +106,9 @@ export function createRoutineConfigurationQueryService(
     async getConfigurationSnapshot(identityId) {
       const definitions = await options.routineProfileStore.listDefinitions({ identityId });
       const profiles = await options.routineProfileStore.listProfiles({ identityId });
+      const preferences = options.routinePreferencesStore
+        ? await options.routinePreferencesStore.find({ identityId })
+        : null;
       const memberships = await options.routineProfileStore.listMembershipsForRoutines({
         identityId,
         routineIds: definitions.map((definition) => definition.id),
@@ -123,6 +128,10 @@ export function createRoutineConfigurationQueryService(
         definitions: definitions.map(definitionDto),
         profiles: profiles.map((profile) => profileDto(profile, activeProfileIds)),
         memberships: memberships.map(membershipDto),
+        preferences: {
+          globalEnabled: preferences?.globalEnabled ?? true,
+          version: preferences?.version ?? 0,
+        },
         runtimeContext: { activeProfileIds: [...runtimeContext.activeProfileIds] },
         capabilities: { localRuntime: options.localRuntimeAvailable ?? false },
         overrides,
@@ -130,6 +139,11 @@ export function createRoutineConfigurationQueryService(
     },
 
     async getUpcomingOccurrences(identityId, query) {
+      const preferences = options.routinePreferencesStore
+        ? await options.routinePreferencesStore.find({ identityId })
+        : null;
+      if (preferences?.globalEnabled === false) return { occurrences: [] };
+
       const definitions = await options.routineProfileStore.listDefinitions({ identityId });
       const memberships = await options.routineProfileStore.listMembershipsForRoutines({
         identityId,

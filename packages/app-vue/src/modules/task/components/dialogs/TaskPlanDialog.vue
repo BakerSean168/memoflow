@@ -4,15 +4,10 @@
       :open="visible"
       test-id="task-plan-dialog"
       size="lg"
+      height-mode="workspace"
+      body-class="flex flex-col"
       initial-focus-selector="[data-testid='task-plan-title-input']"
     >
-      <template #icon>
-        <component
-          :is="mode === 'edit' ? Pencil : mode === 'copy' ? Copy : PlusCircle"
-          :class="mode === 'edit' ? 'text-primary' : 'text-success'"
-          class="mt-0.5 h-5 w-5 shrink-0"
-        />
-      </template>
       <template #title>
         {{
           mode === 'edit'
@@ -22,16 +17,6 @@
               : t('task.templateDialog.createTitle')
         }}
       </template>
-      <template #description>
-        {{
-          mode === 'edit'
-            ? t('task.templateDialog.editSubtitle')
-            : mode === 'copy'
-              ? t('task.templateDialog.copySubtitle')
-              : t('task.templateDialog.createSubtitle')
-        }}
-      </template>
-
       <template #status>
         <p
           v-if="mode === 'edit' && (localTemplate?.futurePendingOccurrenceCount ?? 0) > 0"
@@ -87,7 +72,6 @@
 import { computed, ref, toRaw, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Dialog, Button } from '@memoflow/ui-vue-shadcn';
-import { Copy, Pencil, PlusCircle } from '@lucide/vue';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
@@ -121,7 +105,7 @@ function createBlankTemplate(): TaskPlanViewModel {
     importance: 'Moderate',
     labels: [],
     labelIds: [],
-    goalBinding: null,
+    goalBinding: props.initialGoalBinding ? structuredClone(props.initialGoalBinding) : null,
     checklist: [],
     schedule: TaskPlanScheduleSchema.parse({
       kind: 'OneTime',
@@ -183,11 +167,13 @@ const props = withDefaults(
     template?: TaskPlanViewModel | null;
     mode?: 'create' | 'edit' | 'copy';
     saving?: boolean;
+    initialGoalBinding?: TaskPlanViewModel['goalBinding'];
   }>(),
   {
     template: null,
     mode: 'create',
     saving: false,
+    initialGoalBinding: null,
   },
 );
 
@@ -232,7 +218,11 @@ function initializeDraft(): void {
 
 function resolveDraftKey(): string {
   const scope = dialogDraftStore.scope?.value ?? 'standalone';
-  return `${scope}:task-plan-dialog:${props.mode}:${props.template?.id ?? 'new'}`;
+  const createBindingKey =
+    props.mode === 'create' && props.initialGoalBinding?.goalId
+      ? `:${props.initialGoalBinding.goalId}:${props.initialGoalBinding.keyResultId ?? 'goal'}`
+      : '';
+  return `${scope}:task-plan-dialog:${props.mode}:${props.template?.id ?? 'new'}${createBindingKey}`;
 }
 
 function clearDraft(): void {

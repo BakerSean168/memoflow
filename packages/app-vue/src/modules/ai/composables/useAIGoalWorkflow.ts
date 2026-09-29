@@ -60,7 +60,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       name: draft.goal.name,
       summary: draft.goal.summary ?? '',
       status: draft.goal.status,
-      startDate: draft.goal.startDate ?? null,
+      start: draft.goal.start ?? null,
       target: draft.goal.target ?? null,
     };
     editableKeyResults.value = draft.keyResults.map((item) => ({
@@ -140,7 +140,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       name: editableGoal.value.name,
       summary: editableGoal.value.summary.trim() || null,
       status: editableGoal.value.status,
-      startDate: editableGoal.value.startDate,
+      start: editableGoal.value.start,
       target: editableGoal.value.target,
     };
 
@@ -175,7 +175,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       goal: {
         ...content.goal,
         summary: content.goal.summary ?? null,
-        startDate: content.goal.startDate ?? null,
+        start: content.goal.start ?? null,
         target: content.goal.target ?? null,
       },
       keyResults: content.keyResults.map((item) => ({

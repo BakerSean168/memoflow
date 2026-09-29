@@ -78,7 +78,7 @@ function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
     name: 'Ship Core vNext',
     summary: null,
     status: 'InProgress',
-    startDate: goalStart,
+    start: { kind: 'day', date: goalStart },
     target: { kind: 'day', date: goalTarget },
     completedAt: null,
     archivedAt: null,
@@ -197,7 +197,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
   it('projects Goal start/target as distinct all-day facts targeting the Goal owner', () => {
     const events = projectGoalDates(goal(), time);
     expect(events).toHaveLength(2);
-    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start-date', 'goal-1:target']);
+    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start', 'goal-1:target']);
     expect(events[1]).toMatchObject({
       allDay: true,
       start: '2026-09-30',

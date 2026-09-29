@@ -33,12 +33,11 @@ describe('Product date presentation boundary', () => {
     expect(resolveEmptyLabel('unknown')).toBe(DEFAULT_EMPTY_LITERALS.unknown);
   });
 
-  it('renders Goal calendar dates and broad targets without local Date wrappers', () => {
-    expect(goalDetail).toContain('formatProductYmd');
-    expect(goalDetail).toContain('formatProductDate');
+  it('renders semantic Goal timeframes without collapsing them into calendar dates', () => {
     expect(goalDetail).toContain('goalTimeframeLabel');
-    expect(goalRow).toContain('formatProductYmd');
     expect(goalRow).toContain('goalTimeframeLabel');
+    expect(goalDetail).not.toContain('formatProductYmd');
+    expect(goalRow).not.toContain('formatProductYmd');
     for (const source of [goalDetail, goalRow]) {
       expect(source).not.toMatch(/function formatDate\b/);
       expect(source).not.toContain('toISOString');

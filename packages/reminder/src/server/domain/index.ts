@@ -21,6 +21,7 @@ export type {
   RoutineOccurrenceTruthStore,
   RoutineHistoryEntry,
   RoutineProfileStore,
+  RoutinePreferencesStore,
   RoutineRuntimeContextStore,
   RoutineRuntimeContextUpdateReceipt,
   RoutineTemporaryOverrideStore,

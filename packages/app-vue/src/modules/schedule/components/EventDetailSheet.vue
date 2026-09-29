@@ -3,15 +3,8 @@
     <SheetContent side="right" class="w-96 overflow-y-auto" data-testid="event-detail-sheet">
       <SheetHeader>
         <SheetTitle class="flex items-center gap-2">
-          <span
-            class="h-2.5 w-2.5 shrink-0 rounded-full"
-            :class="{
-              'bg-primary': event?.source === 'schedule',
-              'bg-success': event?.source === 'goal',
-              'bg-info': event?.source === 'task',
-            }"
-          />
-          {{ event?.title }}
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full" :class="sourceDotClass" />
+          <span class="min-w-0 truncate">{{ event?.title }}</span>
         </SheetTitle>
         <SheetDescription>{{ t('schedule.eventDetail.subtitle') }}</SheetDescription>
       </SheetHeader>
@@ -22,30 +15,54 @@
             <dt class="text-xs font-medium text-muted-foreground">
               {{ t('schedule.eventDetail.time') }}
             </dt>
-            <dd class="text-sm text-foreground">
-              {{ event.displayMode === 'all-day' ? t('schedule.eventDetail.allDay') : timeRange }}
-            </dd>
+            <dd class="text-sm text-foreground">{{ timeRange }}</dd>
           </div>
+
           <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
             <dt class="text-xs font-medium text-muted-foreground">
               {{ t('schedule.eventDetail.source') }}
             </dt>
             <dd>
               <span
-                class="inline-block rounded px-1.5 py-0.5 text-[11px] font-medium"
-                :class="{
-                  'bg-primary/10 text-primary': event.source === 'schedule',
-                  'bg-success/15 text-success': event.source === 'goal',
-                  'bg-info/15 text-info': event.source === 'task',
-                }"
+                class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium"
+                :class="sourceBadgeClass"
               >
-                {{ calendarEventSourceLabel(event.source, t) }}
+                {{ sourceLabel }}
               </span>
+            </dd>
+          </div>
+
+          <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
+            <dt class="text-xs font-medium text-muted-foreground">
+              {{ t('schedule.eventDetail.kind') }}
+            </dt>
+            <dd class="text-sm text-foreground">{{ semanticLabel }}</dd>
+          </div>
+
+          <div
+            v-if="event.displayMetadata.status"
+            class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3"
+          >
+            <dt class="text-xs font-medium text-muted-foreground">
+              {{ t('schedule.eventDetail.status') }}
+            </dt>
+            <dd class="text-sm text-foreground">{{ event.displayMetadata.status }}</dd>
+          </div>
+
+          <div
+            v-if="event.displayMetadata.subtitle"
+            class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3"
+          >
+            <dt class="text-xs font-medium text-muted-foreground">
+              {{ t('schedule.eventDetail.note') }}
+            </dt>
+            <dd class="text-sm leading-5 text-foreground">
+              {{ event.displayMetadata.subtitle }}
             </dd>
           </div>
         </dl>
 
-        <Alert v-if="event.hasConflict" class="border-warning/40 bg-warning/10">
+        <Alert v-if="hasConflict" class="border-warning/40 bg-warning/10">
           <AlertTriangle class="h-4 w-4 text-warning" />
           <AlertDescription class="text-xs">
             {{ t('schedule.eventDetail.conflictHint') }}
@@ -61,15 +78,9 @@
 </template>
 
 <script setup lang="ts">
-/**
- * EventDetailSheet — 非任务日历事件的只读详情（UI_PAGE_REDESIGN_PLAN §7）
- *
- * 补位：此前非任务事件点击仅 toast（Brief §8-P3 交互断层）。
- * 只读展示既有投影字段（标题/时间/来源/冲突）；编辑能力另立项，
- * 不在本轮引入新数据依赖。参照 DayDetailSheet 实现。
- */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
 import {
   Alert,
   AlertDescription,
@@ -80,14 +91,21 @@ import {
   SheetTitle,
 } from '@memoflow/ui-vue-shadcn';
 import { AlertTriangle } from '@lucide/vue';
-import { calendarEventSourceLabel, type CalendarEventItem } from '../composables/useCalendarView';
-import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
-// Residual 1291: sourceLabel dual retired onto calendarEventSourceLabel sole.
+import {
+  formatPlannerProjectionTimeRange,
+  plannerSemanticI18nKey,
+} from '../planner/planner-presentation';
 
-const props = defineProps<{
-  open: boolean;
-  event: CalendarEventItem | null;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    event: CalendarEventProjection | null;
+    hasConflict?: boolean;
+  }>(),
+  {
+    hasConflict: false,
+  },
+);
 
 const emit = defineEmits<{
   'update:open': [value: boolean];
@@ -95,10 +113,47 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const timeRange = computed(() => {
-  void productTimeRevision.value;
-  if (!props.event) return '';
-  const time = getProductTime();
-  return `${time.format.pattern(props.event.startTime, 'MMM d HH:mm')} – ${time.format.pattern(props.event.endTime, 'MMM d HH:mm')}`;
+const timeRange = computed(() =>
+  props.event
+    ? formatPlannerProjectionTimeRange(props.event, t('schedule.eventDetail.allDay'))
+    : '',
+);
+
+const sourceLabel = computed(() =>
+  props.event ? t(`schedule.source.${props.event.sourceType}`) : '',
+);
+
+const semanticLabel = computed(() =>
+  props.event ? t(plannerSemanticI18nKey[props.event.displayMetadata.semantic]) : '',
+);
+
+const sourceDotClass = computed(() => {
+  switch (props.event?.sourceType) {
+    case 'schedule':
+      return 'bg-primary';
+    case 'task':
+      return 'bg-info';
+    case 'goal':
+      return 'bg-success';
+    case 'routine':
+      return 'bg-muted-foreground';
+    default:
+      return 'bg-muted-foreground';
+  }
+});
+
+const sourceBadgeClass = computed(() => {
+  switch (props.event?.sourceType) {
+    case 'schedule':
+      return 'bg-primary/10 text-primary';
+    case 'task':
+      return 'bg-info/15 text-info';
+    case 'goal':
+      return 'bg-success/15 text-success';
+    case 'routine':
+      return 'bg-muted text-muted-foreground';
+    default:
+      return 'bg-muted text-muted-foreground';
+  }
 });
 </script>

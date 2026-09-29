@@ -11,8 +11,9 @@
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
+      "continuous": true,
       "options": {
-        "command": "node ../../node_modules/tsx/dist/cli.mjs watch src/main.ts",
+        "command": "node ../../node_modules/tsx/dist/cli.mjs watch --tsconfig ../../tsconfig.workspace-src.json --exclude '../../packages/**/dist/**' --exclude '../../packages/database/src/generated/**' src/main.ts",
         "cwd": "apps/api"
       }
     },

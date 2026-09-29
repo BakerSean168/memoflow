@@ -2,11 +2,13 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import { PowerSyncProtocolSessionStore } from './routine-vnext/protocol-session-store.powersync';
 import { PowerSyncRoutineOccurrenceTruthStore } from './routine-vnext/routine-occurrence-truth-store.powersync';
 import { PowerSyncRoutineProfileStore } from './routine-vnext/routine-profile-store.powersync';
+import { PowerSyncRoutinePreferencesStore } from './routine-vnext/routine-preferences-store.powersync';
 import { PowerSyncRoutineTemporaryOverrideStore } from './routine-schedule/routine-temporary-override-store.powersync';
 import type {
   ProtocolSessionStore,
   RoutineOccurrenceTruthStore,
   RoutineProfileStore,
+  RoutinePreferencesStore,
   RoutineTemporaryOverrideStore,
 } from '../domain/ports';
 
@@ -40,6 +42,7 @@ export function createPowerSyncClosureChecker(
 /** Canonical PowerSync persistence set for Routine vNext. */
 export interface RoutinePowerSyncRepositorySet {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routinePreferencesStore: RoutinePreferencesStore;
   readonly routineTemporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly protocolSessionStore: ProtocolSessionStore;
   readonly routineOccurrenceTruthStore: RoutineOccurrenceTruthStore;
@@ -49,6 +52,7 @@ export interface RoutinePowerSyncRepositorySet {
 export function createRoutinePowerSyncRepositories(db: Queryable): RoutinePowerSyncRepositorySet {
   return {
     routineProfileStore: new PowerSyncRoutineProfileStore(db),
+    routinePreferencesStore: new PowerSyncRoutinePreferencesStore(db),
     routineTemporaryOverrideStore: new PowerSyncRoutineTemporaryOverrideStore(db),
     protocolSessionStore: new PowerSyncProtocolSessionStore(db),
     routineOccurrenceTruthStore: new PowerSyncRoutineOccurrenceTruthStore(db),

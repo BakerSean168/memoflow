@@ -25,11 +25,11 @@ import {
 } from '../application';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { NotificationDurableRuntimePort } from './runtime/notification.runtime';
-import { mapReceiptToTimelineEntry, runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
-import type {
-  OperationAuditRecord,
-  OperationAuditRepository,
+import {
+  mapReceiptToTimelineEntry,
+  runTimelineQueryWithAudit,
 } from '@memoflow/patterns/operations';
+import type { OperationAuditRecord, OperationAuditRepository } from '@memoflow/patterns/operations';
 import { createLogger } from '@memoflow/utils/logger';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -125,23 +125,25 @@ function normalizeRuntimeContributions(
 export function createNotificationModule(
   dependencies: NotificationModuleDependencies,
 ): NotificationModuleInstance {
-  const {
-    notificationRepository,
-    preferenceRepository,
-    interactionRepository,
-    durableRuntime,
-  } = dependencies;
+  const { notificationRepository, preferenceRepository, interactionRepository, durableRuntime } =
+    dependencies;
   const auditRepository = dependencies.auditRepository;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
 
   if (!dependencies.closureChecker) {
-    throw new Error('[FAIL-CLOSED] NotificationModule requires an explicit closureChecker dependency.');
+    throw new Error(
+      '[FAIL-CLOSED] NotificationModule requires an explicit closureChecker dependency.',
+    );
   }
   if (!interactionRepository) {
-    throw new Error('[FAIL-CLOSED] NotificationModule requires an interactionRepository dependency.');
+    throw new Error(
+      '[FAIL-CLOSED] NotificationModule requires an interactionRepository dependency.',
+    );
   }
   if (!durableRuntime) {
-    throw new Error('[FAIL-CLOSED] NotificationModule requires an explicit durableRuntime dependency.');
+    throw new Error(
+      '[FAIL-CLOSED] NotificationModule requires an explicit durableRuntime dependency.',
+    );
   }
 
   const ownerCommandRegistry =
@@ -155,6 +157,7 @@ export function createNotificationModule(
   );
   const notificationQueryApplicationService = new NotificationQueryApplicationService(
     notificationRepository,
+    interactionRepository,
   );
   const notificationMaintenanceApplicationService = new NotificationMaintenanceApplicationService(
     notificationRepository,
@@ -162,12 +165,14 @@ export function createNotificationModule(
   let started = false;
 
   const api: NotificationInboxPort = {
-    createNotification: async (data) => useCases.createNotification.execute(
-      data as Parameters<CreateNotificationUseCase['execute']>[0],
-    ),
-    listNotifications: async (query) => notificationQueryApplicationService.listNotifications(
-      query as Parameters<NotificationQueryApplicationService['listNotifications']>[0],
-    ),
+    createNotification: async (data) =>
+      useCases.createNotification.execute(
+        data as Parameters<CreateNotificationUseCase['execute']>[0],
+      ),
+    listNotifications: async (query) =>
+      notificationQueryApplicationService.listNotifications(
+        query as Parameters<NotificationQueryApplicationService['listNotifications']>[0],
+      ),
     getNotification: async (id, identityId) =>
       notificationQueryApplicationService.getNotification(id, identityId),
     deleteNotification: async (id, identityId) =>
@@ -206,10 +211,11 @@ export function createNotificationModule(
       }),
     getPreferences: async (identityId) =>
       useCases.getNotificationPreference.executeOrCreate(identityId),
-    updatePreferences: async (dto, identityId) => useCases.updateNotificationPreference.execute(
-      identityId,
-      dto as Parameters<UpdateNotificationPreferenceUseCase['execute']>[1],
-    ),
+    updatePreferences: async (dto, identityId) =>
+      useCases.updateNotificationPreference.execute(
+        identityId,
+        dto as Parameters<UpdateNotificationPreferenceUseCase['execute']>[1],
+      ),
     executeAction: async (notificationId, actionKey, identityId) =>
       useCases.executeNotificationAction.execute({ identityId, notificationId, actionKey }),
     subscribeSseEvents: (handler: (payload: NotificationSseDeliveryEvent) => void) =>
@@ -221,7 +227,9 @@ export function createNotificationModule(
     replayDeadLetter: async (operationId, identityId) => {
       try {
         if (!auditRepository) {
-          throw new Error('[FAIL-CLOSED] notification replay requires an explicit auditRepository dependency.');
+          throw new Error(
+            '[FAIL-CLOSED] notification replay requires an explicit auditRepository dependency.',
+          );
         }
         const res = await durableRuntime.replayDeadLetter(
           { identityId, operationId },
@@ -245,7 +253,9 @@ export function createNotificationModule(
       ok(await durableRuntime.queryReceipts(identityId, query)),
     getOperationTimeline: async (identityId, query) => {
       if (!auditRepository) {
-        throw new Error('[FAIL-CLOSED] notification operation timeline requires an explicit auditRepository dependency.');
+        throw new Error(
+          '[FAIL-CLOSED] notification operation timeline requires an explicit auditRepository dependency.',
+        );
       }
       const { entries } = await runTimelineQueryWithAudit({
         repository: auditRepository,
@@ -264,7 +274,9 @@ export function createNotificationModule(
     },
     getOperationAudit: async (identityId, query) => {
       if (!auditRepository) {
-        throw new Error('[FAIL-CLOSED] notification operation audit requires an explicit auditRepository dependency.');
+        throw new Error(
+          '[FAIL-CLOSED] notification operation audit requires an explicit auditRepository dependency.',
+        );
       }
       const records: OperationAuditRecord[] = await auditRepository.listByActor({
         identityId,
@@ -299,7 +311,10 @@ export function createNotificationModule(
             try {
               startedRuntime.stop();
             } catch (stopError) {
-              logger.error('NotificationModule: contribution stop failed during partial-start rollback', stopError);
+              logger.error(
+                'NotificationModule: contribution stop failed during partial-start rollback',
+                stopError,
+              );
             }
           }
           throw error;

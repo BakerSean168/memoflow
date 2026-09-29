@@ -1,6 +1,10 @@
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   KnowledgeNoteProjectionClientDTO,
+  KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
 } from '@memoflow/contracts/repository';
 
 export type GithubWebhookDeliveryStatus =
@@ -69,8 +73,27 @@ export interface IKnowledgeNoteProjectionRepository {
   ): Promise<void>;
   listByIdentity(
     identityId: string,
-    options: { connectionId?: string; query?: string; limit: number },
-  ): Promise<KnowledgeNoteProjectionClientDTO[]>;
+    options: {
+      connectionId?: string;
+      query?: string;
+      cursor?: string;
+      includeHidden?: boolean;
+      sort?: 'path' | 'recent';
+      limit: number;
+    },
+  ): Promise<KnowledgeNoteProjectionListResponse>;
+  listReferenceableByIdentity(
+    identityId: string,
+    options: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<ReferenceableKnowledgeDocumentListResponse>;
+  listTreeByIdentity(
+    identityId: string,
+    options: { connectionId?: string; parent: string; includeHidden: boolean },
+  ): Promise<KnowledgeNoteTreeResponse>;
+  resolveReferenceForIdentity(
+    identityId: string,
+    options: { connectionId?: string; reference: string },
+  ): Promise<KnowledgeNoteProjectionClientDTO | null>;
   findByIdForIdentity(
     identityId: string,
     projectionId: string,

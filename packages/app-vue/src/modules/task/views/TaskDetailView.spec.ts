@@ -5,15 +5,49 @@ import { describe, expect, it } from 'vitest';
 const source = readFileSync(resolve(__dirname, 'TaskDetailView.vue'), 'utf8');
 
 describe('TaskDetailView occurrence correction and plan settings', () => {
-  it('shows plan-owned recurrence, scheduling, reminders, and Goal binding through one editor', () => {
+  it('is the canonical inline Task editor instead of reopening the plan dialog', () => {
     expect(source).toContain('data-testid="task-plan-workspace"');
+    expect(source).toContain('data-testid="task-detail-title"');
     expect(source).toContain('data-testid="task-plan-workspace-properties"');
-    expect(source).toContain('recurrenceBoundaryText');
-    expect(source).toContain('scheduleText');
-    expect(source).toContain('reminderText');
-    expect(source).toContain('goalBindingText');
-    expect(source).toContain('<TaskPlanDialog');
-    expect(source).toContain('@save="saveEdit"');
+    expect(source).toContain('data-testid="task-detail-metadata"');
+    expect(source).toContain('data-testid="task-properties-row"');
+    expect(source).toContain('data-testid="task-properties-more"');
+    expect(source).toContain('v-if="viewModel.goalBinding || showGoalEditor"');
+    expect(source).toContain('v-if="labelIds.length || showLabelsEditor"');
+    expect(source).toContain('v-if="reminderTriggers.length || showReminderEditor"');
+    expect(source).toContain('data-testid="task-goal-row"');
+    expect(source).toContain('data-testid="task-labels-row"');
+    expect(source).toContain('data-testid="task-reminders-row"');
+    expect(source).toContain('data-testid="task-detail-description"');
+    expect(source).toContain('task-detail-schedule-chip');
+    expect(source).toContain('task-detail-recurrence-chip');
+    expect(source).toContain('task-detail-goal-chip');
+    expect(source).toContain('task-detail-reminder-chip');
+    expect(source).toContain('task-detail-importance-chip');
+    expect(source).toContain('<LabelCommandPanel');
+    expect(source).toContain('reminderTriggerLabel');
+    expect(source).toContain('formatTaskReminderAbsoluteTime');
+    expect(source).toContain('hasMorePropertiesMenuItems');
+    expect(source).toContain('<DropdownMenuSub');
+    expect(source).toContain('<DropdownMenuCheckboxItem');
+    expect(source).toContain('<TaskReminderMenuItems');
+    expect(source).toContain('quickBindGoal');
+    expect(source).toContain('toggleLabelSelection');
+    expect(source).toContain('openGoalEditor');
+    expect(source).toContain('openLabelsEditor');
+    expect(source).toContain('openReminderEditor');
+    expect(source).toContain('openCustomReminderPicker');
+    expect(source).toContain('<ProductDateTimePicker');
+    expect(source).not.toContain('<LabelPicker');
+    expect(source).not.toContain('data-testid="task-detail-goal-context"');
+    expect(source).toContain('<ChecklistSection');
+    expect(source).toContain('saveInlinePlan');
+    expect(source).toContain('const req: UpdateTaskPlanReq = {}');
+    expect(source).not.toContain('name: vm.title');
+    expect(source).not.toContain('description: vm.description');
+    expect(source).not.toContain('<TaskPlanDialog');
+    expect(source).not.toContain('saveEdit');
+    expect(source).not.toContain('openEdit');
   });
 
   it('shows workspace occurrences and correction commands without inventing bounded positions', () => {
@@ -40,13 +74,15 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).toContain('runOccurrenceAction(occurrenceId, uncompleteOccurrenceMutation)');
     expect(source).toContain('runOccurrenceAction(occurrenceId, markOccurrenceMissedMutation)');
     expect(source).toContain('runOccurrenceAction(occurrenceId, skipOccurrenceMutation)');
-    expect(source).toContain('setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion })');
+    expect(source).toContain('setOccurrenceChecklistItemMutation(occurrenceIdValue, {');
 
     expect(source).not.toContain('runOccurrenceAction(occurrenceId, completeOccurrence)');
     expect(source).not.toContain('runOccurrenceAction(occurrenceId, uncompleteOccurrence)');
     expect(source).not.toContain('runOccurrenceAction(occurrenceId, markOccurrenceMissed)');
     expect(source).not.toContain('runOccurrenceAction(occurrenceId, skipOccurrence)');
-    expect(source).not.toContain('setOccurrenceChecklistItem(id, { definitionId, completed, expectedVersion })');
+    expect(source).not.toContain(
+      'setOccurrenceChecklistItem(id, { definitionId, completed, expectedVersion })',
+    );
   });
 
   it('does not resurrect dependency or graph state', () => {

@@ -27,7 +27,6 @@ describe('split workspace responsive contract', () => {
     for (const path of [
       '../../modules/goal/components/weight/WeightSuggestionPanel.vue',
       '../../modules/goal/components/weight-snapshot/WeightComparison.vue',
-      '../../modules/repository/views/KnowledgeProjectionWorkspaceView.vue',
       '../../modules/repository/components/KnowledgeProjectionRelationsView.vue',
     ]) {
       expect(source(path)).toMatch(/@(?:sm|md|lg|xl)\/panel:/);

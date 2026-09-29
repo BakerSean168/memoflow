@@ -115,7 +115,7 @@ const draft = {
     name: 'Ship durable goal workflow',
     summary: 'Make Mastra Workflow the only goal.create owner.',
     status: 'InProgress' as const,
-    startDate: '2026-09-01' as const,
+    start: { kind: 'day' as const, date: '2026-09-01' as const },
     target: { kind: 'quarter' as const, year: 2026, quarter: 4 },
     labels: ['ai-vnext'],
   },
@@ -207,7 +207,7 @@ function createPanelProps(overrides: Partial<PanelProps> = {}): PanelProps {
       name: draft.goal.name,
       summary: draft.goal.summary,
       status: draft.goal.status,
-      startDate: draft.goal.startDate,
+      start: draft.goal.start,
       target: draft.goal.target,
     },
     editableKeyResults: draft.keyResults.map((item) => ({

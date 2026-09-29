@@ -36,10 +36,6 @@ function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0;
 }
 
-function isNullableString(value: unknown): value is string | null {
-  return value === null || typeof value === 'string';
-}
-
 function isObjectArray(value: unknown): value is JsonRecord[] {
   return Array.isArray(value) && value.every(isRecord);
 }
@@ -77,7 +73,7 @@ function parseEditorOverlay(value: unknown): PersistedWorkflowEditorOverlay | un
     typeof editableGoal.name !== 'string' ||
     typeof editableGoal.summary !== 'string' ||
     typeof editableGoal.status !== 'string' ||
-    !isNullableString(editableGoal.startDate) ||
+    (editableGoal.start !== null && !isRecord(editableGoal.start)) ||
     (editableGoal.target !== null && !isRecord(editableGoal.target)) ||
     !isObjectArray(value.editableKeyResults) ||
     !isObjectArray(value.editableTasks) ||
@@ -95,7 +91,7 @@ function parseEditorOverlay(value: unknown): PersistedWorkflowEditorOverlay | un
       name: editableGoal.name,
       summary: editableGoal.summary,
       status: editableGoal.status as EditableGoal['status'],
-      startDate: editableGoal.startDate as EditableGoal['startDate'],
+      start: editableGoal.start as EditableGoal['start'],
       target: editableGoal.target as EditableGoal['target'],
     },
     // The complete overlay is validated against the authoritative draft before
@@ -138,7 +134,7 @@ function editableGoalFromDraft(draft: GoalPlanDraft): EditableGoal {
     name: draft.goal.name,
     summary: draft.goal.summary ?? '',
     status: draft.goal.status,
-    startDate: draft.goal.startDate ?? null,
+    start: draft.goal.start ?? null,
     target: draft.goal.target ?? null,
   };
 }

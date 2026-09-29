@@ -83,6 +83,11 @@ export type {
   KnowledgeQueryResult,
 } from './knowledge-query.port';
 export type { IKnowledgeSourcePort } from './knowledge-source.port';
+export type {
+  AISelectedEntityContextProjection,
+  AISelectedEntityContextReadInput,
+  IAISelectedEntityContextReadPort,
+} from './selected-entity-context-read.port';
 
 export type {
   IAIProviderCredentialProbePort,

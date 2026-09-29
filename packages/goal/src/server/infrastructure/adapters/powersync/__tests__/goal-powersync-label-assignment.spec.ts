@@ -49,6 +49,7 @@ async function createSchema(db: IElectronDatabase): Promise<void> {
     name TEXT NOT NULL,
     summary TEXT,
     status TEXT NOT NULL,
+    start_kind TEXT,
     start_date TEXT,
     target_kind TEXT,
     target_end_date TEXT,

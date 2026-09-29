@@ -7,145 +7,49 @@
       </ProductPropertyChip>
     </PopoverTrigger>
 
-    <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] p-0">
-      <div class="space-y-2 border-b border-border/70 p-3">
-        <p class="text-sm font-medium">{{ label }}</p>
-        <Input
-          v-model="query"
-          :placeholder="inputPlaceholder"
-          :data-testid="`${testId}-query`"
-          :aria-label="ariaLabel"
-          @keydown.enter.prevent="commitQuery"
-        />
-        <p v-if="parseError" class="text-xs text-destructive" role="alert">{{ invalidText }}</p>
-        <p v-else class="text-[11px] text-muted-foreground">{{ precisionHint }}</p>
-      </div>
-
-      <div class="border-b border-border/70 p-3">
-        <ToggleGroup
-          :model-value="kind"
-          type="single"
-          variant="outline"
-          class="grid grid-cols-5"
-          @update:model-value="selectKind"
-        >
-          <ToggleGroupItem value="day" class="px-2 text-xs">{{ dayLabel }}</ToggleGroupItem>
-          <ToggleGroupItem value="month" class="px-2 text-xs">{{ monthLabel }}</ToggleGroupItem>
-          <ToggleGroupItem value="quarter" class="px-2 text-xs">{{ quarterLabel }}</ToggleGroupItem>
-          <ToggleGroupItem value="halfYear" class="px-2 text-xs">{{
-            halfYearLabel
-          }}</ToggleGroupItem>
-          <ToggleGroupItem value="year" class="px-2 text-xs">{{ yearLabel }}</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-
-      <div class="p-2">
-        <Calendar
-          v-if="kind === 'day'"
-          mode="single"
-          :selected="dayValue ? parseToCalendarDate(dayValue) : undefined"
-          @update:model-value="handleDayCalendar"
-        />
-
-        <div v-else-if="kind === 'month'" class="space-y-3 p-2">
-          <Input
-            v-model.number="yearValue"
-            type="number"
-            min="1"
-            max="9999"
-            :aria-label="yearLabel"
-            @update:model-value="commitMonth"
-          />
-          <div class="grid grid-cols-3 gap-1.5">
-            <Button
-              v-for="month in 12"
-              :key="month"
-              type="button"
-              size="sm"
-              :variant="monthValue === month ? 'secondary' : 'ghost'"
-              @click="
-                monthValue = month;
-                commitMonth();
-              "
-            >
-              {{ monthName(month) }}
-            </Button>
-          </div>
-        </div>
-
-        <div v-else-if="kind === 'quarter'" class="space-y-3 p-2">
-          <Input
-            v-model.number="yearValue"
-            type="number"
-            min="1"
-            max="9999"
-            :aria-label="yearLabel"
-            @update:model-value="commitQuarter"
-          />
-          <div class="grid grid-cols-4 gap-2">
-            <Button
-              v-for="quarter in [1, 2, 3, 4] as const"
-              :key="quarter"
-              type="button"
-              :variant="quarterValue === quarter ? 'secondary' : 'outline'"
-              @click="
-                quarterValue = quarter;
-                commitQuarter();
-              "
-              >Q{{ quarter }}</Button
-            >
-          </div>
-        </div>
-
-        <div v-else-if="kind === 'halfYear'" class="space-y-3 p-2">
-          <Input
-            v-model.number="yearValue"
-            type="number"
-            min="1"
-            max="9999"
-            :aria-label="yearLabel"
-            @update:model-value="commitHalfYear"
-          />
-          <div class="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              :variant="halfValue === 1 ? 'secondary' : 'outline'"
-              @click="
-                halfValue = 1;
-                commitHalfYear();
-              "
-              >H1</Button
-            >
-            <Button
-              type="button"
-              :variant="halfValue === 2 ? 'secondary' : 'outline'"
-              @click="
-                halfValue = 2;
-                commitHalfYear();
-              "
-              >H2</Button
-            >
-          </div>
-        </div>
-
-        <div v-else class="p-2">
-          <Input
-            v-model.number="yearValue"
-            type="number"
-            min="1"
-            max="9999"
-            :aria-label="yearLabel"
-            @update:model-value="commitYear"
-          />
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between border-t border-border/70 px-3 py-2">
-        <span class="min-w-0 truncate text-xs text-muted-foreground">{{ resolvedLabel }}</span>
-        <Button type="button" variant="ghost" size="sm" @click="clearTarget">{{
-          clearLabel
-        }}</Button>
-      </div>
+    <PopoverContent
+      align="start"
+      class="w-[19rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-[10px] border-border/80 bg-[hsl(var(--surface-overlay))] p-0 shadow-lg dark:border-white/10 dark:shadow-[0_18px_40px_rgba(0,0,0,0.38),0_2px_8px_rgba(0,0,0,0.24)]"
+    >
+      <ProductTemporalPickerSurface
+        :label="label"
+        :query="query"
+        :kind="kind"
+        :parse-error="parseError || constraintError"
+        :selected-date="dayValue ? parseToCalendarDate(dayValue) : undefined"
+        :return-date="calendarReturnDate"
+        :min-date="calendarMinDate"
+        :max-date="calendarMaxDate"
+        :disabled-months="disabledMonths"
+        :disabled-quarters="disabledQuarters"
+        :disabled-halves="disabledHalves"
+        :year-value="yearValue"
+        :month-value="monthValue"
+        :quarter-value="quarterValue"
+        :half-value="halfValue"
+        :locale="productLocale"
+        :week-starts-on="weekStartsOn"
+        :test-id="testId"
+        :ariaLabel="ariaLabel"
+        :input-placeholder="inputPlaceholder"
+        :invalid-text="constraintError ? constraintText : invalidText"
+        :day-label="dayLabel"
+        :month-label="monthLabel"
+        :quarter-label="quarterLabel"
+        :half-year-label="halfYearLabel"
+        :year-label="yearLabel"
+        :clear-label="clearLabel"
+        :return-to-selected-label="returnToSelectedLabel"
+        @update:query="updateQuery"
+        @commit-query="commitQuery"
+        @select-kind="selectKind"
+        @calendar="handleDayCalendar"
+        @update-year="updateYear"
+        @select-month="selectMonth"
+        @select-quarter="selectQuarter"
+        @select-half="selectHalf"
+        @clear="clearTarget"
+      />
     </PopoverContent>
   </Popover>
 </template>
@@ -153,24 +57,24 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { CalendarRange } from '@lucide/vue';
+type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 import {
+  goalTimeframeEndBoundary,
   goalTimeframeLabel,
+  goalTimeframeStartBoundary,
   type GoalTimeframe,
   type GoalTimeframeKind,
 } from '@memoflow/contracts/goal';
 import type { Ymd } from '@memoflow/contracts/primitives';
-import {
-  Button,
-  Calendar,
-  Input,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@memoflow/ui-vue-shadcn';
+import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import ProductPropertyChip from './ProductPropertyChip.vue';
-import { getProductTodayYmd } from '../utils/product-time';
+import ProductTemporalPickerSurface from './ProductTemporalPickerSurface.vue';
+import {
+  formatProductYmd,
+  getProductTime,
+  getProductTodayYmd,
+  productTimeRevision,
+} from '../utils/product-time';
 import { parseToCalendarDate } from '../utils/parse-to-date';
 import { handleCalendarSelect } from '../utils/handle-calendar-select';
 import { parseExplicitProductDateInput } from '../utils/parse-explicit-product-date';
@@ -192,6 +96,10 @@ const props = withDefaults(
     halfYearLabel?: string;
     yearLabel?: string;
     clearLabel?: string;
+    returnToSelectedLabel?: string;
+    constraintText?: string;
+    minEndBoundary?: Ymd;
+    maxStartBoundary?: Ymd;
     locale?: string;
   }>(),
   {
@@ -208,6 +116,10 @@ const props = withDefaults(
     halfYearLabel: 'Half',
     yearLabel: 'Year',
     clearLabel: 'Clear',
+    returnToSelectedLabel: 'Return to today',
+    constraintText: 'This timeframe conflicts with the current planning window.',
+    minEndBoundary: undefined,
+    maxStartBoundary: undefined,
     locale: 'en-US',
   },
 );
@@ -216,6 +128,7 @@ const emit = defineEmits<{ 'update:modelValue': [GoalTimeframe | null] }>();
 const open = ref(false);
 const query = ref('');
 const parseError = ref(false);
+const constraintError = ref(false);
 const kind = ref<GoalTimeframeKind>('day');
 const dayValue = ref('');
 const yearValue = ref(2026);
@@ -223,65 +136,132 @@ const monthValue = ref(1);
 const quarterValue = ref<1 | 2 | 3 | 4>(1);
 const halfValue = ref<1 | 2>(1);
 
-function todayYear(): number {
-  return Number(getProductTodayYmd().slice(0, 4));
+const productLocale = computed(() => {
+  void productTimeRevision.value;
+  return getProductTime().presentation.locale;
+});
+const weekStartsOn = computed(() => {
+  void productTimeRevision.value;
+  return getProductTime().context.weekStartsOn as WeekStartsOn;
+});
+const calendarReturnDate = computed(() => {
+  void productTimeRevision.value;
+  return parseToCalendarDate(getProductTodayYmd());
+});
+const calendarMinDate = computed(() =>
+  props.minEndBoundary ? parseToCalendarDate(props.minEndBoundary) : undefined,
+);
+const calendarMaxDate = computed(() =>
+  props.maxStartBoundary ? parseToCalendarDate(props.maxStartBoundary) : undefined,
+);
+
+function isCandidateAllowed(value: GoalTimeframe): boolean {
+  if (
+    props.minEndBoundary &&
+    goalTimeframeEndBoundary(value) < props.minEndBoundary
+  ) {
+    return false;
+  }
+  if (
+    props.maxStartBoundary &&
+    goalTimeframeStartBoundary(value) > props.maxStartBoundary
+  ) {
+    return false;
+  }
+  return true;
 }
+
+const disabledMonths = computed(() => {
+  const year = validYear();
+  if (!year) return [];
+  return Array.from({ length: 12 }, (_, index) => index + 1).filter(
+    (month) => !isCandidateAllowed({ kind: 'month', year, month }),
+  );
+});
+const disabledQuarters = computed(() => {
+  const year = validYear();
+  if (!year) return [];
+  return ([1, 2, 3, 4] as const).filter(
+    (quarter) => !isCandidateAllowed({ kind: 'quarter', year, quarter }),
+  );
+});
+const disabledHalves = computed(() => {
+  const year = validYear();
+  if (!year) return [];
+  return ([1, 2] as const).filter(
+    (half) => !isCandidateAllowed({ kind: 'halfYear', year, half }),
+  );
+});
+
 function validYear(): number | null {
   const year = Number(yearValue.value);
   return Number.isInteger(year) && year >= 1 && year <= 9999 ? year : null;
 }
 function formatQuery(value: GoalTimeframe | null): string {
   if (!value) return '';
-  if (value.kind === 'day') return value.date;
+  if (value.kind === 'day') return value.date.replace(/-/g, '/');
   if (value.kind === 'month') return `${value.year}-${String(value.month).padStart(2, '0')}`;
   if (value.kind === 'quarter') return `Q${value.quarter} ${value.year}`;
   if (value.kind === 'halfYear') return `H${value.half} ${value.year}`;
   return String(value.year);
 }
+function seedControlsFromYmd(date: Ymd): void {
+  const year = Number(date.slice(0, 4));
+  const month = Number(date.slice(5, 7));
+  yearValue.value = year;
+  monthValue.value = month;
+  quarterValue.value = Math.ceil(month / 3) as 1 | 2 | 3 | 4;
+  halfValue.value = month <= 6 ? 1 : 2;
+}
+function timeframeFromAnchor(kindValue: GoalTimeframeKind, anchor: Ymd): GoalTimeframe {
+  const year = Number(anchor.slice(0, 4));
+  const month = Number(anchor.slice(5, 7));
+  if (kindValue === 'day') return { kind: 'day', date: anchor };
+  if (kindValue === 'month') return { kind: 'month', year, month };
+  if (kindValue === 'quarter') {
+    return { kind: 'quarter', year, quarter: Math.ceil(month / 3) as 1 | 2 | 3 | 4 };
+  }
+  if (kindValue === 'halfYear') return { kind: 'halfYear', year, half: month <= 6 ? 1 : 2 };
+  return { kind: 'year', year };
+}
 function sync(value: GoalTimeframe | null): void {
   query.value = formatQuery(value);
   parseError.value = false;
-  if (!value) {
-    kind.value = 'day';
-    dayValue.value = '';
-    yearValue.value = todayYear();
-    monthValue.value = 1;
-    quarterValue.value = 1;
-    halfValue.value = 1;
-    return;
-  }
-  kind.value = value.kind;
-  if (value.kind === 'day') {
-    dayValue.value = value.date;
-    yearValue.value = Number(value.date.slice(0, 4));
-  } else if (value.kind === 'month') {
-    yearValue.value = value.year;
-    monthValue.value = value.month;
-  } else if (value.kind === 'quarter') {
-    yearValue.value = value.year;
-    quarterValue.value = value.quarter as 1 | 2 | 3 | 4;
-  } else if (value.kind === 'halfYear') {
-    yearValue.value = value.year;
-    halfValue.value = value.half as 1 | 2;
-  } else {
-    yearValue.value = value.year;
-  }
+  constraintError.value = false;
+  const anchor = value ? goalTimeframeStartBoundary(value) : getProductTodayYmd();
+  seedControlsFromYmd(anchor);
+  dayValue.value = value?.kind === 'day' ? value.date : '';
+  kind.value = value?.kind ?? 'day';
 }
 watch(() => props.modelValue, sync, { immediate: true, deep: true });
-
-const resolvedLabel = computed(() =>
-  props.modelValue ? goalTimeframeLabel(props.modelValue, props.locale) : props.placeholder,
-);
-const triggerLabel = computed(() =>
-  props.modelValue
-    ? `${props.label}: ${goalTimeframeLabel(props.modelValue, props.locale)}`
-    : props.placeholder || props.label,
+watch(
+  () => [props.minEndBoundary, props.maxStartBoundary],
+  () => {
+    constraintError.value = false;
+  },
 );
 
-function emitTarget(value: GoalTimeframe | null): void {
+const triggerLabel = computed(() => {
+  if (!props.modelValue) return props.placeholder || props.label;
+  if (props.modelValue.kind === 'day') return formatProductYmd(props.modelValue.date);
+  return goalTimeframeLabel(props.modelValue, props.locale);
+});
+
+function emitTarget(value: GoalTimeframe | null): boolean {
   parseError.value = false;
+  if (value && !isCandidateAllowed(value)) {
+    constraintError.value = true;
+    return false;
+  }
+  constraintError.value = false;
   emit('update:modelValue', value);
   sync(value);
+  return true;
+}
+function updateQuery(value: string): void {
+  query.value = value;
+  parseError.value = false;
+  constraintError.value = false;
 }
 function commitQuery(): void {
   const parsed = parseExplicitProductDateInput(query.value);
@@ -293,13 +273,44 @@ function commitQuery(): void {
 }
 function selectKind(value: unknown): void {
   if (typeof value !== 'string' || !value) return;
-  kind.value = value as GoalTimeframeKind;
-  if (kind.value === 'day') {
-    if (dayValue.value) emitTarget({ kind: 'day', date: dayValue.value as Ymd });
-  } else if (kind.value === 'month') commitMonth();
+  const nextKind = value as GoalTimeframeKind;
+  kind.value = nextKind;
+  parseError.value = false;
+
+  // Precision tabs are navigation when the Goal has no value yet. Do not
+  // silently create January/Q1/H1 just because the user is exploring modes.
+  if (!props.modelValue) {
+    if (nextKind === 'year') commitYear();
+    return;
+  }
+
+  // For an existing semantic value, changing precision intentionally converts
+  // the same planning anchor rather than jumping to an unrelated default.
+  const candidate = timeframeFromAnchor(nextKind, goalTimeframeStartBoundary(props.modelValue));
+  if (!emitTarget(candidate)) kind.value = props.modelValue.kind;
+}
+function updateYear(value: number): void {
+  yearValue.value = value;
+  if (kind.value === 'year') {
+    commitYear();
+    return;
+  }
+  if (!props.modelValue) return;
+  if (kind.value === 'month') commitMonth();
   else if (kind.value === 'quarter') commitQuarter();
   else if (kind.value === 'halfYear') commitHalfYear();
-  else commitYear();
+}
+function selectMonth(value: number): void {
+  monthValue.value = value;
+  commitMonth();
+}
+function selectQuarter(value: 1 | 2 | 3 | 4): void {
+  quarterValue.value = value;
+  commitQuarter();
+}
+function selectHalf(value: 1 | 2): void {
+  halfValue.value = value;
+  commitHalfYear();
 }
 function handleDayCalendar(value: unknown): void {
   handleCalendarSelect(value, (date) => {
@@ -326,10 +337,5 @@ function commitYear(): void {
 }
 function clearTarget(): void {
   emitTarget(null);
-}
-function monthName(month: number): string {
-  return new Intl.DateTimeFormat(props.locale, { month: 'short', timeZone: 'UTC' }).format(
-    new Date(Date.UTC(2020, month - 1, 1)),
-  );
 }
 </script>

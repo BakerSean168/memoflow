@@ -6,18 +6,124 @@ const appRoot = resolve(import.meta.dirname, '../..');
 const read = (relative: string) => readFileSync(resolve(appRoot, relative), 'utf8');
 
 describe('MemoFlow product surface polish', () => {
-  it('keeps Goal detail on the shared module header and a flat identity surface', () => {
+  it('keeps Goal detail on a direct-manipulation workspace instead of a global edit mode', () => {
     const goal = read('modules/goal/views/GoalDetailView.vue');
     expect(goal).toContain('<ModuleHeader data-testid="goal-detail-toolbar">');
     expect(goal).toContain('data-testid="goal-detail-identity"');
-    expect(goal).toContain('class="space-y-5 border-b border-border/70 pb-5"');
-    expect(goal).not.toContain('class="space-y-5 rounded-xl border bg-card p-5"');
+    expect(goal).toContain('class="space-y-4 border-b border-border/70 pb-5"');
+    expect(goal).toContain('<GoalStatusPicker');
+    expect(goal.match(/<GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(goal).toContain('<GoalReminderMenuItems');
+    expect(goal).toContain('<ProductDateTimePicker');
+    expect(goal).toContain('@request-custom-time="openCustomReminderPicker"');
+    expect(goal).toContain('<GoalKnowledgeMenuItems');
+    expect(goal).toContain('data-testid="goal-reminders-row"');
+    expect(goal).toContain('v-for="trigger in pendingReminderTriggers"');
+    expect(goal).not.toContain('variant="header"');
+    expect(goal).not.toContain('goal-reminder-header');
+    expect(goal).toContain('<LabelCommandPanel');
+    expect(goal).toContain('<DropdownMenuSub');
+    expect(goal).toContain('<DropdownMenuCheckboxItem');
+    expect(goal).toContain('v-for="option in selectedLabelOptions"');
+    expect(goal).toContain('variant="outline"');
+    expect(goal).toContain('data-testid="goal-properties-row"');
+    expect(goal).toContain('data-testid="goal-labels-row"');
+    expect(goal).toContain('data-testid="goal-tasks-row"');
+    expect(goal).toContain('data-testid="goal-knowledge-row"');
+    expect(goal).toContain('data-testid="goal-reviews-row"');
+    expect(goal).toContain('v-if="pendingReminderTriggers.length === 0"');
+    expect(goal).toContain('v-if="labelIdsDraft.length === 0 && !showLabelsEditor"');
+    expect(goal).toContain('v-if="taskCount === 0"');
+    expect(goal).toContain('v-if="knowledgeCount === 0"');
+    expect(goal).toContain('v-if="reviewCount === 0"');
+    expect(goal.indexOf('data-testid="goal-workspace-description"')).toBeLessThan(
+      goal.indexOf('data-testid="goal-workspace-key-results"'),
+    );
+    expect(goal).not.toContain('data-testid="goal-workspace-tasks"');
+    expect(goal).not.toContain('data-testid="goal-workspace-knowledge"');
+    expect(goal).not.toContain('data-testid="goal-workspace-reviews"');
+    expect(goal).not.toContain('v-model:open="editOpen"');
+    expect(goal).not.toContain('data-testid="goal-start-action"');
+    expect(goal).not.toContain('data-testid="goal-abandon-action"');
   });
 
-  it('presents Task plan properties as rows instead of four card tiles', () => {
+  it('keeps Goal reminder UX on absolute and target-relative presets instead of percentage configuration', () => {
+    const reminder = read('modules/goal/components/GoalReminderMenuItems.vue');
+    expect(reminder).toContain('ReminderTriggerType.AbsoluteAt');
+    expect(reminder).toContain('ReminderTriggerType.RemainingDays');
+    expect(reminder).toContain('goal.reminder.inOneHour');
+    expect(reminder).toContain('goal.reminder.customTime');
+    expect(reminder).toContain("emit('request-custom-time')");
+    expect(reminder).not.toContain('<ProductDatePicker');
+    expect(reminder).not.toContain('type="time"');
+    expect(reminder).toContain('goal.reminder.relativeToTarget');
+    expect(reminder).toContain('triggers: [...existing, { type, value, enabled: true }]');
+    expect(reminder).toContain('MAX_REMINDERS = 10');
+    expect(reminder).toContain('canSetRemainingDays');
+    expect(reminder).toContain('goalTimeframeStartBoundary');
+    expect(reminder.match(/formatProductDateTime\(/g)?.length).toBeGreaterThanOrEqual(8);
+    expect(reminder).toContain('remainingDaysInstant');
+    expect(reminder).not.toContain('formatProductHm');
+    expect(reminder).not.toContain('formatProductDate(next');
+    expect(reminder).not.toContain('TimeProgressPercentage');
+  });
+
+  it('keeps standalone Key Result create/edit on the same trajectory editor as the Goal form', () => {
+    const goalDialog = read('modules/goal/components/dialogs/GoalDialog.vue');
+    const keyResultDialog = read('modules/goal/components/dialogs/KeyResultDialog.vue');
+
+    expect(goalDialog).toContain('<GoalKeyResultDraftEditor');
+    expect(keyResultDialog).toContain('<GoalKeyResultCardEditor');
+    expect(keyResultDialog).toContain('v-model:initial-value="draft.initialValue"');
+    expect(keyResultDialog).toContain('v-model:current-value="currentValueModel"');
+    expect(keyResultDialog).toContain('v-model:target-value="draft.targetValue"');
+    expect(keyResultDialog).toContain(':goal-start="goalStart"');
+    expect(keyResultDialog).toContain(':goal-target="goalTarget"');
+    expect(keyResultDialog).not.toContain('key-result-initial-input');
+    expect(keyResultDialog).not.toContain('krAdvanced');
+    expect(keyResultDialog).not.toContain('<Collapsible');
+  });
+
+  it('keeps the Key Result trajectory editor on one restrained surface with compact controls', () => {
+    const card = read('modules/goal/components/GoalKeyResultCardEditor.vue');
+    const trajectory = read('modules/goal/components/GoalKeyResultTrajectoryPlot.vue');
+
+    expect(card).toContain('data-testid="draft-kr-weight-popover"');
+    expect(card).toContain('data-testid="draft-kr-weight-glyph"');
+    expect(card).toContain('<Sigma');
+    expect(card).toContain('<Plus v-if="!unit"');
+    expect(card).toContain('weightOpen.value = false');
+    expect(trajectory).toContain('class="relative mt-4 h-[14.5rem] border-t border-border/45"');
+    expect(trajectory).not.toContain('rounded-xl bg-background/35');
+    expect(trajectory).not.toContain('stroke-dasharray="1.2 2.4"');
+    expect(trajectory).toContain(":data-target-state=\"hasTarget ? 'set' : 'unset'\"");
+    expect(trajectory).toContain('v-if="hasTarget"');
+    expect(trajectory).toContain('bg-transparent');
+  });
+
+  it('aligns Task detail metadata with the Goal detail label/value rows', () => {
     const task = read('modules/task/views/TaskDetailView.vue');
-    expect(task).toContain('data-testid="task-detail-property-list"');
-    expect(task).toContain('class="divide-y border-y border-border/70"');
+    expect(task).toContain('data-testid="task-detail-metadata"');
+    expect(task).toContain('data-testid="task-properties-row"');
+    expect(task).toContain('data-testid="task-properties-more"');
+    expect(task).toContain('<DropdownMenuSub');
+    expect(task).toContain('<DropdownMenuCheckboxItem');
+    expect(task).toContain('<TaskReminderMenuItems');
+    expect(task).toContain('<ProductDateTimePicker');
+    expect(task).toContain('v-if="viewModel.goalBinding || showGoalEditor"');
+    expect(task).toContain('v-if="labelIds.length || showLabelsEditor"');
+    expect(task).toContain('v-if="reminderTriggers.length || showReminderEditor"');
+    expect(task).toContain('data-testid="task-goal-row"');
+    expect(task).toContain('data-testid="task-labels-row"');
+    expect(task).toContain('data-testid="task-reminders-row"');
+    expect(task).toContain('grid-cols-[6.5rem_minmax(0,1fr)]');
+    expect(task).toContain('<LabelCommandPanel');
+    expect(task).toContain('variant="outline"');
+    expect(task).toContain('task-detail-schedule-chip');
+    expect(task).toContain('task-detail-recurrence-chip');
+    expect(task).toContain('task-detail-goal-chip');
+    expect(task).toContain('task-detail-reminder-chip');
+    expect(task).not.toContain('<LabelPicker');
     expect(task).not.toContain('@3xl/panel:grid-cols-4');
   });
 
@@ -46,13 +152,14 @@ describe('MemoFlow product surface polish', () => {
     expect(navigation).toContain('settings-return-to-app');
   });
 
-  it('reuses the product date picker across Goal, Task, and Schedule instead of native date inputs', () => {
+  it('uses semantic Goal timeframes and shared product date pickers instead of native date inputs', () => {
     const goal = read('modules/goal/components/dialogs/GoalDialog.vue');
     const task = read('modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue');
     const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
-    expect(goal).toContain('ProductDatePicker');
+    expect(goal.match(/GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
     expect(task).toContain('ProductDatePicker');
     expect(schedule.match(/ProductDatePicker/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(schedule.match(/ProductDateTimePicker/g)?.length).toBeGreaterThanOrEqual(2);
     expect(goal).not.toContain('type="date"');
     expect(task).not.toContain('type="date"');
     expect(schedule).not.toContain('type="date"');

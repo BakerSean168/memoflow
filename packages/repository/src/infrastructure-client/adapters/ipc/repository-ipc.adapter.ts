@@ -40,7 +40,12 @@ import type {
   AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -155,12 +160,35 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
 
   async listKnowledgeNoteProjections(
     _request: ListKnowledgeNoteProjectionsReq = { limit: 50 },
+    _options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionListResponse>> {
+    return this.serverProjectionUnavailable();
+  }
+
+  async listReferenceableKnowledgeDocuments(
+    _request: ListReferenceableKnowledgeDocumentsReq = { limit: 24 },
+    _options?: { signal?: AbortSignal },
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>> {
+    return this.serverProjectionUnavailable();
+  }
+
+  async listKnowledgeNoteTree(
+    _request: ListKnowledgeNoteTreeReq = { parent: '', includeHidden: false },
+    _options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteTreeResponse>> {
+    return this.serverProjectionUnavailable();
+  }
+
+  async resolveKnowledgeNoteReference(
+    _request: ResolveKnowledgeNoteReferenceReq,
+    _options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
     return this.serverProjectionUnavailable();
   }
 
   async getKnowledgeNoteProjection(
     _projectionId: string,
+    _options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
     return this.serverProjectionUnavailable();
   }

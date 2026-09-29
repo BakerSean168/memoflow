@@ -381,7 +381,7 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
   );
 
   async listByIdentity() {
-    return [];
+    return { notes: [], total: 0, nextCursor: null };
   }
 
   async findByIdForIdentity() {

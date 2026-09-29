@@ -63,12 +63,16 @@ test.describe('Planner owner-command acceptance', () => {
       hasText: taskName,
     });
     await expect(event).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    const targetTimeLabel = page.getByText(/^(16:00|16时)$/, { exact: true }).last();
-    await expect(targetTimeLabel).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await targetTimeLabel.scrollIntoViewIfNeeded();
+    const sourceSlot = page.locator('.planner-slot-lane[data-time="14:00:00"]');
+    const targetSlot = page.locator('.planner-slot-lane[data-time="16:00:00"]');
+    await expect(sourceSlot).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(targetSlot).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await targetSlot.scrollIntoViewIfNeeded();
     await expect(event).toBeVisible();
     const before = await event.boundingBox();
+    const source = await sourceSlot.boundingBox();
     expect(before).not.toBeNull();
+    expect(source).not.toBeNull();
 
     let reschedulePayload: unknown = null;
     await page.route('**/api/v1/task-occurrences/*/reschedule', async (route) => {
@@ -83,8 +87,9 @@ test.describe('Planner owner-command acceptance', () => {
       });
     });
 
-    const target = await targetTimeLabel.boundingBox();
+    const target = await targetSlot.boundingBox();
     expect(target).not.toBeNull();
+    const slotDeltaY = target!.y - source!.y;
 
     const requestPromise = page.waitForRequest(
       (request) =>
@@ -94,9 +99,11 @@ test.describe('Planner owner-command acceptance', () => {
 
     await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);
     await page.mouse.down();
-    await page.mouse.move(before!.x + before!.width / 2, target!.y + target!.height / 2, {
-      steps: 12,
-    });
+    await page.mouse.move(
+      before!.x + before!.width / 2,
+      before!.y + before!.height / 2 + slotDeltaY,
+      { steps: 12 },
+    );
     await page.mouse.up();
     await requestPromise;
 

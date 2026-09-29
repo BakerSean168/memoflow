@@ -9,6 +9,7 @@ import {
   NotificationChannelType,
   NotificationType,
   type NotificationRequestedOutboxInput,
+  type NotificationRequestedWriterPort,
 } from '@memoflow/contracts/notification';
 import type {
   RoutineOccurrenceNotificationRequestInput,
@@ -17,6 +18,30 @@ import type {
 
 export const ROUTINE_NOTIFICATION_SOURCE = 'routine';
 
+export function buildRoutineOccurrenceNotificationRequest(input: {
+  readonly identityId: string;
+  readonly routineId: string;
+  readonly occurrenceKey: string;
+  readonly notificationOccurrenceKey?: string;
+  readonly scheduledFor: number;
+  readonly sourceRevision: string | number | null;
+  readonly routineName: string;
+  readonly routineDescription?: string | null;
+}): RoutineOccurrenceNotificationRequestInput {
+  return {
+    identityId: input.identityId,
+    routineId: input.routineId,
+    occurrenceKey: input.occurrenceKey,
+    ...(input.notificationOccurrenceKey
+      ? { notificationOccurrenceKey: input.notificationOccurrenceKey }
+      : {}),
+    scheduledFor: input.scheduledFor,
+    sourceRevision: input.sourceRevision,
+    title: `例行提醒：${input.routineName}`,
+    content: input.routineDescription ?? `已到「${input.routineName}」的执行时间。`,
+  };
+}
+
 /** Durable `notification.requested` envelope for one committed routine occurrence. */
 export function buildRoutineNotificationRequestedOutboxInput(
   input: RoutineOccurrenceNotificationRequestInput,
@@ -24,17 +49,18 @@ export function buildRoutineNotificationRequestedOutboxInput(
 ): NotificationRequestedOutboxInput {
   const operationId =
     input.operationId ?? options?.operationIdFactory?.() ?? `routine-requested:${randomUUID()}`;
+  const notificationOccurrenceKey = input.notificationOccurrenceKey ?? input.occurrenceKey;
   const idempotencyKey = buildIdempotencyKeyString({
     identityId: input.identityId,
     source: ROUTINE_NOTIFICATION_SOURCE,
-    occurrenceKey: input.occurrenceKey,
+    occurrenceKey: notificationOccurrenceKey,
   });
   return {
     operationId,
     envelope: {
       identityId: input.identityId,
       source: ROUTINE_NOTIFICATION_SOURCE,
-      occurrenceKey: input.occurrenceKey,
+      occurrenceKey: notificationOccurrenceKey,
       idempotencyKey,
       workflowKey: 'routine.intervention',
       relatedEntity: { type: 'routine', id: input.routineId },
@@ -82,6 +108,25 @@ export function buildRoutineNotificationRequestedOutboxInput(
 }
 
 /**
+ * Adapts the shared NotificationRequested durable writer to the Routine-owned
+ * occurrence notification seam. Local/Desktop runtimes use this adapter so a
+ * due occurrence produces the same canonical NotificationRequested envelope
+ * as the Scheduler/WallClock lane instead of inventing a parallel presenter.
+ */
+export function createRoutineOccurrenceNotificationWriter(
+  writer: NotificationRequestedWriterPort,
+): RoutineOccurrenceNotificationWriterPort {
+  return {
+    async enqueueRoutineOccurrenceRequested(input, options) {
+      const outboxInput = buildRoutineNotificationRequestedOutboxInput(input);
+      return writer.enqueueNotificationRequested(outboxInput, {
+        txClient: options?.transaction?.client,
+      });
+    },
+  };
+}
+
+/**
  * In-memory NotificationRequested writer honoring the durable envelope's
  * idempotency key. A replay of the same envelope is a no-op that returns the
  * stable receipt — the assertion used by crash/retry no-duplicate tests.
@@ -97,7 +142,9 @@ export function createInMemoryRoutineNotificationWriter(options?: {
     rows,
     async enqueueRoutineOccurrenceRequested(input) {
       const envelope = buildRoutineNotificationRequestedOutboxInput(input);
-      const existing = rows.find((row) => row.envelope.idempotencyKey === envelope.envelope.idempotencyKey);
+      const existing = rows.find(
+        (row) => row.envelope.idempotencyKey === envelope.envelope.idempotencyKey,
+      );
       if (existing) {
         return toReceipt(existing, now());
       }
@@ -107,7 +154,10 @@ export function createInMemoryRoutineNotificationWriter(options?: {
   };
 }
 
-function toReceipt(row: NotificationRequestedOutboxInput, finishedAt: number): BusinessOperationReceipt {
+function toReceipt(
+  row: NotificationRequestedOutboxInput,
+  finishedAt: number,
+): BusinessOperationReceipt {
   return assertValidBusinessOperationReceipt({
     schemaVersion: 1,
     operationId: row.operationId,

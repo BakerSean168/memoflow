@@ -3,6 +3,7 @@ import { evaluateRoutineEligibility, temporaryOverrideAllowsExecution } from '..
 import type { ElapsedTrigger, RoutineTemporaryOverride } from '../../domain/routine';
 
 export interface ElapsedGateState {
+  readonly globalEnabled?: boolean;
   readonly routineEnabled: boolean;
   readonly profileEnabled?: boolean;
   readonly membershipEnabled?: boolean;
@@ -103,6 +104,7 @@ function laneKey(identityId: string, routineId: string): string {
 
 function staticEnabled(gates: ElapsedGateState): boolean {
   return evaluateRoutineEligibility({
+    globalEnabled: gates.globalEnabled,
     routineEnabled: gates.routineEnabled,
     profileEnabled: gates.profileEnabled,
     membershipEnabled: gates.membershipEnabled,
@@ -112,6 +114,7 @@ function staticEnabled(gates: ElapsedGateState): boolean {
 
 function effectiveEnabled(gates: ElapsedGateState, at: Instant): boolean {
   return evaluateRoutineEligibility({
+    globalEnabled: gates.globalEnabled,
     routineEnabled: gates.routineEnabled,
     profileEnabled: gates.profileEnabled,
     membershipEnabled: gates.membershipEnabled,
@@ -138,20 +141,21 @@ function profileAnchor(
   };
 }
 
-function durableAnchor(input: ElapsedRoutineRegistration): Pick<Lane, 'anchorAt' | 'anchorRevision'> {
+function durableAnchor(
+  input: ElapsedRoutineRegistration,
+): Pick<Lane, 'anchorAt' | 'anchorRevision'> {
   if (input.durableAnchorAt == null || !input.durableAnchorRevision?.trim()) {
     throw new TypeError(
       `Elapsed ${input.trigger.anchor} registration requires a durable anchor and revision`,
     );
   }
   const anchorAt = asInstant(Number(input.durableAnchorAt));
-  if (!Number.isFinite(Number(anchorAt))) throw new TypeError('Elapsed durable anchor must be valid');
+  if (!Number.isFinite(Number(anchorAt)))
+    throw new TypeError('Elapsed durable anchor must be valid');
   return { anchorAt, anchorRevision: input.durableAnchorRevision.trim() };
 }
 
-function restoredSnapshot(
-  input: ElapsedRoutineRegistration,
-): ElapsedRuntimeSnapshot | null {
+function restoredSnapshot(input: ElapsedRoutineRegistration): ElapsedRuntimeSnapshot | null {
   const restored = input.restoredSnapshot;
   if (!restored) return null;
   if (restored.identityId !== input.identityId || restored.routineId !== input.routineId) {
@@ -201,9 +205,7 @@ export function createElapsedRuntime(options: CreateElapsedRuntimeOptions): Elap
   const advanceLane = (lane: Lane, at: Instant): void => {
     if (lane.anchorAt == null || lane.anchorRevision == null || lane.thresholdSignaled) return;
     if (!effectiveEnabled(lane.gates, at)) return;
-    const dueAt = asInstant(
-      Number(lane.anchorAt) + lane.trigger.durationMs * lane.generation,
-    );
+    const dueAt = asInstant(Number(lane.anchorAt) + lane.trigger.durationMs * lane.generation);
     if (Number(at) < Number(dueAt)) return;
     lane.thresholdSignaled = true;
     options.onOccurrenceDue({
@@ -249,7 +251,8 @@ export function createElapsedRuntime(options: CreateElapsedRuntimeOptions): Elap
             generation = restored.generation;
             thresholdSignaled = restored.thresholdSignaled;
           } else {
-            ({ anchorAt, anchorRevision, generation, thresholdSignaled } = profileAnchor(resolveAt()));
+            ({ anchorAt, anchorRevision, generation, thresholdSignaled } =
+              profileAnchor(resolveAt()));
           }
         }
       } else {
@@ -341,7 +344,9 @@ export function createElapsedRuntime(options: CreateElapsedRuntimeOptions): Elap
     },
     listSnapshots() {
       return [...lanes.values()]
-        .sort((a, b) => laneKey(a.identityId, a.routineId).localeCompare(laneKey(b.identityId, b.routineId)))
+        .sort((a, b) =>
+          laneKey(a.identityId, a.routineId).localeCompare(laneKey(b.identityId, b.routineId)),
+        )
         .map(snapshot);
     },
     start() {

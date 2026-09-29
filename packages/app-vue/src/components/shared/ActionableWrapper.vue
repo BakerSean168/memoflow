@@ -26,6 +26,7 @@
                 type="button"
                 :data-testid="moreButtonTestId"
                 class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-background/80 text-muted-foreground opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover/actionable:opacity-100"
+                :class="moreButtonClass"
                 :aria-label="moreButtonLabel"
                 :title="moreButtonLabel"
                 @click.stop
@@ -108,7 +109,7 @@ interface Props {
   /** Extra CSS classes on the wrapper div */
   wrapperClass?: string;
   /** Position of the "..." button */
-  moreButtonPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  moreButtonPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'center-right';
   /** DropdownMenuContent align */
   dropdownAlign?: 'start' | 'center' | 'end';
   /** DropdownMenuContent side */
@@ -119,6 +120,8 @@ interface Props {
   moreButtonTestId?: string;
   /** Accessible label for the icon-only menu trigger. */
   moreButtonLabel?: string;
+  /** Optional classes appended to the icon-only menu trigger. */
+  moreButtonClass?: string;
 }
 
 withDefaults(defineProps<Props>(), {
@@ -131,6 +134,7 @@ withDefaults(defineProps<Props>(), {
   menuWidth: 'w-48',
   moreButtonTestId: undefined,
   moreButtonLabel: 'More actions',
+  moreButtonClass: '',
 });
 
 const positionClasses = {
@@ -138,5 +142,6 @@ const positionClasses = {
   'top-left': 'top-2 left-2',
   'bottom-right': 'bottom-2 right-2',
   'bottom-left': 'bottom-2 left-2',
+  'center-right': 'top-1/2 right-2 -translate-y-1/2',
 } as const;
 </script>

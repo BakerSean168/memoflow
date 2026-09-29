@@ -10,6 +10,7 @@ import {
   SetRoutineMembershipEnabledRequestSchema,
   SetRoutineProfileActiveRequestSchema,
   SetRoutineTemporaryOverrideRequestSchema,
+  UpdateRoutinePreferencesRequestSchema,
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
 } from '@memoflow/contracts/routine';
@@ -84,6 +85,33 @@ export function composeRoutineApiModule(options: ComposeRoutineApiModuleOptions)
           return res
             .status(200)
             .json(auth.response.success(await options.queryPort.getConfigurationSnapshot(auth.id)));
+        } catch (error) {
+          return handleRoutineError(auth.response, res, error);
+        }
+      });
+
+      routineRouter.patch('/preferences', context.middleware.auth, async (req, res) => {
+        const request = req as AuthenticatedRequest;
+        const auth = authIdentity(request, res);
+        if (!auth) return;
+        const parsed = UpdateRoutinePreferencesRequestSchema.safeParse(req.body);
+        if (!parsed.success) {
+          return res
+            .status(422)
+            .json(auth.response.validationError(validationDetails(parsed.error.issues)));
+        }
+        try {
+          const receipt = await options.commandPort.updatePreferences({
+            identityId: auth.id,
+            globalEnabled: parsed.data.globalEnabled,
+            expectedVersion: parsed.data.expectedVersion,
+          });
+          return res.status(200).json(
+            auth.response.success({
+              globalEnabled: receipt.globalEnabled,
+              version: receipt.version,
+            }),
+          );
         } catch (error) {
           return handleRoutineError(auth.response, res, error);
         }

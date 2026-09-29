@@ -4,16 +4,7 @@
   使用 TaskReminderConfig.triggers 数组结构
 -->
 <template>
-  <section class="space-y-4" aria-labelledby="task-reminder-heading">
-    <header class="flex items-center gap-2">
-      <Bell class="h-5 w-5 text-primary" />
-      <h3 id="task-reminder-heading" class="text-sm font-semibold">
-        {{ t('task.reminderSection.title') }}
-      </h3>
-      <!-- 验证状态指示器 -->
-      <AlertTriangle v-if="!isValid" class="h-5 w-5 ml-2 text-destructive" />
-      <CheckCircle v-else class="h-5 w-5 ml-2 text-success" />
-    </header>
+  <section class="space-y-4">
     <div>
       <!-- 显示验证错误 -->
       <Alert v-if="errors.length > 0" variant="destructive" class="mb-4">
@@ -26,13 +17,19 @@
 
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between gap-3 rounded-lg bg-muted/25 px-2.5 py-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <Bell class="h-4 w-4 shrink-0 text-muted-foreground" />
+              <Label for="task-reminder-enabled" class="cursor-pointer">
+                {{ t('task.reminderSection.enable') }}
+              </Label>
+            </div>
             <Switch
               id="task-reminder-enabled"
+              data-testid="task-reminder-enabled"
               :model-value="reminderEnabled"
               @update:model-value="reminderEnabled = $event as boolean"
             />
-            <Label for="task-reminder-enabled">{{ t('task.reminderSection.enable') }}</Label>
           </div>
         </div>
 
@@ -65,7 +62,13 @@
                         :id="`task-reminder-type-${index}`"
                         :aria-label="t('task.reminderSection.type')"
                       >
-                        <SelectValue :placeholder="t('task.reminderSection.selectType')" />
+                        <div class="flex items-center gap-2">
+                          <component
+                            :is="reminderTypeIcon(trigger.type)"
+                            class="h-4 w-4 text-muted-foreground"
+                          />
+                          <SelectValue :placeholder="t('task.reminderSection.selectType')" />
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem
@@ -73,7 +76,10 @@
                           :key="opt.value"
                           :value="opt.value"
                         >
-                          {{ opt.title }}
+                          <div class="flex items-center gap-2">
+                            <component :is="opt.icon" class="h-4 w-4 text-muted-foreground" />
+                            <span>{{ opt.title }}</span>
+                          </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -216,7 +222,7 @@
                       :aria-label="t('common.delete')"
                       @click="removeTrigger(index)"
                     >
-                      <Trash2 class="h-4 w-4 text-destructive" />
+                      <Trash2 class="h-4 w-4 text-muted-foreground" />
                     </Button>
                   </div>
                 </div>
@@ -259,14 +265,7 @@ import {
   PopoverContent,
   Calendar,
 } from '@memoflow/ui-vue-shadcn';
-import {
-  Bell,
-  AlertTriangle,
-  CheckCircle,
-  Trash2,
-  Plus,
-  Calendar as CalendarIcon,
-} from '@lucide/vue';
+import { Bell, Calendar as CalendarIcon, CalendarClock, Plus, Timer, Trash2 } from '@lucide/vue';
 import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
 import { getProductTime } from '../../../../../shared/utils/product-time';
@@ -376,9 +375,21 @@ const updatePlan = (updater: (template: TaskPlanViewModel) => void) => {
 
 // 提醒类型选项
 const reminderTypeOptions = computed(() => [
-  { title: t('task.reminderSection.relative'), value: ReminderType.Relative },
-  { title: t('task.reminderSection.absolute'), value: ReminderType.Absolute },
+  {
+    title: t('task.reminderSection.relative'),
+    value: ReminderType.Relative,
+    icon: Timer,
+  },
+  {
+    title: t('task.reminderSection.absolute'),
+    value: ReminderType.Absolute,
+    icon: CalendarClock,
+  },
 ]);
+
+function reminderTypeIcon(type: TaskReminderType) {
+  return type === ReminderType.Absolute ? CalendarClock : Timer;
+}
 
 // 时间单位选项
 const timeUnitOptions = computed(() => [

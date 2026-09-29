@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { INotificationRepository } from '../../domain/repositories';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+} from '../../domain/repositories';
 import { NotificationQueryApplicationService } from './notification-query-application-service';
 import {
   NotificationCategory,
   NotificationType,
+  type NotificationClientDTO,
 } from '@memoflow/contracts/notification';
 
 const IDENTITY_ID = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
@@ -24,6 +28,7 @@ type NotificationDtoOverrides = Partial<{
   updatedAt: number;
   deletedAt: number | null;
   archivedAt: number | null;
+  actions: NotificationClientDTO['actions'];
 }>;
 
 function createNotificationRecord(overrides: NotificationDtoOverrides = {}) {
@@ -65,6 +70,7 @@ function createNotificationRecord(overrides: NotificationDtoOverrides = {}) {
 
 describe('NotificationQueryApplicationService', () => {
   let notificationRepository: ReturnType<typeof createMockRepo<INotificationRepository>>;
+  let interactionRepository: ReturnType<typeof createMockRepo<INotificationInteractionRepository>>;
   let service: NotificationQueryApplicationService;
 
   beforeEach(() => {
@@ -73,7 +79,14 @@ describe('NotificationQueryApplicationService', () => {
       findByRelatedEntity: vi.fn().mockResolvedValue([]),
       findByIdForIdentity: vi.fn().mockResolvedValue(null),
     });
-    service = new NotificationQueryApplicationService(notificationRepository);
+    interactionRepository = createMockRepo<INotificationInteractionRepository>({
+      listByNotification: vi.fn().mockResolvedValue([]),
+      listByNotifications: vi.fn().mockResolvedValue([]),
+    });
+    service = new NotificationQueryApplicationService(
+      notificationRepository,
+      interactionRepository,
+    );
   });
 
   it('filters, sorts, and paginates notifications in the application layer', async () => {
@@ -166,6 +179,124 @@ describe('NotificationQueryApplicationService', () => {
     if (result.ok) {
       expect(result.data.total).toBe(1);
     }
+  });
+
+  it('suppresses stale owner commands after an accepted business interaction without changing read state', async () => {
+    const notificationId = 'INotificationId_550e8400-e29b-41d4-a716-446655440020';
+    (notificationRepository.findByIdentityId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      createNotificationRecord({
+        id: notificationId,
+        isRead: false,
+        actions: [
+          {
+            kind: 'owner-command',
+            actionKey: 'complete',
+            labelKey: 'routine.action.complete',
+            owner: { type: 'routine-occurrence', id: 'occ-1' },
+            commandKey: 'routine.complete',
+            input: { routineId: 'routine-1', occurrenceKey: 'occ-1' },
+          },
+          {
+            kind: 'owner-command',
+            actionKey: 'snooze-10m',
+            labelKey: 'routine.action.snooze10m',
+            owner: { type: 'routine-occurrence', id: 'occ-1' },
+            commandKey: 'routine.snooze',
+            input: {
+              routineId: 'routine-1',
+              occurrenceKey: 'occ-1',
+              durationMs: 600_000,
+            },
+          },
+          {
+            kind: 'archive',
+            actionKey: 'archive',
+            labelKey: 'notification.action.archive',
+          },
+        ],
+      }),
+    ]);
+    (interactionRepository.listByNotifications as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        id: 'interaction-1',
+        idempotencyKey: 'notification:n:action:complete',
+        identityId: IDENTITY_ID,
+        notificationId,
+        actionKey: 'complete',
+        actionKind: 'owner-command',
+        occurredAt: 500,
+        commandReceiptId: 'routine-interaction-1',
+        outcome: 'accepted',
+        correlationId: null,
+        causationId: null,
+      },
+    ]);
+
+    const result = await service.listNotifications({
+      identityId: IDENTITY_ID,
+      page: 1,
+      limit: 20,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.notifications[0]).toMatchObject({
+      id: notificationId,
+      isRead: false,
+      actions: [
+        {
+          kind: 'archive',
+          actionKey: 'archive',
+        },
+      ],
+    });
+    expect(interactionRepository.listByNotifications).toHaveBeenCalledWith(IDENTITY_ID, [
+      notificationId,
+    ]);
+  });
+
+  it('keeps owner commands available when the interaction was rejected', async () => {
+    const notificationId = 'INotificationId_550e8400-e29b-41d4-a716-446655440021';
+    (notificationRepository.findByIdentityId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      createNotificationRecord({
+        id: notificationId,
+        actions: [
+          {
+            kind: 'owner-command',
+            actionKey: 'complete',
+            labelKey: 'routine.action.complete',
+            owner: { type: 'routine-occurrence', id: 'occ-1' },
+            commandKey: 'routine.complete',
+            input: { routineId: 'routine-1', occurrenceKey: 'occ-1' },
+          },
+        ],
+      }),
+    ]);
+    (interactionRepository.listByNotifications as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        id: 'interaction-rejected',
+        idempotencyKey: 'notification:n:action:complete',
+        identityId: IDENTITY_ID,
+        notificationId,
+        actionKey: 'complete',
+        actionKind: 'owner-command',
+        occurredAt: 500,
+        commandReceiptId: null,
+        outcome: 'rejected',
+        correlationId: null,
+        causationId: null,
+      },
+    ]);
+
+    const result = await service.listNotifications({
+      identityId: IDENTITY_ID,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.notifications[0]?.actions).toEqual([
+      expect.objectContaining({ actionKey: 'complete' }),
+    ]);
   });
 
   it('returns NOT_FOUND for missing notification detail', async () => {

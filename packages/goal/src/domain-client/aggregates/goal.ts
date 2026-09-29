@@ -1,4 +1,4 @@
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/contracts/primitives';
 /**
  * Goal Aggregate Root - Domain Client
  * 目标聚合根 - 领域客户端
@@ -25,7 +25,7 @@ export interface GoalState {
   summary: string | null;
   description: string | null;
   status: GoalStatus;
-  startDate: Ymd | null;
+  start: GoalTimeframe | null;
   target: GoalTimeframe | null;
   completedAt: Instant | null;
   archivedAt: Instant | null;
@@ -72,8 +72,8 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.status;
   }
 
-  get startDate(): Ymd | null {
-    return this._props.startDate;
+  get start(): GoalTimeframe | null {
+    return this._props.start;
   }
 
   get target(): GoalTimeframe | null {
@@ -151,7 +151,7 @@ export class Goal extends AggregateRoot<GoalId> {
         summary: this._props.summary,
         description: this._props.description,
         status: this._props.status,
-        startDate: this._props.startDate ?? null,
+        start: this._props.start ?? null,
         target: this._props.target ?? null,
         completedAt: this._props.completedAt ?? null,
         archivedAt: this._props.archivedAt ?? null,

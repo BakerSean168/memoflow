@@ -38,7 +38,12 @@ import type {
   AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -88,9 +93,23 @@ export interface IRepositoryApiClient {
 
   listKnowledgeNoteProjections(
     request?: ListKnowledgeNoteProjectionsReq,
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionListResponse>>;
+  listReferenceableKnowledgeDocuments(
+    request?: ListReferenceableKnowledgeDocumentsReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>>;
+  listKnowledgeNoteTree(
+    request?: ListKnowledgeNoteTreeReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteTreeResponse>>;
+  resolveKnowledgeNoteReference(
+    request: ResolveKnowledgeNoteReferenceReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>>;
   getKnowledgeNoteProjection(
     projectionId: string,
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionClientDTO>>;
   getKnowledgeNoteLinkGraph(
     projectionId: string,

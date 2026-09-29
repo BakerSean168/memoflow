@@ -19,6 +19,7 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",
+    "@memoflow/relation": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/schedule": "workspace:*",

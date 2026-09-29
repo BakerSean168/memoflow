@@ -12,6 +12,7 @@ import {
   GOAL_REMINDER_NOTIFICATION_SOURCE,
   GOAL_REMINDER_WORKFLOW_KEY,
   buildGoalReminderOperationId,
+  createGoalReminderFireHandler,
   executeGoalReminderFire,
   GoalReminderFirePayloadSchema,
   type GoalReminderFirePayload,
@@ -30,7 +31,7 @@ const payload: GoalReminderFirePayload = {
   goalTitle: 'Ship R06',
   triggerType: ReminderTriggerType.RemainingDays,
   triggerValue: 3,
-  startDate: requireYmd('2026-02-01'),
+  start: { kind: 'day', date: requireYmd('2026-02-01') },
   target: { kind: 'quarter', year: 2026, quarter: 4 },
   reminderTime: 8 * 60,
 };
@@ -111,6 +112,41 @@ describe('GoalReminderFirePayloadSchema', () => {
       GoalReminderFirePayloadSchema.parse({ ...payload, triggerType: 'MysteryTrigger' }),
     ).toThrow();
   });
+
+  it('decodes queued v2 startDate payloads into day-precision semantic starts', () => {
+    const { start: _start, ...legacy } = payload;
+    expect(
+      GoalReminderFirePayloadSchema.parse({
+        ...legacy,
+        startDate: requireYmd('2026-02-01'),
+      }),
+    ).toEqual(payload);
+
+    expect(
+      GoalReminderFirePayloadSchema.parse({
+        ...legacy,
+        startDate: null,
+      }).start,
+    ).toBeNull();
+  });
+});
+
+describe('createGoalReminderFireHandler', () => {
+  it('normalizes queued legacy v2 payloads at the scheduler registration boundary', () => {
+    const writer = makeWriter();
+    const registration = createGoalReminderFireHandler({
+      goalRepository: { findByIdForIdentity: vi.fn() },
+      requestedWriter: { enqueueNotificationRequested: writer.enqueueNotificationRequested },
+    });
+    const { start: _start, ...legacy } = payload;
+
+    expect(
+      registration.validatePayload({
+        ...legacy,
+        startDate: requireYmd('2026-02-01'),
+      }),
+    ).toEqual(payload);
+  });
 });
 
 describe('buildGoalReminderOperationId', () => {
@@ -175,6 +211,42 @@ describe('executeGoalReminderFire', () => {
         idempotencyKey: expectedIdempotencyKey,
       },
     });
+  });
+
+  it('fires an absolute reminder for a planned Goal', async () => {
+    const remindAt = Date.parse('2026-09-30T09:30:00.000Z');
+    const absolutePayload: GoalReminderFirePayload = {
+      ...payload,
+      triggerType: ReminderTriggerType.AbsoluteAt,
+      triggerValue: remindAt,
+      start: null,
+      target: null,
+      reminderTime: remindAt,
+    };
+    const findByIdForIdentity = vi.fn().mockResolvedValue(
+      makeGoal({
+        status: GoalStatus.Planned,
+        summary: 'Review the release goal.',
+        reminderConfig: {
+          enabled: true,
+          triggers: [{ type: ReminderTriggerType.AbsoluteAt, value: remindAt, enabled: true }],
+        },
+      }),
+    );
+    const writer = makeWriter();
+
+    const result = await executeGoalReminderFire(
+      {
+        goalRepository: { findByIdForIdentity },
+        requestedWriter: { enqueueNotificationRequested: writer.enqueueNotificationRequested },
+      },
+      { ...context, payload: absolutePayload },
+    );
+
+    expect(result.status).toBe('succeeded');
+    expect((writer.lastEnvelope()?.content as { content: string }).content).toBe(
+      'Review the release goal.',
+    );
   });
 
   it('uses target-date wording for a day-precision target', async () => {

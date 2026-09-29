@@ -20,6 +20,7 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   routine_definitions: new Set(['enabled']),
+  routine_preferences: new Set(['global_enabled']),
   routine_profiles: new Set(['enabled']),
   routine_profile_memberships: new Set(['enabled']),
   notifications: new Set(['is_read']),

@@ -15,6 +15,7 @@ function createApiClient(overrides: Partial<IRepositoryApiClient> = {}): IReposi
     syncKnowledgeRepository: vi.fn(),
     issueDesktopKnowledgeRepositoryToken: vi.fn(),
     listKnowledgeNoteProjections: vi.fn(),
+    listReferenceableKnowledgeDocuments: vi.fn(),
     getKnowledgeNoteProjection: vi.fn(),
     getKnowledgeNoteLinkGraph: vi.fn(),
     listKnowledgeAttachmentProjections: vi.fn(),
@@ -51,6 +52,26 @@ describe('RepositoryClientService', () => {
     expect(syncKnowledgeRepository).toHaveBeenCalledWith({ connectionId: 'connection-1' });
   });
 
+  it('forwards referenceable knowledge-document queries', async () => {
+    const listReferenceableKnowledgeDocuments = vi.fn(async () =>
+      ok({ documents: [], total: 0, nextCursor: null }),
+    );
+    const service = new RepositoryClientService(
+      createApiClient({ listReferenceableKnowledgeDocuments }),
+    );
+    const abortController = new AbortController();
+
+    await service.listReferenceableKnowledgeDocuments(
+      { query: '1Password', limit: 24 },
+      { signal: abortController.signal },
+    );
+
+    expect(listReferenceableKnowledgeDocuments).toHaveBeenCalledWith(
+      { query: '1Password', limit: 24 },
+      { signal: abortController.signal },
+    );
+  });
+
   it('forwards confirmed knowledge note creation', async () => {
     const createConfirmedKnowledgeNote = vi.fn(async () =>
       ok({
@@ -59,9 +80,7 @@ describe('RepositoryClientService', () => {
         created: true,
       }),
     );
-    const service = new RepositoryClientService(
-      createApiClient({ createConfirmedKnowledgeNote }),
-    );
+    const service = new RepositoryClientService(createApiClient({ createConfirmedKnowledgeNote }));
 
     await service.createConfirmedKnowledgeNote({
       connectionId: 'connection-1',

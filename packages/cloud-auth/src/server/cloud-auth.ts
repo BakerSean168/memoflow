@@ -42,6 +42,7 @@ interface CloudAuthOptions {
   readonly github?: {
     readonly clientId: string;
     readonly clientSecret: string;
+    readonly redirectURI?: string;
   };
   readonly userProvisioner: CloudUserProvisioner;
   readonly emailDelivery: CloudAuthEmailDelivery;
@@ -144,6 +145,7 @@ export function createCloudAuth(
           github: {
             clientId: options.github.clientId,
             clientSecret: options.github.clientSecret,
+            redirectURI: options.github.redirectURI,
           },
         }
       : undefined,

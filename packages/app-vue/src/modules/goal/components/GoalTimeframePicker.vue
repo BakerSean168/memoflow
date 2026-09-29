@@ -5,8 +5,8 @@
     :test-id="testId"
     :aria-label="ariaLabel"
     :placeholder="placeholder"
-    :label="t('goal.dialog.target')"
-    :input-placeholder="t('common.productDateInputPlaceholder')"
+    :label="label || t('goal.dialog.target')"
+    :input-placeholder="t('goal.dialog.timeframeInputPlaceholder')"
     :precision-hint="t('goal.dialog.targetPrecisionHint')"
     :invalid-text="t('common.productDateInputInvalid')"
     :day-label="t('goal.dialog.targetDay')"
@@ -15,6 +15,10 @@
     :half-year-label="t('goal.dialog.targetHalfYear')"
     :year-label="t('goal.dialog.targetYear')"
     :clear-label="t('common.clear')"
+    :return-to-selected-label="t('goal.dialog.returnToToday')"
+    :constraint-text="constraintText"
+    :min-end-boundary="minEndBoundary"
+    :max-start-boundary="maxStartBoundary"
     :locale="locale"
     @update:model-value="emit('update:modelValue', $event)"
   />
@@ -23,6 +27,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import type { GoalTimeframe } from '@memoflow/contracts/goal';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { ProductTimeframePicker } from '../../../shared/components';
 
 withDefaults(
@@ -32,12 +37,20 @@ withDefaults(
     testId?: string;
     ariaLabel?: string;
     placeholder?: string;
+    label?: string;
+    constraintText?: string;
+    minEndBoundary?: Ymd;
+    maxStartBoundary?: Ymd;
   }>(),
   {
     disabled: false,
     testId: 'goal-target-chip',
     ariaLabel: 'Target timeframe',
     placeholder: '',
+    label: '',
+    constraintText: '',
+    minEndBoundary: undefined,
+    maxStartBoundary: undefined,
   },
 );
 const emit = defineEmits<{ 'update:modelValue': [GoalTimeframe | null] }>();

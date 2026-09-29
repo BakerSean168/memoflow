@@ -29,14 +29,3 @@ export const governanceSurfacePolicy = resolveGovernanceSurfacePolicy({
   isDevelopment: import.meta.env.DEV,
   diagnosticSurfaceEnabled: import.meta.env.VITE_ENABLE_GOVERNANCE_DEV_SURFACE === 'true',
 });
-
-/**
- * Keep a direct/deep-linked Governance route self-describing even when normal
- * production navigation hides the entry point.
- */
-export function shouldRenderGovernanceSegment(
-  active: 'notes' | 'governance',
-  policy: GovernanceSurfacePolicy = governanceSurfacePolicy,
-): boolean {
-  return policy.navigationVisible || active === 'governance';
-}

@@ -40,6 +40,26 @@ function messageText(message: MastraDBMessage): string {
     .join('');
 }
 
+function messageAttachments(message: MastraDBMessage) {
+  return message.content.parts.flatMap((part) => {
+    if (!part || typeof part !== 'object' || !('type' in part) || part.type !== 'file') return [];
+    const record = part as Record<string, unknown>;
+    const mediaType =
+      typeof record.mediaType === 'string'
+        ? record.mediaType
+        : typeof record.mimeType === 'string'
+          ? record.mimeType
+          : 'application/octet-stream';
+    const filename =
+      typeof record.filename === 'string'
+        ? record.filename
+        : typeof record.name === 'string'
+          ? record.name
+          : undefined;
+    return [{ mediaType, ...(filename ? { filename } : {}) }];
+  });
+}
+
 /** Mastra Memory is the sole authoritative Assistant message/history store. */
 export class AssistantHistoryService {
   private readonly openInFlight = new Map<string, Promise<void>>();
@@ -79,6 +99,7 @@ export class AssistantHistoryService {
         conversationId: input.conversationId,
         role: message.role,
         content: messageText(message),
+        attachments: messageAttachments(message),
         createdAt: message.createdAt.getTime(),
       }))
       .sort((left, right) => left.createdAt - right.createdAt || left.id.localeCompare(right.id));

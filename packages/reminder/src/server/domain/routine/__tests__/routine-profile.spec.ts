@@ -87,6 +87,38 @@ describe('RoutineDefinition + RoutineProfile + ProfileMembership', () => {
     );
   });
 
+  it('applies the identity-scoped global gate without mutating child state', () => {
+    const routine = RoutineDefinition.create({
+      identityId: 'identity-1',
+      name: '20-20-20',
+    });
+    const profile = RoutineProfile.create({
+      identityId: 'identity-1',
+      name: 'Work',
+      enabled: true,
+    });
+    const membership = ProfileMembership.create({
+      identityId: 'identity-1',
+      routineId: routine.id,
+      profileId: profile.id,
+    });
+
+    expect(
+      evaluateRoutineMembershipEligibility({
+        routine,
+        profile,
+        membership,
+        globalEnabled: false,
+      }),
+    ).toMatchObject({
+      eligible: false,
+      reasonCodes: ['global-disabled'],
+    });
+    expect(routine.enabled).toBe(true);
+    expect(profile.enabled).toBe(true);
+    expect(membership.enabled).toBe(true);
+  });
+
   it('uses a strict AND across routine, profile enabled/active, membership and temporary override', () => {
     const routine = RoutineDefinition.create({
       identityId: 'identity-1',

@@ -223,6 +223,24 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
+  it('reapplies viewport focus when reopening the right panel on a narrow screen', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+    const { wrapper, store } = await mountShell();
+
+    store.closeRightPanel();
+    await nextTick();
+    store.setLayout('split', 'default');
+    await nextTick();
+
+    store.toggleRightPanel();
+    await nextTick();
+
+    expect(store.layout).toBe('focus');
+    expect(store.layoutReason).toBe('viewport');
+    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
+    wrapper.unmount();
+  });
+
   it('restores the active input after a panel-resize pointer gesture settles', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);

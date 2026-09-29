@@ -5,6 +5,12 @@ import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import { ok, fail } from '@memoflow/contracts/result';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import {
+  createTestServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+  type ServerStateRuntime,
+} from '../../../platform/server-state';
 import { useGoalHomeSummary } from './useGoalHomeSummary';
 
 const i18n = createI18n({
@@ -13,7 +19,10 @@ const i18n = createI18n({
   messages: { 'en-US': { goal: { error: { loadFailed: 'Failed to load goal' } } } },
 });
 
-async function mountComposable(getHomeSummary: ReturnType<typeof vi.fn>) {
+async function mountComposable(
+  getHomeSummary: ReturnType<typeof vi.fn>,
+  runtime: ServerStateRuntime = createTestServerStateRuntime(),
+) {
   let api!: ReturnType<typeof useGoalHomeSummary>;
   const Host = defineComponent({
     setup() {
@@ -26,11 +35,13 @@ async function mountComposable(getHomeSummary: ReturnType<typeof vi.fn>) {
       plugins: [i18n],
       provide: {
         [GOAL_SERVICE_KEY as symbol]: { getHomeSummary },
+        [SERVER_STATE_RUNTIME_KEY as symbol]: runtime,
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'identity-1',
       },
     },
   });
   await nextTick();
-  return { wrapper, api };
+  return { wrapper, api, runtime };
 }
 
 describe('useGoalHomeSummary', () => {
@@ -55,5 +66,39 @@ describe('useGoalHomeSummary', () => {
     expect(api.error.value).toBeTruthy();
     expect(api.isLoading.value).toBe(false);
     wrapper.unmount();
+  });
+
+  it('shares the fresh summary across remounts and only bypasses the cache for refresh', async () => {
+    const runtime = createTestServerStateRuntime();
+    const getHomeSummary = vi.fn().mockResolvedValue(
+      ok({
+        activeCount: 1,
+        goals: [
+          {
+            id: 'g1',
+            name: 'Cached Goal',
+            progress: 20,
+            status: 'Planned',
+            target: null,
+            keyResultCount: 0,
+          },
+        ],
+      }),
+    );
+
+    const first = await mountComposable(getHomeSummary, runtime);
+    await first.api.ensure();
+    expect(getHomeSummary).toHaveBeenCalledTimes(1);
+    first.wrapper.unmount();
+
+    const second = await mountComposable(getHomeSummary, runtime);
+    expect(second.api.goals.value[0]?.name).toBe('Cached Goal');
+    await second.api.ensure();
+    expect(getHomeSummary).toHaveBeenCalledTimes(1);
+
+    await second.api.refresh();
+    expect(getHomeSummary).toHaveBeenCalledTimes(2);
+    second.wrapper.unmount();
+    runtime.dispose();
   });
 });

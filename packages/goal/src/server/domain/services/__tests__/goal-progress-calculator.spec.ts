@@ -22,7 +22,7 @@ function createTestGoal(opts?: { name?: string }): Goal {
     identityId: 'test-identity-id' as any,
     name: opts?.name ?? 'Test Goal',
     summary: null,
-    startDate: null,
+    start: null,
     reminderConfig: null,
   });
 }

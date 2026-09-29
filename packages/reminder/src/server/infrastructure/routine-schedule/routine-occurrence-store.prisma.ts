@@ -55,12 +55,11 @@ export class PrismaRoutineOccurrenceStore implements RoutineOccurrenceStore {
           source: ROUTINE_OCCURRENCE_SOURCE,
           occurrenceKey: input.occurrenceKey,
           scheduledFor: new Date(input.scheduledFor),
-          sourceRevision:
-            input.sourceRevision == null ? null : String(input.sourceRevision),
+          sourceRevision: input.sourceRevision == null ? null : String(input.sourceRevision),
           idempotencyKey,
           status: 'running',
-          triggerKind: 'WallClock',
-          becameDueAt: new Date(input.scheduledFor),
+          triggerKind: input.triggerKind ?? 'WallClock',
+          becameDueAt: new Date(input.becameDueAt ?? input.scheduledFor),
           resolutionState: 'Open',
           attempt: 1,
           ownerToken: `owner:${randomUUID()}`,
@@ -137,8 +136,7 @@ export class PrismaRoutineOccurrenceStore implements RoutineOccurrenceStore {
         leaseExpiresAt: null,
         lastError: null,
         historyJson: JSON.stringify([input.history]),
-        nextOccurrenceAt:
-          input.nextOccurrenceAt == null ? null : new Date(input.nextOccurrenceAt),
+        nextOccurrenceAt: input.nextOccurrenceAt == null ? null : new Date(input.nextOccurrenceAt),
         attempt: { increment: 1 },
         finishedAt: now,
         updatedAt: now,
@@ -216,7 +214,7 @@ export class PrismaRoutineOccurrenceStore implements RoutineOccurrenceStore {
 function mapRowToLease(row: RoutineOccurrence): RoutineOccurrenceLease {
   if (row.scheduledFor == null) {
     throw new TypeError(
-      `WallClock routine occurrence '${row.occurrenceKey}' is missing scheduledFor`,
+      `Scheduled routine occurrence '${row.occurrenceKey}' is missing scheduledFor`,
     );
   }
   const finalized = row.status === 'succeeded' || row.status === 'skipped';

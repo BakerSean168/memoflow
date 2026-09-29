@@ -13,6 +13,7 @@ export {
 export {
   createPlannerOwnerCommandRouter,
   defaultPlannerMutationTimePort,
+  type PlannerMutationConflictReason,
   type PlannerMutationKind,
   type PlannerMutationOutcome,
   type PlannerMutationRequest,

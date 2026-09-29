@@ -38,7 +38,7 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     document.body.innerHTML = '';
   });
 
-  it('uses compact property chips and expands only one property editor at a time', async () => {
+  it('keeps required time visible and progressively reveals only optional details', async () => {
     const wrapper = mount(CreateScheduleDialog, {
       props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
       attachTo: document.body,
@@ -46,31 +46,65 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     });
     await nextTick();
 
+    expect(document.querySelector('[data-testid="schedule-time-panel"]')).not.toBeNull();
+    expect(document.querySelector('[data-testid="schedule-start-time-button"]')).not.toBeNull();
+    expect(document.querySelector('[data-testid="schedule-end-time-button"]')).not.toBeNull();
+    expect(document.querySelector('[data-testid="schedule-conflict-setting"]')).not.toBeNull();
+
     const chips = document.querySelector('[data-testid="schedule-property-chips"]');
     expect(chips).not.toBeNull();
     expect(document.querySelector('[data-testid="schedule-property-editor"]')).toBeNull();
 
-    const whenChip = new DOMWrapper(
-      document.querySelector<HTMLButtonElement>('[data-testid="schedule-when-chip"]')!,
-    );
     const locationChip = new DOMWrapper(
       document.querySelector<HTMLButtonElement>('[data-testid="schedule-location-chip"]')!,
     );
-
-    await whenChip.trigger('click');
-    await nextTick();
-    expect(whenChip.attributes('aria-pressed')).toBe('true');
-    expect(document.querySelectorAll('[data-testid="schedule-property-editor"]')).toHaveLength(1);
-    expect(document.querySelector('#all-day')).not.toBeNull();
+    const attendeesChip = new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-attendees-chip"]')!,
+    );
 
     await locationChip.trigger('click');
     await nextTick();
-    expect(whenChip.attributes('aria-pressed')).toBe('false');
     expect(locationChip.attributes('aria-pressed')).toBe('true');
     expect(document.querySelectorAll('[data-testid="schedule-property-editor"]')).toHaveLength(1);
     expect(document.querySelector('#location')).not.toBeNull();
-    expect(document.querySelector('#all-day')).toBeNull();
 
+    await attendeesChip.trigger('click');
+    await nextTick();
+    expect(locationChip.attributes('aria-pressed')).toBe('false');
+    expect(attendeesChip.attributes('aria-pressed')).toBe('true');
+    expect(document.querySelectorAll('[data-testid="schedule-property-editor"]')).toHaveLength(1);
+    expect(document.querySelector('#location')).toBeNull();
+
+    wrapper.unmount();
+  }, 20_000);
+
+  it('seeds the exact calendar selection into the create draft', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true);
+    const start = Date.parse('2026-08-14T09:30:00.000Z');
+    const end = Date.parse('2026-08-14T11:00:00.000Z');
+    const wrapper = mount(CreateScheduleDialog, {
+      props: {
+        modelValue: true,
+        initialRange: { start, end, allDay: false },
+        onSubmit,
+      },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    await new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    ).setValue('Selected block');
+    await new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-save-button"]')!,
+    ).trigger('click');
+    await nextTick();
+    await nextTick();
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    const request = onSubmit.mock.calls[0]?.[0];
+    expect(request?.range).toEqual({ kind: 'Timed', start, end });
     wrapper.unmount();
   }, 20_000);
 

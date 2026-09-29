@@ -34,6 +34,9 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
     DropdownMenuContent: passthrough('DropdownMenuContentStub'),
     DropdownMenuItem: passthrough('DropdownMenuItemStub'),
     DropdownMenuSeparator: passthrough('DropdownMenuSeparatorStub'),
+    DropdownMenuSub: passthrough('DropdownMenuSubStub'),
+    DropdownMenuSubContent: passthrough('DropdownMenuSubContentStub'),
+    DropdownMenuSubTrigger: passthrough('DropdownMenuSubTriggerStub'),
     Select: passthrough('SelectStub'),
     SelectTrigger: passthrough('SelectTriggerStub'),
     SelectValue: passthrough('SelectValueStub'),
@@ -55,7 +58,28 @@ function mountComposer(
     modelValue: string;
     loading: boolean;
     canSend: boolean;
-    toolButtonLabel: string;
+    attachments: Array<{
+      id: string;
+      data: string;
+      mediaType: string;
+      filename?: string;
+      size: number;
+    }>;
+    contextEntities: Array<{
+      entityType: 'goal' | 'task' | 'knowledge_document';
+      id: string;
+      label: string;
+      origin: 'explicit' | 'surface';
+    }>;
+    recentGoals: Array<{
+      id: string;
+      title: string;
+      status: string;
+      updatedAt: number;
+      progress: number | null;
+    }>;
+    recentTasks: Array<{ id: string; title: string; updatedAt: number }>;
+    recentKnowledgeNotes: Array<{ id: string; title: string; path: string; updatedAt: number }>;
     modelGroups: Array<{
       providerId: string;
       providerName: string;
@@ -70,7 +94,11 @@ function mountComposer(
       modelValue: '',
       loading: false,
       canSend: true,
-      toolButtonLabel: 'Chat',
+      attachments: [],
+      contextEntities: [],
+      recentGoals: [],
+      recentTasks: [],
+      recentKnowledgeNotes: [],
       modelGroups: [
         {
           providerId: 'p1',
@@ -85,16 +113,16 @@ function mountComposer(
     global: {
       plugins: [i18n],
       stubs: {
-        Sparkles: true,
-        MessageSquare: true,
-        Search: true,
-        NotebookPen: true,
-        WandSparkles: true,
-        BarChart3: true,
-        ClipboardCheck: true,
-        AlertTriangle: true,
+        Settings2: true,
         ArrowUp: true,
         Square: true,
+        Plus: true,
+        Paperclip: true,
+        FileText: true,
+        ListChecks: true,
+        Target: true,
+        Check: true,
+        X: true,
       },
     },
   });
@@ -168,7 +196,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
     blocked.unmount();
   });
 
-  it('shows empty-models warning button instead of permanent dashed card row', () => {
+  it('shows a compact empty-models configuration control', () => {
     const wrapper = mountComposer({ modelGroups: [] });
     expect(wrapper.find('[data-testid="ai-chat-empty-models"]').exists()).toBe(true);
     wrapper.unmount();
@@ -185,26 +213,125 @@ describe('AIFooterComposer (Global Composer input)', () => {
     wrapper.unmount();
   });
 
-  it('disables quick-entry tools and keeps only a compact configure control when no models are available', () => {
+  it('keeps the draft editable while AI is unavailable', () => {
     const wrapper = mountComposer({
       modelGroups: [],
       canSend: false,
       selectedModelKey: '',
     });
 
-    const toolTrigger = wrapper.find('[data-testid="ai-chat-tool-menu-trigger"]');
-    expect(toolTrigger.exists()).toBe(true);
-    expect(toolTrigger.attributes('disabled')).toBeDefined();
+    expect(
+      (wrapper.get('[data-testid="ai-chat-composer"]').element as HTMLTextAreaElement).disabled,
+    ).toBe(false);
+    wrapper.unmount();
+  });
 
+  it('removes the manual intent selector and exposes one add-context control instead', () => {
+    const wrapper = mountComposer({
+      modelGroups: [],
+      canSend: false,
+      selectedModelKey: '',
+    });
+
+    expect(wrapper.find('[data-testid="ai-chat-tool-menu-trigger"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-chat-add-context"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-chat-empty-models"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-chat-empty-models-hint"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-chat-empty-models-cue"]').exists()).toBe(true);
 
-    // Configure cue must not be bare i18n key
     const cueText = wrapper.find('[data-testid="ai-chat-empty-models"]').text();
     expect(cueText).not.toMatch(/aiAssistant\.chatPage/);
     expect(cueText.length).toBeGreaterThan(0);
 
+    wrapper.unmount();
+  });
+
+  it('allows attachment-only submit and emits pasted files', async () => {
+    const wrapper = mountComposer({
+      attachments: [
+        {
+          id: 'a1',
+          data: 'data:image/png;base64,AAAA',
+          mediaType: 'image/png',
+          filename: 'screen.png',
+          size: 4,
+        },
+      ],
+    });
+
+    expect(
+      (wrapper.get('[data-testid="ai-chat-send-message"]').element as HTMLButtonElement).disabled,
+    ).toBe(false);
+    expect(wrapper.find('[data-testid="ai-composer-attachment-chip"]').exists()).toBe(true);
+
+    const pasted = new File(['abc'], 'paste.png', { type: 'image/png' });
+    await wrapper.get('[data-testid="ai-chat-composer"]').trigger('paste', {
+      clipboardData: { files: [pasted] },
+    });
+    expect(wrapper.emitted('add-files')?.[0]?.[0]).toEqual([pasted]);
+    wrapper.unmount();
+  });
+
+  it('accepts pasted screenshots from ClipboardItem when clipboard.files is empty', async () => {
+    const wrapper = mountComposer();
+    const screenshot = new File(['png'], 'clipboard.png', { type: 'image/png' });
+
+    await wrapper.get('[data-testid="ai-chat-composer"]').trigger('paste', {
+      clipboardData: {
+        files: [],
+        items: [{ kind: 'file', getAsFile: () => screenshot }],
+      },
+    });
+
+    expect(wrapper.emitted('add-files')?.[0]?.[0]).toEqual([screenshot]);
+    wrapper.unmount();
+  });
+
+  it('supports @ mention autocomplete for goals, tasks, and notes', async () => {
+    const wrapper = mountComposer({
+      modelValue: 'compare @Ship',
+      recentGoals: [
+        { id: 'g1', title: 'Ship v1', status: 'InProgress', updatedAt: 10, progress: 20 },
+      ],
+      recentTasks: [{ id: 't1', title: 'Review release', updatedAt: 9 }],
+      recentKnowledgeNotes: [
+        {
+          id: 'projection-n1',
+          contextId: 'kdoc-n1',
+          title: 'Release notes',
+          path: 'notes/release.md',
+          updatedAt: 8,
+        },
+      ],
+    });
+    const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
+    const textareaEl = textarea.element as HTMLTextAreaElement;
+    textareaEl.setSelectionRange(textareaEl.value.length, textareaEl.value.length);
+    await textarea.trigger('keyup');
+    await nextTick();
+
+    expect(wrapper.find('[data-testid="ai-composer-mention-menu"]').exists()).toBe(true);
+    const options = wrapper.findAll('[data-testid="ai-composer-mention-option"]');
+    expect(options).toHaveLength(1);
+    expect(options[0].text()).toContain('Ship v1');
+
+    await options[0].trigger('mousedown');
+    expect(wrapper.emitted('toggle-context-entity')?.[0]?.[0]).toEqual({
+      entityType: 'goal',
+      id: 'g1',
+      label: 'Ship v1',
+    });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toBe('compare @Ship v1 ');
+    wrapper.unmount();
+  });
+
+  it('renders explicit entity chips as removable context', async () => {
+    const wrapper = mountComposer({
+      contextEntities: [{ entityType: 'goal', id: 'g1', label: 'Ship v1', origin: 'explicit' }],
+    });
+
+    expect(wrapper.get('[data-testid="ai-composer-entity-chip"]').text()).toContain('Ship v1');
+    const chipButton = wrapper.get('[data-testid="ai-composer-entity-chip"] button');
+    await chipButton.trigger('click');
+    expect(wrapper.emitted('remove-context-entity')?.[0]).toEqual(['goal', 'g1']);
     wrapper.unmount();
   });
 });

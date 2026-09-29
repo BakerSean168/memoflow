@@ -22,6 +22,7 @@ describe('PowerSync Routine schedule dirty-owner convergence', () => {
     let committed = false;
     const tx = {
       routineDefinition: simpleDelegate(),
+      routinePreference: simpleDelegate(),
       routineProfile: simpleDelegate(),
       routineProfileMembership: compoundDelegate(),
       routineTemporaryOverride: compoundDelegate(),
@@ -34,6 +35,11 @@ describe('PowerSync Routine schedule dirty-owner convergence', () => {
       },
       routineProfileMembership: {
         findMany: vi.fn().mockResolvedValue([{ routineId: 'routine-from-profile' }]),
+      },
+      routineDefinition: {
+        findMany: vi
+          .fn()
+          .mockResolvedValue([{ id: 'routine-definition' }, { id: 'routine-from-global-gate' }]),
       },
     };
     const changed = vi.fn((input: { identityId: string; routineId: string }) => {
@@ -51,7 +57,16 @@ describe('PowerSync Routine schedule dirty-owner convergence', () => {
               op: 'PATCH',
               type: 'routine_definitions',
               id: 'routine-definition',
-              data: { enabled: 0 },
+              data: {
+                enabled: 1,
+                activated_at: '2026-09-28T08:00:00.000Z',
+              },
+            },
+            {
+              op: 'PATCH',
+              type: 'routine_preferences',
+              id: 'routine-preferences:identity-1',
+              data: { global_enabled: 0, version: 2 },
             },
             {
               op: 'PATCH',
@@ -83,12 +98,21 @@ describe('PowerSync Routine schedule dirty-owner convergence', () => {
       { onRoutineScheduleChanged: changed },
     );
 
+    expect(tx.routineDefinition.update).toHaveBeenCalledWith({
+      where: { id: 'routine-definition' },
+      data: {
+        identityId: 'identity-1',
+        enabled: true,
+        activatedAt: '2026-09-28T08:00:00.000Z',
+      },
+    });
     expect(db.routineProfileMembership.findMany).toHaveBeenCalledWith({
       where: { identityId: 'identity-1', profileId: { in: ['profile-1'] } },
       select: { routineId: true },
     });
     expect(changed.mock.calls.map(([value]) => value)).toEqual([
       { identityId: 'identity-1', routineId: 'routine-definition' },
+      { identityId: 'identity-1', routineId: 'routine-from-global-gate' },
       { identityId: 'identity-1', routineId: 'routine-from-profile' },
       { identityId: 'identity-1', routineId: 'routine-membership' },
     ]);

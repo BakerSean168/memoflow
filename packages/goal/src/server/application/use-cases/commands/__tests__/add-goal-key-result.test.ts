@@ -14,7 +14,7 @@ function createTestGoal(name = 'Test Goal'): Goal {
     identityId: 'test-identity-id' as any,
     name,
     summary: null,
-    startDate: null,
+    start: null,
     reminderConfig: null,
   });
 }

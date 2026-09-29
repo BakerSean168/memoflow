@@ -65,7 +65,7 @@ export interface GoalPortabilitySnapshot {
   status: GoalServerDTO['status'];
   version: number;
   completedAt: GoalServerDTO['completedAt'];
-  startDate: GoalServerDTO['startDate'];
+  start: GoalServerDTO['start'];
   target: GoalServerDTO['target'];
   archivedAt: GoalServerDTO['archivedAt'];
   deletedAt: GoalServerDTO['deletedAt'];
@@ -92,7 +92,7 @@ export function createGoalPortabilitySnapshot(
     status: server.status,
     version: server.version,
     completedAt: server.completedAt,
-    startDate: server.startDate,
+    start: server.start,
     target: server.target,
     archivedAt: server.archivedAt,
     deletedAt: server.deletedAt,

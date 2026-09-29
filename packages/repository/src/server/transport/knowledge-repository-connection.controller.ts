@@ -23,6 +23,10 @@ import {
   type DisconnectKnowledgeRepositoryConnectionRes,
   type PreviewKnowledgeRepositoryReconciliationReq,
   ListKnowledgeProjectionsSchema,
+  ListKnowledgeNoteProjectionsSchema,
+  ListReferenceableKnowledgeDocumentsSchema,
+  ListKnowledgeNoteTreeSchema,
+  ResolveKnowledgeNoteReferenceSchema,
   CreateConfirmedKnowledgeNoteSchema,
   AdoptKnowledgeDocumentSchema,
   GetKnowledgeNoteLinkGraphSchema,
@@ -33,7 +37,12 @@ import {
   type AdoptKnowledgeDocumentResponse,
   type KnowledgeNoteProjectionClientDTO,
   type KnowledgeNoteProjectionListResponse,
+  type KnowledgeNoteTreeResponse,
   type ListKnowledgeNoteProjectionsReq,
+  type ListReferenceableKnowledgeDocumentsReq,
+  type ReferenceableKnowledgeDocumentListResponse,
+  type ListKnowledgeNoteTreeReq,
+  type ResolveKnowledgeNoteReferenceReq,
   type GetKnowledgeNoteLinkGraphReq,
   type KnowledgeNoteLinkGraphResponse,
   type KnowledgeAttachmentContentResponse,
@@ -97,6 +106,18 @@ export interface KnowledgeRepositoryConnectionUseCases {
     ctx: Context,
     request: ListKnowledgeNoteProjectionsReq,
   ): Promise<Result<KnowledgeNoteProjectionListResponse>>;
+  listReferenceableKnowledgeDocuments(
+    ctx: Context,
+    request: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>>;
+  listKnowledgeNoteTree(
+    ctx: Context,
+    request: ListKnowledgeNoteTreeReq,
+  ): Promise<Result<KnowledgeNoteTreeResponse>>;
+  resolveKnowledgeNoteReference(
+    ctx: Context,
+    request: ResolveKnowledgeNoteReferenceReq,
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>>;
   getKnowledgeNoteProjection(
     ctx: Context,
     projectionId: string,
@@ -274,7 +295,7 @@ export class KnowledgeRepositoryConnectionController {
   }
 
   async listNotes(ctx: Context, input: unknown) {
-    const parsed = ListKnowledgeProjectionsSchema.safeParse(input ?? {});
+    const parsed = ListKnowledgeNoteProjectionsSchema.safeParse(input ?? {});
     if (!parsed.success) {
       return fail({
         code: 'VALIDATION_ERROR',
@@ -283,6 +304,42 @@ export class KnowledgeRepositoryConnectionController {
       });
     }
     return this.useCases.listKnowledgeNoteProjections(ctx, parsed.data);
+  }
+
+  async listReferenceableDocuments(ctx: Context, input: unknown) {
+    const parsed = ListReferenceableKnowledgeDocumentsSchema.safeParse(input ?? {});
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid referenceable knowledge document query',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.listReferenceableKnowledgeDocuments(ctx, parsed.data);
+  }
+
+  async listNoteTree(ctx: Context, input: unknown) {
+    const parsed = ListKnowledgeNoteTreeSchema.safeParse(input ?? {});
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid knowledge note tree query',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.listKnowledgeNoteTree(ctx, parsed.data);
+  }
+
+  async resolveNoteReference(ctx: Context, input: unknown) {
+    const parsed = ResolveKnowledgeNoteReferenceSchema.safeParse(input ?? {});
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid knowledge note reference',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.resolveKnowledgeNoteReference(ctx, parsed.data);
   }
 
   async getNote(ctx: Context, projectionId: string) {

@@ -8,11 +8,13 @@
  */
 
 import type { App } from 'vue';
+import type { ExecuteNotificationActionReq } from '@memoflow/contracts/notification';
 import { createCloudAuthHttpClient } from '@memoflow/cloud-auth';
 import {
   ACCOUNT_SERVICE_KEY,
   AUTH_SERVICE_KEY,
   GOAL_SERVICE_KEY,
+  GOAL_KNOWLEDGE_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
@@ -60,10 +62,19 @@ const labelService = createLazyService(async () => {
   return createLabelHttpClient(resultHttpClient);
 });
 
+const goalKnowledgeService = createLazyService(async () => {
+  const { createGoalKnowledgeHttpClient } = await import('@memoflow/relation/client');
+  return createGoalKnowledgeHttpClient(resultHttpClient);
+});
+
 const notificationService = createLazyService(async () => {
   const { createNotificationHttpClient } = await import('@memoflow/notification/client');
   return createNotificationHttpClient(resultHttpClient);
 });
+
+export function executeWebNotificationAction(request: ExecuteNotificationActionReq) {
+  return notificationService.executeAction(request);
+}
 
 const repositoryService = createLazyService(async () => {
   const { createRepositoryHttpClient } = await import('@memoflow/repository/client');
@@ -120,6 +131,7 @@ export function installAppServices(app: App): void {
   app.provide(AUTH_SERVICE_KEY, authService);
   app.provide(RULE_SERVICE_KEY, ruleService);
   app.provide(GOAL_SERVICE_KEY, goalService);
+  app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, goalKnowledgeService);
   app.provide(LABEL_SERVICE_KEY, labelService);
   app.provide(NOTIFICATION_SERVICE_KEY, notificationService);
   app.provide(REPOSITORY_SERVICE_KEY, repositoryService);

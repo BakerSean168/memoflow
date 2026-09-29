@@ -4,11 +4,11 @@
     data-testid="schedule-calendar-view"
   >
     <header
-      class="z-10 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b bg-background/80 px-2 py-2 backdrop-blur-sm @2xl/panel:px-4"
+      class="z-10 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border/60 bg-[hsl(var(--surface)/0.9)] px-2 py-2 shadow-[0_1px_0_hsl(var(--border)/0.18)] backdrop-blur-md @2xl/panel:px-4"
       data-testid="schedule-page-toolbar"
     >
       <div
-        class="flex min-w-0 items-center gap-1"
+        class="flex min-w-0 items-center gap-0.5 rounded-lg border border-border/40 bg-muted/25 p-0.5"
         role="tablist"
         :aria-label="t('schedule.route.calendar')"
         data-testid="schedule-view-tabs"
@@ -22,8 +22,10 @@
           :aria-selected="activeView === tab.value"
           :aria-label="tab.label"
           :class="[
-            'h-8 px-2 text-muted-foreground hover:text-foreground @xl/panel:px-3',
-            activeView === tab.value ? 'bg-secondary font-medium text-foreground' : '',
+            'h-7 rounded-md px-2 text-muted-foreground hover:bg-[hsl(var(--hover)/0.7)] hover:text-foreground @xl/panel:px-3',
+            activeView === tab.value
+              ? 'bg-primary/12 font-semibold text-primary shadow-sm shadow-black/10'
+              : '',
           ]"
           :data-testid="`schedule-view-tab-${tab.value}`"
           @click="changeView(tab.value)"
@@ -40,7 +42,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0"
+          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
           :aria-label="t('schedule.calendar.previousPeriod')"
           data-testid="schedule-previous-period"
           @click="movePeriod(-1)"
@@ -48,7 +50,7 @@
           <ChevronLeft class="h-4 w-4" />
         </Button>
         <p
-          class="min-w-0 max-w-44 flex-1 truncate text-center text-sm font-medium @3xl/panel:w-48 @3xl/panel:flex-none"
+          class="min-w-0 max-w-48 flex-1 truncate px-2 text-center text-sm font-semibold tracking-tight @3xl/panel:w-52 @3xl/panel:flex-none"
           data-testid="schedule-period-label"
         >
           {{ currentPeriodTitle }}
@@ -56,7 +58,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0"
+          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
           :aria-label="t('schedule.calendar.nextPeriod')"
           data-testid="schedule-next-period"
           @click="movePeriod(1)"
@@ -66,7 +68,7 @@
         <Button
           variant="outline"
           size="sm"
-          class="h-8 shrink-0 px-2"
+          class="h-8 shrink-0 border-border/40 bg-transparent px-2 font-medium text-primary hover:bg-primary/10 hover:text-primary"
           data-testid="schedule-today"
           @click="goToToday"
         >
@@ -74,17 +76,14 @@
         </Button>
       </div>
 
-      <Button
-        size="sm"
-        class="ml-auto h-8 shrink-0 px-2 @xl/panel:px-3"
-        :aria-label="t('schedule.planning.createSchedule')"
+      <ResponsivePrimaryAction
+        class="ml-auto"
+        :label="t('schedule.planning.createSchedule')"
+        :icon="Plus"
         data-primary-action="create-schedule"
         data-testid="create-schedule-button"
-        @click="showCreateDialog = true"
-      >
-        <Plus class="h-4 w-4 @xl/panel:mr-1.5" />
-        <span class="hidden @xl/panel:inline">{{ t('schedule.planning.createSchedule') }}</span>
-      </Button>
+        @click="openCreateDialog"
+      />
     </header>
 
     <div class="min-h-0 flex-1 overflow-hidden" data-testid="schedule-calendar-content">
@@ -100,7 +99,8 @@
         @range-change="handleVisibleRange"
         @event-click="handleProjectionClick"
         @day-click="handleDayClick"
-        @select-range="showCreateDialog = true"
+        @mutation="handlePlannerMutation"
+        @select-range="handleSelectRange"
       />
     </div>
 
@@ -108,7 +108,8 @@
       v-model:open="dayDetailOpen"
       :date="selectedDate"
       :events="selectedDayEvents"
-      @event-click="handleEventClick"
+      :conflicts="conflicts"
+      @event-click="handleProjectionClick"
       @view-in-day="switchToDayView"
       @complete-task="handleCompleteTask"
     />
@@ -119,8 +120,16 @@
       @complete-task="handleCompleteTask"
     />
 
-    <EventDetailSheet v-model:open="eventDetailOpen" :event="selectedDetailEvent" />
-    <CreateScheduleDialog v-model="showCreateDialog" :on-submit="handleCreateSchedule" />
+    <EventDetailSheet
+      v-model:open="eventDetailOpen"
+      :event="selectedDetailEvent"
+      :has-conflict="selectedDetailHasConflict"
+    />
+    <CreateScheduleDialog
+      v-model="showCreateDialog"
+      :initial-range="pendingCreateRange"
+      :on-submit="handleCreateSchedule"
+    />
   </div>
 </template>
 
@@ -145,19 +154,25 @@ import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView'
 import { useSchedule } from '../composables/useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { ResponsivePrimaryAction } from '../../../shared/components';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
-import type { CalendarEventItem } from '../composables/useCalendarView';
 import type { CalendarEventProjection, CreateScheduleRequest } from '@memoflow/contracts/schedule';
 import PlannerCalendar, {
   type PlannerCalendarView,
   type PlannerVisibleRange,
 } from '../planner/PlannerCalendar.vue';
-import { createPlannerOwnerCommandRouter } from '../planner';
+import { createPlannerOwnerCommandRouter, type PlannerMutationOutcome } from '../planner';
+import {
+  plannerProjectionDateKey,
+  plannerProjectionKeyForUi,
+} from '../planner/planner-presentation';
+import { plannerConflictSourceKeys } from '@memoflow/schedule/client';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 const { t, locale } = useI18n();
-const { projections, conflicts, events, isLoading, fetchForRange, windowStart, windowEnd } =
+const { projections, conflicts, isLoading, fetchForRange, windowStart, windowEnd } =
   useCalendarView();
 const schedule = useSchedule();
 const task = useTask();
@@ -165,20 +180,26 @@ const goal = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },
-  task: { rescheduleOccurrence: task.rescheduleOccurrence },
+  task: {
+    rescheduleOccurrence: (id, request) =>
+      task.rescheduleOccurrence(id, request, { suppressErrorReport: true }),
+  },
   goal: { updateGoal: goal.updateGoal.bind(goal) },
 });
 
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
 const showCreateDialog = ref(false);
+const pendingCreateRange = ref<{ start: number; end: number; allDay: boolean } | null>(null);
 const activeView = ref<PlannerCalendarView>('week');
 const currentPeriodTitle = ref('');
 const dayDetailOpen = ref(false);
 const selectedDate = ref<Date | null>(null);
 const taskPanelOpen = ref(false);
-const selectedTaskEvent = ref<CalendarEventItem | null>(null);
+const selectedTaskEvent = ref<Extract<CalendarEventProjection, { sourceType: 'task' }> | null>(
+  null,
+);
 const eventDetailOpen = ref(false);
-const selectedDetailEvent = ref<CalendarEventItem | null>(null);
+const selectedDetailEvent = ref<CalendarEventProjection | null>(null);
 
 // Phase 0 / UI-004：日程创建/编辑弹窗打开即视为未完成操作——统一离开协议。
 const surfaceStatus = computed<PanelSurfaceStatus>(() =>
@@ -186,11 +207,18 @@ const surfaceStatus = computed<PanelSurfaceStatus>(() =>
 );
 usePanelSurfaceStatus(surfaceStatus);
 
-const selectedDayEvents = computed<CalendarEventItem[]>(() => {
+const selectedDayEvents = computed<CalendarEventProjection[]>(() => {
   if (!selectedDate.value) return [];
   const dateStr = toLocalDateKey(selectedDate.value);
-  return events.value.filter((event) => toLocalDateKey(event.startTime) === dateStr);
+  return projections.value.filter((event) => plannerProjectionDateKey(event) === dateStr);
 });
+
+const conflictKeys = computed(() => plannerConflictSourceKeys(conflicts.value));
+const selectedDetailHasConflict = computed(() =>
+  selectedDetailEvent.value
+    ? conflictKeys.value.has(plannerProjectionKeyForUi(selectedDetailEvent.value))
+    : false,
+);
 
 const viewTabs = computed(() => [
   { label: t('schedule.viewTabs.day'), value: 'day' as const, icon: Calendar },
@@ -202,8 +230,25 @@ function changeView(view: PlannerCalendarView): void {
   activeView.value = view;
 }
 
+function formatPeriodTitle(range: PlannerVisibleRange): string {
+  void productTimeRevision.value;
+  const time = getProductTime();
+  const presentation = { locale: locale.value };
+
+  if (range.view === 'day') {
+    return time.format.slot('periodDay', range.start, presentation);
+  }
+  if (range.view === 'month') {
+    return time.format.slot('periodMonth', range.start, presentation);
+  }
+
+  const start = time.format.slot('periodRangeDay', range.start, presentation);
+  const end = time.format.slot('periodRangeDay', range.end, presentation);
+  return `${start} – ${end}`;
+}
+
 function handleVisibleRange(range: PlannerVisibleRange): void {
-  currentPeriodTitle.value = range.title;
+  currentPeriodTitle.value = formatPeriodTitle(range);
   if (activeView.value !== range.view) activeView.value = range.view;
   void fetchForRange(range.start, range.end);
 }
@@ -217,30 +262,15 @@ function goToToday(): void {
   plannerCalendarRef.value?.today();
 }
 
-function findLegacyEvent(projection: CalendarEventProjection): CalendarEventItem | null {
-  if (projection.sourceType !== 'schedule' && projection.sourceType !== 'task') return null;
-  return (
-    events.value.find(
-      (event) =>
-        event.source === projection.sourceType &&
-        event.originalId === projection.ownerCommandTarget.ownerId,
-    ) ?? null
-  );
-}
-
 function handleProjectionClick(projection: CalendarEventProjection): void {
-  const event = findLegacyEvent(projection);
-  if (event) handleEventClick(event);
-}
-
-function handleEventClick(event: CalendarEventItem): void {
-  if (event.source === 'task') {
-    selectedTaskEvent.value = event;
+  if (projection.sourceType === 'task') {
+    selectedTaskEvent.value = projection;
     taskPanelOpen.value = true;
-  } else {
-    selectedDetailEvent.value = event;
-    eventDetailOpen.value = true;
+    return;
   }
+
+  selectedDetailEvent.value = projection;
+  eventDetailOpen.value = true;
 }
 
 async function handleCompleteTask(originalId: string): Promise<void> {
@@ -248,6 +278,58 @@ async function handleCompleteTask(originalId: string): Promise<void> {
   if (result && windowStart.value && windowEnd.value) {
     await fetchForRange(windowStart.value, windowEnd.value);
   }
+}
+
+function plannerConflictMessage(
+  outcome: Extract<PlannerMutationOutcome, { status: 'conflict' }>,
+): string {
+  if (outcome.reason === 'target-date-occupied') {
+    return t('schedule.plannerMutation.taskTargetDayConflict');
+  }
+
+  if (outcome.reason === 'stale-version') {
+    return t('schedule.plannerMutation.staleConflict');
+  }
+
+  return t('schedule.plannerMutation.conflict');
+}
+
+async function refreshPlannerAfterConflict(): Promise<void> {
+  if (!windowStart.value || !windowEnd.value) return;
+  try {
+    await fetchForRange(windowStart.value, windowEnd.value);
+  } catch {
+    toast.warning(t('schedule.plannerMutation.refreshFailed'));
+  }
+}
+
+function handlePlannerMutation(outcome: PlannerMutationOutcome): void {
+  if (outcome.status === 'applied') return;
+
+  if (outcome.status === 'conflict') {
+    toast.warning(plannerConflictMessage(outcome));
+    if (outcome.reason === 'stale-version') {
+      void refreshPlannerAfterConflict();
+    }
+    return;
+  }
+
+  if (outcome.status === 'read-only') {
+    toast.info(t('schedule.plannerMutation.readOnly'));
+    return;
+  }
+
+  if (outcome.status === 'invalid') {
+    toast.error(t('schedule.plannerMutation.invalid'));
+    return;
+  }
+
+  if (outcome.status === 'unsupported') {
+    toast.error(t('schedule.plannerMutation.unsupported'));
+    return;
+  }
+
+  toast.error(t('schedule.plannerMutation.failed'));
 }
 
 function handleDayClick(date: Date): void {
@@ -260,6 +342,16 @@ function switchToDayView(date: Date | null): void {
   dayDetailOpen.value = false;
   activeView.value = 'day';
   plannerCalendarRef.value?.showDate('day', date);
+}
+
+function openCreateDialog(): void {
+  pendingCreateRange.value = null;
+  showCreateDialog.value = true;
+}
+
+function handleSelectRange(range: { start: number; end: number; allDay: boolean }): void {
+  pendingCreateRange.value = range;
+  showCreateDialog.value = true;
 }
 
 async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolean> {

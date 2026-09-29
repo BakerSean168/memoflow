@@ -16,6 +16,7 @@ import {
   SetRoutineMembershipEnabledRequestSchema,
   SetRoutineProfileActiveRequestSchema,
   SetRoutineTemporaryOverrideRequestSchema,
+  UpdateRoutinePreferencesRequestSchema,
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
 } from '@memoflow/contracts/routine';
@@ -62,6 +63,7 @@ export function createRoutineConfigurationElectronModule(
   let registered = false;
   const channels = [
     RoutineChannels.CONFIGURATION_GET,
+    RoutineChannels.PREFERENCES_UPDATE,
     RoutineChannels.UPCOMING_GET,
     RoutineChannels.CREATE,
     RoutineChannels.UPDATE,
@@ -99,6 +101,24 @@ export function createRoutineConfigurationElectronModule(
           } catch (error) {
             return failed(error);
           }
+        }),
+      );
+
+      ipcMain.handle(RoutineChannels.PREFERENCES_UPDATE, (_event, request: unknown) =>
+        withAuthenticatedIdentity(context, async (identityId) => {
+          const parsed = UpdateRoutinePreferencesRequestSchema.safeParse(request);
+          if (!parsed.success) return invalid('Invalid Routine preferences update');
+          return mutate(async () => {
+            const receipt = await options.commandPort.updatePreferences({
+              identityId,
+              globalEnabled: parsed.data.globalEnabled,
+              expectedVersion: parsed.data.expectedVersion,
+            });
+            return {
+              globalEnabled: receipt.globalEnabled,
+              version: receipt.version,
+            };
+          });
         }),
       );
 

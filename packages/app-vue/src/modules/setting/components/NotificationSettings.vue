@@ -1,5 +1,45 @@
 <template>
   <div class="space-y-6" data-testid="notification-settings">
+    <Card v-if="!devicePreferencePort" data-testid="notification-browser-card">
+      <CardHeader>
+        <CardTitle class="text-lg font-medium">
+          {{ t('setting.notifications.browserTitle') }}
+        </CardTitle>
+        <CardDescription>
+          {{ t('setting.notifications.browserDescription') }}
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="p-6">
+        <div class="flex items-center justify-between gap-6">
+          <div class="space-y-0.5">
+            <Label for="browser-notification-switch" class="text-base font-medium">
+              {{ t('setting.notifications.browserSystemNotification') }}
+            </Label>
+            <p class="max-w-sm text-[13px] text-muted-foreground">
+              {{
+                !browserNotificationAvailable
+                  ? t('setting.notifications.browserSecureContextRequired')
+                  : browserNotificationPermission === 'denied'
+                    ? t('setting.notifications.browserPermissionDenied')
+                    : t('setting.notifications.browserSystemNotificationDescription')
+              }}
+            </p>
+          </div>
+          <Switch
+            id="browser-notification-switch"
+            data-testid="notification-browser-system-switch"
+            :model-value="browserNotificationEnabled"
+            :disabled="
+              browserNotificationBusy ||
+              !browserNotificationAvailable ||
+              browserNotificationPermission === 'denied'
+            "
+            @update:model-value="updateBrowserNotification"
+          />
+        </div>
+      </CardContent>
+    </Card>
+
     <Card v-if="devicePreferenceAvailable" data-testid="notification-device-card">
       <CardHeader>
         <CardTitle class="text-lg font-medium">{{
@@ -131,6 +171,13 @@ import { Switch } from '@memoflow/ui-vue-shadcn';
 import { DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY } from '../../../di/keys';
 import type { DesktopNotificationPreference } from '@memoflow/contracts/electron';
 import {
+  browserSystemNotificationPermission,
+  isBrowserSystemNotificationEnabled,
+  isBrowserSystemNotificationSupported,
+  requestBrowserSystemNotificationPermission,
+  setBrowserSystemNotificationEnabled,
+} from '../../notification/browser-system-notification';
+import {
   useNotificationPreferences,
   type NotificationPreferenceModule,
   type PreferenceChannelFlag,
@@ -144,6 +191,10 @@ const devicePreference = ref<DesktopNotificationPreference>({
 });
 const devicePreferenceAvailable = ref(false);
 const deviceBusy = ref(false);
+const browserNotificationAvailable = ref(isBrowserSystemNotificationSupported());
+const browserNotificationEnabled = ref(false);
+const browserNotificationBusy = ref(false);
+const browserNotificationPermission = ref(browserSystemNotificationPermission());
 const {
   modules,
   isLoading: preferenceLoading,
@@ -195,7 +246,28 @@ async function onGlobalChannelChange(flag: (typeof globalChannels)[number], valu
   await setGlobalChannel(flag, value);
 }
 
+async function updateBrowserNotification(value: boolean) {
+  browserNotificationBusy.value = true;
+  try {
+    if (!value) {
+      setBrowserSystemNotificationEnabled(false);
+      browserNotificationEnabled.value = false;
+      return;
+    }
+    browserNotificationPermission.value = await requestBrowserSystemNotificationPermission();
+    browserNotificationEnabled.value =
+      browserNotificationPermission.value === 'granted' && isBrowserSystemNotificationEnabled();
+  } finally {
+    browserNotificationBusy.value = false;
+  }
+}
+
 onMounted(() => {
+  browserNotificationAvailable.value = isBrowserSystemNotificationSupported();
+  browserNotificationPermission.value = browserSystemNotificationPermission();
+  browserNotificationEnabled.value =
+    browserNotificationPermission.value === 'granted' && isBrowserSystemNotificationEnabled();
+
   void loadPreferences();
   if (devicePreferencePort) {
     void devicePreferencePort.get().then((result) => {

@@ -63,6 +63,28 @@ export class InMemoryKnowledgeRepositoryInstallationIntentRepository implements 
     return this.clone(candidates[0] ?? null);
   }
 
+  async findLatestRecoverableFinalized(
+    identityId: string,
+    routeKey: string,
+    clientKind: KnowledgeRepositoryInstallationIntentRecord['clientKind'],
+    notBefore: number,
+  ): Promise<KnowledgeRepositoryInstallationIntentRecord | null> {
+    const candidates = [...this.rows.values()]
+      .filter(
+        (row) =>
+          row.identityId === identityId &&
+          row.routeKey === routeKey &&
+          row.clientKind === clientKind &&
+          row.status === 'Finalized' &&
+          row.installationId !== null &&
+          row.providerAccountId !== null &&
+          row.callbackReceivedAt !== null &&
+          row.callbackReceivedAt >= notBefore,
+      )
+      .sort((a, b) => (b.finalizedAt ?? 0) - (a.finalizedAt ?? 0));
+    return this.clone(candidates[0] ?? null);
+  }
+
   async renewVerifiedForRetry(input: {
     identityId: string;
     intentId: string;

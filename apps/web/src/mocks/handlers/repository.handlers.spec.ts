@@ -19,6 +19,15 @@ describe('repository handlers contracts', () => {
       /\/repositories\/knowledge-connections$/,
     );
     expect(repositoryMockRoutes.knowledgeNotes).toMatch(/\/repositories\/knowledge-notes$/);
+    expect(repositoryMockRoutes.referenceableKnowledgeDocuments).toMatch(
+      /\/repositories\/knowledge-documents\/referenceable$/,
+    );
+    expect(repositoryMockRoutes.knowledgeNoteTree).toMatch(
+      /\/repositories\/knowledge-notes\/tree$/,
+    );
+    expect(repositoryMockRoutes.knowledgeNoteResolve).toMatch(
+      /\/repositories\/knowledge-notes\/resolve$/,
+    );
     expect(repositoryMockRoutes.knowledgeAttachments).toMatch(
       /\/repositories\/knowledge-attachments$/,
     );
@@ -30,7 +39,10 @@ describe('repository handlers contracts', () => {
 
   it('does not expose retired database Repository/Resource client methods', () => {
     const httpClient = createHttpClientSpy();
-    const adapter = new repositoryClient.RepositoryHttpAdapter(httpClient) as Record<string, unknown>;
+    const adapter = new repositoryClient.RepositoryHttpAdapter(httpClient) as Record<
+      string,
+      unknown
+    >;
 
     for (const method of [
       'getCurrentRepository',
@@ -56,18 +68,70 @@ describe('repository handlers contracts', () => {
     const adapter = new repositoryClient.RepositoryHttpAdapter(httpClient);
 
     httpClient.get.mockResolvedValueOnce({ ok: true, data: { connections: [] } });
-    httpClient.get.mockResolvedValueOnce({ ok: true, data: { notes: [] } });
+    httpClient.get.mockResolvedValueOnce({
+      ok: true,
+      data: { notes: [], total: 0, nextCursor: null },
+    });
+    httpClient.get.mockResolvedValueOnce({
+      ok: true,
+      data: { documents: [], total: 0, nextCursor: null },
+    });
+    httpClient.get.mockResolvedValueOnce({
+      ok: true,
+      data: {
+        parent: '',
+        nodes: [],
+        metadata: {
+          total: 0,
+          visibleTotal: 0,
+          hiddenNoteCount: 0,
+          hiddenDirectories: [],
+        },
+      },
+    });
+    httpClient.get.mockResolvedValueOnce({
+      ok: true,
+      data: {
+        id: 'projection-1',
+        connectionId: 'connection-1',
+        knowledgeDocumentId: null,
+        relativePath: 'README.md',
+        title: 'README',
+        commitSha: 'a'.repeat(40),
+        blobSha: 'b'.repeat(40),
+        contentHash: 'c'.repeat(64),
+        frontmatter: {},
+        markdownContent: '# README',
+        createdAt: 1,
+        updatedAt: 1,
+        deletedAt: null,
+      },
+    });
     httpClient.get.mockResolvedValueOnce({ ok: true, data: { attachments: [] } });
 
     await adapter.listKnowledgeRepositoryConnections();
     await adapter.listKnowledgeNoteProjections({ limit: 20 });
+    await adapter.listReferenceableKnowledgeDocuments({ limit: 24 });
+    await adapter.listKnowledgeNoteTree({ parent: '', includeHidden: false });
+    await adapter.resolveKnowledgeNoteReference({ reference: 'README.md' });
     await adapter.listKnowledgeAttachmentProjections({ limit: 20 });
 
     expect(httpClient.get).toHaveBeenNthCalledWith(1, '/repositories/knowledge-connections');
     expect(httpClient.get).toHaveBeenNthCalledWith(2, '/repositories/knowledge-notes', {
       params: { limit: 20 },
     });
-    expect(httpClient.get).toHaveBeenNthCalledWith(3, '/repositories/knowledge-attachments', {
+    expect(httpClient.get).toHaveBeenNthCalledWith(
+      3,
+      '/repositories/knowledge-documents/referenceable',
+      { params: { limit: 24 } },
+    );
+    expect(httpClient.get).toHaveBeenNthCalledWith(4, '/repositories/knowledge-notes/tree', {
+      params: { includeHidden: 'false' },
+    });
+    expect(httpClient.get).toHaveBeenNthCalledWith(5, '/repositories/knowledge-notes/resolve', {
+      params: { reference: 'README.md' },
+    });
+    expect(httpClient.get).toHaveBeenNthCalledWith(6, '/repositories/knowledge-attachments', {
       params: { limit: 20 },
     });
   });
@@ -81,7 +145,7 @@ describe('repository handlers contracts', () => {
     expect(source).not.toMatch(/repositories\/current/);
     expect(source).toContain('knowledge-connections');
     expect(source).toContain('knowledge-notes');
+    expect(source).toContain('knowledge-documents/referenceable');
     expect(source).toContain('knowledge-attachments');
   });
 });
-

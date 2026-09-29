@@ -57,8 +57,8 @@ export class GoalHttpAdapter implements IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>> {
     const requestParams = {

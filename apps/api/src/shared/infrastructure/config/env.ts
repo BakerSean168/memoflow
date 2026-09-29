@@ -201,7 +201,11 @@ export function getJwtConfig() {
  * `.env.test.local`; they must not displace the placeholder configuration.
  * Knowledge-repo App credentials stay on `getGithubAppConfig()` (separate).
  */
-export function getGithubOAuthConfig(): { clientId: string; clientSecret: string } | null {
+export function getGithubOAuthConfig(): {
+  clientId: string;
+  clientSecret: string;
+  redirectURI?: string;
+} | null {
   // Prefer live process.env so test stubs (vi.stubEnv) and container inject win
   // over the frozen env singleton when modules are re-imported.
   const runtimeLane = process.env.RUNTIME_LANE ?? env.RUNTIME_LANE;
@@ -210,6 +214,11 @@ export function getGithubOAuthConfig(): { clientId: string; clientSecret: string
   const clientSecret = (
     process.env.GITHUB_OAUTH_CLIENT_SECRET ??
     env.GITHUB_OAUTH_CLIENT_SECRET ??
+    ''
+  ).trim();
+  const redirectURI = (
+    process.env.GITHUB_OAUTH_REDIRECT_URI ??
+    env.GITHUB_OAUTH_REDIRECT_URI ??
     ''
   ).trim();
 
@@ -226,6 +235,7 @@ export function getGithubOAuthConfig(): { clientId: string; clientSecret: string
     return {
       clientId,
       clientSecret,
+      ...(redirectURI ? { redirectURI } : {}),
     };
   }
 

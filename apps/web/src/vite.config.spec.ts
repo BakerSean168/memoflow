@@ -32,11 +32,18 @@ describe('web Vite development configuration', () => {
       });
 
       expect(config.experimental?.bundledDev).toBe(true);
+      expect(config.build?.rolldownOptions).toMatchObject({
+        experimental: { devMode: { lazy: false } },
+      });
       expect(config.resolve?.alias).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             find: '@memoflow/http-client',
             replacement: expect.stringContaining('/packages/http-client/src/index.ts'),
+          }),
+          expect.objectContaining({
+            find: '@memoflow/time',
+            replacement: expect.stringContaining('/packages/time/src/index.ts'),
           }),
           expect.objectContaining({
             find: '@memoflow/utils/shared',
@@ -47,6 +54,56 @@ describe('web Vite development configuration', () => {
     } finally {
       if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
       else process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+
+  it('can opt back into bundled-dev lazy compilation for local A/B diagnostics', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousLazy = process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY;
+    process.env.NODE_ENV = 'development';
+    process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY = 'true';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      expect(config.experimental?.bundledDev).toBe(true);
+      expect(config.build?.rolldownOptions).toMatchObject({
+        experimental: { devMode: { lazy: true } },
+      });
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+      if (previousLazy === undefined) delete process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY;
+      else process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY = previousLazy;
+    }
+  });
+
+  it('allows the configured MagicDNS development host without disabling host checks', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousWebUrl = process.env.MEMOFLOW_WEB_URL;
+    process.env.MEMOFLOW_WEB_URL = 'https://gcp-dev-01.example.ts.net:20220';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      expect(config.server?.allowedHosts).toEqual(['gcp-dev-01.example.ts.net']);
+      expect(config.server?.strictPort).toBe(true);
+    } finally {
+      if (previousWebUrl === undefined) delete process.env.MEMOFLOW_WEB_URL;
+      else process.env.MEMOFLOW_WEB_URL = previousWebUrl;
     }
   });
 
@@ -108,6 +165,9 @@ describe('web Vite development configuration', () => {
       expect(config.experimental?.bundledDev).toBe(false);
       expect(config.resolve?.alias).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ find: '@memoflow/http-client' })]),
+      );
+      expect(config.resolve?.alias).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ find: '@memoflow/time' })]),
       );
       expect(config.resolve?.alias).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ find: '@memoflow/utils/shared' })]),

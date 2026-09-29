@@ -163,17 +163,18 @@ export class KnowledgeRepositoryConnectionService {
       const expiresAt = now + INSTALLATION_INTENT_TTL_MS;
       const clientKind: KnowledgeRepositoryInstallationClientKind = request.clientKind ?? 'web';
 
-      if (clientKind === 'desktop') {
-        const recovered = await this.tryRecoverVerifiedDesktopIntent(identityId, now, expiresAt);
-        if (!recovered.ok) return recovered;
-        if (recovered.data) {
-          return ok({
-            intentId: recovered.data.id,
-            installationUrl: `https://github.com/apps/${encodeURIComponent(this.options.appSlug)}/installations/new`,
-            expiresAt: recovered.data.expiresAt,
-            requiresExternalBrowser: false,
-          });
-        }
+      const recovered =
+        clientKind === 'desktop'
+          ? await this.tryRecoverVerifiedDesktopIntent(identityId, now, expiresAt)
+          : await this.tryRecoverFinalizedWebIntent(identityId, now, expiresAt);
+      if (!recovered.ok) return recovered;
+      if (recovered.data) {
+        return ok({
+          intentId: recovered.data.id,
+          installationUrl: `https://github.com/apps/${encodeURIComponent(this.options.appSlug)}/installations/new`,
+          expiresAt: recovered.data.expiresAt,
+          requiresExternalBrowser: false,
+        });
       }
 
       const intentId = `knowledge-install-intent-${randomUUID()}`;
@@ -769,6 +770,32 @@ export class KnowledgeRepositoryConnectionService {
       this.options.installationRouting.routeKey,
       notBefore,
     );
+    return this.revalidateAndRenewVerifiedIntent(identityId, candidate, notBefore, now, expiresAt);
+  }
+
+  private async tryRecoverFinalizedWebIntent(
+    identityId: string,
+    now: number,
+    expiresAt: number,
+  ): Promise<Result<KnowledgeRepositoryInstallationIntentRecord | null>> {
+    const notBefore = now - VERIFIED_INSTALLATION_RETRY_WINDOW_MS;
+    const candidate =
+      await this.options.installationIntentRepository.findLatestRecoverableFinalized(
+        identityId,
+        this.options.installationRouting.routeKey,
+        'web',
+        notBefore,
+      );
+    return this.revalidateAndRenewVerifiedIntent(identityId, candidate, notBefore, now, expiresAt);
+  }
+
+  private async revalidateAndRenewVerifiedIntent(
+    identityId: string,
+    candidate: KnowledgeRepositoryInstallationIntentRecord | null,
+    notBefore: number,
+    now: number,
+    expiresAt: number,
+  ): Promise<Result<KnowledgeRepositoryInstallationIntentRecord | null>> {
     if (!candidate?.installationId || !candidate.providerAccountId) return ok(null);
 
     let inventory: GitHubAppInstallationInventory;

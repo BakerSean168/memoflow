@@ -110,6 +110,10 @@ export const envSchema = z
       .preprocess(emptyStringToUndefined, z.string().optional())
       .describe('GitHub 登录 Client Secret（服务端保管，未设置时禁用 GitHub 登录）'),
 
+    GITHUB_OAUTH_REDIRECT_URI: z
+      .preprocess(emptyStringToUndefined, z.string().url().optional())
+      .describe('GitHub 登录 provider callback override（用于受控的 remote-dev callback ingress）'),
+
     // ========== GitHub 知识仓库配置（GitHub App，与登录 OAuth 分离）==========
     GITHUB_APP_ID: z
       .preprocess(emptyStringToUndefined, z.string().trim().min(1).optional())

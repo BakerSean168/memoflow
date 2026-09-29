@@ -11,6 +11,7 @@
  * 一次 `reconnect` invalidation。
  */
 
+import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
 import type { ServerStateInvalidationDispatcher } from '../../../platform/server-state';
 
 /** Minimal metadata extracted from an SSE payload (Step 3: no DTO construction). */
@@ -18,6 +19,29 @@ interface SseNotificationMetadata {
   id?: string;
   operationId?: string;
   identityId?: string;
+  title?: string;
+  body?: string | null;
+  category?: string;
+  type?: string;
+  updatedAt?: string;
+  importance?: string;
+  urgency?: string;
+  data?: Record<string, unknown>;
+}
+
+function toLiveInAppDispatch(
+  metadata: SseNotificationMetadata,
+): NotificationDispatchInAppEvent | null {
+  if (
+    typeof metadata.id !== 'string' ||
+    typeof metadata.identityId !== 'string' ||
+    typeof metadata.title !== 'string' ||
+    typeof metadata.category !== 'string' ||
+    typeof metadata.type !== 'string'
+  ) {
+    return null;
+  }
+  return metadata as unknown as NotificationDispatchInAppEvent;
 }
 
 /** Persistence seam for the identity-scoped cursor. identity-scoped cursor 持久化接口。 */
@@ -34,6 +58,11 @@ export interface NotificationSseInvalidationSourceOptions {
   /** Absolute SSE endpoint URL. SSE 端点绝对 URL。 */
   url: string;
   cursorStore: NotificationSseCursorStore;
+  /**
+   * Optional Web presentation for live InApp delivery events. Historical
+   * receipt catch-up intentionally never replays OS popups.
+   */
+  presentInAppDispatch?: (event: NotificationDispatchInAppEvent) => void;
   /** EventSource constructor override (tests). EventSource 构造器覆盖（测试用）。 */
   eventSource?: new (url: string) => EventSource;
 }
@@ -63,6 +92,16 @@ export function createNotificationSseInvalidationSource(
 
     if (message.lastEventId) {
       options.cursorStore.set(message.lastEventId);
+    }
+
+    const liveDispatch = toLiveInAppDispatch(metadata);
+    if (options.presentInAppDispatch && liveDispatch) {
+      try {
+        options.presentInAppDispatch(liveDispatch);
+      } catch {
+        // Device presentation is best-effort; canonical Notification Fact and
+        // query invalidation must still proceed.
+      }
     }
 
     void options.dispatcher.invalidate({

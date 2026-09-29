@@ -32,21 +32,19 @@ describe('MemoFlow product form language', () => {
 
   it('keeps active Repository projection dialogs on the shared product dialog shell', () => {
     const repository = read('modules/repository/views/KnowledgeProjectionWorkspaceView.vue');
-    expect(repository).toContain('test-id="knowledge-projection-create-dialog"');
     expect(repository).toContain('test-id="knowledge-projection-adopt-dialog"');
+    expect(repository).not.toContain('test-id="knowledge-projection-create-dialog"');
     expect(repository).toContain('ProductDialogShell');
     expect(repository).not.toContain('<DialogContent');
   });
 
-  it('keeps Schedule progressive-disclosure instead of restoring the long always-open form', () => {
+  it('keeps Schedule time primary while progressively disclosing optional properties', () => {
     const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
-    expect(schedule).toContain(
-      "type ScheduleProperty = 'when' | 'location' | 'attendees' | 'conflict'",
-    );
+    expect(schedule).toContain("type ScheduleProperty = 'location' | 'attendees'");
+    expect(schedule).toContain('schedule-time-panel');
     expect(schedule).toContain('schedule-property-editor');
-    expect(schedule).toContain('v-if="activeProperty === \'when\'"');
-    expect(schedule).toContain('v-else-if="activeProperty === \'location\'"');
-    expect(schedule).toContain('v-else-if="activeProperty === \'attendees\'"');
-    expect(schedule).toContain('v-else-if="activeProperty === \'conflict\'"');
+    expect(schedule).toContain("activeProperty === 'location'");
+    expect(schedule).toContain('schedule-conflict-setting');
+    expect(schedule).toContain('<ProductDateTimePicker');
   });
 });

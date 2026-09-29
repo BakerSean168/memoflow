@@ -1,5 +1,8 @@
 <template>
-  <div class="notification-list" data-testid="notification-list">
+  <div
+    class="notification-list overflow-hidden rounded-xl border border-border/60 bg-card/30 shadow-sm"
+    data-testid="notification-list"
+  >
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-8">
       <Loader2 class="h-8 w-8 animate-spin text-primary" />
@@ -15,7 +18,7 @@
     </div>
 
     <!-- Notification List -->
-    <div v-else class="divide-y" data-testid="notifications-list">
+    <div v-else class="divide-y divide-border/60" data-testid="notifications-list">
       <slot
         v-for="notification in notifications"
         :key="notification.id"
@@ -26,6 +29,7 @@
           :notification="notification"
           @click="$emit('notification-click', $event)"
           @mark-read="$emit('mark-read', $event)"
+          @execute-action="$emit('execute-action', $event)"
           @delete="$emit('delete', $event)"
         />
       </slot>
@@ -53,6 +57,7 @@ const { t } = useI18n();
 defineEmits<{
   'notification-click': [notification: NotificationClientDTO];
   'mark-read': [id: string];
+  'execute-action': [input: { notificationId: string; actionKey: string }];
   delete: [id: string];
 }>();
 </script>

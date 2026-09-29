@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
@@ -53,15 +55,26 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
 
     await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
     expect(wrapper.find('[data-testid="schedule-fullcalendar"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="schedule-event-schedule-calendar-entry-1"]').exists()).toBe(
-      true,
-    );
+    const eventRoot = wrapper.get('[data-testid="schedule-event-schedule-calendar-entry-1"]');
+    expect(eventRoot.classes()).toContain('planner-event-timed');
+    expect(eventRoot.classes()).toContain('planner-occupancy-blocking');
     expect(wrapper.text()).toContain('Deep work');
+    const eventContent = wrapper.get(
+      '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
+    );
+    expect(eventContent.text()).toBe('Deep work');
+    expect(eventContent.text()).not.toContain('10:00');
     expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(
       expect.objectContaining({ view: 'week' }),
     );
 
     wrapper.unmount();
+  });
+
+  it('guards FullCalendar synthetic selection events before reading Planner projection fields', () => {
+    const source = readFileSync(resolve(__dirname, 'PlannerCalendar.vue'), 'utf8');
+    expect(source).toContain('v-if="event.extendedProps.projection"');
+    expect(source).toContain('data-testid="schedule-selection-preview"');
   });
 
   it('emits one semantic range even when projection updates make FullCalendar refresh its options', async () => {
@@ -158,14 +171,18 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       },
     });
 
-    await vi.waitFor(() => expect(wrapper.text()).toContain('⚠'));
+    await vi.waitFor(() =>
+      expect(wrapper.find('.planner-event-conflict-icon').exists()).toBe(true),
+    );
     const content = wrapper.find(
       '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
     );
     expect(content.classes()).toContain('planner-tone-warning');
 
     await wrapper.setProps({ conflicts: [] });
-    await vi.waitFor(() => expect(wrapper.text()).not.toContain('⚠'));
+    await vi.waitFor(() =>
+      expect(wrapper.find('.planner-event-conflict-icon').exists()).toBe(false),
+    );
     wrapper.unmount();
   });
 

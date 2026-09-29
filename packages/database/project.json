@@ -150,7 +150,7 @@
       "cache": false,
       "options": {
         "cwd": "packages/database",
-        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-task-shared-label-migration.ts && tsx ./scripts/prepare-knowledge-stable-document-identity-cutover.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
+        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-goal-start-timeframe-semantics.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-task-shared-label-migration.ts && tsx ./scripts/prepare-knowledge-stable-document-identity-cutover.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
       }
     },
     "ai-knowledge-smoke": {
@@ -175,6 +175,14 @@
       "options": {
         "cwd": "packages/database",
         "command": "tsx ./scripts/prepare-goal-record-source-correlation.ts"
+      }
+    },
+    "goal-start-timeframe-semantics-bootstrap": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "packages/database",
+        "command": "tsx ./scripts/prepare-goal-start-timeframe-semantics.ts"
       }
     },
     "notification-preference-hierarchy-bootstrap": {

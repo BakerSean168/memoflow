@@ -14,38 +14,44 @@
           <ArrowLeft class="mr-1 h-4 w-4" />
           {{ t('common.back') }}
         </Button>
-        <div class="min-w-0">
-          <h1 class="truncate text-sm font-semibold">
-            {{ viewModel?.title ?? t('task.detail.title') }}
-          </h1>
-          <p class="hidden truncate text-xs text-muted-foreground @2xl/panel:block">
-            {{ t('task.detail.subtitle') }}
-          </p>
-        </div>
       </template>
       <template #actions>
-        <template v-if="viewModel">
-          <Button variant="outline" size="sm" @click="openEdit">
-            <Pencil class="mr-1.5 h-4 w-4" />
-            {{ t('common.edit') }}
-          </Button>
-          <Button v-if="viewModel.isActive" variant="ghost" size="sm" @click="pause">
-            <Pause class="mr-1.5 h-4 w-4" />
-            {{ t('task.action.pause') }}
-          </Button>
-          <Button v-else-if="!viewModel.isArchived" variant="ghost" size="sm" @click="activate">
-            <Play class="mr-1.5 h-4 w-4" />
-            {{ t('task.action.activate') }}
-          </Button>
-          <Button variant="ghost" size="sm" @click="archive">
-            <Archive class="mr-1.5 h-4 w-4" />
-            {{ t('task.action.archive') }}
-          </Button>
-          <Button variant="ghost" size="sm" class="text-destructive" @click="remove">
-            <Trash2 class="mr-1.5 h-4 w-4" />
-            {{ t('common.delete') }}
-          </Button>
-        </template>
+        <DropdownMenu v-if="viewModel">
+          <DropdownMenuTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="h-8 w-8 rounded-full text-muted-foreground"
+              :aria-label="t('task.management.moreActions')"
+              data-testid="task-detail-more-actions"
+            >
+              <MoreHorizontal class="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="w-44">
+            <DropdownMenuItem v-if="viewModel.isActive" @click="pause">
+              <Pause class="mr-2 h-4 w-4 text-muted-foreground" />
+              {{ t('task.action.pause') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-else-if="!viewModel.isArchived && viewModel.isPaused"
+              @click="activate"
+            >
+              <Play class="mr-2 h-4 w-4 text-muted-foreground" />
+              {{ t('task.action.activate') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem v-if="!viewModel.isArchived" @click="archive">
+              <Archive class="mr-2 h-4 w-4 text-muted-foreground" />
+              {{ t('task.action.archive') }}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem class="text-destructive focus:text-destructive" @click="remove">
+              <Trash2 class="mr-2 h-4 w-4" />
+              {{ t('common.delete') }}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </template>
     </ModuleHeader>
 
@@ -83,116 +89,543 @@
         v-else-if="viewModel && currentTemplate"
         class="mx-auto flex w-full max-w-5xl flex-col gap-5"
       >
-        <article class="border-b border-border/70 pb-5" data-testid="task-plan-overview">
-          <div class="flex flex-wrap items-center gap-2">
-            <Badge>{{ viewModel.statusText }}</Badge>
-            <Badge variant="outline">{{ viewModel.importanceText }}</Badge>
-            <Badge v-if="viewModel.goalBinding" variant="secondary">
-              {{ t('task.occurrence.goalLinked') }}
-            </Badge>
+        <article class="space-y-4 border-b border-border/70 pb-5" data-testid="task-plan-overview">
+          <ProductAutoTextarea
+            v-model="titleDraft"
+            :max-length="120"
+            :rows="1"
+            data-testid="task-detail-title"
+            class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            :placeholder="t('task.basicInfo.titlePlaceholder')"
+            :disabled="isSaving || !!viewModel.isArchived"
+            @blur="saveTitle"
+            @keydown.enter.exact.prevent="commitTitleFromKeyboard"
+            @keydown.esc.prevent="resetInlineDrafts"
+          />
+
+          <div class="space-y-0.5" data-testid="task-detail-metadata">
+            <div
+              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              data-testid="task-properties-row"
+            >
+              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
+                {{ t('task.detail.properties') }}
+              </span>
+              <div
+                class="flex min-w-0 flex-wrap items-center gap-2"
+                data-testid="task-plan-workspace-properties"
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <ProductPropertyChip :disabled="isSaving || !!viewModel.isArchived">
+                      <template #icon>
+                        <CircleDot class="h-3.5 w-3.5" />
+                      </template>
+                      {{ viewModel.statusText }}
+                    </ProductPropertyChip>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" class="w-44">
+                    <DropdownMenuItem v-if="viewModel.isActive" @click="pause">
+                      <Pause class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('task.action.pause') }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      v-else-if="viewModel.isPaused && !viewModel.isArchived"
+                      @click="activate"
+                    >
+                      <Play class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('task.action.activate') }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="!viewModel.isArchived" @click="archive">
+                      <Archive class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('task.action.archive') }}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Popover
+                  :open="activeProperty === 'schedule'"
+                  @update:open="setPropertyOpen('schedule', $event)"
+                >
+                  <PopoverTrigger as-child>
+                    <ProductPropertyChip
+                      data-testid="task-detail-schedule-chip"
+                      :active="activeProperty === 'schedule'"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                    >
+                      <template #icon><CalendarClock class="h-3.5 w-3.5" /></template>
+                      {{ scheduleChipLabel }}
+                    </ProductPropertyChip>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                  >
+                    <TimeConfigSection
+                      :model-value="viewModel"
+                      is-edit-mode
+                      @update:model-value="saveInlinePlan"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Popover
+                  :open="activeProperty === 'recurrence'"
+                  @update:open="setPropertyOpen('recurrence', $event)"
+                >
+                  <PopoverTrigger as-child>
+                    <ProductPropertyChip
+                      data-testid="task-detail-recurrence-chip"
+                      :active="activeProperty === 'recurrence'"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                    >
+                      <template #icon><Repeat2 class="h-3.5 w-3.5" /></template>
+                      {{ viewModel.recurrenceText }}
+                    </ProductPropertyChip>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                  >
+                    <RecurrenceSection
+                      :model-value="viewModel"
+                      @update:model-value="saveInlinePlan"
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Popover
+                  :open="activeProperty === 'importance'"
+                  @update:open="setPropertyOpen('importance', $event)"
+                >
+                  <PopoverTrigger as-child>
+                    <ProductPropertyChip
+                      data-testid="task-detail-importance-chip"
+                      :active="activeProperty === 'importance'"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                    >
+                      <template #icon><Flag class="h-3.5 w-3.5" /></template>
+                      {{ viewModel.importanceText }}
+                    </ProductPropertyChip>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    class="w-60 rounded-xl border-border/80 p-1.5 shadow-xl"
+                  >
+                    <Button
+                      v-for="option in importanceOptions"
+                      :key="option.value"
+                      type="button"
+                      variant="ghost"
+                      class="h-9 w-full justify-start gap-2 rounded-md px-2 font-normal"
+                      :class="
+                        viewModel.importance === option.value
+                          ? 'bg-accent text-accent-foreground'
+                          : ''
+                      "
+                      @click="saveImportance(option.value)"
+                    >
+                      <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span class="min-w-0 flex-1 text-left">{{ option.title }}</span>
+                      <Check
+                        class="h-4 w-4 shrink-0"
+                        :class="viewModel.importance === option.value ? 'opacity-100' : 'opacity-0'"
+                      />
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+
+                <DropdownMenu v-if="hasMorePropertiesMenuItems">
+                  <DropdownMenuTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-8 w-8 rounded-full text-muted-foreground"
+                      :aria-label="t('task.detail.moreProperties')"
+                      data-testid="task-properties-more"
+                    >
+                      <MoreHorizontal class="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" class="w-52">
+                    <DropdownMenuSub v-if="!viewModel.goalBinding && !showGoalEditor">
+                      <DropdownMenuSubTrigger>
+                        <Target class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('task.detail.linkedGoal') }}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent class="w-72">
+                        <DropdownMenuItem
+                          v-for="option in goalOptions"
+                          :key="option.id"
+                          @click="quickBindGoal(option.id)"
+                        >
+                          <Flag class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                          <div class="min-w-0 flex-1">
+                            <div class="truncate">{{ option.title }}</div>
+                            <div
+                              v-if="option.description"
+                              class="truncate text-xs text-muted-foreground"
+                            >
+                              {{ option.description }}
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem v-if="loadingGoals" disabled>
+                          {{ t('task.krLinks.loadingGoals') }}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem v-else-if="goalOptions.length === 0" disabled>
+                          {{ t('task.krLinks.noGoals') }}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem @click="openGoalEditor">
+                          <Pencil class="mr-2 h-4 w-4 text-muted-foreground" />
+                          {{ t('task.detail.advancedGoalBinding') }}
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+
+                    <DropdownMenuSub v-if="labelIds.length === 0 && !showLabelsEditor">
+                      <DropdownMenuSubTrigger>
+                        <Tag class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('task.metadata.labels') }}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent class="w-60">
+                        <DropdownMenuCheckboxItem
+                          v-for="option in labelOptions"
+                          :key="option.id"
+                          :model-value="labelIds.includes(option.id)"
+                          @update:model-value="toggleLabelSelection(option.id)"
+                          @select.prevent
+                        >
+                          <span
+                            v-if="option.color"
+                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-border/60"
+                            :style="{ backgroundColor: option.color }"
+                          />
+                          <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuItem v-if="labelOptions.length === 0" disabled>
+                          {{ t('task.metadata.noLabels') }}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem @click="openLabelsEditor">
+                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                          {{ t('task.detail.createOrManageLabels') }}
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+
+                    <DropdownMenuSub v-if="reminderTriggers.length === 0 && !showReminderEditor">
+                      <DropdownMenuSubTrigger>
+                        <Bell class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('task.detail.reminders') }}
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent class="w-96 max-w-[calc(100vw-2rem)]">
+                        <TaskReminderMenuItems
+                          :model-value="taskReminderConfig"
+                          :disabled="isSaving || !!viewModel.isArchived"
+                          @update:model-value="saveReminderConfig"
+                          @request-custom-time="openCustomReminderPicker"
+                          @request-advanced="openReminderEditor"
+                        />
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <div
+              v-if="viewModel.goalBinding || showGoalEditor"
+              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              data-testid="task-goal-row"
+            >
+              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
+                {{ t('task.detail.linkedGoal') }}
+              </span>
+              <div class="flex min-w-0 flex-wrap items-center gap-1.5">
+                <button
+                  v-if="goalContextAvailable"
+                  type="button"
+                  class="max-w-64"
+                  @click="openGoalContext"
+                >
+                  <Badge
+                    variant="outline"
+                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                  >
+                    <Target class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span class="truncate">{{ goalContextText }}</span>
+                  </Badge>
+                </button>
+                <Badge
+                  v-else-if="viewModel.goalBinding"
+                  variant="secondary"
+                  class="h-7 max-w-64 rounded-full px-2.5 font-normal"
+                >
+                  <span class="truncate">{{ goalContextText }}</span>
+                </Badge>
+                <Badge
+                  v-if="goalContextKeyResultName"
+                  variant="outline"
+                  class="h-7 max-w-64 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                >
+                  <span class="truncate">{{ goalContextKeyResultName }}</span>
+                </Badge>
+
+                <Popover
+                  :open="activeProperty === 'goal'"
+                  @update:open="setPropertyOpen('goal', $event)"
+                >
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7 rounded-full text-muted-foreground"
+                      :aria-label="t('task.detail.editGoalBinding')"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                      data-testid="task-detail-goal-chip"
+                    >
+                      <Pencil v-if="viewModel.goalBinding" class="h-3.5 w-3.5" />
+                      <Plus v-else class="h-3.5 w-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                  >
+                    <KeyResultLinksSection
+                      :model-value="viewModel"
+                      :goals="goalOptions"
+                      :key-results-by-goal="keyResultsByGoal"
+                      :loading-goals="loadingGoals"
+                      :loading-key-results="loadingKeyResults"
+                      :key-result-errors-by-goal="keyResultErrorsByGoal"
+                      :on-request-key-results="requestKeyResults"
+                      @update:model-value="saveInlinePlan"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div
+              v-if="labelIds.length || showLabelsEditor"
+              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              data-testid="task-labels-row"
+            >
+              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
+                {{ t('task.metadata.labels') }}
+              </span>
+              <div class="flex min-w-0 flex-wrap items-center gap-1.5">
+                <Badge
+                  v-for="label in viewModel.labels"
+                  :key="label.id"
+                  variant="outline"
+                  class="h-7 max-w-48 gap-1.5 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                >
+                  <span
+                    v-if="label.color"
+                    class="h-2 w-2 shrink-0 rounded-full border border-border/60"
+                    :style="{ backgroundColor: label.color }"
+                  />
+                  <span class="truncate">{{ label.name }}</span>
+                </Badge>
+
+                <Popover :open="labelsPopoverOpen" @update:open="handleLabelsPopoverOpen">
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7 rounded-full text-muted-foreground"
+                      :aria-label="t('task.metadata.labels')"
+                      :disabled="labelsLoading || isSaving || !!viewModel.isArchived"
+                    >
+                      <Plus class="h-3.5 w-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] p-0">
+                    <LabelCommandPanel
+                      :model-value="labelIds"
+                      :options="labelOptions"
+                      :disabled="labelsLoading || isSaving || !!viewModel.isArchived"
+                      allow-create
+                      :search-placeholder="t('task.metadata.searchLabels')"
+                      :empty-text="t('task.metadata.noLabels')"
+                      :create-label="t('task.metadata.createLabel')"
+                      @update:model-value="saveLabelIds"
+                      @create="createAndSelectLabel"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div
+              v-if="reminderTriggers.length || showReminderEditor"
+              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              data-testid="task-reminders-row"
+            >
+              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
+                {{ t('task.detail.reminders') }}
+              </span>
+              <div class="flex min-w-0 flex-wrap items-center gap-1.5">
+                <DropdownMenu
+                  v-for="trigger in reminderTriggers"
+                  :key="reminderTriggerKey(trigger)"
+                >
+                  <DropdownMenuTrigger as-child>
+                    <button type="button" class="max-w-72">
+                      <Badge
+                        variant="outline"
+                        class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                      >
+                        <Bell class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
+                      </Badge>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" class="w-44">
+                    <DropdownMenuItem
+                      class="text-destructive focus:text-destructive"
+                      @click="removeReminderTrigger(trigger)"
+                    >
+                      <Trash2 class="mr-2 h-4 w-4" />
+                      {{ t('task.reminderMenu.removeReminder') }}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7 rounded-full text-muted-foreground"
+                      :aria-label="t('task.reminderMenu.addReminder')"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                      data-testid="task-reminder-add-menu"
+                    >
+                      <Plus class="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" class="w-96 max-w-[calc(100vw-2rem)]">
+                    <TaskReminderMenuItems
+                      :model-value="taskReminderConfig"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                      @update:model-value="saveReminderConfig"
+                      @request-custom-time="openCustomReminderPicker"
+                      @request-advanced="openReminderEditor"
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Popover
+                  :open="activeProperty === 'reminder'"
+                  @update:open="setPropertyOpen('reminder', $event)"
+                >
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-7 w-7 rounded-full text-muted-foreground"
+                      :aria-label="t('task.detail.editReminders')"
+                      :disabled="isSaving || !!viewModel.isArchived"
+                      data-testid="task-detail-reminder-chip"
+                    >
+                      <Pencil class="h-3.5 w-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                  >
+                    <ReminderSection
+                      :model-value="viewModel"
+                      @update:model-value="saveInlinePlan"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
-          <p v-if="viewModel.description" class="mt-4 text-sm leading-6 text-muted-foreground">
-            {{ viewModel.description }}
+
+          <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
+            {{ labelCreateError }}
           </p>
-          <div v-if="viewModel.labels?.length" class="mt-4 flex flex-wrap gap-1.5">
-            <Badge v-for="label in viewModel.labels" :key="label.id" variant="outline">
-              {{ label.name }}
-            </Badge>
-          </div>
         </article>
 
-        <section
-          aria-labelledby="task-plan-settings-heading"
-          data-testid="task-plan-workspace-properties"
-        >
-          <div class="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <h2 id="task-plan-settings-heading" class="font-semibold">
-                {{ t('task.detail.planSettings') }}
-              </h2>
-              <p class="text-sm text-muted-foreground">
-                {{ t('task.detail.planSettingsDescription') }}
-              </p>
-            </div>
-            <Button size="sm" variant="outline" @click="openEdit">
-              {{ t('task.detail.editSettings') }}
-            </Button>
-          </div>
-          <dl class="divide-y border-y border-border/70" data-testid="task-detail-property-list">
-            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
-              <dt class="text-xs font-medium text-muted-foreground">
-                {{ t('task.detail.recurrence') }}
-              </dt>
-              <dd>
-                <p class="text-sm font-medium">{{ viewModel.recurrenceText }}</p>
-                <p class="mt-0.5 text-xs text-muted-foreground">{{ recurrenceBoundaryText }}</p>
-              </dd>
-            </div>
-            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
-              <dt class="text-xs font-medium text-muted-foreground">
-                {{ t('task.detail.schedule') }}
-              </dt>
-              <dd>
-                <p class="text-sm font-medium">{{ scheduleText }}</p>
-                <p class="mt-0.5 text-xs text-muted-foreground">{{ planStartText }}</p>
-              </dd>
-            </div>
-            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
-              <dt class="text-xs font-medium text-muted-foreground">
-                {{ t('task.detail.reminders') }}
-              </dt>
-              <dd>
-                <p class="text-sm font-medium">{{ reminderText }}</p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ t('task.detail.reminderAuthority') }}
-                </p>
-              </dd>
-            </div>
-            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
-              <dt class="text-xs font-medium text-muted-foreground">
-                {{ t('task.detail.goalBinding') }}
-              </dt>
-              <dd>
-                <p class="text-sm font-medium">{{ goalBindingText }}</p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ t('task.detail.goalBindingDescription') }}
-                </p>
-              </dd>
-            </div>
-          </dl>
+        <section class="space-y-2" data-testid="task-detail-description-section">
+          <h2 class="text-sm font-medium text-muted-foreground">
+            {{ t('task.detail.description') }}
+          </h2>
+          <ProductAutoTextarea
+            v-model="descriptionDraft"
+            :max-length="2000"
+            :rows="4"
+            data-testid="task-detail-description"
+            class="-mx-1 min-h-20 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            :placeholder="t('task.basicInfo.descPlaceholder')"
+            :disabled="isSaving || !!viewModel.isArchived"
+            @blur="saveDescription"
+            @keydown.ctrl.enter.prevent="commitDescriptionFromKeyboard"
+            @keydown.meta.enter.prevent="commitDescriptionFromKeyboard"
+            @keydown.esc.prevent="resetInlineDrafts"
+          />
         </section>
 
-        <section
-          class="grid border-y border-border/70 @xl/panel:grid-cols-2 @xl/panel:divide-x"
-          data-testid="task-detail-execution-summary"
-        >
-          <div class="py-4 @xl/panel:pr-5">
-            <h2 class="font-semibold">{{ t('task.detail.executionStats') }}</h2>
-            <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
-              <span>{{ t('task.detail.totalInstances') }}: {{ executionSummary.total }}</span>
-              <span>{{ t('task.detail.completed') }}: {{ executionSummary.completed }}</span>
-              <span
-                >{{ t('task.detail.completionRate') }}: {{ executionSummary.completionRate }}%</span
+        <ChecklistSection
+          :model-value="viewModel"
+          :disabled="isSaving || !!viewModel.isArchived"
+          @update:model-value="saveInlinePlan"
+        />
+
+        <section class="border-y border-border/70 py-3" data-testid="task-detail-execution-summary">
+          <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3">
+            <span class="pt-1.5 text-xs font-medium text-muted-foreground">
+              {{ t('task.detail.executionStats') }}
+            </span>
+            <div class="flex min-w-0 flex-wrap items-center gap-1.5">
+              <Badge
+                variant="outline"
+                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
               >
-              <span>{{
-                t('task.detail.openCount', {
-                  count: executionSummary.pending + executionSummary.inProgress,
-                })
-              }}</span>
-              <span
-                >{{ t('task.detail.instanceStatusMissed') }}: {{ executionSummary.missed }}</span
+                {{ t('task.detail.totalInstances') }} {{ executionSummary.total }}
+              </Badge>
+              <Badge
+                variant="outline"
+                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
               >
-              <span
-                >{{ t('task.detail.instanceStatusSkipped') }}: {{ executionSummary.skipped }}</span
+                {{ t('task.detail.completed') }} {{ executionSummary.completed }}
+              </Badge>
+              <Badge variant="secondary" class="h-7 rounded-full px-2.5 font-normal">
+                {{ t('task.detail.completionRate') }} {{ executionSummary.completionRate }}%
+              </Badge>
+              <Badge
+                variant="outline"
+                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
               >
+                {{
+                  t('task.detail.openCount', {
+                    count: executionSummary.pending + executionSummary.inProgress,
+                  })
+                }}
+              </Badge>
+              <Badge
+                v-if="executionSummary.missed"
+                variant="outline"
+                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+              >
+                {{ t('task.detail.instanceStatusMissed') }} {{ executionSummary.missed }}
+              </Badge>
+              <Badge
+                v-if="executionSummary.skipped"
+                variant="outline"
+                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+              >
+                {{ t('task.detail.instanceStatusSkipped') }} {{ executionSummary.skipped }}
+              </Badge>
             </div>
-          </div>
-          <div class="border-t py-4 @xl/panel:border-t-0 @xl/panel:pl-5">
-            <h2 class="font-semibold">{{ t('task.detail.goalBinding') }}</h2>
-            <p class="mt-3 text-sm" data-testid="task-detail-goal-context">{{ goalContextText }}</p>
-            <p v-if="goalContextKeyResultText" class="mt-1 text-sm text-muted-foreground">
-              {{ goalContextKeyResultText }}
-            </p>
           </div>
         </section>
 
@@ -241,7 +674,7 @@
             </div>
           </div>
 
-          <div v-if="templateOccurrences.length" class="grid gap-3">
+          <div v-if="templateOccurrences.length" class="border-y border-border/70">
             <TaskOccurrenceRow
               v-for="occurrence in sortedOccurrences"
               :key="occurrence.id"
@@ -275,44 +708,105 @@
       </div>
     </main>
 
-    <TaskPlanDialog
-      v-model="showEditDialog"
-      mode="edit"
-      :template="viewModel"
-      :saving="isSaving"
-      @save="saveEdit"
-      @cancel="showEditDialog = false"
+    <ProductDateTimePicker
+      :open="customReminderPickerOpen"
+      :model-value="null"
+      :title="t('task.reminderMenu.customDialogTitle')"
+      :description="t('task.reminderMenu.customDialogDescription')"
+      :time-label="t('task.reminderMenu.customClockTime')"
+      :hour-label="t('task.reminderMenu.hour')"
+      :minute-label="t('task.reminderMenu.minute')"
+      :cancel-label="t('common.cancel')"
+      :apply-label="t('task.reminderMenu.setReminder')"
+      :return-to-today-label="t('task.reminderMenu.returnToToday')"
+      :invalid-time-text="t('task.reminderMenu.invalidClockTime')"
+      :past-time-text="t('task.reminderMenu.pastTime')"
+      :min-value="customReminderMinValue"
+      test-id="task-custom-reminder-picker"
+      @update:open="customReminderPickerOpen = $event"
+      @apply="addCustomAbsoluteReminder"
     />
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   Archive,
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
+  Bell,
+  CalendarClock,
+  Check,
+  ChevronsDown,
+  ChevronsUp,
   CircleAlert,
+  CircleDot,
+  Flag,
   Loader2,
+  Minus,
+  MoreHorizontal,
   Pause,
   Pencil,
   Play,
+  Plus,
   RefreshCw,
+  Repeat2,
+  Tag,
+  Target,
   Trash2,
 } from '@lucide/vue';
-import { Badge, Button, useConfirm } from '@memoflow/ui-vue-shadcn';
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  useConfirm,
+} from '@memoflow/ui-vue-shadcn';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { TaskReminderConfigDTO } from '@memoflow/contracts/task';
+import {
+  ReminderTimeUnit,
+  TaskReminderType,
+  type TaskReminderConfigDTO,
+  type UpdateTaskPlanReq,
+} from '@memoflow/contracts/task';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
+import {
+  ProductAutoTextarea,
+  ProductDateTimePicker,
+  ProductPropertyChip,
+} from '../../../shared/components';
+import LabelCommandPanel from '../../../shared/components/LabelCommandPanel.vue';
+import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
+import { getProductTime } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import TaskReminderMenuItems from '../components/TaskReminderMenuItems.vue';
+import ChecklistSection from '../components/TaskPlanForm/sections/ChecklistSection.vue';
+import KeyResultLinksSection from '../components/TaskPlanForm/sections/KeyResultLinksSection.vue';
+import RecurrenceSection from '../components/TaskPlanForm/sections/RecurrenceSection.vue';
+import ReminderSection from '../components/TaskPlanForm/sections/ReminderSection.vue';
+import TimeConfigSection from '../components/TaskPlanForm/sections/TimeConfigSection.vue';
 import type { TaskPlanViewModel } from '../components/types';
+import { useTaskGoalBindingOptions } from '../composables/useTaskGoalBindingOptions';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
 import { useTaskPlanWorkspaceQuery } from '../composables/useTaskPlanWorkspaceQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
+  formatTaskReminderAbsoluteTime,
   getTaskPlanScheduleDate,
   getTaskPlanScheduleTimeDisplay,
   mapTaskPlanDtoToViewModel,
@@ -320,10 +814,24 @@ import {
 } from '../utils/task-plan-presentation';
 import { sortTaskOccurrences } from '../utils/task-occurrence-presentation';
 
+type PropertyEditor = 'schedule' | 'recurrence' | 'goal' | 'reminder' | 'importance';
+
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const id = computed(() => String(route.params.id ?? ''));
+const activeProperty = ref<PropertyEditor | null>(null);
+const titleDraft = ref('');
+const descriptionDraft = ref('');
+const labelCreateError = ref<string | null>(null);
+const labelsPopoverOpen = ref(false);
+const showGoalEditor = ref(false);
+const showLabelsEditor = ref(false);
+const showReminderEditor = ref(false);
+const customReminderPickerOpen = ref(false);
+const customReminderMinValue = ref(Number(getProductTime().now()));
+const busyOccurrenceId = ref<string | null>(null);
+
 const {
   workspace,
   query: workspaceQuery,
@@ -344,12 +852,22 @@ const {
   skipOccurrence: skipOccurrenceMutation,
   setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
 } = useTaskOccurrences();
+const {
+  goals: goalOptions,
+  keyResultsByGoal,
+  loadingGoals,
+  loadingKeyResults,
+  keyResultErrorsByGoal,
+  loadGoals,
+  loadGoalBinding,
+  loadKeyResults,
+} = useTaskGoalBindingOptions();
+const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
+
 const currentTemplate = computed(() => workspace.value?.plan ?? null);
 const viewModel = computed(() =>
   currentTemplate.value ? mapTaskPlanDtoToViewModel(currentTemplate.value, t) : null,
 );
-const showEditDialog = ref(false);
-const busyOccurrenceId = ref<string | null>(null);
 const isLoading = computed(() => workspaceQuery.isPending.value);
 const loadError = computed(() => workspaceQuery.isError.value);
 const templateOccurrences = computed(() => workspace.value?.recentOccurrences ?? []);
@@ -375,43 +893,157 @@ const goalContextText = computed(() => {
   if (context.availability === 'Available') return context.goal.name;
   return t(`task.detail.goalContext${context.availability}`);
 });
-const goalContextKeyResultText = computed(() => {
+const goalContextAvailable = computed(
+  () => workspace.value?.goalContext?.availability === 'Available',
+);
+const goalContextKeyResultName = computed(() => {
   const context = workspace.value?.goalContext;
   return context?.availability === 'Available' && context.keyResult
-    ? t('task.detail.keyResultValue', { name: context.keyResult.title })
+    ? context.keyResult.title
     : null;
 });
-const scheduleText = computed(() =>
-  getTaskPlanScheduleTimeDisplay(t, currentTemplate.value?.schedule),
-);
-const planStartText = computed(() => {
-  const schedule = currentTemplate.value?.schedule;
-  if (!schedule) return t('task.detail.noStartDate');
-  return t('task.detail.startsOn', { date: getTaskPlanScheduleDate(schedule) });
+const scheduleChipLabel = computed(() => {
+  const schedule = viewModel.value?.schedule;
+  if (!schedule) return t('task.timeConfig.title');
+  return `${getTaskPlanScheduleDate(schedule)} · ${getTaskPlanScheduleTimeDisplay(t, schedule)}`;
 });
-const recurrenceBoundaryText = computed(() => {
-  const schedule = currentTemplate.value?.schedule;
-  if (!schedule || schedule.kind === 'OneTime') return t('task.detail.oneTimePlan');
-  const end = schedule.recurrence.end;
-  if (end.kind === 'Count') return t('task.detail.occurrenceLimit', { count: end.count });
-  if (end.kind === 'Until') return t('task.detail.endsOn', { date: end.date });
-  return t('task.detail.noRecurrenceEnd');
-});
-const reminderText = computed(() => {
-  const reminder = currentTemplate.value?.reminderConfig as
+const taskReminderConfig = computed(() => {
+  const config = viewModel.value?.reminderConfig as unknown as
     TaskReminderConfigDTO | null | undefined;
-  if (!reminder?.enabled) return t('task.detail.remindersOff');
-  return t('task.detail.reminderCount', { count: reminder.triggers.length });
+  return config ?? null;
 });
-const goalBindingText = computed(() =>
-  currentTemplate.value?.goalBinding
-    ? t('task.detail.goalBindingConfigured')
-    : t('task.detail.goalBindingNone'),
+const reminderTriggers = computed(() =>
+  taskReminderConfig.value?.enabled ? taskReminderConfig.value.triggers : [],
+);
+const labelIds = computed(
+  () => viewModel.value?.labelIds ?? viewModel.value?.labels?.map((label) => label.id) ?? [],
+);
+const hasMorePropertiesMenuItems = computed(
+  () =>
+    (!!viewModel.value && !viewModel.value.goalBinding && !showGoalEditor.value) ||
+    (labelIds.value.length === 0 && !showLabelsEditor.value) ||
+    (reminderTriggers.value.length === 0 && !showReminderEditor.value),
+);
+const importanceOptions = computed(() => [
+  { title: t('task.metadata.importanceCritical'), value: ImportanceLevel.Vital, icon: ChevronsUp },
+  { title: t('task.metadata.importanceHigh'), value: ImportanceLevel.Important, icon: ArrowUp },
+  { title: t('task.metadata.importanceMedium'), value: ImportanceLevel.Moderate, icon: Minus },
+  { title: t('task.metadata.importanceLow'), value: ImportanceLevel.Minor, icon: ArrowDown },
+  {
+    title: t('task.metadata.importanceMinimal'),
+    value: ImportanceLevel.Trivial,
+    icon: ChevronsDown,
+  },
+]);
+
+watch(
+  viewModel,
+  (value) => {
+    if (!value) return;
+    titleDraft.value = value.title;
+    descriptionDraft.value = value.description ?? '';
+    if (value.goalBinding?.goalId) void loadGoalBinding(value.goalBinding.goalId);
+  },
+  { immediate: true },
+);
+watch(
+  () => id.value,
+  () => {
+    void loadGoals();
+  },
+  { immediate: true },
 );
 
-function openEdit() {
-  showEditDialog.value = true;
+function setPropertyOpen(property: PropertyEditor, open: boolean): void {
+  if (open) {
+    activeProperty.value = property;
+    return;
+  }
+  if (activeProperty.value === property) activeProperty.value = null;
+  if (property === 'goal' && !viewModel.value?.goalBinding) showGoalEditor.value = false;
+  if (property === 'reminder' && reminderTriggers.value.length === 0) {
+    showReminderEditor.value = false;
+  }
 }
+
+function openGoalEditor(): void {
+  showGoalEditor.value = true;
+  activeProperty.value = 'goal';
+}
+
+async function quickBindGoal(goalId: string): Promise<void> {
+  const saved = await updatePlanSafe(id.value, {
+    goalBinding: {
+      goalId: goalId as GoalId,
+      keyResultId: null,
+      contribution: null,
+    },
+  });
+  if (saved) {
+    showGoalEditor.value = false;
+    activeProperty.value = null;
+    await refetchWorkspace();
+  }
+}
+
+function openLabelsEditor(): void {
+  showLabelsEditor.value = true;
+  labelsPopoverOpen.value = true;
+}
+
+function handleLabelsPopoverOpen(open: boolean): void {
+  labelsPopoverOpen.value = open;
+  if (!open && labelIds.value.length === 0) showLabelsEditor.value = false;
+}
+
+function openReminderEditor(): void {
+  showReminderEditor.value = true;
+  activeProperty.value = 'reminder';
+}
+
+function openCustomReminderPicker(): void {
+  customReminderMinValue.value = Number(getProductTime().now());
+  customReminderPickerOpen.value = true;
+}
+
+function openGoalContext(): void {
+  const context = workspace.value?.goalContext;
+  if (context?.availability !== 'Available') return;
+  void router.push({ name: 'goal-detail', params: { id: String(context.goalId) } });
+}
+
+function reminderUnitLabel(unit: ReminderTimeUnit | null): string {
+  if (unit === ReminderTimeUnit.Hours) return t('task.reminderSection.hours');
+  if (unit === ReminderTimeUnit.Days) return t('task.reminderSection.days');
+  return t('task.reminderSection.minutes');
+}
+
+function reminderTriggerKey(trigger: TaskReminderConfigDTO['triggers'][number]): string {
+  return [
+    trigger.type,
+    trigger.absoluteTime ?? '',
+    trigger.relativeValue ?? '',
+    trigger.relativeUnit ?? '',
+  ].join(':');
+}
+
+function reminderTriggerLabel(trigger: TaskReminderConfigDTO['triggers'][number]): string {
+  if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime != null) {
+    return formatTaskReminderAbsoluteTime(trigger.absoluteTime);
+  }
+  if (
+    trigger.type === TaskReminderType.Relative &&
+    trigger.relativeValue != null &&
+    trigger.relativeUnit != null
+  ) {
+    return t('task.detail.reminderRelative', {
+      value: trigger.relativeValue,
+      unit: reminderUnitLabel(trigger.relativeUnit),
+    });
+  }
+  return t('task.detail.reminders');
+}
+
 function goalBinding(vm: TaskPlanViewModel) {
   if (!vm.goalBinding?.goalId) return null;
   return {
@@ -420,22 +1052,171 @@ function goalBinding(vm: TaskPlanViewModel) {
     contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
   };
 }
-async function saveEdit(vm: TaskPlanViewModel) {
-  const result = await updatePlanSafe(id.value, {
-    name: vm.title,
-    description: vm.description ?? null,
-    schedule: toTaskPlanSchedulePayload(vm),
-    reminderConfig: (vm.reminderConfig as never) ?? null,
-    importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
-    labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
-    goalBinding: goalBinding(vm),
-    checklist: vm.checklist,
+
+function sameSerializedValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function normalizedLabelIds(vm: TaskPlanViewModel): string[] {
+  return vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [];
+}
+
+async function saveInlinePlan(vm: TaskPlanViewModel): Promise<void> {
+  const current = viewModel.value;
+  if (!current) return;
+
+  const req: UpdateTaskPlanReq = {};
+  const nextSchedule = toTaskPlanSchedulePayload(vm);
+  const currentSchedule = toTaskPlanSchedulePayload(current);
+  if (!sameSerializedValue(nextSchedule, currentSchedule)) req.schedule = nextSchedule;
+
+  const nextReminder = (vm.reminderConfig as UpdateTaskPlanReq['reminderConfig']) ?? null;
+  const currentReminder = (current.reminderConfig as UpdateTaskPlanReq['reminderConfig']) ?? null;
+  if (!sameSerializedValue(nextReminder, currentReminder)) req.reminderConfig = nextReminder;
+
+  const nextImportance = (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate;
+  const currentImportance = (current.importance as ImportanceLevel) ?? ImportanceLevel.Moderate;
+  if (nextImportance !== currentImportance) req.importance = nextImportance;
+
+  const nextLabels = normalizedLabelIds(vm);
+  const currentLabels = normalizedLabelIds(current);
+  if (!sameSerializedValue(nextLabels, currentLabels)) req.labelIds = nextLabels;
+
+  const nextGoalBinding = goalBinding(vm);
+  const currentGoalBinding = goalBinding(current);
+  if (!sameSerializedValue(nextGoalBinding, currentGoalBinding)) {
+    req.goalBinding = nextGoalBinding;
+  }
+
+  if (!sameSerializedValue(vm.checklist, current.checklist)) req.checklist = vm.checklist;
+
+  if (Object.keys(req).length === 0) return;
+  const result = await updatePlanSafe(id.value, req);
+  if (result) await refetchWorkspace();
+}
+
+async function saveTitle(): Promise<void> {
+  const vm = viewModel.value;
+  if (!vm) return;
+  const next = titleDraft.value.trim();
+  if (!next) {
+    titleDraft.value = vm.title;
+    return;
+  }
+  if (next === vm.title) return;
+  const result = await updatePlanSafe(id.value, { name: next });
+  if (!result) titleDraft.value = vm.title;
+}
+
+function commitTitleFromKeyboard(event: KeyboardEvent): void {
+  (event.currentTarget as HTMLElement | null)?.blur();
+}
+
+async function saveDescription(): Promise<void> {
+  const vm = viewModel.value;
+  if (!vm) return;
+  const next = descriptionDraft.value.trim();
+  if (next === (vm.description ?? '')) return;
+  const result = await updatePlanSafe(id.value, { description: next || null });
+  if (!result) descriptionDraft.value = vm.description ?? '';
+}
+
+function commitDescriptionFromKeyboard(event: KeyboardEvent): void {
+  (event.currentTarget as HTMLElement | null)?.blur();
+}
+
+function resetInlineDrafts(): void {
+  const vm = viewModel.value;
+  if (!vm) return;
+  titleDraft.value = vm.title;
+  descriptionDraft.value = vm.description ?? '';
+}
+
+async function saveImportance(value: ImportanceLevel): Promise<void> {
+  if (viewModel.value?.importance !== value) {
+    await updatePlanSafe(id.value, { importance: value });
+  }
+  activeProperty.value = null;
+}
+
+async function saveLabelIds(ids: string[]): Promise<void> {
+  const saved = await updatePlanSafe(id.value, { labelIds: ids });
+  if (!saved) return;
+  if (ids.length > 0) showLabelsEditor.value = false;
+  await refetchWorkspace();
+}
+
+async function toggleLabelSelection(labelId: string): Promise<void> {
+  const next = labelIds.value.includes(labelId)
+    ? labelIds.value.filter((id) => id !== labelId)
+    : [...labelIds.value, labelId];
+  await saveLabelIds(next);
+}
+
+async function saveReminderConfig(value: TaskReminderConfigDTO | null): Promise<void> {
+  const saved = await updatePlanSafe(id.value, { reminderConfig: value });
+  if (!saved) return;
+  if (value?.enabled && value.triggers.length > 0) showReminderEditor.value = false;
+  await refetchWorkspace();
+}
+
+async function removeReminderTrigger(
+  trigger: TaskReminderConfigDTO['triggers'][number],
+): Promise<void> {
+  const key = reminderTriggerKey(trigger);
+  const remaining = reminderTriggers.value.filter((item) => reminderTriggerKey(item) !== key);
+  await saveReminderConfig(
+    remaining.length
+      ? {
+          enabled: true,
+          triggers: remaining,
+        }
+      : null,
+  );
+}
+
+async function addCustomAbsoluteReminder(value: number): Promise<void> {
+  const now = Number(getProductTime().now());
+  const rounded = Math.floor(value / 60_000) * 60_000;
+  if (!Number.isFinite(rounded) || rounded <= now) return;
+  const existing = reminderTriggers.value;
+  if (
+    existing.some(
+      (trigger) => trigger.type === TaskReminderType.Absolute && trigger.absoluteTime === rounded,
+    ) ||
+    existing.length >= 10
+  ) {
+    return;
+  }
+  await saveReminderConfig({
+    enabled: true,
+    triggers: [
+      ...existing,
+      {
+        type: TaskReminderType.Absolute,
+        absoluteTime: rounded,
+        relativeValue: null,
+        relativeUnit: null,
+      },
+    ],
   });
-  if (result) {
-    showEditDialog.value = false;
-    await reloadDetail();
+}
+
+async function createAndSelectLabel(name: string): Promise<void> {
+  labelCreateError.value = null;
+  try {
+    const label = await createLabel(name);
+    await saveLabelIds([...new Set([...labelIds.value, label.id])]);
+  } catch (error) {
+    labelCreateError.value =
+      error instanceof Error ? error.message : t('task.metadata.labelCreateFailed');
   }
 }
+
+function requestKeyResults(goalId: string, force = false) {
+  return loadKeyResults(goalId, force);
+}
+
 async function pause() {
   if (await pausePlanSafe(id.value)) await refetchWorkspace();
 }
@@ -481,8 +1262,12 @@ const setOccurrenceChecklistItem = (
   completed: boolean,
   expectedVersion: number,
 ) =>
-  runOccurrenceAction(occurrenceId, (id) =>
-    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
+  runOccurrenceAction(occurrenceId, (occurrenceIdValue) =>
+    setOccurrenceChecklistItemMutation(occurrenceIdValue, {
+      definitionId,
+      completed,
+      expectedVersion,
+    }),
   );
 const noop = () => undefined;
 </script>

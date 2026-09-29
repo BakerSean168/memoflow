@@ -1954,6 +1954,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/src/auth/capabilities.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/web/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/src/auth/presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3130,6 +3138,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/context/assistant-selected-context-hydrator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/mastra-vnext-architecture.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3644,6 +3662,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3716,6 +3742,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/views/AIChatView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3748,6 +3782,14 @@
       "measurementCollectors": [
         "packages/app-vue/vitest.store-coverage.config.ts"
       ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/GoalKnowledgeMenuItems.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
@@ -3946,6 +3988,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4052,6 +4102,38 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4069,6 +4151,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4108,7 +4198,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/routine/routine-form-ui.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4148,7 +4254,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4197,6 +4319,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4400,6 +4530,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4433,6 +4571,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4698,6 +4844,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductDateTimePicker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4731,6 +4885,22 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/RadioGroupAccessibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5314,6 +5484,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/api/key-result-limits.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5483,6 +5661,14 @@
     },
     {
       "path": "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5954,6 +6140,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/goal-start-timeframe-semantics.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/knowledge-stable-document-identity-cutover.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5971,6 +6165,14 @@
     },
     {
       "path": "packages/database/src/schema/repository-vnext-retirement.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/database/src/schema/routine-activated-at.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
@@ -6737,6 +6939,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/infrastructure/adapters/goal-timeframe-persistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7456,6 +7668,16 @@
       ]
     },
     {
+      "path": "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/notification/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8052,7 +8274,27 @@
       ]
     },
     {
+      "path": "packages/reminder/src/server/domain/routine/durable-elapsed.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8091,6 +8333,16 @@
     },
     {
       "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8159,6 +8411,26 @@
     },
     {
       "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8537,6 +8809,14 @@
     },
     {
       "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-document-identity-prisma.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-note-projection-prisma.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -10712,6 +10992,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/runtime/host-dev-env.spec.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "memoflow:test:governance"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/runtime/load-profiles.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10804,7 +11092,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 89
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -10832,7 +11120,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -10860,14 +11148,14 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 43
+      "fileCount": 44
     },
     {
       "id": "packages/reminder/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 33
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -11028,7 +11316,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 3
+      "fileCount": 4
     },
     {
       "id": "test-system-v2:test",
@@ -11168,7 +11456,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 18
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11182,14 +11470,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 89
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 211
+      "fileCount": 230
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11210,7 +11498,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 88
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11224,7 +11512,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 16
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11238,7 +11526,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11273,7 +11561,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 43
+      "fileCount": 44
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -11301,14 +11589,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 33
     },
     {
       "id": "packages/repository/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -11549,6 +11837,7 @@
       "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
       "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
       "packages/ai/src/server/mastra/context/ai-context-assembler.spec.ts",
+      "packages/ai/src/server/mastra/context/assistant-selected-context-hydrator.spec.ts",
       "packages/ai/src/server/mastra/mastra-vnext-architecture.surface.spec.ts",
       "packages/ai/src/server/mastra/models/model-resolver.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
@@ -11657,6 +11946,7 @@
       "packages/goal/src/server/infrastructure/__tests__/goal-module-partial-start.spec.ts",
       "packages/goal/src/server/infrastructure/__tests__/goal-repositories.surface.spec.ts",
       "packages/goal/src/server/infrastructure/__tests__/schedule-source-ownership.surface.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/goal-timeframe-persistence.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-label-assignment.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-schedule-projection.spec.ts",
@@ -11713,6 +12003,7 @@
       "packages/notification/src/application-client/notification-client-port-dual.surface.spec.ts",
       "packages/notification/src/electron/index-lifecycle.spec.ts",
       "packages/notification/src/electron/notification-electron.surface.spec.ts",
+      "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
       "packages/notification/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.surface.spec.ts",
       "packages/notification/src/server/application/notification-portability.spec.ts",
       "packages/notification/src/server/application/notification-preference-portability.spec.ts",
@@ -11759,16 +12050,21 @@
       "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
+      "packages/reminder/src/server/domain/routine/durable-elapsed.spec.ts",
       "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-elapsed-scheduled-handler.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-schedule/routine-occurrence-notification-writer.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.powersync.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-vnext/routine-preferences-store.prisma.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
       "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
@@ -11917,13 +12213,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1037,
+    "unit": 1070,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 6,
     "e2e": 58,
     "perf": 1,
-    "governance": 58
+    "governance": 59
   }
 }

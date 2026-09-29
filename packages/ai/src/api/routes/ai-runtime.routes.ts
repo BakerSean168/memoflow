@@ -111,6 +111,8 @@ export function registerAIRuntimeRoutes(
         providerId: parsed.data.providerId,
         modelId: parsed.data.modelId,
         locale: parsed.data.locale,
+        attachments: parsed.data.attachments,
+        selectedEntities: parsed.data.selectedEntities,
         signal: abortController.signal,
       })) {
         if (connectionClosed || res.writableEnded) break;
@@ -173,9 +175,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_RUNTIME_ERROR',
         fallbackMessage: 'AI runtime request failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -210,9 +212,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_RUNTIME_ERROR',
         fallbackMessage: 'AI runtime request failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -263,9 +265,7 @@ export function registerAIRuntimeRoutes(
       const summary = AIRuntimeUsageSummarySchema.parse(
         await runtime.summarizeUsage({
           identityId,
-          ...(parsed.data.conversationId
-            ? { conversationId: parsed.data.conversationId }
-            : {}),
+          ...(parsed.data.conversationId ? { conversationId: parsed.data.conversationId } : {}),
           ...(parsed.data.runId ? { runId: parsed.data.runId } : {}),
         }),
       );
@@ -275,9 +275,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_RUNTIME_ERROR',
         fallbackMessage: 'AI runtime request failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -312,9 +312,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Workflow failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -349,9 +349,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Workflow failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -383,9 +383,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Workflow failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -420,9 +420,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Workflow failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 
@@ -454,9 +454,9 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Workflow failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
-      );
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
     }
   });
 

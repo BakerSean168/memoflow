@@ -6,6 +6,10 @@
 
 import { z } from 'zod';
 import { KeyResultCalculationMethod } from '../value-objects/key-result-calculation-method';
+import {
+  KEY_RESULT_DESCRIPTION_MAX_LENGTH,
+  KEY_RESULT_TITLE_MAX_LENGTH,
+} from '../value-objects/key-result-limits';
 import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
 import { brandedId } from '../../../primitives';
 import type { GoalId, KeyResultId } from '../../../primitives';
@@ -38,8 +42,8 @@ export type AddKeyResultRes = KeyResultClientDTO;
  */
 export const UpdateKeyResultSchema = z.object({
   expectedVersion: z.number().int().min(1),
-  title: z.string().min(1).max(256).optional(),
-  description: z.string().max(2000).nullable().optional(),
+  title: z.string().min(1).max(KEY_RESULT_TITLE_MAX_LENGTH).optional(),
+  description: z.string().max(KEY_RESULT_DESCRIPTION_MAX_LENGTH).nullable().optional(),
   initialValue: z.number().optional(),
   calculationMethod: z.enum(KeyResultCalculationMethod).optional(),
   currentValue: z.number().optional(),

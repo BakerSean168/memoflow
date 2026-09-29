@@ -6,7 +6,10 @@ export interface RoutineOccurrenceClaimInput {
   readonly identityId: string;
   readonly routineId: string;
   readonly occurrenceKey: string;
+  readonly triggerKind?: 'WallClock' | 'Elapsed';
   readonly scheduledFor: number;
+  /** Canonical business due boundary; defaults to scheduledFor for WallClock. */
+  readonly becameDueAt?: number;
   readonly sourceRevision: string | number | null;
   readonly claimedAt: number;
   readonly leaseExpiresAt: number;

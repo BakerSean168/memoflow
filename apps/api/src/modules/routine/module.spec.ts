@@ -39,6 +39,7 @@ describe('Routine API module', () => {
       definitions: [],
       profiles: [],
       memberships: [],
+      preferences: { globalEnabled: true, version: 0 },
       runtimeContext: { activeProfileIds: [] },
       capabilities: { localRuntime: false },
       overrides: [],
@@ -100,6 +101,11 @@ describe('Routine API module', () => {
   });
 
   it('wires the complete configuration mutation surface to the canonical owner command port', async () => {
+    const updatePreferences = vi.fn().mockResolvedValue({
+      identityId: 'identity-1',
+      globalEnabled: false,
+      version: 1,
+    });
     const updateRoutine = vi.fn().mockResolvedValue({
       routineId: 'routine-1',
       identityId: 'identity-1',
@@ -156,6 +162,7 @@ describe('Routine API module', () => {
       version: 1,
     });
     const commandPort = {
+      updatePreferences,
       updateRoutine,
       deleteRoutine,
       replaceRoutineProfiles,
@@ -172,6 +179,14 @@ describe('Routine API module', () => {
     } as unknown as RoutineConfigurationQueryPort;
     const app = await createHttpHarness({ commandPort, queryPort });
 
+    expect(
+      (
+        await request(app).patch('/api/routines/preferences').send({
+          globalEnabled: false,
+          expectedVersion: 0,
+        })
+      ).status,
+    ).toBe(200);
     expect(
       (
         await request(app).patch('/api/routines/routine-1').send({
@@ -251,6 +266,11 @@ describe('Routine API module', () => {
       ).status,
     ).toBe(200);
 
+    expect(updatePreferences).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      globalEnabled: false,
+      expectedVersion: 0,
+    });
     expect(updateRoutine).toHaveBeenCalledWith(
       expect.objectContaining({ identityId: 'identity-1', routineId: 'routine-1' }),
     );

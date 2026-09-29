@@ -160,6 +160,8 @@ memoflow_id: kdoc_<opaque-id>
 
 ## 6. 新建文档
 
+MemoFlow 的 confirmed-create application capability 可创建新 Note；当前 Notes 产品页不提供手工新建编辑器。Web 用户主要阅读/搜索 GitHub projection，Desktop 正文编辑交给 Obsidian；AI/automation 若提出新 Note，仍必须经过显式确认后调用同一 confirmed-create boundary。
+
 MemoFlow 创建新 Note 时：
 
 ```text
@@ -205,6 +207,18 @@ select existing note
 ```
 
 不允许在后台 silently 扫描全 Vault 并批量写 ID。
+
+Durable relation 的候选查询也必须以 stable identity 为一等语义，而不是复用普通 Note browse page 后客户端过滤：
+
+```text
+GET /knowledge-documents/referenceable?query=...&cursor=...
+  -> WHERE knowledgeDocumentId IS NOT NULL
+  -> rank/recent order
+  -> keyset pagination
+  -> KnowledgeDocumentRef + current projection metadata
+```
+
+这样 Goal、Task 与 AI picker 不依赖 stable Note 是否刚好落在普通 Catalog 的前 N 条；Web 查询可以取消 superseded request，Desktop 则从 Local Vault 中带 stable ID 的 projection 派生相同的 `KnowledgeDocumentRef`。
 
 ## 8. Web capability boundary
 

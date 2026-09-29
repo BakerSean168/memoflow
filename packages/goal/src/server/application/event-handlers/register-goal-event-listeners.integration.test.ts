@@ -50,7 +50,7 @@ describe('GoalTaskProgressHandler V2 integration', () => {
       identityId,
       name: 'Ship Wave 2',
       summary: null,
-      startDate: null,
+      start: null,
       reminderConfig: null,
     });
     const keyResult = goal.createAndAddKeyResult({

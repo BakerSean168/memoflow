@@ -13,7 +13,7 @@ function createGoalWithProgress() {
     identityId: 'identity-1' as never,
     name: 'Delivery goal',
     summary: null,
-    startDate: null,
+    start: null,
     reminderConfig: null,
   });
   const keyResult = goal.createAndAddKeyResult({

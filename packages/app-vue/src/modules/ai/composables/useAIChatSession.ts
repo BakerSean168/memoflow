@@ -2,17 +2,42 @@ import { computed, nextTick, ref } from 'vue';
 import type {
   AIRuntimeUsage,
   AssistantRuntimeEvent,
+  AssistantRuntimeSelectedEntity,
   AIRuntimeSurface,
 } from '@memoflow/contracts/ai';
 import type { AssistantRuntimeClient, RuntimeUsageClient } from '@memoflow/ai/client';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import type { AIChatService, ChatItem, ChatModelOption, ConversationSummary } from './types';
+import type {
+  AIChatService,
+  ChatItem,
+  ChatModelOption,
+  ComposerAttachment,
+  ComposerContextEntity,
+  ConversationSummary,
+} from './types';
 import { unwrap } from '@memoflow/contracts/result';
 import { getAIErrorMessage } from './error';
 
 const LAST_CONVERSATION_STORAGE_KEY = 'ai:last-conversation-id';
+const MAX_COMPOSER_ATTACHMENTS = 4;
+const MAX_COMPOSER_ATTACHMENT_BYTES = 1_000_000;
+const MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES = 1_200_000;
+const MAX_COMPOSER_CONTEXT_ENTITIES = 12;
+const COMPOSER_IMAGE_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+const COMPOSER_DOCUMENT_MEDIA_TYPES = new Set(['text/plain', 'text/markdown', 'application/pdf']);
 type DeleteConversationId = Parameters<AIChatService['deleteConversation']>[0];
+type RuntimeSelectableEntityType = AssistantRuntimeSelectedEntity['entityType'];
+
+function isRuntimeSelectableEntity(
+  entity: ComposerContextEntity,
+): entity is ComposerContextEntity & { entityType: RuntimeSelectableEntityType } {
+  return (
+    entity.entityType === 'goal' ||
+    entity.entityType === 'task' ||
+    entity.entityType === 'knowledge_document'
+  );
+}
 
 export interface UseAIChatSessionOptions {
   /** Transitional shell/workflow client. Open-chat transcript execution never uses it. */
@@ -44,6 +69,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   const activeStreamAbortController = ref<AbortController | null>(null);
   const activeRuntimeRunId = ref<string | null>(null);
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
+  const composerAttachments = ref<ComposerAttachment[]>([]);
+  const composerContextEntities = ref<ComposerContextEntity[]>([]);
+  const suppressedSurfaceContextKey = ref<string | null>(null);
 
   const hasWorkflowMessages = computed(() =>
     chatTimeline.value.some((item) => item.content.trim().length > 0),
@@ -58,15 +86,201 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   function normalizeChatItem(
-    item: { id?: unknown; role?: unknown; content?: unknown },
+    item: { id?: unknown; role?: unknown; content?: unknown; attachments?: unknown },
     index: number,
   ): ChatItem {
+    const attachments = Array.isArray(item.attachments)
+      ? item.attachments.flatMap((attachment) => {
+          if (!attachment || typeof attachment !== 'object') return [];
+          const candidate = attachment as { mediaType?: unknown; filename?: unknown };
+          if (typeof candidate.mediaType !== 'string' || !candidate.mediaType.trim()) return [];
+          return [
+            {
+              mediaType: candidate.mediaType,
+              ...(typeof candidate.filename === 'string' && candidate.filename.trim()
+                ? { filename: candidate.filename }
+                : {}),
+            },
+          ];
+        })
+      : [];
     return {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
       content: typeof item.content === 'string' ? item.content : '',
+      ...(attachments.length ? { attachments } : {}),
       status: 'success',
     };
+  }
+
+  function inferAttachmentMediaType(file: File): string {
+    const provided = file.type.trim().toLowerCase();
+    if (provided) return provided;
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.md') || name.endsWith('.markdown')) return 'text/markdown';
+    if (name.endsWith('.txt')) return 'text/plain';
+    if (name.endsWith('.pdf')) return 'application/pdf';
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+    if (name.endsWith('.gif')) return 'image/gif';
+    if (name.endsWith('.webp')) return 'image/webp';
+    return 'application/octet-stream';
+  }
+
+  function isSupportedAttachmentMediaType(mediaType: string): boolean {
+    return (
+      COMPOSER_IMAGE_MEDIA_TYPES.has(mediaType) || COMPOSER_DOCUMENT_MEDIA_TYPES.has(mediaType)
+    );
+  }
+
+  function fileToDataUrl(file: File, mediaType: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error ?? new Error('FILE_READ_FAILED'));
+      reader.onload = () => {
+        const raw = String(reader.result ?? '');
+        const commaIndex = raw.indexOf(',');
+        if (commaIndex <= 0) return reject(new Error('FILE_READ_INVALID_DATA_URL'));
+        resolve(`data:${mediaType};base64,${raw.slice(commaIndex + 1)}`);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addComposerFiles(files: readonly File[]) {
+    const room = MAX_COMPOSER_ATTACHMENTS - composerAttachments.value.length;
+    if (room <= 0) {
+      toast.error(
+        t('aiAssistant.chatPage.attachments.tooMany', { count: MAX_COMPOSER_ATTACHMENTS }),
+      );
+      return;
+    }
+    const accepted = [...files].slice(0, room);
+    if (files.length > room) {
+      toast.error(
+        t('aiAssistant.chatPage.attachments.tooMany', { count: MAX_COMPOSER_ATTACHMENTS }),
+      );
+    }
+    let totalBytes = composerAttachments.value.reduce(
+      (sum, attachment) => sum + attachment.size,
+      0,
+    );
+    for (const file of accepted) {
+      const mediaType = inferAttachmentMediaType(file);
+      if (!isSupportedAttachmentMediaType(mediaType)) {
+        toast.error(t('aiAssistant.chatPage.attachments.unsupportedType', { name: file.name }));
+        continue;
+      }
+      if (file.size > MAX_COMPOSER_ATTACHMENT_BYTES) {
+        toast.error(t('aiAssistant.chatPage.attachments.tooLarge', { name: file.name }));
+        continue;
+      }
+      if (totalBytes + file.size > MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES) {
+        toast.error(t('aiAssistant.chatPage.attachments.totalTooLarge'));
+        break;
+      }
+      try {
+        const data = await fileToDataUrl(file, mediaType);
+        if (!data) throw new Error('FILE_READ_EMPTY');
+        composerAttachments.value.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          data,
+          mediaType,
+          filename: file.name || undefined,
+          size: file.size,
+        });
+        totalBytes += file.size;
+      } catch {
+        toast.error(t('aiAssistant.chatPage.attachments.readFailed', { name: file.name }));
+      }
+    }
+  }
+
+  function removeComposerAttachment(id: string) {
+    composerAttachments.value = composerAttachments.value.filter(
+      (attachment) => attachment.id !== id,
+    );
+  }
+
+  function upsertContextEntity(entity: ComposerContextEntity) {
+    const key = `${entity.entityType}:${entity.id}`;
+    const existing = composerContextEntities.value.findIndex(
+      (item) => `${item.entityType}:${item.id}` === key,
+    );
+    if (existing >= 0) composerContextEntities.value.splice(existing, 1, entity);
+    else composerContextEntities.value.push(entity);
+  }
+
+  function toggleExplicitContextEntity(entity: Omit<ComposerContextEntity, 'origin'>) {
+    const key = `${entity.entityType}:${entity.id}`;
+    const existing = composerContextEntities.value.findIndex(
+      (item) => `${item.entityType}:${item.id}` === key && item.origin === 'explicit',
+    );
+    if (existing >= 0) {
+      composerContextEntities.value.splice(existing, 1);
+      return;
+    }
+    if (composerContextEntities.value.length >= MAX_COMPOSER_CONTEXT_ENTITIES) {
+      toast.error(
+        t('aiAssistant.chatPage.context.tooMany', { count: MAX_COMPOSER_CONTEXT_ENTITIES }),
+      );
+      return;
+    }
+    upsertContextEntity({ ...entity, origin: 'explicit' });
+  }
+
+  function setSurfaceContextEntity(entity: Omit<ComposerContextEntity, 'origin'> | null) {
+    const previousSurface = composerContextEntities.value.find((item) => item.origin === 'surface');
+    const previousKey = previousSurface
+      ? `${previousSurface.entityType}:${previousSurface.id}`
+      : null;
+    const nextKey = entity ? `${entity.entityType}:${entity.id}` : null;
+
+    composerContextEntities.value = composerContextEntities.value.filter(
+      (item) => item.origin !== 'surface',
+    );
+
+    // A user-dismissed current-view chip stays dismissed while the same
+    // surface remains visible. Moving to a different surface restores the
+    // default implicit-context behavior for that new object.
+    if (!entity) {
+      suppressedSurfaceContextKey.value = null;
+      return;
+    }
+    if (previousKey && previousKey !== nextKey) suppressedSurfaceContextKey.value = null;
+    if (suppressedSurfaceContextKey.value === nextKey) return;
+
+    const alreadyExplicit = composerContextEntities.value.some(
+      (item) =>
+        item.origin === 'explicit' &&
+        item.entityType === entity.entityType &&
+        item.id === entity.id,
+    );
+    if (!alreadyExplicit && composerContextEntities.value.length < MAX_COMPOSER_CONTEXT_ENTITIES) {
+      upsertContextEntity({ ...entity, origin: 'surface' });
+    }
+  }
+
+  function removeContextEntity(entityType: ComposerContextEntity['entityType'], id: string) {
+    const removed = composerContextEntities.value.find(
+      (item) => item.entityType === entityType && item.id === id,
+    );
+    if (removed?.origin === 'surface') {
+      suppressedSurfaceContextKey.value = `${entityType}:${id}`;
+    }
+    composerContextEntities.value = composerContextEntities.value.filter(
+      (item) => !(item.entityType === entityType && item.id === id),
+    );
+  }
+
+  function clearComposerTurnState() {
+    composerAttachments.value = [];
+  }
+
+  function clearComposerContext() {
+    composerAttachments.value = [];
+    composerContextEntities.value = [];
+    suppressedSurfaceContextKey.value = null;
   }
 
   function isAbortLikeError(error: unknown): boolean {
@@ -119,10 +333,15 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   function buildConversationTranscript() {
-    return chatTimeline.value
+    const transcript = chatTimeline.value
       .filter((item) => item.content.trim().length > 0)
       .map((item) => `${item.role === 'user' ? 'User' : 'Assistant'}: ${item.content.trim()}`)
       .join('\n\n');
+    if (!composerContextEntities.value.length) return transcript;
+    const context = composerContextEntities.value
+      .map((entity) => `- ${entity.entityType}: ${entity.label} (${entity.id})`)
+      .join('\n');
+    return `${transcript}\n\nSelected MemoFlow context:\n${context}`.trim();
   }
 
   async function loadConversationList(
@@ -178,6 +397,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     getConversationModelKey: (id?: string) => string,
   ) {
     abortActiveStream();
+    clearComposerContext();
     chatConversationId.value = item.id;
     conversationTitle.value = item.name || t('aiAssistant.dialogs.chat.defaultConversationName');
     updateLastActiveConversation(String(item.id));
@@ -237,6 +457,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     conversationTitle.value = getDefaultName(mode);
     activeRuntimeRunId.value = null;
     lastRuntimeUsage.value = null;
+    clearComposerContext();
   }
 
   function startNewConversation(mode: string = 'chat') {
@@ -300,8 +521,20 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     let conversationId = '';
 
     try {
+      const pendingAttachments = composerAttachments.value.map((attachment) => ({
+        data: attachment.data,
+        mediaType: attachment.mediaType,
+        ...(attachment.filename ? { filename: attachment.filename } : {}),
+      }));
+      const pendingEntities: AssistantRuntimeSelectedEntity[] = composerContextEntities.value
+        .filter(isRuntimeSelectableEntity)
+        .map((entity) => ({
+          entityType: entity.entityType,
+          id: entity.id,
+          label: entity.label,
+        }));
       const pendingUserMessage = chatMessage.value.trim();
-      if (!pendingUserMessage) return;
+      if (!pendingUserMessage && pendingAttachments.length === 0) return;
 
       chatLoading.value = true;
       conversationId = await ensureConversationCreated(loadService, conversationName);
@@ -313,10 +546,24 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       userDraftId = `user-draft-${Date.now()}`;
       assistantDraftId = `assistant-draft-${Date.now()}`;
       chatTimeline.value.push(
-        { id: userDraftId, role: 'user', content: pendingUserMessage, status: 'success' },
+        {
+          id: userDraftId,
+          role: 'user',
+          content: pendingUserMessage,
+          ...(pendingAttachments.length
+            ? {
+                attachments: pendingAttachments.map((attachment) => ({
+                  mediaType: attachment.mediaType,
+                  ...(attachment.filename ? { filename: attachment.filename } : {}),
+                })),
+              }
+            : {}),
+          status: 'success',
+        },
         { id: assistantDraftId, role: 'assistant', content: '', status: 'generating' },
       );
       chatMessage.value = '';
+      clearComposerTurnState();
       await nextTick();
       adjustComposerHeight();
 
@@ -328,6 +575,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           surface: options.surface,
           providerId: selectedModel.providerId,
           modelId: selectedModel.modelId,
+          attachments: pendingAttachments,
+          selectedEntities: pendingEntities,
         },
         {
           onEvent: (event) => applyRuntimeEvent(event, assistantDraftId),
@@ -390,6 +639,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     activeStreamAbortController,
     activeRuntimeRunId,
     lastRuntimeUsage,
+    composerAttachments,
+    composerContextEntities,
     hasWorkflowMessages,
     hasWorkflowUserMessages,
     abortActiveStream,
@@ -407,5 +658,10 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     handleSendChat,
     scrollMessagesToBottom,
     normalizeChatItem,
+    addComposerFiles,
+    removeComposerAttachment,
+    toggleExplicitContextEntity,
+    setSurfaceContextEntity,
+    removeContextEntity,
   };
 }

@@ -37,6 +37,24 @@ describe('Routine trigger persistence parity', () => {
     expect(restored?.timingOwner).toBe(trigger.timingOwner);
   });
 
+  it('normalizes legacy Elapsed timingOwner from anchor semantics on read', () => {
+    expect(
+      deserializeRoutineTrigger(
+        JSON.stringify({
+          type: 'Elapsed',
+          timingOwner: 'local-runtime',
+          durationMs: 50 * 60_000,
+          anchor: 'last-satisfied',
+        }),
+      ),
+    ).toEqual({
+      type: 'Elapsed',
+      timingOwner: 'scheduler',
+      durationMs: 50 * 60_000,
+      anchor: 'last-satisfied',
+    });
+  });
+
   it('rejects an unknown persisted protocol-break capability instead of guessing from the routine name', () => {
     expect(() =>
       deserializeRoutineTrigger(

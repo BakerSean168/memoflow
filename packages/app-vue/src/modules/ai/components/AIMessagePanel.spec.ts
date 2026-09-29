@@ -60,7 +60,7 @@ const i18n = createI18n({
 });
 
 describe('AIMessagePanel (V2 §6.0 welcome)', () => {
-  it('renders shortcut cards without owning the shell today overview', () => {
+  it('renders compact workflow shortcuts without owning the shell today overview', () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
         timeline: [],
@@ -71,7 +71,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
 
     expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('What do you want to move forward today?');
-    expect(wrapper.find('[data-testid="ai-welcome-entry-chat"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-welcome-entry-chat"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-welcome-entry-goal-create"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-task-create"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-capture"]').exists()).toBe(true);
@@ -92,6 +92,28 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-today-overview"]').exists()).toBe(false);
     expect(wrapper.text()).toContain('hello');
+  });
+
+  it('renders attachment-only user turns without synthetic placeholder text', () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'm-file',
+            role: 'user',
+            content: '',
+            status: 'success',
+            attachments: [{ mediaType: 'image/png', filename: 'screen.png' }],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.find('[data-testid="ai-message-attachment"]').text()).toContain('screen.png');
+    expect(wrapper.text()).not.toContain('undefined');
+    expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(false);
   });
 
   it('emits select-shortcut from welcome cards', async () => {

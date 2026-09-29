@@ -1,4 +1,7 @@
-import { ReminderTriggerType as ReminderTriggerTypeContract, type ReminderTriggerType as IReminderTriggerType } from '@memoflow/contracts/goal';
+import {
+  ReminderTriggerType as ReminderTriggerTypeContract,
+  type ReminderTriggerType as IReminderTriggerType,
+} from '@memoflow/contracts/goal';
 
 export type ReminderTriggerType = IReminderTriggerType & { readonly __brand: unique symbol };
 
@@ -7,6 +10,7 @@ export type ReminderTriggerType = IReminderTriggerType & { readonly __brand: uni
 const VALUES: IReminderTriggerType[] = Object.values(ReminderTriggerTypeContract);
 
 export const ReminderTriggerType = {
+  AbsoluteAt: 'AbsoluteAt' as ReminderTriggerType,
   TimeProgressPercentage: 'TimeProgressPercentage' as ReminderTriggerType,
   RemainingDays: 'RemainingDays' as ReminderTriggerType,
 

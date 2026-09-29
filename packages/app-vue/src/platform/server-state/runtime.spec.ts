@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { createServerStateRuntime, createTestServerStateRuntime } from './runtime';
-import { notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
+import {
+  goalHomeQueryKeys,
+  notificationQueryKeys,
+  plannerOwnerQueryKeys,
+  recentKnowledgeQueryKeys,
+  routineUpcomingQueryKeys,
+  scheduleCalendarQueryKeys,
+  taskOccurrenceQueryKeys,
+  taskPlanQueryKeys,
+} from './query-keys';
 
 describe('createServerStateRuntime (plan §3.1)', () => {
   it('creates one QueryClient + dispatcher per runtime (never shared across renderers)', () => {
@@ -29,13 +38,40 @@ describe('createServerStateRuntime (plan §3.1)', () => {
     const runtime = createTestServerStateRuntime();
     const notifKey = notificationQueryKeys.unread('id-a');
     const taskKey = taskPlanQueryKeys.list('id-a', { page: 1, limit: 20 });
-    await runtime.queryClient.fetchQuery({ queryKey: notifKey, queryFn: async () => 1 });
-    await runtime.queryClient.fetchQuery({ queryKey: taskKey, queryFn: async () => 1 });
+    const occurrenceKey = taskOccurrenceQueryKeys.range('id-a', 1, 2);
+    const scheduleKey = scheduleCalendarQueryKeys.entries('id-a');
+    const plannerGoalKey = plannerOwnerQueryKeys.goals('id-a');
+    const goalHomeKey = goalHomeQueryKeys.summary('id-a');
+    const notesKey = recentKnowledgeQueryKeys.recent('id-a', 'projection', 20);
+    const routineKey = routineUpcomingQueryKeys.range('id-a', 1, 2, 500);
+
+    for (const key of [
+      notifKey,
+      taskKey,
+      occurrenceKey,
+      scheduleKey,
+      plannerGoalKey,
+      goalHomeKey,
+      notesKey,
+      routineKey,
+    ]) {
+      await runtime.queryClient.fetchQuery({ queryKey: key, queryFn: async () => 1 });
+    }
 
     runtime.clearIdentity('id-a');
 
-    expect(runtime.queryClient.getQueryState(notifKey)).toBeUndefined();
-    expect(runtime.queryClient.getQueryState(taskKey)).toBeUndefined();
+    for (const key of [
+      notifKey,
+      taskKey,
+      occurrenceKey,
+      scheduleKey,
+      plannerGoalKey,
+      goalHomeKey,
+      notesKey,
+      routineKey,
+    ]) {
+      expect(runtime.queryClient.getQueryState(key)).toBeUndefined();
+    }
   });
 
   it('dispose clears the whole pilot cache', async () => {

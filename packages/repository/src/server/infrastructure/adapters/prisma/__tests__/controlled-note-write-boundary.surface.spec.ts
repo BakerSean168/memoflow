@@ -4,10 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Controlled note-write boundary (ADR-090): generic existing-note editing stays
- * closed. Runtime writes are confirmed create plus the one specialized Web
- * adoption operation that only adds memoflow_id under an exact-blob CAS guard.
- * Desktop Local Vault confirmed create remains exclusive-create. packages/editor
- * stays deleted; portable editor_* backup remains data-portability-only.
+ * closed. Confirmed create remains an application capability for explicit
+ * AI/automation proposals, but the Notes workspace itself is read/search only.
+ * Its only direct Web mutation is stable-id adoption under an exact-blob CAS
+ * guard. Desktop editing remains delegated to Obsidian. packages/editor stays
+ * deleted; portable editor_* backup remains data-portability-only.
  */
 describe('controlled note-write boundary surface', () => {
   const repoRoot = resolve(__dirname, '../../../../../../../../');
@@ -164,32 +165,25 @@ describe('controlled note-write boundary surface', () => {
     expect(aiKnowledgeDto).not.toMatch(/confirmation:\s*z\.object\([\s\S]*?\)\.optional\(/);
   });
 
-  it('Vue routes and workspaces close existing-note edit; create dialog is draft→review only', () => {
+  it('Vue workspaces expose no generic or manual note editor/create surface', () => {
     expect(vueRepositoryRouter).toContain("path: '/repository'");
     expect(vueRepositoryRouter).toContain('Existing-note editing is');
     expect(vueRepositoryRouter).not.toContain("path: '/note");
     expect(vueRepositoryRouter).not.toContain('note-edit');
     expect(vueRepositoryRouter).not.toContain('/note/:id');
 
-    expect(projectionWorkspace).toContain('createConfirmedKnowledgeNote');
+    // Web is a read/search surface plus the specialized metadata-only adoption command.
+    // Confirmed create stays an application capability for explicitly confirmed AI/automation
+    // workflows, but the Notes workspace does not expose a manual create editor.
+    expect(projectionWorkspace).not.toContain('createConfirmedKnowledgeNote');
+    expect(projectionWorkspace).not.toContain('knowledge-projection-create');
     expect(projectionWorkspace).toContain('adoptKnowledgeDocument');
     expect(projectionWorkspace).toContain('knowledge-projection-adopt-document-id');
-    expect(projectionWorkspace).toContain('function editDraft()');
-    expect(projectionWorkspace).toContain("stage.value = 'draft'");
-    expect(projectionWorkspace).toContain("stage.value = 'review'");
-    expect(projectionWorkspace).toContain('function confirmCreate()');
-    // editDraft only returns to draft stage — no note id / projection id mutation path.
-    const editDraftBody = projectionWorkspace.match(
-      /function editDraft\(\):\s*void\s*\{([\s\S]*?)\n\}/,
-    )?.[1];
-    expect(editDraftBody).toBeTruthy();
-    expect(editDraftBody).toContain("stage.value = 'draft'");
-    expect(editDraftBody).not.toMatch(/selectedNoteId|projectionId|update|save|write/);
     expect(projectionWorkspace).not.toMatch(
-      /updateKnowledgeNote|saveKnowledgeNote|writeConfirmedLocalVaultNote/,
+      /updateKnowledgeNote|saveKnowledgeNote|writeConfirmedLocalVaultNote|editExistingNote/,
     );
 
-    // Desktop existing notes open in Obsidian; in-app path is not an editor.
+    // Desktop previews are read-only; editing is delegated to Obsidian.
     expect(localVaultWorkspace).toContain('openInObsidian');
     expect(localVaultWorkspace).not.toContain('createConfirmedKnowledgeNote');
     expect(localVaultWorkspace).not.toMatch(

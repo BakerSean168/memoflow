@@ -5,7 +5,7 @@
       data-testid="goal-list-scroll"
       data-scroll-host="goal-list"
     >
-      <div class="mx-auto max-w-5xl py-2">
+      <div class="w-full py-2">
         <div v-if="isLoading" class="divide-y" data-testid="goal-list-skeleton">
           <div v-for="i in 6" :key="i" class="space-y-3 py-4">
             <div class="flex justify-between gap-4">
@@ -18,6 +18,19 @@
         </div>
 
         <div v-else-if="goals.length > 0" data-testid="goal-list">
+          <div
+            class="hidden grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 border-b border-border/70 px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
+            data-testid="goal-list-column-header"
+          >
+            <span>{{ t('goal.list.goalColumn') }}</span>
+            <span>{{ t('goal.list.keyResultsColumn') }}</span>
+            <span>{{ t('goal.list.targetColumn') }}</span>
+            <div class="grid grid-cols-[2.5rem_5rem] items-center gap-2">
+              <span class="text-right">{{ t('goal.list.progressColumn') }}</span>
+              <span aria-hidden="true" />
+            </div>
+          </div>
+
           <GoalProgressRow
             v-for="goal in goals"
             :key="goal.id"

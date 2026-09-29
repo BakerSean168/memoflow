@@ -4,6 +4,7 @@ export default {
   "empty": "暂无通知",
   "emptyDescription": "目前没有新通知。",
   "allCaughtUp": "已全部处理",
+  "unreadEmptyDescription": "暂时没有待处理的通知。新的提醒到达后会显示在这里。",
   "item": {
     "priorityVital": "紧急",
     "priorityImportant": "重要"
@@ -43,20 +44,31 @@ export default {
     "openRelated": "打开相关内容",
     "retry": "重试",
     "enableNotification": "开启通知",
-    "dismiss": "知道了"
+    "dismiss": "知道了",
+    "complete": "完成",
+    "snooze10m": "10 分钟后提醒",
+    "archive": "归档",
+    "more": "更多操作"
   },
   "toast": {
     "allMarkedRead": "已全部标为已读",
-    "deleted": "通知已删除"
+    "deleted": "通知已删除",
+    "routineCompleted": "已完成，本次例程已记录",
+    "routineSnoozed": "已稍后提醒",
+    "archived": "通知已归档",
+    "actionCompleted": "操作已完成",
+    "actionRejected": "当前操作无法执行"
   },
   "permission": {
     "warningTitle": "通知权限提示"
   },
   "error": {
     "fetchFailed": "加载通知列表失败",
+    "fetchFailedDescription": "请检查网络连接后重试。",
     "markReadFailed": "标记已读失败",
     "markAllReadFailed": "全部标记已读失败",
     "deleteFailed": "删除通知失败",
+    "actionFailed": "执行通知操作失败",
     "refreshStatsFailed": "刷新统计失败"
   },
   "sseMonitor": {

@@ -1,6 +1,9 @@
 <template>
-  <section class="space-y-2" data-testid="goal-key-results-editor">
-    <div class="flex items-center justify-between gap-3 px-1">
+  <section
+    class="overflow-hidden rounded-xl border border-border/70 bg-background/20"
+    data-testid="goal-key-results-editor"
+  >
+    <div class="flex min-h-11 items-center justify-between gap-3 px-3">
       <div class="flex min-w-0 items-center gap-2">
         <h3 class="text-sm font-medium">{{ t('goal.dialog.keyResults') }}</h3>
         <span v-if="keyResults.length" class="text-xs tabular-nums text-muted-foreground">
@@ -8,12 +11,13 @@
         </span>
       </div>
       <Button
+        v-if="!keyResults.length && !editorOpen"
         type="button"
         variant="ghost"
         size="icon-sm"
         class="h-8 w-8 text-muted-foreground hover:text-foreground"
         :aria-label="t('goal.dialog.addKeyResult')"
-        :disabled="disabled || editorOpen"
+        :disabled="disabled"
         data-testid="add-key-result-entry"
         @click="openAddKeyResult"
       >
@@ -21,11 +25,11 @@
       </Button>
     </div>
 
-    <div v-if="keyResults.length" class="overflow-hidden rounded-lg bg-muted/20">
+    <div v-if="keyResults.length" class="border-t border-border/60">
       <div
         v-for="(keyResult, index) in keyResults"
         :key="keyResult.id ?? `new-${index}`"
-        class="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-muted/35"
+        class="flex min-h-11 items-center gap-2 px-3 py-2 transition-colors hover:bg-muted/25"
         :class="index > 0 ? 'border-t border-border/50' : ''"
         data-testid="goal-key-result-draft-row"
       >
@@ -35,212 +39,144 @@
           :disabled="disabled || editorOpen"
           @click="openEditKeyResult(index)"
         >
-          <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
-          <p class="mt-0.5 text-xs tabular-nums text-muted-foreground">
-            {{ keyResult.currentValue ?? keyResult.initialValue }} → {{ keyResult.targetValue }}
-            <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
-          </p>
+          <div class="flex min-w-0 items-center gap-3">
+            <p class="min-w-0 flex-1 truncate text-sm font-medium">{{ keyResult.title }}</p>
+
+            <span class="shrink-0 text-xs tabular-nums text-muted-foreground">
+              {{ keyResult.currentValue ?? keyResult.initialValue }} → {{ keyResult.targetValue }}
+              <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
+            </span>
+
+            <span
+              class="shrink-0 text-[11px] text-muted-foreground/80"
+              data-testid="goal-key-result-draft-calculation"
+            >
+              {{ calculationMethodLabel(keyResult.calculationMethod) }}
+            </span>
+
+            <span
+              class="ml-auto flex shrink-0 items-center gap-1.5 text-xs tabular-nums text-muted-foreground"
+              data-testid="goal-key-result-draft-target"
+            >
+              <CalendarDays class="h-3.5 w-3.5 opacity-70" />
+              {{ compactTargetLabel(keyResult) }}
+            </span>
+          </div>
         </button>
         <Button
           type="button"
           variant="ghost"
           size="icon-xs"
-          :aria-label="t('common.edit')"
-          :disabled="disabled || editorOpen"
-          @click="openEditKeyResult(index)"
-        >
-          <Pencil class="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          class="text-destructive hover:text-destructive"
+          class="text-muted-foreground/70 hover:bg-muted/60 hover:text-foreground"
           :aria-label="t('common.delete')"
           :disabled="disabled || editorOpen"
           @click="removeKeyResult(index)"
         >
-          <Trash2 class="h-3.5 w-3.5" />
+          <X class="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>
 
     <div
-      v-else-if="!editorOpen"
-      class="rounded-lg bg-muted/15 px-3 py-2.5 text-sm text-muted-foreground"
-      data-testid="goal-key-results-empty"
+      v-if="keyResults.length && !editorOpen"
+      class="flex justify-end border-t border-border/60 px-2 py-1.5"
     >
-      {{ t('goal.dialog.krEmptyTitle') }}
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+        :disabled="disabled"
+        data-testid="add-key-result-entry"
+        @click="openAddKeyResult"
+      >
+        <Plus class="h-3.5 w-3.5" />
+        {{ t('goal.dialog.addKeyResult') }}
+      </Button>
     </div>
 
-    <div
-      v-if="editorOpen"
-      class="space-y-4 rounded-lg bg-muted/20 p-4"
-      data-testid="key-result-draft-form"
-    >
-      <div class="rounded-md bg-background/70 px-3 py-2">
-        <Label for="draft-kr-title" class="sr-only">{{ t('goal.dialog.krTitle') }}</Label>
-        <ProductAutoTextarea
-          id="draft-kr-title"
-          v-model="form.title"
-          :max-length="200"
-          :rows="1"
-          data-testid="draft-kr-title-input"
-          class="min-h-7 text-sm font-medium leading-5"
-          :placeholder="t('goal.dialog.inlineKrPlaceholder')"
-        />
-      </div>
-
-      <div class="grid gap-3 sm:grid-cols-3">
-        <div class="space-y-2">
-          <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
-          <Input
-            id="draft-kr-initial"
-            v-model.number="form.initialValue"
-            type="number"
-            data-testid="draft-kr-initial-input"
-          />
-        </div>
-        <div class="space-y-2">
-          <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
-          <Input
-            id="draft-kr-current"
-            v-model.number="form.currentValue"
-            type="number"
-            data-testid="draft-kr-current-input"
-          />
-        </div>
-        <div class="space-y-2">
-          <Label for="draft-kr-target">{{ t('goal.dialog.krTargetValue') }}</Label>
-          <Input
-            id="draft-kr-target"
-            v-model.number="form.targetValue"
-            type="number"
-            data-testid="draft-kr-target-input"
-          />
-        </div>
-      </div>
-
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div class="space-y-2">
-          <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
-          <Input
-            id="draft-kr-unit"
-            v-model="form.unit"
-            data-testid="draft-kr-unit-input"
-            maxlength="20"
-            :placeholder="t('goal.dialog.krUnitPlaceholder')"
-          />
-        </div>
-        <div class="space-y-2">
-          <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
-          <GoalTimeframePicker
-            v-model="form.target"
-            test-id="draft-kr-target-timeframe"
-            :aria-label="t('goal.dialog.krTargetTimeframe')"
-            :placeholder="t('goal.dialog.krTargetTimeframe')"
-          />
-        </div>
-      </div>
-
-      <Collapsible v-model:open="advancedOpen">
-        <CollapsibleTrigger as-child>
-          <Button type="button" variant="ghost" size="sm" class="px-0 text-muted-foreground">
-            <ChevronRight
-              class="mr-1 h-4 w-4 transition-transform"
-              :class="advancedOpen ? 'rotate-90' : ''"
+    <Transition name="kr-editor-reveal" @after-enter="ensureEditorFullyVisible">
+      <div v-if="editorOpen" class="grid grid-rows-[1fr]" data-testid="key-result-draft-form">
+        <div class="min-h-0 overflow-hidden">
+          <div
+            ref="editorPanelRef"
+            class="space-y-4 border-t border-border/60 p-4"
+            data-testid="key-result-draft-panel"
+          >
+            <GoalKeyResultCardEditor
+              v-model:title="form.title"
+              v-model:description="form.description"
+              v-model:initial-value="form.initialValue"
+              v-model:current-value="currentValueModel"
+              v-model:target-value="form.targetValue"
+              v-model:target="form.target"
+              v-model:calculation-method="form.calculationMethod"
+              v-model:unit="form.unit"
+              v-model:weight="form.weight"
+              :goal-start="goalStart"
+              :goal-target="goalTarget"
+              :disabled="disabled"
             />
-            {{ t('goal.dialog.krAdvanced') }}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
-          <div class="space-y-2 sm:col-span-2">
-            <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
-            <Textarea id="draft-kr-description" v-model="form.description" maxlength="2000" />
-          </div>
-          <div class="space-y-2">
-            <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
-            <Select v-model="form.calculationMethod">
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="method in calculationMethods" :key="method" :value="method">
-                  {{ calculationMethodLabel(method) }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="space-y-2">
-            <Label for="draft-kr-weight">{{ t('goal.dialog.krWeightLabel') }}</Label>
-            <Input
-              id="draft-kr-weight"
-              v-model.number="form.weight"
-              type="number"
-              min="1"
-              max="5"
-            />
-            <p class="text-[11px] text-muted-foreground">{{ t('goal.dialog.krWeightHint') }}</p>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
 
-      <p v-if="formError" role="alert" class="text-xs text-destructive">{{ formError }}</p>
-      <div class="flex justify-end gap-2">
-        <Button type="button" variant="ghost" size="sm" @click="cancelEdit">
-          {{ t('common.cancel') }}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          data-testid="save-key-result-draft"
-          :disabled="!canSave"
-          @click="saveDraft"
-        >
-          {{ editingIndex === null ? t('goal.dialog.addKeyResult') : t('common.save') }}
-        </Button>
+            <p v-if="formError" role="alert" class="text-xs text-destructive">{{ formError }}</p>
+            <div class="flex justify-end gap-2">
+              <Button type="button" variant="ghost" size="sm" @click="cancelEdit">
+                {{ t('common.cancel') }}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                data-testid="save-key-result-draft"
+                :disabled="!canSave"
+                @click="saveDraft"
+              >
+                {{ editingIndex === null ? t('goal.dialog.addKeyResult') : t('common.save') }}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronRight, Pencil, Plus, Trash2 } from '@lucide/vue';
+import { CalendarDays, Plus, X } from '@lucide/vue';
 import {
+  goalTimeframeLabel,
   KeyResultCalculationMethod,
   type GoalTimeframe,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
-import GoalTimeframePicker from './GoalTimeframePicker.vue';
-import { ProductAutoTextarea } from '../../../shared/components';
+import { Button } from '@memoflow/ui-vue-shadcn';
+import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
 type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
 type KrId = DraftKeyResult['id'];
 
-const props = withDefaults(defineProps<{ disabled?: boolean }>(), { disabled: false });
+const props = withDefaults(
+  defineProps<{
+    disabled?: boolean;
+    goalStart?: GoalTimeframe | null;
+    goalTarget?: GoalTimeframe | null;
+  }>(),
+  {
+    disabled: false,
+    goalStart: null,
+    goalTarget: null,
+  },
+);
 const keyResults = defineModel<DraftKeyResult[]>({ required: true });
 const emit = defineEmits<{ 'editing-change': [boolean] }>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const editorOpen = ref(false);
+const editorPanelRef = ref<HTMLElement | null>(null);
 const editingIndex = ref<number | null>(null);
-const advancedOpen = ref(false);
 const formError = ref<string | null>(null);
-const calculationMethods = Object.values(KeyResultCalculationMethod);
+const currentFollowsInitial = ref(true);
 const form = reactive({
   id: undefined as KrId | undefined,
   title: '',
@@ -262,8 +198,28 @@ const canSave = computed(
     Number.isFinite(Number(form.currentValue)) &&
     Number.isFinite(Number(form.targetValue)),
 );
+const currentValueModel = computed({
+  get: () => form.currentValue,
+  set: (value: number) => {
+    currentFollowsInitial.value = false;
+    form.currentValue = value;
+  },
+});
 
-watch(editorOpen, (open) => emit('editing-change', open), { immediate: true });
+watch(
+  editorOpen,
+  (open) => {
+    emit('editing-change', open);
+    if (open) scheduleEditorVisibilityCheck();
+  },
+  { immediate: true },
+);
+watch(
+  () => form.initialValue,
+  (value) => {
+    if (currentFollowsInitial.value) form.currentValue = Number(value);
+  },
+);
 
 function resetForm(): void {
   form.id = undefined;
@@ -277,7 +233,34 @@ function resetForm(): void {
   form.unit = '';
   form.weight = 3;
   formError.value = null;
-  advancedOpen.value = false;
+  currentFollowsInitial.value = true;
+}
+
+function scheduleEditorVisibilityCheck(): void {
+  void nextTick(() => {
+    requestAnimationFrame(() => ensureEditorFullyVisible());
+  });
+}
+
+function ensureEditorFullyVisible(): void {
+  const panel = editorPanelRef.value;
+  if (!panel) return;
+
+  const scrollContainer = panel.closest<HTMLElement>('[data-testid="product-dialog-body"]');
+  if (!scrollContainer) return;
+
+  if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return;
+
+  const maxScrollTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
+  if (typeof scrollContainer.scrollTo !== 'function') return;
+  scrollContainer.scrollTo({
+    top: maxScrollTop,
+    behavior: prefersReducedMotion ? 'auto' : 'smooth',
+  });
 }
 
 function openAddKeyResult(): void {
@@ -303,6 +286,7 @@ function openEditKeyResult(index: number): void {
   form.calculationMethod = keyResult.calculationMethod;
   form.unit = keyResult.unit ?? '';
   form.weight = keyResult.weight;
+  currentFollowsInitial.value = false;
   editorOpen.value = true;
 }
 
@@ -367,4 +351,48 @@ function calculationMethodLabel(method: KeyResultCalculationMethod): string {
   };
   return labels[method];
 }
+
+function compactTargetLabel(keyResult: DraftKeyResult): string {
+  const target = keyResult.target ?? props.goalTarget;
+  return target ? goalTimeframeLabel(target, locale.value) : t('goal.dialog.krTrajectoryNotSet');
+}
 </script>
+
+<style scoped>
+.kr-editor-reveal-enter-active,
+.kr-editor-reveal-leave-active {
+  transform-origin: bottom;
+  transition:
+    grid-template-rows 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms ease-out,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kr-editor-reveal-enter-from,
+.kr-editor-reveal-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.kr-editor-reveal-enter-to,
+.kr-editor-reveal-leave-from {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kr-editor-reveal-enter-active,
+  .kr-editor-reveal-leave-active {
+    transition-duration: 0.01ms;
+  }
+
+  .kr-editor-reveal-enter-from,
+  .kr-editor-reveal-leave-to,
+  .kr-editor-reveal-enter-to,
+  .kr-editor-reveal-leave-from {
+    transform: none;
+  }
+}
+</style>

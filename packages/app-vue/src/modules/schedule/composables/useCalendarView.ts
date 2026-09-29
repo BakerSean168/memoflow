@@ -34,8 +34,13 @@ import {
   projectTaskOccurrence,
   type PlannerProductTimePort,
 } from '../planner';
+import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { plannerOwnerQueryKeys } from '../../../platform/server-state/query-keys';
+import { PLANNER_OWNER_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
+import { fetchRoutineUpcomingCached } from '../../routine/composables/routineUpcomingCache';
 
 const PLANNER_GOAL_PAGE_SIZE = 100;
+const PLANNER_TASK_PLAN_LIMIT = 200;
 type PlannerGoalEntity = { toDTO(): GoalClientDTO };
 
 // ============ 统一内部事件类型 ============
@@ -46,9 +51,15 @@ export interface CalendarEventItem {
   startTime: number; // ms timestamp
   endTime: number; // ms timestamp
   displayMode: 'timed' | 'all-day';
-  source: 'schedule' | 'task' | 'goal';
+  source: CalendarEventProjection['sourceType'];
   hasConflict?: boolean;
   originalId: string;
+  /** Canonical projected fact id; owner id lives on ownerCommandTarget. */
+  sourceId?: string;
+  /** Present for canonical Planner-derived capsule items. */
+  ownerCommandTarget?: CalendarEventProjection['ownerCommandTarget'];
+  /** Task detail routes are plan-owned while Planner mutations are occurrence-owned. */
+  taskPlanId?: string;
   /** 仅当 source === 'task' 时存在，对应 TaskOccurrenceStatus 值 */
   instanceStatus?: TaskOccurrenceStatus;
 }
@@ -79,6 +90,7 @@ export function calendarEventSourceLabel(
     schedule: 'schedule.source.schedule',
     goal: 'schedule.source.goal',
     task: 'schedule.source.task',
+    routine: 'schedule.source.routine',
   };
   return translate(keys[source]);
 }
@@ -175,9 +187,10 @@ function plannerProductTimePort(): PlannerProductTimePort {
  * Day/Week/Month layout. Canonical ownership/revision/time truth stays on the
  * CalendarEventProjection; this only reshapes Schedule/Task facts for old UI.
  */
-function projectionToLegacyCalendarEvent(
-  projection: Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }>,
+function projectionToCalendarEventItem(
+  projection: CalendarEventProjection,
   conflictingSourceKeys: ReadonlySet<string> = new Set(),
+  taskPlanId?: string,
 ): CalendarEventItem {
   const time = getProductTime();
   const startTime = projection.allDay
@@ -196,6 +209,9 @@ function projectionToLegacyCalendarEvent(
     source: projection.sourceType,
     hasConflict: conflictingSourceKeys.has(plannerProjectionKey(projection)),
     originalId: projection.ownerCommandTarget.ownerId,
+    sourceId: projection.sourceId,
+    ownerCommandTarget: projection.ownerCommandTarget,
+    ...(taskPlanId ? { taskPlanId } : {}),
     instanceStatus:
       projection.sourceType === 'task'
         ? (projection.displayMetadata.status as TaskOccurrenceStatus | undefined)
@@ -216,7 +232,7 @@ export function taskOccurrencesToEvents(
       templateMap.get(String(instance.planId)),
       time,
     );
-    return projection ? [projectionToLegacyCalendarEvent(projection)] : [];
+    return projection ? [projectionToCalendarEventItem(projection)] : [];
   });
 }
 
@@ -227,6 +243,8 @@ export function useCalendarView() {
   const task = useTask();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   const routineService = useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService');
+  const runtime = useServerStateRuntime();
+  const resolveIdentityScope = useServerStateIdentityScope();
   const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
   const plannerRoutineOccurrences = ref<
     Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']
@@ -261,6 +279,14 @@ export function useCalendarView() {
   const conflicts = computed(() => derivePlannerConflicts(projections.value));
   const conflictingSourceKeys = computed(() => plannerConflictSourceKeys(conflicts.value));
 
+  const taskPlanIdByOccurrenceId = computed(() => {
+    const map = new Map<string, string>();
+    for (const occurrence of task.instances.value ?? []) {
+      map.set(String(occurrence.id), String(occurrence.planId));
+    }
+    return map;
+  });
+
   /** Legacy custom-calendar view model, derived from canonical Schedule/Task projections. */
   const events = computed<CalendarEventItem[]>(() =>
     projections.value
@@ -268,7 +294,34 @@ export function useCalendarView() {
         (event): event is Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }> =>
           event.sourceType === 'schedule' || event.sourceType === 'task',
       )
-      .map((projection) => projectionToLegacyCalendarEvent(projection, conflictingSourceKeys.value))
+      .map((projection) =>
+        projectionToCalendarEventItem(
+          projection,
+          conflictingSourceKeys.value,
+          projection.sourceType === 'task'
+            ? taskPlanIdByOccurrenceId.value.get(projection.sourceId)
+            : undefined,
+        ),
+      )
+      .sort((a, b) => a.startTime - b.startTime),
+  );
+
+  /**
+   * Header capsule view model is owner-aware and consumes every canonical Planner
+   * projection. Unlike the retired custom calendar seam, this intentionally includes
+   * Goal and Routine markers so the quick workspace can navigate back to the owner.
+   */
+  const capsuleEvents = computed<CalendarEventItem[]>(() =>
+    projections.value
+      .map((projection) =>
+        projectionToCalendarEventItem(
+          projection,
+          conflictingSourceKeys.value,
+          projection.sourceType === 'task'
+            ? taskPlanIdByOccurrenceId.value.get(projection.sourceId)
+            : undefined,
+        ),
+      )
       .sort((a, b) => a.startTime - b.startTime),
   );
 
@@ -278,48 +331,60 @@ export function useCalendarView() {
 
   async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
     plannerOwnerReadsLoading.value = true;
+    const identityScope = resolveIdentityScope();
     try {
-      const routinePromise = routineService.getUpcomingOccurrences({
+      const goalsPromise = runtime.queryClient.fetchQuery<GoalClientDTO[]>({
+        queryKey: plannerOwnerQueryKeys.goals(identityScope),
+        staleTime: PLANNER_OWNER_STALE_TIME_MS,
+        queryFn: async () => {
+          const collectedGoals: PlannerGoalEntity[] = [];
+          let page = 1;
+          let hasMore = true;
+
+          while (hasMore) {
+            const goalResult = await goalService.listGoals({
+              systemView: 'all',
+              page,
+              pageSize: PLANNER_GOAL_PAGE_SIZE,
+            });
+            if (!goalResult.ok) throw goalResult.error;
+            collectedGoals.push(...goalResult.data.goals);
+            hasMore = Boolean(goalResult.data.pagination?.hasMore);
+            page += 1;
+          }
+
+          return collectedGoals.map((goal) => goal.toDTO());
+        },
+      });
+      const routinesPromise = fetchRoutineUpcomingCached({
+        queryClient: runtime.queryClient,
+        identityScope,
+        service: routineService,
         start: startTime,
         end: endTime,
         limit: 500,
       });
-      const collectedGoals: PlannerGoalEntity[] = [];
-      let page = 1;
-      let hasMore = true;
-      let goalsAvailable = true;
 
-      while (hasMore) {
-        const goalResult = await goalService.listGoals({
-          systemView: 'all',
-          page,
-          pageSize: PLANNER_GOAL_PAGE_SIZE,
-        });
-        if (!goalResult.ok) {
-          goalsAvailable = false;
-          break;
-        }
+      const [goalsResult, routinesResult] = await Promise.allSettled([
+        goalsPromise,
+        routinesPromise,
+      ]);
 
-        collectedGoals.push(...goalResult.data.goals);
-        hasMore = Boolean(goalResult.data.pagination?.hasMore);
-        page += 1;
-      }
-
-      plannerGoals.value = goalsAvailable ? collectedGoals.map((goal) => goal.toDTO()) : [];
-      const routineResult = await routinePromise;
-      plannerRoutineOccurrences.value = routineResult.ok
-        ? routineResult.data.occurrences.map((occurrence) => ({
-            identityId: occurrence.identityId,
-            routineId: occurrence.routineId,
-            occurrenceKey: occurrence.occurrenceKey,
-            title: occurrence.title,
-            subtitle: occurrence.description,
-            occurrenceAt: asInstant(occurrence.occurrenceAt),
-            endAt: occurrence.endAt == null ? null : asInstant(occurrence.endAt),
-            revision: occurrence.revision,
-            editable: false,
-          }))
-        : [];
+      plannerGoals.value = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
+      plannerRoutineOccurrences.value =
+        routinesResult.status === 'fulfilled'
+          ? routinesResult.value.map((occurrence) => ({
+              identityId: occurrence.identityId,
+              routineId: occurrence.routineId,
+              occurrenceKey: occurrence.occurrenceKey,
+              title: occurrence.title,
+              subtitle: occurrence.description,
+              occurrenceAt: asInstant(occurrence.occurrenceAt),
+              endAt: occurrence.endAt == null ? null : asInstant(occurrence.endAt),
+              revision: occurrence.revision,
+              editable: false,
+            }))
+          : [];
     } finally {
       plannerOwnerReadsLoading.value = false;
     }
@@ -333,7 +398,7 @@ export function useCalendarView() {
     await Promise.all([
       schedule.fetchCalendarEntries(startTime, endTime),
       task.fetchInstancesByDateRange(startTime, endTime),
-      task.fetchTemplates(),
+      task.fetchTemplates({ page: 1, limit: PLANNER_TASK_PLAN_LIMIT }),
       fetchPlannerOwnerMarkers(startTime, endTime),
     ]);
   }
@@ -350,13 +415,14 @@ export function useCalendarView() {
   }
 
   function getScheduleCapsuleSnapshot(nowMs: number = Date.now()): ScheduleCapsuleSnapshot {
-    return resolveScheduleCapsule(events.value, nowMs);
+    return resolveScheduleCapsule(capsuleEvents.value, nowMs);
   }
 
   return {
     projections,
     conflicts,
     events,
+    capsuleEvents,
     isLoading,
     windowStart,
     windowEnd,

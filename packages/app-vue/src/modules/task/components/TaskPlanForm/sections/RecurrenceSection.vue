@@ -3,13 +3,7 @@
   Task Plan / canonical TaskRecurrence or TaskPlanSchedule recurrence configuration
 -->
 <template>
-  <section class="space-y-4" aria-labelledby="task-recurrence-heading">
-    <header class="flex items-center gap-2">
-      <Repeat class="h-5 w-5 text-primary" />
-      <h3 id="task-recurrence-heading" class="text-sm font-semibold">
-        {{ t('task.recurrence.title') }}
-      </h3>
-    </header>
+  <section class="space-y-4">
     <div>
       <!-- 显示验证错误 -->
       <Alert v-if="validationErrors.length > 0" variant="destructive" class="mb-4">
@@ -20,24 +14,21 @@
         </AlertDescription>
       </Alert>
 
-      <!-- 显示规则描述 -->
-      <Alert v-if="isValid && hasRecurrence" class="mb-4">
-        <Info class="h-4 w-4" />
-        <AlertDescription>
-          {{ t('task.recurrence.currentSetting') }}{{ recurrenceDescription }}
-        </AlertDescription>
-      </Alert>
-
       <div class="grid grid-cols-12 gap-4">
         <!-- 是否启用重复 -->
         <div class="col-span-12">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between gap-3 rounded-lg bg-muted/25 px-2.5 py-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <Repeat2 class="h-4 w-4 shrink-0 text-muted-foreground" />
+              <Label for="task-recurrence-enabled" class="cursor-pointer">
+                {{ t('task.recurrence.enable') }}
+              </Label>
+            </div>
             <Switch
               id="task-recurrence-enabled"
               :model-value="recurrenceEnabled"
               @update:model-value="recurrenceEnabled = $event"
             />
-            <Label for="task-recurrence-enabled">{{ t('task.recurrence.enable') }}</Label>
           </div>
         </div>
 
@@ -59,7 +50,10 @@
               </SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="opt in frequencyOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.title }}
+                  <div class="flex items-center gap-2">
+                    <component :is="opt.icon" class="h-4 w-4 text-muted-foreground" />
+                    <span>{{ opt.title }}</span>
+                  </div>
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -78,7 +72,6 @@
               max="365"
               @update:model-value="interval = Number($event)"
             />
-            <p class="text-xs text-muted-foreground mt-1">{{ intervalHint }}</p>
           </div>
 
           <!-- 每周重复：选择星期几 -->
@@ -110,28 +103,34 @@
             <div class="text-sm font-medium mb-2">{{ t('task.recurrence.endCondition') }}</div>
           </div>
 
-          <div class="col-span-12 md:col-span-4">
-            <RadioGroup
+          <div class="col-span-12">
+            <div
+              class="space-y-0.5"
+              role="radiogroup"
               :aria-label="t('task.recurrence.endCondition')"
-              :model-value="endConditionType"
-              @update:model-value="endConditionType = $event as 'never' | 'date' | 'count'"
             >
-              <div class="flex items-center gap-2">
-                <RadioGroupItem value="never" id="end-never" />
-                <Label for="end-never">{{ t('task.recurrence.never') }}</Label>
-              </div>
-              <div class="flex items-center gap-2">
-                <RadioGroupItem value="date" id="end-date" />
-                <Label for="end-date">{{ t('task.recurrence.endDate') }}</Label>
-              </div>
-              <div class="flex items-center gap-2">
-                <RadioGroupItem value="count" id="end-count" />
-                <Label for="end-count">{{ t('task.recurrence.countLimit') }}</Label>
-              </div>
-            </RadioGroup>
+              <Button
+                v-for="option in endConditionOptions"
+                :key="option.value"
+                type="button"
+                variant="ghost"
+                class="h-9 w-full justify-start gap-2 rounded-md px-2 font-normal"
+                :class="endConditionType === option.value ? 'bg-accent text-accent-foreground' : ''"
+                role="radio"
+                :aria-checked="endConditionType === option.value"
+                @click="endConditionType = option.value"
+              >
+                <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span class="min-w-0 flex-1 text-left">{{ option.title }}</span>
+                <Check
+                  class="h-4 w-4 shrink-0"
+                  :class="endConditionType === option.value ? 'opacity-100' : 'opacity-0'"
+                />
+              </Button>
+            </div>
           </div>
 
-          <div class="col-span-12 md:col-span-8">
+          <div class="col-span-12">
             <!-- 结束日期 -->
             <div v-if="endConditionType === 'date'">
               <Label for="task-recurrence-end-date" class="mb-2 block">{{
@@ -210,14 +209,21 @@ import {
   Input,
   Button,
   Separator,
-  RadioGroup,
-  RadioGroupItem,
   Popover,
   PopoverTrigger,
   PopoverContent,
   Calendar,
 } from '@memoflow/ui-vue-shadcn';
-import { Repeat, Info, Calendar as CalendarIcon } from '@lucide/vue';
+import {
+  Calendar as CalendarIcon,
+  CalendarClock,
+  CalendarDays,
+  CalendarRange,
+  Check,
+  ListOrdered,
+  Repeat2,
+  Sun,
+} from '@lucide/vue';
 import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
 import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
 import { getProductTime } from '../../../../../shared/utils/product-time';
@@ -284,10 +290,10 @@ function updateRecurrence(updates: Partial<TaskRecurrence>): void {
 }
 
 const frequencyOptions = computed(() => [
-  { title: t('task.recurrence.daily'), value: RecurrenceFrequency.Daily },
-  { title: t('task.recurrence.weekly'), value: RecurrenceFrequency.Weekly },
-  { title: t('task.recurrence.monthly'), value: RecurrenceFrequency.Monthly },
-  { title: t('task.recurrence.yearly'), value: RecurrenceFrequency.Yearly },
+  { title: t('task.recurrence.daily'), value: RecurrenceFrequency.Daily, icon: Sun },
+  { title: t('task.recurrence.weekly'), value: RecurrenceFrequency.Weekly, icon: CalendarDays },
+  { title: t('task.recurrence.monthly'), value: RecurrenceFrequency.Monthly, icon: CalendarRange },
+  { title: t('task.recurrence.yearly'), value: RecurrenceFrequency.Yearly, icon: CalendarClock },
 ]);
 const dayOptions = computed(() => [
   { title: t('task.recurrence.sun'), value: DayOfWeek.Sunday },
@@ -329,6 +335,11 @@ function toggleDay(day: DayOfWeek): void {
 }
 
 const endConditionType = ref<'never' | 'date' | 'count'>('never');
+const endConditionOptions = computed(() => [
+  { title: t('task.recurrence.never'), value: 'never' as const, icon: Repeat2 },
+  { title: t('task.recurrence.endDate'), value: 'date' as const, icon: CalendarDays },
+  { title: t('task.recurrence.countLimit'), value: 'count' as const, icon: ListOrdered },
+]);
 const endDate = ref('');
 const occurrences = ref(1);
 const endDateAsDate = computed(() =>
@@ -385,28 +396,6 @@ watch(occurrences, (value) => {
   }
 });
 
-const intervalHint = computed(() => {
-  switch (frequency.value) {
-    case RecurrenceFrequency.Daily:
-      return t('task.recurrence.intervalHintDay');
-    case RecurrenceFrequency.Weekly:
-      return t('task.recurrence.intervalHintWeek');
-    case RecurrenceFrequency.Monthly:
-      return t('task.recurrence.intervalHintMonth');
-    case RecurrenceFrequency.Yearly:
-      return t('task.recurrence.intervalHintYear');
-    default:
-      return '';
-  }
-});
-const hasRecurrence = computed(() => recurrenceEnabled.value);
-const recurrenceDescription = computed(() => {
-  if (!recurrenceEnabled.value) return '';
-  return t('task.recurrence.description', {
-    interval: recurrence().interval,
-    unit: intervalHint.value,
-  });
-});
 const validationErrors = computed(() => {
   if (!recurrenceEnabled.value) return [];
   const rule = recurrence();

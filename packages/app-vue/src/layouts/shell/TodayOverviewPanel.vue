@@ -15,14 +15,17 @@ const emit = defineEmits<{
   (e: 'open-route', module: 'goal' | 'task' | 'routine', route: string): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { goals: goalProgress, isLoading, refresh: refreshGoalSummary } = useGoalHomeSummary();
 const goalReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
 let goalRefreshGeneration = 0;
 
 const todayLabel = computed(() => {
   void productTimeRevision.value;
-  return getProductTime().format.pattern(Date.now(), 'MMMM d, EEE');
+  const time = getProductTime();
+  return time.format.slot('monthDayWeekday', time.now(), {
+    locale: locale.value,
+  });
 });
 
 watch(
@@ -63,7 +66,12 @@ onBeforeUnmount(() => {
           <h2 class="text-base font-semibold text-foreground">
             {{ t('shell.home.title') }}
           </h2>
-          <p class="mt-0.5 text-xs text-muted-foreground">{{ todayLabel }}</p>
+          <p
+            class="mt-0.5 text-xs text-muted-foreground"
+            data-testid="today-overview-date"
+          >
+            {{ todayLabel }}
+          </p>
         </div>
         <div class="flex shrink-0 items-center gap-1.5" :aria-label="t('shell.home.directActions')">
           <Button

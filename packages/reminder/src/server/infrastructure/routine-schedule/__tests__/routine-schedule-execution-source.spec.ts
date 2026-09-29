@@ -1,7 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { LeaseFencingException } from '@memoflow/contracts/reliable-messaging';
 import { createRecurrenceEngine } from '@memoflow/time';
-import { createSnoozeOverride, type RoutineTemporaryOverride } from '../../../domain/routine';
+import {
+  createElapsedTrigger,
+  createSnoozeOverride,
+  type DurableElapsedOccurrenceSnapshot,
+  type RoutineTemporaryOverride,
+} from '../../../domain/routine';
 import {
   createRoutineWallClockExecutionSource,
   ROUTINE_OCCURRENCE_LEASE_MS,
@@ -42,12 +47,15 @@ interface Deployment {
   }>;
   nowMs: () => number;
   setNow: (ms: number) => void;
+  clearTemporaryOverride: ReturnType<typeof vi.fn>;
 }
 
 function createDeployment(options?: {
+  globalEnabled?: boolean;
   durableProfileGateOpen?: boolean;
   snapshot?: ReturnType<typeof buildFixtureFRoutine> | null;
   temporaryOverride?: RoutineTemporaryOverride | null;
+  elapsedOccurrences?: readonly DurableElapsedOccurrenceSnapshot[];
   writer?: RoutineOccurrenceNotificationWriterPort;
   now?: number;
 }): Deployment {
@@ -60,20 +68,30 @@ function createDeployment(options?: {
       if (definition == null) return null;
       return {
         definition,
+        globalEnabled: options?.globalEnabled ?? true,
         durableProfileGateOpen: options?.durableProfileGateOpen ?? true,
         temporaryOverride: options?.temporaryOverride ?? null,
+        elapsedOccurrences: options?.elapsedOccurrences ?? [],
       };
     },
   };
   const store = createInMemoryRoutineOccurrenceStore({ now: () => nowMs });
   const writer = options?.writer ?? createInMemoryRoutineNotificationWriter({ now: () => nowMs });
   const published: Deployment['published'] = [];
+  const clearTemporaryOverride = vi.fn().mockResolvedValue(undefined);
   const source = createRoutineWallClockExecutionSource({
     reader,
     occurrenceStore: store,
     notificationWriter: writer,
     recurrenceEngine,
     now: () => nowMs,
+    temporaryOverrideStore: {
+      async findRoutineTemporaryOverride() {
+        return options?.temporaryOverride ?? null;
+      },
+      async setRoutineTemporaryOverride() {},
+      clearRoutineTemporaryOverride: clearTemporaryOverride,
+    },
     publishOccurrenceCommitted: (event) => published.push(event),
   } satisfies RoutineScheduleExecutionDeps);
 
@@ -86,10 +104,201 @@ function createDeployment(options?: {
     setNow: (ms) => {
       nowMs = ms;
     },
+    clearTemporaryOverride,
   };
 }
 
 describe('createRoutineWallClockExecutionSource (ROUTINE-3401)', () => {
+  it('executes a scheduler-owned Elapsed occurrence and emits canonical notification truth', async () => {
+    const activatedAt = Date.parse('2026-08-25T15:00:00.000Z');
+    const dueAt = activatedAt + 50 * 60_000;
+    const occurrenceKey =
+      'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1';
+    const deps = createDeployment({
+      snapshot: buildFixtureFRoutine({
+        trigger: createElapsedTrigger({
+          durationMs: 50 * 60_000,
+          anchor: 'last-satisfied',
+        }),
+        activatedAt: new Date(activatedAt),
+      }),
+      now: dueAt + 1,
+    });
+
+    const outcome = await deps.source.executeRoutineOccurrence(
+      createExecutionInput({
+        occurrenceKey,
+        triggerKind: 'Elapsed',
+        scheduledFor: dueAt,
+        dueAt,
+      }),
+    );
+
+    expect(outcome).toMatchObject({
+      kind: 'succeeded',
+      nextOccurrenceAt: null,
+      notificationRequested: true,
+    });
+    expect(deps.writer.rows).toHaveLength(1);
+    expect(deps.writer.rows[0].envelope).toMatchObject({
+      workflowKey: 'routine.intervention',
+      occurrenceKey,
+    });
+    expect(deps.published).toEqual([
+      {
+        routineId: FIXTURE_F.routineId,
+        identityId: FIXTURE_F.identityId,
+        occurrenceKey,
+        scheduledFor: dueAt,
+      },
+    ]);
+  });
+
+  it('re-presents the same open Elapsed occurrence once after snooze and consumes the override', async () => {
+    const activatedAt = Date.parse('2026-08-25T15:00:00.000Z');
+    const originalDueAt = activatedAt + 50 * 60_000;
+    const snoozeUntil = originalDueAt + 10 * 60_000;
+    const occurrenceKey =
+      'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1';
+    const notificationOccurrenceKey = occurrenceKey + ':snooze:' + snoozeUntil;
+    const snooze = createSnoozeOverride({
+      now: originalDueAt,
+      durationMs: 10 * 60_000,
+      reason: 'user snoozed',
+    });
+    const deps = createDeployment({
+      snapshot: buildFixtureFRoutine({
+        trigger: createElapsedTrigger({
+          durationMs: 50 * 60_000,
+          anchor: 'last-satisfied',
+        }),
+        activatedAt: new Date(activatedAt),
+      }),
+      temporaryOverride: snooze,
+      elapsedOccurrences: [
+        {
+          occurrenceKey,
+          sourceRevision: String(FIXTURE_F.version),
+          resolutionState: 'Open',
+          resolvedAt: null,
+        },
+      ],
+      now: snoozeUntil + 1,
+    });
+
+    deps.setNow(originalDueAt);
+    const lease = await deps.store.claimOccurrence({
+      identityId: FIXTURE_F.identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey,
+      triggerKind: 'Elapsed',
+      scheduledFor: originalDueAt,
+      becameDueAt: originalDueAt,
+      sourceRevision: FIXTURE_F.version,
+      claimedAt: originalDueAt,
+      leaseExpiresAt: originalDueAt + ROUTINE_OCCURRENCE_LEASE_MS,
+    });
+    await deps.store.completeOccurrence({
+      occurrenceId: lease.occurrenceId,
+      fencingToken: lease.fencingToken,
+      ownerToken: lease.ownerToken,
+      status: 'succeeded',
+      history: {
+        routineId: FIXTURE_F.routineId,
+        identityId: FIXTURE_F.identityId,
+        occurrenceKey,
+        scheduledFor: originalDueAt,
+        triggeredAt: originalDueAt,
+        result: 'success',
+        reason: null,
+      },
+      nextOccurrenceAt: null,
+    });
+    deps.setNow(snoozeUntil + 1);
+
+    const outcome = await deps.source.executeRoutineOccurrence(
+      createExecutionInput({
+        occurrenceKey,
+        notificationOccurrenceKey,
+        triggerKind: 'Elapsed',
+        scheduledFor: snoozeUntil,
+        dueAt: snoozeUntil,
+      }),
+    );
+
+    expect(outcome).toMatchObject({
+      kind: 'succeeded',
+      nextOccurrenceAt: null,
+      notificationRequested: true,
+    });
+    expect(deps.writer.rows).toHaveLength(1);
+    expect(deps.writer.rows[0].envelope).toMatchObject({
+      occurrenceKey: notificationOccurrenceKey,
+      actions: expect.arrayContaining([
+        expect.objectContaining({
+          actionKey: 'complete',
+          owner: { type: 'routine-occurrence', id: occurrenceKey },
+        }),
+      ]),
+    });
+    expect(deps.clearTemporaryOverride).toHaveBeenCalledWith({
+      identityId: FIXTURE_F.identityId,
+      routineId: FIXTURE_F.routineId,
+    });
+    expect(deps.published).toEqual([
+      {
+        routineId: FIXTURE_F.routineId,
+        identityId: FIXTURE_F.identityId,
+        occurrenceKey,
+        scheduledFor: snoozeUntil,
+      },
+    ]);
+  });
+
+  it('rejects a forged snooze wake-up that does not match the durable override', async () => {
+    const activatedAt = Date.parse('2026-08-25T15:00:00.000Z');
+    const occurrenceKey =
+      'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1';
+    const snooze = createSnoozeOverride({
+      now: activatedAt + 50 * 60_000,
+      durationMs: 10 * 60_000,
+      reason: 'user snoozed',
+    });
+    const deps = createDeployment({
+      snapshot: buildFixtureFRoutine({
+        trigger: createElapsedTrigger({ durationMs: 50 * 60_000 }),
+        activatedAt: new Date(activatedAt),
+      }),
+      temporaryOverride: snooze,
+      elapsedOccurrences: [
+        {
+          occurrenceKey,
+          sourceRevision: String(FIXTURE_F.version),
+          resolutionState: 'Open',
+          resolvedAt: null,
+        },
+      ],
+    });
+
+    const outcome = await deps.source.executeRoutineOccurrence(
+      createExecutionInput({
+        occurrenceKey,
+        notificationOccurrenceKey: occurrenceKey + ':snooze:123',
+        triggerKind: 'Elapsed',
+        scheduledFor: 123,
+        dueAt: 123,
+      }),
+    );
+
+    expect(outcome).toEqual({
+      kind: 'skipped',
+      reason: 'no-eligible-occurrence',
+      occurrenceId: null,
+    });
+    expect(deps.writer.rows).toHaveLength(0);
+    expect(deps.clearTemporaryOverride).not.toHaveBeenCalled();
+  });
+
   it('commits the occurrence once, then advances nextOccurrenceAt to the following day', async () => {
     const deps = createDeployment();
     const outcome = await deps.source.executeRoutineOccurrence(createExecutionInput());
@@ -252,6 +461,14 @@ describe('createRoutineWallClockExecutionSource (ROUTINE-3401)', () => {
     const outcome = await deps.source.executeRoutineOccurrence(createExecutionInput());
     expect(outcome).toEqual({ kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null });
     expect(deps.published).toHaveLength(0);
+  });
+
+  it('skips a stale durable invocation when the global Routine gate is now closed', async () => {
+    const deps = createDeployment({ globalEnabled: false });
+    const outcome = await deps.source.executeRoutineOccurrence(createExecutionInput());
+
+    expect(outcome).toEqual({ kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null });
+    expect(deps.writer.rows).toHaveLength(0);
   });
 
   it('skips a stale durable invocation when Profile/Membership gates are now closed', async () => {

@@ -40,7 +40,7 @@ test.describe('Task completion closed loop', () => {
         data: {
           name: goalName,
           summary: 'Verifies task-to-goal progress projection.',
-          startDate: taskDate,
+          start: { kind: 'day', date: taskDate },
         },
       }),
     );

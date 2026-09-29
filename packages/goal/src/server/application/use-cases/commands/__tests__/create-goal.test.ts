@@ -215,7 +215,7 @@ describe('CreateGoalUseCase', () => {
       identityId: testIdentityId,
       name: 'Learn TypeScript',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });

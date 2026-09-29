@@ -21,15 +21,14 @@ describe('date input product-time boundary', () => {
     'utf8',
   );
 
-  it('keeps Goal start dates on Product Time and broad targets on GoalTimeframe', () => {
-    expect(goalDialog).toContain('GoalTimeframePicker');
-    expect(goalDialog).toContain('toProductYmdInputValue');
-    expect(goalDialog).toContain('fromProductYmdInputValue');
-    expect(vueAi).toContain('toProductYmdInputValue');
-    expect(vueAi).toContain('fromProductYmdInputValue');
-    expect(vueAi).toContain('goalTimeframeLabel');
+  it('keeps Goal start and target as precision-preserving GoalTimeframe values', () => {
+    expect(goalDialog.match(/GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(vueAi.match(/GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
 
     for (const source of [vueAi, goalDialog]) {
+      expect(source).not.toContain('toProductYmdInputValue');
+      expect(source).not.toContain('fromProductYmdInputValue');
+      expect(source).not.toContain('type="date"');
       expect(source).not.toContain('getTimezoneOffset');
       expect(source).not.toContain('toISOString().slice');
       expect(source).not.toMatch(/function toDateInputValue\b/);

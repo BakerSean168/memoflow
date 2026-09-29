@@ -46,8 +46,13 @@ export class NotificationInteractionPowerSyncRepository implements INotification
         [input.idempotencyKey],
       );
       if (existing) {
-        if (existing.identity_id !== input.identityId || existing.notification_id !== input.notificationId) {
-          throw new Error('Notification interaction idempotency key is already owned by another fact');
+        if (
+          existing.identity_id !== input.identityId ||
+          existing.notification_id !== input.notificationId
+        ) {
+          throw new Error(
+            'Notification interaction idempotency key is already owned by another fact',
+          );
         }
         return toDTO(existing);
       }
@@ -98,6 +103,21 @@ export class NotificationInteractionPowerSyncRepository implements INotification
     const rows = await this.db.getAll<InteractionRow>(
       `SELECT * FROM notification_interactions WHERE identity_id = ? AND notification_id = ? ORDER BY occurred_at ASC`,
       [identityId, notificationId],
+    );
+    return rows.map(toDTO);
+  }
+
+  async listByNotifications(
+    identityId: string,
+    notificationIds: readonly string[],
+  ): Promise<NotificationInteractionDTO[]> {
+    if (notificationIds.length === 0) return [];
+    const placeholders = notificationIds.map(() => '?').join(', ');
+    const rows = await this.db.getAll<InteractionRow>(
+      `SELECT * FROM notification_interactions
+       WHERE identity_id = ? AND notification_id IN (${placeholders})
+       ORDER BY occurred_at ASC`,
+      [identityId, ...notificationIds],
     );
     return rows.map(toDTO);
   }

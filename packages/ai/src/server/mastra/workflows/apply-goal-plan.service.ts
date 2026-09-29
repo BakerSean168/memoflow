@@ -186,7 +186,7 @@ function goalRequest(
     id: expected.goal as NonNullable<CreateGoalReq['id']>,
     name: draft.goal.name,
     ...(draft.goal.summary == null ? {} : { summary: draft.goal.summary }),
-    ...(draft.goal.startDate == null ? {} : { startDate: draft.goal.startDate }),
+    ...(draft.goal.start == null ? {} : { start: draft.goal.start }),
     ...(draft.goal.target == null ? {} : { target: draft.goal.target }),
     labelIds: [...labelIds],
     initialKeyResults: draft.keyResults.map((keyResult) => ({

@@ -23,6 +23,7 @@ export interface RoutineDefinitionPrismaRecord {
   description: string | null;
   enabled: boolean;
   triggerJson: string | null;
+  activatedAt: Date | null;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +57,7 @@ export interface RoutineDefinitionPowerSyncRecord {
   description: string | null;
   enabled: 0 | 1;
   trigger_json: string | null;
+  activated_at: string | null;
   version: number;
   created_at: string;
   updated_at: string;
@@ -92,6 +94,7 @@ export function routineDefinitionToPrisma(
     description: state.description,
     enabled: state.enabled,
     triggerJson: serializeRoutineTrigger(state.trigger),
+    activatedAt: state.activatedAt,
     version: state.version,
     createdAt: state.createdAt,
     updatedAt: state.updatedAt,
@@ -118,6 +121,7 @@ export function routineDefinitionToPowerSync(
     description: state.description,
     enabled: boolInt(state.enabled),
     trigger_json: serializeRoutineTrigger(state.trigger),
+    activated_at: state.activatedAt?.toISOString() ?? null,
     version: state.version,
     created_at: state.createdAt.toISOString(),
     updated_at: state.updatedAt.toISOString(),
@@ -163,6 +167,7 @@ export function normalizePrismaRoutineDefinition(
     description: record.description,
     enabled: record.enabled,
     triggerJson: record.triggerJson,
+    activatedAt: record.activatedAt?.toISOString() ?? null,
     version: record.version,
     createdAt: record.createdAt.toISOString(),
     updatedAt: record.updatedAt.toISOString(),
@@ -179,6 +184,7 @@ export function normalizePowerSyncRoutineDefinition(
     description: record.description,
     enabled: record.enabled === 1,
     triggerJson: record.trigger_json,
+    activatedAt: record.activated_at,
     version: record.version,
     createdAt: record.created_at,
     updatedAt: record.updated_at,

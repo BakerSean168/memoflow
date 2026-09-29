@@ -67,7 +67,7 @@ function goalFromDTO(dto: GoalClientDTO): Goal {
     summary: dto.summary,
     description: dto.description,
     status: dto.status,
-    startDate: dto.startDate ?? null,
+    start: dto.start ?? null,
     target: dto.target ?? null,
     completedAt: dto.completedAt ? dto.completedAt : null,
     archivedAt: dto.archivedAt ? dto.archivedAt : null,

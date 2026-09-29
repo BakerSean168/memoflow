@@ -1,4 +1,8 @@
 import type { Instant } from '@memoflow/contracts/primitives';
+import {
+  KEY_RESULT_DESCRIPTION_MAX_LENGTH,
+  KEY_RESULT_TITLE_MAX_LENGTH,
+} from '@memoflow/contracts/goal';
 import type {
   GoalTimeframe,
   KeyResultCalculationMethod,
@@ -67,7 +71,15 @@ export class KeyResult extends Entity<KeyResultId> {
     weight?: number;
     sortOrder?: number;
   }): KeyResult {
-    if (!params.title?.trim()) throw new Error('Title is required');
+    const title = params.title?.trim();
+    if (!title) throw new Error('Title is required');
+    if (title.length > KEY_RESULT_TITLE_MAX_LENGTH) {
+      throw new Error(`Title too long (max ${KEY_RESULT_TITLE_MAX_LENGTH} characters)`);
+    }
+    const description = params.description?.trim() || null;
+    if (description && description.length > KEY_RESULT_DESCRIPTION_MAX_LENGTH) {
+      throw new Error(`Description too long (max ${KEY_RESULT_DESCRIPTION_MAX_LENGTH} characters)`);
+    }
     calculateKeyResultProgress(params.progress);
     const weight = params.weight ?? 3;
     if (!Number.isInteger(weight) || weight < 1 || weight > 5) {
@@ -76,8 +88,8 @@ export class KeyResult extends Entity<KeyResultId> {
     const now = Date.now();
     return new KeyResult({
       id: params.id ?? KeyResultId.generate(),
-      title: params.title.trim(),
-      description: params.description?.trim() || null,
+      title,
+      description,
       progress: { ...params.progress },
       target: params.target ?? null,
       weight,
@@ -90,12 +102,19 @@ export class KeyResult extends Entity<KeyResultId> {
   public updateTitle(title: string): void {
     const trimmed = title.trim();
     if (!trimmed) throw new Error('Title cannot be empty');
+    if (trimmed.length > KEY_RESULT_TITLE_MAX_LENGTH) {
+      throw new Error(`Title too long (max ${KEY_RESULT_TITLE_MAX_LENGTH} characters)`);
+    }
     this._props.title = trimmed;
     this.touch();
   }
 
   public updateDescription(description: string): void {
-    this._props.description = description.trim() || null;
+    const normalized = description.trim();
+    if (normalized.length > KEY_RESULT_DESCRIPTION_MAX_LENGTH) {
+      throw new Error(`Description too long (max ${KEY_RESULT_DESCRIPTION_MAX_LENGTH} characters)`);
+    }
+    this._props.description = normalized || null;
     this.touch();
   }
 

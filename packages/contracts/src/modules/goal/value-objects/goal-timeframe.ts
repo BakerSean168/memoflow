@@ -130,6 +130,39 @@ export type GoalTimeframeKind = GoalTimeframe['kind'];
  * Reconstruct the semantic timeframe from the normalized persistence pair.
  * The pair is accepted only when the supplied end day is canonical for its precision.
  */
+export function goalTimeframeFromStartBoundary(
+  kind: GoalTimeframeKind,
+  startDate: Ymd,
+): GoalTimeframe {
+  const canonicalStart = requireYmd(startDate);
+  const [year, month] = canonicalStart.split('-').map(Number);
+  let candidate: GoalTimeframe;
+  switch (kind) {
+    case 'day':
+      candidate = { kind, date: canonicalStart };
+      break;
+    case 'month':
+      candidate = { kind, year, month };
+      break;
+    case 'quarter':
+      candidate = { kind, year, quarter: (month + 2) / 3 };
+      break;
+    case 'halfYear':
+      candidate = { kind, year, half: month === 1 ? 1 : month === 7 ? 2 : 0 };
+      break;
+    case 'year':
+      candidate = { kind, year };
+      break;
+  }
+  const invalidPair = () =>
+    new TypeError(`Non-canonical GoalTimeframe start persistence pair: ${kind}/${canonicalStart}`);
+  const parsed = GoalTimeframeSchema.safeParse(candidate);
+  if (!parsed.success || goalTimeframeStartBoundary(parsed.data) !== canonicalStart) {
+    throw invalidPair();
+  }
+  return parsed.data;
+}
+
 export function goalTimeframeFromEndBoundary(kind: GoalTimeframeKind, endDate: Ymd): GoalTimeframe {
   const canonicalEnd = requireYmd(endDate);
   const [year, month] = canonicalEnd.split('-').map(Number);
@@ -152,7 +185,7 @@ export function goalTimeframeFromEndBoundary(kind: GoalTimeframeKind, endDate: Y
       break;
   }
   const invalidPair = () =>
-    new TypeError(`Non-canonical GoalTimeframe persistence pair: ${kind}/${canonicalEnd}`);
+    new TypeError(`Non-canonical GoalTimeframe end persistence pair: ${kind}/${canonicalEnd}`);
   const parsed = GoalTimeframeSchema.safeParse(candidate);
   if (!parsed.success || goalTimeframeEndBoundary(parsed.data) !== canonicalEnd) {
     throw invalidPair();

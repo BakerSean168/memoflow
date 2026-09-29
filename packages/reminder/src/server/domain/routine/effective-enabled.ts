@@ -2,6 +2,7 @@ import type { ProfileMembership, RoutineDefinition, RoutineProfile } from './mod
 
 export type RoutineEligibilityReasonCode =
   | 'eligible'
+  | 'global-disabled'
   | 'routine-disabled'
   | 'profile-disabled'
   | 'membership-disabled'
@@ -13,6 +14,7 @@ export interface RoutineRuntimeContext {
 }
 
 export interface RoutineEligibilityInput {
+  readonly globalEnabled?: boolean;
   readonly routineEnabled: boolean;
   readonly profileEnabled?: boolean;
   readonly membershipEnabled?: boolean;
@@ -30,6 +32,7 @@ export function evaluateRoutineEligibility(
   input: RoutineEligibilityInput,
 ): RoutineEligibilityResult {
   const reasons: RoutineEligibilityReasonCode[] = [];
+  if (input.globalEnabled === false) reasons.push('global-disabled');
   if (!input.routineEnabled) reasons.push('routine-disabled');
   if (input.profileEnabled === false) reasons.push('profile-disabled');
   if (input.membershipEnabled === false) reasons.push('membership-disabled');
@@ -48,6 +51,7 @@ export function evaluateRoutineMembershipEligibility(input: {
   routine: RoutineDefinition;
   profile: RoutineProfile;
   membership: ProfileMembership;
+  globalEnabled?: boolean;
   runtimeContext?: RoutineRuntimeContext;
   temporaryOverrideAllowsExecution?: boolean;
 }): RoutineEligibilityResult {
@@ -60,6 +64,7 @@ export function evaluateRoutineMembershipEligibility(input: {
     throw new TypeError('Routine/profile/membership ownership mismatch');
   }
   return evaluateRoutineEligibility({
+    globalEnabled: input.globalEnabled,
     routineEnabled: input.routine.enabled,
     profileEnabled: input.profile.enabled,
     membershipEnabled: input.membership.enabled,

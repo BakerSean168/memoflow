@@ -70,6 +70,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
       cwd: databaseRoot,
       label: 'retire legacy AI runtime state',
     },
+    {
+      executable: process.execPath,
+      args: [resolve(runtimeScripts, 'prepare-goal-start-timeframe-semantics.js')],
+      cwd: databaseRoot,
+      label: 'prepare Goal start timeframe semantics',
+    },
   ];
 
   if (hasPrismaMigrations(migrationsDir)) {

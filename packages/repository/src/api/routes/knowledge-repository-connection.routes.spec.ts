@@ -98,6 +98,7 @@ function createApiStub(): RepositoryApplicationPort {
         repositoryId: 'repository-1',
       }),
     ),
+    resolveKnowledgeNoteReference: vi.fn(),
     getKnowledgeNoteLinkGraph: vi.fn(async () =>
       ok({
         centerProjectionId: 'projection-1',
@@ -413,6 +414,168 @@ describe('knowledge repository connection routes', () => {
 
     expect(api.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('validates and forwards knowledge-note catalog pagination without loading detail bodies', async () => {
+    const api = createApiStub();
+    api.listKnowledgeNoteProjections = vi.fn(async () =>
+      ok({ notes: [], total: 3648, nextCursor: null }),
+    );
+    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
+    const handler = getRouteHandler(router, 'get', '/knowledge-notes');
+    const res = createResponse();
+
+    await handler(
+      {
+        query: {
+          connectionId: 'connection-1',
+          cursor: 'r~1759017600000~knowledge-note-1',
+          sort: 'recent',
+          limit: '50',
+        },
+        headers: { 'user-agent': 'Mozilla/5.0' },
+        user: { identityId: 'identity-route' },
+        requestContext: carrier(),
+      },
+      res,
+    );
+
+    expect(api.listKnowledgeNoteProjections).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-route' }),
+      {
+        connectionId: 'connection-1',
+        cursor: 'r~1759017600000~knowledge-note-1',
+        sort: 'recent',
+        limit: 50,
+      },
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('forwards the first-class referenceable knowledge-document query', async () => {
+    const api = createApiStub();
+    api.listReferenceableKnowledgeDocuments = vi.fn(async () =>
+      ok({ documents: [], total: 2, nextCursor: null }),
+    );
+    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
+    const handler = getRouteHandler(router, 'get', '/knowledge-documents/referenceable');
+    const res = createResponse();
+
+    await handler(
+      {
+        query: {
+          query: '1Password',
+          cursor: 'r~1759017600000~knowledge-note-1',
+          limit: '24',
+        },
+        headers: { 'user-agent': 'Mozilla/5.0' },
+        user: { identityId: 'identity-route' },
+        requestContext: carrier(),
+      },
+      res,
+    );
+
+    expect(api.listReferenceableKnowledgeDocuments).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-route' }),
+      {
+        query: '1Password',
+        cursor: 'r~1759017600000~knowledge-note-1',
+        limit: 24,
+      },
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('validates and forwards lazy knowledge-note tree browsing with hidden-directory control', async () => {
+    const api = createApiStub();
+    api.listKnowledgeNoteTree = vi.fn(async () =>
+      ok({
+        parent: 'assets',
+        nodes: [
+          {
+            kind: 'directory' as const,
+            name: 'hosts',
+            relativePath: 'assets/hosts',
+            noteCount: 92,
+            hasChildren: true as const,
+          },
+        ],
+        metadata: null,
+      }),
+    );
+    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
+    const handler = getRouteHandler(router, 'get', '/knowledge-notes/tree');
+    const res = createResponse();
+
+    await handler(
+      {
+        query: {
+          connectionId: 'connection-1',
+          parent: 'assets',
+          includeHidden: 'true',
+        },
+        headers: { 'user-agent': 'Mozilla/5.0' },
+        user: { identityId: 'identity-route' },
+        requestContext: carrier(),
+      },
+      res,
+    );
+
+    expect(api.listKnowledgeNoteTree).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-route' }),
+      {
+        connectionId: 'connection-1',
+        parent: 'assets',
+        includeHidden: true,
+      },
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('resolves a stable knowledge-note reference inside the selected connection', async () => {
+    const api = createApiStub();
+    api.resolveKnowledgeNoteReference = vi.fn(async () =>
+      ok({
+        id: 'projection-1',
+        connectionId: 'connection-1',
+        knowledgeDocumentId: 'KnowledgeDocumentId_11111111-1111-4111-8111-111111111111' as never,
+        relativePath: 'z/reference.md',
+        title: 'Reference',
+        commitSha: 'a'.repeat(40),
+        blobSha: 'b'.repeat(40),
+        contentHash: 'c'.repeat(64),
+        frontmatter: {},
+        markdownContent: '# Reference',
+        createdAt: 1,
+        updatedAt: 2,
+        deletedAt: null,
+      }),
+    );
+    const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });
+    const handler = getRouteHandler(router, 'get', '/knowledge-notes/resolve');
+    const res = createResponse();
+
+    await handler(
+      {
+        query: {
+          connectionId: 'connection-1',
+          reference: 'KnowledgeDocumentId_11111111-1111-4111-8111-111111111111',
+        },
+        headers: { 'user-agent': 'Mozilla/5.0' },
+        user: { identityId: 'identity-route' },
+        requestContext: carrier(),
+      },
+      res,
+    );
+
+    expect(api.resolveKnowledgeNoteReference).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-route' }),
+      {
+        connectionId: 'connection-1',
+        reference: 'KnowledgeDocumentId_11111111-1111-4111-8111-111111111111',
+      },
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('validates and forwards an identity-scoped knowledge note link graph query', async () => {

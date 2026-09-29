@@ -13,7 +13,8 @@ export default {
   "source": {
     "schedule": "日程",
     "task": "任务",
-    "goal": "目标"
+    "goal": "目标",
+    "routine": "例程"
   },
   "dayDetail": {
     "subtitle": "{count} 个安排",
@@ -21,12 +22,22 @@ export default {
     "viewInDayView": "在日视图中查看"
   },
   "eventDetail": {
-    "subtitle": "日程详情",
+    "subtitle": "时间规划详情",
     "time": "时间",
     "allDay": "全天",
     "source": "来源",
-    "conflictHint": "该时段存在日程冲突",
-    "readOnlyHint": "日程事件编辑能力将在后续版本提供。"
+    "kind": "类型",
+    "status": "状态",
+    "note": "补充信息",
+    "semantic": {
+      "calendarEntry": "日程事件",
+      "taskOccurrence": "任务实例",
+      "goalStart": "目标开始",
+      "goalTarget": "目标节点",
+      "routineWallClock": "例程实例"
+    },
+    "conflictHint": "该时段存在规划冲突",
+    "readOnlyHint": "日历负责时间投影；编辑仍由对应的目标、任务、例程或日程对象负责。"
   },
   "planning": {
     "title": "日程",
@@ -46,6 +57,16 @@ export default {
     "taskDeleted": "调度任务已删除",
     "scheduleCreated": "日程已创建",
     "scheduleCreatedRefreshFailed": "日程已创建，但规划视图刷新失败。请刷新页面以重新加载最新状态。"
+  },
+  "plannerMutation": {
+    "taskTargetDayConflict": "目标日期已经存在同一任务计划的任务实例，已恢复到原位置。",
+    "staleConflict": "该日程项已被其他操作更新，已恢复原位置并刷新最新状态。",
+    "conflict": "此次时间调整与现有数据冲突，已恢复到原位置。",
+    "readOnly": "该日程项当前不可拖动或调整时长。",
+    "invalid": "该拖动无法转换为有效的时间安排，已恢复到原位置。",
+    "unsupported": "该类型的日程项暂不支持这样调整。",
+    "failed": "时间调整失败，已恢复到原位置。",
+    "refreshFailed": "冲突已回滚，但刷新最新规划状态失败，请手动刷新页面。"
   },
   "confirm": {
     "deleteTask": "确认删除调度「{name}」？",
@@ -93,9 +114,9 @@ export default {
     "emptyTitle": "暂无提醒模块任务"
   },
   "createDialog": {
-    "titleCreate": "创建日程事件",
-    "titleEdit": "编辑日程事件",
-    "description": "设置日程的标题、时间和可选详情。",
+    "titleCreate": "新建日程",
+    "titleEdit": "编辑日程",
+    "description": "先确定时间，再按需补充地点和参与者。",
     "fieldTitle": "标题 *",
     "fieldTitlePlaceholder": "输入日程标题",
     "fieldDescription": "描述",
@@ -124,6 +145,25 @@ export default {
     "fieldAttendees": "参与者",
     "fieldAttendeePlaceholder": "输入邮箱或用户名",
     "addAttendee": "添加",
+    "timeSection": "时间",
+    "optionalDetails": "可选详情",
+    "addLocation": "添加地点",
+    "addAttendees": "添加参与者",
+    "attendeeCount": "{count} 位参与者",
+    "startPickerTitle": "设置开始时间",
+    "startPickerDescription": "选择日程开始的日期和具体时间。",
+    "endPickerTitle": "设置结束时间",
+    "endPickerDescription": "选择日程结束的日期和具体时间。",
+    "clockTime": "具体时间",
+    "hour": "小时",
+    "minute": "分钟",
+    "returnToToday": "返回今天",
+    "invalidClockTime": "请输入有效时间。",
+    "endAfterStart": "结束时间必须晚于开始时间。",
+    "invalidRange": "开始时间必须早于结束时间。",
+    "exactDateInputPlaceholder": "例如：2026/09/29",
+    "exactDateInputHint": "请选择或输入具体日期。",
+    "exactDateInputInvalid": "请输入具体日期，例如 2026/09/29。",
     "submitFailed": "日程保存失败，你填写的内容仍保留在此处。"
   },
   "calendar": {

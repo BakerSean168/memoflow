@@ -18,8 +18,10 @@ import {
   type AIWorkflowResumeClientRequest,
   type AIWorkflowRunView,
   type AIWorkflowStartClientRequest,
+  type AssistantRuntimeAttachment,
   type AssistantRuntimeEvent,
   type AssistantRuntimeHistoryView,
+  type AssistantRuntimeSelectedEntity,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
@@ -29,6 +31,8 @@ import type {
   IAIRoutineCommandPort,
   IAIPlannerReadPort,
   IAINotificationReadPort,
+  IAISelectedEntityContextReadPort,
+  IAnalyticsReadPort,
 } from '../../application/ports';
 import {
   createMemoFlowAssistant,
@@ -38,7 +42,11 @@ import {
 } from '../agents';
 import { createMemoFlowProductTools } from '../tools/product-tools';
 import type { MastraModelResolver } from '../models';
-import { setAIContextRequestContext, type AIContextAssemblerPort } from '../context';
+import {
+  AssistantSelectedContextHydrator,
+  setAIContextRequestContext,
+  type AIContextAssemblerPort,
+} from '../context';
 import {
   ApplyGoalPlanService,
   GOAL_CREATE_LIFECYCLE_STEP_ID,
@@ -73,9 +81,7 @@ import type { AssistantConversationShellSource } from './assistant-conversation-
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
 import { toAIPublicFailure } from '../../../shared/ai-public-failure';
 
-function messageText(
-  event: Extract<AgentControllerEvent, { type: 'message_start' }>,
-): string {
+function messageText(event: Extract<AgentControllerEvent, { type: 'message_start' }>): string {
   const parts = event.message.content.parts;
   return parts
     .filter(
@@ -113,6 +119,10 @@ export interface MastraAIRuntimeDependencies {
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
+  /** Owner-backed hydration for explicit Goal/Task references selected in the composer. */
+  readonly selectedEntityContextReadPort: IAISelectedEntityContextReadPort;
+  /** Bounded cross-owner workspace projection used by read-only assistant tools. */
+  readonly analyticsReadPort: IAnalyticsReadPort;
   /** Invocation-scoped context projection; resolves canonical Product Time and budgets inputs. */
   readonly contextAssembler: AIContextAssemblerPort;
 }
@@ -138,6 +148,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private initPromise: Promise<void> | null = null;
   private disposePromise: Promise<void> | null = null;
   private readonly activeRuns = new Map<string, ActiveRun>();
+  private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
   constructor(private readonly deps: MastraAIRuntimeDependencies) {
     this.memory = new Memory({
@@ -145,6 +156,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       options: { lastMessages: 40 },
     });
     this.history = new AssistantHistoryService(this.memory, deps.conversationShellSource);
+    this.selectedContextHydrator = new AssistantSelectedContextHydrator(
+      deps.selectedEntityContextReadPort,
+      deps.knowledgeSourcePort,
+    );
     this.assistant = createMemoFlowAssistant({
       modelResolver: deps.modelResolver,
       memory: this.memory,
@@ -153,6 +168,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       routineCommandPort: deps.routineCommandPort,
       plannerReadPort: deps.plannerReadPort,
       notificationReadPort: deps.notificationReadPort,
+      analyticsReadPort: deps.analyticsReadPort,
+      knowledgeSourcePort: deps.knowledgeSourcePort,
     });
     this.goalPlanner = new GoalPlannerWorker(
       deps.modelResolver,
@@ -889,6 +906,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     providerId?: string;
     modelId?: string;
     locale?: 'zh-CN' | 'en-US';
+    attachments?: readonly AssistantRuntimeAttachment[];
+    selectedEntities?: readonly AssistantRuntimeSelectedEntity[];
     signal?: AbortSignal;
   }): AsyncGenerator<AssistantRuntimeEvent, void, void> {
     await this.init();
@@ -908,6 +927,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         chat: 'required',
         streaming: 'required',
         toolCalling: 'required',
+        ...(input.attachments?.some((attachment) => attachment.mediaType.startsWith('image/'))
+          ? { vision: 'required' as const }
+          : {}),
       },
     });
     const requestContext = new RequestContext();
@@ -918,6 +940,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (input.context) requestContext.setRaw('executionContext', input.context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId);
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
+
+    const selectedEntities = input.selectedEntities ?? [];
+    const selectedContext = await this.selectedContextHydrator.hydrate(
+      input.identityId,
+      selectedEntities,
+    );
+
     const contextEnvelope = await this.deps.contextAssembler.assemble({
       invocation: {
         identityId: input.identityId,
@@ -925,13 +954,31 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         surface: 'assistant',
         locale: input.locale ?? 'zh-CN',
       },
-      userInput: { content: input.content },
+      userInput: {
+        content: input.content,
+        attachments: input.attachments?.map((attachment) => ({
+          mediaType: attachment.mediaType,
+          filename: attachment.filename,
+        })),
+        selectedEntities: input.selectedEntities?.map((entity) => ({
+          entityType: entity.entityType,
+          id: entity.id,
+          label: entity.label,
+        })),
+      },
+      domainFacts: selectedContext.domainFacts,
+      knowledgeEvidence: selectedContext.knowledgeEvidence,
       selectedEntities: [
         {
           entityType: 'conversation',
           id: input.conversationId,
           source: 'assistant.session',
         },
+        ...(input.selectedEntities ?? []).map((entity) => ({
+          entityType: entity.entityType,
+          id: entity.id,
+          source: 'assistant.user-selection',
+        })),
       ],
     });
     setAIContextRequestContext(requestContext, contextEnvelope);
@@ -1060,10 +1107,20 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     const abort = () => session.abortRun();
     input.signal?.addEventListener('abort', abort, { once: true });
-    void session.sendMessage({ content: input.content, requestContext }).catch((error) => {
-      lastRuntimeError = publicRuntimeError(error);
-      settle('assistant.run.failed');
-    });
+    void session
+      .sendMessage({
+        content: input.content,
+        files: input.attachments?.map((attachment) => ({
+          data: attachment.data,
+          mediaType: attachment.mediaType,
+          ...(attachment.filename ? { filename: attachment.filename } : {}),
+        })),
+        requestContext,
+      })
+      .catch((error) => {
+        lastRuntimeError = publicRuntimeError(error);
+        settle('assistant.run.failed');
+      });
 
     try {
       while (true) {

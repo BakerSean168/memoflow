@@ -1,7 +1,11 @@
 import { z } from 'zod';
-import { YmdSchema } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import { GoalTimeframeSchema, KeyResultCalculationMethod } from '../../goal';
+import {
+  GoalTimeframeSchema,
+  KEY_RESULT_DESCRIPTION_MAX_LENGTH,
+  KEY_RESULT_TITLE_MAX_LENGTH,
+  KeyResultCalculationMethod,
+} from '../../goal';
 import { KnowledgeDocumentRefSchema } from '../../repository';
 import {
   GoalContributionRuleSchema,
@@ -64,7 +68,7 @@ export const GoalPlanGoalSchema = z
     name: z.string().trim().min(1).max(256),
     summary: z.string().trim().max(500).nullable().optional(),
     status: z.enum(['Planned', 'InProgress']).default('Planned'),
-    startDate: YmdSchema.nullable().optional(),
+    start: GoalTimeframeSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),
     labels: z.array(LabelNameSchema).max(50).default([]),
   })
@@ -74,8 +78,8 @@ export type GoalPlanGoal = z.infer<typeof GoalPlanGoalSchema>;
 export const GoalPlanKeyResultSchema = z
   .object({
     draftRef: GoalPlanKeyResultDraftRefSchema,
-    title: z.string().trim().min(1).max(200),
-    description: z.string().trim().max(2000).nullable().optional(),
+    title: z.string().trim().min(1).max(KEY_RESULT_TITLE_MAX_LENGTH),
+    description: z.string().trim().max(KEY_RESULT_DESCRIPTION_MAX_LENGTH).nullable().optional(),
     aggregationMethod: z.enum(KeyResultCalculationMethod).default(KeyResultCalculationMethod.Sum),
     initialValue: z.number().default(0),
     currentValue: z.number().optional(),

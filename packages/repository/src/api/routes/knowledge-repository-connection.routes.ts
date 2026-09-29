@@ -18,6 +18,8 @@ import {
   AdoptKnowledgeDocumentResponseSchema,
   KnowledgeNoteProjectionClientSchema,
   KnowledgeNoteProjectionListResponseSchema,
+  ReferenceableKnowledgeDocumentListResponseSchema,
+  KnowledgeNoteTreeResponseSchema,
   CreateConfirmedKnowledgeNoteSchema,
   KnowledgeNoteLinkGraphResponseSchema,
   KnowledgeAttachmentContentResponseSchema,
@@ -240,6 +242,9 @@ export function registerKnowledgeRepositoryConnectionRoutes(
         query: z.object({
           connectionId: z.string().optional(),
           query: z.string().optional(),
+          cursor: z.string().optional(),
+          includeHidden: z.enum(['true', 'false']).optional(),
+          sort: z.enum(['path', 'recent']).optional(),
           limit: z.string().optional(),
         }),
       },
@@ -251,6 +256,75 @@ export function registerKnowledgeRepositoryConnectionRoutes(
     },
     auth,
     (req, ctx) => controller.listNotes(ctx, req.query),
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/knowledge-documents/referenceable',
+      summary: '列出可稳定引用的知识文档',
+      request: {
+        query: z.object({
+          query: z.string().optional(),
+          cursor: z.string().optional(),
+          limit: z.string().optional(),
+        }),
+      },
+      responses: {
+        200: successResponse(ReferenceableKnowledgeDocumentListResponseSchema, '获取成功'),
+        401: errorResponse('未授权，请登录'),
+        422: errorResponse('可引用知识文档参数错误'),
+        503: errorResponse('知识投影暂不可用'),
+      },
+    },
+    auth,
+    (req, ctx) => controller.listReferenceableDocuments(ctx, req.query),
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/knowledge-notes/tree',
+      summary: '浏览 GitHub 知识笔记目录树',
+      request: {
+        query: z.object({
+          connectionId: z.string().optional(),
+          parent: z.string().optional(),
+          includeHidden: z.enum(['true', 'false']).optional(),
+        }),
+      },
+      responses: {
+        200: successResponse(KnowledgeNoteTreeResponseSchema, '目录树已获取'),
+        401: errorResponse('未授权，请登录'),
+        422: errorResponse('目录树参数错误'),
+        503: errorResponse('知识投影暂不可用'),
+      },
+    },
+    auth,
+    (req, ctx) => controller.listNoteTree(ctx, req.query),
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/knowledge-notes/resolve',
+      summary: '解析 GitHub 知识笔记引用',
+      request: {
+        query: z.object({
+          connectionId: z.string().optional(),
+          reference: z.string().min(1),
+        }),
+      },
+      responses: {
+        200: successResponse(KnowledgeNoteProjectionClientSchema, '笔记引用已解析'),
+        401: errorResponse('未授权，请登录'),
+        404: errorResponse('笔记不存在'),
+        422: errorResponse('笔记引用参数错误'),
+        503: errorResponse('知识投影暂不可用'),
+      },
+    },
+    auth,
+    (req, ctx) => controller.resolveNoteReference(ctx, req.query),
   );
 
   r.route(

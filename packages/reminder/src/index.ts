@@ -8,6 +8,8 @@
 export {
   createRoutinePrismaRepositories,
   createRoutinePowerSyncRepositories,
+  createRoutineOccurrenceNotificationWriter,
+  buildRoutineOccurrenceNotificationRequest,
   createPowerSyncClosureChecker,
   loadPowerSyncRoutineLocalRegistrations,
   RoutineAccountClosedConsumer,
@@ -24,6 +26,7 @@ export {
   type RoutineConfigurationQueryPort,
   type RoutineDefinitionReceipt,
   type RoutineMembershipReceipt,
+  type RoutinePreferencesReceipt,
   type RoutineNotificationOwnerCommandRegistry,
   type RoutineProfileReceipt,
   type RoutineProtocolMethodId,

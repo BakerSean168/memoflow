@@ -13,6 +13,7 @@ import type {
   SetRoutineMembershipEnabledRequest,
   SetRoutineProfileActiveRequest,
   SetRoutineTemporaryOverrideRequest,
+  UpdateRoutinePreferencesRequest,
   UpdateRoutineProfileRequest,
   UpdateRoutineRequest,
 } from '@memoflow/contracts/routine';
@@ -22,6 +23,9 @@ import type { IResultIpcClient } from '@memoflow/ipc-client';
 
 export interface RoutineClientPort {
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>>;
+  updatePreferences(
+    input: UpdateRoutinePreferencesRequest,
+  ): Promise<Result<RoutineConfigurationSnapshot['preferences']>>;
   getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>>;
   createRoutine(input: CreateRoutineRequest): Promise<Result<RoutineMutationReceipt>>;
   updateRoutine(
@@ -71,6 +75,12 @@ export class RoutineHttpClient implements RoutineClientPort {
 
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>> {
     return this.http.get(this.baseUrl + '/configuration');
+  }
+
+  updatePreferences(
+    input: UpdateRoutinePreferencesRequest,
+  ): Promise<Result<RoutineConfigurationSnapshot['preferences']>> {
+    return this.http.patch(this.baseUrl + '/preferences', input);
   }
 
   getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>> {
@@ -155,6 +165,12 @@ export class RoutineIpcClient implements RoutineClientPort {
 
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>> {
     return this.ipc.invoke(RoutineChannels.CONFIGURATION_GET);
+  }
+
+  updatePreferences(
+    input: UpdateRoutinePreferencesRequest,
+  ): Promise<Result<RoutineConfigurationSnapshot['preferences']>> {
+    return this.ipc.invoke(RoutineChannels.PREFERENCES_UPDATE, input);
   }
 
   getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>> {

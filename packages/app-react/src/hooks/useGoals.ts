@@ -9,7 +9,6 @@ import type {
   KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
 import type { Goal } from '@memoflow/goal/client';
-import type { Ymd } from '@memoflow/contracts/primitives';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -21,7 +20,7 @@ export type GoalSummary = {
   name: string;
   summary: string | null;
   status: GoalStatus;
-  startDate: Ymd | null;
+  start: GoalTimeframe | null;
   target: GoalTimeframe | null;
   reminderConfig: GoalClientDTO['reminderConfig'];
   archivedAt: number | null;
@@ -67,7 +66,7 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
     name: dto.name,
     summary: dto.summary,
     status: dto.status,
-    startDate: dto.startDate,
+    start: dto.start,
     target: dto.target,
     reminderConfig: dto.reminderConfig,
     archivedAt: dto.archivedAt,

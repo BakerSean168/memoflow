@@ -8,7 +8,7 @@ function createGoal(overrides?: Partial<Parameters<typeof Goal.create>[0]>): Goa
     identityId: 'IdentityId_1' as never,
     name: 'Launch Goal',
     summary: ' Ship it ',
-    startDate: requireYmd('2026-04-20'),
+    start: { kind: 'day', date: requireYmd('2026-04-20') },
     target: { kind: 'month', year: 2026, month: 4 },
     reminderConfig: GoalReminderConfig.createDefault(),
     ...overrides,
@@ -29,7 +29,7 @@ describe('Goal aggregate management', () => {
     expect(() => createGoal({ name: '   ' })).toThrow();
     expect(() =>
       createGoal({
-        startDate: requireYmd('2026-05-10'),
+        start: { kind: 'day', date: requireYmd('2026-05-10') },
         target: { kind: 'day', date: requireYmd('2026-05-01') },
       }),
     ).toThrow(GoalInvalidPlanningWindowError);
@@ -62,10 +62,10 @@ describe('Goal aggregate management', () => {
     goal.pullDomainEvents();
 
     goal.updatePlanningTime({
-      startDate: requireYmd('2026-04-18'),
+      start: { kind: 'day', date: requireYmd('2026-04-18') },
       target: { kind: 'day', date: requireYmd('2026-05-05') },
     });
-    expect(goal.startDate).toBe('2026-04-18');
+    expect(goal.start).toEqual({ kind: 'day', date: '2026-04-18' });
     expect(goal.target).toEqual({ kind: 'day', date: '2026-05-05' });
 
     goal.updateSortOrder(7);
@@ -91,6 +91,40 @@ describe('Goal aggregate management', () => {
     goal.softDelete();
     expect(goal.deletedAt).not.toBeNull();
     expect(() => goal.updateBasicInfo({ name: 'Blocked' })).toThrow('已删除');
+  });
+
+  it('enforces compact KR name and description limits', () => {
+    const goal = createGoal();
+
+    expect(() =>
+      goal.createAndAddKeyResult({
+        title: 'x'.repeat(51),
+        targetValue: 10,
+      }),
+    ).toThrow('max 50 characters');
+
+    expect(() =>
+      goal.createAndAddKeyResult({
+        title: 'Valid KR',
+        description: 'y'.repeat(201),
+        targetValue: 10,
+      }),
+    ).toThrow('max 200 characters');
+
+    const kr = goal.createAndAddKeyResult({
+      title: 'x'.repeat(50),
+      description: 'y'.repeat(200),
+      targetValue: 10,
+    });
+    expect(kr.title).toHaveLength(50);
+    expect(kr.description).toHaveLength(200);
+
+    expect(() => goal.updateKeyResult(String(kr.id), { title: 'x'.repeat(51) })).toThrow(
+      'max 50 characters',
+    );
+    expect(() => goal.updateKeyResult(String(kr.id), { description: 'y'.repeat(201) })).toThrow(
+      'max 200 characters',
+    );
   });
 
   it('manages reminder config and key results', () => {

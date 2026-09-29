@@ -23,7 +23,6 @@ interface RoutineTemporaryOverrideRow {
   override_json: string;
 }
 
-
 interface RoutineLocalOccurrenceRow {
   routine_id: string;
   occurrence_key: string;
@@ -41,42 +40,8 @@ interface RoutineMembershipPathRow {
   profile_enabled: 0 | 1;
 }
 
-function elapsedOccurrenceGeneration(row: RoutineLocalOccurrenceRow): number | null {
-  const suffix = row.occurrence_key.slice(row.occurrence_key.lastIndexOf(':') + 1);
-  const generation = Number(suffix);
-  return Number.isInteger(generation) && generation > 0 ? generation : null;
-}
-
-function latestSatisfiedOccurrence(
-  rows: readonly RoutineLocalOccurrenceRow[],
-): RoutineLocalOccurrenceRow | null {
-  return [...rows]
-    .filter((row) => row.resolution_state === 'Satisfied' && row.resolved_at != null)
-    .sort((a, b) => Date.parse(b.resolved_at!) - Date.parse(a.resolved_at!))[0] ?? null;
-}
-
-function coldStartGeneration(input: {
-  readonly rows: readonly RoutineLocalOccurrenceRow[];
-  readonly anchorRevision: string;
-  readonly anchorAt: number;
-  readonly durationMs: number;
-}): number {
-  const matching = input.rows
-    .filter((row) => row.source_revision === input.anchorRevision)
-    .map((row) => ({ row, generation: elapsedOccurrenceGeneration(row) }))
-    .filter((entry): entry is { row: RoutineLocalOccurrenceRow; generation: number } =>
-      entry.generation != null,
-    )
-    .sort((a, b) => b.generation - a.generation);
-  const latest = matching[0];
-  if (!latest) return 1;
-  if (latest.row.resolution_state === 'Open') return latest.generation;
-
-  const resolvedAt = latest.row.resolved_at == null ? NaN : Date.parse(latest.row.resolved_at);
-  const nextByResolution = Number.isFinite(resolvedAt)
-    ? Math.floor(Math.max(0, resolvedAt - input.anchorAt) / input.durationMs) + 1
-    : latest.generation + 1;
-  return Math.max(latest.generation + 1, nextByResolution);
+interface RoutinePreferenceRow {
+  global_enabled: 0 | 1;
 }
 
 function activeUsageGeneration(row: RoutineLocalOccurrenceRow): number | null {
@@ -91,8 +56,9 @@ function activeUsageRestoredSnapshot(
 ): ActiveUsageRoutineRegistration['restoredSnapshot'] {
   const sequenced = rows
     .map((row) => ({ row, generation: activeUsageGeneration(row) }))
-    .filter((entry): entry is { row: RoutineLocalOccurrenceRow; generation: number } =>
-      entry.generation != null,
+    .filter(
+      (entry): entry is { row: RoutineLocalOccurrenceRow; generation: number } =>
+        entry.generation != null,
     )
     .sort((a, b) => b.generation - a.generation);
   const latest = sequenced[0];
@@ -143,16 +109,17 @@ export async function loadPowerSyncRoutineLocalRegistrations(
   const owner = identityId.trim();
   if (!owner) throw new TypeError('Routine local registration identityId must not be empty');
 
-  const [definitions, membershipPaths, overrideRows, localOccurrenceRows] = await Promise.all([
-    db.getAll<RoutineDefinitionRow>(
-      `SELECT id, identity_id, enabled, trigger_json, version, updated_at
+  const [definitions, membershipPaths, preferenceRows, overrideRows, localOccurrenceRows] =
+    await Promise.all([
+      db.getAll<RoutineDefinitionRow>(
+        `SELECT id, identity_id, enabled, trigger_json, version, updated_at
          FROM routine_definitions
         WHERE identity_id = ?
         ORDER BY id`,
-      [owner],
-    ),
-    db.getAll<RoutineMembershipPathRow>(
-      `SELECT m.routine_id,
+        [owner],
+      ),
+      db.getAll<RoutineMembershipPathRow>(
+        `SELECT m.routine_id,
               m.profile_id,
               m.enabled AS membership_enabled,
               p.enabled AS profile_enabled
@@ -162,26 +129,34 @@ export async function loadPowerSyncRoutineLocalRegistrations(
           AND p.id = m.profile_id
         WHERE m.identity_id = ?
         ORDER BY m.routine_id, m.profile_id`,
-      [owner],
-    ),
-    db.getAll<RoutineTemporaryOverrideRow>(
-      `SELECT routine_id, override_json
+        [owner],
+      ),
+      db.getAll<RoutinePreferenceRow>(
+        `SELECT global_enabled
+         FROM routine_preferences
+        WHERE identity_id = ?
+        LIMIT 1`,
+        [owner],
+      ),
+      db.getAll<RoutineTemporaryOverrideRow>(
+        `SELECT routine_id, override_json
          FROM routine_temporary_overrides
         WHERE identity_id = ?
         ORDER BY routine_id`,
-      [owner],
-    ),
-    db.getAll<RoutineLocalOccurrenceRow>(
-      `SELECT routine_id, occurrence_key, trigger_kind, source_revision,
+        [owner],
+      ),
+      db.getAll<RoutineLocalOccurrenceRow>(
+        `SELECT routine_id, occurrence_key, trigger_kind, source_revision,
               resolution_state, resolved_at, became_due_at
          FROM routine_occurrences
         WHERE identity_id = ?
-          AND trigger_kind IN ('Elapsed', 'ActiveUsage')
+          AND trigger_kind = 'ActiveUsage'
         ORDER BY routine_id, became_due_at DESC, created_at DESC`,
-      [owner],
-    ),
-  ]);
+        [owner],
+      ),
+    ]);
 
+  const globalEnabled = preferenceRows[0]?.global_enabled !== 0;
   const pathsByRoutine = new Map<string, RoutineMembershipPathRow[]>();
   for (const row of membershipPaths) {
     const paths = pathsByRoutine.get(row.routine_id) ?? [];
@@ -190,16 +165,15 @@ export async function loadPowerSyncRoutineLocalRegistrations(
   }
 
   const overridesByRoutine = new Map(
-    overrideRows.map((row) => [row.routine_id, deserializeRoutineTemporaryOverride(row.override_json)] as const),
+    overrideRows.map(
+      (row) => [row.routine_id, deserializeRoutineTemporaryOverride(row.override_json)] as const,
+    ),
   );
-  const elapsedOccurrencesByRoutine = new Map<string, RoutineLocalOccurrenceRow[]>();
   const activeUsageOccurrencesByRoutine = new Map<string, RoutineLocalOccurrenceRow[]>();
   for (const row of localOccurrenceRows) {
-    const target =
-      row.trigger_kind === 'Elapsed' ? elapsedOccurrencesByRoutine : activeUsageOccurrencesByRoutine;
-    const rows = target.get(row.routine_id) ?? [];
+    const rows = activeUsageOccurrencesByRoutine.get(row.routine_id) ?? [];
     rows.push(row);
-    target.set(row.routine_id, rows);
+    activeUsageOccurrencesByRoutine.set(row.routine_id, rows);
   }
 
   const elapsed: ElapsedRoutineRegistration[] = [];
@@ -225,6 +199,7 @@ export async function loadPowerSyncRoutineLocalRegistrations(
           );
 
     const gates = {
+      ...(globalEnabled ? {} : { globalEnabled: false }),
       routineEnabled: row.enabled === 1,
       ...(overridesByRoutine.has(row.id)
         ? { temporaryOverride: overridesByRoutine.get(row.id)! }
@@ -238,41 +213,16 @@ export async function loadPowerSyncRoutineLocalRegistrations(
     };
 
     if (trigger.type === 'Elapsed') {
-      const updatedAtMs = Date.parse(row.updated_at);
-      if (!Number.isFinite(updatedAtMs)) {
-        throw new TypeError(`Routine '${row.id}' has invalid updated_at runtime anchor`);
+      // Durable Elapsed anchors are Scheduler-owned. Only profile activation is
+      // device-contextual and may be armed by the local runtime.
+      if (trigger.anchor === 'profile-activation') {
+        elapsed.push({
+          identityId: owner,
+          routineId: row.id,
+          trigger,
+          gates,
+        });
       }
-      const occurrenceRows = elapsedOccurrencesByRoutine.get(row.id) ?? [];
-      const lastSatisfied = latestSatisfiedOccurrence(occurrenceRows);
-      const lastSatisfiedAtMs = lastSatisfied?.resolved_at
-        ? Date.parse(lastSatisfied.resolved_at)
-        : null;
-      if (lastSatisfiedAtMs != null && !Number.isFinite(lastSatisfiedAtMs)) {
-        throw new TypeError(`Routine '${row.id}' has invalid last satisfied runtime anchor`);
-      }
-      const useLastSatisfied = trigger.anchor === 'last-satisfied' && lastSatisfiedAtMs != null;
-      const durableAnchorAt = useLastSatisfied ? lastSatisfiedAtMs! : updatedAtMs;
-      const durableAnchorRevision = useLastSatisfied
-        ? `satisfied-${lastSatisfiedAtMs}`
-        : `definition-${row.version}`;
-      elapsed.push({
-        identityId: owner,
-        routineId: row.id,
-        trigger,
-        gates,
-        ...(trigger.anchor === 'profile-activation'
-          ? {}
-          : {
-              durableAnchorAt: asInstant(durableAnchorAt),
-              durableAnchorRevision,
-              initialGeneration: coldStartGeneration({
-                rows: occurrenceRows,
-                anchorRevision: durableAnchorRevision,
-                anchorAt: durableAnchorAt,
-                durationMs: trigger.durationMs,
-              }),
-            }),
-      });
       continue;
     }
 

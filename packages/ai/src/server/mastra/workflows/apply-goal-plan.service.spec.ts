@@ -26,7 +26,7 @@ const draft = GoalPlanDraftSchema.parse({
     name: 'Pass JLPT N1',
     summary: 'Build a durable study plan.',
     status: 'InProgress',
-    startDate: '2026-09-15',
+    start: { kind: 'day', date: '2026-09-15' },
     target: { kind: 'year', year: 2027 },
     labels: ['Learning'],
   },
@@ -201,7 +201,7 @@ describe('ApplyGoalPlanService V2', () => {
         id: expected.goal,
         name: 'Pass JLPT N1',
         summary: 'Build a durable study plan.',
-        startDate: '2026-09-15',
+        start: { kind: 'day', date: '2026-09-15' },
         target: { kind: 'year', year: 2027 },
         initialKeyResults: [
           expect.objectContaining({

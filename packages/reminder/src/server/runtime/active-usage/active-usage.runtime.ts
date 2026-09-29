@@ -4,6 +4,7 @@ import type { ActiveUsageTrigger, RoutineTemporaryOverride } from '../../domain/
 import type { ActivitySensorPort, RoutineActivityEvent } from '../../domain/ports';
 
 export interface ActiveUsageGateState {
+  readonly globalEnabled?: boolean;
   readonly routineEnabled: boolean;
   readonly profileEnabled?: boolean;
   readonly membershipEnabled?: boolean;
@@ -172,6 +173,7 @@ export function createActiveUsageRuntime(
 
   const effectiveEnabled = (lane: Lane, at: Instant): boolean =>
     evaluateRoutineEligibility({
+      globalEnabled: lane.gates.globalEnabled,
       routineEnabled: lane.gates.routineEnabled,
       profileEnabled: lane.gates.profileEnabled,
       membershipEnabled: lane.gates.membershipEnabled,
@@ -183,6 +185,7 @@ export function createActiveUsageRuntime(
 
   const eligibleActiveMs = (lane: Lane, from: Instant, to: Instant): number => {
     const staticGates = evaluateRoutineEligibility({
+      globalEnabled: lane.gates.globalEnabled,
       routineEnabled: lane.gates.routineEnabled,
       profileEnabled: lane.gates.profileEnabled,
       membershipEnabled: lane.gates.membershipEnabled,

@@ -41,6 +41,7 @@ function createTailwindPlugins(useBundledDev: boolean): Plugin[] {
 
 const webBundledDevWorkspaceEntries = [
   ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
+  ['@memoflow/time', 'packages/time/src/index.ts'],
   ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],
 ] as const;
 
@@ -104,6 +105,11 @@ export default defineConfig(({ mode, command }) => {
     mode === 'development' &&
     env.MEMOFLOW_VITE_BUNDLED_DEV === 'true' &&
     process.env.NODE_ENV !== 'test';
+  // Rolldown's bundled dev defaults to lazy compilation. That is useful on a
+  // local LAN, but each dynamic-import boundary becomes a request/compile round
+  // trip over remote development links. Keep it explicitly tunable so the GCP
+  // host-dev lane can prefer one stable upfront bundle instead.
+  const useBundledDevLazy = env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY !== 'false';
 
   const directWorkspaceAliases = createWorkspaceSourceAliasEntries(
     workspaceRoot,
@@ -135,6 +141,21 @@ export default defineConfig(({ mode, command }) => {
       replacement: path.resolve(configDir, './src'),
     },
   ];
+
+  // Tailscale Serve keeps Vite bound to loopback but forwards the public MagicDNS
+  // hostname through HTTPS. Allow only the configured public development hostname
+  // instead of disabling Vite's host-header protection globally.
+  let allowedDevHosts: string[] | undefined;
+  if (isDev && env.MEMOFLOW_WEB_URL) {
+    try {
+      const hostname = new URL(env.MEMOFLOW_WEB_URL).hostname;
+      if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '[::1]') {
+        allowedDevHosts = [hostname];
+      }
+    } catch {
+      // API env validation owns URL diagnostics. Keep classic Vite defaults here.
+    }
+  }
 
   // Proxy target for API requests (local dev only)
   const proxyTarget = env.PROXY_TARGET_URL || env.API_URL || 'http://localhost:3000';
@@ -191,7 +212,9 @@ export default defineConfig(({ mode, command }) => {
     ].filter(Boolean),
     server: {
       port: Number(env.VITE_DEV_PORT) || 5173,
+      strictPort: true,
       open: false,
+      allowedHosts: allowedDevHosts,
       middlewareMode: false,
       // 完全禁用 Vite 的压缩中间件，避免破坏 SSE 流
       fs: {
@@ -215,6 +238,15 @@ export default defineConfig(({ mode, command }) => {
       outDir: path.resolve(workspaceRoot, 'dist/apps/web'),
       sourcemap: isDev,
       emptyOutDir: true,
+      rolldownOptions: useBundledDev
+        ? {
+            experimental: {
+              devMode: {
+                lazy: useBundledDevLazy,
+              },
+            },
+          }
+        : undefined,
     },
     test: {
       globals: true,

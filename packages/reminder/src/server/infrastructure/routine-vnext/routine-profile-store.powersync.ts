@@ -69,7 +69,7 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly routineId: string;
   }): Promise<RoutineDefinition | null> {
     const row = await this.db.getOptional<RoutineDefinitionPowerSyncRecord>(
-      `SELECT id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at
+      `SELECT id, identity_id, name, description, enabled, trigger_json, activated_at, version, created_at, updated_at
        FROM routine_definitions WHERE id = ? AND identity_id = ? LIMIT 1`,
       [input.routineId, input.identityId],
     );
@@ -78,7 +78,7 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
 
   async listDefinitions(input: { readonly identityId: string }): Promise<RoutineDefinition[]> {
     const rows = await this.db.getAll<RoutineDefinitionPowerSyncRecord>(
-      `SELECT id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at
+      `SELECT id, identity_id, name, description, enabled, trigger_json, activated_at, version, created_at, updated_at
        FROM routine_definitions WHERE identity_id = ? ORDER BY created_at ASC, id ASC`,
       [input.identityId],
     );
@@ -92,13 +92,14 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     const row = routineDefinitionToPowerSync(input.definition.snapshot());
     const result = await this.db.execute(
       `UPDATE routine_definitions
-       SET name = ?, description = ?, enabled = ?, trigger_json = ?, version = ?, updated_at = ?
+       SET name = ?, description = ?, enabled = ?, trigger_json = ?, activated_at = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
       [
         row.name,
         row.description,
         row.enabled,
         row.trigger_json,
+        row.activated_at,
         row.version,
         row.updated_at,
         row.id,
@@ -326,8 +327,8 @@ async function insertDefinition(
 ): Promise<void> {
   await tx.execute(
     `INSERT INTO routine_definitions
-      (id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, identity_id, name, description, enabled, trigger_json, activated_at, version, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.id,
       row.identity_id,
@@ -335,6 +336,7 @@ async function insertDefinition(
       row.description,
       row.enabled,
       row.trigger_json,
+      row.activated_at,
       row.version,
       row.created_at,
       row.updated_at,
@@ -353,13 +355,14 @@ async function upsertDefinition(
   if (existing) {
     await tx.execute(
       `UPDATE routine_definitions
-       SET name = ?, description = ?, enabled = ?, trigger_json = ?, version = ?, updated_at = ?
+       SET name = ?, description = ?, enabled = ?, trigger_json = ?, activated_at = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ?`,
       [
         row.name,
         row.description,
         row.enabled,
         row.trigger_json,
+        row.activated_at,
         row.version,
         row.updated_at,
         row.id,
@@ -370,8 +373,8 @@ async function upsertDefinition(
   }
   await tx.execute(
     `INSERT INTO routine_definitions
-      (id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, identity_id, name, description, enabled, trigger_json, activated_at, version, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.id,
       row.identity_id,
@@ -379,6 +382,7 @@ async function upsertDefinition(
       row.description,
       row.enabled,
       row.trigger_json,
+      row.activated_at,
       row.version,
       row.created_at,
       row.updated_at,
@@ -477,6 +481,7 @@ function mapDefinition(row: RoutineDefinitionPowerSyncRecord): RoutineDefinition
     description: row.description,
     enabled: row.enabled === 1,
     trigger: deserializeRoutineTrigger(row.trigger_json),
+    activatedAt: row.activated_at == null ? null : new Date(row.activated_at),
     version: Number(row.version),
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),

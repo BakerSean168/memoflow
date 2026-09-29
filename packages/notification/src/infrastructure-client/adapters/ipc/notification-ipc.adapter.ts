@@ -16,6 +16,8 @@ import type {
 } from '../types';
 import type {
   BatchOperationResultDTO,
+  ExecuteNotificationActionReq,
+  ExecuteNotificationActionRes,
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
@@ -24,11 +26,15 @@ import type {
 export class NotificationIpcAdapter implements INotificationApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
-  async createNotification(request: CreateNotificationRequest): Promise<Result<NotificationClientDTO>> {
+  async createNotification(
+    request: CreateNotificationRequest,
+  ): Promise<Result<NotificationClientDTO>> {
     return this.ipcClient.invoke(NotificationChannels.CREATE, request);
   }
 
-  async findNotifications(query?: QueryNotificationsRequest): Promise<Result<NotificationListResponse>> {
+  async findNotifications(
+    query?: QueryNotificationsRequest,
+  ): Promise<Result<NotificationListResponse>> {
     return this.ipcClient.invoke(NotificationChannels.LIST, query);
   }
 
@@ -62,6 +68,12 @@ export class NotificationIpcAdapter implements INotificationApiClient {
 
   async batchDeleteNotifications(ids: string[]): Promise<Result<BatchOperationResultDTO>> {
     return this.ipcClient.invoke(NotificationChannels.CLEAR_ALL, ids);
+  }
+
+  async executeAction(
+    request: ExecuteNotificationActionReq,
+  ): Promise<Result<ExecuteNotificationActionRes>> {
+    return this.ipcClient.invoke(NotificationChannels.EXECUTE_ACTION, request);
   }
 
   async getUnreadCount(): Promise<Result<UnreadCountResponse>> {

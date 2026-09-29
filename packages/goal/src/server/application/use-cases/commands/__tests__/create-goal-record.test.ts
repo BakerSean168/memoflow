@@ -14,7 +14,7 @@ function createTestGoal() {
     identityId: 'identity-1' as any,
     name: 'Graduation Goal',
     summary: null,
-    startDate: null,
+    start: null,
     reminderConfig: null,
   });
 }

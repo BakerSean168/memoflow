@@ -29,7 +29,7 @@ import {
 import { eventBus } from '@memoflow/utils/domain';
 import { PrismaGoalMapper, type PrismaGoalWithRelations } from './mappers/prisma-goal-mapper';
 import { rawDataToGoalState, type RawKeyResultData } from './mappers/goal-state-mapper';
-import { encodeGoalTimeframe } from '../goal-timeframe-persistence';
+import { encodeGoalStartTimeframe, encodeGoalTimeframe } from '../goal-timeframe-persistence';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -243,6 +243,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
    */
   protected async persist(goal: Goal): Promise<void> {
     const dto = goal.toServerDTO(true);
+    const start = encodeGoalStartTimeframe(dto.start);
     const target = encodeGoalTimeframe(dto.target);
 
     // Run in a transaction for consistency
@@ -257,7 +258,8 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           summary: dto.summary,
           description: dto.description,
           status: dto.status,
-          startDate: dto.startDate,
+          startKind: start.startKind,
+          startDate: start.startDate,
           targetKind: target.targetKind,
           targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
@@ -272,7 +274,8 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           summary: dto.summary,
           description: dto.description,
           status: dto.status,
-          startDate: dto.startDate,
+          startKind: start.startKind,
+          startDate: start.startDate,
           targetKind: target.targetKind,
           targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
@@ -427,6 +430,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
 
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
+    const start = encodeGoalStartTimeframe(dto.start);
     const target = encodeGoalTimeframe(dto.target);
     const result = await this.prisma.goal.updateMany({
       where: { id: String(dto.id), identityId: String(dto.identityId), version: expectedVersion },
@@ -435,7 +439,8 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         summary: dto.summary,
         description: dto.description,
         status: dto.status,
-        startDate: dto.startDate,
+        startKind: start.startKind,
+        startDate: start.startDate,
         targetKind: target.targetKind,
         targetEndDate: target.targetEndDate,
         completedAt: dto.completedAt ? new Date(dto.completedAt) : null,

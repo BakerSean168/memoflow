@@ -82,6 +82,7 @@ export function useTask() {
     completeOccurrence: instanceOps.completeOccurrence,
     uncompleteOccurrence: instanceOps.uncompleteOccurrence,
     rescheduleOccurrence: instanceOps.rescheduleOccurrence,
+    setOccurrenceChecklistItem: instanceOps.setOccurrenceChecklistItem,
     skipOccurrence: instanceOps.skipOccurrence,
     // Pagination
     setPage,

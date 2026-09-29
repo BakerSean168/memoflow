@@ -1,4 +1,4 @@
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/contracts/primitives';
 import type { LabelDto } from '@memoflow/contracts/label';
 /**
  * Goal 聚合根实现
@@ -31,11 +31,13 @@ import type { LabelDto } from '@memoflow/contracts/label';
 
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared';
+import { addYmdDays } from '@memoflow/time';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
 import type { GoalEventMap } from '@memoflow/contracts/goal';
 import {
   GoalStatus,
   ReminderTriggerType,
+  goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
 } from '@memoflow/contracts/goal';
 import type {
@@ -58,6 +60,7 @@ import {
   KeyResultNotFoundInGoalError,
   GoalNameRequiredError,
   GoalInvalidPlanningWindowError,
+  GoalInvalidReminderWindowError,
   GoalKeyResultNotFoundError,
   GoalReviewNotFoundError,
   GoalDeletedError,
@@ -80,7 +83,7 @@ export interface GoalState {
   summary: string | null;
   description: string | null;
   status: GoalStatus;
-  startDate: Ymd | null;
+  start: GoalTimeframe | null;
   target: GoalTimeframe | null;
   completedAt: Instant | null;
   archivedAt: Instant | null;
@@ -124,7 +127,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: params.summary ?? null,
       description: params.description ?? null,
       status: params.status,
-      startDate: params.startDate ?? null,
+      start: params.start ?? null,
       target: params.target ?? null,
       completedAt: params.completedAt ?? null,
       archivedAt: params.archivedAt ?? null,
@@ -168,8 +171,8 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.status;
   }
 
-  get startDate(): Ymd | null {
-    return this._props.startDate;
+  get start(): GoalTimeframe | null {
+    return this._props.start;
   }
 
   get target(): GoalTimeframe | null {
@@ -261,7 +264,7 @@ export class Goal extends AggregateRoot<GoalId> {
     name: string;
     summary?: string | null;
     description?: string | null;
-    startDate: Ymd | null;
+    start: GoalTimeframe | null;
     target: GoalTimeframe | null;
     reminderConfig: GoalReminderConfig | null;
   }): Goal {
@@ -271,7 +274,12 @@ export class Goal extends AggregateRoot<GoalId> {
     Goal.validateTitle(params.name);
     Goal.validateSummary(params.summary ?? null);
     Goal.validateDescription(params.description ?? null);
-    Goal.validatePlanningWindow(params.startDate, params.target);
+    Goal.validatePlanningWindow(params.start, params.target);
+    Goal.validateReminderWindow(
+      params.start,
+      params.target,
+      params.reminderConfig?.toDTO() ?? null,
+    );
 
     const now = Date.now();
     const goal = new Goal({
@@ -281,7 +289,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: params.summary?.trim() || null,
       description: params.description?.trim() || null,
       status: GoalStatus.Planned,
-      startDate: params.startDate ?? null,
+      start: params.start ?? null,
       target: params.target ?? null,
       completedAt: null,
       archivedAt: null,
@@ -362,20 +370,22 @@ export class Goal extends AggregateRoot<GoalId> {
   }
 
   public updatePlanningTime(params: {
-    startDate?: Ymd | null;
+    start?: GoalTimeframe | null;
     target?: GoalTimeframe | null;
   }): void {
     this.ensureModifiable();
-    const nextStartDate = params.startDate !== undefined ? params.startDate : this._props.startDate;
+    const nextStart = params.start !== undefined ? params.start : this._props.start;
     const nextTarget = params.target !== undefined ? params.target : this._props.target;
-    Goal.validatePlanningWindow(nextStartDate, nextTarget);
+    Goal.validatePlanningWindow(nextStart, nextTarget);
+    Goal.validateReminderWindow(nextStart, nextTarget, this._props.reminderConfig?.toDTO() ?? null);
+    const startUnchanged = Goal.sameTimeframe(nextStart, this._props.start);
     const targetUnchanged = Goal.sameTimeframe(nextTarget, this._props.target);
-    if (nextStartDate === this._props.startDate && targetUnchanged) return;
+    if (startUnchanged && targetUnchanged) return;
 
     const changes: string[] = [];
-    if (params.startDate !== undefined && params.startDate !== this._props.startDate) {
-      this._props.startDate = params.startDate;
-      changes.push('startDate');
+    if (params.start !== undefined && !startUnchanged) {
+      this._props.start = params.start;
+      changes.push('start');
     }
     if (params.target !== undefined && !targetUnchanged) {
       this._props.target = params.target;
@@ -489,7 +499,8 @@ export class Goal extends AggregateRoot<GoalId> {
    * ✅ 更新提醒配置
    */
   public updateReminderConfig(config: GoalReminderConfigDTO | null): void {
-    this._props.reminderConfig = config ? GoalReminderConfig.fromDTO(config) : null;
+    Goal.validateReminderWindow(this._props.start, this._props.target, config);
+    this._props.reminderConfig = config ? GoalReminderConfig.create(config) : null;
     this._props.updatedAt = Date.now();
     this.addDomainEvent<GoalEventMap['goal:reminder-config-changed']>(
       'goal:reminder-config-changed',
@@ -981,7 +992,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: this._props.summary,
       description: this._props.description,
       status: this._props.status,
-      startDate: this._props.startDate,
+      start: this._props.start,
       target: this._props.target,
       completedAt: this._props.completedAt,
       archivedAt: this._props.archivedAt,
@@ -1027,7 +1038,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: this._props.summary,
       description: this._props.description,
       status: this._props.status,
-      startDate: this._props.startDate ?? null,
+      start: this._props.start ?? null,
       target: this._props.target ?? null,
       completedAt: this._props.completedAt ?? null,
       archivedAt: this._props.archivedAt ?? null,
@@ -1097,15 +1108,37 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  /** Goal start may sit inside a coarse target period, but never after that period ends. */
+  /** Semantic start may overlap a coarse target period, but cannot begin after it ends. */
   public static validatePlanningWindow(
-    startDate: Ymd | null | undefined,
+    start: GoalTimeframe | null | undefined,
     target: GoalTimeframe | null | undefined,
   ): void {
-    if (startDate == null || target == null) return;
-    const targetEndDate = goalTimeframeEndBoundary(target);
-    if (startDate > targetEndDate) {
-      throw new GoalInvalidPlanningWindowError(startDate, targetEndDate);
+    if (start == null || target == null) return;
+    const startBoundary = goalTimeframeStartBoundary(start);
+    const targetEndBoundary = goalTimeframeEndBoundary(target);
+    if (startBoundary > targetEndBoundary) {
+      throw new GoalInvalidPlanningWindowError(startBoundary, targetEndBoundary);
+    }
+  }
+
+  /**
+   * Target-relative reminders belong to the Goal planning window. A reminder
+   * that would fire before the Goal starts is an invalid configuration.
+   */
+  public static validateReminderWindow(
+    start: GoalTimeframe | null | undefined,
+    target: GoalTimeframe | null | undefined,
+    config: GoalReminderConfigDTO | null | undefined,
+  ): void {
+    if (start == null || target == null || !config?.enabled) return;
+    const startBoundary = goalTimeframeStartBoundary(start);
+    const targetEndBoundary = goalTimeframeEndBoundary(target);
+    for (const trigger of config.triggers) {
+      if (!trigger.enabled || trigger.type !== ReminderTriggerType.RemainingDays) continue;
+      const reminderBoundary = addYmdDays(targetEndBoundary, -trigger.value);
+      if (reminderBoundary < startBoundary) {
+        throw new GoalInvalidReminderWindowError(reminderBoundary, startBoundary);
+      }
     }
   }
 

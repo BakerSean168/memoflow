@@ -33,6 +33,7 @@ const i18n = createI18n({
           markReadFailed: 'Failed to mark as read',
           markAllReadFailed: 'Failed to mark all as read',
           deleteFailed: 'Failed to delete notification',
+          actionFailed: 'Failed to execute notification action',
           refreshStatsFailed: 'Failed to refresh stats',
         },
       },

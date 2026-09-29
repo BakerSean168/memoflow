@@ -59,6 +59,12 @@ const command: AssistantRuntimeMessageCommand = {
   surface: 'web',
 };
 
+const normalizedCommand = {
+  ...command,
+  attachments: [],
+  selectedEntities: [],
+};
+
 const started = {
   eventId: 'run-1:1',
   runId: 'run-1',
@@ -89,6 +95,7 @@ describe('AssistantRuntimeHttpClient', () => {
           conversationId: 'conversation-1',
           role: 'assistant' as const,
           content: 'persisted reply',
+          attachments: [],
           createdAt: 1,
         },
       ],
@@ -130,7 +137,7 @@ describe('AssistantRuntimeHttpClient', () => {
 
     expect(stream).toHaveBeenCalledWith(
       '/ai/runtime/assistant/sse',
-      expect.objectContaining({ method: 'POST', body: command }),
+      expect.objectContaining({ method: 'POST', body: normalizedCommand }),
     );
     expect(JSON.stringify(stream.mock.calls[0][1].body)).not.toContain('identityId');
     expect(events).toEqual([started, completed]);
@@ -181,6 +188,7 @@ describe('AssistantRuntimeIpcClient', () => {
           conversationId: 'conversation-1',
           role: 'assistant' as const,
           content: 'persisted reply',
+          attachments: [],
           createdAt: 1,
         },
       ],
@@ -240,7 +248,7 @@ describe('AssistantRuntimeIpcClient', () => {
     expect(invoke).toHaveBeenCalledWith(
       AIChannels.RUNTIME_ASSISTANT_START,
       expect.objectContaining({
-        command: { ...command, surface: 'desktop' },
+        command: { ...normalizedCommand, surface: 'desktop' },
       }),
     );
     expect(events).toEqual([started, completed]);

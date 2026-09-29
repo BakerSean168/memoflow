@@ -21,11 +21,13 @@ class FakeDb implements IElectronDatabase {
     private readonly definitions: Record<string, unknown>[],
     private readonly memberships: Record<string, unknown>[],
     private readonly overrides: Record<string, unknown>[] = [],
+    private readonly preferences: Record<string, unknown>[] = [],
   ) {}
 
   async getAll<T>(sql: string): Promise<T[]> {
     if (sql.includes('FROM routine_definitions')) return this.definitions as T[];
     if (sql.includes('FROM routine_profile_memberships')) return this.memberships as T[];
+    if (sql.includes('FROM routine_preferences')) return this.preferences as T[];
     if (sql.includes('FROM routine_temporary_overrides')) return this.overrides as T[];
     if (sql.includes('FROM routine_occurrences')) return [] as T[];
     throw new Error(`Unexpected SQL: ${sql}`);
@@ -57,6 +59,42 @@ const activeTrigger = createActiveUsageTrigger({
 });
 
 describe('PowerSync Routine local registration projection', () => {
+  it('projects the persisted global gate into every local runtime lane', async () => {
+    const trigger = createElapsedTrigger({
+      durationMs: 30 * 60_000,
+      anchor: 'profile-activation',
+    });
+    const db = new FakeDb(
+      [
+        {
+          id: 'routine-global-gated',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(trigger),
+          version: 1,
+          updated_at: '2026-09-17T00:00:00.000Z',
+        },
+      ],
+      [],
+      [],
+      [{ global_enabled: 0 }],
+    );
+
+    const snapshot = await loadPowerSyncRoutineLocalRegistrations(db, 'identity-1', {
+      activeProfileIds: [],
+    });
+
+    expect(snapshot.elapsed).toEqual([
+      expect.objectContaining({
+        routineId: 'routine-global-gated',
+        gates: expect.objectContaining({
+          globalEnabled: false,
+          routineEnabled: true,
+        }),
+      }),
+    ]);
+  });
+
   it('loads ActiveUsage semantics and explicit protocol-break capability without name heuristics', async () => {
     const db = new FakeDb(
       [
@@ -225,10 +263,16 @@ describe('PowerSync Routine local registration projection', () => {
     });
     const snapshot = await loadPowerSyncRoutineLocalRegistrations(
       new FakeDb(
-        [{
-          id: 'legacy', identity_id: 'identity-1', enabled: 1, trigger_json: legacyJson,
-          version: 1, updated_at: '2026-09-17T00:00:00.000Z',
-        }],
+        [
+          {
+            id: 'legacy',
+            identity_id: 'identity-1',
+            enabled: 1,
+            trigger_json: legacyJson,
+            version: 1,
+            updated_at: '2026-09-17T00:00:00.000Z',
+          },
+        ],
         [],
       ),
       'identity-1',
@@ -236,65 +280,47 @@ describe('PowerSync Routine local registration projection', () => {
     expect(snapshot.activeUsage[0]?.trigger.protocolBreakCredit).toBeNull();
     expect(snapshot.protocolBreakCredits).toEqual([]);
   });
-  it('projects Elapsed durable anchors from definition revision or last satisfied occurrence', async () => {
-    class ElapsedDb extends FakeDb {
-      override async getAll<T>(sql: string): Promise<T[]> {
-        if (sql.includes('FROM routine_occurrences')) {
-          return [
-            {
-              routine_id: 'activation',
-              occurrence_key: 'routine:activation:elapsed:definition-4:2',
-              trigger_kind: 'Elapsed',
-              source_revision: 'definition-4',
-              became_due_at: '2026-09-17T01:32:00.000Z',
-              resolution_state: 'Open',
-              resolved_at: null,
-            },
-            {
-              routine_id: 'last',
-              occurrence_key: 'routine:last:elapsed:definition-7:1',
-              trigger_kind: 'Elapsed',
-              source_revision: 'definition-7',
-              became_due_at: '2026-09-17T01:45:00.000Z',
-              resolution_state: 'Satisfied',
-              resolved_at: '2026-09-17T02:00:00.000Z',
-            },
-            {
-              routine_id: 'last',
-              occurrence_key: 'routine:last:elapsed:definition-7:0',
-              trigger_kind: 'Elapsed',
-              source_revision: 'definition-7',
-              became_due_at: '2026-09-17T00:45:00.000Z',
-              resolution_state: 'Satisfied',
-              resolved_at: '2026-09-17T01:00:00.000Z',
-            },
-          ] as T[];
-        }
-        return super.getAll<T>(sql);
-      }
-    }
-    const db = new ElapsedDb(
+  it('arms only profile-activation Elapsed locally and excludes durable Elapsed lanes', async () => {
+    const db = new FakeDb(
       [
         {
-          id: 'activation', identity_id: 'identity-1', enabled: 1,
-          trigger_json: serializeRoutineTrigger(createElapsedTrigger({
-            durationMs: 60_000, anchor: 'routine-activation',
-          })),
-          version: 4, updated_at: '2026-09-17T00:30:00.000Z',
+          id: 'activation',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(
+            createElapsedTrigger({
+              durationMs: 60_000,
+              anchor: 'routine-activation',
+            }),
+          ),
+          version: 4,
+          updated_at: '2026-09-17T00:30:00.000Z',
         },
         {
-          id: 'last', identity_id: 'identity-1', enabled: 1,
-          trigger_json: serializeRoutineTrigger(createElapsedTrigger({
-            durationMs: 60_000, anchor: 'last-satisfied',
-          })),
-          version: 7, updated_at: '2026-09-17T00:45:00.000Z',
+          id: 'last',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(
+            createElapsedTrigger({
+              durationMs: 60_000,
+              anchor: 'last-satisfied',
+            }),
+          ),
+          version: 7,
+          updated_at: '2026-09-17T00:45:00.000Z',
         },
         {
-          id: 'profile', identity_id: 'identity-1', enabled: 1,
-          trigger_json: serializeRoutineTrigger(createElapsedTrigger({
-            durationMs: 60_000, anchor: 'profile-activation',
-          })),
-          version: 2, updated_at: '2026-09-17T00:50:00.000Z',
+          id: 'profile',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(
+            createElapsedTrigger({
+              durationMs: 60_000,
+              anchor: 'profile-activation',
+            }),
+          ),
+          version: 2,
+          updated_at: '2026-09-17T00:50:00.000Z',
         },
       ],
       [],
@@ -303,24 +329,19 @@ describe('PowerSync Routine local registration projection', () => {
     const snapshot = await loadPowerSyncRoutineLocalRegistrations(db, 'identity-1', {
       activeProfileIds: [],
     });
-    expect(snapshot.elapsed).toEqual([
-      expect.objectContaining({
-        routineId: 'activation',
-        durableAnchorAt: Date.parse('2026-09-17T00:30:00.000Z'),
-        durableAnchorRevision: 'definition-4',
-        initialGeneration: 2,
-      }),
-      expect.objectContaining({
-        routineId: 'last',
-        durableAnchorAt: Date.parse('2026-09-17T02:00:00.000Z'),
-        durableAnchorRevision: `satisfied-${Date.parse('2026-09-17T02:00:00.000Z')}`,
-        initialGeneration: 1,
-      }),
-      expect.objectContaining({ routineId: 'profile' }),
-    ]);
-    expect(snapshot.elapsed[2]).not.toHaveProperty('durableAnchorAt');
-    expect(snapshot.elapsed[2]).not.toHaveProperty('durableAnchorRevision');
-    expect(snapshot.elapsed[2]).not.toHaveProperty('initialGeneration');
+
+    expect(snapshot.elapsed).toHaveLength(1);
+    expect(snapshot.elapsed[0]).toMatchObject({
+      routineId: 'profile',
+      trigger: {
+        type: 'Elapsed',
+        timingOwner: 'local-runtime',
+        anchor: 'profile-activation',
+      },
+    });
+    expect(snapshot.elapsed[0]).not.toHaveProperty('durableAnchorAt');
+    expect(snapshot.elapsed.map((entry) => entry.routineId)).not.toContain('activation');
+    expect(snapshot.elapsed.map((entry) => entry.routineId)).not.toContain('last');
   });
 
   it('restores ActiveUsage generation from durable terminal/open occurrences after restart', async () => {
@@ -364,13 +385,19 @@ describe('PowerSync Routine local registration projection', () => {
     const db = new RestartDb(
       [
         {
-          id: 'active-open', identity_id: 'identity-1', enabled: 1,
-          trigger_json: serializeRoutineTrigger(active), version: 1,
+          id: 'active-open',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(active),
+          version: 1,
           updated_at: '2026-09-17T00:00:00.000Z',
         },
         {
-          id: 'active-terminal', identity_id: 'identity-1', enabled: 1,
-          trigger_json: serializeRoutineTrigger(active), version: 1,
+          id: 'active-terminal',
+          identity_id: 'identity-1',
+          enabled: 1,
+          trigger_json: serializeRoutineTrigger(active),
+          version: 1,
           updated_at: '2026-09-17T00:00:00.000Z',
         },
       ],
@@ -403,5 +430,4 @@ describe('PowerSync Routine local registration projection', () => {
       }),
     ]);
   });
-
 });

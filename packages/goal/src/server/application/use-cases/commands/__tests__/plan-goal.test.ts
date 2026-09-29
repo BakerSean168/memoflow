@@ -9,7 +9,7 @@ function createGoal() {
     identityId: 'identity-1' as never,
     name: 'Plan me',
     summary: null,
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
   });

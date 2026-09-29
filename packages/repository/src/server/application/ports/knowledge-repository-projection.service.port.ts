@@ -18,10 +18,15 @@ import type {
   KnowledgeAttachmentProjectionListResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   KnowledgeNoteLinkGraphResponse,
   GetKnowledgeNoteLinkGraphReq,
   ListKnowledgeAttachmentProjectionsReq,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
 } from '@memoflow/contracts/repository';
@@ -34,11 +39,24 @@ import type {
 export interface IKnowledgeRepositoryProjectionService {
   start(): void;
   stop(): void;
+  reconcileNow(): Promise<void>;
   ingest(request: GithubWebhookIngressRequest): Promise<Result<GithubWebhookIngressResponse>>;
   listNotes(
     identityId: string,
     request: ListKnowledgeNoteProjectionsReq,
   ): Promise<Result<KnowledgeNoteProjectionListResponse>>;
+  listReferenceableDocuments(
+    identityId: string,
+    request: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>>;
+  listNoteTree(
+    identityId: string,
+    request: ListKnowledgeNoteTreeReq,
+  ): Promise<Result<KnowledgeNoteTreeResponse>>;
+  resolveNoteReference(
+    identityId: string,
+    request: ResolveKnowledgeNoteReferenceReq,
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>>;
   getNote(
     identityId: string,
     projectionId: string,

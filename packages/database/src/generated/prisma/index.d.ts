@@ -209,6 +209,11 @@ export type OperationAuditLog = $Result.DefaultSelection<Prisma.$OperationAuditL
  */
 export type RoutineDefinition = $Result.DefaultSelection<Prisma.$RoutineDefinitionPayload>
 /**
+ * Model RoutinePreference
+ *
+ */
+export type RoutinePreference = $Result.DefaultSelection<Prisma.$RoutinePreferencePayload>
+/**
  * Model RoutineProfile
  *
  */
@@ -913,6 +918,16 @@ export class PrismaClient<
     * ```
     */
   get routineDefinition(): Prisma.RoutineDefinitionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.routinePreference`: Exposes CRUD operations for the **RoutinePreference** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RoutinePreferences
+    * const routinePreferences = await prisma.routinePreference.findMany()
+    * ```
+    */
+  get routinePreference(): Prisma.RoutinePreferenceDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.routineProfile`: Exposes CRUD operations for the **RoutineProfile** model.
@@ -1758,6 +1773,7 @@ export namespace Prisma {
     AccountClosureOperation: 'AccountClosureOperation',
     OperationAuditLog: 'OperationAuditLog',
     RoutineDefinition: 'RoutineDefinition',
+    RoutinePreference: 'RoutinePreference',
     RoutineProfile: 'RoutineProfile',
     RoutineProfileMembership: 'RoutineProfileMembership',
     RoutineProtocolDefinition: 'RoutineProtocolDefinition',
@@ -1809,7 +1825,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4622,6 +4638,80 @@ export namespace Prisma {
           count: {
             args: Prisma.RoutineDefinitionCountArgs<ExtArgs>
             result: $Utils.Optional<RoutineDefinitionCountAggregateOutputType> | number
+          }
+        }
+      }
+      RoutinePreference: {
+        payload: Prisma.$RoutinePreferencePayload<ExtArgs>
+        fields: Prisma.RoutinePreferenceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RoutinePreferenceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RoutinePreferenceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          findFirst: {
+            args: Prisma.RoutinePreferenceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RoutinePreferenceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          findMany: {
+            args: Prisma.RoutinePreferenceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>[]
+          }
+          create: {
+            args: Prisma.RoutinePreferenceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          createMany: {
+            args: Prisma.RoutinePreferenceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RoutinePreferenceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>[]
+          }
+          delete: {
+            args: Prisma.RoutinePreferenceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          update: {
+            args: Prisma.RoutinePreferenceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          deleteMany: {
+            args: Prisma.RoutinePreferenceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RoutinePreferenceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RoutinePreferenceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>[]
+          }
+          upsert: {
+            args: Prisma.RoutinePreferenceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RoutinePreferencePayload>
+          }
+          aggregate: {
+            args: Prisma.RoutinePreferenceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRoutinePreference>
+          }
+          groupBy: {
+            args: Prisma.RoutinePreferenceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RoutinePreferenceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RoutinePreferenceCountArgs<ExtArgs>
+            result: $Utils.Optional<RoutinePreferenceCountAggregateOutputType> | number
           }
         }
       }
@@ -7450,6 +7540,7 @@ export namespace Prisma {
     accountClosureOperation?: AccountClosureOperationOmit
     operationAuditLog?: OperationAuditLogOmit
     routineDefinition?: RoutineDefinitionOmit
+    routinePreference?: RoutinePreferenceOmit
     routineProfile?: RoutineProfileOmit
     routineProfileMembership?: RoutineProfileMembershipOmit
     routineProtocolDefinition?: RoutineProtocolDefinitionOmit
@@ -8783,6 +8874,7 @@ export namespace Prisma {
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
     taskLabels?: boolean | Account$taskLabelsArgs<ExtArgs>
     routineDefinitions?: boolean | Account$routineDefinitionsArgs<ExtArgs>
+    routinePreference?: boolean | Account$routinePreferenceArgs<ExtArgs>
     routineTemporaryOverrides?: boolean | Account$routineTemporaryOverridesArgs<ExtArgs>
     routineProfiles?: boolean | Account$routineProfilesArgs<ExtArgs>
     routineProfileMemberships?: boolean | Account$routineProfileMembershipsArgs<ExtArgs>
@@ -8854,6 +8946,7 @@ export namespace Prisma {
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
     taskLabels?: boolean | Account$taskLabelsArgs<ExtArgs>
     routineDefinitions?: boolean | Account$routineDefinitionsArgs<ExtArgs>
+    routinePreference?: boolean | Account$routinePreferenceArgs<ExtArgs>
     routineTemporaryOverrides?: boolean | Account$routineTemporaryOverridesArgs<ExtArgs>
     routineProfiles?: boolean | Account$routineProfilesArgs<ExtArgs>
     routineProfileMemberships?: boolean | Account$routineProfileMembershipsArgs<ExtArgs>
@@ -8903,6 +8996,7 @@ export namespace Prisma {
       goalLabels: Prisma.$GoalLabelPayload<ExtArgs>[]
       taskLabels: Prisma.$TaskLabelPayload<ExtArgs>[]
       routineDefinitions: Prisma.$RoutineDefinitionPayload<ExtArgs>[]
+      routinePreference: Prisma.$RoutinePreferencePayload<ExtArgs> | null
       routineTemporaryOverrides: Prisma.$RoutineTemporaryOverridePayload<ExtArgs>[]
       routineProfiles: Prisma.$RoutineProfilePayload<ExtArgs>[]
       routineProfileMemberships: Prisma.$RoutineProfileMembershipPayload<ExtArgs>[]
@@ -9342,6 +9436,7 @@ export namespace Prisma {
     goalLabels<T extends Account$goalLabelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskLabels<T extends Account$taskLabelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     routineDefinitions<T extends Account$routineDefinitionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineDefinitionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineDefinitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    routinePreference<T extends Account$routinePreferenceArgs<ExtArgs> = {}>(args?: Subset<T, Account$routinePreferenceArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     routineTemporaryOverrides<T extends Account$routineTemporaryOverridesArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineTemporaryOverridesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineTemporaryOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     routineProfiles<T extends Account$routineProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     routineProfileMemberships<T extends Account$routineProfileMembershipsArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineProfileMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineProfileMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9926,6 +10021,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RoutineDefinitionScalarFieldEnum | RoutineDefinitionScalarFieldEnum[]
+  }
+
+  /**
+   * Account.routinePreference
+   */
+  export type Account$routinePreferenceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    where?: RoutinePreferenceWhereInput
   }
 
   /**
@@ -23537,6 +23651,7 @@ export namespace Prisma {
     summary: string | null
     description: string | null
     status: string | null
+    startKind: string | null
     startDate: string | null
     targetKind: string | null
     targetEndDate: string | null
@@ -23557,6 +23672,7 @@ export namespace Prisma {
     summary: string | null
     description: string | null
     status: string | null
+    startKind: string | null
     startDate: string | null
     targetKind: string | null
     targetEndDate: string | null
@@ -23577,6 +23693,7 @@ export namespace Prisma {
     summary: number
     description: number
     status: number
+    startKind: number
     startDate: number
     targetKind: number
     targetEndDate: number
@@ -23609,6 +23726,7 @@ export namespace Prisma {
     summary?: true
     description?: true
     status?: true
+    startKind?: true
     startDate?: true
     targetKind?: true
     targetEndDate?: true
@@ -23629,6 +23747,7 @@ export namespace Prisma {
     summary?: true
     description?: true
     status?: true
+    startKind?: true
     startDate?: true
     targetKind?: true
     targetEndDate?: true
@@ -23649,6 +23768,7 @@ export namespace Prisma {
     summary?: true
     description?: true
     status?: true
+    startKind?: true
     startDate?: true
     targetKind?: true
     targetEndDate?: true
@@ -23756,6 +23876,7 @@ export namespace Prisma {
     summary: string | null
     description: string | null
     status: string
+    startKind: string | null
     startDate: string | null
     targetKind: string | null
     targetEndDate: string | null
@@ -23795,6 +23916,7 @@ export namespace Prisma {
     summary?: boolean
     description?: boolean
     status?: boolean
+    startKind?: boolean
     startDate?: boolean
     targetKind?: boolean
     targetEndDate?: boolean
@@ -23821,6 +23943,7 @@ export namespace Prisma {
     summary?: boolean
     description?: boolean
     status?: boolean
+    startKind?: boolean
     startDate?: boolean
     targetKind?: boolean
     targetEndDate?: boolean
@@ -23842,6 +23965,7 @@ export namespace Prisma {
     summary?: boolean
     description?: boolean
     status?: boolean
+    startKind?: boolean
     startDate?: boolean
     targetKind?: boolean
     targetEndDate?: boolean
@@ -23863,6 +23987,7 @@ export namespace Prisma {
     summary?: boolean
     description?: boolean
     status?: boolean
+    startKind?: boolean
     startDate?: boolean
     targetKind?: boolean
     targetEndDate?: boolean
@@ -23876,7 +24001,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "description" | "status" | "startDate" | "targetKind" | "targetEndDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
+  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "description" | "status" | "startKind" | "startDate" | "targetKind" | "targetEndDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
   export type GoalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResults?: boolean | Goal$keyResultsArgs<ExtArgs>
@@ -23908,6 +24033,7 @@ export namespace Prisma {
       summary: string | null
       description: string | null
       status: string
+      startKind: string | null
       startDate: string | null
       targetKind: string | null
       targetEndDate: string | null
@@ -24353,6 +24479,7 @@ export namespace Prisma {
     readonly summary: FieldRef<"Goal", 'String'>
     readonly description: FieldRef<"Goal", 'String'>
     readonly status: FieldRef<"Goal", 'String'>
+    readonly startKind: FieldRef<"Goal", 'String'>
     readonly startDate: FieldRef<"Goal", 'String'>
     readonly targetKind: FieldRef<"Goal", 'String'>
     readonly targetEndDate: FieldRef<"Goal", 'String'>
@@ -52731,6 +52858,7 @@ export namespace Prisma {
     description: string | null
     enabled: boolean | null
     triggerJson: string | null
+    activatedAt: Date | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -52743,6 +52871,7 @@ export namespace Prisma {
     description: string | null
     enabled: boolean | null
     triggerJson: string | null
+    activatedAt: Date | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -52755,6 +52884,7 @@ export namespace Prisma {
     description: number
     enabled: number
     triggerJson: number
+    activatedAt: number
     version: number
     createdAt: number
     updatedAt: number
@@ -52777,6 +52907,7 @@ export namespace Prisma {
     description?: true
     enabled?: true
     triggerJson?: true
+    activatedAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -52789,6 +52920,7 @@ export namespace Prisma {
     description?: true
     enabled?: true
     triggerJson?: true
+    activatedAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -52801,6 +52933,7 @@ export namespace Prisma {
     description?: true
     enabled?: true
     triggerJson?: true
+    activatedAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -52900,6 +53033,7 @@ export namespace Prisma {
     description: string | null
     enabled: boolean
     triggerJson: string | null
+    activatedAt: Date | null
     version: number
     createdAt: Date
     updatedAt: Date
@@ -52931,6 +53065,7 @@ export namespace Prisma {
     description?: boolean
     enabled?: boolean
     triggerJson?: boolean
+    activatedAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -52949,6 +53084,7 @@ export namespace Prisma {
     description?: boolean
     enabled?: boolean
     triggerJson?: boolean
+    activatedAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -52962,6 +53098,7 @@ export namespace Prisma {
     description?: boolean
     enabled?: boolean
     triggerJson?: boolean
+    activatedAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -52975,12 +53112,13 @@ export namespace Prisma {
     description?: boolean
     enabled?: boolean
     triggerJson?: boolean
+    activatedAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoutineDefinitionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "enabled" | "triggerJson" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["routineDefinition"]>
+  export type RoutineDefinitionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "enabled" | "triggerJson" | "activatedAt" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["routineDefinition"]>
   export type RoutineDefinitionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     memberships?: boolean | RoutineDefinition$membershipsArgs<ExtArgs>
@@ -53012,6 +53150,7 @@ export namespace Prisma {
       description: string | null
       enabled: boolean
       triggerJson: string | null
+      activatedAt: Date | null
       version: number
       createdAt: Date
       updatedAt: Date
@@ -53449,6 +53588,7 @@ export namespace Prisma {
     readonly description: FieldRef<"RoutineDefinition", 'String'>
     readonly enabled: FieldRef<"RoutineDefinition", 'Boolean'>
     readonly triggerJson: FieldRef<"RoutineDefinition", 'String'>
+    readonly activatedAt: FieldRef<"RoutineDefinition", 'DateTime'>
     readonly version: FieldRef<"RoutineDefinition", 'Int'>
     readonly createdAt: FieldRef<"RoutineDefinition", 'DateTime'>
     readonly updatedAt: FieldRef<"RoutineDefinition", 'DateTime'>
@@ -53959,6 +54099,1116 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: RoutineDefinitionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RoutinePreference
+   */
+
+  export type AggregateRoutinePreference = {
+    _count: RoutinePreferenceCountAggregateOutputType | null
+    _avg: RoutinePreferenceAvgAggregateOutputType | null
+    _sum: RoutinePreferenceSumAggregateOutputType | null
+    _min: RoutinePreferenceMinAggregateOutputType | null
+    _max: RoutinePreferenceMaxAggregateOutputType | null
+  }
+
+  export type RoutinePreferenceAvgAggregateOutputType = {
+    version: number | null
+  }
+
+  export type RoutinePreferenceSumAggregateOutputType = {
+    version: number | null
+  }
+
+  export type RoutinePreferenceMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    globalEnabled: boolean | null
+    version: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RoutinePreferenceMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    globalEnabled: boolean | null
+    version: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RoutinePreferenceCountAggregateOutputType = {
+    id: number
+    identityId: number
+    globalEnabled: number
+    version: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RoutinePreferenceAvgAggregateInputType = {
+    version?: true
+  }
+
+  export type RoutinePreferenceSumAggregateInputType = {
+    version?: true
+  }
+
+  export type RoutinePreferenceMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    globalEnabled?: true
+    version?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RoutinePreferenceMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    globalEnabled?: true
+    version?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RoutinePreferenceCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    globalEnabled?: true
+    version?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RoutinePreferenceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoutinePreference to aggregate.
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RoutinePreferences to fetch.
+     */
+    orderBy?: RoutinePreferenceOrderByWithRelationInput | RoutinePreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: RoutinePreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RoutinePreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RoutinePreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned RoutinePreferences
+    **/
+    _count?: true | RoutinePreferenceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: RoutinePreferenceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: RoutinePreferenceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: RoutinePreferenceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: RoutinePreferenceMaxAggregateInputType
+  }
+
+  export type GetRoutinePreferenceAggregateType<T extends RoutinePreferenceAggregateArgs> = {
+        [P in keyof T & keyof AggregateRoutinePreference]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRoutinePreference[P]>
+      : GetScalarType<T[P], AggregateRoutinePreference[P]>
+  }
+
+
+
+
+  export type RoutinePreferenceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoutinePreferenceWhereInput
+    orderBy?: RoutinePreferenceOrderByWithAggregationInput | RoutinePreferenceOrderByWithAggregationInput[]
+    by: RoutinePreferenceScalarFieldEnum[] | RoutinePreferenceScalarFieldEnum
+    having?: RoutinePreferenceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RoutinePreferenceCountAggregateInputType | true
+    _avg?: RoutinePreferenceAvgAggregateInputType
+    _sum?: RoutinePreferenceSumAggregateInputType
+    _min?: RoutinePreferenceMinAggregateInputType
+    _max?: RoutinePreferenceMaxAggregateInputType
+  }
+
+  export type RoutinePreferenceGroupByOutputType = {
+    id: string
+    identityId: string
+    globalEnabled: boolean
+    version: number
+    createdAt: Date
+    updatedAt: Date
+    _count: RoutinePreferenceCountAggregateOutputType | null
+    _avg: RoutinePreferenceAvgAggregateOutputType | null
+    _sum: RoutinePreferenceSumAggregateOutputType | null
+    _min: RoutinePreferenceMinAggregateOutputType | null
+    _max: RoutinePreferenceMaxAggregateOutputType | null
+  }
+
+  type GetRoutinePreferenceGroupByPayload<T extends RoutinePreferenceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RoutinePreferenceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RoutinePreferenceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RoutinePreferenceGroupByOutputType[P]>
+            : GetScalarType<T[P], RoutinePreferenceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RoutinePreferenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    globalEnabled?: boolean
+    version?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["routinePreference"]>
+
+  export type RoutinePreferenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    globalEnabled?: boolean
+    version?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["routinePreference"]>
+
+  export type RoutinePreferenceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    globalEnabled?: boolean
+    version?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["routinePreference"]>
+
+  export type RoutinePreferenceSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    globalEnabled?: boolean
+    version?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RoutinePreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "globalEnabled" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["routinePreference"]>
+  export type RoutinePreferenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type RoutinePreferenceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type RoutinePreferenceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $RoutinePreferencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RoutinePreference"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      globalEnabled: boolean
+      version: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["routinePreference"]>
+    composites: {}
+  }
+
+  type RoutinePreferenceGetPayload<S extends boolean | null | undefined | RoutinePreferenceDefaultArgs> = $Result.GetResult<Prisma.$RoutinePreferencePayload, S>
+
+  type RoutinePreferenceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RoutinePreferenceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RoutinePreferenceCountAggregateInputType | true
+    }
+
+  export interface RoutinePreferenceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RoutinePreference'], meta: { name: 'RoutinePreference' } }
+    /**
+     * Find zero or one RoutinePreference that matches the filter.
+     * @param {RoutinePreferenceFindUniqueArgs} args - Arguments to find a RoutinePreference
+     * @example
+     * // Get one RoutinePreference
+     * const routinePreference = await prisma.routinePreference.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RoutinePreferenceFindUniqueArgs>(args: SelectSubset<T, RoutinePreferenceFindUniqueArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RoutinePreference that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RoutinePreferenceFindUniqueOrThrowArgs} args - Arguments to find a RoutinePreference
+     * @example
+     * // Get one RoutinePreference
+     * const routinePreference = await prisma.routinePreference.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RoutinePreferenceFindUniqueOrThrowArgs>(args: SelectSubset<T, RoutinePreferenceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoutinePreference that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceFindFirstArgs} args - Arguments to find a RoutinePreference
+     * @example
+     * // Get one RoutinePreference
+     * const routinePreference = await prisma.routinePreference.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RoutinePreferenceFindFirstArgs>(args?: SelectSubset<T, RoutinePreferenceFindFirstArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RoutinePreference that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceFindFirstOrThrowArgs} args - Arguments to find a RoutinePreference
+     * @example
+     * // Get one RoutinePreference
+     * const routinePreference = await prisma.routinePreference.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RoutinePreferenceFindFirstOrThrowArgs>(args?: SelectSubset<T, RoutinePreferenceFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RoutinePreferences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RoutinePreferences
+     * const routinePreferences = await prisma.routinePreference.findMany()
+     *
+     * // Get first 10 RoutinePreferences
+     * const routinePreferences = await prisma.routinePreference.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const routinePreferenceWithIdOnly = await prisma.routinePreference.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends RoutinePreferenceFindManyArgs>(args?: SelectSubset<T, RoutinePreferenceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RoutinePreference.
+     * @param {RoutinePreferenceCreateArgs} args - Arguments to create a RoutinePreference.
+     * @example
+     * // Create one RoutinePreference
+     * const RoutinePreference = await prisma.routinePreference.create({
+     *   data: {
+     *     // ... data to create a RoutinePreference
+     *   }
+     * })
+     *
+     */
+    create<T extends RoutinePreferenceCreateArgs>(args: SelectSubset<T, RoutinePreferenceCreateArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RoutinePreferences.
+     * @param {RoutinePreferenceCreateManyArgs} args - Arguments to create many RoutinePreferences.
+     * @example
+     * // Create many RoutinePreferences
+     * const routinePreference = await prisma.routinePreference.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends RoutinePreferenceCreateManyArgs>(args?: SelectSubset<T, RoutinePreferenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RoutinePreferences and returns the data saved in the database.
+     * @param {RoutinePreferenceCreateManyAndReturnArgs} args - Arguments to create many RoutinePreferences.
+     * @example
+     * // Create many RoutinePreferences
+     * const routinePreference = await prisma.routinePreference.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many RoutinePreferences and only return the `id`
+     * const routinePreferenceWithIdOnly = await prisma.routinePreference.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends RoutinePreferenceCreateManyAndReturnArgs>(args?: SelectSubset<T, RoutinePreferenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RoutinePreference.
+     * @param {RoutinePreferenceDeleteArgs} args - Arguments to delete one RoutinePreference.
+     * @example
+     * // Delete one RoutinePreference
+     * const RoutinePreference = await prisma.routinePreference.delete({
+     *   where: {
+     *     // ... filter to delete one RoutinePreference
+     *   }
+     * })
+     *
+     */
+    delete<T extends RoutinePreferenceDeleteArgs>(args: SelectSubset<T, RoutinePreferenceDeleteArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RoutinePreference.
+     * @param {RoutinePreferenceUpdateArgs} args - Arguments to update one RoutinePreference.
+     * @example
+     * // Update one RoutinePreference
+     * const routinePreference = await prisma.routinePreference.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends RoutinePreferenceUpdateArgs>(args: SelectSubset<T, RoutinePreferenceUpdateArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RoutinePreferences.
+     * @param {RoutinePreferenceDeleteManyArgs} args - Arguments to filter RoutinePreferences to delete.
+     * @example
+     * // Delete a few RoutinePreferences
+     * const { count } = await prisma.routinePreference.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends RoutinePreferenceDeleteManyArgs>(args?: SelectSubset<T, RoutinePreferenceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoutinePreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RoutinePreferences
+     * const routinePreference = await prisma.routinePreference.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends RoutinePreferenceUpdateManyArgs>(args: SelectSubset<T, RoutinePreferenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RoutinePreferences and returns the data updated in the database.
+     * @param {RoutinePreferenceUpdateManyAndReturnArgs} args - Arguments to update many RoutinePreferences.
+     * @example
+     * // Update many RoutinePreferences
+     * const routinePreference = await prisma.routinePreference.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more RoutinePreferences and only return the `id`
+     * const routinePreferenceWithIdOnly = await prisma.routinePreference.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends RoutinePreferenceUpdateManyAndReturnArgs>(args: SelectSubset<T, RoutinePreferenceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RoutinePreference.
+     * @param {RoutinePreferenceUpsertArgs} args - Arguments to update or create a RoutinePreference.
+     * @example
+     * // Update or create a RoutinePreference
+     * const routinePreference = await prisma.routinePreference.upsert({
+     *   create: {
+     *     // ... data to create a RoutinePreference
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RoutinePreference we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RoutinePreferenceUpsertArgs>(args: SelectSubset<T, RoutinePreferenceUpsertArgs<ExtArgs>>): Prisma__RoutinePreferenceClient<$Result.GetResult<Prisma.$RoutinePreferencePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RoutinePreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceCountArgs} args - Arguments to filter RoutinePreferences to count.
+     * @example
+     * // Count the number of RoutinePreferences
+     * const count = await prisma.routinePreference.count({
+     *   where: {
+     *     // ... the filter for the RoutinePreferences we want to count
+     *   }
+     * })
+    **/
+    count<T extends RoutinePreferenceCountArgs>(
+      args?: Subset<T, RoutinePreferenceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RoutinePreferenceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RoutinePreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RoutinePreferenceAggregateArgs>(args: Subset<T, RoutinePreferenceAggregateArgs>): Prisma.PrismaPromise<GetRoutinePreferenceAggregateType<T>>
+
+    /**
+     * Group by RoutinePreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RoutinePreferenceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends RoutinePreferenceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RoutinePreferenceGroupByArgs['orderBy'] }
+        : { orderBy?: RoutinePreferenceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RoutinePreferenceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRoutinePreferenceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RoutinePreference model
+   */
+  readonly fields: RoutinePreferenceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RoutinePreference.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RoutinePreferenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RoutinePreference model
+   */
+  interface RoutinePreferenceFieldRefs {
+    readonly id: FieldRef<"RoutinePreference", 'String'>
+    readonly identityId: FieldRef<"RoutinePreference", 'String'>
+    readonly globalEnabled: FieldRef<"RoutinePreference", 'Boolean'>
+    readonly version: FieldRef<"RoutinePreference", 'Int'>
+    readonly createdAt: FieldRef<"RoutinePreference", 'DateTime'>
+    readonly updatedAt: FieldRef<"RoutinePreference", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * RoutinePreference findUnique
+   */
+  export type RoutinePreferenceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoutinePreference to fetch.
+     */
+    where: RoutinePreferenceWhereUniqueInput
+  }
+
+  /**
+   * RoutinePreference findUniqueOrThrow
+   */
+  export type RoutinePreferenceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoutinePreference to fetch.
+     */
+    where: RoutinePreferenceWhereUniqueInput
+  }
+
+  /**
+   * RoutinePreference findFirst
+   */
+  export type RoutinePreferenceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoutinePreference to fetch.
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RoutinePreferences to fetch.
+     */
+    orderBy?: RoutinePreferenceOrderByWithRelationInput | RoutinePreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RoutinePreferences.
+     */
+    cursor?: RoutinePreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RoutinePreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RoutinePreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RoutinePreferences.
+     */
+    distinct?: RoutinePreferenceScalarFieldEnum | RoutinePreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * RoutinePreference findFirstOrThrow
+   */
+  export type RoutinePreferenceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoutinePreference to fetch.
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RoutinePreferences to fetch.
+     */
+    orderBy?: RoutinePreferenceOrderByWithRelationInput | RoutinePreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RoutinePreferences.
+     */
+    cursor?: RoutinePreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RoutinePreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RoutinePreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RoutinePreferences.
+     */
+    distinct?: RoutinePreferenceScalarFieldEnum | RoutinePreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * RoutinePreference findMany
+   */
+  export type RoutinePreferenceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RoutinePreferences to fetch.
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RoutinePreferences to fetch.
+     */
+    orderBy?: RoutinePreferenceOrderByWithRelationInput | RoutinePreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing RoutinePreferences.
+     */
+    cursor?: RoutinePreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RoutinePreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RoutinePreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RoutinePreferences.
+     */
+    distinct?: RoutinePreferenceScalarFieldEnum | RoutinePreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * RoutinePreference create
+   */
+  export type RoutinePreferenceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RoutinePreference.
+     */
+    data: XOR<RoutinePreferenceCreateInput, RoutinePreferenceUncheckedCreateInput>
+  }
+
+  /**
+   * RoutinePreference createMany
+   */
+  export type RoutinePreferenceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RoutinePreferences.
+     */
+    data: RoutinePreferenceCreateManyInput | RoutinePreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RoutinePreference createManyAndReturn
+   */
+  export type RoutinePreferenceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to create many RoutinePreferences.
+     */
+    data: RoutinePreferenceCreateManyInput | RoutinePreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoutinePreference update
+   */
+  export type RoutinePreferenceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RoutinePreference.
+     */
+    data: XOR<RoutinePreferenceUpdateInput, RoutinePreferenceUncheckedUpdateInput>
+    /**
+     * Choose, which RoutinePreference to update.
+     */
+    where: RoutinePreferenceWhereUniqueInput
+  }
+
+  /**
+   * RoutinePreference updateMany
+   */
+  export type RoutinePreferenceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RoutinePreferences.
+     */
+    data: XOR<RoutinePreferenceUpdateManyMutationInput, RoutinePreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which RoutinePreferences to update
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * Limit how many RoutinePreferences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoutinePreference updateManyAndReturn
+   */
+  export type RoutinePreferenceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to update RoutinePreferences.
+     */
+    data: XOR<RoutinePreferenceUpdateManyMutationInput, RoutinePreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which RoutinePreferences to update
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * Limit how many RoutinePreferences to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RoutinePreference upsert
+   */
+  export type RoutinePreferenceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RoutinePreference to update in case it exists.
+     */
+    where: RoutinePreferenceWhereUniqueInput
+    /**
+     * In case the RoutinePreference found by the `where` argument doesn't exist, create a new RoutinePreference with this data.
+     */
+    create: XOR<RoutinePreferenceCreateInput, RoutinePreferenceUncheckedCreateInput>
+    /**
+     * In case the RoutinePreference was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RoutinePreferenceUpdateInput, RoutinePreferenceUncheckedUpdateInput>
+  }
+
+  /**
+   * RoutinePreference delete
+   */
+  export type RoutinePreferenceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
+    /**
+     * Filter which RoutinePreference to delete.
+     */
+    where: RoutinePreferenceWhereUniqueInput
+  }
+
+  /**
+   * RoutinePreference deleteMany
+   */
+  export type RoutinePreferenceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RoutinePreferences to delete
+     */
+    where?: RoutinePreferenceWhereInput
+    /**
+     * Limit how many RoutinePreferences to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RoutinePreference without action
+   */
+  export type RoutinePreferenceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoutinePreference
+     */
+    select?: RoutinePreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoutinePreference
+     */
+    omit?: RoutinePreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoutinePreferenceInclude<ExtArgs> | null
   }
 
 
@@ -96492,6 +97742,7 @@ export namespace Prisma {
     summary: 'summary',
     description: 'description',
     status: 'status',
+    startKind: 'startKind',
     startDate: 'startDate',
     targetKind: 'targetKind',
     targetEndDate: 'targetEndDate',
@@ -96922,12 +98173,25 @@ export namespace Prisma {
     description: 'description',
     enabled: 'enabled',
     triggerJson: 'triggerJson',
+    activatedAt: 'activatedAt',
     version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type RoutineDefinitionScalarFieldEnum = (typeof RoutineDefinitionScalarFieldEnum)[keyof typeof RoutineDefinitionScalarFieldEnum]
+
+
+  export const RoutinePreferenceScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    globalEnabled: 'globalEnabled',
+    version: 'version',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RoutinePreferenceScalarFieldEnum = (typeof RoutinePreferenceScalarFieldEnum)[keyof typeof RoutinePreferenceScalarFieldEnum]
 
 
   export const RoutineProfileScalarFieldEnum: {
@@ -97729,6 +98993,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelListRelationFilter
     taskLabels?: TaskLabelListRelationFilter
     routineDefinitions?: RoutineDefinitionListRelationFilter
+    routinePreference?: XOR<RoutinePreferenceNullableScalarRelationFilter, RoutinePreferenceWhereInput> | null
     routineTemporaryOverrides?: RoutineTemporaryOverrideListRelationFilter
     routineProfiles?: RoutineProfileListRelationFilter
     routineProfileMemberships?: RoutineProfileMembershipListRelationFilter
@@ -97775,6 +99040,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelOrderByRelationAggregateInput
     taskLabels?: TaskLabelOrderByRelationAggregateInput
     routineDefinitions?: RoutineDefinitionOrderByRelationAggregateInput
+    routinePreference?: RoutinePreferenceOrderByWithRelationInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideOrderByRelationAggregateInput
     routineProfiles?: RoutineProfileOrderByRelationAggregateInput
     routineProfileMemberships?: RoutineProfileMembershipOrderByRelationAggregateInput
@@ -97824,6 +99090,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelListRelationFilter
     taskLabels?: TaskLabelListRelationFilter
     routineDefinitions?: RoutineDefinitionListRelationFilter
+    routinePreference?: XOR<RoutinePreferenceNullableScalarRelationFilter, RoutinePreferenceWhereInput> | null
     routineTemporaryOverrides?: RoutineTemporaryOverrideListRelationFilter
     routineProfiles?: RoutineProfileListRelationFilter
     routineProfileMemberships?: RoutineProfileMembershipListRelationFilter
@@ -98878,6 +100145,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Goal"> | string | null
     description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
+    startKind?: StringNullableFilter<"Goal"> | string | null
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
     targetEndDate?: StringNullableFilter<"Goal"> | string | null
@@ -98903,6 +100171,7 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     status?: SortOrder
+    startKind?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
     targetKind?: SortOrderInput | SortOrder
     targetEndDate?: SortOrderInput | SortOrder
@@ -98932,6 +100201,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Goal"> | string | null
     description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
+    startKind?: StringNullableFilter<"Goal"> | string | null
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
     targetEndDate?: StringNullableFilter<"Goal"> | string | null
@@ -98957,6 +100227,7 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     status?: SortOrder
+    startKind?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
     targetKind?: SortOrderInput | SortOrder
     targetEndDate?: SortOrderInput | SortOrder
@@ -98985,6 +100256,7 @@ export namespace Prisma {
     summary?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     description?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     status?: StringWithAggregatesFilter<"Goal"> | string
+    startKind?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     startDate?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     targetKind?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     targetEndDate?: StringNullableWithAggregatesFilter<"Goal"> | string | null
@@ -101116,6 +102388,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"RoutineDefinition"> | string | null
     enabled?: BoolFilter<"RoutineDefinition"> | boolean
     triggerJson?: StringNullableFilter<"RoutineDefinition"> | string | null
+    activatedAt?: DateTimeNullableFilter<"RoutineDefinition"> | Date | string | null
     version?: IntFilter<"RoutineDefinition"> | number
     createdAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
@@ -101133,6 +102406,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     enabled?: SortOrder
     triggerJson?: SortOrderInput | SortOrder
+    activatedAt?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -101154,6 +102428,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"RoutineDefinition"> | string | null
     enabled?: BoolFilter<"RoutineDefinition"> | boolean
     triggerJson?: StringNullableFilter<"RoutineDefinition"> | string | null
+    activatedAt?: DateTimeNullableFilter<"RoutineDefinition"> | Date | string | null
     version?: IntFilter<"RoutineDefinition"> | number
     createdAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
@@ -101171,6 +102446,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     enabled?: SortOrder
     triggerJson?: SortOrderInput | SortOrder
+    activatedAt?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -101191,9 +102467,72 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"RoutineDefinition"> | string | null
     enabled?: BoolWithAggregatesFilter<"RoutineDefinition"> | boolean
     triggerJson?: StringNullableWithAggregatesFilter<"RoutineDefinition"> | string | null
+    activatedAt?: DateTimeNullableWithAggregatesFilter<"RoutineDefinition"> | Date | string | null
     version?: IntWithAggregatesFilter<"RoutineDefinition"> | number
     createdAt?: DateTimeWithAggregatesFilter<"RoutineDefinition"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoutineDefinition"> | Date | string
+  }
+
+  export type RoutinePreferenceWhereInput = {
+    AND?: RoutinePreferenceWhereInput | RoutinePreferenceWhereInput[]
+    OR?: RoutinePreferenceWhereInput[]
+    NOT?: RoutinePreferenceWhereInput | RoutinePreferenceWhereInput[]
+    id?: StringFilter<"RoutinePreference"> | string
+    identityId?: StringFilter<"RoutinePreference"> | string
+    globalEnabled?: BoolFilter<"RoutinePreference"> | boolean
+    version?: IntFilter<"RoutinePreference"> | number
+    createdAt?: DateTimeFilter<"RoutinePreference"> | Date | string
+    updatedAt?: DateTimeFilter<"RoutinePreference"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type RoutinePreferenceOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    globalEnabled?: SortOrder
+    version?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type RoutinePreferenceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId?: string
+    AND?: RoutinePreferenceWhereInput | RoutinePreferenceWhereInput[]
+    OR?: RoutinePreferenceWhereInput[]
+    NOT?: RoutinePreferenceWhereInput | RoutinePreferenceWhereInput[]
+    globalEnabled?: BoolFilter<"RoutinePreference"> | boolean
+    version?: IntFilter<"RoutinePreference"> | number
+    createdAt?: DateTimeFilter<"RoutinePreference"> | Date | string
+    updatedAt?: DateTimeFilter<"RoutinePreference"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id" | "identityId">
+
+  export type RoutinePreferenceOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    globalEnabled?: SortOrder
+    version?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RoutinePreferenceCountOrderByAggregateInput
+    _avg?: RoutinePreferenceAvgOrderByAggregateInput
+    _max?: RoutinePreferenceMaxOrderByAggregateInput
+    _min?: RoutinePreferenceMinOrderByAggregateInput
+    _sum?: RoutinePreferenceSumOrderByAggregateInput
+  }
+
+  export type RoutinePreferenceScalarWhereWithAggregatesInput = {
+    AND?: RoutinePreferenceScalarWhereWithAggregatesInput | RoutinePreferenceScalarWhereWithAggregatesInput[]
+    OR?: RoutinePreferenceScalarWhereWithAggregatesInput[]
+    NOT?: RoutinePreferenceScalarWhereWithAggregatesInput | RoutinePreferenceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RoutinePreference"> | string
+    identityId?: StringWithAggregatesFilter<"RoutinePreference"> | string
+    globalEnabled?: BoolWithAggregatesFilter<"RoutinePreference"> | boolean
+    version?: IntWithAggregatesFilter<"RoutinePreference"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"RoutinePreference"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RoutinePreference"> | Date | string
   }
 
   export type RoutineProfileWhereInput = {
@@ -104455,6 +105794,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -104500,6 +105840,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -104545,6 +105886,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -104590,6 +105932,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -105789,6 +107132,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -105814,6 +107158,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -105837,6 +107182,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105862,6 +107208,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105886,6 +107233,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -105905,6 +107253,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105925,6 +107274,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108303,6 +109653,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108320,6 +109671,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108335,6 +109687,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108352,6 +109705,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108368,6 +109722,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108379,6 +109734,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108391,6 +109747,69 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoutinePreferenceCreateInput = {
+    id: string
+    globalEnabled?: boolean
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutRoutinePreferenceInput
+  }
+
+  export type RoutinePreferenceUncheckedCreateInput = {
+    id: string
+    identityId: string
+    globalEnabled?: boolean
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoutinePreferenceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutRoutinePreferenceNestedInput
+  }
+
+  export type RoutinePreferenceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoutinePreferenceCreateManyInput = {
+    id: string
+    identityId: string
+    globalEnabled?: boolean
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoutinePreferenceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoutinePreferenceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -112116,6 +113535,11 @@ export namespace Prisma {
     none?: RoutineDefinitionWhereInput
   }
 
+  export type RoutinePreferenceNullableScalarRelationFilter = {
+    is?: RoutinePreferenceWhereInput | null
+    isNot?: RoutinePreferenceWhereInput | null
+  }
+
   export type RoutineTemporaryOverrideListRelationFilter = {
     every?: RoutineTemporaryOverrideWhereInput
     some?: RoutineTemporaryOverrideWhereInput
@@ -113337,6 +114761,7 @@ export namespace Prisma {
     summary?: SortOrder
     description?: SortOrder
     status?: SortOrder
+    startKind?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
     targetEndDate?: SortOrder
@@ -113362,6 +114787,7 @@ export namespace Prisma {
     summary?: SortOrder
     description?: SortOrder
     status?: SortOrder
+    startKind?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
     targetEndDate?: SortOrder
@@ -113382,6 +114808,7 @@ export namespace Prisma {
     summary?: SortOrder
     description?: SortOrder
     status?: SortOrder
+    startKind?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
     targetEndDate?: SortOrder
@@ -114743,6 +116170,7 @@ export namespace Prisma {
     description?: SortOrder
     enabled?: SortOrder
     triggerJson?: SortOrder
+    activatedAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -114759,6 +116187,7 @@ export namespace Prisma {
     description?: SortOrder
     enabled?: SortOrder
     triggerJson?: SortOrder
+    activatedAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -114771,12 +116200,48 @@ export namespace Prisma {
     description?: SortOrder
     enabled?: SortOrder
     triggerJson?: SortOrder
+    activatedAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type RoutineDefinitionSumOrderByAggregateInput = {
+    version?: SortOrder
+  }
+
+  export type RoutinePreferenceCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    globalEnabled?: SortOrder
+    version?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoutinePreferenceAvgOrderByAggregateInput = {
+    version?: SortOrder
+  }
+
+  export type RoutinePreferenceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    globalEnabled?: SortOrder
+    version?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoutinePreferenceMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    globalEnabled?: SortOrder
+    version?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RoutinePreferenceSumOrderByAggregateInput = {
     version?: SortOrder
   }
 
@@ -116831,6 +118296,12 @@ export namespace Prisma {
     connect?: RoutineDefinitionWhereUniqueInput | RoutineDefinitionWhereUniqueInput[]
   }
 
+  export type RoutinePreferenceCreateNestedOneWithoutAccountInput = {
+    create?: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: RoutinePreferenceCreateOrConnectWithoutAccountInput
+    connect?: RoutinePreferenceWhereUniqueInput
+  }
+
   export type RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput = {
     create?: XOR<RoutineTemporaryOverrideCreateWithoutAccountInput, RoutineTemporaryOverrideUncheckedCreateWithoutAccountInput> | RoutineTemporaryOverrideCreateWithoutAccountInput[] | RoutineTemporaryOverrideUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: RoutineTemporaryOverrideCreateOrConnectWithoutAccountInput | RoutineTemporaryOverrideCreateOrConnectWithoutAccountInput[]
@@ -117081,6 +118552,12 @@ export namespace Prisma {
     connectOrCreate?: RoutineDefinitionCreateOrConnectWithoutAccountInput | RoutineDefinitionCreateOrConnectWithoutAccountInput[]
     createMany?: RoutineDefinitionCreateManyAccountInputEnvelope
     connect?: RoutineDefinitionWhereUniqueInput | RoutineDefinitionWhereUniqueInput[]
+  }
+
+  export type RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput = {
+    create?: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: RoutinePreferenceCreateOrConnectWithoutAccountInput
+    connect?: RoutinePreferenceWhereUniqueInput
   }
 
   export type RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput = {
@@ -117388,6 +118865,16 @@ export namespace Prisma {
     update?: RoutineDefinitionUpdateWithWhereUniqueWithoutAccountInput | RoutineDefinitionUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: RoutineDefinitionUpdateManyWithWhereWithoutAccountInput | RoutineDefinitionUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: RoutineDefinitionScalarWhereInput | RoutineDefinitionScalarWhereInput[]
+  }
+
+  export type RoutinePreferenceUpdateOneWithoutAccountNestedInput = {
+    create?: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: RoutinePreferenceCreateOrConnectWithoutAccountInput
+    upsert?: RoutinePreferenceUpsertWithoutAccountInput
+    disconnect?: RoutinePreferenceWhereInput | boolean
+    delete?: RoutinePreferenceWhereInput | boolean
+    connect?: RoutinePreferenceWhereUniqueInput
+    update?: XOR<XOR<RoutinePreferenceUpdateToOneWithWhereWithoutAccountInput, RoutinePreferenceUpdateWithoutAccountInput>, RoutinePreferenceUncheckedUpdateWithoutAccountInput>
   }
 
   export type RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput = {
@@ -117892,6 +119379,16 @@ export namespace Prisma {
     update?: RoutineDefinitionUpdateWithWhereUniqueWithoutAccountInput | RoutineDefinitionUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: RoutineDefinitionUpdateManyWithWhereWithoutAccountInput | RoutineDefinitionUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: RoutineDefinitionScalarWhereInput | RoutineDefinitionScalarWhereInput[]
+  }
+
+  export type RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput = {
+    create?: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: RoutinePreferenceCreateOrConnectWithoutAccountInput
+    upsert?: RoutinePreferenceUpsertWithoutAccountInput
+    disconnect?: RoutinePreferenceWhereInput | boolean
+    delete?: RoutinePreferenceWhereInput | boolean
+    connect?: RoutinePreferenceWhereUniqueInput
+    update?: XOR<XOR<RoutinePreferenceUpdateToOneWithWhereWithoutAccountInput, RoutinePreferenceUpdateWithoutAccountInput>, RoutinePreferenceUncheckedUpdateWithoutAccountInput>
   }
 
   export type RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -119838,6 +121335,20 @@ export namespace Prisma {
     update?: XOR<XOR<RoutineTemporaryOverrideUpdateToOneWithWhereWithoutRoutineInput, RoutineTemporaryOverrideUpdateWithoutRoutineInput>, RoutineTemporaryOverrideUncheckedUpdateWithoutRoutineInput>
   }
 
+  export type AccountCreateNestedOneWithoutRoutinePreferenceInput = {
+    create?: XOR<AccountCreateWithoutRoutinePreferenceInput, AccountUncheckedCreateWithoutRoutinePreferenceInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutRoutinePreferenceInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutRoutinePreferenceNestedInput = {
+    create?: XOR<AccountCreateWithoutRoutinePreferenceInput, AccountUncheckedCreateWithoutRoutinePreferenceInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutRoutinePreferenceInput
+    upsert?: AccountUpsertWithoutRoutinePreferenceInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutRoutinePreferenceInput, AccountUpdateWithoutRoutinePreferenceInput>, AccountUncheckedUpdateWithoutRoutinePreferenceInput>
+  }
+
   export type AccountCreateNestedOneWithoutRoutineProfilesInput = {
     create?: XOR<AccountCreateWithoutRoutineProfilesInput, AccountUncheckedCreateWithoutRoutineProfilesInput>
     connectOrCreate?: AccountCreateOrConnectWithoutRoutineProfilesInput
@@ -121547,6 +123058,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -121570,6 +123082,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -121675,6 +123188,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -121690,6 +123204,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -121707,6 +123222,27 @@ export namespace Prisma {
   export type RoutineDefinitionCreateManyAccountInputEnvelope = {
     data: RoutineDefinitionCreateManyAccountInput | RoutineDefinitionCreateManyAccountInput[]
     skipDuplicates?: boolean
+  }
+
+  export type RoutinePreferenceCreateWithoutAccountInput = {
+    id: string
+    globalEnabled?: boolean
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoutinePreferenceUncheckedCreateWithoutAccountInput = {
+    id: string
+    globalEnabled?: boolean
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RoutinePreferenceCreateOrConnectWithoutAccountInput = {
+    where: RoutinePreferenceWhereUniqueInput
+    create: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
   }
 
   export type RoutineTemporaryOverrideCreateWithoutAccountInput = {
@@ -123109,6 +124645,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Goal"> | string | null
     description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
+    startKind?: StringNullableFilter<"Goal"> | string | null
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
     targetEndDate?: StringNullableFilter<"Goal"> | string | null
@@ -123227,9 +124764,37 @@ export namespace Prisma {
     description?: StringNullableFilter<"RoutineDefinition"> | string | null
     enabled?: BoolFilter<"RoutineDefinition"> | boolean
     triggerJson?: StringNullableFilter<"RoutineDefinition"> | string | null
+    activatedAt?: DateTimeNullableFilter<"RoutineDefinition"> | Date | string | null
     version?: IntFilter<"RoutineDefinition"> | number
     createdAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineDefinition"> | Date | string
+  }
+
+  export type RoutinePreferenceUpsertWithoutAccountInput = {
+    update: XOR<RoutinePreferenceUpdateWithoutAccountInput, RoutinePreferenceUncheckedUpdateWithoutAccountInput>
+    create: XOR<RoutinePreferenceCreateWithoutAccountInput, RoutinePreferenceUncheckedCreateWithoutAccountInput>
+    where?: RoutinePreferenceWhereInput
+  }
+
+  export type RoutinePreferenceUpdateToOneWithWhereWithoutAccountInput = {
+    where?: RoutinePreferenceWhereInput
+    data: XOR<RoutinePreferenceUpdateWithoutAccountInput, RoutinePreferenceUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type RoutinePreferenceUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RoutinePreferenceUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    globalEnabled?: BoolFieldUpdateOperationsInput | boolean
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RoutineTemporaryOverrideUpsertWithWhereUniqueWithoutAccountInput = {
@@ -124356,6 +125921,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -124400,6 +125966,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -124460,6 +126027,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -124504,6 +126072,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -124548,6 +126117,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -124592,6 +126162,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -124652,6 +126223,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -124696,6 +126268,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -124740,6 +126313,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -124784,6 +126358,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -124844,6 +126419,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -124888,6 +126464,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -124932,6 +126509,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -124976,6 +126554,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -125036,6 +126615,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -125080,6 +126660,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -125124,6 +126705,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -125168,6 +126750,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -125228,6 +126811,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -125272,6 +126856,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -125316,6 +126901,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -125360,6 +126946,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -125420,6 +127007,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -125464,6 +127052,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -125611,6 +127200,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -125655,6 +127245,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -125812,6 +127403,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -125856,6 +127448,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -126116,6 +127709,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -126160,6 +127754,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -126359,6 +127954,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -126403,6 +127999,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -126563,6 +128160,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -126587,6 +128185,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -126753,6 +128352,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126777,6 +128377,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126965,6 +128566,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -126989,6 +128591,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -127027,6 +128630,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127051,6 +128655,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127073,6 +128678,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -127097,6 +128703,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -127183,6 +128790,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127207,6 +128815,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127440,6 +129049,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -127484,6 +129094,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -127593,6 +129204,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -127637,6 +129249,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -127982,6 +129595,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -128026,6 +129640,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -128124,6 +129739,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -128168,6 +129784,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -128244,6 +129861,7 @@ export namespace Prisma {
     labels?: LabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -128288,6 +129906,7 @@ export namespace Prisma {
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -128332,6 +129951,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -128356,6 +129976,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -128426,6 +130047,7 @@ export namespace Prisma {
     labels?: LabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -128470,6 +130092,7 @@ export namespace Prisma {
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -128520,6 +130143,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128544,6 +130168,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128604,6 +130229,7 @@ export namespace Prisma {
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -128648,6 +130274,7 @@ export namespace Prisma {
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -128793,6 +130420,7 @@ export namespace Prisma {
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -128837,6 +130465,7 @@ export namespace Prisma {
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -129113,6 +130742,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -129157,6 +130787,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -129281,6 +130912,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -129325,6 +130957,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -129369,6 +131002,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -129413,6 +131047,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -129540,6 +131175,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -129584,6 +131220,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -129908,6 +131545,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -129952,6 +131590,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -130085,6 +131724,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -130129,6 +131769,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -130173,6 +131814,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -130217,6 +131859,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -130277,6 +131920,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -130321,6 +131965,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -130364,6 +132009,7 @@ export namespace Prisma {
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -130408,6 +132054,7 @@ export namespace Prisma {
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -130625,6 +132272,7 @@ export namespace Prisma {
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -130669,6 +132317,7 @@ export namespace Prisma {
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -130776,6 +132425,202 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AccountCreateWithoutRoutinePreferenceInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutRoutinePreferenceInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutRoutinePreferenceInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutRoutinePreferenceInput, AccountUncheckedCreateWithoutRoutinePreferenceInput>
+  }
+
+  export type AccountUpsertWithoutRoutinePreferenceInput = {
+    update: XOR<AccountUpdateWithoutRoutinePreferenceInput, AccountUncheckedUpdateWithoutRoutinePreferenceInput>
+    create: XOR<AccountCreateWithoutRoutinePreferenceInput, AccountUncheckedCreateWithoutRoutinePreferenceInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutRoutinePreferenceInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutRoutinePreferenceInput, AccountUncheckedUpdateWithoutRoutinePreferenceInput>
+  }
+
+  export type AccountUpdateWithoutRoutinePreferenceInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutRoutinePreferenceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type AccountCreateWithoutRoutineProfilesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -130788,6 +132633,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
@@ -130832,6 +132678,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -130919,6 +132766,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
@@ -130963,6 +132811,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -131023,6 +132872,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
@@ -131067,6 +132917,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -131137,6 +132988,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131153,6 +133005,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131189,6 +133042,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
@@ -131233,6 +133087,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -131315,6 +133170,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131331,6 +133187,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131351,6 +133208,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -131395,6 +133253,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -131490,6 +133349,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -131534,6 +133394,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -131594,6 +133455,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -131638,6 +133500,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -131723,6 +133586,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -131767,6 +133631,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -131836,6 +133701,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131852,6 +133718,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131877,6 +133744,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -131921,6 +133789,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -132009,6 +133878,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132025,6 +133895,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132056,6 +133927,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -132100,6 +133972,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -132160,6 +134033,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -132204,6 +134078,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -132247,6 +134122,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -132263,6 +134139,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -132370,6 +134247,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -132414,6 +134292,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -132463,6 +134342,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132479,6 +134359,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132570,6 +134451,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -132586,6 +134468,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -132611,6 +134494,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
@@ -132655,6 +134539,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -132709,6 +134594,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132725,6 +134611,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132756,6 +134643,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
@@ -132800,6 +134688,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
     routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -132844,6 +134733,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -132888,6 +134778,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -132948,6 +134839,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -132992,6 +134884,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -133222,6 +135115,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -133266,6 +135160,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -133616,6 +135511,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -133660,6 +135556,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -134612,6 +136509,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -134656,6 +136554,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -134761,6 +136660,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -134805,6 +136705,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -134900,6 +136801,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -134944,6 +136846,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -135004,6 +136907,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -135048,6 +136952,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -135092,6 +136997,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -135136,6 +137042,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -135240,6 +137147,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -135284,6 +137192,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -135344,6 +137253,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -135388,6 +137298,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -135513,6 +137424,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -135557,6 +137469,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -135672,6 +137585,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -135716,6 +137630,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -135776,6 +137691,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -135820,6 +137736,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -135864,6 +137781,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -135908,6 +137826,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -135968,6 +137887,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -136012,6 +137932,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -136056,6 +137977,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -136100,6 +138022,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -136297,6 +138220,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -136341,6 +138265,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -136487,6 +138412,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -136531,6 +138457,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -136649,6 +138576,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -136693,6 +138621,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -136801,6 +138730,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -136845,6 +138775,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -136963,6 +138894,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -137007,6 +138939,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -137115,6 +139048,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -137159,6 +139093,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -137253,6 +139188,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -137297,6 +139233,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -137382,6 +139319,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
@@ -137426,6 +139364,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
     routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
@@ -137517,6 +139456,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
@@ -137561,6 +139501,7 @@ export namespace Prisma {
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
     routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
     routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
     routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
@@ -137599,6 +139540,7 @@ export namespace Prisma {
     summary?: string | null
     description?: string | null
     status?: string
+    startKind?: string | null
     startDate?: string | null
     targetKind?: string | null
     targetEndDate?: string | null
@@ -137637,6 +139579,7 @@ export namespace Prisma {
     description?: string | null
     enabled?: boolean
     triggerJson?: string | null
+    activatedAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -138140,6 +140083,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138163,6 +140107,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138186,6 +140131,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    startKind?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
     targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138266,6 +140212,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -138281,6 +140228,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -138296,6 +140244,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     enabled?: BoolFieldUpdateOperationsInput | boolean
     triggerJson?: NullableStringFieldUpdateOperationsInput | string | null
+    activatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

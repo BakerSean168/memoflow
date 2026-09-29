@@ -222,6 +222,7 @@ async function registerBusinessModules(
   const routineComposed = composeRoutine({
     db,
     identityId: profileIdentityId,
+    notificationRequestedWriter: notificationComposed.requestedWriter,
   });
   registerRoutineNotificationOwnerCommands(
     notificationComposed.ownerCommandRegistry,

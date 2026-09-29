@@ -1,5 +1,10 @@
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
-import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type {
+  PreferenceMutationReceipt,
+  PreferenceNamespaceResponse,
+  UserPreferenceProfile,
+} from '@memoflow/contracts/setting';
+import { createSystemTimeZoneSource } from '@memoflow/time';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
@@ -39,6 +44,30 @@ export function usePresentationBootstrap() {
 
     loadingPromise = (async () => {
       try {
+        const regional = unwrapOrThrowError<PreferenceNamespaceResponse>(
+          await settingService.getPreferenceNamespace('regional'),
+        );
+
+        if (regional.namespace === 'regional' && regional.revision === 0) {
+          const deviceTimeZone = createSystemTimeZoneSource().currentTimeZoneId();
+          try {
+            unwrapOrThrowError<PreferenceMutationReceipt>(
+              await settingService.patchPreferenceNamespace(
+                'regional',
+                { timeZone: deviceTimeZone },
+                0,
+              ),
+            );
+          } catch {
+            const latest = unwrapOrThrowError<PreferenceNamespaceResponse>(
+              await settingService.getPreferenceNamespace('regional'),
+            );
+            if (latest.namespace !== 'regional' || latest.revision === 0) {
+              throw new Error('Could not initialize canonical device timezone');
+            }
+          }
+        }
+
         const profile = unwrapOrThrowError<UserPreferenceProfile>(
           await settingService.getPreferenceProfile(),
         );

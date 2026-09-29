@@ -1,4 +1,8 @@
-import { goalTimeframeEndBoundary, type GoalClientDTO } from '@memoflow/contracts/goal';
+import {
+  goalTimeframeStartBoundary,
+  goalTimeframeEndBoundary,
+  type GoalClientDTO,
+} from '@memoflow/contracts/goal';
 import type {
   CalendarEntryClientDTO,
   CalendarEventProjection,
@@ -167,17 +171,19 @@ export function projectGoalDates(
   };
   const events: GoalCalendarEventProjection[] = [];
 
-  if (goal.startDate != null) {
+  if (goal.start != null) {
+    const startEditable = editable && goal.start.kind === 'day';
     events.push({
       ...base,
-      sourceId: `${String(goal.id)}:start-date`,
+      sourceId: `${String(goal.id)}:start`,
       allDay: true,
-      start: goal.startDate,
+      start: goalTimeframeStartBoundary(goal.start),
       end: null,
+      editableCapabilities: { move: startEditable, resize: false },
       displayMetadata: {
         semantic: 'goal-start',
         subtitle: null,
-        tone: 'muted',
+        tone: startEditable ? 'default' : 'muted',
         status: goal.status,
       },
     });

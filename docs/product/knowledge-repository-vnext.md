@@ -25,7 +25,7 @@ updated: 2026-09-19T00:00:00+00:00
 
 Repository vNext 不重新建立数据库式 Repository/Folder/Resource 编辑器，而是在已经完成的 ADR-034 local-first 架构上，把绑定、健康状态、同步、文档身份、投影、AI 索引和可靠操作彻底分轨。
 
-> **当前 implementation checkpoint（2026-09-19）：** ADR-089、KNOW-2002/ADR-090 与 KNOW-2003/ADR-091 均已实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。Confirmed create 与显式 CAS metadata adoption 使用 `memoflow_id: kdoc_<opaque UUID>`，unmanaged Markdown 不会被静默改写，rename/move 与 AI/Local Vault/PowerSync 都复用 stable ID。`KnowledgeProjectionEngine` 统一 confirmed create、webhook 与 reconciliation projection apply；本文的历史 target 讨论不代表未完成代码。
+> **当前 implementation checkpoint（2026-09-28）：** ADR-089、KNOW-2002/ADR-090 与 KNOW-2003/ADR-091 均已实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。Notes 产品页在 Web 收敛为 read/search/link workspace，不暴露手工新建或正文编辑；Desktop 正文编辑继续交给 Obsidian。Confirmed create 仍保留为显式确认的 AI/automation application capability；Web 对已有 Markdown 的唯一直接 mutation 是 CAS metadata adoption，用于写入 `memoflow_id: kdoc_<opaque UUID>`。Unmanaged Markdown 不会被静默改写，rename/move 与 AI/Local Vault/PowerSync 都复用 stable ID。`KnowledgeProjectionEngine` 统一 confirmed create、webhook 与 reconciliation projection apply。
 
 ## 2. Product Constitution
 
@@ -492,6 +492,70 @@ KnowledgeSpace
 
 用户可以看到完整状态，但 ownership 仍然分离。
 
+### 14.1 Web read path: Catalog → Detail
+
+Web Notes 不允许通过“把整个知识库正文加载到浏览器”来换取本地式体验。Remote projection 的读取固定拆成 browse/search catalog + detail：
+
+```text
+Browse catalog
+  GET /knowledge-notes/tree?parent=...
+  -> immediate directory/note nodes
+  -> directory note counts
+  -> root metadata / hidden-directory policy
+
+Search catalog
+  GET /knowledge-notes?query=...
+  -> lightweight summary[]
+  -> total
+  -> nextCursor
+
+Reference resolve
+  GET /knowledge-notes/resolve?reference=...
+  -> resolve projectionId / knowledgeDocumentId / relativePath
+  -> identity + selected-connection scoped detail
+
+Durable reference candidates
+  GET /knowledge-documents/referenceable?query=...&cursor=...
+  -> only documents with stable KnowledgeDocumentId
+  -> KnowledgeDocumentRef + current projection/path/title
+  -> stable filter before ranking/pagination
+
+Detail
+  GET /knowledge-notes/:projectionId
+  -> frontmatter
+  -> markdownContent
+  -> blobSha / commitSha / contentHash
+```
+
+约束：
+
+1. Browse/Search Catalog 都不返回 `frontmatter`、`markdownContent`、`blobSha`、`commitSha`；tree 按目录 lazy load，搜索结果默认 50 条并使用 cursor/keyset pagination。
+2. Search 的 `total` 表示当前 query 的真实命中数量；tree root metadata 维护 repository total，搜索时不能把“命中数”伪装成“仓库总数”。
+3. 只有当前选中 Note 才请求 Detail；浏览器使用有界 LRU cache 按 `projectionId + contentHash` 复用已读正文，Catalog 刷新后仅在 hash 变化时重新获取，不能让阅读历史无限占用内存。
+4. Search 可以在 Server/DB 端读取正文参与匹配与排序，但 HTTP response 仍只返回 summary；正文不能随搜索结果批量下发。
+5. 搜索、分页和 Detail 切换都必须取消 stale HTTP request，避免“结果被丢弃但流量已经完整下载”的假取消。
+6. 禁止把 list limit 提升到整个 Vault 的规模作为分页替代方案；知识库规模增长不应线性放大首次 Web payload。
+7. 来自 AI、recent notes 或 URL 的深链不得依赖“目标 Note 恰好在当前 Catalog page/tree branch 中”；通过 identity + connection scoped reference resolver 解析 projection id、稳定 document id 或 relative path。
+8. Goal/Task/AI 的 durable-reference picker 不允许从普通 Catalog page 取 `limit N` 后再在浏览器过滤 `knowledgeDocumentId`；必须调用 `knowledge-documents/referenceable`，由服务端先执行 stable-identity filter，再搜索/排序/keyset pagination。Web 端搜索需要取消 superseded request；Desktop 继续从当前 Local Vault projection 派生同一 `KnowledgeDocumentRef` 语义。
+
+### 14.2 Notes reading surface: content first
+
+Web Notes 的 UI 以“阅读正文”为唯一主 surface，不把实现细节和辅助关系提升为并列主模式：
+
+- repository source identity、真实 note total、branch、异常/同步状态与 refresh 收进 Catalog 顶部；正常的“GitHub 已连接”不常驻展示；
+- Document toolbar 固定压成单行：左侧 Catalog toggle，中间当前 note title/path/date，右侧 Context 与 More；不再额外占一行 repository header；
+- 大面板为 `Catalog | Content | Context`。Catalog 的默认浏览模式是 Obsidian-style lazy file tree：目录优先、按层展开、只请求当前目录的轻量 node；Context 默认收起；
+- Catalog 有明确的双模式：query 为空时显示 file tree，query 非空时切换为 flat search results，并继续复用 summary + cursor pagination；清空搜索后恢复原来的展开状态；
+- file tree 从 projection 的 `relativePath` 派生，不通过一次加载整个 Vault 的 Summary/Markdown 在浏览器端拼树；服务端 `/knowledge-notes/tree?parent=...` 提供按目录 lazy browsing；
+- 默认隐藏所有 dot-directory（`.*`）以及 `node_modules / generated` 等实现/噪音目录，Catalog 提供“显示隐藏目录”开关，并将该偏好保存在本地；搜索结果遵循同一隐藏策略；
+- `Links / Backlinks / Outline / Metadata` 进入 Context side panel，不再用 `内容 / 链接` tab 切走正文；
+- `建立稳定引用` 属于低频 metadata operation，进入 More menu；正文 header 不把它当主 CTA；
+- Markdown 第一个 H1 与 document title 完全相同时，Reading View 隐藏重复 H1；
+- narrow panel 不把 Catalog 堆在正文上方，而通过左侧 Sheet 临时打开；Context 同理从右侧 Sheet 打开；
+- 正常 list item 依赖 spacing / hover / selected surface 表达层级，不为每条笔记绘制硬分隔线。
+
+Desktop 仍允许 MemoFlow 内安全预览与搜索，但正文编辑继续交给 Obsidian；UI 不引入第二套 Markdown editor。
+
 ## 15. Application Capability Ports
 
 长期把过宽的 `RepositoryApplicationPort` 拆成消费方需要的能力：
@@ -504,7 +568,8 @@ KnowledgeLibraryPort
   list / read / search / link graph / attachment
 
 KnowledgeWritePort
-  confirmed create / confirmed metadata adoption
+  confirmed create (AI/automation capability)
+  confirmed metadata adoption (Notes workspace explicit action)
 
 KnowledgeOperationsPort
   replay / timeline / audit

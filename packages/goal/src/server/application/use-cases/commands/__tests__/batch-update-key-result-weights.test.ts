@@ -10,7 +10,7 @@ function createGoalFixture() {
   const goal = Goal.create({
     identityId: 'identity-1' as any,
     name: 'Test Goal',
-    startDate: null,
+    start: null,
     reminderConfig: null,
   });
   const first = goal.createAndAddKeyResult({

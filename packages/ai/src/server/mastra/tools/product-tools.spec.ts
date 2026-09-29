@@ -76,8 +76,19 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     );
   });
 
-  it('publishes structured schemas for canonical Planner and Notification tools', () => {
+  it('publishes structured schemas for knowledge, workspace, Planner and Notification tools', () => {
     const tools = createMemoFlowProductTools({});
+    expect(tools.knowledge_search.inputSchema.safeParse({ query: 'release notes' }).success).toBe(
+      true,
+    );
+    expect(tools.knowledge_search.inputSchema.safeParse({ query: '', limit: 9 }).success).toBe(
+      false,
+    );
+    expect(
+      tools.workspace_overview.inputSchema.safeParse({ question: 'What should I focus on?' })
+        .success,
+    ).toBe(true);
+    expect(tools.workspace_overview.inputSchema.safeParse({ question: '' }).success).toBe(false);
     expect(
       tools.planner_today_summary.inputSchema.safeParse({
         range: { start: 1_000, end: 2_000 },
@@ -100,6 +111,45 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     ).toBe(true);
   });
 
+  it('searches owner knowledge with bounded excerpts instead of exposing unbounded note bodies', async () => {
+    const listRelevantNotes = vi.fn(async () => [
+      {
+        identityId: 'identity-1',
+        repositoryId: 'repo-1',
+        knowledgeSpaceId: 'space-1',
+        knowledgeDocumentId: 'kdoc-1',
+        sourcePath: 'notes/release.md',
+        sourceContentHash: 'hash-1',
+        title: 'Release note',
+        mimeType: 'text/markdown',
+        content: 'x'.repeat(4_100),
+      },
+    ]);
+    const tools = createMemoFlowProductTools({
+      knowledgeSourcePort: { listRelevantNotes } as never,
+    });
+
+    const result = await tools.knowledge_search.execute?.(
+      { query: 'release', limit: 3 },
+      { requestContext: context(), observe: {} as never },
+    );
+
+    expect(listRelevantNotes).toHaveBeenCalledWith('identity-1', 'release', 3);
+    expect(result).toMatchObject({
+      query: 'release',
+      notes: [
+        {
+          knowledgeDocumentId: 'kdoc-1',
+          title: 'Release note',
+          sourcePath: 'notes/release.md',
+          contentHash: 'hash-1',
+          truncated: true,
+        },
+      ],
+    });
+    expect(result?.notes[0]?.excerpt).toHaveLength(4_000);
+  });
+
   it('delegates Routine commands with canonical owner input and ExecutionContext', async () => {
     const createRoutine = vi.fn(
       async () => ({ kind: 'routine', id: 'r-1', status: 'created' }) as const,
@@ -118,7 +168,20 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     });
   });
 
-  it('keeps Planner reads projection-only and Notification actions owner-routed', async () => {
+  it('keeps workspace and Planner reads projection-only and Notification actions owner-routed', async () => {
+    const buildContext = vi.fn(async (_identityId: string, question: string) => ({
+      timeContext: {} as never,
+      goals: [],
+      goalSearchResults: [],
+      ownerReads: {
+        goal: { progress: { activeCount: 0, goals: [] } },
+        task: { board: { todo: 0, inProgress: 0, done: 0, overdue: 0 } },
+        schedule: { upcoming: [], conflictCount: 0 },
+        notification: { unreadCount: 0 },
+        activity: { recent: [] },
+      },
+      extra: { question },
+    }));
     const getWindowSummary = vi.fn(async (input) => ({
       range: input.range,
       projections: [],
@@ -134,9 +197,14 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
       commandReceiptId: null,
     }));
     const tools = createMemoFlowProductTools({
+      analyticsReadPort: { buildContext } as never,
       plannerReadPort: { getWindowSummary } as never,
       notificationReadPort: { getUnreadSummary, executeAction } as never,
     });
+    await tools.workspace_overview.execute?.(
+      { question: 'What should I focus on?' },
+      { requestContext: context(), observe: {} as never },
+    );
     await tools.planner_today_summary.execute?.(
       { range: { start: 1_000, end: 2_000 } },
       { requestContext: context(), observe: {} as never },
@@ -149,6 +217,7 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
       { notificationId: 'notification-1', actionKey: 'archive' },
       { requestContext: context(), observe: {} as never },
     );
+    expect(buildContext).toHaveBeenCalledWith('identity-1', 'What should I focus on?');
     expect(getWindowSummary).toHaveBeenCalledWith({
       identityId: 'identity-1',
       range: { start: 1_000, end: 2_000 },

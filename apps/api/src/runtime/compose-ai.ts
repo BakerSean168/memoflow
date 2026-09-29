@@ -51,6 +51,7 @@ import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
 import { OwnerActivityAIReadAdapter } from '../modules/ai/owner-activity-read.adapter';
+import { SelectedEntityContextAIReadAdapter } from '../modules/ai/selected-entity-context-read.adapter';
 
 export interface ComposedAI {
   readonly module: AIApiModuleDef;
@@ -117,6 +118,14 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     taskOccurrenceRepository: taskRepositories.taskOccurrenceRepository,
     scheduleRepository: dependencies.scheduleRepository,
   });
+  const analyticsReadPort = new ControlledAnalyticsReadAdapter({
+    goalApplicationPort: dependencies.goalApplicationPort,
+    taskDashboardReadPort: dependencies.taskDashboardReadPort,
+    plannerReadPort,
+    notificationReadPort,
+    activityReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
+  });
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
     dependencies.repositoryStorageBaseDir,
@@ -142,9 +151,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
     ),
-    conversationShellSource: new ConversationShellSource(
-      repositorySet.conversationRepository,
-    ),
+    conversationShellSource: new ConversationShellSource(repositorySet.conversationRepository),
     goalPlanMutationPort,
     taskPlanMutationPort,
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
@@ -154,15 +161,12 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
     plannerReadPort,
     notificationReadPort,
+    selectedEntityContextReadPort: new SelectedEntityContextAIReadAdapter(
+      dependencies.goalApplicationPort,
+      dependencies.taskApplicationPort,
+    ),
+    analyticsReadPort,
     contextAssembler,
-  });
-  const analyticsReadPort = new ControlledAnalyticsReadAdapter({
-    goalApplicationPort: dependencies.goalApplicationPort,
-    taskDashboardReadPort: dependencies.taskDashboardReadPort,
-    plannerReadPort,
-    notificationReadPort,
-    activityReadPort,
-    userTimeContextPort: dependencies.userTimeContextPort,
   });
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 

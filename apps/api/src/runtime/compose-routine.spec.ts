@@ -9,7 +9,11 @@ const mocks = vi.hoisted(() => {
   const queryPort = { tag: 'routine-query-port' };
   const portableCapability = { tag: 'routine-portable-capability' };
   const repositories = {
-    routineProfileStore: { tag: 'profile-store' },
+    routineProfileStore: {
+      tag: 'profile-store',
+      listDefinitions: vi.fn().mockResolvedValue([]),
+    },
+    routinePreferencesStore: { tag: 'preferences-store' },
     routineTemporaryOverrideStore: { tag: 'override-store' },
     protocolSessionStore: { tag: 'protocol-store' },
     routineOccurrenceTruthStore: { tag: 'occurrence-store' },
@@ -57,17 +61,21 @@ describe('composeRoutine', () => {
 
     expect(mocks.createRoutinePrismaRepositories).toHaveBeenCalledWith(fakeDb);
     expect(mocks.createInMemoryRoutineRuntimeContextStore).toHaveBeenCalledTimes(1);
-    expect(mocks.createRoutineCoachCommandService).toHaveBeenCalledWith({
-      routineProfileStore: mocks.repositories.routineProfileStore,
-      runtimeContextStore: mocks.runtimeContextStore,
-      temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
-      occurrenceTruthStore: mocks.repositories.routineOccurrenceTruthStore,
-      protocolSessionStore: mocks.repositories.protocolSessionStore,
-      onOverrideChanged: mocks.overrideNotifier,
-      onScheduleChanged: mocks.scheduleNotifier,
-    });
+    expect(mocks.createRoutineCoachCommandService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        routineProfileStore: mocks.repositories.routineProfileStore,
+        routinePreferencesStore: mocks.repositories.routinePreferencesStore,
+        runtimeContextStore: mocks.runtimeContextStore,
+        temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
+        occurrenceTruthStore: mocks.repositories.routineOccurrenceTruthStore,
+        protocolSessionStore: mocks.repositories.protocolSessionStore,
+        onOverrideChanged: mocks.overrideNotifier,
+        onScheduleChanged: mocks.scheduleNotifier,
+      }),
+    );
     expect(mocks.createRoutineConfigurationQueryService).toHaveBeenCalledWith({
       routineProfileStore: mocks.repositories.routineProfileStore,
+      routinePreferencesStore: mocks.repositories.routinePreferencesStore,
       runtimeContextStore: mocks.runtimeContextStore,
       temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
       localRuntimeAvailable: false,
@@ -78,6 +86,19 @@ describe('composeRoutine', () => {
       routineQueryPort: mocks.queryPort,
       portableCapability: mocks.portableCapability,
     });
+  });
+
+  it('delegates global-gate reconciliation to the command service exactly once', () => {
+    composeRoutine({ db: fakeDb });
+    const options = mocks.createRoutineCoachCommandService.mock.calls[0]?.[0] as Record<
+      string,
+      unknown
+    >;
+
+    expect(options.onScheduleChanged).toBe(mocks.scheduleNotifier);
+    expect(options).not.toHaveProperty('onGlobalEnabledChanged');
+    expect(mocks.repositories.routineProfileStore.listDefinitions).not.toHaveBeenCalled();
+    expect(mocks.scheduleNotifier).not.toHaveBeenCalled();
   });
 
   it('does not expose a transport module, legacy repositories, or schedule source aliases', () => {

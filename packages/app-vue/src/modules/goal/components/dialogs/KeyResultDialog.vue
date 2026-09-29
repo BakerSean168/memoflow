@@ -3,121 +3,33 @@
     <ProductDialogShell
       :open="open"
       test-id="key-result-dialog"
-      size="md"
-      initial-focus-selector="[data-testid='key-result-title-input']"
+      size="lg"
+      initial-focus-selector="[data-testid='draft-kr-title-input']"
+      content-class="sm:max-w-[860px]"
     >
       <template #title>
         {{ editing ? t('goal.krDialog.editTitle') : t('goal.krDialog.createTitle') }}
       </template>
-      <template #description>
-        {{ t('goal.krDialog.descriptionText') }}
-      </template>
 
       <form id="kr-form" class="space-y-4" @submit.prevent="submit">
-        <div
-          v-if="submitError"
-          role="alert"
-          class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-        >
+        <GoalKeyResultCardEditor
+          v-model:title="draft.title"
+          v-model:description="draft.description"
+          v-model:initial-value="draft.initialValue"
+          v-model:current-value="currentValueModel"
+          v-model:target-value="draft.targetValue"
+          v-model:target="draft.target"
+          v-model:calculation-method="draft.calculationMethod"
+          v-model:unit="draft.unit"
+          v-model:weight="draft.weight"
+          :goal-start="goalStart"
+          :goal-target="goalTarget"
+          :disabled="isSubmitting"
+        />
+
+        <p v-if="submitError" role="alert" class="text-xs text-destructive">
           {{ submitError }}
-        </div>
-
-        <div class="space-y-2">
-          <Label for="key-result-title">{{ t('goal.krDialog.name') }}</Label>
-          <Input
-            id="key-result-title"
-            v-model="draft.title"
-            data-testid="key-result-title-input"
-            maxlength="256"
-          />
-        </div>
-
-        <div class="grid gap-3 sm:grid-cols-3">
-          <div class="space-y-2">
-            <Label for="key-result-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
-            <Input
-              id="key-result-initial"
-              v-model.number="draft.initialValue"
-              type="number"
-              data-testid="key-result-initial-input"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="key-result-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
-            <Input
-              id="key-result-current"
-              v-model.number="draft.currentValue"
-              type="number"
-              data-testid="key-result-current-input"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="key-result-target">{{ t('goal.dialog.krTargetValue') }}</Label>
-            <Input
-              id="key-result-target"
-              v-model.number="draft.targetValue"
-              type="number"
-              data-testid="key-result-target-input"
-            />
-          </div>
-        </div>
-
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="space-y-2">
-            <Label for="key-result-unit">{{ t('goal.dialog.krUnit') }}</Label>
-            <Input id="key-result-unit" v-model="draft.unit" maxlength="20" />
-          </div>
-          <div class="space-y-2">
-            <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
-            <GoalTimeframePicker
-              v-model="draft.target"
-              test-id="key-result-target-chip"
-              :aria-label="t('goal.dialog.krTargetTimeframe')"
-              :placeholder="t('goal.dialog.krTargetTimeframe')"
-            />
-          </div>
-        </div>
-
-        <Collapsible v-model:open="advancedOpen">
-          <CollapsibleTrigger as-child>
-            <Button type="button" variant="ghost" size="sm" class="px-0 text-muted-foreground">
-              <ChevronRight
-                class="mr-1 h-4 w-4 transition-transform"
-                :class="advancedOpen ? 'rotate-90' : ''"
-              />
-              {{ t('goal.dialog.krAdvanced') }}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent class="mt-2 space-y-3">
-            <div class="space-y-2">
-              <Label for="key-result-description">{{ t('goal.dialog.description') }}</Label>
-              <Textarea id="key-result-description" v-model="draft.description" maxlength="2000" />
-            </div>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <div class="space-y-2">
-                <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
-                <Select v-model="draft.calculationMethod">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="method in methods" :key="method" :value="method">
-                      {{ method }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="space-y-2">
-                <Label for="key-result-weight">{{ t('goal.dialog.krWeightLabel') }}</Label>
-                <Input
-                  id="key-result-weight"
-                  v-model.number="draft.weight"
-                  type="number"
-                  min="1"
-                  max="5"
-                />
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        </p>
       </form>
 
       <template #footer>
@@ -128,9 +40,9 @@
           type="submit"
           form="kr-form"
           data-testid="save-key-result-button"
-          :disabled="!draft.title.trim() || isSubmitting"
+          :disabled="!canSave || isSubmitting"
         >
-          {{ t('common.save') }}
+          {{ editing ? t('common.save') : t('goal.dialog.addKeyResult') }}
         </Button>
       </template>
     </ProductDialogShell>
@@ -138,43 +50,36 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronRight } from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
   type AddKeyResultReq,
   type GoalTimeframe,
   type KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Dialog,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
+import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
-import GoalTimeframePicker from '../GoalTimeframePicker.vue';
+import GoalKeyResultCardEditor from '../GoalKeyResultCardEditor.vue';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 
-const props = defineProps<{
-  onSubmit: (payload: {
-    goalId: string;
-    keyResult: KeyResultInput;
-    isEditing: boolean;
-    keyResultId?: string;
-  }) => Promise<boolean> | boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    onSubmit: (payload: {
+      goalId: string;
+      keyResult: KeyResultInput;
+      isEditing: boolean;
+      keyResultId?: string;
+    }) => Promise<boolean> | boolean;
+    goalStart?: GoalTimeframe | null;
+    goalTarget?: GoalTimeframe | null;
+  }>(),
+  {
+    goalStart: null,
+    goalTarget: null,
+  },
+);
 
 const { t } = useI18n();
 const open = ref(false);
@@ -183,19 +88,43 @@ const goalId = ref('');
 const keyResultId = ref<string>();
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
-const advancedOpen = ref(false);
-const methods = Object.values(KeyResultCalculationMethod);
+const currentFollowsInitial = ref(true);
+
 const draft = reactive({
   title: '',
   description: '',
   calculationMethod: KeyResultCalculationMethod.Sum as KeyResultInput['calculationMethod'],
   initialValue: 0,
   currentValue: 0,
-  targetValue: 100,
+  targetValue: '' as number | '',
   target: null as GoalTimeframe | null,
   unit: '',
   weight: 3,
 });
+
+const canSave = computed(
+  () =>
+    draft.title.trim().length > 0 &&
+    draft.targetValue !== '' &&
+    Number.isFinite(Number(draft.initialValue)) &&
+    Number.isFinite(Number(draft.currentValue)) &&
+    Number.isFinite(Number(draft.targetValue)),
+);
+
+const currentValueModel = computed({
+  get: () => draft.currentValue,
+  set: (value: number) => {
+    currentFollowsInitial.value = false;
+    draft.currentValue = value;
+  },
+});
+
+watch(
+  () => draft.initialValue,
+  (value) => {
+    if (currentFollowsInitial.value) draft.currentValue = Number(value);
+  },
+);
 
 function reset(): void {
   draft.title = '';
@@ -203,11 +132,11 @@ function reset(): void {
   draft.calculationMethod = KeyResultCalculationMethod.Sum;
   draft.initialValue = 0;
   draft.currentValue = 0;
-  draft.targetValue = 100;
+  draft.targetValue = '';
   draft.target = null;
   draft.unit = '';
   draft.weight = 3;
-  advancedOpen.value = false;
+  currentFollowsInitial.value = true;
   submitError.value = null;
   isSubmitting.value = false;
 }
@@ -234,6 +163,7 @@ function openForUpdateKeyResult(id: string, keyResult: KeyResultClientDTO): void
   draft.target = keyResult.target ? { ...keyResult.target } : null;
   draft.unit = keyResult.progress.unit ?? '';
   draft.weight = keyResult.weight;
+  currentFollowsInitial.value = false;
   open.value = true;
 }
 
@@ -243,30 +173,36 @@ function setOpen(value: boolean): void {
   if (!value) submitError.value = null;
 }
 
-async function submit(): Promise<void> {
-  if (!draft.title.trim() || isSubmitting.value) return;
+function validateMeasurement(): boolean {
+  submitError.value = null;
   const initialValue = Number(draft.initialValue);
   const currentValue = Number(draft.currentValue);
   const targetValue = Number(draft.targetValue);
+
   if (![initialValue, currentValue, targetValue].every(Number.isFinite)) {
     submitError.value = t('common.operationFailed');
-    return;
+    return false;
   }
   if (initialValue === targetValue) {
     submitError.value = t('goal.dialog.krInitialTargetConflict');
-    return;
+    return false;
   }
+  return true;
+}
+
+async function submit(): Promise<void> {
+  if (!canSave.value || isSubmitting.value || !validateMeasurement()) return;
 
   const keyResult: KeyResultInput = {
     title: draft.title.trim(),
     description: draft.description.trim() || null,
     calculationMethod: draft.calculationMethod,
-    initialValue,
-    currentValue,
-    targetValue,
+    initialValue: Number(draft.initialValue),
+    currentValue: Number(draft.currentValue),
+    targetValue: Number(draft.targetValue),
     target: draft.target,
     unit: draft.unit.trim() || null,
-    weight: Math.max(1, Math.min(5, Math.round(Number(draft.weight)))),
+    weight: Math.max(1, Math.min(5, Math.round(Number(draft.weight) || 3))),
   };
 
   isSubmitting.value = true;

@@ -106,6 +106,45 @@ test.describe('Schedule calendar workspace', () => {
     );
   });
 
+  test('[P0] selects blank time without crashing the panel on FullCalendar mirror events', async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+
+    const plannerCalendar = page.getByTestId('schedule-fullcalendar');
+    await expect(plannerCalendar).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+
+    const dayColumn = plannerCalendar.locator('.planner-day-lane').first();
+    const startSlot = plannerCalendar.locator('.planner-slot-lane[data-time="08:00:00"]');
+    const endSlot = plannerCalendar.locator('.planner-slot-lane[data-time="09:00:00"]');
+    await expect(dayColumn).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(startSlot).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(endSlot).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+
+    const day = await dayColumn.boundingBox();
+    const start = await startSlot.boundingBox();
+    const end = await endSlot.boundingBox();
+    expect(day).not.toBeNull();
+    expect(start).not.toBeNull();
+    expect(end).not.toBeNull();
+
+    // FullCalendar selection must begin inside a dated time-grid column. The slot-lane
+    // row is only the vertical time geometry; using its own X coordinate can hit the
+    // axis/mirror layer instead of a selectable day cell.
+    const x = day!.x + day!.width / 2;
+    await page.mouse.move(x, start!.y + start!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(x, end!.y + end!.height / 2, { steps: 8 });
+    await page.mouse.up();
+
+    await expect(page.getByTestId('panel-error-fallback')).toBeHidden();
+    await expect(page.getByTestId('schedule-dialog')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    expect(pageErrors.some((message) => message.includes("reading 'sourceType'"))).toBe(false);
+  });
+
   test('[P0] creates a schedule from the only primary action', async ({ page }) => {
     const title = `E2E Schedule ${Date.now()}`;
 

@@ -36,6 +36,7 @@ import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsulePreview.vue';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
+import type { CalendarEventItem } from '../../modules/schedule/composables/useCalendarView';
 import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
 import ConversationSidebar from './ConversationSidebar.vue';
 import BusinessPanel from './BusinessPanel.vue';
@@ -125,6 +126,7 @@ const headerCapsules = computed<WindowHeaderCapsule[]>(() =>
     route: entry.route,
     icon: entry.icon,
     placement: entry.id === 'schedule' || entry.id === 'notification' ? 'utility' : 'primary',
+    previewSize: entry.previewSize,
     badge: resolveCapsuleBadge(entry.badgeSource),
   })),
 );
@@ -575,6 +577,13 @@ watch([showSidebar, sidebarWidth, sidebarCollapsed], () => {
   onViewportGeometryChange();
 });
 
+watch(rightPanelOpen, (open) => {
+  // Reopening the business/workflow panel changes the geometry budget. A conversation
+  // may have restored its split preference while the app was chat-only, so narrow
+  // viewports must immediately re-apply the viewport-owned focus override.
+  if (open) onViewportGeometryChange();
+});
+
 // ── 业务工作区入口 / 面板动作（导航细节在 useShellRouterSync） ──
 function openHeaderModule(payload: { id: string; route: string }): void {
   if (!headerCapsules.value.some((entry) => entry.id === payload.id)) return;
@@ -610,11 +619,52 @@ function openHeaderTaskPreview(closePreview: () => void, taskId: string): void {
   });
 }
 
+function openHeaderRoutinePreview(closePreview: () => void, routineId: string): void {
+  openHeaderPreviewModule(closePreview, {
+    id: 'routine',
+    route: `/routines?routine=${encodeURIComponent(routineId)}`,
+  });
+}
+
 function openHeaderNotePreview(closePreview: () => void, noteId: string): void {
   openHeaderPreviewModule(closePreview, {
     id: 'note',
     route: `/repository?note=${encodeURIComponent(noteId)}`,
   });
+}
+
+function openHeaderScheduleItem(closePreview: () => void, event: CalendarEventItem): void {
+  if (event.source === 'goal') {
+    openHeaderGoalPreview(closePreview, event.originalId);
+    return;
+  }
+  if (event.source === 'routine') {
+    openHeaderRoutinePreview(closePreview, event.originalId);
+    return;
+  }
+  if (event.source === 'task') {
+    if (event.taskPlanId) {
+      openHeaderTaskPreview(closePreview, event.taskPlanId);
+      return;
+    }
+    openHeaderPreviewModule(closePreview, { id: 'task', route: '/tasks' });
+    return;
+  }
+  openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' });
+}
+
+function openHeaderNotificationDestination(
+  closePreview: () => void,
+  destination: { path: string; query?: Record<string, string> },
+): void {
+  closePreview();
+  const resolved = router.resolve(destination);
+  const module = moduleForPath(resolved.path);
+  if (module) {
+    void sync.openModule(module, resolved.fullPath);
+    return;
+  }
+  void router.push(destination).catch(() => {});
 }
 
 function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
@@ -720,6 +770,7 @@ function panelCacheKey(
       <template #capsule-preview-routine="{ closePreview }">
         <RoutineCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })"
+          @select="openHeaderRoutinePreview(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-note="{ closePreview }">
@@ -731,6 +782,7 @@ function panelCacheKey(
       <template #capsule-preview-schedule="{ closePreview }">
         <ScheduleCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })"
+          @select="openHeaderScheduleItem(closePreview, $event)"
         />
       </template>
       <template #capsule-preview-notification="{ closePreview }">
@@ -741,6 +793,7 @@ function panelCacheKey(
               route: '/notifications',
             })
           "
+          @navigate="openHeaderNotificationDestination(closePreview, $event)"
         />
       </template>
     </WindowHeader>

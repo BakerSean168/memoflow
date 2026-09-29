@@ -255,6 +255,8 @@ export function useAIWorkspace() {
           surface: 'mobile',
           providerId: selectedProviderId ?? undefined,
           modelId: selectedModel ?? undefined,
+          attachments: [],
+          selectedEntities: [],
         },
         {
           onEvent: (event) => {

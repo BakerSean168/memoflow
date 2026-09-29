@@ -36,7 +36,7 @@ const draftContent = GoalPlanDraftContentSchema.parse({
     name: 'Pass JLPT N1',
     summary: 'Build a durable study plan.',
     status: 'InProgress',
-    startDate: '2026-09-01',
+    start: { kind: 'day', date: '2026-09-01' },
     target: { kind: 'year', year: 2026 },
     labels: ['Learning'],
   },

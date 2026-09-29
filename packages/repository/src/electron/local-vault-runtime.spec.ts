@@ -216,6 +216,25 @@ describe('LocalVaultRuntime', () => {
     expect(new URL(uri).searchParams.get('path')).toBe(await fs.promises.realpath(notePath));
   });
 
+  it('ranks exact title matches ahead of body-only local Vault matches', async () => {
+    await selectVault();
+    await fs.promises.writeFile(
+      path.join(vault, 'Security.md'),
+      '# Security\n\nA comparison of 1Password password manager features.',
+    );
+    await fs.promises.writeFile(
+      path.join(vault, '1Password.md'),
+      '---\ntitle: 1Password\n---\n# 1Password\n\nA password manager.',
+    );
+
+    const search = await runtime.searchVault({ query: '1Password password', limit: 10 });
+
+    expect(search.results.map((result) => result.note.relativePath)).toEqual([
+      '1Password.md',
+      'Security.md',
+    ]);
+  });
+
   it('reads valid memoflow_id markers without mutating unmanaged notes', async () => {
     await selectVault();
     await fs.promises.writeFile(path.join(vault, 'Unmanaged.md'), '# Unmanaged');

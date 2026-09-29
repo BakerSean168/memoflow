@@ -16,18 +16,32 @@ import {
   getGlobalResultErrorT,
   translateResultError,
 } from '../../../shared/utils/translate-result-error';
+import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { recentKnowledgeQueryKeys } from '../../../platform/server-state/query-keys';
+import { RECENT_KNOWLEDGE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 
 export type RecentKnowledgeNote = {
   id: string;
   title: string;
   path: string;
+  /** Stable owner id used by AI context hydration; null until the note is registered. */
+  knowledgeDocumentId: string | null;
   updatedAt: number;
   source: 'projection' | 'local-vault';
+};
+
+type RecentKnowledgeSnapshot = {
+  notes: RecentKnowledgeNote[];
+  error: string | null;
+  errorMessageKey: string | null;
+  emailVerificationRequired: boolean;
 };
 
 export function useRecentKnowledgeNotes() {
   const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');
   const desktopBridge = inject(DESKTOP_BRIDGE_KEY, undefined);
+  const runtime = useServerStateRuntime();
+  const resolveIdentityScope = useServerStateIdentityScope();
   const t = getGlobalResultErrorT();
 
   const notes = ref<RecentKnowledgeNote[]>([]);
@@ -37,29 +51,73 @@ export function useRecentKnowledgeNotes() {
   const errorMessageKey = ref<string | null>(null);
   const emailVerificationRequired = ref(false);
 
-  async function load(limit = 20): Promise<void> {
-    isLoading.value = true;
-    error.value = null;
-    errorMessageKey.value = null;
-    // Clear prior degrade; re-set only if this load hits EMAIL_VERIFICATION_REQUIRED.
-    emailVerificationRequired.value = false;
+  function applySnapshot(snapshot: RecentKnowledgeSnapshot): void {
+    notes.value = snapshot.notes;
+    error.value = snapshot.error;
+    errorMessageKey.value = snapshot.errorMessageKey;
+    emailVerificationRequired.value = snapshot.emailVerificationRequired;
+  }
+
+  async function read(limit: number, force: boolean): Promise<void> {
+    const source = desktopBridge ? 'local-vault' : 'projection';
+    const queryKey = recentKnowledgeQueryKeys.recent(resolveIdentityScope(), source, limit);
+    const cachedSnapshot =
+      runtime.queryClient.getQueryData<RecentKnowledgeSnapshot>(queryKey);
+    if (cachedSnapshot) applySnapshot(cachedSnapshot);
+    isLoading.value = cachedSnapshot === undefined;
+    if (!cachedSnapshot) {
+      error.value = null;
+      errorMessageKey.value = null;
+      emailVerificationRequired.value = false;
+    }
+
     try {
-      notes.value = desktopBridge
-        ? await loadLocalVaultNotes(limit)
-        : await loadProjectionNotes(limit);
+      const snapshot = await runtime.queryClient.fetchQuery<RecentKnowledgeSnapshot>({
+        queryKey,
+        staleTime: force ? 0 : RECENT_KNOWLEDGE_STALE_TIME_MS,
+        queryFn: async () => {
+          error.value = null;
+          errorMessageKey.value = null;
+          emailVerificationRequired.value = false;
+          const nextNotes = desktopBridge
+            ? await loadLocalVaultNotes(limit)
+            : await loadProjectionNotes(limit);
+          return {
+            notes: nextNotes,
+            error: error.value,
+            errorMessageKey: errorMessageKey.value,
+            emailVerificationRequired: emailVerificationRequired.value,
+          };
+        },
+      });
+      applySnapshot(snapshot);
     } catch (loadError) {
-      notes.value = [];
-      error.value = translateResultError(loadError, t, {
-        scope: 'repository',
-        fallbackKey: 'common.operationFailed',
+      applySnapshot({
+        notes: [],
+        error: translateResultError(loadError, t, {
+          scope: 'repository',
+          fallbackKey: 'common.operationFailed',
+        }),
+        errorMessageKey: null,
+        emailVerificationRequired: false,
       });
     } finally {
       isLoading.value = false;
     }
   }
 
+  /** Explicit refresh for pages/retry. */
+  function load(limit = 20): Promise<void> {
+    return read(limit, true);
+  }
+
+  /** Cache-aware read for shell/assistant lightweight projections. */
+  function ensure(limit = 20): Promise<void> {
+    return read(limit, false);
+  }
+
   async function loadProjectionNotes(limit: number): Promise<RecentKnowledgeNote[]> {
-    const result = await service.listKnowledgeNoteProjections({ limit });
+    const result = await service.listKnowledgeNoteProjections({ limit, sort: 'recent' });
     if (!result.ok) {
       // Empty connection / unavailable projection is a normal empty state.
       if (
@@ -83,13 +141,13 @@ export function useRecentKnowledgeNotes() {
     }
 
     return [...result.data.notes]
-      .filter((note) => note.deletedAt == null)
       .sort((left, right) => Number(right.updatedAt) - Number(left.updatedAt))
       .slice(0, limit)
       .map((note) => ({
         id: note.id,
         title: note.title,
         path: note.relativePath,
+        knowledgeDocumentId: note.knowledgeDocumentId,
         updatedAt: Number(note.updatedAt),
         source: 'projection' as const,
       }));
@@ -118,6 +176,7 @@ export function useRecentKnowledgeNotes() {
         id: note.relativePath,
         title: note.title,
         path: note.relativePath,
+        knowledgeDocumentId: note.knowledgeDocumentId,
         updatedAt: Number(note.updatedAt),
         source: 'local-vault' as const,
       }));
@@ -130,5 +189,6 @@ export function useRecentKnowledgeNotes() {
     errorMessageKey,
     emailVerificationRequired,
     load,
+    ensure,
   };
 }

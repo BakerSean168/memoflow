@@ -49,7 +49,10 @@ test.describe('Local Docker core product Phase B', () => {
 
     const headers = {};
 
-    await expect(page.getByTestId('create-task-plan-button')).toHaveText('新建计划');
+    await expect(page.getByTestId('create-task-plan-button')).toHaveAttribute(
+      'aria-label',
+      '新建计划',
+    );
     await expectElementToFit(page.getByTestId('task-page-toolbar'));
 
     await page.getByTestId('create-task-plan-button').click();
@@ -147,11 +150,13 @@ test.describe('Local Docker core product Phase B', () => {
       /将更新 \d+ 个尚未开始的待办任务/,
     );
     await expect(page.getByTestId('task-plan-property-chips')).toBeVisible();
-    await expect(page.getByTestId('task-plan-property-editor')).toHaveCount(0);
-    await page.getByTestId('task-properties-chip').click();
-    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
-    await page.locator('#importance-select').click();
-    await page.getByRole('option', { name: '高', exact: true }).click();
+    await expect(page.getByTestId('task-importance-popover')).toHaveCount(0);
+    await page.getByTestId('task-importance-chip').click();
+    await expect(page.getByTestId('task-importance-popover')).toBeVisible();
+    await page
+      .getByTestId('task-importance-popover')
+      .getByRole('button', { name: '高', exact: true })
+      .click();
     const updatePromise = waitForTemplateWrite(page, 'PATCH');
     await page.getByTestId('task-dialog-save-button').click();
     await expectApiData<unknown>(await updatePromise);
@@ -225,6 +230,7 @@ async function showTodayOverview(page: Page): Promise<void> {
 }
 
 async function showPlansSurface(page: Page): Promise<void> {
+  await page.getByTestId('task-surface-trigger').click();
   await page.getByTestId('task-surface-plans').click();
   await expect(page.getByTestId('task-plan-list')).toBeVisible({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,

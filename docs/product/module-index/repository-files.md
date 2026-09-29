@@ -35,9 +35,9 @@ updated: 2026-09-11T00:02:00+08:00
 | [`packages/app-vue/src/modules/repository/views/RepositoryEntryView.vue`](../../../packages/app-vue/src/modules/repository/views/RepositoryEntryView.vue)                                     | 按平台选择 Web 投影或 Desktop Vault 工作区                                  |
 | [`packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue`](../../../packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue)           | Web：GitHub default-branch 只读投影、搜索、安全预览、关系、confirmed create |
 | [`packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue`](../../../packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue)                             | Desktop：本地 Vault 浏览、预览、Obsidian 打开、确认写入                     |
-| [`packages/app-vue/src/modules/repository/views/NoteModuleLayout.vue`](../../../packages/app-vue/src/modules/repository/views/NoteModuleLayout.vue)                                           | 工作区布局壳                                                                |
 | [`packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue) | 投影 Link Graph / 关系视图                                                  |
-| [`packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue`](../../../packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue)                                     | 笔记分段导航                                                                |
+| [`packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.vue)                         | 投影笔记目录与搜索列表                                                      |
+| [`packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue)                   | 当前笔记上下文与稳定引用关系                                                |
 
 ## 前端组合函数与设置
 

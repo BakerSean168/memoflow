@@ -13,6 +13,9 @@ const isLoadingRef = ref(false);
 
 const markAsRead = vi.fn().mockResolvedValue(undefined);
 const markAllAsRead = vi.fn().mockResolvedValue(undefined);
+const executeAction = vi.fn().mockResolvedValue({
+  interaction: { outcome: 'accepted' },
+});
 
 vi.mock('../composables/useNotificationListQuery', () => ({
   useNotificationListQuery: () => ({
@@ -33,11 +36,12 @@ vi.mock('../composables/useNotificationMutations', () => ({
   useNotificationMutations: () => ({
     markAsRead: { mutateAsync: markAsRead, isPending: { value: false } },
     markAllAsRead: { mutateAsync: markAllAsRead, isPending: { value: false } },
+    executeAction: { mutateAsync: executeAction, isPending: { value: false } },
   }),
 }));
 
 vi.mock('vue-sonner', () => ({
-  toast: { success: vi.fn() },
+  toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('@memoflow/ui-vue-shadcn', async () => {
@@ -58,7 +62,7 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
             type: 'button',
             ...attrs,
             disabled: props.disabled,
-            onClick: () => emit('click'),
+            onClick: (event: MouseEvent) => emit('click', event),
           },
           slots.default?.(),
         );
@@ -80,9 +84,20 @@ const i18n = createI18n({
         },
         action: {
           markAllRead: 'Mark all read',
+          complete: 'Complete',
+          snooze10m: 'Remind in 10 min',
         },
         toast: {
           allMarkedRead: 'All marked as read',
+          routineCompleted: 'Completed',
+          routineSnoozed: 'Snoozed',
+          actionRejected: 'Rejected',
+        },
+      },
+      routine: {
+        action: {
+          complete: 'Complete',
+          snooze10m: 'Remind in 10 min',
         },
       },
     },
@@ -108,6 +123,7 @@ function createNotification(overrides: Partial<NotificationClientDTO> = {}): Not
     updatedAt: Date.now(),
     deletedAt: null,
     notificationChannels: null,
+    navigationIntent: null,
     ...overrides,
   } as NotificationClientDTO;
 }
@@ -161,6 +177,59 @@ describe('NotificationCapsulePreview (V2 §6.5)', () => {
     wrapper.unmount();
   });
 
+  it('executes Routine quick actions directly from the capsule without marking the fact as read', async () => {
+    notificationsRef.value = [
+      createNotification({
+        id: 'n-routine' as NotificationClientDTO['id'],
+        title: 'Stand & Move',
+        actions: [
+          {
+            kind: 'owner-command',
+            actionKey: 'complete',
+            labelKey: 'routine.action.complete',
+            owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+            commandKey: 'routine.complete',
+            input: { routineId: 'routine-1', occurrenceKey: 'occurrence-1' },
+          },
+          {
+            kind: 'owner-command',
+            actionKey: 'snooze-10m',
+            labelKey: 'routine.action.snooze10m',
+            owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+            commandKey: 'routine.snooze',
+            input: {
+              routineId: 'routine-1',
+              occurrenceKey: 'occurrence-1',
+              durationMs: 600_000,
+            },
+          },
+        ],
+      }),
+    ];
+
+    const wrapper = mountPreview();
+    await nextTick();
+
+    expect(
+      wrapper.get('[data-testid="notification-capsule-action-n-routine-complete"]').text(),
+    ).toBe('Complete');
+    expect(
+      wrapper.get('[data-testid="notification-capsule-action-n-routine-snooze-10m"]').text(),
+    ).toBe('Remind in 10 min');
+
+    await wrapper
+      .get('[data-testid="notification-capsule-action-n-routine-complete"]')
+      .trigger('click');
+    await nextTick();
+
+    expect(executeAction).toHaveBeenCalledWith({
+      notificationId: 'n-routine',
+      actionKey: 'complete',
+    });
+    expect(markAsRead).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it('emits view-all when the footer action is clicked', async () => {
     notificationsRef.value = [];
     const wrapper = mountPreview();
@@ -171,9 +240,13 @@ describe('NotificationCapsulePreview (V2 §6.5)', () => {
     wrapper.unmount();
   });
 
-  it('marks an unread item as read when clicked', async () => {
+  it('marks an unread item as read and emits a stable destination when clicked', async () => {
     notificationsRef.value = [
-      createNotification({ id: 'n-9' as NotificationClientDTO['id'], isRead: false }),
+      createNotification({
+        id: 'n-9' as NotificationClientDTO['id'],
+        isRead: false,
+        navigationIntent: { route: '/tasks/plan-1', params: { from: 'notification' } },
+      }),
     ];
     unreadCountRef.value = 1;
     const wrapper = mountPreview();
@@ -182,6 +255,9 @@ describe('NotificationCapsulePreview (V2 §6.5)', () => {
     await wrapper.get('[data-testid="notification-capsule-item-n-9"] button').trigger('click');
     await nextTick();
     expect(markAsRead).toHaveBeenCalledWith('n-9');
+    expect(wrapper.emitted('navigate')).toEqual([
+      [{ path: '/tasks/plan-1', query: { from: 'notification' } }],
+    ]);
     wrapper.unmount();
   });
 });

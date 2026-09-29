@@ -12,7 +12,7 @@ describe('DeleteGoalRecordUseCase', () => {
       identityId: 'identity-1' as any,
       name: 'Atomic record deletion',
       summary: null,
-      startDate: null,
+      start: null,
       reminderConfig: null,
     });
     const keyResult = goal.createAndAddKeyResult({
@@ -80,7 +80,7 @@ describe('DeleteGoalRecordUseCase', () => {
       identityId: 'identity-1' as any,
       name: 'Reach 70 kg',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });

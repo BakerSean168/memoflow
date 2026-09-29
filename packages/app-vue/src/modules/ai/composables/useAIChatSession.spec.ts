@@ -22,6 +22,16 @@ const i18n = createI18n({
     'en-US': {
       common: { unknown: 'Unknown', operationFailed: 'Operation failed' },
       aiAssistant: {
+        chatPage: {
+          context: { tooMany: 'Too many context items' },
+          attachments: {
+            tooMany: 'Too many attachments',
+            tooLarge: 'Too large',
+            totalTooLarge: 'Attachments too large',
+            unsupportedType: 'Unsupported type',
+            readFailed: 'Read failed',
+          },
+        },
         dialogs: {
           chat: {
             defaultConversationName: 'New chat',
@@ -203,6 +213,8 @@ describe('useAIChatSession Mastra-native open chat', () => {
         surface: 'web',
         providerId: 'provider-1',
         modelId: 'model-1',
+        attachments: [],
+        selectedEntities: [],
       },
       expect.objectContaining({ onEvent: expect.any(Function) }),
       expect.any(AbortSignal),
@@ -210,6 +222,124 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(service.dispatchAssistant).not.toHaveBeenCalled();
     expect(runtime.listMessages).toHaveBeenCalledWith('conv-1');
     expect(usageRuntime.get).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+  });
+
+  it('normalizes supported attachment media types and rejects unsupported files before transport', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+
+    await composable.addComposerFiles([new File(['# note'], 'note.md', { type: '' })]);
+    expect(composable.composerAttachments.value).toHaveLength(1);
+    expect(composable.composerAttachments.value[0]).toMatchObject({
+      mediaType: 'text/markdown',
+      filename: 'note.md',
+    });
+    expect(composable.composerAttachments.value[0]?.data).toMatch(/^data:text\/markdown;base64,/u);
+
+    await composable.addComposerFiles([
+      new File(['archive'], 'archive.zip', { type: 'application/zip' }),
+    ]);
+    expect(composable.composerAttachments.value).toHaveLength(1);
+    expect(toastMocks.error).toHaveBeenCalledWith('Unsupported type');
+  });
+
+  it('keeps a dismissed implicit surface context hidden until the visible entity changes', () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+
+    composable.setSurfaceContextEntity({ entityType: 'goal', id: 'goal-1', label: 'Goal one' });
+    expect(composable.composerContextEntities.value).toEqual([
+      { entityType: 'goal', id: 'goal-1', label: 'Goal one', origin: 'surface' },
+    ]);
+
+    composable.removeContextEntity('goal', 'goal-1');
+    composable.setSurfaceContextEntity({
+      entityType: 'goal',
+      id: 'goal-1',
+      label: 'Goal one updated',
+    });
+    expect(composable.composerContextEntities.value).toEqual([]);
+
+    composable.setSurfaceContextEntity({ entityType: 'goal', id: 'goal-2', label: 'Goal two' });
+    expect(composable.composerContextEntities.value).toEqual([
+      { entityType: 'goal', id: 'goal-2', label: 'Goal two', origin: 'surface' },
+    ]);
+  });
+
+  it('preserves an explicit entity selection when the same entity is also the current surface', () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+
+    composable.toggleExplicitContextEntity({ entityType: 'goal', id: 'goal-1', label: 'Ship v1' });
+    composable.setSurfaceContextEntity({ entityType: 'goal', id: 'goal-1', label: 'Ship v1' });
+
+    expect(composable.composerContextEntities.value).toEqual([
+      { entityType: 'goal', id: 'goal-1', label: 'Ship v1', origin: 'explicit' },
+    ]);
+
+    composable.setSurfaceContextEntity(null);
+    expect(composable.composerContextEntities.value).toEqual([
+      { entityType: 'goal', id: 'goal-1', label: 'Ship v1', origin: 'explicit' },
+    ]);
+  });
+
+  it('sends attachment payloads and selected entity context while keeping provenance server-owned', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    composable.composerAttachments.value.push({
+      id: 'attachment-1',
+      data: 'data:image/png;base64,aGVsbG8=',
+      mediaType: 'image/png',
+      filename: 'screen.png',
+      size: 5,
+    });
+    composable.toggleExplicitContextEntity({ entityType: 'goal', id: 'goal-1', label: 'Ship v1' });
+
+    await send(composable, service, runtime);
+
+    expect(runtime.streamMessage.mock.calls[0][0]).toMatchObject({
+      attachments: [
+        {
+          data: 'data:image/png;base64,aGVsbG8=',
+          mediaType: 'image/png',
+          filename: 'screen.png',
+        },
+      ],
+      selectedEntities: [{ entityType: 'goal', id: 'goal-1', label: 'Ship v1' }],
+    });
+    expect(composable.composerAttachments.value).toEqual([]);
+    expect(composable.composerContextEntities.value).toHaveLength(1);
+  });
+
+  it('allows an attachment-only turn without injecting visible synthetic text', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    composable.composerAttachments.value.push({
+      id: 'attachment-only',
+      data: 'data:image/png;base64,aGVsbG8=',
+      mediaType: 'image/png',
+      filename: 'screen.png',
+      size: 5,
+    });
+    composable.chatMessage.value = '';
+
+    await composable.handleSendChat(service as never, MODEL, 'New chat', () => {});
+
+    expect(runtime.streamMessage.mock.calls[0][0]).toMatchObject({
+      content: '',
+      attachments: [
+        {
+          data: 'data:image/png;base64,aGVsbG8=',
+          mediaType: 'image/png',
+          filename: 'screen.png',
+        },
+      ],
+    });
   });
 
   it('deletes Mastra memory before the legacy Conversation shell so a shell failure remains recoverable', async () => {

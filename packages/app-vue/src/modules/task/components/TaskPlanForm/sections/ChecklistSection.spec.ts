@@ -10,6 +10,11 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
+      common: {
+        edit: 'Edit',
+        cancel: 'Cancel',
+        save: 'Save',
+      },
       task: {
         checklist: {
           title: 'Checklist',
@@ -44,8 +49,9 @@ describe('ChecklistSection', () => {
       global: { plugins: [i18n] },
     });
 
-    await wrapper.get('[data-testid="task-checklist-new-item"]').setValue('Prepare evidence');
     await wrapper.get('[data-testid="task-checklist-add"]').trigger('click');
+    await wrapper.get('[data-testid="task-checklist-new-item"]').setValue('Prepare evidence');
+    await wrapper.get('[data-testid="task-checklist-save"]').trigger('click');
 
     const emitted = wrapper.emitted('update:modelValue');
     expect(emitted?.at(-1)?.[0]).toMatchObject({
@@ -65,7 +71,9 @@ describe('ChecklistSection', () => {
       global: { plugins: [i18n] },
     });
 
-    await wrapper.get('[data-testid="task-checklist-title-0"]').setValue('Updated first');
+    await wrapper.get('[data-testid="task-checklist-title-0"]').trigger('click');
+    await wrapper.get('[data-testid="task-checklist-new-item"]').setValue('Updated first');
+    await wrapper.get('[data-testid="task-checklist-save"]').trigger('click');
     expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toMatchObject({
       checklist: [
         { id: 'check-a', title: 'Updated first', order: 0 },

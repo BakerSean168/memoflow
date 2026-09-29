@@ -14,9 +14,10 @@ describe('normal Planner owner boundary (PLAN-4302 / RAR-2602/2603)', () => {
     expect(calendarView).toContain('projections');
   });
 
-  it('feeds Routine markers from the canonical owner client instead of a hard-coded empty lane', () => {
+  it('feeds Routine markers from the canonical owner client through the shared range cache instead of a hard-coded empty lane', () => {
     expect(calendarView).toContain("useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService')");
-    expect(calendarView).toContain('routineService.getUpcomingOccurrences');
+    expect(calendarView).toContain('fetchRoutineUpcomingCached');
+    expect(calendarView).toContain('service: routineService');
     expect(calendarView).not.toContain('plannerRoutineOccurrences.value = [];');
     expect(calendarView).not.toContain('Phase 5 will');
   });

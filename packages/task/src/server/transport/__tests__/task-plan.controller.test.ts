@@ -88,6 +88,26 @@ describe('TaskPlanController', () => {
       expect(args.importance).toBe('Moderate');
     });
 
+    it('forwards checklist definitions to the create use case', async () => {
+      (useCases.createPlan as ReturnType<typeof vi.fn>).mockResolvedValue(
+        ok({ plan: FAKE_TEMPLATE_DTO, occurrenceCount: 0, todayOccurrenceCreated: false }),
+      );
+
+      const checklist = [
+        { id: 'check-1', title: 'Prepare evidence', order: 0 },
+        { id: 'check-2', title: 'Publish result', order: 1 },
+      ];
+
+      await controller.createPlan({ ...VALID_CREATE_INPUT, checklist }, ctx);
+
+      expect(useCases.createPlan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identityId: TEST_IDENTITY_ID,
+          checklist,
+        }),
+      );
+    });
+
     it('should preserve generated-occurrence feedback in the transport response', async () => {
       (useCases.createPlan as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok({ plan: FAKE_TEMPLATE_DTO, occurrenceCount: 5, todayOccurrenceCreated: true }),
@@ -238,9 +258,7 @@ describe('TaskPlanController', () => {
 
     it('should return plans and total', async () => {
       const plans = [FAKE_TEMPLATE_DTO];
-      (useCases.listPlans as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ plans, total: 1 }),
-      );
+      (useCases.listPlans as ReturnType<typeof vi.fn>).mockResolvedValue(ok({ plans, total: 1 }));
 
       const result = await controller.listPlans(undefined, ctx);
 
@@ -258,9 +276,7 @@ describe('TaskPlanController', () => {
     it('delegates parsed input to the use case (shape validation is adapter-owned)', async () => {
       // Phase 4: malformed shapes are rejected by the adapters before the
       // controller; the controller receives inferred input and delegates.
-      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok(FAKE_TEMPLATE_DTO),
-      );
+      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_TEMPLATE_DTO));
 
       const result = await controller.updatePlan('tmpl_1', VALID_UPDATE_INPUT, ctx);
 
@@ -269,9 +285,7 @@ describe('TaskPlanController', () => {
     });
 
     it('should call updatePlan use case with id and parsed data', async () => {
-      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok(FAKE_TEMPLATE_DTO),
-      );
+      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_TEMPLATE_DTO));
 
       await controller.updatePlan('tmpl_1', VALID_UPDATE_INPUT, ctx);
 
@@ -283,8 +297,22 @@ describe('TaskPlanController', () => {
         importance: undefined,
         labelIds: undefined,
         goalBinding: undefined,
+        checklist: undefined,
         completionPolicy: undefined,
       });
+    });
+
+    it('forwards checklist definitions to the update use case', async () => {
+      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_TEMPLATE_DTO));
+      const checklist = [{ id: 'check-1', title: 'Prepare evidence', order: 0 }];
+
+      await controller.updatePlan('tmpl_1', { checklist }, ctx);
+
+      expect(useCases.updatePlan).toHaveBeenCalledWith(
+        'tmpl_1',
+        TEST_IDENTITY_ID,
+        expect.objectContaining({ checklist }),
+      );
     });
 
     it('should return use case result directly (no unwrap)', async () => {
@@ -297,9 +325,7 @@ describe('TaskPlanController', () => {
     });
 
     it('should accept empty object (all fields optional)', async () => {
-      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok(FAKE_TEMPLATE_DTO),
-      );
+      (useCases.updatePlan as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_TEMPLATE_DTO));
 
       const result = await controller.updatePlan('tmpl_1', {}, ctx);
 
@@ -411,9 +437,7 @@ describe('TaskPlanController', () => {
   // =========================================================================
   describe('archivePlan', () => {
     it('should call archivePlan use case with id', async () => {
-      (useCases.archivePlan as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok(FAKE_TEMPLATE_DTO),
-      );
+      (useCases.archivePlan as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_TEMPLATE_DTO));
 
       await controller.archivePlan('tmpl_1', ctx);
 
