@@ -4,6 +4,8 @@ Date: 2026-09-29
 Branch: `product/vnext-convergence`  
 Status: discovery / first-pass verified audit
 
+> **Second-pass closure:** [Remaining Modules Full Surface / UI Audit](./2026-09-29-product-vnext-remaining-modules-full-surface-audit.md) now supersedes this document for Schedule, Routine, Knowledge, Notification, Settings/Account, Governance, AI/Shell severity, page-level UI findings, and convergence order. This first-pass document remains useful as the original cross-module baseline.
+
 ## 1. Scope
 
 This audit compares the current Vue product surfaces with the active product documents and the Goal reference direction frozen on 2026-09-29.

@@ -35,7 +35,7 @@ finish Goal KR -> Record -> Review vertical loop
         ↓
 extract only the shared grammar proven by Goal
         ↓
-audit and converge Task / Schedule / Routine / Knowledge / Notification / Settings / AI
+audit and converge Task / Schedule / Routine / Knowledge / Notification / Settings+Account / Governance / AI+Shell
         ↓
 product-wide drift closure
         ↓
@@ -48,7 +48,7 @@ The plan deliberately avoids premature “one universal entity component” abst
 
 # 1. Target outcome
 
-A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification and AI.
+A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification, Settings/Account, Governance and AI.
 
 Observable outcomes:
 
@@ -871,6 +871,30 @@ This ticket should also replace the current Sum-biased Goal record composer with
 
 ADR-056/068/069/075 have now been amended to distinguish `automatic fixed contribution` from `user-authored completion measurement`, preserve Goal ownership, define provenance/correction semantics, and retire Upcoming in favor of Schedule. Contract implementation must follow those revised ADR boundaries.
 
+### PVC-TASK-3401 — Canonical occurrence action coordinator
+
+**Why now:** second-pass remaining-module audit found that Task completion is initiated from Task Home/Detail, Task Capsule, Today Overview and Schedule. Once completion-time KR measurement exists, direct `completeOccurrence(id)` calls become interaction bypasses.
+
+Converge all user-facing completion entry points onto one Task-owned interaction contract:
+
+```text
+request complete
+ -> inspect completion requirements
+ -> direct complete OR prompted KR measurement
+ -> canonical completion command with optional measurement intent
+```
+
+Affected presentation entry points currently include:
+
+- `TaskManagementView`;
+- `TaskDetailView`;
+- `TaskCapsulePreview`;
+- `DailyTodoWidget`;
+- Schedule `DayDetailSheet`;
+- Schedule `TaskEventActionPanel`.
+
+The host may render the dialog, but Task owns the decision and Goal owns measurement aggregation.
+
 ---
 
 # 9. Phase 4 — Schedule / Planner convergence
@@ -881,16 +905,19 @@ Schedule is the temporal planning owner, not another Task editor.
 
 ### PVC-SCHED-4001 — Calendar surface audit
 
-Review:
+**Status:** second-pass discovery complete.
 
-- toolbar variants;
-- view switch;
-- period navigation;
-- event/card density;
-- drag/drop mutation behavior;
-- collision/error feedback;
-- selection/create behavior;
-- mobile/narrow panel behavior.
+Evidence: [Remaining Modules Full Surface / UI Audit](../../analysis/2026-09-29-product-vnext-remaining-modules-full-surface-audit.md).
+
+Verified direction:
+
+- keep Calendar-specific Day / Week / Month + period-navigation toolbar as a legal specialized surface;
+- converge gutters, states and semantic presentation without forcing a Goal-style header;
+- keep owner-projection mutation routing;
+- reuse the existing edit-capable `CreateScheduleDialog` for Schedule-owned CalendarEntry edit;
+- expose CalendarEntry edit/delete from event inspect;
+- keep Routine projections read-only until Routine owns a canonical single-occurrence override;
+- route Task completion through the canonical Task occurrence action coordinator rather than direct `completeOccurrence(id)` calls.
 
 ### PVC-SCHED-4101 — Create/edit temporal surface convergence
 
@@ -898,14 +925,15 @@ Reuse canonical date/date-time surfaces while preserving exact Instant/Ymd seman
 
 ### PVC-SCHED-4201 — Inspect vs edit surfaces
 
-Decide which event information belongs in:
+Resolved interaction family:
 
-- direct calendar interaction;
-- Sheet;
-- Dialog;
-- cross-module owner navigation.
+- direct calendar interaction for move/resize/high-frequency selection;
+- Sheet/Dialog for event inspect;
+- Schedule-owned CalendarEntry can enter edit/delete from inspect;
+- Task/Goal/Routine projections delegate business mutation to the owner;
+- no new page is introduced merely for event metadata.
 
-No new page should be introduced merely for event metadata.
+Also converge duplicated source-dot/source-badge mappings into one Schedule projection presentation authority.
 
 ---
 
@@ -917,16 +945,17 @@ Routine is a Coach/runtime configuration domain, not a generic reminder CRUD pag
 
 ### PVC-ROUTINE-5001 — Routine configuration audit
 
-Review:
+**Status:** second-pass discovery complete.
 
-- Profile vs Routine hierarchy;
-- method library;
-- configuration center density;
-- inline enable/disable;
-- runtime-active vs configured state;
-- web unsupported capability handling;
-- temporary overrides;
-- capsule quick workspace.
+Verified direction:
+
+- preserve Profile / Membership / Runtime / TemporaryOverride ownership;
+- keep Method Library and compact Routine rows;
+- keep the h-11 configuration-toolbar family as a legal compact variant;
+- reduce persistent toolbar administration density by moving low-frequency Profile CRUD into the Profile menu;
+- replace native WallClock date/time controls with Product Time controls;
+- replace free-text IANA timezone entry with a canonical searchable timezone selector/default-to-Product-Time flow;
+- preserve host capability gating and unsupported-on-Web behavior.
 
 ### PVC-ROUTINE-5101 — Configuration/direct-manipulation convergence
 
@@ -946,16 +975,15 @@ Knowledge remains a projected repository/document owner, not an embedded Goal/Ta
 
 ### PVC-KNOW-6001 — Repository workspace audit
 
-Review:
+**Status:** second-pass discovery complete.
 
-- catalog tree;
-- document toolbar;
-- context panel;
-- stable reference state;
-- hidden directory behavior;
-- loading/retry/error;
-- narrow-panel behavior;
-- source connection health.
+Verified direction:
+
+- keep `Catalog | Content | Context` as a specialized document workspace;
+- keep Web read/search/link-only and Desktop external-editor capability boundaries;
+- converge Web/Desktop toolbar, catalog-row, selection, loading/error/empty and source-status presentation where semantics are shared;
+- replace the native connection `<select>` with the standard selector grammar;
+- do not add a Goal-style max-width entity page or resurrect built-in Markdown editing.
 
 ### PVC-KNOW-6101 — Note capsule and quick-access contract
 
@@ -973,81 +1001,143 @@ Make “projected note” vs “stable durable reference” understandable witho
 
 ## PVC-NOTIF-7001 — Notification center audit
 
-Review:
+**Status:** second-pass discovery complete.
 
-- unread/read filtering;
-- actionability;
-- compact row density;
-- navigation target;
-- browser/system delivery preferences;
-- capsule preview;
-- read state/update latency.
+Verified direction:
+
+- converge Inbox onto the shared Collection surface grammar while preserving unread/archive semantics;
+- keep typed owner actions and `read != business completion`;
+- make Web browser-system notification click use the same typed destination resolver as in-app/Desktop;
+- move category/source colors onto shared semantic tone mapping;
+- keep SSE Monitor dev/diagnostic scoped rather than styling it as a normal Inbox page.
 
 ## PVC-SET-7101 — Settings visual convergence
 
-Do not redesign Settings domain ownership.
+**Status:** second-pass discovery complete.
 
-Converge only:
+Do not redesign Settings domain ownership or its sidebar/Sheet scene.
 
-- navigation/chrome;
-- property rows;
-- status/connection surfaces;
-- loading/error states;
-- responsive presentation.
+Converge section internals toward:
 
-The existing six-group Settings Hub and owner boundaries remain protected.
+- `SettingsSection`;
+- `SettingsPropertyRow`;
+- `SettingsStatusBlock`;
+- `SettingsObjectCard` only for real bounded objects;
+- `SettingsDangerZone`;
+- Product/Settings dialog shell based on the canonical dialog primitives.
+
+Reduce the current card-heavy presentation, replace visible native selects, and migrate raw amber/emerald/green feedback to semantic tokens.
+
+Account remains a Settings capability surface; `/account -> /settings?tab=account` stays canonical. Auth identity remains separate.
 
 ---
 
-# 13. Phase 8 — AI / shell convergence
+# 13. Phase 8 — Governance + AI / shell convergence
 
 ## Product target
 
+Governance becomes the current executable UI/reference feature for full-page list/detail/editor/history patterns.
+
 AI remains a first-class interaction surface but uses the same product objects and owner actions.
+
+### PVC-GOV-7901 — Governance UI reference convergence
+
+**Status:** second-pass discovery complete.
+
+Governance is a permanent executable reference module, so its UI must stop teaching older conventions.
+
+Converge:
+
+- Rule list -> canonical Collection surface;
+- Rule detail -> current Entity workspace grammar;
+- Rule editor -> standard Input/Textarea/Select + stable full-page editor shell;
+- Revision history -> same Rule workspace family;
+- loading/error/empty -> shared state grammar;
+- native controls/hand-built spinners/custom router-link buttons -> current primitives.
+
+Keep Rule/RuleRevision routes and audit semantics; unlike Goal KR, Rule is a first-class owner entity.
 
 ### PVC-AI-8001 — AI chat/composer audit
 
-Review:
+**Status:** second-pass discovery complete.
 
-- attachment/context adding;
-- pasted image behavior;
-- referenced Goal/Task/Knowledge context;
-- automatic intent recognition;
-- model selection density;
-- tool/action confirmation;
-- narrow-column behavior.
+Verified direction:
+
+- keep attachment/context/paste/automatic-intent behavior;
+- keep one specialized composer;
+- hide normal-workflow draft refs, IDs, mutation/reference-map details and low-level codes behind diagnostic/DEV detail;
+- render owner drafts using the same product language as manual Goal/Task/Knowledge surfaces;
+- replace bespoke elevation with semantic elevation tokens;
+- collapse Teleport/non-Teleport composer wiring to one logical mount path without changing shell geometry.
 
 ### PVC-AI-8101 — Goal/Task action presentation
 
-AI-generated Goal/KR/Task drafts should reuse the same user-facing concepts as manual owner surfaces; no parallel “AI-only form language”.
+AI-generated Goal/KR/Task drafts must reuse the same user-facing concepts as manual owner surfaces; no parallel “AI-only form language”.
+
+In particular:
+
+- friendly KR calculation labels and Initial / Current / Target grammar;
+- current Goal timeframe/property interactions;
+- current Task schedule/importance/Goal-KR grammar;
+- Task→KR three-mode record semantics once PVC-TASK-3301 lands;
+- no raw owner IDs/draftRefs as normal user copy.
 
 ### PVC-SHELL-8201 — Capsule convergence
 
-Audit all capsule previews for:
+**Audit status:** behavior is generally correct; presentation duplication remains.
+
+Protect:
 
 - hover/pinned dismissal;
+- focus behavior;
 - stale-window query reuse;
 - repeated request avoidance;
-- quick actions;
-- consistent header/list/footer density;
 - owner navigation.
+
+Promote only the repeated shell grammar:
+
+- CapsulePreviewShell;
+- CapsulePreviewHeader;
+- CapsulePreviewFooter;
+- loading/error/empty state surface.
+
+Do not create one universal capsule item row.
+
+Task capsule/Today quick completion must also route through the canonical Task occurrence action coordinator.
 
 ---
 
 # 14. Phase 9 — Product-wide drift closure
 
-Only after the module vertical slices are complete:
+The second-pass full-surface audit defines the convergence model as **shared grammar, specialized surfaces, owner-canonical actions**.
 
-1. eliminate duplicated toolbar recipes;
-2. eliminate duplicated metadata chip recipes;
-3. normalize semantic tokens/elevation;
-4. remove retired views/components;
-5. remove dead route rendering while preserving redirects/mappings;
-6. remove temporary compatibility code after migration window;
-7. run full visual matrix;
-8. run accessibility/focus pass;
-9. profile high-frequency UI queries and hover surfaces;
-10. archive superseded product/active-plan docs.
+Before final cleanup, formalize the legal surface families:
+
+1. Collection;
+2. Entity workspace;
+3. Create/edit configuration;
+4. Inspect overlay;
+5. Document workspace;
+6. Calendar workspace;
+7. Settings scene;
+8. AI collaborator;
+9. Diagnostic/developer surface.
+
+Then close drift:
+
+1. document legal header/toolbar variants rather than forcing one literal height;
+2. eliminate duplicated toolbar/filter recipes within the same surface family;
+3. eliminate duplicated metadata/property/status recipes where semantics match;
+4. converge collection/workspace/dialog loading-error-empty presentation;
+5. normalize semantic tokens/elevation and owner/source tone mapping;
+6. remove retired/alternate views/components only after parity evidence;
+7. preserve redirects/mappings when routes are retired;
+8. remove temporary compatibility code after migration windows;
+9. run the representative screenshot matrix;
+10. run accessibility/focus/keyboard pass;
+11. run narrow/wide container, light/dark and zh-CN/en-US representative checks;
+12. profile high-frequency UI queries, shell previews and hover surfaces;
+13. archive superseded product/active-plan docs.
 
 ---
 
@@ -1145,37 +1235,47 @@ Goal 1101..1601
         ↓
 UI 2101..2105
         ↓
-parallel module audits:
-TASK-3001
+second-pass discovery closure:
+TASK-3001 + Task deep audit
 SCHED-4001
 ROUTINE-5001
 KNOW-6001
 NOTIF-7001
 SET-7101
+GOV-7901
 AI-8001
++ Remaining Modules Full Surface / UI Audit
         ↓
-bounded module convergence batches
+root-cause / owner-correct vertical slices
+TASK-3002 / TASK-3401 / TASK-3301
+SCHED-4201
+Goal Record/Review closure
         ↓
-Phase 9 global drift closure
+bounded module visual convergence batches
+        ↓
+Phase 9 product-wide grammar + visual regression closure
 ```
 
-Module audits may run in parallel after the Goal interaction contract is stable enough to compare against; implementation migrations should not all begin simultaneously before shared-primitives decisions are reviewed.
+The broad module audits are now discovery-complete. Do not reopen them as generic discovery unless implementation uncovers contradictory evidence. Implementation migrations should be grouped by root cause and owner contract; shared primitives are promoted only after multiple converged surfaces prove the same grammar.
 
 ---
 
 # 19. Immediate next actions
 
 1. Keep `product/vnext-convergence` on top of the current `main` baseline.
-2. Preserve the updated Goal product North Star frozen on 2026-09-29.
-3. Continue the focused audits for Task, Routine, Schedule, Knowledge, Notification, Settings and AI.
-4. Produce one verified module drift ledger per owner before implementing its convergence batch.
-5. Begin implementation with Goal create Reminder removal + KR/Record/Review closure.
+2. Preserve the updated Goal and Task product North Stars frozen on 2026-09-29.
+3. Treat the Task second-pass audit and Remaining Modules Full Surface / UI Audit as discovery-complete evidence.
+4. Convert verified findings into bounded implementation tickets by dependency/root cause rather than reopening broad module discovery.
+5. Before product-wide visual abstraction, complete owner-correct vertical slices: Task lifecycle/action coordinator, Schedule CalendarEntry inspect/edit/delete, Goal/Task measurement loop.
+6. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
+7. Make deterministic visual regression part of closure, not an informal screenshot exercise.
 
 # 20. Discovery references
 
 - [Goal vNext Workspace & Create UI](../../product/goal-vnext-workspace-and-create-ui.md)
 - [Cross-module convergence audit](../../analysis/2026-09-29-product-vnext-module-convergence-audit.md)
 - [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md)
+- [Remaining Modules Full Surface / UI Audit](../../analysis/2026-09-29-product-vnext-remaining-modules-full-surface-audit.md)
 - [Workspace UI contract](../../product/workspace-ui.md)
 - [Task vNext](../../product/task-vnext-plan-occurrence-workspace.md)
 - [Routine Coach vNext](../../product/routine-coach-vnext.md)
