@@ -8,3 +8,4 @@ export { weightRecommendationService } from './weight-recommendation';
 export type { WeightStrategy } from './weight-recommendation';
 
 export * from './progress';
+export * from './key-result-calculation-presentation';

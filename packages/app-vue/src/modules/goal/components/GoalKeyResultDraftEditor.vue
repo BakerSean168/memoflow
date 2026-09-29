@@ -51,7 +51,7 @@
               class="shrink-0 text-[11px] text-muted-foreground/80"
               data-testid="goal-key-result-draft-calculation"
             >
-              {{ calculationMethodLabel(keyResult.calculationMethod) }}
+              {{ getKeyResultCalculationLabel(keyResult.calculationMethod, t) }}
             </span>
 
             <span
@@ -151,6 +151,7 @@ import {
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
 type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
@@ -339,17 +340,6 @@ function saveDraft(): void {
 function removeKeyResult(index: number): void {
   if (props.disabled || editorOpen.value) return;
   keyResults.value = keyResults.value.filter((_, itemIndex) => itemIndex !== index);
-}
-
-function calculationMethodLabel(method: KeyResultCalculationMethod): string {
-  const labels: Record<KeyResultCalculationMethod, string> = {
-    Sum: t('goal.dialog.krCalculationSum'),
-    Average: t('goal.dialog.krCalculationAverage'),
-    Max: t('goal.dialog.krCalculationMax'),
-    Min: t('goal.dialog.krCalculationMin'),
-    Last: t('goal.dialog.krCalculationLast'),
-  };
-  return labels[method];
 }
 
 function compactTargetLabel(keyResult: DraftKeyResult): string {
