@@ -651,6 +651,12 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** Task Home/Capsule/Home 对相同 occurrence 的 Complete/Skip/Missed/Checklist 语义一致。
 
+**Execution (2026-09-29): Implemented / validated.** 已建立 `useTaskOccurrenceActionCoordinator` 作为 Task-owned occurrence action entry，并提炼 `TaskOccurrenceQuickRow`、`TaskOccurrenceCompactList`、`TaskQuickSurface`。Task Home 与 Task Detail 保留 full occurrence row，但动作统一经过 coordinator；Task Capsule 与 `DailyTodoWidget` 复用 `TaskQuickSurface`。Capsule quick-create 继续复用 TASK-3004 的 canonical quick-task builder。Schedule integration 仍按计划留给 SCHED-4202。
+
+**Review repairs:** 修复了两处语义/呈现偏差：`Missed/Skipped -> Completed` correction、`Completed -> Uncomplete` 与 canonical row/domain 对齐，Checklist 不再仅因 terminal status 被禁用；surface 仍串行化 action，但仅实际 busy occurrence 显示 spinner，其余 row 只禁用而不伪装 busy。DailyTodo 旧 child selectors 已迁移到 shared semantic selectors（`data-task-occurrence-id` / `data-task-status` / shared complete control / `task-quick-progress[data-progress]`）。
+
+**Validation:** 最终 focused app-vue suite 9 files / 64 tests PASS；`app-vue:typecheck --skipNxCache` PASS；changed-file ESLint PASS；`git diff --check` PASS。selector migration 3 files / 19 tests PASS；4 个受影响 Playwright cases discovery/compile PASS。实际浏览器 `task/task-completion-loop.spec.ts` 1/1 PASS（31.3s test，1.2m total），覆盖 canonical DailyTodo selector 与 Task -> Goal EachCompletion closed loop。Local Docker Phase A/B 仅完成 discovery/compile，未在 freshly built current-worktree container 上实际执行，作为后续 integration acceptance caveat。详见 [implementation report](../../analysis/2026-09-29-pvc-task-3401-implementation.md)。
+
 **Dependencies:** TASK-3003A, TASK-3004；completion-time measurement branch 可先留 hook。
 
 ---
