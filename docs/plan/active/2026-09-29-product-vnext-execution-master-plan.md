@@ -255,6 +255,7 @@ Repeatable package batch: `pnpm nx run-many -t test --projects=goal,task,schedul
 **Scope:** Goal KR/Review deep link、Task lifecycle/quick route、Schedule inspect、AI workflow persistence。
 
 **Implementation:**
+
 1. 为 Goal KR deep link 增加 refresh/not-found/close characterization。
 2. 为 Goal Review create/detail deep link 增加 characterization。
 3. 为 `/tasks?dialog=quick-task` 增加当前失败/目标行为测试。
@@ -275,6 +276,7 @@ Repeatable package batch: `pnpm nx run-many -t test --projects=goal,task,schedul
 **Scope:** Playwright screenshot harness / fixture seed only。
 
 **Implementation:**
+
 1. 选定 deterministic fixture strategy。
 2. 固定 viewport / theme / locale / business-panel width。
 3. 先建立 Goal create/detail、Task Today/Plan、Schedule Calendar 三类 baseline。
@@ -296,10 +298,12 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 **Goal:** 创建 Goal 时不显示 Reminder；创建后仍可配置。
 
 **Files:**
+
 - `GoalDialog.vue`
 - `GoalDialog.spec.ts`
 
 **Implementation:**
+
 1. 定位 create/edit mode property row。
 2. create mode 移除 Reminder chip/render path。
 3. 保留 edit/detail reminder flow。
@@ -321,11 +325,13 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 **Goal:** Goal Detail 直接解释 KR baseline/current/target/trend，不依赖深层页面。
 
 **Files:**
+
 - `GoalDetailView.vue`
 - `GoalKeyResultTrajectoryPlot.vue`
 - current KR row/card components
 
 **Implementation:**
+
 1. 在 Goal Detail KR section 接入 trajectory-first summary。
 2. 同屏展示 Initial/Current/Target/unit/method/weight/timeframe。
 3. 多 KR 情况保持 compact density。
@@ -346,13 +352,14 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 ## PVC-GOAL-1103 — KR direct manipulation
 
-**Execution (2026-09-30): Implemented / validated; ChatGPT Web final review/acceptance pending.** Goal Detail now provides Goal-owned inline title/description edits and direct method/weight/timeframe controls using the existing calculation vocabulary, Select/Popover primitives and GoalTimeframePicker. Metadata patches use the canonical updateKeyResult command with aggregate expectedVersion; a shared busy gate serializes writes and canonical mutation receipts provide the next displayed value/version. Failed edits reset to canonical values and expose existing error feedback. Current still opens the Goal Record composer; measurement values remain read-only. Normal KR Edit overflow is removed after parity checks; create/delete/bound-task/detail routes remain. No GOAL-1301, Review or Task domain changes.
+**Execution (2026-09-30): Implemented / validated / independently reviewed.** Goal Detail now provides Goal-owned inline title/description edits and direct method/weight/timeframe controls using the existing calculation vocabulary, Select/Popover primitives and GoalTimeframePicker. Metadata patches use the canonical updateKeyResult command with aggregate expectedVersion; a shared busy gate serializes writes and canonical mutation receipts provide the next displayed value/version. Failed edits reset to canonical values and expose existing error feedback. Current still opens the Goal Record composer; measurement values remain read-only. Normal KR Edit overflow is removed after parity checks; create/delete/bound-task/detail routes remain. No GOAL-1301, Review or Task domain changes.
 
 **Validation:** PASS — 8 focused/regression spec files / 143 tests, app-vue:typecheck, changed-file ESLint, git diff --check, memoflow:governance-check; isolated Chromium production-CSS keyboard/layout checks at 800px and 360px (not authenticated E2E). Evidence: [GOAL-1103 implementation report](../archive/2026-09-30-pvc-goal-1103-direct-manipulation.md).
 
 **Goal:** 常用 KR 修改不需要 Edit 按钮。
 
 **Implementation:**
+
 1. title/description inline edit。
 2. method/weight/timeframe 使用 popover/menu/picker。
 3. current affordance 指向 Record composer。
@@ -372,6 +379,7 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 **Mapping:** 累计 / 平均值 / 最高值 / 最低值 / 最新值。
 
 **Implementation:**
+
 1. 建立 Goal-owned presentation utility/contract。
 2. 接 create/edit/detail/inspect/record composer。
 3. unit/record-prompt 一并集中。
@@ -394,6 +402,7 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 **Current defects covered:** Sum-biased Plus icon、positive-only、+1/+2/+5/+10 对所有 method 生效、duplicate RecordCard presentation。
 
 **Files:**
+
 - `GoalRecordDialog.vue`
 - `GoalRecordDialog.spec.ts`
 - `GoalRecordCard.vue` x2
@@ -401,6 +410,7 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 - Goal Record contracts/use cases as required
 
 **Implementation:**
+
 1. 明确 Sum=delta、Average/Max/Min/Last=sample。
 2. 允许 signed finite value；移除 global positive-only UI assumption。
 3. 依据 method 切换 label/icon/help/quick values。
@@ -423,6 +433,7 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 **Goal:** 输入 Record 时实时看到 Current → After → Target。
 
 **Implementation:**
+
 1. 建 Goal-owned preview calculation seam，复用 canonical progress calculator。
 2. 新建 Record Preview visual surface，不直接复用 KR editor trajectory contract。
 3. 输入变化实时更新 After/progress。
@@ -431,6 +442,7 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 6. 键盘 submit/cancel + failure 不丢输入。
 
 **Execution plan (2026-09-30, contract frozen):**
+
 - Add dedicated schema-owned `GoalRecordPreviewContext` to the existing KR-scoped record list response: visible measurement, trackingBaseValue and all-record aggregation snapshot. Keep normal KR DTOs unchanged.
 - Extract the pure calculator to Goal shared code, re-export from Goal client; preview calls that exact arithmetic authority.
 - Load context once when the dialog opens; use all identity-scoped records sorted by createdAt then id before visible pagination. Share snapshot arithmetic between server and live preview; show unavailable copy without context.
@@ -439,16 +451,16 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Execution (2026-09-30): Implemented / validated.** Normal `KeyResultClientDTO` / `KeyResultProgressDTO` remain unchanged. KR-scoped GoalRecord reads expose optional/nullable `previewContext` with visible measurement, `trackingBaseValue` and an all-record aggregation snapshot; Goal-wide record reads do not expose it. Owned Goal/KR validation and identity filtering precede visible pagination; `Last` ordering is deterministic by `createdAt` then id. The dialog reads preview context once per open and calls the shared Goal arithmetic authority for each candidate. Goal Detail opens the existing dialog from the KR current-value affordance and refreshes after successful save. Review repair removed duplicate native-button keyboard handlers, restored the Goal-wide client return surface, and removed abandoned aggregate-query churn.
 
-| Validation | Result |
-| --- | --- |
-| `pnpm nx run contracts:test -- src/modules/goal` | PASS: 11 files, 89 tests |
-| `pnpm nx run goal:test -- src/shared src/server/domain src/server/application/use-cases/queries/__tests__ src/infrastructure-client/adapters/goal-record-preview-context.spec.ts` | PASS: 24 files, 190 tests |
-| `pnpm nx run app-vue:test -- src/modules/goal/components/GoalRecordPreview.spec.ts src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts src/modules/goal/views/GoalDetailView.spec.ts src/modules/goal/stores/goalStore.spec.ts` | PASS: 4 files, 85 tests |
-| `pnpm nx run goal:typecheck` | PASS |
-| `pnpm nx run app-vue:typecheck` | PASS, including dependency builds |
-| Changed-file `pnpm exec eslint` | PASS: 0 errors; 4 `no-explicit-any` warnings in query test helpers |
-| `pnpm nx run memoflow:governance-check` | PASS |
-| `git diff --check` | PASS |
+| Validation                                                                                                                                                                                                                               | Result                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `pnpm nx run contracts:test -- src/modules/goal`                                                                                                                                                                                         | PASS: 11 files, 89 tests                                           |
+| `pnpm nx run goal:test -- src/shared src/server/domain src/server/application/use-cases/queries/__tests__ src/infrastructure-client/adapters/goal-record-preview-context.spec.ts`                                                        | PASS: 24 files, 190 tests                                          |
+| `pnpm nx run app-vue:test -- src/modules/goal/components/GoalRecordPreview.spec.ts src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts src/modules/goal/views/GoalDetailView.spec.ts src/modules/goal/stores/goalStore.spec.ts` | PASS: 4 files, 85 tests                                            |
+| `pnpm nx run goal:typecheck`                                                                                                                                                                                                             | PASS                                                               |
+| `pnpm nx run app-vue:typecheck`                                                                                                                                                                                                          | PASS, including dependency builds                                  |
+| Changed-file `pnpm exec eslint`                                                                                                                                                                                                          | PASS: 0 errors; 4 `no-explicit-any` warnings in query test helpers |
+| `pnpm nx run memoflow:governance-check`                                                                                                                                                                                                  | PASS                                                               |
+| `git diff --check`                                                                                                                                                                                                                       | PASS                                                               |
 
 Exact changed/new files:
 
@@ -490,6 +502,7 @@ packages/goal/src/shared/key-result-progress-calculator.ts
 **Goal:** 区分 source correlation 与 measurement authorship，为 TaskUserMeasurement 做准备。
 
 **Implementation:**
+
 1. 扩展/迁移 GoalRecord read/client projection，使 source/provenance 可见。
 2. 保留 source correlation 用于幂等/revert。
 3. 区分 Manual / TaskAutomatic / TaskUserMeasurement（最终 enum/name 在实施时冻结）。
@@ -505,23 +518,23 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Green evidence:**
 
-| Exact validation | Result |
-| --- | --- |
-| `pnpm nx run contracts:test -- goal-record` | 2 files, 7 tests passed |
-| `pnpm nx run goal:test -- goal-record task-goal-progress remove-task-goal-contribution goal-portability goal-record-preview` | Post-rebase: 15 files, 168 tests passed |
-| `pnpm nx run database:test -- goal-record` | 2 files, 7 tests passed |
-| `pnpm nx run powersync-schema:test` | 1 file, 12 tests passed |
-| `pnpm nx run app-vue:test -- GoalRecordCard GoalRecordDialog GoalRecordPreview useGoalRecords` | 4 files, 88 tests passed |
-| `pnpm nx run migrator:test` | 1 file, 3 tests passed |
-| `pnpm nx run goal:typecheck`; `pnpm nx run app-vue:typecheck` | Passed |
-| `pnpm nx run powersync-schema:typecheck`; `pnpm nx run migrator:typecheck` | Passed |
-| `pnpm nx run database:prisma-generate` | Generated/normalized Prisma artifacts through repository tooling |
-| `pnpm exec prisma validate --config ./prisma/prisma.config.ts` (packages/database) | Schema valid |
-| `pnpm nx run database:runtime-scripts:build` | Passed, authorship bootstrap emitted |
-| PostgreSQL temporary-table fixture `packages/database/src/schema/goal-record-authorship.test.sql` on MemoFlow-test-db | Legacy null source → Manual; occurrence/plan → TaskAutomatic; default verified; 4 valid combinations accepted, 76 invalid combinations rejected; rerun retains TaskUserMeasurement |
-| Changed-file `pnpm exec eslint` | Exit 0, no errors; existing test `any` warnings and ignored JSON warning |
-| `git diff --check` | Passed |
-| `pnpm test:inventory`; `pnpm nx run memoflow:governance-check` | Inventory regenerated; governance passed |
+| Exact validation                                                                                                             | Result                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm nx run contracts:test -- goal-record`                                                                                  | 2 files, 7 tests passed                                                                                                                                                            |
+| `pnpm nx run goal:test -- goal-record task-goal-progress remove-task-goal-contribution goal-portability goal-record-preview` | Post-rebase: 15 files, 168 tests passed                                                                                                                                            |
+| `pnpm nx run database:test -- goal-record`                                                                                   | 2 files, 7 tests passed                                                                                                                                                            |
+| `pnpm nx run powersync-schema:test`                                                                                          | 1 file, 12 tests passed                                                                                                                                                            |
+| `pnpm nx run app-vue:test -- GoalRecordCard GoalRecordDialog GoalRecordPreview useGoalRecords`                               | 4 files, 88 tests passed                                                                                                                                                           |
+| `pnpm nx run migrator:test`                                                                                                  | 1 file, 3 tests passed                                                                                                                                                             |
+| `pnpm nx run goal:typecheck`; `pnpm nx run app-vue:typecheck`                                                                | Passed                                                                                                                                                                             |
+| `pnpm nx run powersync-schema:typecheck`; `pnpm nx run migrator:typecheck`                                                   | Passed                                                                                                                                                                             |
+| `pnpm nx run database:prisma-generate`                                                                                       | Generated/normalized Prisma artifacts through repository tooling                                                                                                                   |
+| `pnpm exec prisma validate --config ./prisma/prisma.config.ts` (packages/database)                                           | Schema valid                                                                                                                                                                       |
+| `pnpm nx run database:runtime-scripts:build`                                                                                 | Passed, authorship bootstrap emitted                                                                                                                                               |
+| PostgreSQL temporary-table fixture `packages/database/src/schema/goal-record-authorship.test.sql` on MemoFlow-test-db        | Legacy null source → Manual; occurrence/plan → TaskAutomatic; default verified; 4 valid combinations accepted, 76 invalid combinations rejected; rerun retains TaskUserMeasurement |
+| Changed-file `pnpm exec eslint`                                                                                              | Exit 0, no errors; existing test `any` warnings and ignored JSON warning                                                                                                           |
+| `git diff --check`                                                                                                           | Passed                                                                                                                                                                             |
+| `pnpm test:inventory`; `pnpm nx run memoflow:governance-check`                                                               | Inventory regenerated; governance passed                                                                                                                                           |
 
 **Files / execution evidence:** [PVC-GOAL-1203 implementation](../archive/2026-09-30-pvc-goal-1203-implementation.md) lists exact changed files and local result logs. Initial governance failure was stale generated inventory (including pre-existing omitted tests); repository regeneration resolved it. After rebasing onto the integrated TASK-3301A baseline, Prisma artifacts were regenerated from the combined Goal/Task schema and the full focused validation/typecheck/governance set passed again. **Blockers:** none.
 
@@ -534,6 +547,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 常规 KR inspect 不再进入 standalone page。
 
 **Implementation:**
+
 1. Goal Detail 增加 KR Inspect Dialog state。
 2. 显示 larger trajectory/full record history/Task context/method explanation/source context。
 3. `/goals/:goalId/key-results/:krId` 映射到 Goal Detail + inspect。
@@ -542,7 +556,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** normal click 无新页面；旧 deep link 仍能打开同一 KR。
 
-**Execution (2026-09-30): Implemented / validated locally; ChatGPT Web final review/acceptance pending.** Goal Detail owns one route-driven KR Inspect dialog. Both `/goals/:id` and legacy `/goals/:goalId/key-results/:keyResultId` render the same workspace; the legacy URL opens Inspect after the workspace read. Close preserves query/hash and returns to `goal-detail`; back/forward follows route params without a duplicate owner fetch. Inspect reuses the enlarged readonly trajectory, extends the GOAL-1104 vocabulary for method explanation, displays core KR metadata, and reads KR-scoped records and linked Task context through canonical bounded pages with loaded totals/Load more. Provenance retains GOAL-1203 authorship labels and readable source-kind context without raw IDs. Current delegates to GoalRecordDialog; metadata commands remain on Goal Detail. Missing Goal/KR now show explicit deterministic feedback, deliberately replacing BASE-002 blank bodies. The standalone KeyResultDetailView and spec were retired after reference search. Evidence: App-Vue 10 files / 175 tests PASS (final Inspect rerun 18/18); Goal record owner regressions 4 files / 33 tests PASS; typecheck, changed-file ESLint, diff and governance PASS; isolated production-CSS Chromium 1000px/360px route/keyboard checks PASS, not authenticated E2E. See [implementation report](../archive/2026-09-30-pvc-goal-1301-inspect.md).
+**Execution (2026-09-30): Implemented / validated / independently reviewed.** Goal Detail owns one route-driven KR Inspect dialog. Both `/goals/:id` and legacy `/goals/:goalId/key-results/:keyResultId` render the same workspace; the legacy URL opens Inspect after the workspace read. Close preserves query/hash and returns to `goal-detail`; back/forward follows route params without a duplicate owner fetch. Inspect reuses the enlarged readonly trajectory, extends the GOAL-1104 vocabulary for method explanation, displays core KR metadata, and reads KR-scoped records and linked Task context through canonical bounded pages with loaded totals/Load more. Provenance retains GOAL-1203 authorship labels and readable source-kind context without raw IDs. Current delegates to GoalRecordDialog; metadata commands remain on Goal Detail. Missing Goal/KR now show explicit deterministic feedback, deliberately replacing BASE-002 blank bodies. The standalone KeyResultDetailView and spec were retired after reference search. Evidence: App-Vue 10 files / 175 tests PASS (final Inspect rerun 18/18); Goal record owner regressions 4 files / 33 tests PASS; typecheck, changed-file ESLint, diff and governance PASS; isolated production-CSS Chromium 1000px/360px route/keyboard checks PASS, not authenticated E2E. See [implementation report](../archive/2026-09-30-pvc-goal-1301-inspect.md).
 
 **Dependencies:** GOAL-1102, GOAL-1201, BASE-002.
 
@@ -553,6 +567,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 默认 Review 覆盖 `previous.windowEndAt -> now`；首次 7 天。
 
 **Implementation:**
+
 1. owner service/use-case 增加 authoritative default window resolver。
 2. 保留旧 `windowDays` compatibility。
 3. 支持 last review / 7d / 30d / custom。
@@ -563,7 +578,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** BASE-001.
 
-**Execution (2026-09-30): Implemented / locally validated; pending ChatGPT Web final review/acceptance.** One Goal-owned `ReviewWindowResolver` now serves context and creation. Default starts at the latest authoritative child review's `systemContext.windowEndAt` (lexical review ID tie-break), with first-review fallback to seven Product Time calendar days. Explicit legacy `windowDays` retains precedence; additive typed since-last-review / 7d / 30d / custom selection is aligned across HTTP, IPC and clients. Custom bounds are preserved and validated. Consecutive review, reviewedAt mismatch, DST, contract and production transport parity evidence: Goal 7 files / 94 tests, contracts 1 file / 19 tests, existing UI compatibility 1 file / 8 tests PASS; Goal/contracts/app-vue/app-react typechecks, changed-file ESLint, diff and governance PASS. No UI, facts aggregation, persistence schema or AI changes. Database integration was not run because the existing harness uses `db push --accept-data-loss`; safeguards remain intact. Exact files, commands and limits: [GOAL-1401 implementation report](../archive/2026-09-30-pvc-goal-1401-implementation.md).
+**Execution (2026-09-30): Implemented / validated / independently reviewed.** One Goal-owned `ReviewWindowResolver` now serves context and creation. Default starts at the latest authoritative child review's `systemContext.windowEndAt` (lexical review ID tie-break), with first-review fallback to seven Product Time calendar days. Explicit legacy `windowDays` retains precedence; additive typed since-last-review / 7d / 30d / custom selection is aligned across HTTP, IPC and clients. Custom bounds are preserved and validated. Consecutive review, reviewedAt mismatch, DST, contract and production transport parity evidence: Goal 7 files / 94 tests, contracts 1 file / 19 tests, existing UI compatibility 1 file / 8 tests PASS; Goal/contracts/app-vue/app-react typechecks, changed-file ESLint, diff and governance PASS. No UI, facts aggregation, persistence schema or AI changes. Database integration was not run because the existing harness uses `db push --accept-data-loss`; safeguards remain intact. Exact files, commands and limits: [GOAL-1401 implementation report](../archive/2026-09-30-pvc-goal-1401-implementation.md).
 
 ---
 
@@ -572,6 +587,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Review 在 AI 关闭时也有价值。
 
 **Implementation:**
+
 1. 汇总 overall/KR start/end/delta/trend。
 2. 汇总 manual Record/Task contribution count。
 3. 生成 explainable deterministic signals。
@@ -589,6 +605,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 创建/查看 Review 不离开 Goal workspace。
 
 **Implementation:**
+
 1. Goal Detail 增加 create/read-only Review Dialog。
 2. create route 映射到 Goal Detail + create dialog。
 3. review detail route 映射到 read-only dialog。
@@ -608,6 +625,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Matrix:** empty/create/KR five methods/Record/Inspect/Review/narrow/light-dark/zh-en/error/AI unavailable。
 
 **Commands:**
+
 - focused Goal Vitest
 - `pnpm nx run goal:test`
 - `pnpm nx run app-vue:typecheck`
@@ -630,12 +648,14 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 用户点击“结束计划”得到真实业务结束。
 
 **Files:**
+
 - `TaskDetailView.vue`
 - `TaskPlanRow.vue`
 - `useTaskPlanMutations.ts`
 - i18n/specs
 
 **Implementation:**
+
 1. 删除 `End plan -> archivePlanSafe` 映射。
 2. 接入 existing `abandonPlan` client/application port。
 3. 删除 optimistic `archive -> Closed` 假状态。
@@ -657,6 +677,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Scope:** Task domain/application/reminder/schedule projection。
 
 **Implementation:**
+
 1. 对照 Pause use case，定义 Abandon future-occurrence reconciliation。
 2. 删除/撤销已 materialize 的未来 incomplete occurrences。
 3. 确保 recurring materializer 不再选择 Closed/Abandoned plan。
@@ -680,6 +701,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 删除用户可配置 completion-policy 的产品影响，但保持 compatibility migration。
 
 **Implementation:**
+
 1. characterization 旧 AllowCorrection/StrictNoBackfill persistence/portable input。
 2. 新 canonical evaluator：unresolved->Open；resolved+Missed->Failed；resolved+no Missed->Succeeded；infinite->Open until Abandon。
 3. Skipped 从 required scope 排除。
@@ -701,6 +723,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 前端显示 Succeeded / Failed / Abandoned，而不是只看 lifecycle status。
 
 **Implementation:**
+
 1. 扩展 `TaskPlanViewModel` 映射 outcome。
 2. 定义 lifecycle/outcome/archive presentation utility。
 3. Plans row/detail 显示正确 product state。
@@ -722,6 +745,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 删除 Upcoming，消除跨 surface filter 泄漏。
 
 **Implementation:**
+
 1. 删除 Upcoming top-level surface/render path。
 2. Today 包含 today + unresolved overdue grouping。
 3. occurrence filter 只作用 Today。
@@ -744,6 +768,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Today/Plans 不再加载不必要全量历史或假分页。
 
 **Implementation:**
+
 1. Today 改用 bounded date/range occurrence query。
 2. 移除/修正 phantom page/limit semantics。
 3. Plans list server/query contract 增加真实 bounded behavior或明确 cursor；不要继续伪分页。
@@ -766,6 +791,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** AI/Today Overview/Capsule 的快速创建入口真正可用。
 
 **Implementation:**
+
 1. 统一 quick-create entry contract。
 2. `/tasks?dialog=quick-task` 恢复或迁移到 canonical surface state。
 3. title + today/all-day default + create。
@@ -787,6 +813,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Capsule/Home/Schedule 不再各自维护 Task execution UI/action。
 
 **Implementation:**
+
 1. 从 `TaskOccurrenceCompactRow`/Capsule/DailyTodoWidget 提炼 `TaskOccurrenceQuickRow` 语义。
 2. 提炼 `TaskOccurrenceCompactList`。
 3. 提炼 `TaskQuickSurface`，summary/quick-create/view-all 由 host option 控制。
@@ -807,6 +834,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 需要更多信息时使用 compact Inspect，不新增 detail route。
 
 **Implementation:**
+
 1. 建 TaskOccurrence Inspect Dialog。
 2. 包含 status/time/checklist snapshot/result/note/Goal-KR context。
 3. View Plan 显式进入 `/tasks/:planId`。
@@ -834,6 +862,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Modes:** 仅关联 / 自动记录固定值 / 完成时记录。
 
 **Implementation:**
+
 1. 扩展 `KeyResultBindingOption` projection：method/unit/current/target/必要 preview context。
 2. Sum 支持 fixed automatic delta；允许 signed finite delta。
 3. Average/Max/Min/Last 禁止 blind fixed auto contribution。
@@ -856,6 +885,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Task completion 与 Goal measurement intent 同一 durable path，不前端双写。
 
 **Implementation:**
+
 1. 扩展 CompleteTaskOccurrence command/DTO，接受 optional user measurement intent。
 2. Task transaction 同时持久 completion fact + outbox intent。
 3. outbox schema 区分 FixedAutomatic / PromptedUserMeasurement provenance。
@@ -868,7 +898,6 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** TASK-3301A, GOAL-1203.
 
-
 **Implementation evidence (2026-09-30):** Command → completion event → same-transaction V2 outbox now carries optional Prompt measurement. Explicit recording mode maps to Goal-owned TaskUserMeasurement; Fixed/legacy V2 remains TaskAutomatic. No measurement completes Task only; suggestions never become facts. Focused contracts/Task/Goal tests, both typechecks, lint and governance pass. Prisma transaction characterization passes; database integration setup is blocked by Prisma's protected `db push --accept-data-loss` action. Exact scope, commands and validation limits: [TASK-3301B execution report](../archive/2026-09-30-pvc-task-3301b.md).
 
 ---
@@ -878,6 +907,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Complete 时可输入真实值，并能后续纠正。
 
 **Implementation:**
+
 1. Task ActionCoordinator 检测 Prompt mode。
 2. 打开 Goal-owned Record Composer/preview surface。
 3. 根据 method 显示 delta/sample language。
@@ -902,6 +932,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** correctness/owner path稳定后，再对齐 Goal proven grammar。
 
 **Implementation:**
+
 1. Task Plan create property chips 与 Goal proven pattern 对齐。
 2. Detail metadata rows/property affordances 对齐。
 3. 删除 value + tiny Pencil 的重复编辑模式，property 本身可编辑时直接点击 property。
@@ -933,6 +964,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Task/Goal/Routine/CalendarEntry 的 dot/badge/source copy 不再多处重复。
 
 **Implementation:**
+
 1. inventory existing source tone/label mapping。
 2. 定义 Schedule-owned projection presentation utility。
 3. Calendar cell/event/day dialog 复用。
@@ -947,6 +979,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 默认 desktop inspect 从右侧 Sheet 改为 Dialog，并补齐 Schedule-owned edit/delete。
 
 **Implementation:**
+
 1. 建 PlannerDayDialog。
 2. 建 PlannerEventDialog。
 3. CalendarEntry event inspect 增加 Edit/Delete。
@@ -966,6 +999,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Schedule Task action 不再直接 complete occurrence。
 
 **Implementation:**
+
 1. Day/Event Dialog 内使用 TaskOccurrenceQuickRow/Quick Surface。
 2. Complete/Skip/Missed/Checklist 走 Task ActionCoordinator。
 3. Prompt measurement 能在 Schedule host 正常打开。
@@ -983,6 +1017,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 锁住此前拖动偶发冲突/重复错误相关路径。
 
 **Implementation:**
+
 1. characterization drag/resize success/rollback。
 2. owner-command idempotency/duplicate conflict cases。
 3. empty-cell create path。
@@ -1004,6 +1039,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Routine 不再要求用户直接使用 native date/time/free-text IANA input。
 
 **Implementation:**
+
 1. date/time 改 Product Date/Time components。
 2. 默认 Product Time timezone。
 3. override 使用 searchable timezone selector。
@@ -1019,6 +1055,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 降低 h-11 toolbar 持久管理噪声。
 
 **Implementation:**
+
 1. 左侧保留 system/status view。
 2. 右侧保留 current Profile scope/gate + Add Routine。
 3. Profile CRUD/runtime low-frequency actions 收进 Profile menu。
@@ -1045,6 +1082,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Web/Desktop 对相同 document semantics 使用同一 presentation grammar。
 
 **Implementation:**
+
 1. DocumentWorkspaceToolbar。
 2. CatalogSearch/CatalogRow/selected state。
 3. Workspace Loading/Error/Empty。
@@ -1062,6 +1100,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 两种 host 使用共享 presentation primitives，但保留各自 capability。
 
 **Implementation:**
+
 1. Web KnowledgeProjectionWorkspaceView 迁移。
 2. Desktop LocalVaultWorkspaceView 迁移。
 3. Desktop-only vault/Obsidian actions 保留。
@@ -1079,6 +1118,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Inbox 加入 canonical Collection family。
 
 **Implementation:**
+
 1. toolbar/system-view grammar 对齐。
 2. row density/empty/loading/error 对齐。
 3. raw purple/cyan/amber category mapping 迁 semantic tone。
@@ -1094,6 +1134,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Web OS notification click 与 in-app/Desktop 一致。
 
 **Implementation:**
+
 1. browser presenter 使用 canonical destination resolver。
 2. 有 typed destination 则打开 owner target。
 3. 无 destination 才 fallback `/notifications`。
@@ -1110,6 +1151,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Components:** SettingsSection / SettingsPropertyRow / SettingsStatusBlock / SettingsObjectCard / SettingsDangerZone / SettingsDialogShell。
 
 **Implementation:**
+
 1. 先在 General/Appearance/Account 证明 grammar。
 2. shared primitive 只接 presentation props，不接 owner API。
 3. standard Select/Dialog/status tokens。
@@ -1124,6 +1166,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Scope:** Notification, Data, AI, Knowledge sections。
 
 **Implementation:**
+
 1. 迁 Notification/Data property rows。
 2. 迁 AI provider connection object cards/onboarding dialog。
 3. 迁 Knowledge connection/object cards/disconnect dialog。
@@ -1143,6 +1186,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 正式定义 collection/entity/calendar/document/settings/diagnostic header families。
 
 **Implementation:**
+
 1. 从 Goal/Task/Schedule/Knowledge/Settings 已验证样式提取 contract。
 2. 统一 gutter/border/control height/responsive collapse。
 3. 不强制一个 literal height。
@@ -1165,6 +1209,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** Dialog/Popover/Sheet + loading/error/empty 行为收敛。
 
 **Implementation:**
+
 1. compact property popover recipe。
 2. inspect dialog recipe。
 3. workspace/config dialog recipe。
@@ -1190,6 +1235,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Components:** CapsulePreviewShell/Header/Footer/State。
 
 **Implementation:**
+
 1. 先迁 Task + Goal capsule。
 2. 再迁 Routine/Notification/Schedule/Knowledge。
 3. 保留各 owner Quick Surface/item semantics。
@@ -1210,6 +1256,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Contract capabilities:** openCreate/openExisting/patch/addChild/removeChild/focus/requestSubmit/requestCancel/readDraftState。
 
 **Implementation:**
+
 1. 定义 typed surface/session interface，不能暴露 arbitrary component state。
 2. GoalDialog/Goal editor state 接 adapter。
 3. 复用 owner validation/dirty/submit/cancel。
@@ -1227,6 +1274,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** 一个完整 `goal.create` workflow 不再使用 AI-only Goal editor。
 
 **Implementation:**
+
 1. Mastra 继续生成 internal proposal/draftRef。
 2. Surface Orchestrator 投影 proposal 到 Goal native edit session。
 3. user/AI 都可继续 patch same session。
@@ -1245,6 +1293,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** `task.create` 迁到 native Task create/edit surface。
 
 **Implementation:**
+
 1. TaskPlan form 提供 edit-session adapter。
 2. AI proposal 投影到 native Task form。
 3. Goal/KR three-mode rule 使用当前 Task product language。
@@ -1262,6 +1311,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Goal:** knowledge.capture 使用 native Knowledge owner surface/context，而不是 AI 专属编辑面。
 
 **Implementation:**
+
 1. 定义 Knowledge capture/native review session。
 2. stable document/source identity 保持。
 3. Web projection-only boundary 不因 AI 绕过。
@@ -1280,6 +1330,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Retirement candidates:** AIGoalDraftEditor, AITaskDraftEditor, duplicated workflow review form sections。
 
 **Implementation:**
+
 1. grep runtime references。
 2. 删除 normal render path。
 3. 保留 internal draft/revision/receipt diagnostics。
@@ -1333,6 +1384,7 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 **Goal:** `tools/governance` 和 CI 不再依赖 Product Governance runtime/DB/export。
 
 **Implementation:**
+
 1. 识别 pinned bundle 实际使用规则。
 2. repository-native engineering-rules source。
 3. adapters/checks 改读新 source。
@@ -1362,6 +1414,7 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 ## PVC-UI-9001 — Full screenshot matrix
 
 **Matrix:**
+
 - Collection: Goal/Task/Routine/Notification
 - Entity: Goal/TaskPlan
 - Specialized: Schedule Day/Week/Month, Knowledge wide/narrow, Settings, AI native workflow
@@ -1376,6 +1429,7 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 ## PVC-UI-9002 — Keyboard/focus/a11y/container closure
 
 **Checks:**
+
 - keyboard submit/cancel;
 - focus return from Dialog/Popover;
 - reduced motion;
@@ -1389,6 +1443,7 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 ## PVC-UI-9003 — Performance/query closure
 
 **Checks:**
+
 - Task Today bounded query；
 - capsule stale-window reuse；
 - no duplicate hover requests；
@@ -1410,61 +1465,61 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 
 ## Goal
 
-| Problem | Ticket |
-| --- | --- |
-| Create Reminder 增加心智 | GOAL-1101 |
-| KR progress row 信息不足 | GOAL-1102 |
-| KR 仍依赖 Edit action | GOAL-1103 |
-| 五种 method copy 漂移 | GOAL-1104 |
-| Record Sum-biased / positive-only | GOAL-1201 |
-| 缺 live before/after preview | GOAL-1202 |
-| source/provenance 不可区分 | GOAL-1203 |
-| standalone KR detail | GOAL-1301 |
-| Review 固定 7d / window drift | GOAL-1401 |
+| Problem                              | Ticket    |
+| ------------------------------------ | --------- |
+| Create Reminder 增加心智             | GOAL-1101 |
+| KR progress row 信息不足             | GOAL-1102 |
+| KR 仍依赖 Edit action                | GOAL-1103 |
+| 五种 method copy 漂移                | GOAL-1104 |
+| Record Sum-biased / positive-only    | GOAL-1201 |
+| 缺 live before/after preview         | GOAL-1202 |
+| source/provenance 不可区分           | GOAL-1203 |
+| standalone KR detail                 | GOAL-1301 |
+| Review 固定 7d / window drift        | GOAL-1401 |
 | Review blank/manual-first facts 缺失 | GOAL-1402 |
-| standalone Review pages | GOAL-1403 |
+| standalone Review pages              | GOAL-1403 |
 
 ## Task
 
-| Finding | Ticket |
-| --- | --- |
-| T2-01 Quick Task disconnected | TASK-3004 |
-| T2-02 hidden filter controls Plans | TASK-3003A |
-| T2-03 End plan = Archive | TASK-3002A/B |
-| T2-04 outcome missing | TASK-3002D |
-| T2-05 completion policy residue | TASK-3002C |
-| T2-06 invalid non-Sum fixed contribution | TASK-3301A |
-| T2-07 full occurrence history | TASK-3003B |
-| T2-08 phantom page/limit | TASK-3003B |
-| T2-09 KR filter/raw IDs | TASK-3003B |
-| T2-10 DailyTodo legacy surface | TASK-3401 |
-| T2-11 detail grammar drift | TASK-3101 |
-| T2-13 Archive normal UX | TASK-3002A/D |
-| T2-14 recent history copy | TASK-3101 |
-| T2-15 fixed-delta-only KR recording | GOAL-1201/1203 + TASK-3301A/B/C |
+| Finding                                  | Ticket                          |
+| ---------------------------------------- | ------------------------------- |
+| T2-01 Quick Task disconnected            | TASK-3004                       |
+| T2-02 hidden filter controls Plans       | TASK-3003A                      |
+| T2-03 End plan = Archive                 | TASK-3002A/B                    |
+| T2-04 outcome missing                    | TASK-3002D                      |
+| T2-05 completion policy residue          | TASK-3002C                      |
+| T2-06 invalid non-Sum fixed contribution | TASK-3301A                      |
+| T2-07 full occurrence history            | TASK-3003B                      |
+| T2-08 phantom page/limit                 | TASK-3003B                      |
+| T2-09 KR filter/raw IDs                  | TASK-3003B                      |
+| T2-10 DailyTodo legacy surface           | TASK-3401                       |
+| T2-11 detail grammar drift               | TASK-3101                       |
+| T2-13 Archive normal UX                  | TASK-3002A/D                    |
+| T2-14 recent history copy                | TASK-3101                       |
+| T2-15 fixed-delta-only KR recording      | GOAL-1201/1203 + TASK-3301A/B/C |
 
 ## Remaining modules
 
-| Finding | Ticket |
-| --- | --- |
-| RUI-01 cross-module Task action bypass | TASK-3401 + SCHED-4202 |
-| RUI-02 Schedule CRUD inspect gap | SCHED-4201 |
-| RUI-03 Governance reference-runtime cost | GOV-7901/7902/7903 |
-| RUI-04 AI duplicate product editors | AI-8001/8101/8111/8112/8121 |
-| RUI-05 no visual regression matrix | BASE-003 + UI-9001 |
-| RUI-06 ad-hoc toolbar variants | UI-2101 |
-| RUI-07 Routine native time controls | ROUTINE-5101 |
-| RUI-08 Knowledge Web/Desktop presentation drift | KNOW-6101/6102 |
-| RUI-09 browser notification destination | NOTIF-7102 |
-| RUI-10 Settings card/raw-dialog/native-select drift | SET-7201/7202 |
-| RUI-11 capsule repeated shell | SHELL-8201 |
-| RUI-12 AI composer duplication/elevation | AI-8201 |
-| RUI-13 source tone duplication | UI-2104 + NOTIF-7101 + SCHED-4101 |
-| RUI-14 loading/error/empty drift | UI-2103 |
-| RUI-15 large files semantic decomposition | owner-specific tickets only |
-| RUI-16 alternate Account surfaces | SET-7202 / cleanup |
-| RUI-17 Auth redirect visual fallback | UI-9004 P3 |
-| RUI-18 SSE Monitor older diagnostic UI | deferred to diagnostic polish unless touched |
+| Finding                                             | Ticket                                       |
+| --------------------------------------------------- | -------------------------------------------- |
+| RUI-01 cross-module Task action bypass              | TASK-3401 + SCHED-4202                       |
+| RUI-02 Schedule CRUD inspect gap                    | SCHED-4201                                   |
+| RUI-03 Governance reference-runtime cost            | GOV-7901/7902/7903                           |
+| RUI-04 AI duplicate product editors                 | AI-8001/8101/8111/8112/8121                  |
+| RUI-05 no visual regression matrix                  | BASE-003 + UI-9001                           |
+| RUI-06 ad-hoc toolbar variants                      | UI-2101                                      |
+| RUI-07 Routine native time controls                 | ROUTINE-5101                                 |
+| RUI-08 Knowledge Web/Desktop presentation drift     | KNOW-6101/6102                               |
+| RUI-09 browser notification destination             | NOTIF-7102                                   |
+| RUI-10 Settings card/raw-dialog/native-select drift | SET-7201/7202                                |
+| RUI-11 capsule repeated shell                       | SHELL-8201                                   |
+| RUI-12 AI composer duplication/elevation            | AI-8201                                      |
+| RUI-13 source tone duplication                      | UI-2104 + NOTIF-7101 + SCHED-4101            |
+| RUI-14 loading/error/empty drift                    | UI-2103                                      |
+| RUI-15 large files semantic decomposition           | owner-specific tickets only                  |
+| RUI-16 alternate Account surfaces                   | SET-7202 / cleanup                           |
+| RUI-17 Auth redirect visual fallback                | UI-9004 P3                                   |
+| RUI-18 SSE Monitor older diagnostic UI              | deferred to diagnostic polish unless touched |
 
 ---
 
@@ -1473,15 +1528,19 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 ## Can run after Phase 0
 
 Parallel lane A:
+
 - GOAL-1101/1104/1401
 
 Parallel lane B:
+
 - TASK-3002A/B/C
 
 Parallel lane C:
+
 - BASE-003 visual harness
 
 Parallel lane D:
+
 - GOV-7901 inventory
 
 ## After Goal measurement contract begins stabilizing
@@ -1504,6 +1563,7 @@ Parallel lane D:
 ## After Goal reference + Task reference grammar
 
 Can run in parallel:
+
 - ROUTINE-5101/5102
 - KNOW-6101
 - NOTIF-7101/7102

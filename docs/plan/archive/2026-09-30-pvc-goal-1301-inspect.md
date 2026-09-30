@@ -9,7 +9,7 @@ description: PVC-GOAL-1301 KR Inspect implementation and validation evidence
 
 # PVC-GOAL-1301 implementation report
 
-Implemented and validated locally. ChatGPT Web owns final review/acceptance, which remains pending. No commit or push was performed.
+Implemented, validated, rebased onto the integrated GOAL-1401 baseline, and independently reviewed.
 
 ## Result and route compatibility
 
@@ -67,7 +67,7 @@ The temporary Chromium fixture used the production Inspect dialog, production CS
 
 ## Remaining caveats
 
-Source Task names are unavailable in the existing record projection; linked Task names are shown through the separate Task context read model. Pagination uses the existing live offset API, with no snapshot/cursor guarantee if another writer changes history between pages. No persistence/schema changes, Review window work, Task business changes or AI changes were introduced. Final product acceptance belongs to ChatGPT Web.
+Source Task names are unavailable in the existing record projection; linked Task names are shown through the separate Task context read model. Pagination uses the existing live offset API, with no snapshot/cursor guarantee if another writer changes history between pages. No persistence/schema changes, Review window work, Task business changes or AI changes were introduced. Product-level browser acceptance remains part of the later product-wide E2E/visual closure; this ticket itself is accepted.
 
 ## Exact changed files
 

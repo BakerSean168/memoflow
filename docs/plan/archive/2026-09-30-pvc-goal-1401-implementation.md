@@ -10,7 +10,7 @@ updated: 2026-09-30T00:00:00Z
 
 # PVC-GOAL-1401 — Review window resolver
 
-Implemented and locally validated in the supplied worktree. ChatGPT Web owns final review/acceptance. No commit or push was performed.
+Implemented, validated, and independently reviewed on the integrated Product vNext line.
 
 ## Result and ownership
 
@@ -54,16 +54,16 @@ HTTP GET retains `?windowDays=7` and adds a JSON-encoded `window` query paramete
 
 ## Validation evidence
 
-| Check | Command | Result |
-| --- | --- | --- |
-| Goal resolver/use-cases/facts/client/production transports | `NX_DAEMON=false pnpm nx run goal:test --args='review-window goal-review-window goal-review-context-builder add-goal-review get-goal-review-context goal-transport-parity'` | 7 files, 94 tests PASS |
-| Contracts and OpenAPI | `pnpm exec vitest run --config packages/contracts/vitest.config.ts goal-review-window` | 1 file, 19 tests PASS |
-| Existing Review/deep-link compatibility | `NX_DAEMON=false pnpm nx run app-vue:test --args='GoalDeepLinks.characterization'` | 1 file, 8 tests PASS |
-| Goal/contracts/app-vue typechecks and dependencies | `NX_DAEMON=false pnpm nx run-many --targets=typecheck --projects=goal,contracts,app-vue --output-style=static` | PASS, 31 tasks |
-| React consumer typecheck | `NX_DAEMON=false pnpm nx run app-react:typecheck --excludeTaskDependencies` | PASS; dependencies already built in prior lane |
-| Changed TypeScript ESLint | `pnpm exec eslint <all changed .ts files>` | PASS, zero errors; one pre-existing `no-explicit-any` warning at parity harness line 145 |
-| Whitespace | `git diff --check` | PASS |
-| Governance | `NX_DAEMON=false pnpm nx run memoflow:governance-check` | PASS |
+| Check                                                      | Command                                                                                                                                                                     | Result                                                                                   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Goal resolver/use-cases/facts/client/production transports | `NX_DAEMON=false pnpm nx run goal:test --args='review-window goal-review-window goal-review-context-builder add-goal-review get-goal-review-context goal-transport-parity'` | 7 files, 94 tests PASS                                                                   |
+| Contracts and OpenAPI                                      | `pnpm exec vitest run --config packages/contracts/vitest.config.ts goal-review-window`                                                                                      | 1 file, 19 tests PASS                                                                    |
+| Existing Review/deep-link compatibility                    | `NX_DAEMON=false pnpm nx run app-vue:test --args='GoalDeepLinks.characterization'`                                                                                          | 1 file, 8 tests PASS                                                                     |
+| Goal/contracts/app-vue typechecks and dependencies         | `NX_DAEMON=false pnpm nx run-many --targets=typecheck --projects=goal,contracts,app-vue --output-style=static`                                                              | PASS, 31 tasks                                                                           |
+| React consumer typecheck                                   | `NX_DAEMON=false pnpm nx run app-react:typecheck --excludeTaskDependencies`                                                                                                 | PASS; dependencies already built in prior lane                                           |
+| Changed TypeScript ESLint                                  | `pnpm exec eslint <all changed .ts files>`                                                                                                                                  | PASS, zero errors; one pre-existing `no-explicit-any` warning at parity harness line 145 |
+| Whitespace                                                 | `git diff --check`                                                                                                                                                          | PASS                                                                                     |
+| Governance                                                 | `NX_DAEMON=false pnpm nx run memoflow:governance-check`                                                                                                                     | PASS                                                                                     |
 
 Total focused evidence: **9 files / 121 tests passing**. Tests cover first/second/third default reviews on a real Goal aggregate, exact continuity, restored reviewedAt mismatch, unordered previous reviews and ID ties, explicit legacy 7/30 precedence, all typed modes, custom preservation and invalid ranges, query/command agreement with identical clock, New York spring-forward (seven days = 167 hours), client forwarding and production HTTP/IPC acceptance/rejection parity. Existing context-builder tests protect facts semantics.
 
