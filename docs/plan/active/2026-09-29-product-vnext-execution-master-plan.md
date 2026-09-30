@@ -268,6 +268,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** 新建 Goal 看不到 Reminder；既有 Goal 可正常添加/编辑 Reminder。
 
+**Execution (2026-09-30): Implemented; independently reviewed.** Create mode no longer mounts `GoalReminderChip` and always omits `reminderConfig` from its request, including when stale reminder state exists. Opening/switching to create resets the draft independently of a retained edit Goal prop; switching mode also recreates the KR draft editor to clear its local unsaved form. Edit reminder selectors, payloads and planning validation remain supported; reminder domain/API/persistence support is unchanged.
+
+**Validation:** focused `GoalDialog.spec.ts` PASS (25 tests), including create omission/schema validity, stale draft isolation, edit reminder changes/validation and complete reopen/mode-switch reset with an unsaved KR form. Browser visual acceptance was not run. Full command results and review repairs: [archived implementation report](../archive/2026-09-30-pvc-goal-1101-remove-create-reminder.md).
+
 **Dependencies:** BASE-001.
 
 ---

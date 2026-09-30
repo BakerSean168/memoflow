@@ -128,6 +128,7 @@
             />
 
             <GoalReminderChip
+              v-if="mode === 'edit'"
               v-model="draft.reminderConfig"
               :start="draft.start"
               :target="draft.target"
@@ -203,6 +204,7 @@
         </section>
 
         <GoalKeyResultDraftEditor
+          :key="mode"
           v-model="draft.keyResults"
           class="mt-auto"
           :disabled="isSaving"
@@ -304,7 +306,9 @@ const nameLimitFeedback = useTransientFeedback();
 const summaryLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
 const krEditorOpen = ref(false);
-const persistedStatus = computed(() => props.goal?.status ?? GoalStatus.Planned);
+const persistedStatus = computed(() =>
+  props.mode === 'edit' ? (props.goal?.status ?? GoalStatus.Planned) : GoalStatus.Planned,
+);
 function snapshotDraft(): string {
   return JSON.stringify(draft);
 }
@@ -323,20 +327,21 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
   };
 }
 function reset(): void {
-  draft.name = props.goal?.name ?? '';
-  draft.summary = props.goal?.summary ?? '';
-  draft.description = props.goal?.description ?? '';
-  draft.status = props.goal?.status ?? GoalStatus.Planned;
-  draft.start = props.goal?.start ? { ...props.goal.start } : null;
-  draft.target = props.goal?.target ? { ...props.goal.target } : null;
-  draft.reminderConfig = props.goal?.reminderConfig
+  const goal = props.mode === 'edit' ? props.goal : null;
+  draft.name = goal?.name ?? '';
+  draft.summary = goal?.summary ?? '';
+  draft.description = goal?.description ?? '';
+  draft.status = goal?.status ?? GoalStatus.Planned;
+  draft.start = goal?.start ? { ...goal.start } : null;
+  draft.target = goal?.target ? { ...goal.target } : null;
+  draft.reminderConfig = goal?.reminderConfig
     ? {
-        enabled: props.goal.reminderConfig.enabled,
-        triggers: props.goal.reminderConfig.triggers.map((trigger) => ({ ...trigger })),
+        enabled: goal.reminderConfig.enabled,
+        triggers: goal.reminderConfig.triggers.map((trigger) => ({ ...trigger })),
       }
     : null;
-  draft.labelIds = props.goal?.labels.map((label) => label.id) ?? [];
-  draft.keyResults = props.goal?.keyResults?.map(mapKeyResult) ?? [];
+  draft.labelIds = goal?.labels.map((label) => label.id) ?? [];
+  draft.keyResults = goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
   formError.value = null;
   nameLimitFeedback.hide();
@@ -348,7 +353,7 @@ function reset(): void {
 }
 
 watch(
-  () => [props.open, props.goal?.id] as const,
+  () => [props.open, props.mode, props.goal?.id] as const,
   ([isOpen]) => {
     if (isOpen) reset();
   },
@@ -407,7 +412,7 @@ async function save(): Promise<void> {
     !draft.name.trim() ||
     krEditorOpen.value ||
     !validatePlanningWindow() ||
-    !validateReminderConfig()
+    (props.mode === 'edit' && !validateReminderConfig())
   )
     return;
   const labelIds = [...draft.labelIds];
@@ -447,7 +452,6 @@ async function save(): Promise<void> {
 
   const req: CreateGoalReq = {
     ...common,
-    ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
   };
   const saved = await createGoal(req);

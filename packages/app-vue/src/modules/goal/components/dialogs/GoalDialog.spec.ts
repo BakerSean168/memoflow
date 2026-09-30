@@ -8,8 +8,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
 import { createMockGoal, createMockKeyResult } from '@memoflow/contracts/mocks';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import {
+  CreateGoalSchema,
+  GoalStatus,
+  ReminderTriggerType,
+  type GoalReminderConfigDTO,
+} from '@memoflow/contracts/goal';
 import { LabelPicker } from '../../../../shared/components';
+import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalDialog from './GoalDialog.vue';
@@ -73,8 +79,229 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+    for (const mock of Object.values(mocks)) mock.mockReset();
     mocks.transitionGoalStatus.mockImplementation(async (goal) => goal);
   });
+
+  it('hides Reminder in create mode and submits a valid request without reminderConfig', async () => {
+    mocks.createGoal.mockResolvedValue(createMockGoal({ name: 'New Goal' }));
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    expect(wrapper.findComponent(GoalReminderChip).exists()).toBe(false);
+    expect(document.querySelector('[data-testid="goal-reminder-chip"]')).toBeNull();
+    expect(dom('goal-property-chips').text()).not.toContain('Reminder');
+
+    await dom('goal-name-input').setValue('New Goal');
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    const request = mocks.createGoal.mock.calls[0][0];
+    expect(request).not.toHaveProperty('reminderConfig');
+    expect(CreateGoalSchema.safeParse(request).success).toBe(true);
+    expect(mocks.updateGoal).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('ignores non-null reminder draft state when creating a Goal', async () => {
+    const created = createMockGoal({ name: 'New Goal', status: GoalStatus.Planned });
+    mocks.createGoal.mockResolvedValue(created);
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'create' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    // Fault injection: a hidden stale reminder must neither block create nor enter its request.
+    const state = wrapper.vm as unknown as { draft: { reminderConfig: GoalReminderConfigDTO } };
+    state.draft.reminderConfig = {
+      enabled: true,
+      triggers: [{ type: ReminderTriggerType.RemainingDays, value: 1, enabled: true }],
+    };
+    await dom('goal-name-input').setValue('New Goal');
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    expect(mocks.createGoal.mock.calls[0][0]).not.toHaveProperty('reminderConfig');
+    expect(wrapper.emitted('created')?.at(-1)).toEqual([created]);
+    expect(document.body.textContent).not.toContain(
+      'Remaining-days reminders require a target date.',
+    );
+    wrapper.unmount();
+  });
+
+  it.each(['preserve', 'add', 'change', 'remove'] as const)(
+    'keeps the edit reminder chip available to %s a reminder',
+    async (action) => {
+      const reminderConfig: GoalReminderConfigDTO = {
+        enabled: true,
+        triggers: [{ type: ReminderTriggerType.RemainingDays, value: 1, enabled: true }],
+      };
+      const goal = createMockGoal({
+        name: 'Existing Goal',
+        start: null,
+        target: { kind: 'quarter', year: 2027, quarter: 4 },
+        reminderConfig: action === 'add' ? null : reminderConfig,
+      });
+      mocks.updateGoal.mockResolvedValue(goal);
+      const wrapper = mount(GoalDialog, {
+        props: { open: true, mode: 'edit', goal },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      await nextTick();
+
+      const chip = wrapper.getComponent(GoalReminderChip);
+      expect(dom('goal-reminder-chip').isVisible()).toBe(true);
+      expect(chip.props('modelValue')).toEqual(goal.reminderConfig);
+      const expectedConfig =
+        action === 'remove'
+          ? null
+          : {
+              ...reminderConfig,
+              triggers: [{ ...reminderConfig.triggers[0], value: action === 'change' ? 3 : 1 }],
+            };
+      if (action !== 'preserve') chip.vm.$emit('update:modelValue', expectedConfig);
+      await nextTick();
+      await dom('save-goal-button').trigger('click');
+      await flushPromises();
+
+      expect(mocks.updateGoal).toHaveBeenCalledOnce();
+      expect(mocks.updateGoal).toHaveBeenCalledWith(
+        String(goal.id),
+        expect.objectContaining({
+          expectedVersion: goal.version,
+          reminderConfig: expectedConfig,
+        }),
+      );
+      expect(goal.reminderConfig).toEqual(action === 'add' ? null : reminderConfig);
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
+
+  it.each([
+    { type: ReminderTriggerType.RemainingDays, missing: 'target' },
+    { type: ReminderTriggerType.TimeProgressPercentage, missing: 'start' },
+    { type: ReminderTriggerType.TimeProgressPercentage, missing: 'target' },
+  ] as const)('blocks edit with $type reminders missing $missing', async ({ type, missing }) => {
+    const goal = createMockGoal({
+      name: 'Existing Goal',
+      start: missing === 'start' ? null : { kind: 'quarter', year: 2027, quarter: 1 },
+      target: missing === 'target' ? null : { kind: 'quarter', year: 2027, quarter: 4 },
+      reminderConfig: { enabled: true, triggers: [{ type, value: 1, enabled: true }] },
+    });
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.updateGoal).not.toHaveBeenCalled();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain(
+      type === ReminderTriggerType.RemainingDays
+        ? 'Remaining-days reminders require a target date.'
+        : 'Time-progress reminders require both a start date and a target date.',
+    );
+    wrapper.unmount();
+  });
+
+  it.each(['switch while open', 'reopen'] as const)(
+    'resets edit state when entering create via %s, even if the previous Goal prop remains',
+    async (transition) => {
+      const reminderConfig: GoalReminderConfigDTO = {
+        enabled: true,
+        triggers: [{ type: ReminderTriggerType.RemainingDays, value: 1, enabled: true }],
+      };
+      const goal = createMockGoal({
+        name: 'Existing Goal',
+        summary: 'Existing summary',
+        description: 'Existing description',
+        status: GoalStatus.InProgress,
+        start: null,
+        target: { kind: 'quarter', year: 2027, quarter: 4 },
+        reminderConfig,
+        labels: [{ id: 'label-existing', name: 'Existing', color: null }],
+        keyResults: [createMockKeyResult({ title: 'Existing KR' })],
+      });
+      const created = createMockGoal({ name: 'Fresh Goal', status: GoalStatus.Planned });
+      mocks.createGoal.mockResolvedValue(created);
+      const wrapper = mount(GoalDialog, {
+        props: { open: true, mode: 'edit', goal },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      await nextTick();
+      wrapper.getComponent(GoalReminderChip).vm.$emit('update:modelValue', {
+        enabled: true,
+        triggers: [{ type: ReminderTriggerType.TimeProgressPercentage, value: 50, enabled: true }],
+      });
+      await nextTick();
+      await dom('save-goal-button').trigger('click');
+      expect(document.body.textContent).toContain(
+        'Time-progress reminders require both a start date and a target date.',
+      );
+      await dom('goal-key-result-draft-row').find('button').trigger('click');
+      await dom('draft-kr-title-input').setValue('Unsaved edit KR');
+
+      if (transition === 'reopen') await wrapper.setProps({ open: false });
+      await wrapper.setProps({ mode: 'create' });
+      if (transition === 'reopen') await wrapper.setProps({ open: true });
+      await flushPromises();
+
+      expect(wrapper.findComponent(GoalReminderChip).exists()).toBe(false);
+      expect((dom('goal-name-input').element as HTMLTextAreaElement).value).toBe('');
+      expect((dom('goal-summary-input').element as HTMLTextAreaElement).value).toBe('');
+      expect((dom('goal-description-input').element as HTMLTextAreaElement).value).toBe('');
+      expect(wrapper.getComponent(GoalStatusPicker).props('baseStatus')).toBe(GoalStatus.Planned);
+      expect(wrapper.getComponent(GoalStatusPicker).props('modelValue')).toBe(GoalStatus.Planned);
+      expect(timeframePicker(wrapper, 'goal-start-chip').props('modelValue')).toBeNull();
+      expect(timeframePicker(wrapper, 'goal-target-chip').props('modelValue')).toBeNull();
+      expect(wrapper.getComponent(LabelPicker).props('modelValue')).toEqual([]);
+      expect(document.querySelector('[data-testid="goal-key-result-draft-row"]')).toBeNull();
+      expect(document.querySelector('[data-testid="key-result-draft-form"]')).toBeNull();
+      expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
+      expect(document.body.textContent).not.toContain(
+        'Time-progress reminders require both a start date and a target date.',
+      );
+      await dom('goal-name-input').setValue('Fresh Goal');
+      await dom('save-goal-button').trigger('click');
+      await flushPromises();
+
+      expect(mocks.createGoal).toHaveBeenCalledOnce();
+      expect(mocks.createGoal.mock.calls[0][0]).toEqual({
+        name: 'Fresh Goal',
+        summary: undefined,
+        description: undefined,
+        start: undefined,
+        target: undefined,
+        labelIds: [],
+        initialKeyResults: [],
+      });
+      expect(CreateGoalSchema.safeParse(mocks.createGoal.mock.calls[0][0]).success).toBe(true);
+      expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(created, GoalStatus.Planned);
+      expect(wrapper.emitted('created')?.at(-1)).toEqual([created]);
+      expect(mocks.updateGoal).not.toHaveBeenCalled();
+
+      await wrapper.setProps({ open: false });
+      await wrapper.setProps({ open: true, mode: 'edit' });
+      await flushPromises();
+      expect(wrapper.getComponent(GoalReminderChip).props('modelValue')).toEqual(reminderConfig);
+      expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
+      wrapper.unmount();
+    },
+  );
 
   it('edits only vNext Direction + Measurement fields without retired taxonomy or motivation forms', () => {
     const source = fs.readFileSync(path.resolve(__dirname, '../dialogs/GoalDialog.vue'), 'utf8');
