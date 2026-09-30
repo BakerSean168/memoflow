@@ -281,26 +281,12 @@ export const DevChannels = {
   MEMORY_FORCE_GC: 'dev:memory:force-gc',
 } as const;
 
-/**
- * Canonical Desktop Update transport (ADR-112).
- *
- * The legacy AutoUpdateChannels below remain only until DU-1301 migrates the
- * dormant handler; new code must use this replayable snapshot surface.
- */
+/** Canonical Desktop Update transport (ADR-112 / DU-1301). */
 export const DesktopUpdateChannels = {
   GET_SNAPSHOT: 'desktop-update:get-snapshot',
   CHECK: 'desktop-update:check',
   RESTART_AND_INSTALL: 'desktop-update:restart-and-install',
   STATE_CHANGED: 'desktop-update:state-changed',
-} as const;
-
-/** @deprecated DU-1301 removes this dormant pre-ADR-112 surface. */
-export const AutoUpdateChannels = {
-  CHECK: 'auto-update:check',
-  DOWNLOAD: 'auto-update:download',
-  INSTALL: 'auto-update:install',
-  STATUS: 'auto-update:status',
-  CONFIG: 'auto-update:config',
 } as const;
 
 // V3-only portable user-data surface — no server-held disclosure IPC channel.

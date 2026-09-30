@@ -27,6 +27,8 @@ function createRuntimeHarness() {
     desktopUpdateInstallCoordinator,
     desktopUpdateReceiptStore,
   );
+  const disposeDesktopUpdateIpc = vi.fn();
+  runtime.setDesktopUpdateIpcDisposer(disposeDesktopUpdateIpc);
 
   return {
     runtime,
@@ -34,6 +36,7 @@ function createRuntimeHarness() {
     desktopUpdateCoordinator,
     desktopUpdateInstallCoordinator,
     desktopUpdateReceiptStore,
+    disposeDesktopUpdateIpc,
   };
 }
 
@@ -44,10 +47,12 @@ describe('DesktopMainRuntime Desktop Update ownership', () => {
       deactivateProfile,
       desktopUpdateCoordinator,
       desktopUpdateInstallCoordinator,
+      disposeDesktopUpdateIpc,
     } = createRuntimeHarness();
 
     await runtime.dispose();
 
+    expect(disposeDesktopUpdateIpc).toHaveBeenCalledTimes(1);
     expect(desktopUpdateInstallCoordinator.destroy).toHaveBeenCalledTimes(1);
     expect(desktopUpdateCoordinator.destroy).toHaveBeenCalledTimes(1);
     expect(deactivateProfile).toHaveBeenCalledWith({ preserveSelection: true });
@@ -59,10 +64,12 @@ describe('DesktopMainRuntime Desktop Update ownership', () => {
       deactivateProfile,
       desktopUpdateCoordinator,
       desktopUpdateInstallCoordinator,
+      disposeDesktopUpdateIpc,
     } = createRuntimeHarness();
 
     await runtime.dispose({ preserveDesktopUpdateForHandoff: true });
 
+    expect(disposeDesktopUpdateIpc).toHaveBeenCalledTimes(1);
     expect(desktopUpdateInstallCoordinator.destroy).not.toHaveBeenCalled();
     expect(desktopUpdateCoordinator.destroy).not.toHaveBeenCalled();
     expect(deactivateProfile).toHaveBeenCalledWith({ preserveSelection: true });

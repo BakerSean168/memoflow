@@ -33,6 +33,7 @@ export class DesktopMainRuntime {
   private _notification: NotificationPort | null = null;
   private _desktopFeaturesRuntime: DesktopFeaturesRuntime | null = null;
   private _deviceAuthCoordinator: DeviceAuthCoordinator | null = null;
+  private _desktopUpdateIpcDisposer: (() => void) | null = null;
 
   constructor(
     readonly windowManager: WindowManager,
@@ -76,6 +77,11 @@ export class DesktopMainRuntime {
     this._deviceAuthCoordinator = coordinator;
   }
 
+  setDesktopUpdateIpcDisposer(dispose: () => void): void {
+    this._desktopUpdateIpcDisposer?.();
+    this._desktopUpdateIpcDisposer = dispose;
+  }
+
   /**
    * Dispose all owned resources.
    * Called during application shutdown (before-quit).
@@ -90,6 +96,11 @@ export class DesktopMainRuntime {
 
     this._deviceAuthCoordinator?.dispose();
     this._deviceAuthCoordinator = null;
+
+    // Renderer transport is no longer useful once shutdown begins, even when
+    // the updater engine itself must survive until installer handoff.
+    this._desktopUpdateIpcDisposer?.();
+    this._desktopUpdateIpcDisposer = null;
 
     // Desktop Update is normally disposed with the process runtime. During an
     // update-install shutdown it must survive destructive application cleanup

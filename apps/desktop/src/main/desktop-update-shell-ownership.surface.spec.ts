@@ -17,6 +17,7 @@ describe('Desktop Update shell ownership surface', () => {
   it('composes Desktop Update exactly once in initializeShellRuntime', () => {
     expect(mainSource.match(/composeDesktopUpdateShellRuntime\(/g)).toHaveLength(1);
     expect(mainSource.match(/new UpdateInstallCoordinator\(/g)).toHaveLength(1);
+    expect(mainSource.match(/registerDesktopUpdateIpc\(/g)).toHaveLength(1);
 
     const shellStart = mainSource.indexOf('async function initializeShellRuntime');
     const composition = mainSource.indexOf('composeDesktopUpdateShellRuntime(');
@@ -48,6 +49,16 @@ describe('Desktop Update shell ownership surface', () => {
     expect(runtimeSource).toContain(
       'update-install shutdown it must survive destructive application cleanup',
     );
+  });
+
+  it('registers canonical updater IPC only after the process-owned coordinator initializes', () => {
+    const initialization = mainSource.indexOf('await desktopUpdateShell.coordinator.initialize()');
+    const ipcRegistration = mainSource.indexOf('registerDesktopUpdateIpc({');
+
+    expect(initialization).toBeGreaterThan(-1);
+    expect(ipcRegistration).toBeGreaterThan(initialization);
+    expect(mainSource).toContain('mainRuntime.setDesktopUpdateIpcDisposer');
+    expect(runtimeSource).toContain('this._desktopUpdateIpcDisposer?.()');
   });
 
   it('verifies the device-local install receipt before ProfileRegistry initialization', () => {

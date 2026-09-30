@@ -48,7 +48,6 @@ const ALLOWLIST_GETTERS = new Set([
   'apps/desktop/src/main/database/powersync.ts',
   'apps/desktop/src/main/desktop-features/index.ts',
   'apps/desktop/src/main/lifecycle/desktop-chrome.ts',
-  'apps/desktop/src/main/modules/auto-update/auto-update-manager.ts',
   'apps/desktop/src/main/runtime-init.ts',
   'apps/desktop/src/main/user-data-path.ts',
   'apps/desktop/src/main/utils/api-config.ts',
@@ -65,7 +64,6 @@ const ALLOWLIST_MODULE_OWNERS = new Set([
   'apps/desktop/src/main/utils/memory-monitor.ts',
   'apps/desktop/src/main/utils/ipc-cache.ts',
   'apps/desktop/src/main/database/powersync.ts',
-  'apps/desktop/src/main/modules/auto-update/auto-update-manager.ts',
 ]);
 
 const errors = [];

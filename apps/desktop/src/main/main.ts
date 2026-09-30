@@ -114,6 +114,7 @@ import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repositor
 import { DesktopMainRuntime } from './desktop-main-runtime';
 import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
 import { resolveDesktopUpdateE2EConfig } from './modules/desktop-update/runtime/desktop-update-e2e-harness';
+import { registerDesktopUpdateIpc } from './modules/desktop-update/runtime/desktop-update-ipc';
 import { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
 import { FileDesktopUpdateInstallReceiptStore } from './modules/desktop-update/infrastructure/update-install-receipt.store';
 import { verifyPendingDesktopUpdateInstall } from './modules/desktop-update/application/verify-pending-update-install';
@@ -786,6 +787,11 @@ async function initializeShellRuntime(): Promise<void> {
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
 
   const desktopUpdateSnapshot = await desktopUpdateShell.coordinator.initialize();
+  const desktopUpdateIpc = registerDesktopUpdateIpc({
+    update: desktopUpdateShell.coordinator,
+    install: desktopUpdateInstallCoordinator,
+  });
+  mainRuntime.setDesktopUpdateIpcDisposer(() => desktopUpdateIpc.destroy());
   logger.info('Desktop Update shell runtime initialized', {
     owner: desktopUpdateShell.installation.owner,
     ownershipReason: desktopUpdateShell.installation.reason,
