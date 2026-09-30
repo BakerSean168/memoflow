@@ -949,6 +949,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** GOAL-1601, TASK-3002D, TASK-3401.
 
+**Execution (2026-09-30): Implemented / validated.** Task create and core detail metadata already use the proven shared primitives and remain unchanged. Optional detail labels/reminders now edit through their value chips; Goal owner navigation has an explicit outward-arrow control and remains separate from a named binding-edit chip. Empty rows remain discoverable through More; keyboard dismissal/focus, archived/busy triggers, Task-specific Plan/Occurrence semantics and measurement coordination are preserved. Focused App-Vue 3 files / 19 tests, typecheck, changed-file ESLint, inventory, diff and governance passed; isolated production-component Chromium acceptance passed 11/11 baseline and 11/11 comparison tests across 360/1280px, light/dark and en-US/zh-CN with 80 captures. Service doubles and a sentinel owner destination are explicitly not live-backend E2E. ChatGPT Web independently reviewed the production diff, reminder/label capability preservation, representative wide/narrow light/dark screenshots, focused 19/19 runtime tests, lint, inventory and typecheck evidence; acceptance is complete. See [visual grammar implementation report](../archive/2026-09-30-pvc-task-3101-visual-grammar.md).
+
 ---
 
 ## PVC-TASK-3901 — Task acceptance matrix
