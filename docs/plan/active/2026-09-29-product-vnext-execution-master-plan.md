@@ -296,6 +296,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** 不打开新页即可理解一个 KR 的状态与方向。
 
+**Execution (2026-09-30): Implemented / validated.** Goal Detail now uses the Goal-owned `GoalKeyResultTrajectoryPlot` read-only presentation to show labeled Initial/Current/Target values with the actual KR unit, GOAL-1104 calculation vocabulary, weight and effective target timeframe (KR override, then Goal target). Compact plots keep the existing geometry; long unit labels can expand the layout without overlapping the chart. Current opens the existing quick check-in dialog, while KR title links and `KeyResultDetailView` remain available for GOAL-1301. Linked Task context follows as secondary metadata. Existing overflow actions remain; no GOAL-1103 direct editing or new calculation authority was introduced.
+
+**Validation:** focused app-vue suite 6 files / 114 tests PASS; `app-vue:typecheck` PASS; changed-file ESLint PASS; `git diff --check` PASS; `memoflow:governance-check` PASS. Isolated owner-plot Chromium checks at 800px/360px verify density, long-unit layout and native Enter/Space activation; this does not claim an authenticated E2E or committed golden screenshot baseline. See [implementation report](../archive/2026-09-30-pvc-goal-1102-trajectory.md).
+
 **Dependencies:** GOAL-1104 presentation map 可并行开发，合并前需接入。
 
 ---

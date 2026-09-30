@@ -1,10 +1,11 @@
 <template>
   <div
-    class="relative mt-4 h-[14.5rem] border-t border-border/45"
-    data-testid="kr-trajectory-editor"
+    class="relative border-t border-border/45"
+    :class="readonly ? 'mt-2 flex min-h-32 flex-col pb-8' : 'mt-4 h-[14.5rem]'"
+    :data-testid="readonly ? 'kr-trajectory-summary' : 'kr-trajectory-editor'"
   >
     <div
-      v-if="unit"
+      v-if="unit && !readonly"
       class="pointer-events-none absolute left-1 top-3 z-10 text-[10px] font-medium tracking-wide text-muted-foreground/70"
       data-testid="kr-trajectory-unit"
     >
@@ -12,7 +13,8 @@
     </div>
 
     <svg
-      class="pointer-events-none absolute inset-0 h-full w-full text-border"
+      class="pointer-events-none w-full text-border"
+      :class="readonly ? 'order-2 h-12 shrink-0' : 'absolute inset-0 h-full'"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
       aria-hidden="true"
@@ -105,77 +107,117 @@
       />
     </svg>
 
-    <div
-      class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
-      :style="pointStyle(initialPoint)"
-    >
-      <label
-        for="draft-kr-initial"
-        class="mb-0.5 block text-center text-[10px] font-medium text-muted-foreground"
-      >
-        {{ t('goal.dialog.krInitialValue') }}
-      </label>
-      <Input
-        id="draft-kr-initial"
-        v-model.number="initialValue"
-        type="number"
-        inputmode="decimal"
-        data-testid="draft-kr-initial-input"
-        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
-        :disabled="disabled"
-      />
-    </div>
+    <dl v-if="readonly" class="order-1 grid grid-cols-3 gap-2 py-1 text-center">
+      <div>
+        <dt class="text-[10px] font-medium text-muted-foreground">
+          {{ t('goal.dialog.krTrajectoryStart') }}
+        </dt>
+        <dd class="break-words text-xs font-semibold tabular-nums" data-testid="kr-initial-value">
+          {{ initialValue }}{{ unit ? ` ${unit}` : '' }}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-[10px] font-medium text-primary/80">
+          {{ t('goal.dialog.krTrajectoryCurrent') }}
+        </dt>
+        <dd>
+          <button
+            type="button"
+            class="rounded-sm px-1 text-xs font-semibold tabular-nums text-primary underline decoration-dotted underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :data-testid="checkInTestId"
+            :aria-label="
+              checkInLabel ? `${checkInLabel}: ${currentValue}${unit ? ` ${unit}` : ''}` : undefined
+            "
+            :disabled="disabled"
+            @click="emit('check-in')"
+          >
+            {{ currentValue }}{{ unit ? ` ${unit}` : '' }}
+          </button>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-[10px] font-medium text-muted-foreground">
+          {{ t('goal.dialog.krTrajectoryTarget') }}
+        </dt>
+        <dd class="break-words text-xs font-semibold tabular-nums" data-testid="kr-target-value">
+          {{ hasTarget ? targetValue : '—' }}{{ unit && hasTarget ? ` ${unit}` : '' }}
+        </dd>
+      </div>
+    </dl>
 
-    <div
-      class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
-      :style="pointStyle(currentPoint)"
-    >
-      <label
-        for="draft-kr-current"
-        class="mb-0.5 block text-center text-[10px] font-medium text-primary/80"
+    <template v-else>
+      <div
+        class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
+        :style="pointStyle(initialPoint)"
       >
-        {{ t('goal.dialog.krCurrentValue') }}
-      </label>
-      <Input
-        id="draft-kr-current"
-        v-model.number="currentValue"
-        type="number"
-        inputmode="decimal"
-        data-testid="draft-kr-current-input"
-        class="h-7 w-20 border-0 bg-primary/[0.04] px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-primary/[0.08] focus-visible:bg-background/90 focus-visible:ring-1 focus-visible:ring-primary/30"
-        :disabled="disabled"
-      />
-    </div>
+        <label
+          for="draft-kr-initial"
+          class="mb-0.5 block text-center text-[10px] font-medium text-muted-foreground"
+        >
+          {{ t('goal.dialog.krInitialValue') }}
+        </label>
+        <Input
+          id="draft-kr-initial"
+          v-model.number="initialValue"
+          type="number"
+          inputmode="decimal"
+          data-testid="draft-kr-initial-input"
+          class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
+          :disabled="disabled"
+        />
+      </div>
 
-    <div
-      class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
-      :style="pointStyle(targetPoint)"
-      :data-target-state="hasTarget ? 'set' : 'unset'"
-    >
-      <label
-        for="draft-kr-target"
-        class="mb-0.5 block text-center text-[10px] font-medium"
-        :class="hasTarget ? 'text-muted-foreground' : 'text-muted-foreground/55'"
+      <div
+        class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
+        :style="pointStyle(currentPoint)"
       >
-        {{ t('goal.dialog.krTargetValue') }}
-      </label>
-      <Input
-        id="draft-kr-target"
-        v-model.number="targetValue"
-        type="number"
-        inputmode="decimal"
-        placeholder="—"
-        data-testid="draft-kr-target-input"
-        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors placeholder:text-muted-foreground/50 hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
-        :class="hasTarget ? 'text-foreground' : 'text-muted-foreground/60'"
-        :disabled="disabled"
-      />
-    </div>
+        <label
+          for="draft-kr-current"
+          class="mb-0.5 block text-center text-[10px] font-medium text-primary/80"
+        >
+          {{ t('goal.dialog.krCurrentValue') }}
+        </label>
+        <Input
+          id="draft-kr-current"
+          v-model.number="currentValue"
+          type="number"
+          inputmode="decimal"
+          data-testid="draft-kr-current-input"
+          class="h-7 w-20 border-0 bg-primary/[0.04] px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-primary/[0.08] focus-visible:bg-background/90 focus-visible:ring-1 focus-visible:ring-primary/30"
+          :disabled="disabled"
+        />
+      </div>
+
+      <div
+        class="group/value absolute z-10 -translate-x-1/2 -translate-y-full pb-2"
+        :style="pointStyle(targetPoint)"
+        :data-target-state="hasTarget ? 'set' : 'unset'"
+      >
+        <label
+          for="draft-kr-target"
+          class="mb-0.5 block text-center text-[10px] font-medium"
+          :class="hasTarget ? 'text-muted-foreground' : 'text-muted-foreground/55'"
+        >
+          {{ t('goal.dialog.krTargetValue') }}
+        </label>
+        <Input
+          id="draft-kr-target"
+          v-model.number="targetValue"
+          type="number"
+          inputmode="decimal"
+          placeholder="—"
+          data-testid="draft-kr-target-input"
+          class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors placeholder:text-muted-foreground/50 hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
+          :class="hasTarget ? 'text-foreground' : 'text-muted-foreground/60'"
+          :disabled="disabled"
+        />
+      </div>
+    </template>
 
     <div
       class="pointer-events-none absolute bottom-3 left-[14%] w-[27%] -translate-x-1/2 text-center"
     >
-      <p class="text-[10px] font-medium text-foreground/65">
+      <p v-if="!readonly" class="text-[10px] font-medium text-foreground/65">
         {{ t('goal.dialog.krTrajectoryStart') }}
       </p>
       <p class="mt-0.5 truncate text-[10px] tabular-nums text-muted-foreground/75">
@@ -186,7 +228,7 @@
     <div
       class="pointer-events-none absolute bottom-3 left-1/2 w-[27%] -translate-x-1/2 text-center"
     >
-      <p class="text-[10px] font-medium text-primary/75">
+      <p v-if="!readonly" class="text-[10px] font-medium text-primary/75">
         {{ t('goal.dialog.krTrajectoryCurrent') }}
       </p>
       <p class="mt-0.5 truncate text-[10px] tabular-nums text-muted-foreground/75">
@@ -198,6 +240,7 @@
       class="pointer-events-none absolute bottom-3 left-[86%] w-[27%] -translate-x-1/2 text-center"
     >
       <p
+        v-if="!readonly"
         class="text-[10px] font-medium"
         :class="hasTarget ? 'text-foreground/65' : 'text-muted-foreground/45'"
       >
@@ -224,7 +267,12 @@ defineProps<{
   targetLabel: string;
   unit: string;
   disabled?: boolean;
+  readonly?: boolean;
+  checkInLabel?: string;
+  checkInTestId?: string;
 }>();
+
+const emit = defineEmits<{ 'check-in': [] }>();
 
 const initialValue = defineModel<number>('initialValue', { required: true });
 const currentValue = defineModel<number>('currentValue', { required: true });

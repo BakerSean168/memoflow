@@ -532,37 +532,55 @@
             v-if="keyResults.length"
             class="divide-y border-y border-[hsl(var(--border-subtle))]"
           >
-            <article v-for="kr in keyResults" :key="kr.id" class="p-4">
-              <button
-                type="button"
-                class="block w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                @click="openKr(kr.id)"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <h3 class="truncate font-medium">◇ {{ kr.title }}</h3>
-                  </div>
-                  <div class="shrink-0 text-right">
-                    <p class="text-sm font-medium">{{ Math.round(kr.progressPercentage) }}%</p>
-                    <p v-if="kr.target" class="mt-1 text-xs text-muted-foreground">
-                      {{ formatTarget(kr.target) }}
-                    </p>
-                  </div>
+            <article
+              v-for="kr in keyResults"
+              :key="kr.id"
+              class="px-4 py-3"
+              :data-testid="`goal-kr-summary-${kr.id}`"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <button
+                  type="button"
+                  class="min-w-0 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  :data-testid="`goal-kr-detail-${kr.id}`"
+                  @click="openKr(kr.id)"
+                >
+                  <h3 class="break-words font-medium">◇ {{ kr.title }}</h3>
+                </button>
+                <span class="shrink-0 text-sm font-medium tabular-nums"
+                  >{{ Math.round(kr.progressPercentage) }}%</span
+                >
+              </div>
+              <dl class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <div class="flex gap-1" data-testid="kr-method">
+                  <dt class="sr-only">{{ t('goal.dialog.krCalculationMethod') }}</dt>
+                  <dd>{{ getKeyResultCalculationLabel(kr.progress.aggregationMethod, t) }}</dd>
                 </div>
-                <Progress class="mt-3" :model-value="kr.progressPercentage" />
-              </button>
-              <button
-                type="button"
-                class="mt-1 block text-xs text-muted-foreground underline decoration-dotted underline-offset-4"
-                :data-testid="`goal-quick-check-in-${kr.id}`"
-                :aria-label="`${t('goal.recordDialog.addTitle')}: ${kr.title}`"
-                @click="openQuickCheckIn(kr.id)"
-              >
-                {{ kr.progress.initialValue }} → {{ kr.progress.currentValue }} →
-                {{ kr.progress.targetValue
-                }}<span v-if="kr.progress.unit"> {{ kr.progress.unit }}</span>
-              </button>
-              <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex gap-1" data-testid="kr-weight">
+                  <dt>{{ t('goal.dialog.krWeightShort') }}</dt>
+                  <dd class="tabular-nums">{{ kr.weight }}</dd>
+                </div>
+                <div class="flex gap-1" data-testid="kr-timeframe">
+                  <dt>{{ t('goal.dialog.krTargetShort') }}</dt>
+                  <dd>{{ formatTarget(kr.target ?? goal.target) }}</dd>
+                </div>
+              </dl>
+              <GoalKeyResultTrajectoryPlot
+                readonly
+                :initial-value="kr.progress.initialValue"
+                :current-value="kr.progress.currentValue"
+                :target-value="kr.progress.targetValue"
+                :unit="kr.progress.unit ?? ''"
+                :start-label="
+                  goal.start ? formatTarget(goal.start) : t('goal.dialog.krTrajectoryNotSet')
+                "
+                :current-label="formatProductYmd(getProductTodayYmd())"
+                :target-label="formatTarget(kr.target ?? goal.target)"
+                :check-in-test-id="`goal-quick-check-in-${kr.id}`"
+                :check-in-label="`${t('goal.recordDialog.addTitle')}: ${kr.title}`"
+                @check-in="openQuickCheckIn(kr.id)"
+              />
+              <div class="mt-1 flex flex-wrap items-center justify-between gap-2">
                 <Button
                   v-if="linkedTaskCount(kr.id) > 0"
                   variant="ghost"
@@ -630,12 +648,15 @@
                     formatProductDate(record.recordedAt)
                   }}</span>
                   <Button
-                    v-if="record.authorship === 'Manual' || record.authorship === 'TaskUserMeasurement'"
+                    v-if="
+                      record.authorship === 'Manual' || record.authorship === 'TaskUserMeasurement'
+                    "
                     variant="ghost"
                     size="sm"
                     :data-testid="`correct-goal-record-${record.id}`"
                     @click="openRecordCorrection(record)"
-                  >{{ t('goal.recordDialog.editTitle') }}</Button>
+                    >{{ t('goal.recordDialog.editTitle') }}</Button
+                  >
                 </div>
               </div>
               <p class="mt-1 text-xs text-muted-foreground">
@@ -741,9 +762,12 @@ import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import {
   formatProductDate,
   formatProductDateTime,
+  formatProductYmd,
   getProductTime,
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
+import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
+import { getKeyResultCalculationLabel } from '../utils';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
 import GoalRecordDialog from '../components/dialogs/GoalRecordDialog.vue';
 import { useGoal } from '../composables/useGoal';
@@ -918,8 +942,8 @@ watch(
   { immediate: true },
 );
 
-function formatTarget(target: GoalTimeframe): string {
-  return goalTimeframeLabel(target, locale.value);
+function formatTarget(target: GoalTimeframe | null | undefined): string {
+  return target ? goalTimeframeLabel(target, locale.value) : t('goal.dialog.krTrajectoryNotSet');
 }
 
 function reminderTriggerKey(trigger: ReminderTrigger): string {
