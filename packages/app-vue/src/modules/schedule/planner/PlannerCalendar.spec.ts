@@ -62,6 +62,8 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     const eventContent = wrapper.get(
       '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
     );
+    await eventRoot.trigger('click');
+    expect(wrapper.emitted('event-click')).toEqual([[scheduleProjection]]);
     expect(eventContent.text()).toBe('Deep work');
     expect(eventContent.text()).not.toContain('10:00');
     expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(

@@ -6,7 +6,7 @@ import { Mastra } from '@mastra/core/mastra';
 import { RequestContext } from '@mastra/core/request-context';
 import { LibSQLStore } from '@mastra/libsql';
 import { TaskPlanDraftContentSchema, type TaskPlanningDecision } from '@memoflow/contracts/ai';
-import { ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TaskPlannerPort, TaskPlannerRequest } from '../agents/task-planner.worker';
@@ -185,6 +185,59 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       requestId: 'request-approve',
       source: 'http',
       identityId: workflowInput.identityId,
+    });
+  });
+
+  it('persists recovery and retries the same deterministic task after restart without replanning', async () => {
+    const planner: TaskPlannerPort = {
+      plan: vi.fn(async () => ({
+        status: 'draft_ready' as const,
+        reason: 'Ready',
+        candidateDraft: draftContent,
+      })),
+    };
+    const mutations = mutationPort();
+    mutations.createTaskPlan.mockResolvedValueOnce(error('SERVICE_UNAVAILABLE', 'offline'));
+    const { buildWorkflow } = await harness(planner, mutations);
+    const runId = 'task-workflow-retry-1';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    await run.start({
+      inputData: workflowInput,
+      initialState: initialTaskCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('request-start'),
+    });
+    expect(mutations.createTaskPlan).not.toHaveBeenCalled();
+    const recovery = await run.resume({
+      step: TASK_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'approve' },
+      requestContext: mastraRequestContext('request-approve'),
+    });
+    expect(recovery.status).toBe('suspended');
+    expect(stepSuspendPayload(recovery)).toMatchObject({
+      type: 'recovery_required',
+      retryable: true,
+    });
+    const restarted = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const completed = await restarted.resume({
+      step: TASK_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'retry' },
+      requestContext: mastraRequestContext('request-retry'),
+    });
+    expect(completed.status).toBe('success');
+    expect(completed.result).toMatchObject({
+      outcome: 'completed',
+      receipt: { status: 'success', retryable: false },
+    });
+    expect(planner.plan).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(2);
+    expect(mutations.createTaskPlan.mock.calls[1]?.[0].id).toBe(
+      mutations.createTaskPlan.mock.calls[0]?.[0].id,
+    );
+    expect(mutations.createTaskPlan.mock.calls[1]?.[1]).toMatchObject({
+      requestId: 'request-retry',
     });
   });
 

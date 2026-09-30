@@ -210,6 +210,8 @@ Shared grammar cleanup + screenshot matrix + accessibility/perf closure
 
 ## PVC-BASE-002 — Interaction characterization pack
 
+**Completed (2026-09-30):** Characterization pack complete with no production changes. All six bullets audited; mounted Goal KR/Review router tests, Schedule CalendarEntry click/read-only tests, and durable Task workflow retry added; existing Task quick route/lifecycle and AI restart/approval coverage reused. [Exact tests, current behavior, harness boundaries, and passing validation evidence](../archive/2026-09-30-pvc-base-002-interaction-characterization.md).
+
 **Goal:** 在删除 route/组件/旧 action 前先锁住当前可用行为。
 
 **Scope:** Goal KR/Review deep link、Task lifecycle/quick route、Schedule inspect、AI workflow persistence。
