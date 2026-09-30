@@ -285,7 +285,13 @@ export class ElectronUpdaterAdapter implements DesktopUpdateEngine {
     this.activeOperation = 'install';
     this.handoffRequested = true;
     try {
-      updater.quitAndInstall();
+      // "Restart to update" is an application-owned seamless handoff, not a
+      // request to reopen the assisted NSIS wizard. electron-updater v6 defaults
+      // to a non-silent installer; with oneClick:false that can strand the
+      // detached installer waiting for UI after MemoFlow has already exited.
+      // Silent + force-run gives Windows the intended atomic user experience:
+      // replace the per-user install, then relaunch the updated application.
+      updater.quitAndInstall(true, true);
     } catch (error) {
       this.activeOperation = null;
       this.handoffRequested = false;

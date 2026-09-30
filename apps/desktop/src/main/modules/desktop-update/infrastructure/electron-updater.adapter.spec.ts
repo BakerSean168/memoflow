@@ -167,6 +167,7 @@ describe('ElectronUpdaterAdapter', () => {
     adapter.quitAndInstall();
 
     expect(updater.quitAndInstall).toHaveBeenCalledTimes(1);
+    expect(updater.quitAndInstall).toHaveBeenCalledWith(true, true);
   });
 
   it('normalizes signature failures and never forwards the raw provider error message', async () => {

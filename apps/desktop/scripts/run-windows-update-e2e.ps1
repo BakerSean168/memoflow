@@ -110,6 +110,60 @@ function Get-InstalledProductVersion([string]$ExecutablePath) {
   }
 }
 
+function Write-FailureDiagnostics(
+  [string]$Path,
+  [string]$InstalledExecutable,
+  [System.Diagnostics.Process]$BaseProcess,
+  [Nullable[DateTime]]$BaseExitedAt
+) {
+  $processes = @()
+  try {
+    $processes = @(
+      Get-CimInstance Win32_Process -ErrorAction Stop |
+        Where-Object {
+          $_.Name -ieq 'memoflow.exe' -or
+          ($_.CommandLine -and $_.CommandLine -match 'MemoFlow-Windows-.+-Setup\\.exe')
+        } |
+        Select-Object ProcessId, Name, ExecutablePath, CommandLine
+    )
+  }
+  catch {
+    $processes = @()
+  }
+
+  $updaterCacheFiles = @()
+  try {
+    $updaterRoots = @(
+      Get-ChildItem -LiteralPath $env:LOCALAPPDATA -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match 'updater' }
+    )
+    $updaterCacheFiles = @(
+      $updaterRoots |
+        ForEach-Object {
+          Get-ChildItem -LiteralPath $_.FullName -File -Recurse -ErrorAction SilentlyContinue
+        } |
+        Sort-Object FullName |
+        Select-Object -First 200 FullName, Length, LastWriteTimeUtc
+    )
+  }
+  catch {
+    $updaterCacheFiles = @()
+  }
+
+  $diagnostics = [ordered]@{
+    recordedAt = [DateTime]::UtcNow.ToString('o')
+    installedExecutable = $InstalledExecutable
+    installedVersion = Get-InstalledProductVersion $InstalledExecutable
+    baseProcessId = if ($null -ne $BaseProcess) { $BaseProcess.Id } else { $null }
+    baseProcessHasExited = if ($null -ne $BaseProcess) { $BaseProcess.HasExited } else { $null }
+    baseExitedAt = if ($null -ne $BaseExitedAt) { $BaseExitedAt.Value.ToString('o') } else { $null }
+    matchingProcesses = $processes
+    updaterCacheFiles = $updaterCacheFiles
+  }
+
+  $diagnostics | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $Path -Encoding utf8
+}
+
 if ($env:RUNNER_OS -and $env:RUNNER_OS -ne 'Windows') {
   throw 'Desktop Update installed E2E requires a Windows runner'
 }
@@ -293,6 +347,13 @@ try {
   }
 
   if ($null -eq $successStatus) {
+    $diagnosticsPath = Join-Path $runtimeRoot 'failure-diagnostics.json'
+    Write-FailureDiagnostics `
+      -Path $diagnosticsPath `
+      -InstalledExecutable $installedExecutable `
+      -BaseProcess $baseProcess `
+      -BaseExitedAt $baseExitedAt
+    Write-Host "[update-e2e] wrote failure diagnostics: $diagnosticsPath"
     throw "Desktop Update E2E did not reach candidate-verified within $TimeoutSeconds seconds"
   }
 
