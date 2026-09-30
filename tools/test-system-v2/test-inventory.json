@@ -3792,7 +3792,23 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultEditors.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -3856,6 +3872,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3912,6 +3936,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/composables/useGoalWorkspace.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/goal-vnext-ui-convergence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3954,6 +3986,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3971,14 +4011,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/views/KeyResultDetailView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4422,6 +4454,14 @@
       "measurementCollectors": [
         "packages/app-vue/vitest.store-coverage.config.ts"
       ]
+    },
+    {
+      "path": "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/app-vue/src/modules/schedule/views/schedulePanelAdaptation.spec.ts",
@@ -11749,7 +11789,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 245
+      "fileCount": 250
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12496,7 +12536,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1101,
+    "unit": 1106,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

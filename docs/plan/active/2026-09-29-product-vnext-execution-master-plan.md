@@ -542,6 +542,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** normal click 无新页面；旧 deep link 仍能打开同一 KR。
 
+**Execution (2026-09-30): Implemented / validated locally; ChatGPT Web final review/acceptance pending.** Goal Detail owns one route-driven KR Inspect dialog. Both `/goals/:id` and legacy `/goals/:goalId/key-results/:keyResultId` render the same workspace; the legacy URL opens Inspect after the workspace read. Close preserves query/hash and returns to `goal-detail`; back/forward follows route params without a duplicate owner fetch. Inspect reuses the enlarged readonly trajectory, extends the GOAL-1104 vocabulary for method explanation, displays core KR metadata, and reads KR-scoped records and linked Task context through canonical bounded pages with loaded totals/Load more. Provenance retains GOAL-1203 authorship labels and readable source-kind context without raw IDs. Current delegates to GoalRecordDialog; metadata commands remain on Goal Detail. Missing Goal/KR now show explicit deterministic feedback, deliberately replacing BASE-002 blank bodies. The standalone KeyResultDetailView and spec were retired after reference search. Evidence: App-Vue 10 files / 175 tests PASS (final Inspect rerun 18/18); Goal record owner regressions 4 files / 33 tests PASS; typecheck, changed-file ESLint, diff and governance PASS; isolated production-CSS Chromium 1000px/360px route/keyboard checks PASS, not authenticated E2E. See [implementation report](../archive/2026-09-30-pvc-goal-1301-inspect.md).
+
 **Dependencies:** GOAL-1102, GOAL-1201, BASE-002.
 
 ---

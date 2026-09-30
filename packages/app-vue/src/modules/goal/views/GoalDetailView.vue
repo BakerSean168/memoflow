@@ -20,11 +20,22 @@
     </div>
     <div
       v-else-if="error && !workspace"
+      role="alert"
+      data-testid="goal-not-found"
       class="m-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
     >
-      {{ error }}
+      {{ t('goal.inspect.goalUnavailable') }}
+      <Button v-if="inspectedKrId" variant="ghost" @click="closeInspect">{{
+        t('common.close')
+      }}</Button>
     </div>
 
+    <div v-else-if="!goal" role="alert" data-testid="goal-not-found" class="m-4 p-4 text-sm">
+      {{ t('goal.inspect.goalUnavailable') }}
+      <Button v-if="inspectedKrId" variant="ghost" @click="closeInspect">{{
+        t('common.close')
+      }}</Button>
+    </div>
     <div
       v-else-if="goal && workspace"
       class="min-h-0 flex-1 overflow-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
@@ -680,7 +691,18 @@
       @apply="addCustomAbsoluteReminder"
     />
 
-    <GoalRecordDialog ref="recordDialog" @saved="refresh" />
+    <GoalKeyResultInspectDialog
+      v-if="goal && inspectedKrId"
+      :goal="goal"
+      :key-result="inspectedKr"
+      :task-availability="workspace?.taskContext.availability ?? 'Unavailable'"
+      :record-revision="recordRevision"
+      @close="closeInspect"
+      @check-in="openQuickCheckIn(inspectedKrId)"
+      @open-task="openTask"
+      @open-task-scope="openTaskScope(inspectedKrId)"
+    />
+    <GoalRecordDialog ref="recordDialog" @saved="handleRecordSaved" />
 
     <KeyResultDialog
       ref="krDialog"
@@ -754,6 +776,7 @@ import {
   getProductTime,
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
+import GoalKeyResultInspectDialog from '../components/dialogs/GoalKeyResultInspectDialog.vue';
 import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
 import GoalKeyResultDirectControls from '../components/GoalKeyResultDirectControls.vue';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
@@ -775,7 +798,24 @@ const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const service = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
-const goalId = computed(() => String(route.params.id ?? ''));
+const goalId = computed(() => String(route.params.id ?? route.params.goalId ?? ''));
+const inspectedKrId = computed(() => String(route.params.keyResultId ?? ''));
+const inspectedKr = computed(
+  () => keyResults.value.find((kr) => String(kr.id) === inspectedKrId.value) ?? null,
+);
+const recordRevision = ref(0);
+function closeInspect(): void {
+  void router.push({
+    name: 'goal-detail',
+    params: { id: goalId.value },
+    query: route.query,
+    hash: route.hash,
+  });
+}
+async function handleRecordSaved(): Promise<void> {
+  recordRevision.value += 1;
+  await refresh();
+}
 const { workspace, isLoading, error, refresh } = useGoalWorkspace(goalId);
 const goal = computed(() => workspace.value?.goal ?? null);
 const keyResults = computed(() => goal.value?.keyResults ?? []);
@@ -1193,7 +1233,12 @@ function openCreateKr(): void {
 }
 
 function openKr(keyResultId: string): void {
-  void router.push({ name: 'key-result-detail', params: { goalId: goalId.value, keyResultId } });
+  void router.push({
+    name: 'key-result-detail',
+    params: { goalId: goalId.value, keyResultId },
+    query: route.query,
+    hash: route.hash,
+  });
 }
 
 async function updateKrFields(

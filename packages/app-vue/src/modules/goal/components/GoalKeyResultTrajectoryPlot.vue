@@ -14,7 +14,13 @@
 
     <svg
       class="pointer-events-none w-full text-border"
-      :class="readonly ? 'order-2 h-12 shrink-0' : 'absolute inset-0 h-full'"
+      :class="
+        readonly
+          ? size === 'inspect'
+            ? 'order-2 h-40 shrink-0'
+            : 'order-2 h-12 shrink-0'
+          : 'absolute inset-0 h-full'
+      "
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
       aria-hidden="true"
@@ -268,6 +274,7 @@ defineProps<{
   unit: string;
   disabled?: boolean;
   readonly?: boolean;
+  size?: 'compact' | 'inspect';
   checkInLabel?: string;
   checkInTestId?: string;
 }>();

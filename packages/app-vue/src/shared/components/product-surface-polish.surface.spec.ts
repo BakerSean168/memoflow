@@ -10,9 +10,7 @@ describe('MemoFlow product surface polish', () => {
     const goal = read('modules/goal/views/GoalDetailView.vue');
     expect(goal).toContain('<ModuleHeader data-testid="goal-detail-toolbar">');
     expect(goal).toContain('data-testid="goal-detail-identity"');
-    expect(goal).toContain(
-      'class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"',
-    );
+    expect(goal).toContain('class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"');
     expect(goal).toContain('<GoalStatusPicker');
     expect(goal.match(/<GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
     expect(goal).toContain('<GoalReminderMenuItems');
@@ -70,12 +68,12 @@ describe('MemoFlow product surface polish', () => {
     expect(reminder).not.toContain('TimeProgressPercentage');
   });
 
-  it('keeps Goal review and Key Result secondary pages on the shared product header and semantic surfaces', () => {
+  it('keeps Goal reviews on product headers and KR inspect on the product dialog shell', () => {
     const reviewCreate = read('modules/goal/views/GoalReviewCreationView.vue');
     const reviewDetail = read('modules/goal/views/GoalReviewDetailView.vue');
-    const keyResultDetail = read('modules/goal/views/KeyResultDetailView.vue');
+    const keyResultDetail = read('modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue');
 
-    for (const source of [reviewCreate, reviewDetail, keyResultDetail]) {
+    for (const source of [reviewCreate, reviewDetail]) {
       expect(source).toContain('<ModuleHeader>');
       expect(source).not.toContain('min-h-14 items-center gap-2 border-b');
       expect(source).not.toContain('rounded-lg border bg-card');
@@ -83,7 +81,8 @@ describe('MemoFlow product surface polish', () => {
 
     expect(reviewCreate).toContain('surface-raised');
     expect(reviewDetail).toContain('Authoritative progress snapshot');
-    expect(keyResultDetail).toContain('border-[hsl(var(--border-subtle))]');
+    expect(keyResultDetail).toContain('<ProductDialogShell');
+    expect(keyResultDetail).toContain('<GoalKeyResultTrajectoryPlot');
   });
 
   it('keeps standalone Key Result create/edit on the same trajectory editor as the Goal form', () => {
@@ -111,7 +110,8 @@ describe('MemoFlow product surface polish', () => {
     expect(card).toContain('<Sigma');
     expect(card).toContain('<Plus v-if="!unit"');
     expect(card).toContain('weightOpen.value = false');
-    expect(trajectory).toContain('class="relative mt-4 h-[14.5rem] border-t border-border/45"');
+    expect(trajectory).toContain('class="relative border-t border-border/45"');
+    expect(trajectory).toContain("'mt-4 h-[14.5rem]'");
     expect(trajectory).not.toContain('rounded-xl bg-background/35');
     expect(trajectory).not.toContain('stroke-dasharray="1.2 2.4"');
     expect(trajectory).toContain(":data-target-state=\"hasTarget ? 'set' : 'unset'\"");

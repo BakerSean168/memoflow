@@ -265,6 +265,8 @@ it('keeps linked Task context secondary and preserves both Task and KR deep link
   expect(actions.push).toHaveBeenLastCalledWith({
     name: 'key-result-detail',
     params: { goalId: 'goal-1', keyResultId: 'kr-1' },
+    query: undefined,
+    hash: undefined,
   });
   expect(actions.aggregate).not.toHaveBeenCalled();
   wrapper.unmount();

@@ -24,7 +24,10 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
+  let workspaceRequest = 0;
+
   async function loadWorkspace(request?: GetGoalWorkspaceReq) {
+    const requestId = ++workspaceRequest;
     const id = toValue(goalId);
     if (!id) {
       workspace.value = null;
@@ -35,6 +38,7 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
     error.value = null;
     try {
       const result = await service.getGoalWorkspace(id, request);
+      if (requestId !== workspaceRequest || id !== toValue(goalId)) return null;
       if (!result.ok) {
         workspace.value = null;
         error.value = presentErrorMessage(result.error);
@@ -42,8 +46,14 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
       }
       workspace.value = result.data;
       return result.data;
+    } catch (cause) {
+      if (requestId === workspaceRequest && id === toValue(goalId)) {
+        workspace.value = null;
+        error.value = presentErrorMessage(cause);
+      }
+      return null;
     } finally {
-      isLoading.value = false;
+      if (requestId === workspaceRequest) isLoading.value = false;
     }
   }
 
@@ -82,9 +92,12 @@ export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
   watch(
     () => toValue(goalId),
     (id) => {
+      workspace.value = null;
       taskPage.value = null;
       knowledgePage.value = null;
       if (!id) {
+        workspaceRequest += 1;
+        isLoading.value = false;
         workspace.value = null;
         error.value = null;
         return;
