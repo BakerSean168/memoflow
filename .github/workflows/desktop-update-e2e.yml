@@ -192,9 +192,9 @@ jobs:
             -RuntimeRoot $runtimeRoot `
             -TimeoutSeconds 300
 
-          if ($LASTEXITCODE -ne 0) {
-            throw "installed updater proof exited with code $LASTEXITCODE"
-          }
+          # The PowerShell harness reports failure by throwing. $LASTEXITCODE is
+          # reserved for native programs and can be $null after a successful
+          # .ps1 invocation, which would turn a real PASS into a false failure.
 
           Copy-Item `
             -LiteralPath (Join-Path "${{ steps.fixtures.outputs.candidate_feed_dir }}" 'latest.yml') `
