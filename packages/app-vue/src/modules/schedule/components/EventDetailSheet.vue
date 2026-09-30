@@ -3,14 +3,17 @@
     <SheetContent side="right" class="w-96 overflow-y-auto" data-testid="event-detail-sheet">
       <SheetHeader>
         <SheetTitle class="flex items-center gap-2">
-          <span class="h-2.5 w-2.5 shrink-0 rounded-full" :class="sourceDotClass" />
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full" :class="sourcePresentation.dotClass" />
           <span class="min-w-0 truncate">{{ event?.title }}</span>
         </SheetTitle>
         <SheetDescription>{{ t('schedule.eventDetail.subtitle') }}</SheetDescription>
       </SheetHeader>
 
       <div v-if="event" class="mt-4 space-y-4">
-        <dl class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]" data-testid="event-detail-properties">
+        <dl
+          class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
+          data-testid="event-detail-properties"
+        >
           <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
             <dt class="text-xs font-medium text-muted-foreground">
               {{ t('schedule.eventDetail.time') }}
@@ -25,7 +28,7 @@
             <dd>
               <span
                 class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium"
-                :class="sourceBadgeClass"
+                :class="sourcePresentation.badgeClass"
               >
                 {{ sourceLabel }}
               </span>
@@ -93,6 +96,7 @@ import {
 import { AlertTriangle } from '@lucide/vue';
 import {
   formatPlannerProjectionTimeRange,
+  plannerProjectionSourcePresentation,
   plannerSemanticI18nKey,
 } from '../planner/planner-presentation';
 
@@ -119,41 +123,15 @@ const timeRange = computed(() =>
     : '',
 );
 
-const sourceLabel = computed(() =>
-  props.event ? t(`schedule.source.${props.event.sourceType}`) : '',
+const sourcePresentation = computed(() =>
+  props.event
+    ? plannerProjectionSourcePresentation[props.event.sourceType]
+    : plannerProjectionSourcePresentation.schedule,
 );
+
+const sourceLabel = computed(() => (props.event ? t(sourcePresentation.value.labelI18nKey) : ''));
 
 const semanticLabel = computed(() =>
   props.event ? t(plannerSemanticI18nKey[props.event.displayMetadata.semantic]) : '',
 );
-
-const sourceDotClass = computed(() => {
-  switch (props.event?.sourceType) {
-    case 'schedule':
-      return 'bg-primary';
-    case 'task':
-      return 'bg-info';
-    case 'goal':
-      return 'bg-success';
-    case 'routine':
-      return 'bg-muted-foreground';
-    default:
-      return 'bg-muted-foreground';
-  }
-});
-
-const sourceBadgeClass = computed(() => {
-  switch (props.event?.sourceType) {
-    case 'schedule':
-      return 'bg-primary/10 text-primary';
-    case 'task':
-      return 'bg-info/15 text-info';
-    case 'goal':
-      return 'bg-success/15 text-success';
-    case 'routine':
-      return 'bg-muted text-muted-foreground';
-    default:
-      return 'bg-muted text-muted-foreground';
-  }
-});
 </script>

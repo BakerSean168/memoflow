@@ -1,6 +1,67 @@
 import type { CalendarEventProjection, PlannerDisplaySemantic } from '@memoflow/contracts/schedule';
 import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
+export type PlannerProjectionSource = CalendarEventProjection['sourceType'];
+
+export interface PlannerProjectionSourcePresentation {
+  readonly labelI18nKey: string;
+  readonly sourceClass: string;
+  readonly dotClass: string;
+  readonly badgeClass: string;
+}
+
+/**
+ * Schedule-owned presentation authority for owner projections.
+ *
+ * Keep source identity styling here so Day/Week/Month/event-detail/capsule
+ * surfaces cannot drift into different meanings for the same owner. Business
+ * actions deliberately stay with their owner modules.
+ */
+export const plannerProjectionSourcePresentation: Record<
+  PlannerProjectionSource,
+  PlannerProjectionSourcePresentation
+> = {
+  schedule: {
+    labelI18nKey: 'schedule.source.schedule',
+    sourceClass: 'planner-source-schedule',
+    dotClass: 'bg-primary',
+    badgeClass: 'bg-primary/10 text-primary',
+  },
+  task: {
+    labelI18nKey: 'schedule.source.task',
+    sourceClass: 'planner-source-task',
+    dotClass: 'bg-info',
+    badgeClass: 'bg-info/15 text-info',
+  },
+  goal: {
+    labelI18nKey: 'schedule.source.goal',
+    sourceClass: 'planner-source-goal',
+    dotClass: 'bg-warning',
+    badgeClass: 'bg-warning/15 text-warning',
+  },
+  routine: {
+    labelI18nKey: 'schedule.source.routine',
+    sourceClass: 'planner-source-routine',
+    dotClass: 'bg-success',
+    badgeClass: 'bg-success/15 text-success',
+  },
+};
+
+export function plannerProjectionSourceLabel(
+  source: PlannerProjectionSource,
+  translate: (key: string) => string,
+): string {
+  return translate(plannerProjectionSourcePresentation[source].labelI18nKey);
+}
+
+export function plannerProjectionToneClass(
+  projection: CalendarEventProjection,
+  hasConflict = false,
+): string {
+  if (hasConflict) return 'planner-tone-warning';
+  return `planner-tone-${projection.displayMetadata.tone ?? 'default'}`;
+}
+
 export function plannerProjectionKeyForUi(projection: CalendarEventProjection): string {
   return `${projection.sourceType}:${projection.sourceId}`;
 }

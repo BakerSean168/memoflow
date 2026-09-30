@@ -32,7 +32,7 @@
             >
               <span
                 class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
-                :class="sourceDotClass(event)"
+                :class="plannerProjectionSourcePresentation[event.sourceType].dotClass"
               />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-sm font-medium">{{ event.title }}</span>
@@ -41,22 +41,16 @@
                 </span>
                 <span
                   class="mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium"
-                  :class="sourceBadgeClass(event)"
+                  :class="plannerProjectionSourcePresentation[event.sourceType].badgeClass"
                 >
-                  {{ t(`schedule.source.${event.sourceType}`) }}
+                  {{ t(plannerProjectionSourcePresentation[event.sourceType].labelI18nKey) }}
                 </span>
               </span>
-              <AlertCircle
-                v-if="hasConflict(event)"
-                class="mt-0.5 h-4 w-4 shrink-0 text-warning"
-              />
+              <AlertCircle v-if="hasConflict(event)" class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
             </button>
 
             <button
-              v-if="
-                event.sourceType === 'task' &&
-                event.displayMetadata.status !== 'Completed'
-              "
+              v-if="event.sourceType === 'task' && event.displayMetadata.status !== 'Completed'"
               type="button"
               :aria-label="t('task.action.complete')"
               class="m-2 ml-0 shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-success/10 hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -101,6 +95,7 @@ import { getProductTime } from '../../../shared/utils/product-time';
 import {
   formatPlannerProjectionTimeRange,
   plannerProjectionKeyForUi,
+  plannerProjectionSourcePresentation,
 } from '../planner/planner-presentation';
 
 interface Props {
@@ -132,31 +127,5 @@ const dateTitle = computed(() => {
 
 function hasConflict(event: CalendarEventProjection): boolean {
   return conflictKeys.value.has(plannerProjectionKeyForUi(event));
-}
-
-function sourceDotClass(event: CalendarEventProjection): string {
-  switch (event.sourceType) {
-    case 'schedule':
-      return 'bg-primary';
-    case 'task':
-      return 'bg-info';
-    case 'goal':
-      return 'bg-success';
-    case 'routine':
-      return 'bg-muted-foreground';
-  }
-}
-
-function sourceBadgeClass(event: CalendarEventProjection): string {
-  switch (event.sourceType) {
-    case 'schedule':
-      return 'bg-primary/10 text-primary';
-    case 'task':
-      return 'bg-info/15 text-info';
-    case 'goal':
-      return 'bg-success/15 text-success';
-    case 'routine':
-      return 'bg-muted text-muted-foreground';
-  }
 }
 </script>

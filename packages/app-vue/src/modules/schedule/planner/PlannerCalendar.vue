@@ -52,7 +52,10 @@ import timeGridPlugin from '@fullcalendar/vue3/timegrid';
 import classicThemePlugin from '@fullcalendar/vue3/themes/classic';
 import zhCnLocale from '@fullcalendar/vue3/locales/zh-cn';
 import type { CalendarApi, CalendarOptions, EventApi, EventInput } from '@fullcalendar/vue3';
-import type { CalendarEventProjection, PlannerConflictProjection } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/contracts/schedule';
 import { plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
 import { Loader2, TriangleAlert } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
@@ -63,6 +66,10 @@ import {
   type PlannerMutationOutcome,
   type PlannerOwnerCommandRouter,
 } from './index';
+import {
+  plannerProjectionSourcePresentation,
+  plannerProjectionToneClass,
+} from './planner-presentation';
 
 export type PlannerCalendarView = 'day' | 'week' | 'month';
 
@@ -130,10 +137,10 @@ function projectionToEvent(projection: CalendarEventProjection): EventInput {
     // FullCalendar v7 uses singular className for event UI refiners.
     className: [
       'planner-source',
-      `planner-source-${projection.sourceType}`,
+      plannerProjectionSourcePresentation[projection.sourceType].sourceClass,
       projection.allDay ? 'planner-event-all-day' : 'planner-event-timed',
       `planner-occupancy-${projection.occupancy}`,
-      `planner-tone-${projection.displayMetadata.tone ?? 'default'}`,
+      plannerProjectionToneClass(projection, hasDerivedConflict(projection)),
       hasDerivedConflict(projection) ? 'planner-event-conflict' : '',
     ]
       .filter(Boolean)
@@ -327,8 +334,7 @@ function showDate(view: PlannerCalendarView, date: Date | number): void {
 defineExpose({ previous, next, today, goToDate, showDate });
 
 function eventToneClass(projection: CalendarEventProjection): string {
-  if (hasDerivedConflict(projection)) return 'planner-tone-warning';
-  return `planner-tone-${projection.displayMetadata.tone ?? 'default'}`;
+  return plannerProjectionToneClass(projection, hasDerivedConflict(projection));
 }
 </script>
 
