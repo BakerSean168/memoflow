@@ -759,6 +759,10 @@ packages/goal/src/shared/key-result-progress-calculator.ts
 
 **Acceptance:** 不再允许持久化“non-Sum fixed automatic contribution 后续才失败”的配置。
 
+**Execution (2026-09-30): Implemented / validated.** Task Goal/KR binding 已收敛到 canonical `progressRule`：`Fixed`（EachCompletion/PlanCompletion + signed finite non-zero delta）与 `Prompt`（EachCompletion + optional finite suggestedValue）；`null` 即 LinkOnly。旧 `contribution` 仅保留为 backward-compatible Fixed mirror，legacy input/rows 自动归一化，冲突配置拒绝。Prisma/PowerSync 显式持久 `goal_progress_mode` / `goal_suggested_value`，`goal_record_value` 仅承载 Fixed fact，DB invariant 升级并保留 legacy decode。Task 通过 bounded Goal measurement read port 读取 KR method/unit/current/target；Fixed 仅允许 Sum，Prompt 对五种 method 可用，Prompt 不进入 automatic Goal outbox。Task form 已提供“仅关联 / 自动记录固定值 / 完成时记录”，non-Sum Fixed 会确定性转 Prompt；Goal-only 强制 LinkOnly。Task presentation 复用 Goal module public vocabulary surface，不维护第二套 method 文案。
+
+**Validation:** contracts 11 files / 61 tests PASS；Task focused 18 files / 271 tests PASS；app-vue focused 7 files / 39 tests PASS；最终 presentation-boundary repair 3 files / 28 tests PASS；`task:typecheck`、`app-vue:typecheck`、API/Desktop typecheck、Prisma generate/validate、database/PowerSync/governance checks 均 PASS；post-rebase 再次运行 contracts 61、Task 271、app-vue 39、Task/App typecheck 与 `memoflow:governance-check` 全部 PASS；`git diff --check` PASS。PostgreSQL migration 仍只是 unapplied artifact，没有改动 live DB。详见 [archived implementation report](../archive/2026-09-30-pvc-task-3301a.md)。
+
 **Dependencies:** GOAL-1104, GOAL-1201.
 
 ---
