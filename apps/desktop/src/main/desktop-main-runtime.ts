@@ -18,6 +18,7 @@ import type { NotificationPort, ExternalEditorPort } from './capabilities/ports'
 import type { DesktopFeaturesRuntime } from './desktop-features';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
+import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
 
 const logger = createLogger('DesktopMainRuntime');
 
@@ -29,8 +30,8 @@ export class DesktopMainRuntime {
   constructor(
     readonly windowManager: WindowManager,
     readonly profileRuntimeManager: DesktopProfileRuntimeManager,
-  ) {
-  }
+    readonly desktopUpdateCoordinator: DesktopUpdateCoordinator,
+  ) {}
 
   /** Get the auth context provider for the active profile (or null). */
   get authContextProvider() {
@@ -78,6 +79,11 @@ export class DesktopMainRuntime {
 
     this._deviceAuthCoordinator?.dispose();
     this._deviceAuthCoordinator = null;
+
+    // Desktop Update is a process/Shell capability, not a Profile capability.
+    // It lives across Profile lock/switch and is disposed only when the main
+    // process runtime itself is shutting down.
+    this.desktopUpdateCoordinator.destroy();
 
     // Release profile resources without forgetting which local Profile should reopen next launch.
     try {

@@ -16,7 +16,7 @@
 import './runtime-init';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { powerMonitor } from 'electron';
+import { app, powerMonitor } from 'electron';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
 import { ElectronBootstrapper } from './bootstrap';
@@ -111,6 +111,7 @@ import { DesktopKnowledgeRepositoryReconciliationService } from './modules/repos
 import { DesktopKnowledgeRepositorySyncService } from './modules/repository/desktop-knowledge-repository-sync.service';
 import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repository/desktop-knowledge-repository-auto-sync.scheduler';
 import { DesktopMainRuntime } from './desktop-main-runtime';
+import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
 
 configureDesktopShellIdentity();
 
@@ -677,6 +678,11 @@ async function registerBusinessModules(
  * any profile is selected. This is what runs at app startup.
  */
 async function initializeShellRuntime(): Promise<void> {
+  if (mainRuntime) {
+    logger.warn('Shell runtime is already initialized; reusing process-owned runtime');
+    return;
+  }
+
   const startTime = performance.now();
   console.log('[Shell] Initializing shell runtime...');
 
@@ -707,9 +713,36 @@ async function initializeShellRuntime(): Promise<void> {
     cloudConnectionService,
   );
 
-  // Assemble the explicit runtime owner
-  mainRuntime = new DesktopMainRuntime(windowManager, profileRuntimeManager);
+  // Desktop Update is a process/Shell capability. Compose it before any
+  // Profile is activated and never pass Profile/Window dependencies into it.
+  const electronProcess = process as typeof process & {
+    readonly mas?: boolean;
+    readonly windowsStore?: boolean;
+  };
+  const desktopUpdateShell = composeDesktopUpdateShellRuntime({
+    currentVersion: app.getVersion(),
+    isPackaged: app.isPackaged,
+    platform: process.platform,
+    isMacAppStore: electronProcess.mas === true,
+    isWindowsStore: electronProcess.windowsStore === true,
+    env: process.env,
+  });
+
+  // Assemble the explicit process runtime owner. Profile lock/switch and
+  // BrowserWindow recreation do not recreate or dispose Desktop Update.
+  mainRuntime = new DesktopMainRuntime(
+    windowManager,
+    profileRuntimeManager,
+    desktopUpdateShell.coordinator,
+  );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
+
+  const desktopUpdateSnapshot = await desktopUpdateShell.coordinator.initialize();
+  logger.info('Desktop Update shell runtime initialized', {
+    owner: desktopUpdateShell.installation.owner,
+    ownershipReason: desktopUpdateShell.installation.reason,
+    state: desktopUpdateSnapshot.state.type,
+  });
   registerProfileAccessIpc(
     profileRegistry,
     profileRuntimeManager,

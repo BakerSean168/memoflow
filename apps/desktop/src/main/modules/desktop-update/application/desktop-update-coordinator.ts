@@ -7,6 +7,7 @@ import {
   type DesktopUpdateDisableReasonDTO,
   type DesktopUpdateFailureDTO,
   type DesktopUpdateIntentDTO,
+  type DesktopUpdateOperationDTO,
   type DesktopUpdateSnapshotDTO,
   type DesktopUpdateStateDTO,
 } from '@memoflow/contracts/electron';
@@ -307,23 +308,28 @@ export class DesktopUpdateCoordinator {
       await this.engine.download();
       if (this.destroyed) return this.getSnapshot();
 
-      // A native downloaded event may already have projected this transition.
-      if (this.state.type === 'downloading') {
-        this.state = completeDesktopUpdateDownload(this.state);
+      // A native downloaded/error event may already have projected a new state
+      // while the Promise was pending. Re-read through a method so TypeScript
+      // does not incorrectly preserve a pre-await property narrowing.
+      let stateAfterDownload = this.readState();
+      if (stateAfterDownload.type === 'downloading') {
+        this.state = completeDesktopUpdateDownload(stateAfterDownload);
         this.emit();
+        stateAfterDownload = this.readState();
       }
-      if (this.state.type === 'failed') return this.getSnapshot();
-      if (this.state.type !== 'downloaded') return this.getSnapshot();
+      if (stateAfterDownload.type === 'failed') return this.getSnapshot();
+      if (stateAfterDownload.type !== 'downloaded') return this.getSnapshot();
 
-      this.state = startDesktopUpdatePreparation(this.state);
+      this.state = startDesktopUpdatePreparation(stateAfterDownload);
       this.emit();
 
       await this.engine.prepare();
       if (this.destroyed) return this.getSnapshot();
-      if (this.state.type === 'failed') return this.getSnapshot();
-      if (this.state.type !== 'preparing') return this.getSnapshot();
+      const stateAfterPrepare = this.readState();
+      if (stateAfterPrepare.type === 'failed') return this.getSnapshot();
+      if (stateAfterPrepare.type !== 'preparing') return this.getSnapshot();
 
-      this.state = markDesktopUpdateReady(this.state);
+      this.state = markDesktopUpdateReady(stateAfterPrepare);
       this.emit();
       return this.getSnapshot();
     } catch (error) {
@@ -396,6 +402,10 @@ export class DesktopUpdateCoordinator {
   private emit(): void {
     const snapshot = this.getSnapshot();
     for (const listener of this.listeners) listener(snapshot);
+  }
+
+  private readState(): DesktopUpdateStateDTO {
+    return this.state;
   }
 
   private nowIso(): string {

@@ -69,7 +69,9 @@ Linux AppImage
 - `DU-1103` — **DONE**: immutable typed update state transitions, illegal-transition guards, intent propagation, and failure recovery are covered by focused tests.
 - `DU-1104` — **DONE**: electron-updater is isolated behind a MemoFlow engine port; SDK auto-download/auto-install are disabled, provider events/errors are normalized, and raw paths/errors do not cross the adapter boundary.
 - `DU-1105` — **DONE**: DesktopUpdateCoordinator owns scheduling, single-flight checks/downloads, explicit/background intent, automatic-download policy, replayable snapshots, and engine lifecycle; async error/check races preserve the first terminal state.
-- Next: `DU-1106` — compose the updater exactly once at the Desktop Shell boundary.
+- `DU-1106` — **DONE**: Desktop Update is composed exactly once at the process/Shell boundary, owned by `DesktopMainRuntime`, survives Profile/window lifecycle changes, and is destroyed only with the process runtime. Host installation evidence is conservative: packaged Windows NSIS and AppImage are self-managed, Snap is package-manager owned, dev/unknown Linux/direct macOS without signed provenance fail closed.
+- **Phase 1 complete**: Desktop Update now has contracts, ownership, state machine, adapter, coordinator, and Shell singleton wiring with 52 focused update tests, Desktop main-process tests, full Desktop typecheck, and targeted ESLint green.
+- Next: `DU-1201` — extract the shared `DesktopShutdownCoordinator` so normal quit and update restart share one cleanup owner.
 
 ## 2. Non-goals
 

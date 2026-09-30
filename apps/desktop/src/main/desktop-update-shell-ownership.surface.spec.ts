@@ -1,0 +1,49 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const mainSource = fs.readFileSync(path.join(__dirname, 'main.ts'), 'utf8');
+const runtimeSource = fs.readFileSync(path.join(__dirname, 'desktop-main-runtime.ts'), 'utf8');
+const profileRuntimeSource = fs.readFileSync(
+  path.join(__dirname, 'profile/desktop-profile-runtime-manager.ts'),
+  'utf8',
+);
+const windowManagerSource = fs.readFileSync(
+  path.join(__dirname, 'lifecycle/window-manager.ts'),
+  'utf8',
+);
+
+describe('Desktop Update shell ownership surface', () => {
+  it('composes Desktop Update exactly once in initializeShellRuntime', () => {
+    expect(mainSource.match(/composeDesktopUpdateShellRuntime\(/g)).toHaveLength(1);
+
+    const shellStart = mainSource.indexOf('async function initializeShellRuntime');
+    const composition = mainSource.indexOf('composeDesktopUpdateShellRuntime(');
+    const businessModules = mainSource.indexOf('async function registerBusinessModules');
+
+    expect(shellStart).toBeGreaterThan(-1);
+    expect(composition).toBeGreaterThan(shellStart);
+    expect(composition).toBeGreaterThan(businessModules);
+  });
+
+  it('guards shell initialization against duplicate process-owned composition', () => {
+    expect(mainSource).toContain(
+      "if (mainRuntime) {\n    logger.warn('Shell runtime is already initialized; reusing process-owned runtime');\n    return;",
+    );
+  });
+
+  it('keeps Profile and BrowserWindow lifecycle owners away from updater construction/destruction', () => {
+    for (const source of [profileRuntimeSource, windowManagerSource]) {
+      expect(source).not.toContain('composeDesktopUpdateShellRuntime');
+      expect(source).not.toContain('DesktopUpdateCoordinator');
+      expect(source).not.toContain('desktopUpdateCoordinator.destroy');
+    }
+  });
+
+  it('destroys Desktop Update only from the process runtime disposal path', () => {
+    expect(runtimeSource.match(/desktopUpdateCoordinator\.destroy\(\)/g)).toHaveLength(1);
+    expect(runtimeSource).toContain(
+      'It lives across Profile lock/switch and is disposed only when the main',
+    );
+  });
+});
