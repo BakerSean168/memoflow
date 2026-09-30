@@ -3684,6 +3684,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/account/components/AccountProfileSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4528,6 +4536,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4569,6 +4585,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11629,7 +11653,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 231
+      "fileCount": 234
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12365,7 +12389,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1086,
+    "unit": 1089,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

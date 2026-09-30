@@ -10,18 +10,19 @@ const source = readFileSync(
 );
 
 describe('UserSettingsView owner composition', () => {
-  it('exposes exactly six real owner groups and retires the fake Advanced tab', () => {
+  it('keeps six shared owner groups plus the optional Desktop updates group', () => {
     const definitions =
       source.match(/const GROUP_DEFINITIONS:[\s\S]*?\]\s*;\s*\nconst GROUP_VALUES/)?.[0] ?? '';
     const values = definitions.match(/\{ value: '[a-z]+'/g) ?? [];
 
-    expect(values).toHaveLength(6);
+    expect(values).toHaveLength(7);
     expect(definitions).toContain("{ value: 'appearance'");
     expect(definitions).toContain("{ value: 'repository'");
     expect(definitions).toContain("{ value: 'ai'");
     expect(definitions).toContain("{ value: 'notifications'");
     expect(definitions).toContain("{ value: 'account'");
     expect(definitions).toContain("{ value: 'data'");
+    expect(definitions).toContain("{ value: 'updates'");
     expect(definitions).not.toContain("{ value: 'advanced'");
   });
 
@@ -30,6 +31,13 @@ describe('UserSettingsView owner composition', () => {
     expect(source).toContain('route.query.tab');
     expect(source).toContain('SettingsNavigation');
     expect(source).toContain('route.query.tab');
+  });
+
+  it('exposes updates only when the Desktop host provides DesktopUpdateService', () => {
+    expect(source).toContain('inject(DESKTOP_UPDATE_SERVICE_KEY, null)');
+    expect(source).toContain("group !== 'updates' || desktopUpdateService !== null");
+    expect(source).toContain("activeTab === 'updates'");
+    expect(source).toContain("import('../components/DesktopUpdateSettingsSection.vue')");
   });
 
   it('owns navigation only instead of global owner loading or shadow mutation state', () => {
