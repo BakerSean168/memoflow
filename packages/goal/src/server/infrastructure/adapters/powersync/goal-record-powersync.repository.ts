@@ -43,7 +43,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE identity_id = ?
          AND key_result_id = ?
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY recorded_at ${orderDir}${limitClause}`,
+       ORDER BY recorded_at ${orderDir}, id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, keyResultId, ...params, options.limit]
         : [identityId, keyResultId, ...params],
@@ -68,7 +68,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE gr.identity_id = ?
          AND kr.goal_id = ?
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY gr.recorded_at ${orderDir}${limitClause}`,
+       ORDER BY gr.recorded_at ${orderDir}, gr.id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, goalId, ...params, options.limit]
         : [identityId, goalId, ...params],
@@ -102,7 +102,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE identity_id = ?
          AND key_result_id IN (${placeholders})
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY recorded_at ${orderDir}${limitClause}`,
+       ORDER BY recorded_at ${orderDir}, id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, ...keyResultIds, ...params, options.limit]
         : [identityId, ...keyResultIds, ...params],

@@ -37,7 +37,8 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
       where.recordedAt = recordedAtFilter;
     }
 
-    const orderBy = { recordedAt: options?.orderBy ?? 'desc' };
+    const direction = options?.orderBy ?? 'desc';
+    const orderBy = [{ recordedAt: direction }, { id: direction }];
     const take = options?.limit;
 
     return { where, orderBy, take };
