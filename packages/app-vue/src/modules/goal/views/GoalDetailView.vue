@@ -625,10 +625,22 @@
             <div v-for="record in workspace.recentProgress" :key="record.id" class="px-4 py-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-medium">{{ keyResultName(record.keyResultId) }}</p>
-                <span class="text-xs text-muted-foreground">{{
-                  formatProductDate(record.createdAt)
-                }}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-muted-foreground">{{
+                    formatProductDate(record.recordedAt)
+                  }}</span>
+                  <Button
+                    v-if="record.authorship === 'Manual' || record.authorship === 'TaskUserMeasurement'"
+                    variant="ghost"
+                    size="sm"
+                    :data-testid="`correct-goal-record-${record.id}`"
+                    @click="openRecordCorrection(record)"
+                  >{{ t('goal.recordDialog.editTitle') }}</Button>
+                </div>
               </div>
+              <p class="mt-1 text-xs text-muted-foreground">
+                {{ t(`goal.cards.cardsRecordCard.authorship.${record.authorship}`) }}
+              </p>
               <p class="mt-1 text-xs text-muted-foreground">
                 {{ record.value >= 0 ? '+' : '' }}{{ record.value }} → {{ record.valueAfter }}
                 <span v-if="record.comment"> · {{ record.comment }}</span>
@@ -713,6 +725,7 @@ import {
   isPastGoalTarget,
   type AddKeyResultReq,
   type GoalReminderConfigDTO,
+  type GoalRecordClientDTO,
   type ReminderTrigger,
   type GoalStatus as GoalStatusValue,
   type GoalTimeframe,
@@ -762,6 +775,14 @@ async function openQuickCheckIn(keyResultId: string): Promise<void> {
   const aggregate = await getGoalAggregateView(requestedGoalId);
   if (goalId.value !== requestedGoalId) return;
   if (aggregate) recordDialog.value?.openDialog(requestedGoalId, String(keyResultId));
+}
+async function openRecordCorrection(record: GoalRecordClientDTO) {
+  if (record.authorship !== 'Manual' && record.authorship !== 'TaskUserMeasurement') return;
+  const requestedGoalId = goalId.value;
+  const aggregate = await getGoalAggregateView(requestedGoalId);
+  if (aggregate && goalId.value === requestedGoalId) {
+    recordDialog.value?.openDialog(requestedGoalId, String(record.keyResultId), record);
+  }
 }
 const isSaving = ref(false);
 const mutationError = ref<string | null>(null);

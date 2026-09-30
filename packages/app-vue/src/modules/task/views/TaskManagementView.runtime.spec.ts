@@ -15,6 +15,7 @@ import {
 } from '../../../platform/server-state';
 import { useTaskStore } from '../stores/task-store';
 import type { LocationQuery } from 'vue-router';
+import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
@@ -125,7 +126,7 @@ beforeEach(() => {
   mocks.createPlanSafe.mockResolvedValue({ todayOccurrenceCreated: true });
 });
 
-function render(detailFails = false) {
+function render(detailFails = false, goalBinding: import('@memoflow/contracts/task').TaskGoalBindingDTO | null = null) {
   const pinia = createTestPinia();
   const store = useTaskStore(pinia);
   const occurrences = [
@@ -145,7 +146,7 @@ function render(detailFails = false) {
               id: 'outside-page',
               name: 'Plan outside page',
               labels: [],
-              goalBinding: null,
+              goalBinding,
             }),
           }),
         );
@@ -175,6 +176,7 @@ function render(detailFails = false) {
         [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
       },
       stubs: {
+        TaskCompletionMeasurementDialog: true,
         TaskOccurrenceInspectDialog: true,
         TaskPageToolbar: toolbar,
         TaskOccurrenceRow: occurrenceRow,
@@ -519,4 +521,30 @@ it('uses the same coordinator for row and inspect intents, with selected busy st
   dialog.vm.$emit('checklist-change', 'occurrence', 'step', true, 9);
   await flushPromises();
   expect(mocks.checklist).toHaveBeenCalledWith('occurrence', { definitionId: 'step', completed: true, expectedVersion: 9 });
+});
+
+it.each(['row', 'inspect'])('Home %s resolves Prompt using the occurrence Plan outside the paged list', async host => {
+  const { wrapper, store } = render(false, { goalId: 'goal' as never, keyResultId: 'kr' as never, contribution: null,
+    progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 0 } });
+  await flushPromises();
+  const row = wrapper.findComponent(occurrenceRow);
+  if (host === 'inspect') {
+    row.vm.$emit('inspect', 'occurrence');
+    await flushPromises();
+    wrapper.getComponent(TaskOccurrenceInspectDialog).vm.$emit('complete', 'occurrence');
+  } else row.vm.$emit('complete', 'occurrence');
+  await flushPromises();
+  const dialog = wrapper.getComponent(TaskCompletionMeasurementDialog);
+  const coordinator = dialog.props('coordinator');
+  expect(coordinator.pendingMeasurement.value).toEqual({ occurrenceId: 'occurrence', goalId: 'goal', keyResultId: 'kr', suggestedValue: 0 });
+  expect(mocks.complete).not.toHaveBeenCalled();
+  const completed = { ...store.instances[0], status: 'Completed' as const };
+  mocks.complete.mockResolvedValue(completed);
+  await coordinator.submitMeasurement(-2, 'actual');
+  expect(mocks.complete).toHaveBeenCalledExactlyOnceWith('occurrence', { goalMeasurement: { value: -2, note: 'actual' } });
+  // Completed overdue rows can leave Today; the dialog must still update an open Inspect.
+  store.setInstances([]);
+  dialog.vm.$emit('completed', completed);
+  await flushPromises();
+  if (host === 'inspect') expect(wrapper.getComponent(TaskOccurrenceInspectDialog).props('occurrence')).toEqual(completed);
 });

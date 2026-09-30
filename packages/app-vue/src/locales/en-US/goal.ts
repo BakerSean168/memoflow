@@ -30,6 +30,7 @@ export default {
     updateKRFailed: 'Failed to update key result',
     deleteKRFailed: 'Failed to delete key result',
     loadRecordsFailed: 'Failed to load progress records',
+    updateRecordFailed: 'Failed to correct record',
     createRecordFailed: 'Failed to create progress record',
     loadAggregateViewFailed: 'Failed to load goal aggregate view',
     loadReviewsFailed: 'Failed to load reviews',
@@ -577,7 +578,7 @@ export default {
     valueFinite: 'Enter a finite number.',
     goalNotFound: 'Goal not found',
     krNotFound: 'Key result not found',
-    editNotAllowed: 'Editing records is not allowed',
+    editNotAllowed: 'Automatic Task contributions are read-only',
   },
   weightSnapshotList: {
     title: 'Weight Change History',

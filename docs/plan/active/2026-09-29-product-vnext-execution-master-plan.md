@@ -831,6 +831,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** 五种 KR method 都能从 Task completion 正确记录；撤销/纠正/重试行为可解释且幂等。
 
+**Execution (2026-09-30): Implemented / validated.** Task owns a single Prompt completion session and command; all canonical Task hosts reuse the public Goal composer and one Task dialog. Complete-only remains available on Goal read failure. Goal-owned Manual/TaskUserMeasurement correction preserves provenance and Task state; TaskAutomatic remains read-only. Existing uncomplete/outbox revert is characterized with replacement/retry. Focused app-vue 14 files / 184 tests, Task 3 files / 39 tests, Goal 5 files / 51 tests, affected typechecks, changed-file ESLint, inventory and governance PASS. PostgreSQL/E2E validation limits and exact files are in the [implementation report](../archive/2026-09-30-pvc-task-3301c.md).
+
 **Dependencies:** GOAL-1202, GOAL-1203, TASK-3301B, TASK-3401.
 
 ---

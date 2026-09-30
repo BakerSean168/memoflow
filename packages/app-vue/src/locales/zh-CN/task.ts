@@ -1,4 +1,12 @@
 export default {
+  measurement: {
+    title: '更新关键结果',
+    description: '记录本次完成时的实际值。',
+    completeOnly: '仅完成任务',
+    recordAndComplete: '记录并完成',
+    failed: '完成失败，已保留本次记录，请重试。',
+  },
+
   inspect: {
     description: '本次执行详情',
     open: '查看 {title} 本次执行',

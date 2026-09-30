@@ -72,3 +72,21 @@ describe('useGoalRecords manual creation', () => {
     },
   );
 });
+
+it('corrects a Task measurement through the versioned Goal command and preserves provenance in its receipt', async () => {
+  const store = useGoalStore();
+  const goal = createMockGoal({ version: 4 });
+  store.setGoals([goal]);
+  const record = createMockGoalRecord({ goalId: goal.id, value: -2, comment: 'corrected', authorship: 'TaskUserMeasurement', source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } });
+  const receipt = createMockGoalMutationReceipt({ ...goal, version: 5 }, { recordChanges: { upserted: [record], removedIds: [] } });
+  const service = { updateGoalRecord: vi.fn().mockResolvedValue(ok(receipt)) };
+  let api!: ReturnType<typeof useGoalRecords>;
+  const wrapper = mount(defineComponent({ setup() { api = useGoalRecords(); return () => h('div'); } }), {
+    global: { plugins: [i18n], provide: { [GOAL_SERVICE_KEY as symbol]: service } },
+  });
+  expect(await api.updateGoalRecord(goal.id, record.keyResultId, record.id, { value: -2, note: 'corrected' })).toEqual(record);
+  expect(service.updateGoalRecord).toHaveBeenCalledExactlyOnceWith(goal.id, record.keyResultId, record.id, { expectedVersion: 4, value: -2, note: 'corrected' });
+  expect(store.goalRecords).toContainEqual(record);
+  expect(store.getGoalById(goal.id)?.version).toBe(5);
+  wrapper.unmount();
+});

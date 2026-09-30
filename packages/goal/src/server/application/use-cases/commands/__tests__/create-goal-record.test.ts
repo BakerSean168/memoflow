@@ -7,6 +7,7 @@ import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { Goal, GoalRecord } from '../../../../domain';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import type { IGoalRecordRepository } from '../../../../domain/repositories/i-goal-record-repository';
+import { RemoveTaskGoalContributionUseCase } from '../remove-task-goal-contribution.use-case';
 import { CreateGoalRecordUseCase } from '../create-goal-record.use-case';
 import type { GoalWriteTransactionRunner } from '../goal-write-support';
 import { createInlineGoalWriteTransactionRunner } from '../goal-write-support';
@@ -401,4 +402,48 @@ describe('CreateGoalRecordUseCase', () => {
       expect(goal.getKeyResult(kr.id)?.progress.currentValue).toBe(value);
     },
   );
+  it('reverts a Prompt measurement and creates one replacement on re-complete/retry', async () => {
+    const goal = createTestGoal();
+    const kr = goal.createAndAddKeyResult({ title: 'Actual measurement', aggregationMethod: 'Last',
+      initialValue: 0, currentValue: 10, targetValue: 100, weight: 1, unit: 'points' });
+    let active: GoalRecord | null = null;
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRepository.findByKeyResultIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRecordRepository.findBySource).mockImplementation(async () => active);
+    vi.mocked(goalRecordRepository.findByKeyResultId).mockImplementation(async () => active ? [active] : []);
+    vi.mocked(goalRecordRepository.save).mockImplementation(async record => { active = record; });
+    vi.mocked(goalRecordRepository.delete).mockImplementation(async () => { active = null; });
+    const remove = new RemoveTaskGoalContributionUseCase(goalRepository, goalRecordRepository,
+      createInlineGoalWriteTransactionRunner({ goalRepository, goalRecordRepository }, new InMemoryGoalReliableOperationAdapter()));
+    const handler = new GoalTaskProgressHandler(useCase, remove);
+    const apply: TaskGoalProgressOutboxEventV2 = { eventId: 'prompt-first', schemaVersion: 2,
+      eventType: 'task.goal-progress-requested', action: 'apply', recordingMode: 'PromptedUserMeasurement',
+      identityId: 'identity-1' as never, taskOccurrenceId: 'occurrence-1' as never, taskPlanId: 'plan-1' as never,
+      goalId: goal.id, keyResultId: kr.id, source: { type: 'TaskOccurrence', id: 'occurrence-1' },
+      value: -2, note: 'first', taskTitle: 'Measure', occurredAt: 1000 };
+    await handler.handle(apply);
+    await handler.handle(apply);
+    const firstId = goalRecordRepository.save.mock.calls[0][0].id;
+    expect(kr.progress.currentValue).toBe(-2);
+    const revert: TaskGoalProgressOutboxEventV2 = { eventId: 'prompt-revert', schemaVersion: 2,
+      eventType: 'task.goal-progress-requested', action: 'revert', identityId: 'identity-1' as never,
+      taskOccurrenceId: 'occurrence-1' as never, taskPlanId: 'plan-1' as never,
+      sources: [{ type: 'TaskOccurrence', id: 'occurrence-1' }], occurredAt: 2000 };
+    await handler.handle(revert);
+    await handler.handle(revert);
+    expect(kr.progress.currentValue).toBe(10);
+    expect(goalRecordRepository.delete).toHaveBeenCalledExactlyOnceWith('identity-1', String(firstId));
+    const replacement = { ...apply, eventId: 'prompt-replacement', value: 0, note: 'replacement', occurredAt: 3000 };
+    await handler.handle(replacement);
+    await handler.handle(replacement);
+    expect(goalRecordRepository.save).toHaveBeenCalledTimes(2);
+    const saved = goalRecordRepository.save.mock.calls[1][0];
+    expect(saved.id).not.toBe(firstId);
+    expect(saved.authorship).toBe('TaskUserMeasurement');
+    expect(saved.sourceId).toBe('occurrence-1');
+    expect(saved.value).toBe(0);
+    expect(saved.note).toBe('replacement');
+    expect(kr.progress.currentValue).toBe(0);
+  });
+
 });

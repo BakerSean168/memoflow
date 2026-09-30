@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, expect, it, vi } from 'vitest';
 import TaskQuickSurface from './TaskQuickSurface.vue';
+import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
 import { instance, template } from './task-quick-test-fixtures';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
@@ -29,7 +30,7 @@ function surface(props = {}) {
     },
     global: {
       plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
-      stubs: { TaskOccurrenceCompactList: true },
+      stubs: { TaskOccurrenceCompactList: true, TaskCompletionMeasurementDialog: true },
     },
   });
 }
@@ -151,4 +152,31 @@ it('passes the active occurrence identity while guarding concurrent surface acti
   resolve(instance({ status: 'Completed' }));
   await flushPromises();
   expect(list.props('busyOccurrenceId')).toBeNull();
+});
+
+it('Quick Surface resolves Prompt from its current Plan and routes measured/complete-only success', async () => {
+  const plan = { ...template, goalBinding: { goalId: 'goal' as never, keyResultId: 'kr' as never, contribution: null,
+    progressRule: { mode: 'Prompt' as const, trigger: 'EachCompletion' as const, suggestedValue: -2 } } };
+  const w = surface({ templates: [plan] });
+  const list = w.getComponent(TaskOccurrenceCompactList);
+  list.vm.$emit('complete', 'occurrence-1');
+  await flushPromises();
+  const dialog = w.getComponent(TaskCompletionMeasurementDialog);
+  const coordinator = dialog.props('coordinator');
+  expect(coordinator.pendingMeasurement.value).toEqual({ occurrenceId: 'occurrence-1', goalId: 'goal', keyResultId: 'kr', suggestedValue: -2 });
+  expect(operations.completeOccurrence).not.toHaveBeenCalled();
+  const result = instance({ status: 'Completed' });
+  operations.completeOccurrence.mockResolvedValue(result);
+  await coordinator.submitMeasurement(0, 'actual');
+  dialog.vm.$emit('completed', result);
+  expect(operations.completeOccurrence).toHaveBeenLastCalledWith('occurrence-1', { goalMeasurement: { value: 0, note: 'actual' } });
+  expect(w.emitted('completed')).toEqual([[result]]);
+  list.vm.$emit('uncomplete', 'occurrence-1');
+  await flushPromises();
+  list.vm.$emit('complete', 'occurrence-1');
+  await flushPromises();
+  expect(coordinator.pendingMeasurement.value).not.toBeNull();
+  await coordinator.completeWithoutMeasurement();
+  expect(operations.completeOccurrence).toHaveBeenLastCalledWith('occurrence-1');
+  w.unmount();
 });

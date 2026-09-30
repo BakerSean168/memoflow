@@ -2,7 +2,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils';
 import { defineComponent, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createMockGoalMutationReceipt, createMockKeyResult } from '@memoflow/contracts/mocks';
+import { createMockGoalMutationReceipt, createMockKeyResult, createMockGoalRecord } from '@memoflow/contracts/mocks';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import GoalDetailView from './GoalDetailView.vue';
 
@@ -32,7 +32,11 @@ vi.mock('../composables/useGoalWorkspace', () => ({
       taskContext: { availability: 'Unavailable' },
       knowledgeContext: { availability: 'Unavailable' },
       recentReviews: [],
-      recentProgress: [],
+      recentProgress: ['Manual', 'TaskUserMeasurement', 'TaskAutomatic'].map((authorship, index) => createMockGoalRecord({
+        id: `record-${index}` as never, keyResultId: 'kr-1' as never,
+        authorship: authorship as 'Manual' | 'TaskUserMeasurement' | 'TaskAutomatic',
+        source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: `occurrence-${index}` },
+      })),
     }),
     isLoading: ref(false),
     error: ref(null),
@@ -82,4 +86,20 @@ describe('Goal Detail quick check-in', () => {
       wrapper.unmount();
     },
   );
+});
+
+it('recent progress exposes only Goal-owned Manual/user measurement correction', async () => {
+  actions.aggregate.mockResolvedValue({});
+  const wrapper = shallowMount(GoalDetailView, { global: {
+    plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
+    stubs: { GoalRecordDialog: DialogStub },
+  } });
+  expect(wrapper.find('[data-testid="correct-goal-record-record-2"]').exists()).toBe(false);
+  for (const index of [0, 1]) {
+    await wrapper.get(`[data-testid="correct-goal-record-record-${index}"]`).trigger('click');
+    await flushPromises();
+    expect(actions.openDialog).toHaveBeenLastCalledWith('goal-1', 'kr-1', expect.objectContaining({ id: `record-${index}`, authorship: index ? 'TaskUserMeasurement' : 'Manual' }));
+  }
+  expect(actions.push).not.toHaveBeenCalled();
+  wrapper.unmount();
 });

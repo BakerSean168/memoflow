@@ -3824,6 +3824,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4667,6 +4675,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11733,7 +11749,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 243
+      "fileCount": 245
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12480,7 +12496,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1099,
+    "unit": 1101,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

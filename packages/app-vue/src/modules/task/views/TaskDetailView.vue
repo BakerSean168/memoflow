@@ -732,6 +732,7 @@
       @update:open="customReminderPickerOpen = $event"
       @apply="addCustomAbsoluteReminder"
     />
+    <TaskCompletionMeasurementDialog :coordinator="actionCoordinator" />
   </section>
 </template>
 
@@ -811,6 +812,7 @@ import TimeConfigSection from '../components/TaskPlanForm/sections/TimeConfigSec
 import type { TaskPlanViewModel } from '../components/types';
 import { useTaskGoalBindingOptions } from '../composables/useTaskGoalBindingOptions';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanWorkspaceQuery } from '../composables/useTaskPlanWorkspaceQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
@@ -854,6 +856,11 @@ const {
   isSaving,
 } = useTaskPlanMutations();
 const occurrenceOperations = useTaskOccurrences();
+const actionCoordinator = useTaskOccurrenceActionCoordinator({
+  operations: occurrenceOperations,
+  resolveGoalBinding: () => currentTemplate.value?.goalBinding,
+  afterSuccess: () => refetchWorkspace(),
+});
 const {
   busyOccurrenceId,
   requestComplete: completeOccurrence,
@@ -861,10 +868,7 @@ const {
   requestMissed: markOccurrenceMissed,
   requestSkip: skipOccurrence,
   requestChecklistChange: setOccurrenceChecklistItem,
-} = useTaskOccurrenceActionCoordinator({
-  operations: occurrenceOperations,
-  afterSuccess: () => refetchWorkspace(),
-});
+} = actionCoordinator;
 const {
   goals: goalOptions,
   keyResultsByGoal,

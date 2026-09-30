@@ -30,6 +30,7 @@ export default {
     updateKRFailed: '更新关键结果失败',
     deleteKRFailed: '删除关键结果失败',
     loadRecordsFailed: '加载进度记录失败',
+    updateRecordFailed: '修正记录失败',
     createRecordFailed: '创建进度记录失败',
     loadAggregateViewFailed: '加载目标聚合视图失败',
     loadReviewsFailed: '加载复盘失败',
@@ -567,7 +568,7 @@ export default {
     valueFinite: '请输入有限数值。',
     goalNotFound: '未找到目标',
     krNotFound: '未找到关键结果',
-    editNotAllowed: '不允许编辑记录',
+    editNotAllowed: '任务自动记录不可手动修改',
   },
   weightSnapshotList: {
     title: '权重变更历史',

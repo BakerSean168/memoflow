@@ -7,7 +7,11 @@ import { useGoalStore } from '../stores/goal-store';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
-import type { CreateGoalRecordReq, CreateGoalReviewReq } from '@memoflow/contracts/goal';
+import type {
+  CreateGoalRecordReq,
+  CreateGoalReviewReq,
+  UpdateGoalRecordReq,
+} from '@memoflow/contracts/goal';
 import { executeGoalOperation, createGoalErrorHandler } from './goalOperations';
 
 export function useGoalRecords() {
@@ -61,6 +65,32 @@ export function useGoalRecords() {
     return data?.previewContext ?? null;
   }
 
+  async function updateGoalRecord(
+    goalId: string,
+    keyResultId: string,
+    recordId: string,
+    request: Pick<UpdateGoalRecordReq, 'value' | 'note'>,
+  ) {
+    const expectedVersion = store.getGoalById(goalId)?.version;
+    if (expectedVersion === undefined) {
+      store.setError(t('goal.error.loadFailed'));
+      return null;
+    }
+    const data = await executeGoalOperation(
+      () =>
+        service.updateGoalRecord(
+          goalId,
+          keyResultId,
+          recordId,
+          sanitizeForIpc({ ...request, expectedVersion }),
+        ),
+      { ...opOpts, fallbackKey: 'goal.error.updateRecordFailed', scope: 'updateGoalRecord' },
+    );
+    if (!data) return null;
+    store.applyGoalMutationReceipt(data);
+    return data.recordChanges?.upserted.find((record) => String(record.id) === recordId) ?? null;
+  }
+
   // ── Reviews ──────────────────────────────────────────────────────────
 
   async function createReview(goalId: string, req: Omit<CreateGoalReviewReq, 'expectedVersion'>) {
@@ -84,6 +114,7 @@ export function useGoalRecords() {
 
   return {
     getGoalRecordPreviewContext,
+    updateGoalRecord,
     createRecord,
     createGoalRecord,
     createReview,

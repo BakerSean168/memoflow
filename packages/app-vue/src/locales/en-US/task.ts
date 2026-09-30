@@ -1,4 +1,12 @@
 export default {
+  measurement: {
+    title: 'Record progress',
+    description: 'Enter the measured value for this completion.',
+    completeOnly: 'Complete only',
+    recordAndComplete: 'Record and complete',
+    failed: 'Completion failed. Your measurement is retained; try again.',
+  },
+
   inspect: {
     description: 'Occurrence details',
     open: 'Inspect {title}',

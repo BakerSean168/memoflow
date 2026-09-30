@@ -1,6 +1,53 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ref } from 'vue';
+import { flushPromises, shallowMount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import { instance, template } from '../components/task-quick-test-fixtures';
+import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
+import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
+import TaskDetailView from './TaskDetailView.vue';
+
+const actions = vi.hoisted(() => ({
+  completeOccurrence: vi.fn(),
+  uncompleteOccurrence: vi.fn(),
+  markOccurrenceMissed: vi.fn(),
+  skipOccurrence: vi.fn(),
+  setOccurrenceChecklistItem: vi.fn(),
+  refresh: vi.fn(),
+}));
+const detailWorkspace = ref({ plan: template, recentOccurrences: [instance()], linkedNotes: [] });
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ params: { id: 'plan-1' } }),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+vi.mock('../composables/useTaskOccurrences', () => ({ useTaskOccurrences: () => actions }));
+vi.mock('../composables/useTaskPlanWorkspaceQuery', () => ({
+  useTaskPlanWorkspaceQuery: () => ({
+    workspace: detailWorkspace,
+    query: { isPending: ref(false), isError: ref(false) },
+    refetch: actions.refresh,
+  }),
+}));
+vi.mock('../composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({ isSaving: ref(false) }),
+}));
+vi.mock('../composables/useTaskGoalBindingOptions', () => ({
+  useTaskGoalBindingOptions: () => ({
+    goals: ref([]),
+    keyResultsByGoal: ref({}),
+    loadingGoals: ref(false),
+    loadingKeyResults: ref(false),
+    keyResultErrorsByGoal: ref({}),
+    loadGoals: vi.fn(),
+    loadGoalBinding: vi.fn(),
+    loadKeyResults: vi.fn(),
+  }),
+}));
+vi.mock('../../../shared/composables/useLabelCatalog', () => ({
+  useLabelCatalog: () => ({ options: ref([]), isLoading: ref(false), createLabel: vi.fn() }),
+}));
 
 const source = readFileSync(resolve(__dirname, 'TaskDetailView.vue'), 'utf8');
 
@@ -72,6 +119,8 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
   it('uses the canonical coordinator with the existing operations instance', () => {
     expect(source).toContain('useTaskOccurrenceActionCoordinator({');
     expect(source).toContain('operations: occurrenceOperations');
+    expect(source).toContain('resolveGoalBinding: () => currentTemplate.value?.goalBinding');
+    expect(source).toContain('<TaskCompletionMeasurementDialog :coordinator="actionCoordinator"');
     for (const action of [
       'requestComplete',
       'requestUncomplete',
@@ -89,4 +138,56 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
       expect(source).not.toContain(retired);
     }
   });
+});
+
+describe('Task Detail runtime completion parity', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    actions.completeOccurrence.mockResolvedValue(instance({ status: 'Completed' }));
+  });
+  it.each(['Prompt', 'Fixed', 'LinkOnly'] as const)(
+    'routes %s from the current workspace Plan',
+    async (mode) => {
+      detailWorkspace.value = {
+        plan: {
+          ...template,
+          goalBinding: {
+            goalId: 'goal' as never,
+            keyResultId: 'kr' as never,
+            contribution: mode === 'Fixed' ? { trigger: 'EachCompletion', value: 5 } : null,
+            progressRule:
+              mode === 'LinkOnly'
+                ? null
+                : mode === 'Fixed'
+                  ? { mode, trigger: 'EachCompletion', value: 5 }
+                  : { mode, trigger: 'EachCompletion', suggestedValue: -2 },
+          },
+        },
+        recentOccurrences: [instance()],
+        linkedNotes: [],
+      };
+      const w = shallowMount(TaskDetailView, {
+        global: { plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })] },
+      });
+      w.getComponent(TaskOccurrenceRow).vm.$emit('complete', 'occurrence-1');
+      await flushPromises();
+      const coordinator = w.getComponent(TaskCompletionMeasurementDialog).props('coordinator');
+      if (mode === 'Prompt') {
+        expect(actions.completeOccurrence).not.toHaveBeenCalled();
+        expect(coordinator.pendingMeasurement.value).toEqual({
+          occurrenceId: 'occurrence-1',
+          goalId: 'goal',
+          keyResultId: 'kr',
+          suggestedValue: -2,
+        });
+        await coordinator.submitMeasurement(0, 'actual');
+        expect(actions.completeOccurrence).toHaveBeenCalledExactlyOnceWith('occurrence-1', {
+          goalMeasurement: { value: 0, note: 'actual' },
+        });
+        expect(coordinator.pendingMeasurement.value).toBeNull();
+      } else expect(actions.completeOccurrence).toHaveBeenCalledExactlyOnceWith('occurrence-1');
+      expect(actions.refresh).toHaveBeenCalledOnce();
+      w.unmount();
+    },
+  );
 });

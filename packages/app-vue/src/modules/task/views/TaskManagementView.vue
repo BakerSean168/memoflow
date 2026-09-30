@@ -210,6 +210,10 @@
       @save="handleSubmit"
       @cancel="closeDialog"
     />
+    <TaskCompletionMeasurementDialog
+      :coordinator="actionCoordinator"
+      @completed="applyMeasuredCompletion"
+    />
   </div>
 </template>
 
@@ -247,6 +251,7 @@ import type {
 } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
@@ -342,6 +347,15 @@ const {
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
 const occurrenceOperations = useTaskOccurrences();
 const { fetchInstancesByDateRange: fetchOccurrencesByDateRange } = occurrenceOperations;
+const actionCoordinator = useTaskOccurrenceActionCoordinator({
+  operations: occurrenceOperations,
+  resolveGoalBinding: (id) => {
+    const occurrence =
+      instances.value.find((item) => String(item.id) === id) ??
+      (String(selectedOccurrence.value?.id) === id ? selectedOccurrence.value : null);
+    return occurrence ? templateById.value.get(String(occurrence.planId))?.goalBinding : null;
+  },
+});
 const {
   busyOccurrenceId,
   requestComplete: completeOccurrence,
@@ -349,9 +363,7 @@ const {
   requestMissed: markOccurrenceMissed,
   requestSkip: skipOccurrence,
   requestChecklistChange: setOccurrenceChecklistItem,
-} = useTaskOccurrenceActionCoordinator({
-  operations: occurrenceOperations,
-});
+} = actionCoordinator;
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
@@ -364,6 +376,10 @@ async function updateInspectedOccurrence(action: Promise<TaskOccurrenceClientDTO
   if (identityScope === resolveIdentityScope() && updated?.id === selectedOccurrence.value?.id) {
     selectedOccurrence.value = updated;
   }
+}
+
+function applyMeasuredCompletion(occurrence: TaskOccurrenceClientDTO) {
+  if (occurrence.id === selectedOccurrence.value?.id) selectedOccurrence.value = occurrence;
 }
 
 function openOccurrenceInspect(id: string) {

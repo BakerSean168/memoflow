@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
 import { Diff, Ruler } from '@lucide/vue';
 import { Dialog, Input } from '@memoflow/ui-vue-shadcn';
+import { createMockGoalRecord } from '@memoflow/contracts/mocks';
 import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../../locales/en-US';
@@ -10,6 +11,7 @@ import GoalRecordDialog from './GoalRecordDialog.vue';
 
 const goalActions = vi.hoisted(() => ({
   createGoalRecord: vi.fn(),
+  updateGoalRecord: vi.fn(),
   contextRead: vi.fn(),
   method: 'Sum' as KeyResultCalculationMethod,
   context: true,
@@ -26,6 +28,7 @@ vi.mock('../../composables/useGoal', () => {
   return {
     useGoal: () => ({
       createGoalRecord: goalActions.createGoalRecord,
+      updateGoalRecord: goalActions.updateGoalRecord,
       getGoalRecordPreviewContext: vi.fn(async () => {
         goalActions.contextRead();
         return goalActions.context
@@ -320,6 +323,46 @@ describe('GoalRecordDialog live preview and keyboard', () => {
     );
     await new DOMWrapper(cancel!).trigger('click');
     expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+});
+
+describe('Goal record correction', () => {
+  afterEach(() => { goalActions.updateGoalRecord.mockReset(); goalActions.createGoalRecord.mockReset(); document.body.innerHTML = ''; });
+  it.each(['Manual', 'TaskUserMeasurement'] as const)('corrects %s via Goal update only and retains a failed draft', async authorship => {
+    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
+    const record = createMockGoalRecord({ id: 'record-1' as never, value: 3, comment: 'original', authorship,
+      source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'occurrence-1' } });
+    const provenance = { source: record.source, authorship: record.authorship };
+    wrapper.vm.openDialog('goal-1', 'kr-1', record);
+    await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('3');
+    await new DOMWrapper(document.querySelector('#change-amount')!).setValue('-2');
+    await new DOMWrapper(document.querySelector('#record-note')!).setValue('corrected');
+    goalActions.updateGoalRecord.mockResolvedValueOnce(null);
+    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
+    await nextTick(); await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('-2');
+    expect(wrapper.emitted('saved')).toBeUndefined();
+    goalActions.updateGoalRecord.mockResolvedValueOnce({ ...record, value: -2, comment: 'corrected' });
+    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
+    await nextTick(); await nextTick();
+    expect(goalActions.updateGoalRecord).toHaveBeenLastCalledWith('goal-1', 'kr-1', 'record-1', { value: -2, note: 'corrected' });
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    expect(wrapper.emitted('saved')).toEqual([[]]);
+    expect({ source: record.source, authorship: record.authorship }).toEqual(provenance);
+    wrapper.unmount();
+  });
+  it('renders TaskAutomatic read-only and offers no delete', async () => {
+    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
+    wrapper.vm.openDialog('goal-1', 'kr-1', createMockGoalRecord({ authorship: 'TaskAutomatic', source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } }));
+    await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.disabled).toBe(true);
+    expect(document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled).toBe(true);
+    await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+    expect(goalActions.updateGoalRecord).not.toHaveBeenCalled();
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    expect(document.body.textContent).not.toContain('Delete');
     wrapper.unmount();
   });
 });

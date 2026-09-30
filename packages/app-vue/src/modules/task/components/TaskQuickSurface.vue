@@ -10,6 +10,7 @@ import {
 } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
+import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
 
 const props = withDefaults(
@@ -35,6 +36,13 @@ const emit = defineEmits<{
   completed: [occurrence: TaskOccurrenceClientDTO];
 }>();
 const { t } = useI18n();
+const actionCoordinator = useTaskOccurrenceActionCoordinator({
+  operations: props.operations,
+  resolveGoalBinding: (id) => {
+    const occurrence = props.occurrences.find((item) => String(item.id) === id);
+    return props.templates.find((plan) => plan.id === occurrence?.planId)?.goalBinding;
+  },
+});
 const {
   busyOccurrenceId,
   requestComplete,
@@ -42,7 +50,7 @@ const {
   requestMissed,
   requestSkip,
   requestChecklistChange,
-} = useTaskOccurrenceActionCoordinator({ operations: props.operations });
+} = actionCoordinator;
 const { createPlanSafe, isSaving: isCreatingQuickTask } = useTaskPlanMutations();
 const quickTaskOpen = ref(false);
 const quickTaskTitle = ref('');
@@ -213,5 +221,9 @@ async function createQuickTask() {
         </button>
       </div>
     </div>
+    <TaskCompletionMeasurementDialog
+      :coordinator="actionCoordinator"
+      @completed="emit('completed', $event)"
+    />
   </div>
 </template>
