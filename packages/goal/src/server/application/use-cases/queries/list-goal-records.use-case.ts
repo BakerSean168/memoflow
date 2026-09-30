@@ -8,9 +8,10 @@
  */
 
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
-import type { GoalRecord } from '../../../domain';
+import type { Goal, GoalRecord } from '../../../domain';
 import { KeyResultProgress } from '../../../domain';
-import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import { createGoalRecordAggregationSnapshot } from '../../../../shared/key-result-progress-calculator';
+import type { GetGoalRecordsRes } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 
@@ -22,10 +23,7 @@ export interface ListGoalRecordsParams {
   offset?: number;
 }
 
-export interface ListGoalRecordsResult {
-  data: GoalRecordClientDTO[];
-  total: number;
-}
+export type ListGoalRecordsResult = GetGoalRecordsRes;
 
 export class ListGoalRecordsUseCase {
   constructor(
@@ -40,13 +38,20 @@ export class ListGoalRecordsUseCase {
       return error('UNAUTHORIZED', 'Identity ID is required');
     }
 
+    const goal = goalId
+      ? await this.goalRepository.findByIdForIdentity(identityId, goalId, {
+          includeChildren: true,
+        })
+      : null;
     if (goalId) {
-      const goal = await this.goalRepository.findByIdForIdentity(identityId, goalId, {
-        includeChildren: true,
-      });
       if (!goal) {
         return error('NOT_FOUND', `Goal not found: ${goalId}`);
       }
+    }
+
+    const keyResult = goal?.keyResults.find((kr) => String(kr.id) === keyResultId);
+    if (goalId && keyResultId && !keyResult) {
+      return error('NOT_FOUND', `Key result not found: ${keyResultId}`);
     }
 
     let records: GoalRecord[];
@@ -63,14 +68,40 @@ export class ListGoalRecordsUseCase {
     }
 
     // Defense-in-depth: drop any records not owned by the current identity.
-    records = records.filter((record) => String(record.identityId) === identityId);
+    records = records.filter(
+      (record) =>
+        String(record.identityId) === identityId &&
+        (!keyResultId || String(record.keyResultId) === keyResultId),
+    );
 
     // Apply offset manually (repository doesn't support offset)
     const sliced = records.slice(offset, offset + limit);
 
-    const valueAfterByRecordId = await this.buildValueAfterMap(identityId, goalId, records);
+    const valueAfterByRecordId = this.buildValueAfterMap(goal, records);
+
+    const previewContext = keyResult
+      ? {
+          initialValue: keyResult.progress.initialValue,
+          currentValue: keyResult.progress.currentValue,
+          targetValue: keyResult.progress.targetValue,
+          aggregationMethod: keyResult.progress.aggregationMethod,
+          unit: keyResult.progress.unit,
+          keyResultId: keyResult.id,
+          trackingBaseValue: keyResult.progress.trackingBaseValue,
+          aggregationSnapshot: createGoalRecordAggregationSnapshot(
+            [...records]
+              .sort(
+                (a, b) =>
+                  Number(a.createdAt) - Number(b.createdAt) ||
+                  String(a.id).localeCompare(String(b.id)),
+              )
+              .map((record) => record.value),
+          ),
+        }
+      : null;
 
     return ok({
+      ...(keyResultId && goalId ? { previewContext } : {}),
       data: sliced.map((r) =>
         r.toClientDTO(goalId ?? '', valueAfterByRecordId.get(String(r.id)) ?? r.value),
       ),
@@ -78,22 +109,9 @@ export class ListGoalRecordsUseCase {
     });
   }
 
-  private async buildValueAfterMap(
-    identityId: string,
-    goalId: string | undefined,
-    records: GoalRecord[],
-  ): Promise<Map<string, number>> {
+  private buildValueAfterMap(goal: Goal | null, records: GoalRecord[]): Map<string, number> {
     const result = new Map<string, number>();
-    if (!goalId || records.length === 0) {
-      return result;
-    }
-
-    const goal = await this.goalRepository.findByIdForIdentity(identityId, goalId, {
-      includeChildren: true,
-    });
-    if (!goal) {
-      return result;
-    }
+    if (!goal || records.length === 0) return result;
 
     const keyResultById = new Map(goal.keyResults.map((kr) => [String(kr.id), kr]));
     const recordsByKeyResult = new Map<string, GoalRecord[]>();

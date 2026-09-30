@@ -12,6 +12,7 @@
       test-id="goal-record-dialog"
       size="sm"
       initial-focus-selector="#change-amount"
+      @keydown="handleKeydown"
     >
       <template #title>
         {{ isEditing ? t('goal.recordDialog.editTitle') : t('goal.recordDialog.addTitle') }}
@@ -75,6 +76,8 @@
           </ProductPropertyChip>
         </div>
 
+        <GoalRecordPreview :preview="recordPreview" :unit="currentKeyResultUnit" />
+
         <div class="space-y-2">
           <Label for="record-note">{{ t('goal.recordDialog.remarks') }}</Label>
           <Textarea
@@ -108,8 +111,10 @@
 
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
+import { previewGoalRecord } from '@memoflow/goal/client';
+import GoalRecordPreview from '../GoalRecordPreview.vue';
 import { useI18n } from 'vue-i18n';
-import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import type { GoalRecordClientDTO, GoalRecordPreviewContext } from '@memoflow/contracts/goal';
 import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
 import { Diff, Ruler } from '@lucide/vue';
 import { ProductDialogShell, ProductPropertyChip } from '../../../../shared/components';
@@ -120,9 +125,10 @@ import {
   getKeyResultRecordPromptLabel,
 } from '../../utils/key-result-calculation-presentation';
 
-const { createGoalRecord, getKeyResultById } = useGoal();
+const { createGoalRecord, getKeyResultById, getGoalRecordPreviewContext } = useGoal();
 
 const { t } = useI18n();
+const emit = defineEmits<{ saved: [] }>();
 
 const visible = ref(false);
 const propKeyResultId = ref<string>('');
@@ -130,6 +136,8 @@ const propGoalId = ref<string>('');
 const propRecord = ref<GoalRecordClientDTO | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref('');
+const previewContext = ref<GoalRecordPreviewContext | null>(null);
+let contextRequest = 0;
 
 const quickValues = [-10, -5, -1, 1, 5, 10];
 
@@ -158,6 +166,31 @@ const validationError = computed(() => {
     : t('goal.recordDialog.valueFinite');
 });
 const isValid = computed(() => !!currentKeyResult.value && !validationError.value);
+
+const recordPreview = computed(() => {
+  const context = previewContext.value;
+  const candidate = localRecord.value.changeAmount;
+  if (!context || !isValid.value || typeof candidate !== 'number' || isEditing.value) return null;
+  return previewGoalRecord(context, candidate);
+});
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.isComposing) return;
+  if (event.key === 'Escape') {
+    if (!isSubmitting.value) handleCancel();
+    return;
+  }
+  if (event.key !== 'Enter') return;
+  const target = event.target;
+  if (
+    target instanceof HTMLElement &&
+    (target.closest('textarea, [contenteditable="true"], [aria-multiline="true"]') ||
+      target.closest('button'))
+  )
+    return;
+  event.preventDefault();
+  void handleSave();
+}
 
 const handleCreateKeyResult = async (): Promise<boolean> => {
   if (!propGoalId.value) {
@@ -198,7 +231,10 @@ const handleSave = async () => {
   try {
     if (await handleCreateKeyResult()) {
       closeDialog();
+      emit('saved');
     }
+  } catch {
+    submitError.value = t('goal.error.createRecordFailed');
   } finally {
     isSubmitting.value = false;
   }
@@ -214,10 +250,20 @@ const openDialog = (goalId: string, keyResultId: string, record?: GoalRecordClie
   propRecord.value = record || null;
   submitError.value = '';
   visible.value = true;
+  previewContext.value = null;
+  const request = ++contextRequest;
+  void getGoalRecordPreviewContext(goalId, keyResultId)
+    .then((context) => {
+      if (request === contextRequest && visible.value) previewContext.value = context;
+    })
+    .catch(() => {
+      // Recording remains available if the optional preview read fails.
+    });
 };
 
 const closeDialog = () => {
   visible.value = false;
+  contextRequest++;
 };
 
 // 监听弹窗显示，重置表单

@@ -53,6 +53,14 @@ export function useGoalRecords() {
     });
   }
 
+  async function getGoalRecordPreviewContext(goalId: string, keyResultId: string) {
+    const data = await executeGoalOperation(
+      () => service.getGoalRecordsByKeyResult(goalId, keyResultId, { limit: 1 }),
+      { ...opOpts, fallbackKey: 'goal.error.loadFailed', scope: 'getGoalRecordPreviewContext' },
+    );
+    return data?.previewContext ?? null;
+  }
+
   // ── Reviews ──────────────────────────────────────────────────────────
 
   async function createReview(goalId: string, req: Omit<CreateGoalReviewReq, 'expectedVersion'>) {
@@ -75,6 +83,7 @@ export function useGoalRecords() {
   }
 
   return {
+    getGoalRecordPreviewContext,
     createRecord,
     createGoalRecord,
     createReview,

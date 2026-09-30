@@ -528,7 +528,10 @@
             {{ t('goal.detail.progressNeedsKr') }}
           </p>
 
-          <div v-if="keyResults.length" class="divide-y border-y border-[hsl(var(--border-subtle))]">
+          <div
+            v-if="keyResults.length"
+            class="divide-y border-y border-[hsl(var(--border-subtle))]"
+          >
             <article v-for="kr in keyResults" :key="kr.id" class="p-4">
               <button
                 type="button"
@@ -538,11 +541,6 @@
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <h3 class="truncate font-medium">◇ {{ kr.title }}</h3>
-                    <p class="mt-1 text-xs text-muted-foreground">
-                      {{ kr.progress.initialValue }} → {{ kr.progress.currentValue }} →
-                      {{ kr.progress.targetValue
-                      }}<span v-if="kr.progress.unit"> {{ kr.progress.unit }}</span>
-                    </p>
                   </div>
                   <div class="shrink-0 text-right">
                     <p class="text-sm font-medium">{{ Math.round(kr.progressPercentage) }}%</p>
@@ -552,6 +550,17 @@
                   </div>
                 </div>
                 <Progress class="mt-3" :model-value="kr.progressPercentage" />
+              </button>
+              <button
+                type="button"
+                class="mt-1 block text-xs text-muted-foreground underline decoration-dotted underline-offset-4"
+                :data-testid="`goal-quick-check-in-${kr.id}`"
+                :aria-label="`${t('goal.recordDialog.addTitle')}: ${kr.title}`"
+                @click="openQuickCheckIn(kr.id)"
+              >
+                {{ kr.progress.initialValue }} → {{ kr.progress.currentValue }} →
+                {{ kr.progress.targetValue
+                }}<span v-if="kr.progress.unit"> {{ kr.progress.unit }}</span>
               </button>
               <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
                 <Button
@@ -649,6 +658,8 @@
       @apply="addCustomAbsoluteReminder"
     />
 
+    <GoalRecordDialog ref="recordDialog" @saved="refresh" />
+
     <KeyResultDialog
       ref="krDialog"
       :on-submit="saveKr"
@@ -721,6 +732,8 @@ import {
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
+import GoalRecordDialog from '../components/dialogs/GoalRecordDialog.vue';
+import { useGoal } from '../composables/useGoal';
 import GoalKnowledgeMenuItems from '../components/GoalKnowledgeMenuItems.vue';
 import GoalReminderMenuItems from '../components/GoalReminderMenuItems.vue';
 import GoalStatusPicker from '../components/GoalStatusPicker.vue';
@@ -742,6 +755,14 @@ const { workspace, isLoading, error, refresh } = useGoalWorkspace(goalId);
 const goal = computed(() => workspace.value?.goal ?? null);
 const keyResults = computed(() => goal.value?.keyResults ?? []);
 const krDialog = ref<InstanceType<typeof KeyResultDialog> | null>(null);
+const recordDialog = ref<InstanceType<typeof GoalRecordDialog> | null>(null);
+const { getGoalAggregateView } = useGoal();
+async function openQuickCheckIn(keyResultId: string): Promise<void> {
+  const requestedGoalId = goalId.value;
+  const aggregate = await getGoalAggregateView(requestedGoalId);
+  if (goalId.value !== requestedGoalId) return;
+  if (aggregate) recordDialog.value?.openDialog(requestedGoalId, String(keyResultId));
+}
 const isSaving = ref(false);
 const mutationError = ref<string | null>(null);
 const labelCreateError = ref<string | null>(null);

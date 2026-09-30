@@ -265,11 +265,7 @@ export function useGoal() {
         scope: 'getGoalAggregateView',
       });
       if (data) {
-        store.upsertGoal(data.goal);
-        store.selectGoal(goalId);
-        store.setKeyResults(goalId, data.keyResults, data.goal.version);
-        store.setGoalRecords(data.records);
-        store.setGoalReviews(data.reviews);
+        store.hydrateAggregate(data);
         return data;
       }
       return null;

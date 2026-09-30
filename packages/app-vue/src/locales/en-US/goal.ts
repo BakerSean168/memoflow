@@ -550,6 +550,13 @@ export default {
     create: 'Create',
   },
   recordDialog: {
+    current: 'Current',
+    after: 'After',
+    target: 'Target',
+    previewUnavailable: 'Preview unavailable. Load goal records and enter a valid value.',
+    unchangedSample: 'Current stays unchanged. This sample will still be recorded.',
+    unchanged: 'Current stays unchanged. This record will still be saved.',
+
     cancel: 'Cancel',
     editTitle: 'Edit Record',
     addTitle: 'Add Record',

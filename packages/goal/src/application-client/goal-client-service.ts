@@ -209,7 +209,13 @@ export interface GoalClientPort {
     goalId: string,
     krId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>>;
+  ): Promise<
+    Result<{
+      records: GoalRecord[];
+      total: number;
+      previewContext?: GetGoalRecordsRes['previewContext'];
+    }>
+  >;
   getGoalRecordsByGoal(
     goalId: string,
     params?: { limit?: number; offset?: number },
@@ -457,11 +463,18 @@ export class GoalClientService implements GoalClientPort {
     goalId: string,
     krId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>> {
+  ): Promise<
+    Result<{
+      records: GoalRecord[];
+      total: number;
+      previewContext?: GetGoalRecordsRes['previewContext'];
+    }>
+  > {
     const result = await this.goalApi.getGoalRecordsByKeyResult(goalId, krId, params);
     return mapResult(result, (data: GetGoalRecordsRes) => ({
       records: data.data.map((dto) => goalRecordFromDTO(dto)),
       total: data.total,
+      previewContext: data.previewContext,
     }));
   }
 

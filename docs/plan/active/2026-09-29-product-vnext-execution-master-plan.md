@@ -378,6 +378,55 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 5. KR surface current point/value 打开 compact composer。
 6. 键盘 submit/cancel + failure 不丢输入。
 
+**Execution plan (2026-09-30, contract frozen):**
+- Add dedicated schema-owned `GoalRecordPreviewContext` to the existing KR-scoped record list response: visible measurement, trackingBaseValue and all-record aggregation snapshot. Keep normal KR DTOs unchanged.
+- Extract the pure calculator to Goal shared code, re-export from Goal client; preview calls that exact arithmetic authority.
+- Load context once when the dialog opens; use all identity-scoped records sorted by createdAt then id before visible pagination. Share snapshot arithmetic between server and live preview; show unavailable copy without context.
+- Add compact Current → After → Target preview, unchanged sample copy, keyboard behavior, and Goal Detail quick check-in through existing dialog.
+- Verify contract/transport, five aggregation methods and seed regression, dialog lifecycle, Detail entry, focused tests, typechecks, changed-file ESLint and governance. No GOAL-1203/TASK-3301 work.
+
+**Execution (2026-09-30): Implemented / validated.** Normal `KeyResultClientDTO` / `KeyResultProgressDTO` remain unchanged. KR-scoped GoalRecord reads expose optional/nullable `previewContext` with visible measurement, `trackingBaseValue` and an all-record aggregation snapshot; Goal-wide record reads do not expose it. Owned Goal/KR validation and identity filtering precede visible pagination; `Last` ordering is deterministic by `createdAt` then id. The dialog reads preview context once per open and calls the shared Goal arithmetic authority for each candidate. Goal Detail opens the existing dialog from the KR current-value affordance and refreshes after successful save. Review repair removed duplicate native-button keyboard handlers, restored the Goal-wide client return surface, and removed abandoned aggregate-query churn.
+
+| Validation | Result |
+| --- | --- |
+| `pnpm nx run contracts:test -- src/modules/goal` | PASS: 11 files, 89 tests |
+| `pnpm nx run goal:test -- src/shared src/server/domain src/server/application/use-cases/queries/__tests__ src/infrastructure-client/adapters/goal-record-preview-context.spec.ts` | PASS: 24 files, 190 tests |
+| `pnpm nx run app-vue:test -- src/modules/goal/components/GoalRecordPreview.spec.ts src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts src/modules/goal/views/GoalDetailView.spec.ts src/modules/goal/stores/goalStore.spec.ts` | PASS: 4 files, 85 tests |
+| `pnpm nx run goal:typecheck` | PASS |
+| `pnpm nx run app-vue:typecheck` | PASS, including dependency builds |
+| Changed-file `pnpm exec eslint` | PASS: 0 errors; 4 `no-explicit-any` warnings in query test helpers |
+| `pnpm nx run memoflow:governance-check` | PASS |
+| `git diff --check` | PASS |
+
+Exact changed/new files:
+
+```text
+docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md
+packages/app-vue/src/locales/en-US/goal.ts
+packages/app-vue/src/locales/zh-CN/goal.ts
+packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts
+packages/app-vue/src/modules/goal/components/GoalRecordPreview.vue
+packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts
+packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue
+packages/app-vue/src/modules/goal/composables/useGoal.ts
+packages/app-vue/src/modules/goal/composables/useGoalRecords.ts
+packages/app-vue/src/modules/goal/stores/goal-store.ts
+packages/app-vue/src/modules/goal/stores/goalStore.spec.ts
+packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts
+packages/app-vue/src/modules/goal/views/GoalDetailView.vue
+packages/contracts/src/modules/goal/api/goal-record-preview-context.spec.ts
+packages/contracts/src/modules/goal/api/response-schemas.ts
+packages/goal/src/application-client/goal-client-service.ts
+packages/goal/src/client/index.ts
+packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts
+packages/goal/src/server/application/use-cases/queries/__tests__/list-goal-records.test.ts
+packages/goal/src/server/application/use-cases/queries/list-goal-records.use-case.ts
+packages/goal/src/server/domain/services/key-result-progress-calculator.ts
+packages/goal/src/shared/goal-record-preview.spec.ts
+packages/goal/src/shared/goal-record-preview.ts
+packages/goal/src/shared/key-result-progress-calculator.ts
+```
+
 **Acceptance:** 用户提交前能理解新 Record 对 KR 的影响。
 
 **Dependencies:** GOAL-1201.

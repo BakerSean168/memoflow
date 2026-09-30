@@ -57,3 +57,6 @@ export {
   createGoalHttpAdapters,
   createGoalIpcAdapters,
 };
+
+export * from '../shared/key-result-progress-calculator';
+export * from '../shared/goal-record-preview';
