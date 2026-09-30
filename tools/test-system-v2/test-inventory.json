@@ -1572,6 +1572,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/renderer/platform/desktop-update-di.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/desktop-update-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/renderer/platform/electron.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3461,6 +3477,14 @@
     },
     {
       "path": "packages/app-vue/src/di/desktop-bridge-electron-bridge-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/di/desktop-update-service.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11570,7 +11594,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 85
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11605,7 +11629,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 230
+      "fileCount": 231
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12341,7 +12365,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1083,
+    "unit": 1086,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
