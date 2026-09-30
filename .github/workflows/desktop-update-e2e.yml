@@ -1,6 +1,11 @@
 name: Desktop Update Installed E2E
 
 on:
+  # Exploration-only bootstrap so this new workflow can run before it exists on
+  # the default branch. Remove after the first Windows installed-update proof.
+  push:
+    branches:
+      - explore/desktop-auto-update
   workflow_call:
     inputs:
       ref:
