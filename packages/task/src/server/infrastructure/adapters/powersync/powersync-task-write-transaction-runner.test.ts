@@ -32,7 +32,7 @@ import { PowerSyncTaskWriteTransactionRunner } from './powersync-task-write-tran
 
 type TemplateRecord = { id: string };
 type InstanceRecord = { id: string; planId: string };
-type OutboxRecord = { id: string };
+type OutboxRecord = { id: string; payload: string };
 type StateSnapshot = {
   plans: Map<string, TemplateRecord>;
   occurrences: Map<string, InstanceRecord>;
@@ -53,6 +53,14 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
 
   get occurrenceCount(): number {
     return this.state.occurrences.size;
+  }
+
+  get outboxPayloads(): string[] {
+    return Array.from(this.state.outbox.values(), (row) => row.payload);
+  }
+
+  get firstOccurrenceId(): string {
+    return Array.from(this.state.occurrences.keys())[0];
   }
 
   get outboxCount(): number {
@@ -124,7 +132,7 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
         throw new Error('PowerSync outbox write failure simulation');
       }
       const id = String(parameters?.[0]);
-      state.outbox.set(id, { id });
+      state.outbox.set(id, { id, payload: String(parameters?.[6]) });
       return { rowsAffected: 1 };
     }
 
@@ -288,6 +296,11 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
       return (match?.id ? { id: match.id } : null) as T | null;
     }
 
+    if (sql.includes('SELECT id, version FROM task_occurrences WHERE id = ?')) {
+      const row = state.occurrences.get(String(parameters?.[0]));
+      return (row ? { id: row.id, version: (row as { version?: number }).version } : null) as T | null;
+    }
+
     if (sql.includes('SELECT id FROM task_occurrences WHERE id = ?')) {
       const id = String(parameters?.[0]);
       return (state.occurrences.has(id) ? { id } : null) as T | null;
@@ -428,43 +441,56 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     module.dispose();
   });
 
-  it('rolls back task module writes, outbox and publishes nothing when task_goal_outbox insert fails', async () => {
-    const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db, {
-      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
-    });
-    const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
+  it.each(['Fixed', 'Prompt'] as const)(
+    'rolls back %s occurrence and outbox together when append fails',
+    async (mode) => {
+      const db = new FakePowerSyncTaskDb();
+      const module = createTaskPowerSyncModule(db, {
+        userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+        goalReadPort: {
+          getKeyResultMeasurementContext: vi
+            .fn()
+            .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+        },
+      });
+      const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
-    const identityId = anIdentityId();
-    const createRes = await module.api.createTaskPlan({
-      identityId,
-      name: 'Goal Task',
-      schedule: canonicalTaskPlanScheduleForTest(
-        TaskPlanScheduleKind.Recurring,
-        Date.now(),
-        anAllDayTiming(),
-        aDailyRecurrence(),
-        TASK_TEST_TIME_CONTEXT,
-      ).toDTO(),
-      importance: ImportanceLevel.Moderate,
-      goalBinding: {
-        goalId: 'goal-1',
-        keyResultId: 'kr-1',
-        contribution: { value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
-      },
-    });
-    expect(createRes.ok).toBe(true);
-    if (!createRes.ok) return;
+      const identityId = anIdentityId();
+      const createRes = await module.api.createTaskPlan({
+        identityId,
+        name: 'Goal Task',
+        schedule: canonicalTaskPlanScheduleForTest(
+          TaskPlanScheduleKind.Recurring,
+          Date.now(),
+          anAllDayTiming(),
+          aDailyRecurrence(),
+          TASK_TEST_TIME_CONTEXT,
+        ).toDTO(),
+        importance: ImportanceLevel.Moderate,
+        goalBinding: {
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          progressRule:
+            mode === 'Prompt'
+              ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
+              : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
+        },
+      });
+      expect(createRes.ok).toBe(true);
+      if (!createRes.ok) return;
 
-    expect(db.occurrenceCount).toBeGreaterThan(0);
-    const occurrenceId = Array.from((db as any).state.occurrences.keys())[0] as string;
+      expect(db.occurrenceCount).toBeGreaterThan(0);
+      const occurrenceId = db.firstOccurrenceId;
 
     dispatchSpy.mockClear();
 
     db.failOutbox = true;
 
-    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId);
+      const result = await module.api.completeTaskOccurrence(
+        occurrenceId,
+        identityId,
+        mode === 'Prompt' ? { goalMeasurement: { value: 0, note: 'Measured' } } : undefined,
+      );
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(db.templateCount).toBe(1);
@@ -478,6 +504,75 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     );
     expect(instanceRow?.status).toBe('Pending');
 
-    module.dispose();
-  });
+      module.dispose();
+    },
+  );
+  it.each([0, -2, undefined])(
+    'commits Prompt completion with optional fact %s in one transaction',
+    async (value) => {
+      const mode = 'Prompt';
+      const db = new FakePowerSyncTaskDb();
+      const module = createTaskPowerSyncModule(db, {
+        userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+        goalReadPort: {
+          getKeyResultMeasurementContext: vi
+            .fn()
+            .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+        },
+      });
+      const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
+
+      const identityId = anIdentityId();
+      const createRes = await module.api.createTaskPlan({
+        identityId,
+        name: 'Goal Task',
+        schedule: canonicalTaskPlanScheduleForTest(
+          TaskPlanScheduleKind.Recurring,
+          Date.now(),
+          anAllDayTiming(),
+          aDailyRecurrence(),
+          TASK_TEST_TIME_CONTEXT,
+        ).toDTO(),
+        importance: ImportanceLevel.Moderate,
+        goalBinding: {
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          progressRule:
+            mode === 'Prompt'
+              ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
+              : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
+        },
+      });
+      expect(createRes.ok).toBe(true);
+      if (!createRes.ok) return;
+
+      expect(db.occurrenceCount).toBeGreaterThan(0);
+      const occurrenceId = db.firstOccurrenceId;
+
+      dispatchSpy.mockClear();
+
+      const result = await module.api.completeTaskOccurrence(
+        occurrenceId,
+        identityId,
+        value === undefined
+          ? { note: 'Task only' }
+          : { note: 'Task note', goalMeasurement: { value, note: 'Measured' } },
+      );
+      expect(result).toBeOk();
+      const row = await db.getOptional<{ status: string }>(
+        'SELECT status FROM task_occurrences WHERE id = ?',
+        [occurrenceId],
+      );
+      expect(row?.status).toBe('Completed');
+      expect(db.outboxCount).toBe(value === undefined ? 0 : 1);
+      if (value !== undefined)
+        expect(JSON.parse(db.outboxPayloads[0])).toMatchObject({
+          recordingMode: 'PromptedUserMeasurement',
+          value,
+          note: 'Measured',
+          source: { type: 'TaskOccurrence', id: occurrenceId },
+        });
+      module.dispose();
+    },
+  );
 });

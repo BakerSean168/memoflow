@@ -4,6 +4,15 @@ import { brandedId } from '../../../primitives';
 import type { GoalId, KeyResultId } from '../../../primitives';
 import { TaskGoalBindingTrigger } from './task-goal-binding-trigger';
 
+/** User fact only; binding and provenance are resolved by Task. */
+export const TaskGoalMeasurementSchema = z
+  .object({
+    value: z.number().finite(),
+    note: z.string().max(500).nullable().optional(),
+  })
+  .strict();
+export type TaskGoalMeasurement = z.infer<typeof TaskGoalMeasurementSchema>;
+
 const FixedValueSchema = z
   .number()
   .finite()

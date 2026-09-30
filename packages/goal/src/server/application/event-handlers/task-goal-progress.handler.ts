@@ -1,6 +1,7 @@
 import { GoalRecordAuthorship, GoalRecordSourceType } from '@memoflow/contracts/goal';
 import {
   TaskGoalSettlementSourceType,
+  TaskGoalRecordingMode,
   type TaskGoalProgressOutboxEventV2,
   type TaskGoalSettlementSource,
 } from '@memoflow/contracts/task';
@@ -57,14 +58,26 @@ export class GoalTaskProgressHandler implements TaskGoalProgressHandler {
     }
 
     const source = toGoalRecordSource(event.source);
-    const note =
-      event.source.type === TaskGoalSettlementSourceType.TaskPlan
+    const prompted = event.recordingMode === TaskGoalRecordingMode.PromptedUserMeasurement;
+    if (prompted && event.source.type !== TaskGoalSettlementSourceType.TaskOccurrence) {
+      throw new Error('Prompted measurement requires TaskOccurrence source');
+    }
+    const note = prompted
+      ? (event.note ?? undefined)
+      : event.source.type === TaskGoalSettlementSourceType.TaskPlan
         ? `任务计划完成: ${event.taskTitle}`
         : `任务实例完成: ${event.taskTitle}`;
     const result = await this.createGoalRecord.execute(
       String(event.goalId),
       String(event.keyResultId),
-      { value: event.value, note, source, authorship: GoalRecordAuthorship.TaskAutomatic },
+      {
+        value: event.value,
+        note,
+        source,
+        authorship: prompted
+          ? GoalRecordAuthorship.TaskUserMeasurement
+          : GoalRecordAuthorship.TaskAutomatic,
+      },
       String(event.identityId),
     );
 

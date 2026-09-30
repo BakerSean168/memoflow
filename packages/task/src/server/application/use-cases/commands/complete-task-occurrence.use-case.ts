@@ -8,7 +8,11 @@ import type {
   CompleteTaskOccurrenceReq,
   TaskOccurrenceOperationRes,
 } from '@memoflow/contracts/task';
-import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import {
+  TaskOccurrenceStatus,
+  TaskGoalMeasurementSchema,
+  TaskGoalProgressConfigurationSchema,
+} from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -88,9 +92,28 @@ export class CompleteTaskOccurrenceUseCase {
       identityId,
       String(occurrence.planId),
     );
+    const binding = plan?.goalBinding?.toDTO() ?? null;
+    let goalMeasurement: CompleteTaskOccurrenceReq['goalMeasurement'];
+    if (request?.goalMeasurement !== undefined) {
+      const measurement = TaskGoalMeasurementSchema.safeParse(request.goalMeasurement);
+      const configuration = TaskGoalProgressConfigurationSchema.safeParse(binding);
+      if (
+        !measurement.success ||
+        !binding?.keyResultId ||
+        !configuration.success ||
+        configuration.data.progressRule?.mode !== 'Prompt'
+      ) {
+        return error(
+          'VALIDATION_ERROR',
+          'Goal measurement requires a valid Prompt Key Result binding and measurement',
+        );
+      }
+      goalMeasurement = measurement.data;
+    }
     const goalContext = {
       taskTitle: plan?.title ?? '',
-      goalBinding: plan?.goalBinding?.toDTO() ?? null,
+      goalBinding: binding,
+      ...(goalMeasurement ? { goalMeasurement } : {}),
     };
 
     // Mark as completed（goalContext 会被嵌入领域事件的 payload）

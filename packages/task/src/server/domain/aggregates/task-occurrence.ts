@@ -2,7 +2,6 @@ import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import type {
   ChecklistItemDefinitionDTO,
   TaskEventMap,
-  TaskGoalBindingDTO,
   TaskOccurrenceChecklistItem,
   TaskOccurrenceClientDTO,
   TaskOccurrenceResult,
@@ -173,7 +172,10 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     actualDurationMinutes?: number,
     note?: string,
     rating?: number,
-    goalContext?: { taskTitle: string; goalBinding: TaskGoalBindingDTO | null },
+    goalContext?: Pick<
+      TaskEventMap['task:occurrence-completed'],
+      'taskTitle' | 'goalBinding' | 'goalMeasurement'
+    >,
     now = Date.now(),
   ): void {
     if (!this.canComplete()) throw new Error('Cannot complete task in current state');
@@ -203,6 +205,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       completedAt: now,
       taskTitle: goalContext?.taskTitle ?? '',
       goalBinding: goalContext?.goalBinding ?? null,
+      ...(goalContext?.goalMeasurement ? { goalMeasurement: goalContext.goalMeasurement } : {}),
     });
   }
 

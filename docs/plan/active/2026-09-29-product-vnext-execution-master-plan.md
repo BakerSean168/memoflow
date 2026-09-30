@@ -810,6 +810,9 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** TASK-3301A, GOAL-1203.
 
+
+**Implementation evidence (2026-09-30):** Command → completion event → same-transaction V2 outbox now carries optional Prompt measurement. Explicit recording mode maps to Goal-owned TaskUserMeasurement; Fixed/legacy V2 remains TaskAutomatic. No measurement completes Task only; suggestions never become facts. Focused contracts/Task/Goal tests, both typechecks, lint and governance pass. Prisma transaction characterization passes; database integration setup is blocked by Prisma's protected `db push --accept-data-loss` action. Exact scope, commands and validation limits: [TASK-3301B execution report](../archive/2026-09-30-pvc-task-3301b.md).
+
 ---
 
 ## PVC-TASK-3301C — Measurement dialog + correction/revert

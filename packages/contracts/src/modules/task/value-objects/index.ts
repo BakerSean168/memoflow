@@ -81,3 +81,5 @@ export type {
   ChecklistItemDefinitionDTO,
   TaskPlanChecklist,
 } from './checklist-item-definition';
+
+export { TaskGoalMeasurementSchema, type TaskGoalMeasurement } from './task-goal-binding';

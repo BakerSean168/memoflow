@@ -19,6 +19,14 @@ export interface TaskGoalSettlementSource {
   id: string;
 }
 
+/** Recording intent is Task-owned; Goal maps it to its authorship. */
+export const TaskGoalRecordingMode = {
+  FixedAutomatic: 'FixedAutomatic',
+  PromptedUserMeasurement: 'PromptedUserMeasurement',
+} as const;
+export type TaskGoalRecordingMode =
+  (typeof TaskGoalRecordingMode)[keyof typeof TaskGoalRecordingMode];
+
 interface TaskGoalProgressOutboxEventV2Base {
   eventId: string;
   schemaVersion: 2;
@@ -32,6 +40,8 @@ interface TaskGoalProgressOutboxEventV2Base {
 /** Apply one configured Task contribution to a Goal KR. */
 export interface TaskGoalProgressApplyEventV2 extends TaskGoalProgressOutboxEventV2Base {
   action: 'apply';
+  recordingMode: TaskGoalRecordingMode;
+  note?: string | null;
   goalId: GoalId;
   keyResultId: KeyResultId;
   value: number;
