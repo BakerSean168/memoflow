@@ -16,11 +16,12 @@ const actions = vi.hoisted(() => ({
   skipOccurrence: vi.fn(),
   setOccurrenceChecklistItem: vi.fn(),
   refresh: vi.fn(),
+  push: vi.fn(),
 }));
 const detailWorkspace = ref({ plan: template, recentOccurrences: [instance()], linkedNotes: [] });
 vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { id: 'plan-1' } }),
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: actions.push }),
 }));
 vi.mock('../composables/useTaskOccurrences', () => ({ useTaskOccurrences: () => actions }));
 vi.mock('../composables/useTaskPlanWorkspaceQuery', () => ({
@@ -38,7 +39,7 @@ vi.mock('../composables/useTaskGoalBindingOptions', () => ({
     goals: ref([]),
     keyResultsByGoal: ref({}),
     loadingGoals: ref(false),
-    loadingKeyResults: ref(false),
+    loadingKeyResults: ref<Record<string, boolean>>({}),
     keyResultErrorsByGoal: ref({}),
     loadGoals: vi.fn(),
     loadGoalBinding: vi.fn(),
@@ -190,4 +191,76 @@ describe('Task Detail runtime completion parity', () => {
       w.unmount();
     },
   );
+});
+
+describe('Task Detail optional property grammar', () => {
+  function mountDetail() {
+    return shallowMount(TaskDetailView, {
+      global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
+        renderStubDefaultSlot: true,
+      },
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    detailWorkspace.value = {
+      plan: { ...template },
+      recentOccurrences: [instance()],
+      linkedNotes: [],
+    };
+  });
+
+  it('keeps empty optional rows hidden and More discoverable', () => {
+    const wrapper = mountDetail();
+    for (const row of ['goal', 'labels', 'reminders']) {
+      expect(wrapper.find(`[data-testid="task-${row}-row"]`).exists()).toBe(false);
+    }
+    expect(wrapper.find('[data-testid="task-properties-more"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('puts values on edit chips and keeps owner routing separate', async () => {
+    detailWorkspace.value.plan = {
+      ...template,
+      labels: [{ id: 'label-1', name: 'Focus', color: '#5588aa' }] as typeof template.labels,
+      goalBinding: {
+        goalId: 'goal' as never,
+        keyResultId: null,
+        contribution: null,
+        progressRule: null,
+      },
+      reminderConfig: {
+        enabled: true,
+        triggers: [
+          { type: 'Relative', relativeValue: 15, relativeUnit: 'Minutes', absoluteTime: null },
+        ],
+      },
+    };
+    Object.assign(detailWorkspace.value, {
+      goalContext: {
+        availability: 'Available',
+        goalId: 'goal',
+        goal: { name: 'Owner Goal' },
+        keyResult: null,
+      },
+    });
+    const wrapper = mountDetail();
+    expect(wrapper.get('[data-testid="task-detail-labels-chip"]').text()).toBe('Focus');
+    expect(wrapper.get('[data-testid="task-detail-reminder-chip"]').text()).toContain(
+      'task.detail.reminderRelative',
+    );
+    expect(wrapper.get('[data-testid="task-detail-goal-chip"]').text()).toBe(
+      'task.detail.editGoalBinding',
+    );
+    await wrapper.get('[data-testid="task-detail-goal-chip"]').trigger('click');
+    expect(actions.push).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="task-goal-owner-navigation"]').trigger('click');
+    expect(actions.push).toHaveBeenCalledExactlyOnceWith({
+      name: 'goal-detail',
+      params: { id: 'goal' },
+    });
+    wrapper.unmount();
+  });
 });

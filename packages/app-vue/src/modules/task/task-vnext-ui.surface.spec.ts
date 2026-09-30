@@ -58,6 +58,19 @@ describe('Task vNext UI anti-resurrection', () => {
     expect(checklist).not.toContain('task-checklist-empty');
   });
 
+  it('keeps optional detail editors on shared chips and owner navigation separate', () => {
+    const detail = read('views/TaskDetailView.vue');
+    for (const property of ['goal', 'labels', 'reminder']) {
+      expect(detail).toMatch(
+        new RegExp(`<ProductPropertyChip[^>]*data-testid="task-detail-${property}-chip"`),
+      );
+    }
+    expect(detail).toContain('data-testid="task-goal-owner-navigation"');
+    expect(detail).not.toContain('task-reminder-add-menu');
+    expect(detail).not.toContain('removeReminderTrigger');
+    expect(detail).not.toContain('UniversalEntityDetail');
+  });
+
   it('keeps occurrence checklist interaction on the occurrence snapshot and workspace surface', () => {
     const row = read('components/TaskOccurrenceRow.vue');
     const detail = read('views/TaskDetailView.vue');

@@ -152,6 +152,7 @@ export default {
     moreProperties: 'More properties',
     goalBinding: 'Goal contribution',
     linkedGoal: 'Linked Goal',
+    openLinkedGoal: 'Open Goal: {name}',
     editGoalBinding: 'Edit Goal binding',
     advancedGoalBinding: 'More binding settings…',
     createOrManageLabels: 'Create or manage labels…',

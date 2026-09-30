@@ -350,20 +350,15 @@
                 {{ t('task.detail.linkedGoal') }}
               </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
-                <button
+                <ProductPropertyChip
                   v-if="goalContextAvailable"
-                  type="button"
-                  class="max-w-64"
+                  data-testid="task-goal-owner-navigation"
+                  :aria-label="t('task.detail.openLinkedGoal', { name: goalContextText })"
                   @click="openGoalContext"
                 >
-                  <Badge
-                    variant="outline"
-                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
-                  >
-                    <Target class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span class="truncate">{{ goalContextText }}</span>
-                  </Badge>
-                </button>
+                  <template #icon><ArrowUpRight class="h-3.5 w-3.5" /></template>
+                  {{ goalContextText }}
+                </ProductPropertyChip>
                 <Badge
                   v-else-if="viewModel.goalBinding"
                   variant="secondary"
@@ -384,17 +379,14 @@
                   @update:open="setPropertyOpen('goal', $event)"
                 >
                   <PopoverTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7 rounded-full text-muted-foreground"
-                      :aria-label="t('task.detail.editGoalBinding')"
+                    <ProductPropertyChip
+                      :active="activeProperty === 'goal'"
                       :disabled="isSaving || !!viewModel.isArchived"
                       data-testid="task-detail-goal-chip"
                     >
-                      <Pencil v-if="viewModel.goalBinding" class="h-3.5 w-3.5" />
-                      <Plus v-else class="h-3.5 w-3.5" />
-                    </Button>
+                      <template #icon><Target class="h-3.5 w-3.5" /></template>
+                      {{ t('task.detail.editGoalBinding') }}
+                    </ProductPropertyChip>
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
@@ -424,33 +416,33 @@
                 {{ t('task.metadata.labels') }}
               </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
-                <Badge
-                  v-for="label in viewModel.labels"
-                  :key="label.id"
-                  variant="outline"
-                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
-                >
-                  <span
-                    v-if="label.color"
-                    class="h-2 w-2 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
-                    :style="{ backgroundColor: label.color }"
-                  />
-                  <span class="truncate">{{ label.name }}</span>
-                </Badge>
-
                 <Popover :open="labelsPopoverOpen" @update:open="handleLabelsPopoverOpen">
                   <PopoverTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7 rounded-full text-muted-foreground"
-                      :aria-label="t('task.metadata.labels')"
+                    <ProductPropertyChip
+                      data-testid="task-detail-labels-chip"
+                      :active="labelsPopoverOpen"
                       :disabled="labelsLoading || isSaving || !!viewModel.isArchived"
                     >
-                      <Plus class="h-3.5 w-3.5" />
-                    </Button>
+                      <template #icon><Tag class="h-3.5 w-3.5" /></template>
+                      <template v-if="viewModel.labels?.length">
+                        <span v-for="(label, index) in viewModel.labels" :key="label.id">
+                          <span
+                            v-if="label.color"
+                            class="mr-1.5 inline-block h-2 w-2 rounded-full border border-[hsl(var(--border-subtle))]"
+                            :style="{ backgroundColor: label.color }"
+                            aria-hidden="true"
+                          />
+                          {{ label.name }}{{ index < viewModel.labels.length - 1 ? ', ' : '' }}
+                        </span>
+                      </template>
+                      <template v-else>{{ t('task.metadata.labels') }}</template>
+                    </ProductPropertyChip>
                   </PopoverTrigger>
-                  <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] p-0">
+                  <PopoverContent
+                    align="start"
+                    class="w-80 max-w-[calc(100vw-2rem)] p-0"
+                    @keydown.esc.capture.stop.prevent="handleLabelsPopoverOpen(false)"
+                  >
                     <LabelCommandPanel
                       :model-value="labelIds"
                       :options="labelOptions"
@@ -476,71 +468,22 @@
                 {{ t('task.detail.reminders') }}
               </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
-                <DropdownMenu
-                  v-for="trigger in reminderTriggers"
-                  :key="reminderTriggerKey(trigger)"
-                >
-                  <DropdownMenuTrigger as-child>
-                    <button type="button" class="max-w-72">
-                      <Badge
-                        variant="outline"
-                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
-                      >
-                        <Bell class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
-                      </Badge>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" class="w-44">
-                    <DropdownMenuItem
-                      class="text-destructive focus:text-destructive"
-                      @click="removeReminderTrigger(trigger)"
-                    >
-                      <Trash2 class="mr-2 h-4 w-4" />
-                      {{ t('task.reminderMenu.removeReminder') }}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7 rounded-full text-muted-foreground"
-                      :aria-label="t('task.reminderMenu.addReminder')"
-                      :disabled="isSaving || !!viewModel.isArchived"
-                      data-testid="task-reminder-add-menu"
-                    >
-                      <Plus class="h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" class="w-96 max-w-[calc(100vw-2rem)]">
-                    <TaskReminderMenuItems
-                      :model-value="taskReminderConfig"
-                      :disabled="isSaving || !!viewModel.isArchived"
-                      @update:model-value="saveReminderConfig"
-                      @request-custom-time="openCustomReminderPicker"
-                      @request-advanced="openReminderEditor"
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 <Popover
                   :open="activeProperty === 'reminder'"
                   @update:open="setPropertyOpen('reminder', $event)"
                 >
                   <PopoverTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-7 w-7 rounded-full text-muted-foreground"
-                      :aria-label="t('task.detail.editReminders')"
+                    <ProductPropertyChip
+                      :active="activeProperty === 'reminder'"
                       :disabled="isSaving || !!viewModel.isArchived"
                       data-testid="task-detail-reminder-chip"
                     >
-                      <Pencil class="h-3.5 w-3.5" />
-                    </Button>
+                      <template #icon><Bell class="h-3.5 w-3.5" /></template>
+                      {{
+                        reminderTriggers.map(reminderTriggerLabel).join(', ') ||
+                        t('task.detail.reminders')
+                      }}
+                    </ProductPropertyChip>
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
@@ -746,6 +689,7 @@ import {
   CircleStop,
   ArrowDown,
   ArrowLeft,
+  ArrowUpRight,
   ArrowUp,
   Bell,
   CalendarClock,
@@ -1035,15 +979,6 @@ function reminderUnitLabel(unit: ReminderTimeUnit | null): string {
   return t('task.reminderSection.minutes');
 }
 
-function reminderTriggerKey(trigger: TaskReminderConfigDTO['triggers'][number]): string {
-  return [
-    trigger.type,
-    trigger.absoluteTime ?? '',
-    trigger.relativeValue ?? '',
-    trigger.relativeUnit ?? '',
-  ].join(':');
-}
-
 function reminderTriggerLabel(trigger: TaskReminderConfigDTO['triggers'][number]): string {
   if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime != null) {
     return formatTaskReminderAbsoluteTime(trigger.absoluteTime);
@@ -1175,21 +1110,6 @@ async function saveReminderConfig(value: TaskReminderConfigDTO | null): Promise<
   if (!saved) return;
   if (value?.enabled && value.triggers.length > 0) showReminderEditor.value = false;
   await refetchWorkspace();
-}
-
-async function removeReminderTrigger(
-  trigger: TaskReminderConfigDTO['triggers'][number],
-): Promise<void> {
-  const key = reminderTriggerKey(trigger);
-  const remaining = reminderTriggers.value.filter((item) => reminderTriggerKey(item) !== key);
-  await saveReminderConfig(
-    remaining.length
-      ? {
-          enabled: true,
-          triggers: remaining,
-        }
-      : null,
-  );
 }
 
 async function addCustomAbsoluteReminder(value: number): Promise<void> {

@@ -149,6 +149,7 @@ export default {
     moreProperties: '更多属性',
     goalBinding: '目标贡献',
     linkedGoal: '关联 Goal',
+    openLinkedGoal: '打开目标：{name}',
     editGoalBinding: '编辑 Goal 关联',
     advancedGoalBinding: '更多关联设置…',
     createOrManageLabels: '创建或管理标签…',

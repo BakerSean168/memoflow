@@ -1890,6 +1890,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.task-visual-grammar.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/user-settings/appearance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -11729,6 +11737,13 @@
       "fileCount": 1
     },
     {
+      "id": "apps/web/playwright.task-visual-grammar.config.ts",
+      "type": "primary",
+      "suite": "e2e",
+      "runner": "playwright",
+      "fileCount": 1
+    },
+    {
       "id": "ci-cd-platform:test",
       "type": "primary",
       "suite": "governance",
@@ -12660,7 +12675,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 6,
-    "e2e": 59,
+    "e2e": 60,
     "perf": 1,
     "governance": 59
   }
