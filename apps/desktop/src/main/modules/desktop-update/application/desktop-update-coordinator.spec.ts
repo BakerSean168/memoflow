@@ -258,6 +258,39 @@ describe('DesktopUpdateCoordinator', () => {
     });
   });
 
+  it('recovers a retryable install failure back through ready before restarting again', async () => {
+    const engine = new FakeEngine();
+    engine.check.mockResolvedValue({ kind: 'available', release });
+    engine.download.mockImplementation(async () => {
+      engine.emit({ type: 'downloaded', release });
+    });
+    const coordinator = directCoordinator(engine, {
+      policy: { mode: 'manual', autoDownload: true },
+    });
+    await coordinator.initialize();
+    await coordinator.check('explicit');
+    await vi.waitFor(() => expect(coordinator.getSnapshot().state.type).toBe('ready'));
+
+    coordinator.beginRestartAndInstall();
+    expect(coordinator.getSnapshot().state.type).toBe('restarting');
+
+    coordinator.failInstall({
+      code: 'install-receipt-failed',
+      message: 'Unable to record the pending update before restart.',
+      retryable: true,
+    });
+    expect(coordinator.getSnapshot().state).toMatchObject({
+      type: 'failed',
+      recoverableTo: 'ready',
+    });
+
+    coordinator.beginRestartAndInstall();
+    expect(coordinator.getSnapshot().state).toMatchObject({
+      type: 'restarting',
+      release,
+    });
+  });
+
   it('schedules delayed startup and periodic background checks in the shell', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-30T01:00:00.000Z'));

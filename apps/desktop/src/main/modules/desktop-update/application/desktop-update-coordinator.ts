@@ -21,6 +21,7 @@ import {
   initializeDesktopUpdateState,
   markDesktopUpdateReady,
   recoverDesktopUpdateFailure,
+  requestDesktopUpdateRestart,
   reportDesktopUpdateDownloadProgress,
   startDesktopUpdateCheck,
   startDesktopUpdateDownload,
@@ -218,6 +219,45 @@ export class DesktopUpdateCoordinator {
       this.checkPromise = null;
     });
     return this.checkPromise;
+  }
+
+  /**
+   * Acquire the update-install state transition before destructive shutdown.
+   * The terminal installer handoff remains owned by UpdateInstallCoordinator.
+   */
+  beginRestartAndInstall(): DesktopUpdateSnapshotDTO {
+    this.assertReady();
+
+    if (this.state.type === 'failed' && this.state.recoverableTo === 'ready') {
+      this.state = recoverDesktopUpdateFailure(this.state, {
+        currentVersion: this.currentVersion,
+        recoveredAt: this.nowIso(),
+        intent: 'explicit',
+      });
+      this.emit();
+    }
+
+    this.state = requestDesktopUpdateRestart(this.state);
+    this.emit();
+    return this.getSnapshot();
+  }
+
+  /** Execute the platform installer handoff only from canonical restarting state. */
+  handoffInstall(): void {
+    this.assertReady();
+    if (this.state.type !== 'restarting') {
+      throw new Error(`Desktop Update cannot hand off install from '${this.state.type}'`);
+    }
+    this.engine.quitAndInstall();
+  }
+
+  /** Project a bounded install failure after restart/shutdown coordination began. */
+  failInstall(failure: DesktopUpdateFailureDTO): DesktopUpdateSnapshotDTO {
+    this.assertReady();
+    if (this.state.type !== 'restarting') return this.getSnapshot();
+    this.state = failDesktopUpdate(this.state, 'install', failure);
+    this.emit();
+    return this.getSnapshot();
   }
 
   destroy(): void {

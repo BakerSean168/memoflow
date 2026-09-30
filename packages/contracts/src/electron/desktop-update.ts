@@ -82,6 +82,7 @@ export const DesktopUpdateFailureCodeSchema = z.enum([
   'download-failed',
   'prepare-failed',
   'shutdown-failed',
+  'install-receipt-failed',
   'install-handoff-failed',
   'release-superseded',
   'unknown',
