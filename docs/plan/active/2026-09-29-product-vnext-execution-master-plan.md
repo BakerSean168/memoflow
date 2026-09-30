@@ -588,6 +588,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** UI 不再把 Archive 表达成 End；server response 与 optimistic state 一致。
 
+**Execution (2026-09-30): Implemented / validated.** Historical implementation is commit `703d62306ed` (`feat(task): converge lifecycle and outcome semantics`): End Plan routes to the canonical Abandon mutation, Active/Paused normal UX no longer treats Archive as End, and abandon remains server-confirmed instead of optimistic fake-Closed state. Current-batch revalidation: app-vue lifecycle/presentation suite 3 files / 23 tests PASS; Task lifecycle suite 6 files / 63 tests PASS; Task settlement PostgreSQL integration 1 file / 5 tests PASS; current Task/app-vue typechecks and governance PASS.
+
 **Dependencies:** BASE-002.
 
 ---
@@ -611,6 +613,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** End Plan 后未来 occurrence/reminder/Schedule event 全部消失，历史仍在。
 
+**Execution (2026-09-30): Implemented / validated.** Commit `703d62306ed` closes Abandon operational semantics across the use case, future occurrence ownership, reminder fail-closed behavior, lifecycle event and Schedule projection source while retaining history. Current-batch revalidation includes `abandon-task-plan`, reminder-fire, occurrence-ownership, schedule-projection and Task plan settlement integration; 6 Task unit files / 63 tests plus PostgreSQL settlement 1 file / 5 tests PASS.
+
 **Dependencies:** TASK-3002A 可并行开发，合并前一起验收。
 
 ---
@@ -630,6 +634,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** Overdue 不失败；有限计划显式 Missed 后在 scope resolved 时失败；纠正后可成功。
 
+**Execution (2026-09-30): Implemented / validated.** Commit `703d62306ed` installs the canonical TaskPlan outcome evaluator and reevaluation transaction semantics while retaining compatibility fields only for migration/round-trip. Current-batch revalidation covers evaluator behavior, outcome correction transaction and settlement: Task focused suite PASS, including 19 evaluator tests and PostgreSQL settlement fixtures.
+
 **Dependencies:** ADR-057.
 
 ---
@@ -646,6 +652,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 5. tests 覆盖 Closed+Succeeded/Failed/Abandoned。
 
 **Acceptance:** 用户能区分成功、未达成、主动结束。
+
+**Execution (2026-09-30): Implemented / validated.** Commit `703d62306ed` maps lifecycle/outcome/archive through the canonical presentation utility and exposes Succeeded / Failed / Abandoned in Plan row/detail without treating `archivedAt` as outcome. Current-batch app-vue revalidation (`TaskPlanRow`, `useTaskPlanMutations`, `task-plan-presentation`) is 3 files / 23 tests PASS.
 
 **Dependencies:** TASK-3002C.
 
@@ -733,12 +741,6 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 8. Schedule integration 留给 SCHED-4202。
 
 **Acceptance:** Task Home/Capsule/Home 对相同 occurrence 的 Complete/Skip/Missed/Checklist 语义一致。
-
-**Execution (2026-09-29): Implemented / validated.** 已建立 `useTaskOccurrenceActionCoordinator` 作为 Task-owned occurrence action entry，并提炼 `TaskOccurrenceQuickRow`、`TaskOccurrenceCompactList`、`TaskQuickSurface`。Task Home 与 Task Detail 保留 full occurrence row，但动作统一经过 coordinator；Task Capsule 与 `DailyTodoWidget` 复用 `TaskQuickSurface`。Capsule quick-create 继续复用 TASK-3004 的 canonical quick-task builder。Schedule integration 仍按计划留给 SCHED-4202。
-
-**Review repairs:** 修复了两处语义/呈现偏差：`Missed/Skipped -> Completed` correction、`Completed -> Uncomplete` 与 canonical row/domain 对齐，Checklist 不再仅因 terminal status 被禁用；surface 仍串行化 action，但仅实际 busy occurrence 显示 spinner，其余 row 只禁用而不伪装 busy。DailyTodo 旧 child selectors 已迁移到 shared semantic selectors（`data-task-occurrence-id` / `data-task-status` / shared complete control / `task-quick-progress[data-progress]`）。
-
-**Validation:** 最终 focused app-vue suite 9 files / 64 tests PASS；`app-vue:typecheck --skipNxCache` PASS；changed-file ESLint PASS；`git diff --check` PASS。selector migration 3 files / 19 tests PASS；4 个受影响 Playwright cases discovery/compile PASS。实际浏览器 `task/task-completion-loop.spec.ts` 1/1 PASS（31.3s test，1.2m total），覆盖 canonical DailyTodo selector 与 Task -> Goal EachCompletion closed loop。Local Docker Phase A/B 仅完成 discovery/compile，未在 freshly built current-worktree container 上实际执行，作为后续 integration acceptance caveat。详见 [implementation report](../../analysis/2026-09-29-pvc-task-3401-implementation.md)。
 
 **Dependencies:** TASK-3003A, TASK-3004；completion-time measurement branch 可先留 hook。
 
@@ -832,6 +834,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 **Acceptance:** 五种 KR method 都能从 Task completion 正确记录；撤销/纠正/重试行为可解释且幂等。
 
 **Execution (2026-09-30): Implemented / validated.** Task owns a single Prompt completion session and command; all canonical Task hosts reuse the public Goal composer and one Task dialog. Complete-only remains available on Goal read failure. Goal-owned Manual/TaskUserMeasurement correction preserves provenance and Task state; TaskAutomatic remains read-only. Existing uncomplete/outbox revert is characterized with replacement/retry. Focused app-vue 14 files / 184 tests, Task 3 files / 39 tests, Goal 5 files / 51 tests, affected typechecks, changed-file ESLint, inventory and governance PASS. PostgreSQL/E2E validation limits and exact files are in the [implementation report](../archive/2026-09-30-pvc-task-3301c.md).
+
+**Integrated acceptance (2026-09-30): PASS on batch `9e769415b50`.** From the GOAL-1201 baseline through TASK-3301C, 57 / 58 changed spec files were actually executed and 745 tests passed across app-vue, Goal, Task, contracts, database, PowerSync schema and migrator; Goal PostgreSQL event-listener integration also passed. The sole unexecuted changed spec is the protected Task Prisma transaction harness whose bootstrap can require `db push --accept-data-loss`; Browser E2E for the new Prompt/correction/revert loop remains assigned to TASK-3901. Full evidence: [integrated acceptance report](../archive/2026-09-30-goal-task-measurement-vertical-slice-acceptance.md).
 
 **Dependencies:** GOAL-1202, GOAL-1203, TASK-3301B, TASK-3401.
 
