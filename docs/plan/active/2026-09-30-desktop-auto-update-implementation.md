@@ -60,6 +60,12 @@ macOS x64 + arm64
 Linux AppImage
 ```
 
+## Current progress
+
+- `DU-1001` — **DONE**: legacy updater dormancy / preload / ad-hoc event / mutable policy baseline locked by characterization tests.
+- `DU-1002` — **DONE**: release updater metadata closure gate implemented and wired before GitHub Release asset upload; Windows/Linux/current macOS arch manifests are checked against canonical release assets.
+- Next: `DU-1101` — renderer-safe Desktop Update contracts.
+
 ## 2. Non-goals
 
 本计划不包含：

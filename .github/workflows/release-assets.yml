@@ -416,6 +416,7 @@ jobs:
         shell: bash
         run: |
           node ./tools/ci-cd-platform/release-tools/create-desktop-manifest.mjs artifacts "$RELEASE_TAG" "$RELEASE_SHA" desktop-release-manifest.json
+          node ./tools/ci-cd-platform/release-tools/verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           const manifest = JSON.parse(await readFile('desktop-release-manifest.json', 'utf8'));
