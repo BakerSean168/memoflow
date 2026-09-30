@@ -260,3 +260,92 @@ describe('ListGoalRecordsUseCase', () => {
     expect(recordB.toClientDTO).toHaveBeenCalledWith('goal-1', 20);
   });
 });
+
+describe('Goal-owned record preview context', () => {
+  it.each(['Sum', 'Average', 'Max', 'Min', 'Last'] as const)(
+    'uses all identity-scoped records before pagination for %s with deterministic Last',
+    async (aggregationMethod) => {
+      const records = [
+        createRecordFixture({ id: 'c', value: 0, createdAt: 2 }),
+        createRecordFixture({ id: 'a', value: -2, createdAt: 1 }),
+        createRecordFixture({ id: 'b', value: 6, createdAt: 2 }),
+        createRecordFixture({ id: 'foreign', value: 999, createdAt: 3, identityId: 'other' }),
+        createRecordFixture({ id: 'wrong-kr', keyResultId: 'other', value: 999, createdAt: 3 }),
+      ];
+      const progress = {
+        initialValue: 100,
+        currentValue: 80,
+        targetValue: 50,
+        trackingBaseValue: 40,
+        aggregationMethod,
+        unit: 'kg',
+      };
+      const goalRepo = createMockRepo<IGoalRepository>({
+        findByIdForIdentity: vi
+          .fn()
+          .mockResolvedValue(createGoalFixture({ keyResults: [{ id: 'kr-1', progress }] })),
+      });
+      const recordRepo = createMockRepo<IGoalRecordRepository>({
+        findByKeyResultId: vi.fn().mockResolvedValue(records),
+        findByGoalId: vi.fn().mockResolvedValue(records),
+      });
+      const useCase = new ListGoalRecordsUseCase(recordRepo, goalRepo);
+      for (const offset of [0, 1, 10]) {
+        const result = await useCase.execute({
+          identityId: 'identity-1',
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          limit: 1,
+          offset,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok) continue;
+        expect(result.data.data.length).toBeLessThanOrEqual(1);
+        expect(result.data.total).toBe(3);
+        expect(result.data.previewContext).toEqual({
+          ...progress,
+          keyResultId: 'kr-1',
+          aggregationSnapshot: { count: 3, sum: 4, max: 6, min: -2, last: 0 },
+        });
+      }
+      const goalWide = await useCase.execute({ identityId: 'identity-1', goalId: 'goal-1' });
+      if (goalWide.ok) expect(goalWide.data).not.toHaveProperty('previewContext');
+    },
+  );
+
+  it('returns empty snapshot and refuses a KR outside the owned goal', async () => {
+    const progress = {
+      initialValue: 0,
+      currentValue: 40,
+      targetValue: 100,
+      trackingBaseValue: 40,
+      aggregationMethod: 'Sum',
+      unit: null,
+    };
+    const goalRepo = createMockRepo<IGoalRepository>({
+      findByIdForIdentity: vi
+        .fn()
+        .mockResolvedValue(createGoalFixture({ keyResults: [{ id: 'kr-1', progress }] })),
+    });
+    const recordRepo = createMockRepo<IGoalRecordRepository>({
+      findByKeyResultId: vi.fn().mockResolvedValue([]),
+    });
+    const useCase = new ListGoalRecordsUseCase(recordRepo, goalRepo);
+    const result = await useCase.execute({
+      identityId: 'identity-1',
+      goalId: 'goal-1',
+      keyResultId: 'kr-1',
+    });
+    if (result.ok)
+      expect(result.data.previewContext?.aggregationSnapshot).toEqual({
+        count: 0,
+        sum: 0,
+        max: null,
+        min: null,
+        last: null,
+      });
+    expect(
+      await useCase.execute({ identityId: 'identity-1', goalId: 'goal-1', keyResultId: 'other' }),
+    ).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+  });
+});

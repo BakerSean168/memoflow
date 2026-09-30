@@ -540,6 +540,13 @@ export default {
     create: '创建',
   },
   recordDialog: {
+    current: '当前',
+    after: '记录后',
+    target: '目标',
+    previewUnavailable: '预览暂不可用，请加载目标记录并输入有效数值。',
+    unchangedSample: '当前值保持不变，本次测量仍会被记录。',
+    unchanged: '当前值保持不变，本次记录仍会保存。',
+
     cancel: '取消',
     editTitle: '编辑记录',
     addTitle: '添加记录',

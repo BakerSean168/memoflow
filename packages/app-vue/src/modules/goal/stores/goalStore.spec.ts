@@ -209,3 +209,40 @@ describe('Goal store vNext', () => {
     expect(store.isInitialized).toBe(false);
   });
 });
+
+describe('Goal aggregate hydration', () => {
+  beforeEach(() => setActivePinia(createPinia()));
+
+  it('hydrates records/KRs without replacing other goals and rejects stale aggregates', () => {
+    const store = useGoalStore();
+    const kr = createMockKeyResult();
+    const goal = createMockGoalMutationReceipt({ version: 3, keyResults: [kr] }).readModel;
+    const record = createMockGoalRecord({ goalId: goal.id, keyResultId: kr.id });
+    const other = createMockGoalRecord();
+    store.setGoalRecords([other]);
+    const aggregate = {
+      goal,
+      keyResults: [kr],
+      records: [record],
+      reviews: [],
+      statistics: {
+        totalKeyResults: 1,
+        completedKeyResults: 0,
+        totalRecords: 1,
+        totalReviews: 0,
+        overallProgress: 0,
+      },
+    };
+    store.hydrateAggregate(aggregate);
+    expect(store.getKeyResultById(String(kr.id))).toEqual(kr);
+    expect(store.goalRecords).toEqual([other, record]);
+    store.hydrateAggregate({
+      ...aggregate,
+      goal: { ...goal, version: 2 },
+      records: [],
+    });
+    expect(store.goalRecords).toEqual([other, record]);
+    store.hydrateAggregate({ ...aggregate, records: [] });
+    expect(store.goalRecords).toEqual([other]);
+  });
+});
