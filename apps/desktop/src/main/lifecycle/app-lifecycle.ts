@@ -23,6 +23,10 @@ import type { WindowManager } from './window-manager';
 import type { DesktopShutdownCoordinator } from './desktop-shutdown-coordinator';
 import { createBeforeQuitHandler } from './before-quit-handler';
 import { createLogger } from '@memoflow/utils/logger';
+import {
+  resolveDesktopUpdateE2EConfig,
+  runDesktopUpdateE2EHarness,
+} from '../modules/desktop-update/runtime/desktop-update-e2e-harness';
 const logger = createLogger('AppLifecycle');
 
 /**
@@ -88,6 +92,22 @@ async function handleAppReady(
     console.log('[Lifecycle] System IPC handlers registered');
 
     console.log('[Lifecycle] Desktop features initialized');
+  }
+
+  const desktopUpdateE2EConfig = resolveDesktopUpdateE2EConfig({
+    isPackaged: app.isPackaged,
+    env: process.env,
+  });
+  if (desktopUpdateE2EConfig) {
+    await runDesktopUpdateE2EHarness({
+      config: desktopUpdateE2EConfig,
+      currentVersion: app.getVersion(),
+      update: mainRuntime.desktopUpdateCoordinator,
+      install: mainRuntime.desktopUpdateInstallCoordinator,
+      receiptStore: mainRuntime.desktopUpdateReceiptStore,
+      quitVerifiedCandidate: () => app.quit(),
+      failProcess: () => app.exit(1),
+    });
   }
 
   // macOS: Re-create window when dock icon is clicked

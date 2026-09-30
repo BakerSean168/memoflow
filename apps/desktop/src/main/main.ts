@@ -113,6 +113,7 @@ import { DesktopKnowledgeRepositorySyncService } from './modules/repository/desk
 import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repository/desktop-knowledge-repository-auto-sync.scheduler';
 import { DesktopMainRuntime } from './desktop-main-runtime';
 import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
+import { resolveDesktopUpdateE2EConfig } from './modules/desktop-update/runtime/desktop-update-e2e-harness';
 import { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
 import { FileDesktopUpdateInstallReceiptStore } from './modules/desktop-update/infrastructure/update-install-receipt.store';
 import { verifyPendingDesktopUpdateInstall } from './modules/desktop-update/application/verify-pending-update-install';
@@ -743,14 +744,26 @@ async function initializeShellRuntime(): Promise<void> {
     readonly mas?: boolean;
     readonly windowsStore?: boolean;
   };
-  const desktopUpdateShell = composeDesktopUpdateShellRuntime({
-    currentVersion: app.getVersion(),
+  const desktopUpdateE2EConfig = resolveDesktopUpdateE2EConfig({
     isPackaged: app.isPackaged,
-    platform: process.platform,
-    isMacAppStore: electronProcess.mas === true,
-    isWindowsStore: electronProcess.windowsStore === true,
     env: process.env,
   });
+  const desktopUpdateShell = composeDesktopUpdateShellRuntime(
+    {
+      currentVersion: app.getVersion(),
+      isPackaged: app.isPackaged,
+      platform: process.platform,
+      isMacAppStore: electronProcess.mas === true,
+      isWindowsStore: electronProcess.windowsStore === true,
+      env: process.env,
+    },
+    desktopUpdateE2EConfig
+      ? {
+          feedOverride: desktopUpdateE2EConfig.feed,
+          policy: { mode: 'manual' },
+        }
+      : {},
+  );
 
   const desktopUpdateInstallCoordinator = new UpdateInstallCoordinator({
     update: desktopUpdateShell.coordinator,
@@ -768,6 +781,7 @@ async function initializeShellRuntime(): Promise<void> {
     profileRuntimeManager,
     desktopUpdateShell.coordinator,
     desktopUpdateInstallCoordinator,
+    desktopUpdateReceiptStore,
   );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
 

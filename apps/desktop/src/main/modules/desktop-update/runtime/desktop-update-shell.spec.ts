@@ -87,6 +87,39 @@ describe('Desktop Update shell composition', () => {
     });
   });
 
+  it('accepts a CI-only feed override without changing installation ownership', async () => {
+    const engine = new FakeEngine();
+    const runtime = composeDesktopUpdateShellRuntime(
+      {
+        currentVersion: '1.2.2',
+        isPackaged: true,
+        platform: 'win32',
+        env: {},
+      },
+      {
+        engine,
+        feedOverride: {
+          provider: 'generic',
+          url: 'http://127.0.0.1:4567',
+          channel: 'latest',
+        },
+        policy: { mode: 'manual' },
+      },
+    );
+
+    await runtime.coordinator.initialize();
+
+    expect(runtime.installation.owner).toBe('memoflow-direct');
+    expect(engine.initialize).toHaveBeenCalledWith({
+      channel: 'stable',
+      feed: {
+        provider: 'generic',
+        url: 'http://127.0.0.1:4567',
+        channel: 'latest',
+      },
+    });
+  });
+
   it('recognizes Windows Store and portable ownership before direct NSIS', () => {
     expect(
       collectDesktopInstallationEvidence({

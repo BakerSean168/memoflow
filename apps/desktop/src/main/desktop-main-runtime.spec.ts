@@ -13,6 +13,11 @@ function createRuntimeHarness() {
   const desktopUpdateInstallCoordinator = {
     destroy: vi.fn(),
   } as unknown as ConstructorParameters<typeof DesktopMainRuntime>[3];
+  const desktopUpdateReceiptStore = {
+    read: vi.fn(async () => null),
+    write: vi.fn(async () => undefined),
+    clear: vi.fn(async () => undefined),
+  } as unknown as ConstructorParameters<typeof DesktopMainRuntime>[4];
   const windowManager = {} as ConstructorParameters<typeof DesktopMainRuntime>[0];
 
   const runtime = new DesktopMainRuntime(
@@ -20,6 +25,7 @@ function createRuntimeHarness() {
     profileRuntimeManager,
     desktopUpdateCoordinator,
     desktopUpdateInstallCoordinator,
+    desktopUpdateReceiptStore,
   );
 
   return {
@@ -27,6 +33,7 @@ function createRuntimeHarness() {
     deactivateProfile,
     desktopUpdateCoordinator,
     desktopUpdateInstallCoordinator,
+    desktopUpdateReceiptStore,
   };
 }
 

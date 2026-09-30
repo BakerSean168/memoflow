@@ -6,7 +6,7 @@ import {
   type DesktopUpdatePolicy,
   DesktopUpdateCoordinator,
 } from '../application/desktop-update-coordinator';
-import type { DesktopUpdateEngine } from '../application/desktop-update-engine';
+import type { DesktopUpdateEngine, DesktopUpdateFeed } from '../application/desktop-update-engine';
 import { resolveDesktopUpdateFeed } from '../application/desktop-update-feed';
 import { ElectronUpdaterAdapter } from '../infrastructure/electron-updater.adapter';
 import {
@@ -28,6 +28,7 @@ export interface DesktopUpdateShellHost {
 export interface DesktopUpdateShellCompositionOptions {
   readonly engine?: DesktopUpdateEngine;
   readonly channel?: DesktopUpdateChannelDTO;
+  readonly feedOverride?: DesktopUpdateFeed;
   readonly policy?: Partial<DesktopUpdatePolicy>;
 }
 
@@ -89,7 +90,9 @@ export function composeDesktopUpdateShellRuntime(
   const installation = detectDesktopInstallationOwner(collectDesktopInstallationEvidence(host));
   const engine = options.engine ?? new ElectronUpdaterAdapter();
   const channel = options.channel ?? 'stable';
-  const feed = installation.capabilities.canCheck ? resolveDesktopUpdateFeed(channel) : undefined;
+  const feed = installation.capabilities.canCheck
+    ? (options.feedOverride ?? resolveDesktopUpdateFeed(channel))
+    : undefined;
 
   const coordinator = new DesktopUpdateCoordinator({
     engine,

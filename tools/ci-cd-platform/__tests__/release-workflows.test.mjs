@@ -103,6 +103,52 @@ test('desktop assets and image publishing are reusable retryable lanes, not publ
   assert.match(images, /requested SHA was/);
 });
 
+test('Windows Desktop release promotion is gated by a real installed N to N+1 updater proof', async () => {
+  const [releaseAssets, updateE2E, runner, harness] = await Promise.all([
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('.github/workflows/desktop-update-e2e.yml'),
+    readRepoFile('apps/desktop/scripts/run-windows-update-e2e.ps1'),
+    readRepoFile(
+      'apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-e2e-harness.ts',
+    ),
+  ]);
+
+  assert.match(updateE2E, /workflow_call:/u);
+  assert.match(updateE2E, /workflow_dispatch:/u);
+  assert.match(updateE2E, /runs-on: windows-latest/u);
+  assert.match(updateE2E, /Package synthetic N and current N\+1 NSIS fixtures/u);
+  assert.match(updateE2E, /\$candidateVersion = \$original\.version/u);
+  assert.match(updateE2E, /\$baseVersion = "\$major\.\$minor\.\$\(\$patch - 1\)"/u);
+  assert.match(updateE2E, /electron-builder --win nsis --x64 --publish never/u);
+  assert.match(updateE2E, /run-windows-update-e2e\.ps1/u);
+  assert.match(updateE2E, /desktop-update-installed-e2e\.json/u);
+  assert.match(updateE2E, /finalStatus\.phase -ne 'candidate-verified'/u);
+  assert.match(updateE2E, /profileRegistrySemanticSha256Before/u);
+  assert.match(updateE2E, /preservationSentinelSha256Before/u);
+  assert.match(updateE2E, /actions\/upload-artifact@[0-9a-f]{40}/u);
+
+  assert.match(runner, /MEMOFLOW_DESKTOP_UPDATE_E2E = '1'/u);
+  assert.match(runner, /python -ErrorAction Stop/u);
+  assert.match(runner, /http\.server/u);
+  assert.match(runner, /latest\.yml/u);
+  assert.match(runner, /receipt still exists after candidate verification/u);
+  assert.match(runner, /Get-InstalledProductVersion/u);
+  assert.match(runner, /StartsWith\(\$ExpectedVersion/u);
+  assert.match(runner, /Profile registry semantic identity changed across installed update/u);
+
+  assert.match(harness, /options\.env\.CI !== 'true'/u);
+  assert.match(harness, /options\.env\.MEMOFLOW_DESKTOP_UPDATE_E2E !== '1'/u);
+  assert.match(harness, /provider: 'generic'/u);
+  assert.doesNotMatch(harness, /ipcMain|window\.electronAPI/u);
+
+  assert.match(releaseAssets, /windows-installed-update-e2e:/u);
+  assert.match(releaseAssets, /uses: \.\/\.github\/workflows\/desktop-update-e2e\.yml/u);
+  assert.match(releaseAssets, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
+  const uploadJob = releaseAssets.slice(releaseAssets.indexOf('  upload-release-assets:'));
+  assert.match(uploadJob, /- windows-installed-update-e2e/u);
+  assert.match(uploadJob, /- build-release-assets/u);
+});
+
 test('desktop packaging has one stable product identity and one native rebuild owner', async () => {
   const [packageText, builder, projectText, workflow, nativeRebuildHelper] = await Promise.all([
     readRepoFile('apps/desktop/package.json'),

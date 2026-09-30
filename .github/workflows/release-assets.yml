@@ -94,6 +94,13 @@ jobs:
             core.setOutput('release_sha', tagSha);
             core.setOutput('macos_signing_mode', macosSigningMode);
 
+  windows-installed-update-e2e:
+    name: Windows Installed Update Gate
+    needs: prepare-release
+    uses: ./.github/workflows/desktop-update-e2e.yml
+    with:
+      ref: ${{ needs.prepare-release.outputs.release_sha }}
+
   build-release-assets:
     needs: prepare-release
     name: Build ${{ matrix.platform }} Assets
@@ -386,6 +393,7 @@ jobs:
     name: Upload Draft Release Assets
     needs:
       - prepare-release
+      - windows-installed-update-e2e
       - build-release-assets
     runs-on: ubuntu-latest
 

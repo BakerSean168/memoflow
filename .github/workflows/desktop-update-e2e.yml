@@ -1,0 +1,239 @@
+name: Desktop Update Installed E2E
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact source ref/SHA to validate
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Source ref/SHA to validate; defaults to the workflow commit
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-update-e2e-${{ inputs.ref || github.sha }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+  PRISMA_HIDE_UPDATE_MESSAGE: 'true'
+
+jobs:
+  windows-installed-update:
+    name: Windows NSIS N to N+1
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact update source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Setup pnpm
+        shell: pwsh
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: apps/desktop/.python-version
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Install dependencies
+        shell: pwsh
+        env:
+          PYTHON: ${{ env.pythonLocation }}\python.exe
+          npm_config_python: ${{ env.pythonLocation }}\python.exe
+        run: pnpm install --frozen-lockfile --reporter=append-only
+
+      - name: Build Desktop application
+        shell: pwsh
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}\tools\ci\node-process-bootstrap.cjs
+          PYTHON: ${{ env.pythonLocation }}\python.exe
+          npm_config_python: ${{ env.pythonLocation }}\python.exe
+        run: pnpm nx run desktop:build:production --outputStyle=static
+
+      - name: Rebuild native dependencies for Electron
+        shell: pwsh
+        run: >-
+          node apps/desktop/scripts/rebuild-native-dependencies.mjs
+          --workspace-root "${{ github.workspace }}"
+          --platform windows
+          --arch x64
+
+      - name: Package synthetic N and current N+1 NSIS fixtures
+        id: fixtures
+        shell: pwsh
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          NODE_OPTIONS: --require=${{ github.workspace }}\tools\ci\node-process-bootstrap.cjs
+          PYTHON: ${{ env.pythonLocation }}\python.exe
+          npm_config_python: ${{ env.pythonLocation }}\python.exe
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $packagePath = Join-Path $env:GITHUB_WORKSPACE 'apps\desktop\package.json'
+          $originalText = Get-Content -LiteralPath $packagePath -Raw
+          $original = $originalText | ConvertFrom-Json
+          $match = [regex]::Match($original.version, '^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)$')
+          if (-not $match.Success) {
+            throw "installed updater E2E requires a stable x.y.z Desktop version: $($original.version)"
+          }
+
+          $major = [int]$match.Groups['major'].Value
+          $minor = [int]$match.Groups['minor'].Value
+          $patch = [int]$match.Groups['patch'].Value
+          $candidateVersion = $original.version
+          if ($patch -gt 0) {
+            $baseVersion = "$major.$minor.$($patch - 1)"
+          }
+          elseif ($minor -gt 0) {
+            $baseVersion = "$major.$($minor - 1).999"
+          }
+          elseif ($major -gt 0) {
+            $baseVersion = "$($major - 1).999.999"
+          }
+          else {
+            throw 'cannot synthesize a lower Desktop version from 0.0.0'
+          }
+
+          "base_version=$baseVersion" >> $env:GITHUB_OUTPUT
+          "candidate_version=$candidateVersion" >> $env:GITHUB_OUTPUT
+
+          $fixturesRoot = Join-Path $env:GITHUB_WORKSPACE 'apps\desktop\update-e2e-fixtures'
+          $baseDir = Join-Path $fixturesRoot 'base'
+          $candidateDir = Join-Path $fixturesRoot 'candidate'
+          Remove-Item -LiteralPath $fixturesRoot -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $baseDir, $candidateDir | Out-Null
+
+          function Set-DesktopVersion([string]$version) {
+            $package = Get-Content -LiteralPath $packagePath -Raw | ConvertFrom-Json
+            $package.version = $version
+            $package | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $packagePath -Encoding utf8
+          }
+
+          function Package-Fixture([string]$version, [string]$destination) {
+            Write-Host "[update-e2e] Packaging MemoFlow $version"
+            Set-DesktopVersion $version
+            $dist = Join-Path $env:GITHUB_WORKSPACE 'apps\desktop\dist-package'
+            Remove-Item -LiteralPath $dist -Recurse -Force -ErrorAction SilentlyContinue
+
+            Push-Location (Join-Path $env:GITHUB_WORKSPACE 'apps\desktop')
+            try {
+              pnpm exec electron-builder --win nsis --x64 --publish never --config electron-builder.json5
+              if ($LASTEXITCODE -ne 0) {
+                throw "electron-builder failed for version $version with exit code $LASTEXITCODE"
+              }
+            }
+            finally {
+              Pop-Location
+            }
+
+            Copy-Item -Path (Join-Path $dist '*') -Destination $destination -Recurse -Force
+          }
+
+          try {
+            Package-Fixture $baseVersion $baseDir
+            Package-Fixture $candidateVersion $candidateDir
+          }
+          finally {
+            [System.IO.File]::WriteAllText($packagePath, $originalText)
+          }
+
+          $baseInstallers = @(Get-ChildItem -LiteralPath $baseDir -Filter '*Setup.exe' -File)
+          $candidateInstallers = @(Get-ChildItem -LiteralPath $candidateDir -Filter '*Setup.exe' -File)
+          if ($baseInstallers.Count -ne 1) {
+            throw "base fixture must contain exactly one Setup.exe; found $($baseInstallers.Count)"
+          }
+          if ($candidateInstallers.Count -ne 1) {
+            throw "candidate fixture must contain exactly one Setup.exe; found $($candidateInstallers.Count)"
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $candidateDir 'latest.yml'))) {
+            throw 'candidate fixture is missing latest.yml'
+          }
+
+          "base_installer=$($baseInstallers[0].FullName)" >> $env:GITHUB_OUTPUT
+          "candidate_feed_dir=$candidateDir" >> $env:GITHUB_OUTPUT
+
+      - name: Run installed Windows updater proof
+        shell: pwsh
+        run: |
+          $evidenceRoot = Join-Path $env:GITHUB_WORKSPACE 'apps\desktop\update-e2e-evidence'
+          $runtimeRoot = Join-Path $evidenceRoot 'runtime'
+          $reportPath = Join-Path $evidenceRoot 'desktop-update-installed-e2e.json'
+          New-Item -ItemType Directory -Force -Path $evidenceRoot | Out-Null
+
+          & "${{ github.workspace }}\apps\desktop\scripts\run-windows-update-e2e.ps1" `
+            -BaseInstaller "${{ steps.fixtures.outputs.base_installer }}" `
+            -CandidateFeedDir "${{ steps.fixtures.outputs.candidate_feed_dir }}" `
+            -ExpectedVersion "${{ steps.fixtures.outputs.candidate_version }}" `
+            -ReportPath $reportPath `
+            -RuntimeRoot $runtimeRoot `
+            -TimeoutSeconds 300
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "installed updater proof exited with code $LASTEXITCODE"
+          }
+
+          Copy-Item `
+            -LiteralPath (Join-Path "${{ steps.fixtures.outputs.candidate_feed_dir }}" 'latest.yml') `
+            -Destination (Join-Path $evidenceRoot 'latest.yml') `
+            -Force
+
+      - name: Verify installed updater evidence
+        shell: pwsh
+        run: |
+          $reportPath = Join-Path $env:GITHUB_WORKSPACE 'apps\desktop\update-e2e-evidence\desktop-update-installed-e2e.json'
+          $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+
+          if ($report.kind -ne 'desktop-update-installed-e2e') {
+            throw "unexpected update E2E evidence kind: $($report.kind)"
+          }
+          if ($report.result -ne 'passed') {
+            throw "Desktop Update E2E did not pass: $($report.result)"
+          }
+          if ($report.expectedVersion -ne "${{ steps.fixtures.outputs.candidate_version }}") {
+            throw "Desktop Update E2E candidate version mismatch"
+          }
+          if ($report.finalStatus.phase -ne 'candidate-verified') {
+            throw "Desktop Update E2E final phase is not candidate-verified"
+          }
+          if (-not $report.receiptCleared) {
+            throw "Desktop Update E2E receipt was not cleared"
+          }
+          if ($report.profileRegistrySemanticSha256Before -ne $report.profileRegistrySemanticSha256After) {
+            throw "Profile registry semantic identity drifted across update"
+          }
+          if ($report.preservationSentinelSha256Before -ne $report.preservationSentinelSha256After) {
+            throw "userData preservation sentinel drifted across update"
+          }
+
+      - name: Upload installed updater evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-update-installed-e2e-windows
+          path: apps/desktop/update-e2e-evidence
+          if-no-files-found: warn
+          retention-days: 14

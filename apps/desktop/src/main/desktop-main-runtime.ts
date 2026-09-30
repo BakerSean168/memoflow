@@ -20,6 +20,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
 import type { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
+import type { DesktopUpdateInstallReceiptStore } from './modules/desktop-update/application/desktop-update-install-receipt';
 
 export interface DesktopMainRuntimeDisposeOptions {
   /** Keep the updater engine alive until UpdateInstallCoordinator hands off to the installer. */
@@ -38,6 +39,7 @@ export class DesktopMainRuntime {
     readonly profileRuntimeManager: DesktopProfileRuntimeManager,
     readonly desktopUpdateCoordinator: DesktopUpdateCoordinator,
     readonly desktopUpdateInstallCoordinator: UpdateInstallCoordinator,
+    readonly desktopUpdateReceiptStore: DesktopUpdateInstallReceiptStore,
   ) {}
 
   /** Get the auth context provider for the active profile (or null). */
