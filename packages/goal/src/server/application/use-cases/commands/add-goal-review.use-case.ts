@@ -1,10 +1,11 @@
+import { ReviewWindowResolver } from '../../services/review-window-resolver';
 import { GoalPolicy, GoalVersionConflictError, type IGoalRepository } from '../../../domain';
-import type { GoalMutationReceipt } from '@memoflow/contracts/goal';
+import type { CreateGoalReviewReq, GoalMutationReceipt } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { GoalReviewContextBuilder } from '../../services/goal-review-context-builder';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
-import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 export class AddGoalReviewUseCase {
   constructor(
@@ -13,18 +14,13 @@ export class AddGoalReviewUseCase {
     private readonly contextBuilder: GoalReviewContextBuilder,
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = () => Date.now(),
+    private readonly windowResolver: ReviewWindowResolver = new ReviewWindowResolver(),
   ) {}
 
   async execute(
     goalId: string,
     identityId: string,
-    params: {
-      expectedVersion: number;
-      reflection: string;
-      challenges?: string | null;
-      adjustments?: string | null;
-      windowDays?: number;
-    },
+    params: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>> {
     const goal = await this.goalRepository.findByIdForIdentity(identityId, goalId, {
       includeChildren: true,
@@ -36,13 +32,10 @@ export class AddGoalReviewUseCase {
 
     this.goalPolicy.ensureGoalCanBeModified(goal);
     const windowEndAt = this.now();
-    const windowDays = params.windowDays ?? 7;
     const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-    const goalTime = createTimeFacade({ context: timeContext });
-    const systemContext = await this.contextBuilder.build(goal, {
-      windowStartAt: Number(goalTime.calendar.addDays(windowEndAt, -windowDays)),
-      windowEndAt,
-    });
+    const window = this.windowResolver.resolve(goal.goalReviews, params, windowEndAt, timeContext);
+    if (!window.ok) return window;
+    const systemContext = await this.contextBuilder.build(goal, window.data);
     const review = goal.createAndAddReview({
       reflection: params.reflection,
       challenges: params.challenges,

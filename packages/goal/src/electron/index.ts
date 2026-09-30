@@ -409,8 +409,15 @@ export function createGoalElectronModule(
           GoalChannels.REVIEW_CONTEXT,
           ReviewContextInvocationSchema,
           (data, requestContext) =>
-            goalController.getReviewContext(data.params.id, data.query.windowDays, requestContext),
-          (args) => ({ params: { id: args[0] }, query: { windowDays: args[1] } }),
+            goalController.getReviewContext(
+              data.params.id,
+              data.query.window === undefined ? data.query.windowDays : data.query,
+              requestContext,
+            ),
+          (args) => ({
+            params: { id: args[0] },
+            query: typeof args[1] === 'number' ? { windowDays: args[1] } : (args[1] ?? {}),
+          }),
         );
         installed.push(GoalChannels.REVIEW_CONTEXT);
         ipcMain.handle(GoalChannels.REVIEW_LIST, async (_, goalId) =>

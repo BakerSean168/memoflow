@@ -365,6 +365,68 @@ describe('goal transport parity (Phase 4) — production registrations', () => {
     }
   }
 
+  it.each([
+    {},
+    { windowDays: 7 },
+    { windowDays: 30 },
+    { window: { mode: 'since-last-review' } },
+    { window: { mode: '7d' } },
+    { window: { mode: '30d' } },
+    { window: { mode: 'custom', windowStartAt: 101, windowEndAt: 987 } },
+    { windowDays: 7, window: { mode: 'since-last-review' } },
+  ])('review window context production HTTP/IPC parity: %j', async (input) => {
+    const port = createPortStub();
+    const query = 'window' in input ? { ...input, window: JSON.stringify(input.window) } : input;
+    const bad = { window: { mode: 'custom', windowStartAt: 2, windowEndAt: 1 } };
+    await runRow(port, {
+      httpKey: 'review GET /:id/reviews/context',
+      ipcChannel: GoalChannels.REVIEW_CONTEXT,
+      httpReq: { params: { id: GOAL_ID }, query },
+      ipcArgs: [GOAL_ID, input],
+      validInvocation: input,
+      malformedHttpReq: { params: { id: GOAL_ID }, query: { window: JSON.stringify(bad.window) } },
+      malformedIpcArgs: [GOAL_ID, bad],
+      assertPort: (p) => {
+        const mock = p.getReviewContext as ReturnType<typeof vi.fn>;
+        expect(mock).toHaveBeenCalledTimes(2);
+        const expected =
+          'window' in input ? input : 'windowDays' in input ? input.windowDays : undefined;
+        for (const call of mock.mock.calls) expect(call).toEqual([GOAL_ID, 'identity-1', expected]);
+      },
+    });
+    expect(port.getReviewContext).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    {},
+    { windowDays: 7 },
+    { windowDays: 30 },
+    { window: { mode: 'since-last-review' } },
+    { window: { mode: '7d' } },
+    { window: { mode: '30d' } },
+    { window: { mode: 'custom', windowStartAt: 101, windowEndAt: 987 } },
+  ])('review window creation production HTTP/IPC parity: %j', async (input) => {
+    const port = createPortStub();
+    const body = { expectedVersion: 1, reflection: 'Progress', ...input };
+    const bad = { ...body, window: { mode: 'custom', windowStartAt: 2, windowEndAt: 1 } };
+    await runRow(port, {
+      httpKey: 'review POST /:id/reviews',
+      successStatus: 201,
+      ipcChannel: GoalChannels.REVIEW_CREATE,
+      httpReq: { params: { id: GOAL_ID }, body },
+      ipcArgs: [GOAL_ID, body],
+      validInvocation: body,
+      malformedHttpReq: { params: { id: GOAL_ID }, body: bad },
+      malformedIpcArgs: [GOAL_ID, bad],
+      assertPort: (p) => {
+        const mock = p.addReview as ReturnType<typeof vi.fn>;
+        expect(mock).toHaveBeenCalledTimes(2);
+        for (const call of mock.mock.calls) expect(call).toEqual([GOAL_ID, 'identity-1', body]);
+      },
+    });
+    expect(port.addReview).toHaveBeenCalledTimes(2);
+  });
+
   it('home summary: HTTP and IPC expose the same Goal-owned read model', async () => {
     const port = createPortStub();
     const http = buildHttp(port);

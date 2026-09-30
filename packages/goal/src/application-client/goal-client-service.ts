@@ -26,6 +26,7 @@ import type {
   DeleteGoalReviewReq,
   GoalReviewClientDTO,
   GoalReviewSystemContext,
+  GoalReviewWindowInput,
   GoalClientDTO,
   GoalMutationReceipt,
   GoalSystemView,
@@ -236,7 +237,7 @@ export interface GoalClientPort {
   getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReview[] }>>;
   getGoalReviewContext(
     goalId: string,
-    windowDays?: number,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,
@@ -519,9 +520,9 @@ export class GoalClientService implements GoalClientPort {
 
   async getGoalReviewContext(
     goalId: string,
-    windowDays: number = 7,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>> {
-    return this.goalApi.getGoalReviewContext(goalId, windowDays);
+    return this.goalApi.getGoalReviewContext(goalId, input);
   }
 
   async updateGoalReview(

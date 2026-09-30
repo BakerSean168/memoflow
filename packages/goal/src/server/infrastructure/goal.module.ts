@@ -51,6 +51,7 @@ import {
 import type { GoalSystemView } from '@memoflow/contracts/goal';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalReviewContextBuilder } from '../application';
+import { ReviewWindowResolver } from '../application/services/review-window-resolver';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalApplicationPort } from '../application';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
@@ -228,6 +229,7 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
   } = deps;
 
   const goalPolicy = new GoalPolicy();
+  const reviewWindowResolver = new ReviewWindowResolver();
 
   const habitRepository: IHabitRepository | undefined = deps.habitRepository;
   const userTimeContextPort = deps.userTimeContextPort;
@@ -297,12 +299,16 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
       goalPolicy,
       new GoalReviewContextBuilder(goalRecordRepository),
       userTimeContextPort,
+      undefined,
+      reviewWindowResolver,
     ),
     listReviews: new ListGoalReviewsUseCase(goalRepository),
     getReviewContext: new GetGoalReviewContextUseCase(
       goalRepository,
       new GoalReviewContextBuilder(goalRecordRepository),
       userTimeContextPort,
+      undefined,
+      reviewWindowResolver,
     ),
     updateReview: new UpdateGoalReviewUseCase(goalRepository, goalPolicy),
     deleteReview: new DeleteGoalReviewUseCase(goalRepository, goalPolicy),

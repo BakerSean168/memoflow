@@ -7,6 +7,8 @@ import type {
   GetGoalRes,
   GoalMutationReceipt,
   GoalReviewSystemContext,
+  GoalReviewWindowInput,
+  CreateGoalReviewReq,
   GoalTimeframe,
   ListGoalsQuery,
   QueryGoalsRes,
@@ -120,18 +122,12 @@ export interface GoalApplicationPort {
   addReview(
     goalId: string,
     identityId: string,
-    params: {
-      reflection: string;
-      challenges?: string | null;
-      adjustments?: string | null;
-      windowDays?: number;
-      expectedVersion: number;
-    },
+    params: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
   getReviewContext(
     goalId: string,
     identityId: string,
-    windowDays?: number,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>>;
   listReviews(goalId: string, identityId: string): Promise<Result<ListGoalReviewsResult>>;
   updateReview(

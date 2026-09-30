@@ -25,6 +25,7 @@ import type {
   GetKeyResultsRes,
   CreateGoalReviewReq,
   GoalReviewSystemContext,
+  GoalReviewWindowInput,
   UpdateGoalReviewReq,
   DeleteGoalReviewReq,
   GetGoalReviewsRes,
@@ -122,7 +123,7 @@ export interface IGoalApiClient {
   getGoalReviewsByGoal(goalId: string): Promise<Result<GetGoalReviewsRes>>;
   getGoalReviewContext(
     goalId: string,
-    windowDays?: number,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,

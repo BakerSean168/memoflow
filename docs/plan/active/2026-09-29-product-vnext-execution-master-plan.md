@@ -561,6 +561,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** BASE-001.
 
+**Execution (2026-09-30): Implemented / locally validated; pending ChatGPT Web final review/acceptance.** One Goal-owned `ReviewWindowResolver` now serves context and creation. Default starts at the latest authoritative child review's `systemContext.windowEndAt` (lexical review ID tie-break), with first-review fallback to seven Product Time calendar days. Explicit legacy `windowDays` retains precedence; additive typed since-last-review / 7d / 30d / custom selection is aligned across HTTP, IPC and clients. Custom bounds are preserved and validated. Consecutive review, reviewedAt mismatch, DST, contract and production transport parity evidence: Goal 7 files / 94 tests, contracts 1 file / 19 tests, existing UI compatibility 1 file / 8 tests PASS; Goal/contracts/app-vue/app-react typechecks, changed-file ESLint, diff and governance PASS. No UI, facts aggregation, persistence schema or AI changes. Database integration was not run because the existing harness uses `db push --accept-data-loss`; safeguards remain intact. Exact files, commands and limits: [GOAL-1401 implementation report](../archive/2026-09-30-pvc-goal-1401-implementation.md).
+
 ---
 
 ## PVC-GOAL-1402 — Review facts + deterministic diagnosis

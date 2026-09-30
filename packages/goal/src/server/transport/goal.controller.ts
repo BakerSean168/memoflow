@@ -22,6 +22,7 @@ import type {
   UpdateGoalRecordReq,
   CreateGoalReviewReq,
   CreateGoalReq,
+  GoalReviewWindowInput,
   DeleteGoalRecordReq,
   DeleteGoalReviewReq,
   DeleteKeyResultReq,
@@ -309,6 +310,7 @@ export class GoalController {
       challenges: input.challenges,
       adjustments: input.adjustments,
       windowDays: input.windowDays,
+      window: input.window,
       expectedVersion: input.expectedVersion,
     });
   }
@@ -321,10 +323,10 @@ export class GoalController {
 
   async getReviewContext(
     goalId: string,
-    windowDays: number | undefined,
+    input: GoalReviewWindowInput | undefined,
     cx: ExecutionContext,
   ): Promise<Result<unknown>> {
-    return this.useCases.getReviewContext(goalId, cx.identityId, windowDays);
+    return this.useCases.getReviewContext(goalId, cx.identityId, input);
   }
 
   async updateReview(
