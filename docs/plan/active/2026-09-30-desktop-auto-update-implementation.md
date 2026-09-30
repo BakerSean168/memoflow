@@ -64,7 +64,10 @@ Linux AppImage
 
 - `DU-1001` — **DONE**: legacy updater dormancy / preload / ad-hoc event / mutable policy baseline locked by characterization tests.
 - `DU-1002` — **DONE**: release updater metadata closure gate implemented and wired before GitHub Release asset upload; Windows/Linux/current macOS arch manifests are checked against canonical release assets.
-- Next: `DU-1101` — renderer-safe Desktop Update contracts.
+- `DU-1101` — **DONE**: renderer-safe Desktop Update schemas and the narrow replayable transport contract are established; legacy channels remain isolated until DU-1301 transport cutover.
+- `DU-1102` — **DONE**: installation ownership/capabilities are modeled independently from OS and fail closed for unknown/untrusted installation shapes.
+- `DU-1103` — **DONE**: immutable typed update state transitions, illegal-transition guards, intent propagation, and failure recovery are covered by focused tests.
+- Next: `DU-1104` — electron-updater infrastructure adapter.
 
 ## 2. Non-goals
 
