@@ -641,6 +641,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** all Goal tickets above.
 
+**Execution (2026-09-30): Accepted / reference frozen.** Goal reference acceptance is complete: the Goal → KR → Record → trajectory → first/subsequent Review loop is covered by real application-flow tests with persistence doubles and an isolated production-component browser harness with deterministic service ports, without AI. Fresh evidence includes Goal 99 files / 713 tests, focused Goal 7 / 79, App-Vue Goal/Product Date/surface-leave 31 / 315, App-Vue typecheck, and 11/11 browser baseline plus 11/11 comparison tests with 52 PNG artifacts. The full App-Vue run was not green (1,327/1,332 passed before correcting the stale Goal assertion); four unrelated shell geometry/Task capsule baseline failures remain documented. Real-backend Goal E2E discovered 9 tests but was not executed because its database bootstrap can run `prisma db push --accept-data-loss`; this acceptance explicitly retains that limitation and does not claim live-backend E2E coverage. Production references to retired standalone KR/Review views are zero; GOAL-1601 changes no production code. Final inventory/lint/governance evidence, required-state matrix and visual inspection: [GOAL-1601 reference acceptance report](../archive/2026-09-30-pvc-goal-1601-reference-acceptance.md).
+
 ---
 
 # 7. Phase 1B — Task lifecycle correctness
