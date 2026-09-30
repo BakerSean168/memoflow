@@ -68,7 +68,8 @@ Linux AppImage
 - `DU-1102` — **DONE**: installation ownership/capabilities are modeled independently from OS and fail closed for unknown/untrusted installation shapes.
 - `DU-1103` — **DONE**: immutable typed update state transitions, illegal-transition guards, intent propagation, and failure recovery are covered by focused tests.
 - `DU-1104` — **DONE**: electron-updater is isolated behind a MemoFlow engine port; SDK auto-download/auto-install are disabled, provider events/errors are normalized, and raw paths/errors do not cross the adapter boundary.
-- Next: `DU-1105` — shell-owned DesktopUpdateCoordinator.
+- `DU-1105` — **DONE**: DesktopUpdateCoordinator owns scheduling, single-flight checks/downloads, explicit/background intent, automatic-download policy, replayable snapshots, and engine lifecycle; async error/check races preserve the first terminal state.
+- Next: `DU-1106` — compose the updater exactly once at the Desktop Shell boundary.
 
 ## 2. Non-goals
 
