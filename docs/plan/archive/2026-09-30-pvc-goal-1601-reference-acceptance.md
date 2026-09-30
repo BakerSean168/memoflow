@@ -10,8 +10,9 @@ description: PVC-GOAL-1601 reference surface acceptance matrix and evidence
 # PVC-GOAL-1601 — Goal reference acceptance
 
 Validated from worktree `memoflow-goal-1601`, branch `product/vnext-goal-1601`,
-baseline `d9fb14f436a`. This ticket adds acceptance evidence; production Goal,
-server, persistence, AI and Task code remain unchanged.
+baseline `d9fb14f436a`. Acceptance evidence was collected before the final integration
+commit/push. This ticket adds acceptance evidence; production Goal, server,
+persistence, AI and Task code remain unchanged.
 
 **Execution (2026-09-30): Accepted / reference frozen.** Goal reference acceptance
 is complete with the real-backend E2E limitation below explicitly retained. ChatGPT
@@ -71,7 +72,7 @@ repository root (log names are relative to the directory above):
 
 | Evidence                            | Command                                                                    | Result / log                                                                                                                                                                                                                                                                                                                                                        |
 | ----------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full Goal package                   | `NX_DAEMON=false pnpm nx run goal:test --skipNxCache -- --maxWorkers=2`    | PASS, 99 files / 713 tests; `goal.log`. This earlier full run does not include the newly added reference-flow file; that file passes in the focused run below.                                                                                                                                                                                                      |
+| Full Goal package                   | `NX_DAEMON=false pnpm nx run goal:test --skipNxCache -- --maxWorkers=2`    | PASS, **100 files / 718 tests**, fresh on the final diff; `goal-final.log`.                                                                                                                                                                                                                                                                                         |
 | Focused Goal reference              | Command A below                                                            | PASS, 7 files / 79 tests, fresh; `goal-focused.log`.                                                                                                                                                                                                                                                                                                                |
 | Goal + Product Date + surface leave | Command B below                                                            | PASS, 31 files / 315 tests, fresh after correcting the stale Goal boundary; `app-goal.log`.                                                                                                                                                                                                                                                                         |
 | App-Vue typecheck                   | `NX_DAEMON=false pnpm nx run app-vue:typecheck`                            | PASS, App-Vue and 28 dependencies; 12/29 tasks used cache; `typecheck.log`.                                                                                                                                                                                                                                                                                         |
