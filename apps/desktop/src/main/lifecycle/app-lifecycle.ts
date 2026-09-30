@@ -20,6 +20,8 @@ import { initializeDesktopFeatures } from '../desktop-features';
 import { registerSystemIpcHandlers } from '../ipc/system-handlers';
 import type { DesktopMainRuntime } from '../desktop-main-runtime';
 import type { WindowManager } from './window-manager';
+import type { DesktopShutdownCoordinator } from './desktop-shutdown-coordinator';
+import { createBeforeQuitHandler } from './before-quit-handler';
 import { createLogger } from '@memoflow/utils/logger';
 const logger = createLogger('AppLifecycle');
 
@@ -119,53 +121,6 @@ function handleWindowAllClosed(): void {
 }
 
 /**
- * Handles the 'before-quit' event.
- *
- * Performs cleanup tasks such as cleaning up desktop features,
- * shutting down modules, and shutting down the PowerSync runtime.
- *
- * Uses preventDefault to ensure cleanup completes before the app exits.
- */
-let isQuitting = false;
-
-async function handleBeforeQuit(
-  event: Electron.Event,
-  getMainRuntime: () => DesktopMainRuntime | null,
-): Promise<void> {
-  if (isQuitting) return; // Already handling quit — let it proceed
-  isQuitting = true;
-  event.preventDefault();
-
-  console.log('[Lifecycle] Cleaning up before quit...');
-
-  const cleanup = (async () => {
-    try {
-      // Dispose the main runtime (deactivates profile, shuts down PowerSync)
-      const mainRuntime = getMainRuntime();
-      if (mainRuntime) {
-        await mainRuntime.dispose();
-      }
-
-    } catch (err) {
-      console.error('[Lifecycle] Cleanup failed:', err);
-    }
-  })();
-
-  // Safety timeout: if cleanup hangs, force quit after 10 seconds
-  const timeout = new Promise<void>((resolve) => {
-    setTimeout(() => {
-      console.warn('[Lifecycle] Cleanup timed out after 10s, forcing quit');
-      resolve();
-    }, 10_000);
-  });
-
-  await Promise.race([cleanup, timeout]);
-
-  console.log('[Lifecycle] Cleanup complete, quitting...');
-  app.quit();
-}
-
-/**
  * Sets up security handlers to prevent unwanted window creation.
  *
  * Denies all new window requests from web contents.
@@ -190,11 +145,14 @@ export function registerAppLifecycleHandlers(
   initializeApp: () => Promise<void>,
   getMainRuntime: () => DesktopMainRuntime | null,
   windowManager: WindowManager,
+  shutdownCoordinator: DesktopShutdownCoordinator,
 ): void {
   // Create window when application is ready
   app
     .whenReady()
-    .then(() => handleAppReady(initializeApp, getMainRuntime as () => DesktopMainRuntime, windowManager))
+    .then(() =>
+      handleAppReady(initializeApp, getMainRuntime as () => DesktopMainRuntime, windowManager),
+    )
     .catch((error) => {
       logger.error('App ready sequence failed', error);
       app.quit();
@@ -203,10 +161,20 @@ export function registerAppLifecycleHandlers(
   // Handle all windows closed
   app.on('window-all-closed', handleWindowAllClosed);
 
-  // Cleanup before quit
+  // Cleanup before quit. DesktopShutdownCoordinator owns destructive cleanup;
+  // this bridge owns only the normal Electron quit terminal action.
+  const beforeQuitHandler = createBeforeQuitHandler(shutdownCoordinator, () => app.quit());
   app.on('before-quit', (event) => {
-    void handleBeforeQuit(event, getMainRuntime).catch((error) => {
-      logger.error('Before-quit cleanup failed', error);
+    void beforeQuitHandler(event).catch((error) => {
+      logger.error('Before-quit shutdown coordination failed', error);
+      if (!shutdownCoordinator.shouldAllowProcessExit) {
+        try {
+          shutdownCoordinator.beginTerminalExit('normal-quit');
+        } catch {
+          // If another shutdown reason owns the process, do not bypass it.
+          return;
+        }
+      }
       app.quit();
     });
   });

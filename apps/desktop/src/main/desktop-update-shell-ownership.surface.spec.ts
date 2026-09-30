@@ -40,10 +40,11 @@ describe('Desktop Update shell ownership surface', () => {
     }
   });
 
-  it('destroys Desktop Update only from the process runtime disposal path', () => {
+  it('keeps Desktop Update destruction in the process runtime with an explicit update-handoff exception', () => {
     expect(runtimeSource.match(/desktopUpdateCoordinator\.destroy\(\)/g)).toHaveLength(1);
+    expect(runtimeSource).toContain('if (!options.preserveDesktopUpdateForHandoff)');
     expect(runtimeSource).toContain(
-      'It lives across Profile lock/switch and is disposed only when the main',
+      'update-install shutdown it must survive destructive application cleanup',
     );
   });
 });

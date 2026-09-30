@@ -19,6 +19,7 @@ import { pathToFileURL } from 'node:url';
 import { app, powerMonitor } from 'electron';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
+import { DesktopShutdownCoordinator } from './lifecycle/desktop-shutdown-coordinator';
 import { ElectronBootstrapper } from './bootstrap';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
@@ -117,6 +118,18 @@ configureDesktopShellIdentity();
 
 const logger = createLogger('DesktopMain');
 let mainRuntime: DesktopMainRuntime | null = null;
+const desktopShutdownCoordinator = new DesktopShutdownCoordinator({
+  cleanup: async (reason) => {
+    const runtime = mainRuntime;
+    if (!runtime) return;
+
+    await runtime.dispose({
+      // UpdateInstallCoordinator must retain the updater engine until it calls
+      // quitAndInstall() after all other destructive cleanup has settled.
+      preserveDesktopUpdateForHandoff: reason === 'update-install',
+    });
+  },
+});
 const windowManager = new WindowManager();
 let activeFocusWindowController: FocusWindowController | null = null;
 let activeInterventionWindowController: InterventionWindowController | null = null;
@@ -837,4 +850,9 @@ async function initializeShellRuntime(): Promise<void> {
 // Lifecycle
 // ═══════════════════════════════════════════════════════════════════════
 
-registerAppLifecycleHandlers(initializeShellRuntime, () => mainRuntime, windowManager);
+registerAppLifecycleHandlers(
+  initializeShellRuntime,
+  () => mainRuntime,
+  windowManager,
+  desktopShutdownCoordinator,
+);

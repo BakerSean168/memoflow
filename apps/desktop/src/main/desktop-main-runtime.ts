@@ -20,6 +20,11 @@ import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
 
+export interface DesktopMainRuntimeDisposeOptions {
+  /** Keep the updater engine alive until UpdateInstallCoordinator hands off to the installer. */
+  readonly preserveDesktopUpdateForHandoff?: boolean;
+}
+
 const logger = createLogger('DesktopMainRuntime');
 
 export class DesktopMainRuntime {
@@ -74,16 +79,20 @@ export class DesktopMainRuntime {
    * Note: WindowManager cleanup is handled by Electron's window close
    * lifecycle, not here.
    */
-  async dispose(): Promise<void> {
-    logger.info('Disposing DesktopMainRuntime...');
+  async dispose(options: DesktopMainRuntimeDisposeOptions = {}): Promise<void> {
+    logger.info('Disposing DesktopMainRuntime...', {
+      preserveDesktopUpdateForHandoff: options.preserveDesktopUpdateForHandoff === true,
+    });
 
     this._deviceAuthCoordinator?.dispose();
     this._deviceAuthCoordinator = null;
 
-    // Desktop Update is a process/Shell capability, not a Profile capability.
-    // It lives across Profile lock/switch and is disposed only when the main
-    // process runtime itself is shutting down.
-    this.desktopUpdateCoordinator.destroy();
+    // Desktop Update is normally disposed with the process runtime. During an
+    // update-install shutdown it must survive destructive application cleanup
+    // long enough to perform the final installer handoff (DU-1202).
+    if (!options.preserveDesktopUpdateForHandoff) {
+      this.desktopUpdateCoordinator.destroy();
+    }
 
     // Release profile resources without forgetting which local Profile should reopen next launch.
     try {
