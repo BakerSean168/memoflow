@@ -69,10 +69,27 @@ export class DesktopShutdownCoordinator {
     this.phase = 'cleaning';
     const startedAt = this.now().toISOString();
 
-    this.inFlight = this.runCleanup(reason, startedAt).finally(() => {
-      this.inFlight = null;
+    // Publish the single-flight promise before invoking any cleanup code.
+    // Cleanup can synchronously trigger window-all-closed -> app.quit() ->
+    // before-quit, which re-enters request(). Without this deferred owner,
+    // that nested request can start a second cleanup before runCleanup reaches
+    // its first await.
+    let resolveFlight!: (settlement: DesktopShutdownSettlement) => void;
+    let rejectFlight!: (error: unknown) => void;
+    const flight = new Promise<DesktopShutdownSettlement>((resolve, reject) => {
+      resolveFlight = resolve;
+      rejectFlight = reject;
     });
-    return this.inFlight;
+    this.inFlight = flight;
+
+    logger.info('Desktop shutdown cleanup acquired', { reason });
+
+    void this.runCleanup(reason, startedAt).then(resolveFlight, rejectFlight);
+    void flight.finally(() => {
+      if (this.inFlight === flight) this.inFlight = null;
+    });
+
+    return flight;
   }
 
   /**
@@ -93,6 +110,7 @@ export class DesktopShutdownCoordinator {
     }
 
     this.phase = 'terminal-exit';
+    logger.info('Desktop shutdown terminal exit authorized', { reason });
   }
 
   private async runCleanup(
@@ -140,6 +158,7 @@ export class DesktopShutdownCoordinator {
       settledAt: this.now().toISOString(),
     });
     this.phase = 'settled';
+    logger.info('Desktop shutdown cleanup settled', { reason, status });
     return this.settlement;
   }
 }

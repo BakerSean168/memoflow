@@ -30,6 +30,27 @@ describe('DesktopShutdownCoordinator', () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
+  it('publishes single-flight ownership before cleanup can synchronously re-enter', async () => {
+    let nested: Promise<unknown> | null = null;
+    const holder: { coordinator: DesktopShutdownCoordinator | null } = { coordinator: null };
+    const cleanup = vi.fn(async () => {
+      nested = holder.coordinator!.request('normal-quit');
+    });
+    const coordinator = new DesktopShutdownCoordinator({ cleanup });
+    holder.coordinator = coordinator;
+
+    const updateInstall = coordinator.request('update-install');
+
+    expect(nested).toBe(updateInstall);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(coordinator.currentOwnerReason).toBe('update-install');
+
+    await expect(updateInstall).resolves.toMatchObject({
+      reason: 'update-install',
+      status: 'completed',
+    });
+  });
+
   it('lets the first concurrent shutdown reason own the cleanup attempt', async () => {
     let resolveCleanup: (() => void) | null = null;
     const cleanup = vi.fn(

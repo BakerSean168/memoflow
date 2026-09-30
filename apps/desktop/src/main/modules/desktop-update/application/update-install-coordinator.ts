@@ -110,6 +110,10 @@ export class UpdateInstallCoordinator {
 
     try {
       await this.receiptStore.write(receipt);
+      logger.info('Desktop update install receipt persisted', {
+        previousVersion: receipt.previousVersion,
+        expectedVersion: receipt.expectedVersion,
+      });
     } catch (error) {
       logger.error('Failed to persist Desktop update install receipt', undefined, {
         errorName: error instanceof Error ? error.name : typeof error,
@@ -124,7 +128,12 @@ export class UpdateInstallCoordinator {
     }
 
     this.destructiveShutdownStarted = true;
+    logger.info('Desktop update requesting shared shutdown');
     const settlement = await this.shutdown.request('update-install');
+    logger.info('Desktop update shared shutdown settled', {
+      reason: settlement.reason,
+      status: settlement.status,
+    });
 
     if (settlement.reason !== 'update-install') {
       // Normal quit acquired ownership first. It will own terminal exit; never
@@ -163,7 +172,9 @@ export class UpdateInstallCoordinator {
     this.handoffStarted = true;
 
     try {
+      logger.info('Desktop update handing off to installer');
       this.update.handoffInstall();
+      logger.info('Desktop update installer handoff dispatched');
       return this.update.getSnapshot();
     } catch (error) {
       this.clearHandoffWatchdog();
