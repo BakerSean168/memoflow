@@ -15,7 +15,7 @@ tags:
   - governance
 status: active
 created: 2026-09-29T13:00:00+08:00
-updated: 2026-09-29T13:00:00+08:00
+updated: 2026-09-30T08:26:17Z
 description: MemoFlow Product vNext 全量执行拆分方案，将 Goal、Task 与剩余模块审查结果转成可独立实施/审查的 tickets
 ---
 
@@ -191,6 +191,7 @@ Shared grammar cleanup + screenshot matrix + accessibility/perf closure
 **Scope:** repository validation commands + current branch baseline。
 
 **Implementation:**
+
 1. 记录 branch/main ancestry、clean status、当前 Product vNext branch-only commits。
 2. 建立 `docs/plan/active/...` 内验证矩阵，不新增 runtime code。
 3. 确认 `goal/task/schedule/notification/ai/setting/account` Nx targets。
@@ -198,11 +199,48 @@ Shared grammar cleanup + screenshot matrix + accessibility/perf closure
 5. 对超时的 full governance-check 拆成可独立执行的 governance checks，记录实际结果。
 
 **Tests / commands:**
+
 - `git diff --check`
 - `pnpm nx run app-vue:typecheck`
 - targeted docs/governance checks
 
 **Acceptance:** 后续 ticket 不再临时猜验证命令；branch clean，main 无 behind。
+
+**Execution (2026-09-30): Implemented / validated.** The command ledger is verified at the recorded HEAD: eight focused suites (125 tests), Goal/Task contracts (167 tests), all eight typechecks, web build, integration/browser discovery, docs and full governance checks passed. Broad package/Vue test attempts were interrupted and replaced by verified focused commands; database integration and browser scenario execution remain explicitly deferred pending disposable database ownership. This is baseline/ledger acceptance, not full product acceptance. No runtime/product code was modified.
+
+**Validation ledger (2026-09-30; PVC-BASE-001 only):** Run from repository root with Node 24.21.0 / pnpm 11.20.0. Use `NX_DAEMON=false` on this worktree; append `--skipNxCache` for fresh test evidence. Focused paths are relative to the target package, not repository root. Bound Vitest workers with `--maxWorkers=2` when sharing this host. The recorded validation baseline was branch `product/vnext-base-001` at HEAD `6e2bac28df74992a785d5ddab33c259d96b3593d`; merge-base and local/live remote `main` are `d3a32135709cc650aee712bf7fb13e02a17ea08d` (behind 0 / ahead 37). Entry `git status --porcelain=v1` was empty. Completion must leave only this plan and the linked archive evidence report modified/untracked; generated/cache/build output must remain ignored, with no runtime/config/lockfile edits. No commit/push is part of this ticket.
+
+| Owner        | Focused unit command (`pnpm nx run …`)                                                            | Package gates                                 | Database integration target                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| goal         | `goal:test -- src/shared/goal-record-preview.spec.ts --maxWorkers=2`                              | `goal:test`, `goal:typecheck`                 | `goal:test:integration`                                                                                  |
+| task         | `task:test -- src/server/domain/aggregates/__tests__/TaskOccurrence.test.ts --maxWorkers=2`       | `task:test`, `task:typecheck`                 | `task:test:integration`                                                                                  |
+| schedule     | `schedule:test -- src/server/domain/aggregates/__tests__/calendar-entry.spec.ts --maxWorkers=2`   | `schedule:test`, `schedule:typecheck`         | `schedule:test:integration`                                                                              |
+| notification | `notification:test -- src/server/domain/aggregates/__tests__/notification.spec.ts --maxWorkers=2` | `notification:test`, `notification:typecheck` | `notification:test:integration`                                                                          |
+| ai           | `ai:test -- src/server/domain/aggregates/__tests__/ai-conversation.spec.ts --maxWorkers=2`        | `ai:test`, `ai:typecheck`                     | No dedicated target; owner/workflow tests under `ai:test`, browser AI lane below                         |
+| setting      | `setting:test -- src/server/preferences/user-preference-service.spec.ts --maxWorkers=2`           | `setting:test`, `setting:typecheck`           | No dedicated target; Prisma/PowerSync adapter tests under `setting:test`, browser persistence lane below |
+| account      | `account:test -- src/server/domain/aggregates/__tests__/Account.test.ts --maxWorkers=2`           | `account:test`, `account:typecheck`           | `account:test:integration`                                                                               |
+| app-vue      | `app-vue:test -- src/modules/goal/components/dialogs/GoalDialog.spec.ts --maxWorkers=2`           | `app-vue:test`, `app-vue:typecheck`           | No dedicated target; browser lanes below                                                                 |
+
+Repeatable package batch: `pnpm nx run-many -t test --projects=goal,task,schedule,notification,ai,setting,account --parallel=1 -- --maxWorkers=2`; typecheck batch: `pnpm nx run-many -t typecheck --projects=goal,task,schedule,notification,ai,setting,account,app-vue --parallel=2`. Nx typecheck inherits `^build`; app-vue explicitly builds dependencies. Do not replace these with a bare compiler before dependency declarations exist. Package `test` excludes `*.integration.{test,spec}.*`; package green does not imply database integration green. Run dependency-building batches sequentially in one worktree: overlapping `--skipNxCache` builds can remove declarations while another compiler reads them.
+
+| Validation lane                   | Concrete entry point / lower-level split                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shared Goal/Task contracts        | `pnpm nx run contracts:test -- src/modules/goal src/modules/task --maxWorkers=2`                                                                                                                                                                                                                                                                                                                                |
+| Full Vue tests / owner slice      | `pnpm nx run app-vue:test -- --maxWorkers=2`; narrow using `-- src/modules/goal src/modules/task src/modules/schedule src/modules/notification src/modules/ai src/modules/setting src/modules/account --maxWorkers=2`                                                                                                                                                                                           |
+| Web build                         | `pnpm nx run web:build` (inferred Nx/Vite target; dependency builds included)                                                                                                                                                                                                                                                                                                                                   |
+| Database integration              | `pnpm nx run-many -t test:integration --projects=goal,task,schedule,notification,account --parallel=1`; narrow per owner using `pnpm nx run <owner>:test:integration -- <package-relative-file>`                                                                                                                                                                                                                |
+| Safe integration discovery        | `pnpm --dir packages/<owner> exec vitest list --config vitest.integration.config.ts --filesOnly` for the five owners above; discovery does not execute global setup                                                                                                                                                                                                                                             |
+| Browser preflight / discovery     | `pnpm runtime:preflight:e2e`; `TEST_INVENTORY_LIST=1 pnpm nx run web:e2e -- --list`; `pnpm nx run web:e2e:audit -- --list --reporter=list`                                                                                                                                                                                                                                                                      |
+| Core browser owner flows          | After safe DB verification and preflight: `pnpm nx run web:e2e -- e2e/goal/goal-crud.spec.ts e2e/task/task-plan-crud.spec.ts e2e/task/task-completion-loop.spec.ts e2e/schedule/schedule-calendar.spec.ts e2e/notification/notification-inbox-loop.spec.ts e2e/ai/goal-workflow.spec.ts e2e/user-settings/persistence.spec.ts`                                                                                  |
+| Account / secondary browser flows | `pnpm nx run web:e2e:audit -- e2e/account/account-profile.spec.ts e2e/account/account-management.spec.ts e2e/goal/goal-keyresult.spec.ts e2e/setting/setting-appearance.spec.ts`; account specs are in audit, not core                                                                                                                                                                                          |
+| Specialist browser lanes          | `pnpm nx run web:e2e:ai-workspace`; `pnpm nx run web:e2e:sync`; `pnpm nx run web:e2e:shell`; `pnpm nx run web:e2e:local-docker` (own configurations/runtime prerequisites; never silently reuse unrelated running services)                                                                                                                                                                                     |
+| Documentation/governance          | `pnpm nx run memoflow:docs-check`; `pnpm nx run memoflow:governance-check`                                                                                                                                                                                                                                                                                                                                      |
+| Governance timeout split          | Run dependencies individually: `memoflow:test:governance`, `governance-tools:test`, `test-system-v2:test`, `test-system-v2:test:governance`, `test-system-v2:ruleset` via `pnpm nx run`. Then run each `node ./tools/...mjs` command in `project.json` → `targets.governance-check.options.command` individually in its declared order. Record every exit; a partial subset never means full governance passed. |
+| Diff / clean baseline             | `git diff --check`; `git status --porcelain=v1`; `git diff --name-only`; `git ls-files --others --exclude-standard`; `git merge-base --is-ancestor origin/main HEAD`; `git rev-list --left-right --count origin/main...HEAD`; `git ls-remote origin refs/heads/main`                                                                                                                                            |
+
+**Database safety:** Integration global setup and the browser API helper call `ensureTestDatabase`, which enables extensions and runs Prisma `db push --accept-data-loss`; tests can `TRUNCATE … CASCADE`. Default is the test lane on `127.0.0.1:5433`, database `memoflow_test`, but process `TEST_DATABASE_URL` / `TEST_DB_*` can override it. Verify the effective destination is disposable and exclusively owned before any full integration/E2E run. Do not redirect to host-dev/prod-like/staging/prod, set `CI=true` to evade setup, force reset, or suppress a destructive-operation refusal. Open-port preflight is not database ownership proof. This ticket records discovery separately from execution.
+
+**Evidence:** [PVC-BASE-001 baseline report](../archive/2026-09-30-pvc-base-001-validation-ledger.md) records all 37 inherited batch commits, actual commands/exits/counts, and deferred database/browser acceptance. Only this ticket's execution status is changed by this batch.
 
 **Dependencies:** none.
 
