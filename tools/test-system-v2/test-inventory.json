@@ -4018,6 +4018,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/governance/composables/useGovernanceQueries.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5652,6 +5660,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/api/goal-review-signals.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/goal/api/goal-review-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/api/goal-workspace.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6550,6 +6574,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6638,6 +6672,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/goal-review-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6649,6 +6693,26 @@
     },
     {
       "path": "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/services/goal-review-signal-analyzer.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/services/review-window-resolver.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -6835,6 +6899,17 @@
     },
     {
       "path": "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/use-cases/commands/__tests__/review-window-continuity.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -7269,6 +7344,17 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-record-provenance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.mappers.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-review-signals.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -11432,21 +11518,21 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 99
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 9
     },
     {
       "id": "packages/goal/vitest.use-cases.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11789,7 +11875,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 251
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11810,7 +11896,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 94
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11838,7 +11924,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 99
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -12203,6 +12289,7 @@
       "packages/goal/src/electron/index.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
+      "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.surface.spec.ts",
@@ -12211,8 +12298,11 @@
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
       "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
       "packages/goal/src/server/application/goal-portability.spec.ts",
+      "packages/goal/src/server/application/goal-review-portability.spec.ts",
       "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
       "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
+      "packages/goal/src/server/application/services/goal-review-signal-analyzer.spec.ts",
+      "packages/goal/src/server/application/services/review-window-resolver.spec.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/abandon-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/activate-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-key-result.test.ts",
@@ -12230,6 +12320,7 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/plan-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
+      "packages/goal/src/server/application/use-cases/commands/__tests__/review-window-continuity.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-key-result-progress.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-key-result.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-record.test.ts",
@@ -12271,6 +12362,7 @@
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/weight-snapshot-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-record-provenance.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-review-signals.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-state-mapper.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-mapper.additional.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-mapper.spec.ts",
@@ -12536,7 +12628,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1106,
+    "unit": 1115,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

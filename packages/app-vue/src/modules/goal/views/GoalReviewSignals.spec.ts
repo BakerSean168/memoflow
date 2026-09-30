@@ -1,4 +1,4 @@
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { defineComponent, h, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
@@ -6,30 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import { goalRoutes } from '../router';
-import GoalReviewCreationView from './GoalReviewCreationView.vue';
-import GoalReviewDetailView from './GoalReviewDetailView.vue';
+import GoalDetailView from './GoalDetailView.vue';
+import { createMockGoalMutationReceipt } from '@memoflow/contracts/mocks';
 
 const calls = vi.hoisted(() => ({
-  getGoalAggregateView: vi.fn(),
-  createReview: vi.fn(),
+  getGoalWorkspace: vi.fn(),
   getGoalReviewContext: vi.fn(),
 }));
-const kr = {
-  id: 'kr-1',
-  title: 'Distance',
-  description: 'Walk daily',
-  target: null,
-  weight: 3,
-  progress: {
-    aggregationMethod: 'Sum',
-    initialValue: 0,
-    currentValue: 4,
-    targetValue: 10,
-    unit: 'km',
-  },
-  progressPercentage: 40,
-  isCompleted: false,
-};
 const context = {
   windowStartAt: 1,
   windowEndAt: 2,
@@ -79,22 +62,34 @@ const review = {
   reviewedAt: Date.parse('2026-09-30T12:00:00Z'),
   systemContext: context,
 };
-const keyResults = ref<(typeof kr)[]>([]);
 const goalReviews = ref<(typeof review)[]>([]);
 vi.mock('../composables/useGoal', () => ({
-  useGoal: () => ({ keyResults, goalReviews, ...calls }),
+  useGoal: () => ({}),
+}));
+vi.mock('../../../shared/composables/useLabelCatalog', () => ({
+  useLabelCatalog: () => ({ options: ref([]), isLoading: ref(false), createLabel: vi.fn() }),
 }));
 enableAutoUnmount(afterEach);
 beforeEach(() => {
   vi.clearAllMocks();
-  keyResults.value = [];
-  goalReviews.value = [];
-  calls.getGoalAggregateView.mockImplementation(async () => {
-    keyResults.value = [kr];
-    goalReviews.value = [review];
-  });
+  goalReviews.value = [review];
+  calls.getGoalWorkspace.mockImplementation(async () => ({
+    ok: true,
+    data: {
+      goal: createMockGoalMutationReceipt({
+        id: 'goal-1' as never,
+        name: 'Walking goal',
+        keyResults: [],
+        labels: [],
+        reminderConfig: null,
+      }).readModel,
+      taskContext: { availability: 'Unavailable', preview: [], summary: null },
+      knowledgeContext: { availability: 'Unavailable', preview: [], summary: null },
+      recentProgress: [],
+      recentReviews: goalReviews.value,
+    },
+  }));
   calls.getGoalReviewContext.mockResolvedValue({ ok: true, data: context });
-  calls.createReview.mockResolvedValue(review);
 });
 
 async function load(url: string, locale = 'en-US') {
@@ -110,12 +105,11 @@ async function load(url: string, locale = 'en-US') {
         component: RouterView,
         children: parent.children!.map((route) => ({
           ...route,
-          component:
-            route.name === 'goal-review-create'
-              ? GoalReviewCreationView
-              : route.name === 'goal-review-detail'
-                ? GoalReviewDetailView
-                : probe,
+          component: ['goal-detail', 'goal-review-create', 'goal-review-detail'].includes(
+            String(route.name),
+          )
+            ? GoalDetailView
+            : probe,
         })),
       },
     ],
@@ -125,8 +119,14 @@ async function load(url: string, locale = 'en-US') {
   const wrapper = mount(RouterView, {
     global: {
       plugins: [router, createI18n({ legacy: false, locale, messages: productionLocaleMessages })],
+      stubs: {
+        GoalRecordDialog: true,
+        KeyResultDialog: true,
+        GoalKnowledgeMenuItems: true,
+        GoalReminderMenuItems: true,
+      },
       provide: {
-        [GOAL_SERVICE_KEY as symbol]: { getGoalReviewContext: calls.getGoalReviewContext },
+        [GOAL_SERVICE_KEY as symbol]: calls,
       },
     },
   });
@@ -140,7 +140,9 @@ describe('Review deterministic signals without an AI provider', () => {
     async (locale) => {
       for (const url of ['/goals/goal-1/review/create', '/goals/goal-1/review/review-1']) {
         const { wrapper } = await load(url, locale);
-        const snapshot = wrapper.get('[data-testid="review-snapshot"]');
+        const snapshot = new DOMWrapper(
+          document.querySelector<HTMLElement>('[data-testid="review-snapshot"]')!,
+        );
         const signals = snapshot.get('[data-testid="review-signals"]').text();
         expect(snapshot.text()).toContain('30% → 40%');
         expect(signals).toContain('80% → 60%');
@@ -156,7 +158,7 @@ describe('Review deterministic signals without an AI provider', () => {
         expect(signals).toContain(
           locale === 'en-US' ? 'Progress toward target increased' : '向目标的进度上升',
         );
-        expect(wrapper.html()).not.toContain('private-kr-id');
+        expect(document.body.innerHTML).not.toContain('private-kr-id');
         wrapper.unmount();
       }
     },
@@ -173,15 +175,13 @@ describe('Review deterministic signals without an AI provider', () => {
       ],
     };
     calls.getGoalReviewContext.mockResolvedValueOnce({ ok: true, data: empty });
-    calls.getGoalAggregateView.mockImplementation(async () => {
-      goalReviews.value = [{ ...review, systemContext: empty }];
-    });
+    goalReviews.value = [{ ...review, systemContext: empty }];
     for (const url of ['/goals/goal-1/review/create', '/goals/goal-1/review/review-1']) {
       const { wrapper } = await load(url, locale);
-      expect(wrapper.text()).toContain(
+      expect(document.body.textContent).toContain(
         locale === 'en-US' ? 'No measurement records in this window' : '此时间窗口内无测量记录',
       );
-      expect(wrapper.text()).toContain(
+      expect(document.body.textContent).toContain(
         locale === 'en-US'
           ? '0 records · 0 manual · 0 task contributions'
           : '0 条记录 · 0 条手动记录 · 0 条任务贡献',
@@ -189,13 +189,16 @@ describe('Review deterministic signals without an AI provider', () => {
       wrapper.unmount();
     }
   });
-  it('old detail shows facts and explains absent saved signals without a context query', async () => {
-    calls.getGoalAggregateView.mockImplementation(async () => {
-      goalReviews.value = [{ ...review, systemContext: { ...context, signals: [] } }];
-    });
-    const { wrapper } = await load('/goals/goal-1/review/review-1');
-    expect(wrapper.text()).toContain('No signals were saved with this review');
-    expect(wrapper.text()).toContain('30% → 40%');
-    expect(calls.getGoalReviewContext).not.toHaveBeenCalled();
-  });
+  it.each(['empty', 'absent'])(
+    'old detail with %s signals shows facts without a context query',
+    async (kind) => {
+      const legacy = { ...review, systemContext: { ...context, signals: [] } };
+      if (kind === 'absent') Reflect.deleteProperty(legacy.systemContext, 'signals');
+      goalReviews.value = [legacy];
+      await load('/goals/goal-1/review/review-1');
+      expect(document.body.textContent).toContain('No signals were saved with this review');
+      expect(document.body.textContent).toContain('30% → 40%');
+      expect(calls.getGoalReviewContext).not.toHaveBeenCalled();
+    },
+  );
 });

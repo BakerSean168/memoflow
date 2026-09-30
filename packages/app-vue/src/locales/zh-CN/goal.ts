@@ -32,7 +32,7 @@ export default {
     signals: '信号',
     overall: '总体进度',
     points: '个百分点',
-    previewWindow: '系统事实 · 最近 {days} 天',
+    defaultWindow: '系统事实 · 自上次复盘起；首次复盘覆盖产品时间的最近七天。',
     saved: '权威进度快照',
     counts:
       '{recordCount} 条记录 · {manualRecordCount} 条手动记录 · {taskContributionCount} 条任务贡献',
@@ -42,6 +42,7 @@ export default {
     krMovement: '关键结果向目标的进度变化',
     create: '创建复盘',
     detail: '目标复盘',
+    reviewUnavailable: '复盘记录不存在。',
     reflection: '反思',
     challenges: '挑战',
     adjustments: '调整',

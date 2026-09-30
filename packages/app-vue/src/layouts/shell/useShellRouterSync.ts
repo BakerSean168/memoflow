@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import type { RouteLocationNormalizedGeneric } from 'vue-router';
 import { useAppShellStore, type ShellLayoutReason, type ShellModule } from './useAppShellStore';
-import { canLeaveBusinessSurface } from './surface-leave-protocol';
+import { canLeaveBusinessSurface, navigateBusinessSurface } from './surface-leave-protocol';
 import { isStandaloneSettingsPath } from './shell-scene';
 import {
   AI_HARD_MIN,
@@ -251,15 +251,14 @@ export function useShellRouterSync() {
 
   // ── 面板 → URL 的动作（AppShell 事件出口） ──
 
-  /** 切换 Tab：先改 store 再 replace URL（不污染 history）。 */
+  /** 切换 Tab：导航成功后激活（不污染 history）。 */
   async function activateTab(tabId: string): Promise<void> {
     const tab = store.tabs.find((item) => item.id === tabId);
     if (!tab) return;
-    if (store.activeTabId !== tabId && !canLeaveSurface()) return;
-    store.activateTab(tabId);
     if (route.fullPath !== tab.route) {
-      await router.replace(tab.route).catch(() => {});
+      if (!(await navigateBusinessSurface(router, tab.route, t, true))) return;
     }
+    store.activateTab(tabId);
   }
 
   /**
@@ -275,19 +274,15 @@ export function useShellRouterSync() {
       return;
     }
 
-    if (!canLeaveSurface()) return;
-
     const neighbor = store.tabs[index + 1] ?? store.tabs[index - 1];
     if (neighbor) {
-      const failure = await router.replace(neighbor.route).catch(() => true);
-      if (failure) return; // 守卫取消 → 保留 Tab。
+      if (!(await navigateBusinessSurface(router, neighbor.route, t, true))) return;
       store.closeTab(tabId);
       return;
     }
 
     // 最后一个 Tab → `/` 对应右侧 Home；afterEach 不删除其它后台 Tab。
-    const failure = await router.push('/').catch(() => true);
-    if (failure) return;
+    if (!(await navigateBusinessSurface(router, '/', t))) return;
     store.closeTab(tabId);
     maybeAutoFocus();
   }
@@ -314,21 +309,20 @@ export function useShellRouterSync() {
   async function openModule(module: ShellModule, landingRoute: string): Promise<void> {
     // Phase 1：胶囊入口同样经过统一离开协议（dirty/busy 检查），
     // 避免编辑中点击胶囊静默切走（review P1）。
-    if (!canLeaveSurface()) return;
     const existing = store.tabs.find((tab) => tab.module === module);
     if (existing) {
+      if (route.fullPath !== landingRoute) {
+        if (!(await navigateBusinessSurface(router, landingRoute, t, true))) return;
+      }
       store.openTab({
         module,
         route: landingRoute,
         title: titleFor(module),
         intent: 'capsule',
       });
-      if (route.fullPath !== landingRoute) {
-        await router.replace(landingRoute).catch(() => {});
-      }
       return;
     }
-    await router.push(landingRoute).catch(() => {});
+    await navigateBusinessSurface(router, landingRoute, t);
   }
 
   /** 打开独立设置场景：只改路由，不碰 tabs / layout。 */
@@ -349,10 +343,10 @@ export function useShellRouterSync() {
 
   /** 回 STATE A（新对话 / 关面板后的地面态）。 */
   async function goHome(): Promise<void> {
-    if (!canLeaveSurface()) return;
     if (route.path !== '/') {
-      await router.push('/').catch(() => {});
+      await navigateBusinessSurface(router, '/', t);
     } else {
+      if (!canLeaveSurface()) return;
       store.showHome();
       maybeAutoFocus();
     }

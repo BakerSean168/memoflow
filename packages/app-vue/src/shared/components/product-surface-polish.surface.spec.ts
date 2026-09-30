@@ -68,13 +68,13 @@ describe('MemoFlow product surface polish', () => {
     expect(reminder).not.toContain('TimeProgressPercentage');
   });
 
-  it('keeps Goal reviews on product headers and KR inspect on the product dialog shell', () => {
-    const reviewCreate = read('modules/goal/views/GoalReviewCreationView.vue');
-    const reviewDetail = read('modules/goal/views/GoalReviewDetailView.vue');
+  it('keeps Goal review and KR inspect on the product dialog shell', () => {
+    const reviewCreate = read('modules/goal/components/dialogs/GoalReviewCreateDialog.vue');
+    const reviewDetail = read('modules/goal/components/dialogs/GoalReviewInspectDialog.vue');
     const keyResultDetail = read('modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue');
 
     for (const source of [reviewCreate, reviewDetail]) {
-      expect(source).toContain('<ModuleHeader>');
+      expect(source).toContain('<ProductDialogShell');
       expect(source).not.toContain('min-h-14 items-center gap-2 border-b');
       expect(source).not.toContain('rounded-lg border bg-card');
     }

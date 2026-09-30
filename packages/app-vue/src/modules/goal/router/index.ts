@@ -29,16 +29,16 @@ export const goalRoutes: RouteRecordRaw[] = [
       {
         path: ':goalId/review/create',
         name: 'goal-review-create',
-        component: () => import('../views/GoalReviewCreationView.vue'),
+        component: goalDetail,
         meta: { title: 'goal.route.createReview', requiresAuth: true },
-        props: true,
+        props: false,
       },
       {
         path: ':goalId/review/:reviewId',
         name: 'goal-review-detail',
-        component: () => import('../views/GoalReviewDetailView.vue'),
+        component: goalDetail,
         meta: { title: 'goal.route.reviewDetail', requiresAuth: true },
-        props: true,
+        props: false,
       },
       {
         path: ':goalId/key-results/:keyResultId',

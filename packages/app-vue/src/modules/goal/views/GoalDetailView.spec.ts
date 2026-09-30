@@ -29,6 +29,8 @@ const actions = vi.hoisted(() => ({
 vi.mock('vue-router', () => ({
   useRoute: () => ({ params: { id: 'goal-1' } }),
   useRouter: () => ({ push: actions.push }),
+  onBeforeRouteUpdate: vi.fn(),
+  onBeforeRouteLeave: vi.fn(),
 }));
 vi.mock('../composables/useGoal', () => ({
   useGoal: () => ({ getGoalAggregateView: actions.aggregate }),

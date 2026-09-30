@@ -25,14 +25,14 @@
       class="m-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
     >
       {{ t('goal.inspect.goalUnavailable') }}
-      <Button v-if="inspectedKrId" variant="ghost" @click="closeInspect">{{
+      <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
         t('common.close')
       }}</Button>
     </div>
 
     <div v-else-if="!goal" role="alert" data-testid="goal-not-found" class="m-4 p-4 text-sm">
       {{ t('goal.inspect.goalUnavailable') }}
-      <Button v-if="inspectedKrId" variant="ghost" @click="closeInspect">{{
+      <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
         t('common.close')
       }}</Button>
     </div>
@@ -697,10 +697,30 @@
       :key-result="inspectedKr"
       :task-availability="workspace?.taskContext.availability ?? 'Unavailable'"
       :record-revision="recordRevision"
-      @close="closeInspect"
+      @close="closeGoalOverlay"
       @check-in="openQuickCheckIn(inspectedKrId)"
       @open-task="openTask"
       @open-task-scope="openTaskScope(inspectedKrId)"
+    />
+    <GoalReviewCreateDialog
+      v-if="goal && reviewCreateOpen"
+      :open="reviewCreateOpen"
+      :goal-id="goalId"
+      :goal-name="goal.name"
+      :expected-version="goal.version"
+      @close="closeGoalOverlay"
+      @dirty-change="reviewDraftDirty = $event"
+      @busy-change="reviewDraftBusy = $event"
+      @saved="handleReviewSaved"
+    />
+    <GoalReviewInspectDialog
+      v-if="goal && reviewDetailOpen"
+      :open="reviewDetailOpen"
+      :goal-name="goal.name"
+      :review="reviewDetail"
+      :loading="reviewDetailLoading"
+      :load-error="reviewDetailError"
+      @close="closeGoalOverlay"
     />
     <GoalRecordDialog ref="recordDialog" @saved="handleRecordSaved" />
 
@@ -715,7 +735,13 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+  type NavigationGuard,
+} from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   ArrowLeft,
@@ -757,6 +783,7 @@ import {
   type AddKeyResultReq,
   type GoalReminderConfigDTO,
   type GoalRecordClientDTO,
+  type GoalReviewClientDTO,
   type ReminderTrigger,
   type GoalStatus as GoalStatusValue,
   type GoalTimeframe,
@@ -777,6 +804,8 @@ import {
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
 import GoalKeyResultInspectDialog from '../components/dialogs/GoalKeyResultInspectDialog.vue';
+import GoalReviewCreateDialog from '../components/dialogs/GoalReviewCreateDialog.vue';
+import GoalReviewInspectDialog from '../components/dialogs/GoalReviewInspectDialog.vue';
 import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
 import GoalKeyResultDirectControls from '../components/GoalKeyResultDirectControls.vue';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
@@ -789,6 +818,8 @@ import GoalTimeframePicker from '../components/GoalTimeframePicker.vue';
 import { useGoalWorkspace } from '../composables/useGoalWorkspace';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 type LifecycleAction = 'plan' | 'activate' | 'complete' | 'abandon';
@@ -800,11 +831,19 @@ const { t, locale } = useI18n();
 const service = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
 const goalId = computed(() => String(route.params.id ?? route.params.goalId ?? ''));
 const inspectedKrId = computed(() => String(route.params.keyResultId ?? ''));
+const reviewCreateOpen = computed(() => route.name === 'goal-review-create');
+const reviewDetailOpen = computed(() => route.name === 'goal-review-detail');
+const reviewedReviewId = computed(() =>
+  reviewDetailOpen.value ? String(route.params.reviewId ?? '') : '',
+);
+const hasGoalOverlayRoute = computed(
+  () => !!inspectedKrId.value || reviewCreateOpen.value || reviewDetailOpen.value,
+);
 const inspectedKr = computed(
   () => keyResults.value.find((kr) => String(kr.id) === inspectedKrId.value) ?? null,
 );
 const recordRevision = ref(0);
-function closeInspect(): void {
+function closeGoalOverlay(): void {
   void router.push({
     name: 'goal-detail',
     params: { id: goalId.value },
@@ -837,6 +876,28 @@ async function openRecordCorrection(record: GoalRecordClientDTO) {
   }
 }
 const isSaving = ref(false);
+const reviewDraftDirty = ref(false);
+const reviewDraftBusy = ref(false);
+const reviewSaveTransition = ref(false);
+const reviewSurfaceStatus = computed<'clean' | 'dirty' | 'busy'>(() => {
+  if (reviewDraftBusy.value || reviewSaveTransition.value) return 'busy';
+  return reviewDraftDirty.value ? 'dirty' : 'clean';
+});
+usePanelSurfaceStatus(reviewSurfaceStatus);
+
+const guardReviewDraft: NavigationGuard = (to, from) => {
+  if (from.name !== 'goal-review-create') return true;
+  const sameDraft =
+    to.name === 'goal-review-create' &&
+    String(to.params.goalId ?? '') === String(from.params.goalId ?? '');
+  if (reviewSurfaceStatus.value === 'busy') return false;
+  if (sameDraft) return true;
+  if (!reviewDraftDirty.value) return true;
+  return canLeaveBusinessSurface(t, to);
+};
+onBeforeRouteUpdate(guardReviewDraft);
+onBeforeRouteLeave(guardReviewDraft);
+
 const mutationError = ref<string | null>(null);
 const labelCreateError = ref<string | null>(null);
 const customReminderPickerOpen = ref(false);
@@ -916,6 +977,104 @@ const linkedKnowledgeDocumentIds = computed(() =>
     ? workspace.value.knowledgeContext.preview.map((item) => item.documentId)
     : [],
 );
+
+const reviewDetail = ref<GoalReviewClientDTO | null>(null);
+const reviewDetailLoading = ref(false);
+const reviewDetailError = ref(false);
+const reviewHistoryGoalId = ref('');
+const reviewHistory = ref<GoalReviewClientDTO[]>([]);
+let reviewDetailRequest = 0;
+
+async function syncReviewDetailFromRoute(): Promise<void> {
+  const session = ++reviewDetailRequest;
+  reviewDetailError.value = false;
+  if (!reviewDetailOpen.value || !goal.value || !reviewedReviewId.value) {
+    reviewDetail.value = null;
+    reviewDetailLoading.value = false;
+    return;
+  }
+
+  const reviewId = reviewedReviewId.value;
+  const preview =
+    workspace.value?.recentReviews.find((item) => String(item.id) === reviewId) ?? null;
+  if (preview) {
+    reviewDetail.value = preview;
+    reviewDetailLoading.value = false;
+    return;
+  }
+
+  if (reviewHistoryGoalId.value === goalId.value) {
+    const cached = reviewHistory.value.find((item) => String(item.id) === reviewId);
+    if (cached) {
+      reviewDetail.value = cached;
+      reviewDetailLoading.value = false;
+      return;
+    }
+  }
+
+  reviewDetail.value = null;
+  reviewDetailLoading.value = true;
+  try {
+    const requestedGoalId = goalId.value;
+    const result = await service.getGoalReviews(requestedGoalId);
+    if (
+      session !== reviewDetailRequest ||
+      requestedGoalId !== goalId.value ||
+      reviewId !== reviewedReviewId.value
+    ) {
+      return;
+    }
+    if (!result.ok) {
+      reviewDetailError.value = true;
+      return;
+    }
+    const reviews = result.data.reviews.map((item) => item.toDTO());
+    reviewHistoryGoalId.value = requestedGoalId;
+    reviewHistory.value = reviews;
+    reviewDetail.value = reviews.find((item) => String(item.id) === reviewId) ?? null;
+  } catch {
+    if (session === reviewDetailRequest) reviewDetailError.value = true;
+  } finally {
+    if (session === reviewDetailRequest) reviewDetailLoading.value = false;
+  }
+}
+
+watch(
+  () => [reviewDetailOpen.value, goalId.value, reviewedReviewId.value, workspace.value] as const,
+  () => void syncReviewDetailFromRoute(),
+  { immediate: true },
+);
+
+async function handleReviewSaved(review: GoalReviewClientDTO): Promise<void> {
+  const ownerId = goalId.value;
+  reviewSaveTransition.value = true;
+  reviewDraftDirty.value = false;
+  reviewHistory.value = [
+    review,
+    ...(reviewHistoryGoalId.value === ownerId
+      ? reviewHistory.value.filter((item) => item.id !== review.id)
+      : []),
+  ];
+  reviewHistoryGoalId.value = ownerId;
+  reviewDetail.value = review;
+  reviewDetailError.value = false;
+  try {
+    await refresh();
+    reviewDraftBusy.value = false;
+    reviewSaveTransition.value = false;
+    // Dirty has already been cleared; the shell and route guards see a clean surface.
+    await nextTick();
+    await router.push({
+      name: 'goal-review-detail',
+      params: { goalId: ownerId, reviewId: review.id },
+      query: route.query,
+      hash: route.hash,
+    });
+  } finally {
+    reviewSaveTransition.value = false;
+  }
+}
+
 const reviewCount = computed(() => workspace.value?.recentReviews.length ?? 0);
 const latestReview = computed(() => workspace.value?.recentReviews[0] ?? null);
 const latestReviewText = computed(() => {
@@ -1366,7 +1525,12 @@ function openKnowledge(documentId?: string): void {
 
 function openReviewCreate(): void {
   if (!goal.value) return;
-  void router.push({ name: 'goal-review-create', params: { goalId: goal.value.id } });
+  void router.push({
+    name: 'goal-review-create',
+    params: { goalId: goal.value.id },
+    query: route.query,
+    hash: route.hash,
+  });
 }
 
 function openLatestReview(): void {
@@ -1378,6 +1542,8 @@ function openLatestReview(): void {
   void router.push({
     name: 'goal-review-detail',
     params: { goalId: goalId.value, reviewId: review.id },
+    query: route.query,
+    hash: route.hash,
   });
 }
 </script>

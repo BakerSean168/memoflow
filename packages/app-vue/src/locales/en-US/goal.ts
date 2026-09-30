@@ -37,7 +37,8 @@ export default {
     signals: 'Signals',
     overall: 'Overall progress',
     points: 'percentage points',
-    previewWindow: 'System facts · last {days} days',
+    defaultWindow:
+      'System facts since the last review; the first review covers seven Product Time days.',
     saved: 'Authoritative progress snapshot',
     counts:
       '{recordCount} records · {manualRecordCount} manual · {taskContributionCount} task contributions',
@@ -47,6 +48,7 @@ export default {
     krMovement: 'Key result movement toward targets',
     create: 'Create review',
     detail: 'Goal review',
+    reviewUnavailable: 'Review not found.',
     reflection: 'Reflection',
     challenges: 'Challenges',
     adjustments: 'Adjustments',
