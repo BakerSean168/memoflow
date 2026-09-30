@@ -3,7 +3,13 @@
 - Date: 2026-09-30
 - Branch: `explore/desktop-auto-update`
 - Scope: Desktop version discovery, background download, restart-to-apply update, release-feed integrity, and update UX.
-- Status: Exploration / implementation-ready plan
+- Status: Research precursor; detailed design moved to ADR-112 and the implementation plan
+
+Detailed follow-up:
+
+- [Reference study](../../analysis/2026-09-30-desktop-auto-update-reference-study.md)
+- [ADR-112 — Desktop Update Domain、Runtime Boundary 与 Installation Ownership](../../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md)
+- [Implementation plan](./2026-09-30-desktop-auto-update-implementation.md)
 
 ## 1. Executive summary
 
@@ -226,13 +232,7 @@ Use one canonical state shape:
 
 ```ts
 type DesktopUpdatePhase =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'downloading'
-  | 'ready'
-  | 'up-to-date'
-  | 'error';
+  'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'up-to-date' | 'error';
 
 interface DesktopUpdateSnapshot {
   phase: DesktopUpdatePhase;
