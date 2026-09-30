@@ -21,6 +21,7 @@ describe('goal module exports', () => {
     const detailRoute = children.find((r) => r.name === 'goal-detail');
     expect(detailRoute).toBeDefined();
     expect(detailRoute?.path).toBe(':id');
-    expect(detailRoute?.props).toBe(true);
+    // GoalDetail reads route state so all compatibility overlays share one owner.
+    expect(detailRoute?.props).toBe(false);
   });
 });

@@ -1706,6 +1706,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/goal/reference/goal-reference.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.goal-reference.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/local-docker/core-product-phase-a.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -6876,6 +6884,17 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/use-cases/commands/__tests__/goal-reference-flow.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11518,7 +11537,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11532,7 +11551,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 34
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11673,6 +11692,13 @@
       "suite": "e2e",
       "runner": "playwright",
       "fileCount": 2
+    },
+    {
+      "id": "apps/web/playwright.goal-reference.config.ts",
+      "type": "primary",
+      "suite": "e2e",
+      "runner": "playwright",
+      "fileCount": 1
     },
     {
       "id": "apps/web/playwright.local-docker.config.ts",
@@ -11924,7 +11950,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -12317,6 +12343,7 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal-record.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/goal-record-portability.test.ts",
+      "packages/goal/src/server/application/use-cases/commands/__tests__/goal-reference-flow.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/plan-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
@@ -12628,12 +12655,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1115,
+    "unit": 1116,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 6,
-    "e2e": 58,
+    "e2e": 59,
     "perf": 1,
     "governance": 59
   }
