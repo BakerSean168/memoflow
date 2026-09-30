@@ -971,6 +971,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 ## PVC-SCHED-4101 — Single projection presentation authority
 
+**Execution (2026-10-01): Accepted / frozen.** Schedule now owns one typed source-presentation authority for CalendarEntry/Task/Goal/Routine labels, FullCalendar source classes, compact dots/badges and conflict-aware event tone. Planner Day/Week/Month, day detail, event detail, `useCalendarView` compatibility copy and Schedule capsule all consume the same authority. Fresh focused Planner/calendar Vitest passed 5 files / 22 tests; the earlier complete Schedule-module pass remains 18 files / 63 tests; direct App-Vue `vue-tsc` passed. An isolated production-component Playwright matrix passed both en-US/light/1280 and zh-CN/dark/360 scenarios, covering Day/Week/Month overflow, day/event details and capsule with 12 fresh captures, 0 browser errors and 0 horizontal document overflow. Visual review also recorded the existing narrow seven-column Week/Month density limitation for later responsive/dialog work; it is not a source-authority drift. Evidence: [SCHED-4101 presentation authority validation](../archive/2026-10-01-pvc-sched-4101-presentation-authority-validation.md).
+
 **Goal:** Task/Goal/Routine/CalendarEntry 的 dot/badge/source copy 不再多处重复。
 
 **Implementation:**

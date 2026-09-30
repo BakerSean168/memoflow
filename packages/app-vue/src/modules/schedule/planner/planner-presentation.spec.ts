@@ -6,6 +6,9 @@ import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import {
   formatPlannerProjectionTimeRange,
   plannerProjectionDateKey,
+  plannerProjectionSourceLabel,
+  plannerProjectionSourcePresentation,
+  plannerProjectionToneClass,
 } from './planner-presentation';
 
 function timedProjection(start: number, end: number | null): CalendarEventProjection {
@@ -27,6 +30,47 @@ function timedProjection(start: number, end: number | null): CalendarEventProjec
 
 describe('planner projection presentation', () => {
   afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
+
+  it('owns one source label and visual identity for every Planner owner', () => {
+    expect(plannerProjectionSourcePresentation).toEqual({
+      schedule: expect.objectContaining({
+        labelI18nKey: 'schedule.source.schedule',
+        sourceClass: 'planner-source-schedule',
+        dotClass: 'bg-primary',
+      }),
+      task: expect.objectContaining({
+        labelI18nKey: 'schedule.source.task',
+        sourceClass: 'planner-source-task',
+        dotClass: 'bg-info',
+      }),
+      goal: expect.objectContaining({
+        labelI18nKey: 'schedule.source.goal',
+        sourceClass: 'planner-source-goal',
+        dotClass: 'bg-warning',
+      }),
+      routine: expect.objectContaining({
+        labelI18nKey: 'schedule.source.routine',
+        sourceClass: 'planner-source-routine',
+        dotClass: 'bg-success',
+      }),
+    });
+
+    expect(plannerProjectionSourceLabel('goal', (key) => `translated:${key}`)).toBe(
+      'translated:schedule.source.goal',
+    );
+  });
+
+  it('derives event tone from projection metadata and conflict state', () => {
+    const event = timedProjection(Date.parse('2026-03-08T13:05:00.000Z'), null);
+    expect(plannerProjectionToneClass(event)).toBe('planner-tone-default');
+    expect(
+      plannerProjectionToneClass({
+        ...event,
+        displayMetadata: { ...event.displayMetadata, tone: 'success' },
+      }),
+    ).toBe('planner-tone-success');
+    expect(plannerProjectionToneClass(event, true)).toBe('planner-tone-warning');
+  });
 
   it('formats timed projections in the session timezone', () => {
     const profile = createDefaultUserPreferenceProfile();

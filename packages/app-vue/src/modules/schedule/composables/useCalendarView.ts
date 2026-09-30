@@ -34,6 +34,7 @@ import {
   projectTaskOccurrence,
   type PlannerProductTimePort,
 } from '../planner';
+import { plannerProjectionSourceLabel } from '../planner/planner-presentation';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
 import { plannerOwnerQueryKeys } from '../../../platform/server-state/query-keys';
 import { PLANNER_OWNER_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
@@ -77,22 +78,14 @@ export function toLocalDateKey(value: Date | number): string {
 }
 
 /**
- * Residual 1291: sole calendarEventSourceLabel — schedule/goal/task source → i18n label.
- * Dual-retired from DayDetailSheet + EventDetailSheet local sourceLabel copies.
- * TIME-1206: capsule HH:mm formatting resolves through the session Product Time facade.
- * Soft residual 1288: Month eventClass translucent + getEventStyle Day/Week layout keep-boundaries remain separate.
+ * Schedule capsule compatibility alias. Source copy now comes from the same
+ * Planner presentation authority used by Day/Week/Month/detail surfaces.
  */
 export function calendarEventSourceLabel(
   source: CalendarEventItem['source'],
   translate: (key: string) => string,
 ): string {
-  const keys: Record<CalendarEventItem['source'], string> = {
-    schedule: 'schedule.source.schedule',
-    goal: 'schedule.source.goal',
-    task: 'schedule.source.task',
-    routine: 'schedule.source.routine',
-  };
-  return translate(keys[source]);
+  return plannerProjectionSourceLabel(source, translate);
 }
 
 /**

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CalendarDays } from '@lucide/vue';
 import {
+  calendarEventSourceLabel,
   formatCapsuleTime,
   toLocalDateKey,
   type CalendarEventItem,
@@ -122,8 +123,10 @@ onMounted(() => {
               {{ primaryTime }}
             </span>
           </span>
-          <span class="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
-            <span>{{ t(`schedule.source.${primaryEvent.source}`) }}</span>
+          <span
+            class="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground"
+          >
+            <span>{{ calendarEventSourceLabel(primaryEvent.source, t) }}</span>
             <span v-if="snapshot.kind === 'upcoming' && snapshot.minutesUntilStart != null">
               {{ t('shell.schedule.startsIn', { minutes: snapshot.minutesUntilStart }) }}
             </span>
@@ -155,7 +158,7 @@ onMounted(() => {
               {{ event.title }}
             </span>
             <span class="shrink-0 text-[9px] text-muted-foreground/70">
-              {{ t(`schedule.source.${event.source}`) }}
+              {{ calendarEventSourceLabel(event.source, t) }}
             </span>
           </button>
         </div>
