@@ -124,6 +124,9 @@ function goalRecordFromDTO(dto: GoalRecordClientDTO): GoalRecord {
     value: dto.value,
     valueAfter: dto.valueAfter,
     comment: dto.comment,
+    authorship: dto.authorship,
+    source: dto.source,
+    recordedAt: dto.recordedAt,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
   });

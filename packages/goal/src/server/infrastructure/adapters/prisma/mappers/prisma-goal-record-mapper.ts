@@ -25,6 +25,7 @@ export class PrismaGoalRecordMapper {
       keyResultId: KeyResultId.of(data.keyResultId),
       identityId: IdentityId.of(data.identityId),
       value: data.value,
+      authorship: data.authorship as GoalRecord['authorship'],
       note: data.note ?? null,
       sourceType: data.sourceType as GoalRecord['sourceType'],
       sourceId: data.sourceId,

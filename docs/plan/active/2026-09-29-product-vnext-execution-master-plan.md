@@ -447,6 +447,32 @@ packages/goal/src/shared/key-result-progress-calculator.ts
 
 **Acceptance:** 自动 Task record 不能手工改；用户在 Task 完成时输入的 measurement 可以纠正且仍保持 occurrence correlation。
 
+**Completed (2026-09-30):** Goal-owned `GoalRecordAuthorship` wire values are frozen as `Manual / TaskAutomatic / TaskUserMeasurement`; existing sourceType/sourceId remain correlation only. GoalRecord creation/loading validates the complete invariant matrix. Manual records support normal correction/delete; TaskAutomatic rejects both; TaskUserMeasurement permits value/note correction while retaining occurrence source/authorship and rejects normal delete. Source-correlated removal remains generic. The Task handler explicitly creates TaskAutomatic; no TaskUserMeasurement completion/event/outbox flow was added.
+
+The sole client DTO, server projection, Goal client entity/service, Prisma and PowerSync mappings preserve authorship, nullable `{ type, id }` source and recordedAt. GoalRecordCard uses recordedAt and shipped en-US/zh-CN provenance copy without source IDs. PostgreSQL migration/backfill/CHECK, local schema, generated Prisma client, runtime bootstrap and migrator ordering are implemented. Source-neutral portability exports no Task provenance and restores Manual. GOAL-1201/1202 composer/preview and full-history mutation receipts remain covered.
+
+**Green evidence:**
+
+| Exact validation | Result |
+| --- | --- |
+| `pnpm nx run contracts:test -- goal-record` | 2 files, 7 tests passed |
+| `pnpm nx run goal:test -- goal-record task-goal-progress remove-task-goal-contribution goal-portability goal-record-preview` | Post-rebase: 15 files, 168 tests passed |
+| `pnpm nx run database:test -- goal-record` | 2 files, 7 tests passed |
+| `pnpm nx run powersync-schema:test` | 1 file, 12 tests passed |
+| `pnpm nx run app-vue:test -- GoalRecordCard GoalRecordDialog GoalRecordPreview useGoalRecords` | 4 files, 88 tests passed |
+| `pnpm nx run migrator:test` | 1 file, 3 tests passed |
+| `pnpm nx run goal:typecheck`; `pnpm nx run app-vue:typecheck` | Passed |
+| `pnpm nx run powersync-schema:typecheck`; `pnpm nx run migrator:typecheck` | Passed |
+| `pnpm nx run database:prisma-generate` | Generated/normalized Prisma artifacts through repository tooling |
+| `pnpm exec prisma validate --config ./prisma/prisma.config.ts` (packages/database) | Schema valid |
+| `pnpm nx run database:runtime-scripts:build` | Passed, authorship bootstrap emitted |
+| PostgreSQL temporary-table fixture `packages/database/src/schema/goal-record-authorship.test.sql` on MemoFlow-test-db | Legacy null source → Manual; occurrence/plan → TaskAutomatic; default verified; 4 valid combinations accepted, 76 invalid combinations rejected; rerun retains TaskUserMeasurement |
+| Changed-file `pnpm exec eslint` | Exit 0, no errors; existing test `any` warnings and ignored JSON warning |
+| `git diff --check` | Passed |
+| `pnpm test:inventory`; `pnpm nx run memoflow:governance-check` | Inventory regenerated; governance passed |
+
+**Files / execution evidence:** [PVC-GOAL-1203 implementation](../archive/2026-09-30-pvc-goal-1203-implementation.md) lists exact changed files and local result logs. Initial governance failure was stale generated inventory (including pre-existing omitted tests); repository regeneration resolved it. After rebasing onto the integrated TASK-3301A baseline, Prisma artifacts were regenerated from the combined Goal/Task schema and the full focused validation/typecheck/governance set passed again. **Blockers:** none.
+
 **Dependencies:** GOAL-1201.
 
 ---

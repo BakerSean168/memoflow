@@ -45,6 +45,10 @@ export class DeleteGoalRecordUseCase {
           return error('NOT_FOUND', `Goal record not found: ${recordId}`);
         }
 
+        if (!record.canUserDelete) {
+          return error('VALIDATION_ERROR', 'Task Goal records must be removed through Task correction or revert');
+        }
+
         const keyResult = goal.keyResults.find((item) => item.id === keyResultId);
         if (!keyResult) {
           return error('NOT_FOUND', `KeyResult not found: ${keyResultId} in goal ${goalId}`);

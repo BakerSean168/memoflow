@@ -59,6 +59,7 @@ describe('GoalTaskProgressHandler', () => {
       {
         value: 3,
         note: '任务实例完成: Write tests',
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_INSTANCE', id: 'instance-1' },
       },
       'identity-1',
@@ -73,6 +74,7 @@ describe('GoalTaskProgressHandler', () => {
       'kr-1',
       expect.objectContaining({
         note: '任务计划完成: Write tests',
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_TEMPLATE', id: 'template-1' },
       }),
       'identity-1',

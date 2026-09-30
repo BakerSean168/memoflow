@@ -337,6 +337,7 @@ exports.Prisma.GoalRecordScalarFieldEnum = {
   keyResultId: 'keyResultId',
   value: 'value',
   note: 'note',
+  authorship: 'authorship',
   sourceType: 'sourceType',
   sourceId: 'sourceId',
   recordedAt: 'recordedAt',

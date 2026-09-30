@@ -110,6 +110,8 @@ describe('CreateGoalRecordUseCase', () => {
       expect(result.data.recordChanges?.upserted[0]).toMatchObject({
         value: 1,
         valueAfter: 42,
+        authorship: 'Manual',
+        source: null,
       });
     }
   });
@@ -210,6 +212,7 @@ describe('CreateGoalRecordUseCase', () => {
       keyResult.id,
       {
         value: 1,
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
       },
       'identity-1',
@@ -241,6 +244,7 @@ describe('CreateGoalRecordUseCase', () => {
     const params = {
       value: 2,
       note: 'Task completed',
+      authorship: 'TaskAutomatic' as const,
       source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
     };
     const first = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');
@@ -284,4 +288,32 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(4);
     expect(goalRepository.save).not.toHaveBeenCalled();
   });
+  it.each(['Sum', 'Average', 'Max', 'Min', 'Last'] as const)('creates explicit TaskUserMeasurement for %s', async (aggregationMethod) => {
+    const goal = createTestGoal();
+    const kr = goal.createAndAddKeyResult({ title: 'Measurement', aggregationMethod,
+      initialValue: 0, currentValue: 10, targetValue: 100, weight: 1, unit: 'points' });
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    const result = await useCase.execute(goal.id, kr.id, { value: 2, authorship: 'TaskUserMeasurement',
+      source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } }, 'identity-1');
+    expect(result).toBeOk();
+    expect(goalRecordRepository.save).toHaveBeenCalledWith(expect.objectContaining({ authorship: 'TaskUserMeasurement' }));
+    if (result.ok) expect(result.data.recordChanges?.upserted[0]).toMatchObject({
+      authorship: 'TaskUserMeasurement', source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } });
+  });
+
+  it.each([
+    { authorship: 'Manual', source: { type: 'TASK_INSTANCE', id: 'task' } },
+    { authorship: 'TaskAutomatic' },
+    { authorship: 'TaskUserMeasurement', source: { type: 'TASK_TEMPLATE', id: 'plan' } },
+    { authorship: 'TaskUserMeasurement', source: { type: 'TASK_INSTANCE', id: ' ' } },
+  ])('rejects invalid internal provenance $authorship / $source', async (provenance) => {
+    const goal = createTestGoal();
+    const kr = goal.createAndAddKeyResult({ title: 'Measurement', aggregationMethod: 'Sum',
+      initialValue: 0, currentValue: 0, targetValue: 100, weight: 1, unit: 'points' });
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    const result = await useCase.execute(goal.id, kr.id, { value: 2, ...provenance } as never, 'identity-1');
+    expect(result).toBeErrorWithCode('VALIDATION_ERROR');
+    expect(goalRecordRepository.save).not.toHaveBeenCalled();
+  });
+
 });

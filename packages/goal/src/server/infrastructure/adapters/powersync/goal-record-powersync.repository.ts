@@ -159,6 +159,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
              identity_id = ?,
              value = ?,
              note = ?,
+             authorship = ?,
              source_type = ?,
              source_id = ?,
              recorded_at = ?,
@@ -169,6 +170,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
           dto.identityId,
           dto.value,
           dto.note,
+          dto.authorship,
           dto.sourceType,
           dto.sourceId,
           toDbDateTime(dto.recordedAt),
@@ -179,15 +181,16 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
     } else {
       await this.db.execute(
         `INSERT INTO goal_records (
-           id, key_result_id, identity_id, value, note, source_type, source_id, recorded_at,
+           id, key_result_id, identity_id, value, note, authorship, source_type, source_id, recorded_at,
            created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           dto.id,
           dto.keyResultId,
           dto.identityId,
           dto.value,
           dto.note,
+          dto.authorship,
           dto.sourceType,
           dto.sourceId,
           toDbDateTime(dto.recordedAt),

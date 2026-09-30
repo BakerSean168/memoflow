@@ -1,4 +1,4 @@
-import { GoalRecordSourceType } from '@memoflow/contracts/goal';
+import { GoalRecordAuthorship, GoalRecordSourceType } from '@memoflow/contracts/goal';
 import {
   TaskGoalSettlementSourceType,
   type TaskGoalProgressOutboxEventV2,
@@ -64,7 +64,7 @@ export class GoalTaskProgressHandler implements TaskGoalProgressHandler {
     const result = await this.createGoalRecord.execute(
       String(event.goalId),
       String(event.keyResultId),
-      { value: event.value, note, source },
+      { value: event.value, note, source, authorship: GoalRecordAuthorship.TaskAutomatic },
       String(event.identityId),
     );
 

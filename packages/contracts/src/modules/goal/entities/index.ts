@@ -5,7 +5,7 @@
  * Client record DTO lives under aggregates only.
  */
 
-export { GoalRecordSourceType } from './goal-record-server';
+export { GoalRecordSourceType, GoalRecordAuthorship, GoalRecordAuthorshipSchema } from './goal-record-server';
 export type {
   GoalRecordServerDTO,
   GoalRecordSource,

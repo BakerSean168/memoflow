@@ -75,6 +75,7 @@ model GoalRecord {
   keyResultId String   @map("key_result_id")
   value       Float
   note        String?
+  authorship  String   @default("Manual")
   sourceType  String?  @map("source_type")
   sourceId    String?  @map("source_id")
   recordedAt  DateTime @map("recorded_at")

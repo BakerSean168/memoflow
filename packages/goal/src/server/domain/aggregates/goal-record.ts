@@ -24,6 +24,7 @@
 
 import { Entity } from '@memoflow/utils/domain';
 import { GoalRecordId, KeyResultId } from '../../domain';
+import { GoalRecordAuthorship, GoalRecordAuthorshipSchema, GoalRecordSourceType } from '@memoflow/contracts/goal';
 import type {
   GoalRecordServerDTO,
   GoalRecordSource,
@@ -38,6 +39,7 @@ export interface GoalRecordState {
   identityId: IdentityId;
   value: number;
   note: string | null;
+  authorship: GoalRecordAuthorship;
   sourceType?: GoalRecordSourceTypeValue | null;
   sourceId?: string | null;
   recordedAt: Instant;
@@ -55,12 +57,14 @@ export class GoalRecord extends Entity<GoalRecordId> {
   // ================= 2. 构造函数 (Private) =================
   private constructor(state: GoalRecordState) {
     super(state.id);
+    GoalRecord.validateProvenance(state.authorship, state.sourceType ?? null, state.sourceId ?? null);
     this._props = {
       id: state.id,
       keyResultId: state.keyResultId,
       identityId: state.identityId,
       value: state.value,
       note: state.note ?? null,
+      authorship: state.authorship,
       sourceType: state.sourceType ?? null,
       sourceId: state.sourceId ?? null,
       recordedAt: state.recordedAt,
@@ -84,6 +88,43 @@ export class GoalRecord extends Entity<GoalRecordId> {
 
   get note(): string | null {
     return this._props.note;
+  }
+
+  get authorship(): GoalRecordAuthorship {
+    return this._props.authorship;
+  }
+
+  get canUserCorrect(): boolean {
+    return this.authorship !== GoalRecordAuthorship.TaskAutomatic;
+  }
+
+  get canUserDelete(): boolean {
+    return this.authorship === GoalRecordAuthorship.Manual;
+  }
+
+  public static validateProvenance(
+    authorship: GoalRecordAuthorship,
+    sourceType: GoalRecordSourceTypeValue | null,
+    sourceId: string | null,
+  ): void {
+    GoalRecordAuthorshipSchema.parse(authorship);
+    if ((sourceType === null) !== (sourceId === null)) {
+      throw new Error('Goal record source type and ID are required together');
+    }
+    if (sourceType !== null &&
+        (!Object.values(GoalRecordSourceType).includes(sourceType) || !sourceId?.trim())) {
+      throw new Error('Goal record source is invalid');
+    }
+    if (authorship === GoalRecordAuthorship.Manual && sourceType !== null) {
+      throw new Error('Manual Goal records cannot have a source');
+    }
+    if (authorship !== GoalRecordAuthorship.Manual && sourceType === null) {
+      throw new Error('Task Goal records require a source');
+    }
+    if (authorship === GoalRecordAuthorship.TaskUserMeasurement &&
+        sourceType !== GoalRecordSourceType.TaskOccurrence) {
+      throw new Error('Task user measurements require a Task occurrence source');
+    }
   }
 
   get sourceType(): GoalRecordSourceTypeValue | null {
@@ -122,6 +163,7 @@ export class GoalRecord extends Entity<GoalRecordId> {
     value: number;
     note?: string;
     source?: GoalRecordSource;
+    authorship?: GoalRecordAuthorship;
     recordedAt?: Instant;
   }): GoalRecord {
     // 验证
@@ -131,9 +173,11 @@ export class GoalRecord extends Entity<GoalRecordId> {
     if (!Number.isFinite(params.value)) {
       throw new Error('Value must be a finite number');
     }
-    if (params.source && (!params.source.type || !params.source.id.trim())) {
-      throw new Error('Goal record source type and ID are required together');
-    }
+    GoalRecord.validateProvenance(
+      params.authorship ?? GoalRecordAuthorship.Manual,
+      params.source?.type ?? null,
+      params.source?.id ?? null,
+    );
 
     const now = Date.now();
     const id = params.id ?? GoalRecordId.generate();
@@ -143,6 +187,7 @@ export class GoalRecord extends Entity<GoalRecordId> {
       keyResultId: params.keyResultId,
       identityId: params.identityId,
       value: params.value,
+      authorship: params.authorship ?? GoalRecordAuthorship.Manual,
       note: params.note?.trim() || null,
       sourceType: params.source?.type ?? null,
       sourceId: params.source?.id.trim() ?? null,
@@ -165,12 +210,14 @@ export class GoalRecord extends Entity<GoalRecordId> {
    * ✅ 更新备注
    */
   public updateValue(value: number): void {
+    if (!this.canUserCorrect) throw new Error('Automatic Task Goal records cannot be corrected');
     if (!Number.isFinite(value)) throw new Error('Value must be a finite number');
     this._props.value = value;
     this._props.updatedAt = Date.now();
   }
 
   public updateNote(note?: string | null): void {
+    if (!this.canUserCorrect) throw new Error('Automatic Task Goal records cannot be corrected');
     this._props.note = note?.trim() || null;
     this._props.updatedAt = Date.now();
   }
@@ -187,6 +234,7 @@ export class GoalRecord extends Entity<GoalRecordId> {
       identityId: this._props.identityId,
       value: this._props.value,
       note: this._props.note,
+      authorship: this.authorship,
       sourceType: this._props.sourceType ?? null,
       sourceId: this._props.sourceId ?? null,
       recordedAt: this._props.recordedAt,
@@ -209,6 +257,9 @@ export class GoalRecord extends Entity<GoalRecordId> {
       value: this._props.value,
       valueAfter,
       comment: this._props.note,
+      authorship: this.authorship,
+      source: this.sourceType && this.sourceId ? { type: this.sourceType, id: this.sourceId } : null,
+      recordedAt: this.recordedAt,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
     };

@@ -26391,6 +26391,7 @@ export namespace Prisma {
     keyResultId: string | null
     value: number | null
     note: string | null
+    authorship: string | null
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date | null
@@ -26404,6 +26405,7 @@ export namespace Prisma {
     keyResultId: string | null
     value: number | null
     note: string | null
+    authorship: string | null
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date | null
@@ -26417,6 +26419,7 @@ export namespace Prisma {
     keyResultId: number
     value: number
     note: number
+    authorship: number
     sourceType: number
     sourceId: number
     recordedAt: number
@@ -26440,6 +26443,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26453,6 +26457,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26466,6 +26471,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26566,6 +26572,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note: string | null
+    authorship: string
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date
@@ -26598,6 +26605,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26612,6 +26620,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26626,6 +26635,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26640,6 +26650,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26647,7 +26658,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GoalRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "keyResultId" | "value" | "note" | "sourceType" | "sourceId" | "recordedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["goalRecord"]>
+  export type GoalRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "keyResultId" | "value" | "note" | "authorship" | "sourceType" | "sourceId" | "recordedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["goalRecord"]>
   export type GoalRecordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     keyResult?: boolean | KeyResultDefaultArgs<ExtArgs>
   }
@@ -26669,6 +26680,7 @@ export namespace Prisma {
       keyResultId: string
       value: number
       note: string | null
+      authorship: string
       sourceType: string | null
       sourceId: string | null
       recordedAt: Date
@@ -27103,6 +27115,7 @@ export namespace Prisma {
     readonly keyResultId: FieldRef<"GoalRecord", 'String'>
     readonly value: FieldRef<"GoalRecord", 'Float'>
     readonly note: FieldRef<"GoalRecord", 'String'>
+    readonly authorship: FieldRef<"GoalRecord", 'String'>
     readonly sourceType: FieldRef<"GoalRecord", 'String'>
     readonly sourceId: FieldRef<"GoalRecord", 'String'>
     readonly recordedAt: FieldRef<"GoalRecord", 'DateTime'>
@@ -97818,6 +97831,7 @@ export namespace Prisma {
     keyResultId: 'keyResultId',
     value: 'value',
     note: 'note',
+    authorship: 'authorship',
     sourceType: 'sourceType',
     sourceId: 'sourceId',
     recordedAt: 'recordedAt',
@@ -100439,6 +100453,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -100453,6 +100468,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrderInput | SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrderInput | SortOrder
     sourceId?: SortOrderInput | SortOrder
     recordedAt?: SortOrder
@@ -100471,6 +100487,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -100485,6 +100502,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrderInput | SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrderInput | SortOrder
     sourceId?: SortOrderInput | SortOrder
     recordedAt?: SortOrder
@@ -100506,6 +100524,7 @@ export namespace Prisma {
     keyResultId?: StringWithAggregatesFilter<"GoalRecord"> | string
     value?: FloatWithAggregatesFilter<"GoalRecord"> | number
     note?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
+    authorship?: StringWithAggregatesFilter<"GoalRecord"> | string
     sourceType?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeWithAggregatesFilter<"GoalRecord"> | Date | string
@@ -107482,6 +107501,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107496,6 +107516,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107507,6 +107528,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107521,6 +107543,7 @@ export namespace Prisma {
     keyResultId?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107534,6 +107557,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107545,6 +107569,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107558,6 +107583,7 @@ export namespace Prisma {
     keyResultId?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -115031,6 +115057,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -115048,6 +115075,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -115061,6 +115089,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -128346,6 +128375,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -128357,6 +128387,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -128509,6 +128540,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -142240,6 +142272,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -142342,6 +142375,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142353,6 +142387,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142364,6 +142399,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string

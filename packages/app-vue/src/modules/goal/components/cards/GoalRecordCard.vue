@@ -4,8 +4,9 @@
       <p class="text-sm font-medium">
         {{ t('goal.cards.cardsRecordCard.recordValue') }}{{ record.value }}
       </p>
-      <p class="text-xs text-muted-foreground">{{ formatProductDateTime(record.createdAt) }}</p>
+      <p class="text-xs text-muted-foreground">{{ formatProductDateTime(record.recordedAt) }}</p>
     </div>
+    <p class="mt-1 text-xs text-muted-foreground">{{ t(`goal.cards.cardsRecordCard.authorship.${record.authorship}`) }}</p>
     <p v-if="record.comment" class="mt-2 text-sm text-muted-foreground">{{ record.comment }}</p>
   </div>
 </template>

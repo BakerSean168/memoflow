@@ -9,6 +9,10 @@ function getColumnType(tableName: keyof typeof PowerSyncAppSchema.props, columnN
 }
 
 describe('PowerSyncAppSchema', () => {
+  it('syncs GoalRecord authorship separately from correlation and recordedAt', () => {
+    for (const name of ['authorship', 'source_type', 'source_id', 'recorded_at'])
+      expect(getColumnType('goal_records', name)).toBe('TEXT');
+  });
   it('keeps the key sync tables in the exported schema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
     expect(PowerSyncAppSchema.props).toHaveProperty('task_plans');

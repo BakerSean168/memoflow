@@ -54,12 +54,13 @@ describe('RemoveTaskGoalContributionUseCase', () => {
     );
   });
 
-  it('deletes the exact source record and recalculates canonical Sum history', async () => {
+  it.each(['TaskAutomatic', 'TaskUserMeasurement'] as const)('removes %s by source and recalculates canonical Sum history', async (authorship) => {
     const { goal, keyResult } = createGoalWithProgress();
     const record = GoalRecord.create({
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 3,
+      authorship,
       source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);
@@ -89,6 +90,7 @@ describe('RemoveTaskGoalContributionUseCase', () => {
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 3,
+      authorship: 'TaskAutomatic' as const,
       source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);

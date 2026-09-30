@@ -15,6 +15,7 @@ import type {
   IdentityId,
   GoalRecordId,
 } from '../../../primitives';
+import { GoalRecordAuthorshipSchema, GoalRecordSourceType } from '../entities/goal-record-server';
 import { GoalStatus } from '../value-objects/goal-status';
 import { GoalReviewSystemContextSchema } from '../value-objects/goal-review-context';
 export type { GoalReviewSystemContext } from '../value-objects/goal-review-context';
@@ -143,6 +144,9 @@ export const GoalRecordClientDTOSchema = z.object({
   value: z.number(),
   valueAfter: z.number(),
   comment: z.string().nullable(),
+  authorship: GoalRecordAuthorshipSchema,
+  source: z.object({ type: z.enum(GoalRecordSourceType), id: z.string().trim().min(1) }).nullable(),
+  recordedAt: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),
 });

@@ -11,7 +11,7 @@ import type { IGoalRepository, IGoalRecordRepository } from '../../../domain';
 import { GoalVersionConflictError } from '../../../domain';
 import { GoalRecord } from '../../../domain';
 import { KeyResultProgress } from '../../../domain';
-import { KeyResultCalculationMethod, type GoalMutationReceipt, type GoalRecordSource } from '@memoflow/contracts/goal';
+import { GoalRecordAuthorship, KeyResultCalculationMethod, type GoalMutationReceipt, type GoalRecordSource } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { IdentityId, KeyResultId } from '@memoflow/contracts/primitives';
@@ -32,8 +32,8 @@ export class CreateGoalRecordUseCase {
       value: number;
       note?: string;
     } & (
-      | { expectedVersion: number; source?: never }
-      | { source: GoalRecordSource; expectedVersion?: never }
+      | { expectedVersion: number; source?: never; authorship?: never }
+      | { source: GoalRecordSource; authorship: GoalRecordAuthorship; expectedVersion?: never }
     ),
     identityId: string,
   ): Promise<Result<GoalMutationReceipt>> {
@@ -57,8 +57,16 @@ export class CreateGoalRecordUseCase {
           return error('NOT_FOUND', `KeyResult not found: ${keyResultId} in goal ${goalId}`);
         }
 
+        const authorship = params.authorship ?? GoalRecordAuthorship.Manual;
+        try {
+          GoalRecord.validateProvenance(authorship, params.source?.type ?? null, params.source?.id ?? null);
+        } catch (cause) {
+          return error('VALIDATION_ERROR', cause instanceof Error ? cause.message : 'Invalid Goal record provenance');
+        }
+
         if (params.source) {
-          if (keyResult.progress.aggregationMethod !== KeyResultCalculationMethod.Sum) {
+          if (authorship === GoalRecordAuthorship.TaskAutomatic &&
+              keyResult.progress.aggregationMethod !== KeyResultCalculationMethod.Sum) {
             return error(
               'VALIDATION_ERROR',
               'Automatic Task contribution is supported only for Sum key results',
@@ -70,7 +78,8 @@ export class CreateGoalRecordUseCase {
             params.source.id,
           );
           if (existing) {
-            if (String(existing.keyResultId) !== keyResultId || existing.value !== params.value) {
+            if (String(existing.keyResultId) !== keyResultId || existing.value !== params.value ||
+                existing.authorship !== authorship) {
               return error(
                 'VALIDATION_ERROR',
                 'Goal contribution source is already bound to another value',
@@ -105,6 +114,7 @@ export class CreateGoalRecordUseCase {
           value: params.value,
           note: params.note,
           source: params.source,
+          authorship,
         });
 
         // 4. 持久化

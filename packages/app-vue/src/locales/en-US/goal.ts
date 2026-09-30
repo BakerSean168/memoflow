@@ -300,6 +300,11 @@ export default {
       recordValue: 'Record Value',
     },
     cardsRecordCard: {
+      authorship: {
+        Manual: 'Manual record',
+        TaskAutomatic: 'Automatic Task contribution',
+        TaskUserMeasurement: 'Measurement entered on Task completion',
+      },
       recordValue: 'Value:',
     },
     keyResultCard: {

@@ -5,6 +5,8 @@ import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
 import GoalRecordCard from './GoalRecordCard.vue';
+import enGoal from '../../../../locales/en-US/goal';
+import zhGoal from '../../../../locales/zh-CN/goal';
 import { formatProductDateTime } from '../../../../shared/utils/product-time';
 
 const i18n = createI18n({
@@ -15,6 +17,7 @@ const i18n = createI18n({
       goal: {
         cards: {
           cardsRecordCard: {
+            authorship: { Manual: 'Manual record', TaskAutomatic: 'Automatic Task contribution', TaskUserMeasurement: 'Measurement entered on Task completion' },
             recordValue: 'Record value: ',
           },
         },
@@ -27,7 +30,12 @@ function createRecord(overrides: Partial<GoalRecordClientDTO> = {}): GoalRecordC
   return {
     id: 'record-1' as GoalRecordClientDTO['id'],
     keyResultId: 'kr-1' as GoalRecordClientDTO['keyResultId'],
+    goalId: 'goal-1' as GoalRecordClientDTO['goalId'],
     value: 12,
+    valueAfter: 12,
+    authorship: 'Manual',
+    source: null,
+    recordedAt: 1745780400000,
     comment: 'Closed the remaining branch coverage gap.',
     createdAt: 1745780400000,
     updatedAt: 1745780400000,
@@ -64,7 +72,7 @@ describe('GoalRecordCard', () => {
 
     expect(wrapper.text()).toContain('Record value: 12');
     // ADR-037: product-time dateTime (session locale), not Date.toLocaleString
-    expect(wrapper.text()).toContain(formatProductDateTime(record.createdAt));
+    expect(wrapper.text()).toContain(formatProductDateTime(record.recordedAt));
     expect(wrapper.text()).toContain('Closed the remaining branch coverage gap.');
   });
 
@@ -72,7 +80,7 @@ describe('GoalRecordCard', () => {
     const wrapper = mount(GoalRecordCard, {
       props: {
         record: createRecord({
-          createdAt: 'invalid-date' as unknown as GoalRecordClientDTO['createdAt'],
+          recordedAt: 'invalid-date' as unknown as GoalRecordClientDTO['createdAt'],
           comment: null,
         }),
       },
@@ -83,4 +91,31 @@ describe('GoalRecordCard', () => {
     expect(wrapper.text()).toContain(formatProductDateTime('invalid-date'));
     expect(wrapper.text()).not.toContain('Closed the remaining branch coverage gap.');
   });
+  it.each([
+    ['Manual', 'Manual record'],
+    ['TaskAutomatic', 'Automatic Task contribution'],
+    ['TaskUserMeasurement', 'Measurement entered on Task completion'],
+  ] as const)('renders localized %s provenance with recordedAt', (authorship, label) => {
+    const record = createRecord({ authorship, recordedAt: 1700000000000, createdAt: 1600000000000,
+      source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'private-task-source-id' } });
+    const wrapper = mount(GoalRecordCard, { props: { record }, global: { plugins: [i18n] } });
+    expect(wrapper.text()).toContain(label);
+    expect(wrapper.text()).toContain(formatProductDateTime(record.recordedAt));
+    expect(wrapper.text()).not.toContain(formatProductDateTime(record.createdAt));
+    expect(wrapper.text()).not.toContain('private-task-source-id');
+    wrapper.unmount();
+  });
+
+  it.each([
+    ['en-US', enGoal], ['zh-CN', zhGoal],
+  ] as const)('uses the shipped %s provenance catalog', (locale, catalog) => {
+    const localized = createI18n({ legacy: false, locale, messages: { [locale]: { goal: catalog } } });
+    for (const authorship of ['Manual', 'TaskAutomatic', 'TaskUserMeasurement'] as const) {
+      const wrapper = mount(GoalRecordCard, { props: { record: createRecord({ authorship }) }, global: { plugins: [localized] } });
+      expect(wrapper.text()).toContain(catalog.cards.cardsRecordCard.authorship[authorship]);
+      expect(wrapper.text()).not.toContain('goal.cards.cardsRecordCard.authorship.');
+      wrapper.unmount();
+    }
+  });
+
 });

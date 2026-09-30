@@ -153,6 +153,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         );
         goal.hydrateLabels(labels);
       }
+      // Portability deliberately restores measurements as Manual, without Task provenance.
       for (const record of input.records) {
         await goalRecordRepository.save(
           GoalRecord.load({
@@ -161,8 +162,9 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
             identityId: IdentityId.of(cx.identityId),
             value: record.value,
             note: record.note,
-            sourceType: record.sourceType,
-            sourceId: record.sourceId,
+            authorship: 'Manual',
+            sourceType: null,
+            sourceId: null,
             recordedAt: record.recordedAt,
             createdAt: record.createdAt,
             updatedAt: record.updatedAt,

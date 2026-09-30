@@ -60,6 +60,7 @@ describe('GoalRecord owned entity', () => {
       keyResultId: 'KeyResultId_2' as never,
       identityId: 'IdentityId_2' as never,
       value: 99,
+      authorship: 'Manual',
       note: null,
       recordedAt: new Date('2026-04-26T10:00:00.000Z').getTime(),
       createdAt: new Date('2026-04-26T10:00:00.000Z'),
@@ -74,6 +75,7 @@ describe('GoalRecord owned entity', () => {
       keyResultId: 'KeyResultId_1' as never,
       identityId: 'IdentityId_1' as never,
       value: 3,
+      authorship: 'TaskAutomatic' as const,
       source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
 
@@ -111,5 +113,50 @@ describe('manual GoalRecord finite-number contract', () => {
     const record = GoalRecord.create(params);
     expect(() => record.updateValue(value)).toThrow('Value must be a finite number');
     expect(record.value).toBe(0);
+  });
+});
+
+describe('GoalRecord authorship/source invariants', () => {
+  const base = { keyResultId: 'KeyResultId_1' as never, identityId: 'IdentityId_1' as never, value: 3 };
+  const sources = [null, 'TASK_INSTANCE', 'TASK_TEMPLATE'] as const;
+  const authorships = ['Manual', 'TaskAutomatic', 'TaskUserMeasurement'] as const;
+  for (const authorship of authorships) {
+    for (const sourceType of sources) {
+      for (const sourceId of [null, '', '  ', 'task-source-1']) {
+        it(`${authorship}: source ${sourceType}/${JSON.stringify(sourceId)}`, () => {
+          const valid = authorship === 'Manual'
+            ? sourceType === null && sourceId === null
+            : sourceId === 'task-source-1' && (authorship === 'TaskAutomatic'
+              ? sourceType !== null : sourceType === 'TASK_INSTANCE');
+          const state = {
+            ...base, id: 'GoalRecordId_1' as never, note: null, authorship, sourceType, sourceId,
+            recordedAt: 1000, createdAt: 2000, updatedAt: 2000,
+          };
+          if (!valid) {
+            expect(() => GoalRecord.load(state)).toThrow();
+            return;
+          }
+          const loaded = GoalRecord.load(state);
+          const created = GoalRecord.create({ ...base, authorship,
+            source: sourceType ? { type: sourceType, id: sourceId! } : undefined });
+          expect(loaded.authorship).toBe(authorship);
+          expect(created.authorship).toBe(authorship);
+          expect(loaded.canUserCorrect).toBe(authorship !== 'TaskAutomatic');
+          expect(loaded.canUserDelete).toBe(authorship === 'Manual');
+          expect(loaded.toClientDTO('GoalId_1')).toMatchObject({
+            authorship, recordedAt: 1000,
+            source: sourceType ? { type: sourceType, id: sourceId } : null,
+          });
+          if (authorship === 'TaskAutomatic') {
+            expect(() => loaded.updateValue(4)).toThrow();
+            expect(() => loaded.updateNote('edited')).toThrow();
+          }
+        });
+      }
+    }
+  }
+  it('rejects unknown persisted authorship and source types', () => {
+    expect(() => GoalRecord.validateProvenance('Unknown' as never, null, null)).toThrow();
+    expect(() => GoalRecord.validateProvenance('TaskAutomatic', 'Unknown' as never, 'task')).toThrow();
   });
 });

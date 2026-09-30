@@ -153,6 +153,7 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
         identityId: dto.identityId as string,
         value: dto.value,
         note: dto.note,
+        authorship: dto.authorship,
         sourceType: dto.sourceType,
         sourceId: dto.sourceId,
         recordedAt: new Date(dto.recordedAt),
@@ -162,6 +163,7 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
       update: {
         value: dto.value,
         note: dto.note,
+        authorship: dto.authorship,
         sourceType: dto.sourceType,
         sourceId: dto.sourceId,
         recordedAt: new Date(dto.recordedAt),

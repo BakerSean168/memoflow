@@ -134,6 +134,7 @@ const key_results = new Table({
 });
 
 const goal_records = new Table({
+  authorship: column.text,
   identity_id: column.text,
   key_result_id: column.text,
   value: column.real,

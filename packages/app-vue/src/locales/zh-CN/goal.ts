@@ -295,6 +295,11 @@ export default {
       recordValue: '本次记录值',
     },
     cardsRecordCard: {
+      authorship: {
+        Manual: '手动记录',
+        TaskAutomatic: '任务自动贡献',
+        TaskUserMeasurement: '任务完成时填写的记录',
+      },
       recordValue: '记录值：',
     },
     keyResultCard: {
