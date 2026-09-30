@@ -19,6 +19,7 @@ import type { DesktopFeaturesRuntime } from './desktop-features';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
+import type { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
 
 export interface DesktopMainRuntimeDisposeOptions {
   /** Keep the updater engine alive until UpdateInstallCoordinator hands off to the installer. */
@@ -36,6 +37,7 @@ export class DesktopMainRuntime {
     readonly windowManager: WindowManager,
     readonly profileRuntimeManager: DesktopProfileRuntimeManager,
     readonly desktopUpdateCoordinator: DesktopUpdateCoordinator,
+    readonly desktopUpdateInstallCoordinator: UpdateInstallCoordinator,
   ) {}
 
   /** Get the auth context provider for the active profile (or null). */
@@ -91,6 +93,7 @@ export class DesktopMainRuntime {
     // update-install shutdown it must survive destructive application cleanup
     // long enough to perform the final installer handoff (DU-1202).
     if (!options.preserveDesktopUpdateForHandoff) {
+      this.desktopUpdateInstallCoordinator.destroy();
       this.desktopUpdateCoordinator.destroy();
     }
 

@@ -113,6 +113,9 @@ import { DesktopKnowledgeRepositorySyncService } from './modules/repository/desk
 import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repository/desktop-knowledge-repository-auto-sync.scheduler';
 import { DesktopMainRuntime } from './desktop-main-runtime';
 import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
+import { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
+import { FileDesktopUpdateInstallReceiptStore } from './modules/desktop-update/infrastructure/update-install-receipt.store';
+import { verifyPendingDesktopUpdateInstall } from './modules/desktop-update/application/verify-pending-update-install';
 
 configureDesktopShellIdentity();
 
@@ -702,6 +705,14 @@ async function initializeShellRuntime(): Promise<void> {
   const sharedResolver = getSharedPathResolver();
   console.log(`[Shell] Root path: ${sharedResolver.rootDir}`);
 
+  // Verify a pending update receipt before any Profile is opened. Update
+  // verification is device-local shell state and must never depend on a
+  // Profile DB or cloud session.
+  const desktopUpdateReceiptStore = new FileDesktopUpdateInstallReceiptStore(
+    sharedResolver.rootDir,
+  );
+  await verifyPendingDesktopUpdateInstall(app.getVersion(), desktopUpdateReceiptStore);
+
   // Initialize ProfileRegistry
   const profileRegistry = new ProfileRegistry(sharedResolver);
   await profileRegistry.load();
@@ -741,12 +752,22 @@ async function initializeShellRuntime(): Promise<void> {
     env: process.env,
   });
 
+  const desktopUpdateInstallCoordinator = new UpdateInstallCoordinator({
+    update: desktopUpdateShell.coordinator,
+    shutdown: desktopShutdownCoordinator,
+    receiptStore: desktopUpdateReceiptStore,
+    // app.exit bypasses before-quit by design. It is used only after the shared
+    // destructive cleanup path has settled and updater handoff failed/stalled.
+    forceExit: () => app.exit(0),
+  });
+
   // Assemble the explicit process runtime owner. Profile lock/switch and
   // BrowserWindow recreation do not recreate or dispose Desktop Update.
   mainRuntime = new DesktopMainRuntime(
     windowManager,
     profileRuntimeManager,
     desktopUpdateShell.coordinator,
+    desktopUpdateInstallCoordinator,
   );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
 

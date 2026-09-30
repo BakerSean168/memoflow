@@ -16,6 +16,7 @@ const windowManagerSource = fs.readFileSync(
 describe('Desktop Update shell ownership surface', () => {
   it('composes Desktop Update exactly once in initializeShellRuntime', () => {
     expect(mainSource.match(/composeDesktopUpdateShellRuntime\(/g)).toHaveLength(1);
+    expect(mainSource.match(/new UpdateInstallCoordinator\(/g)).toHaveLength(1);
 
     const shellStart = mainSource.indexOf('async function initializeShellRuntime');
     const composition = mainSource.indexOf('composeDesktopUpdateShellRuntime(');
@@ -41,10 +42,20 @@ describe('Desktop Update shell ownership surface', () => {
   });
 
   it('keeps Desktop Update destruction in the process runtime with an explicit update-handoff exception', () => {
+    expect(runtimeSource.match(/desktopUpdateInstallCoordinator\.destroy\(\)/g)).toHaveLength(1);
     expect(runtimeSource.match(/desktopUpdateCoordinator\.destroy\(\)/g)).toHaveLength(1);
     expect(runtimeSource).toContain('if (!options.preserveDesktopUpdateForHandoff)');
     expect(runtimeSource).toContain(
       'update-install shutdown it must survive destructive application cleanup',
     );
+  });
+
+  it('verifies the device-local install receipt before ProfileRegistry initialization', () => {
+    const verification = mainSource.indexOf('verifyPendingDesktopUpdateInstall(');
+    const profileRegistry = mainSource.indexOf('const profileRegistry = new ProfileRegistry');
+
+    expect(verification).toBeGreaterThan(-1);
+    expect(profileRegistry).toBeGreaterThan(verification);
+    expect(mainSource).toContain('new FileDesktopUpdateInstallReceiptStore');
   });
 });

@@ -71,8 +71,10 @@ Linux AppImage
 - `DU-1105` — **DONE**: DesktopUpdateCoordinator owns scheduling, single-flight checks/downloads, explicit/background intent, automatic-download policy, replayable snapshots, and engine lifecycle; async error/check races preserve the first terminal state.
 - `DU-1106` — **DONE**: Desktop Update is composed exactly once at the process/Shell boundary, owned by `DesktopMainRuntime`, survives Profile/window lifecycle changes, and is destroyed only with the process runtime. Host installation evidence is conservative: packaged Windows NSIS and AppImage are self-managed, Snap is package-manager owned, dev/unknown Linux/direct macOS without signed provenance fail closed.
 - **Phase 1 complete**: Desktop Update now has contracts, ownership, state machine, adapter, coordinator, and Shell singleton wiring with 52 focused update tests, Desktop main-process tests, full Desktop typecheck, and targeted ESLint green.
-- `DU-1201` — **DONE**: `DesktopShutdownCoordinator` now owns single-flight destructive cleanup, the 10s safety bound, failure/timeout settlement, shutdown reason ownership, and an explicit terminal-exit gate. Normal quit and future update-install share this owner; update-install cleanup preserves the updater until handoff.
-- Next: `DU-1202` — implement the single Restart-to-Update terminal path.
+- `DU-1201` — **DONE**: `DesktopShutdownCoordinator` now owns single-flight destructive cleanup, the 10s safety bound, failure/timeout settlement, shutdown reason ownership, and an explicit terminal-exit gate. Normal quit and update-install share this owner; update-install cleanup preserves the updater until handoff.
+- `DU-1202` — **DONE**: `UpdateInstallCoordinator` is the sole Restart-to-Update terminal path. It accepts only Ready, provides install single-flight, requires a durable pre-shutdown receipt, shares `DesktopShutdownCoordinator`, authorizes terminal exit immediately before `quitAndInstall()`, normalizes receipt/shutdown/handoff failures, and uses a 15s handoff watchdog to prevent a cleaned-but-alive zombie process.
+- `DU-1203` — **DONE**: pending install state is atomically stored at device-local `shared/update/install-receipt.json`, outside Profile/PowerSync. Startup verifies the expected version before `ProfileRegistry` initialization, clears successful receipts, preserves mismatches as recovery evidence, and ignores/removes corrupted receipts without blocking local access.
+- Next: `DU-1204` — close the Windows NSIS runtime feed and release gate.
 
 ## 2. Non-goals
 
