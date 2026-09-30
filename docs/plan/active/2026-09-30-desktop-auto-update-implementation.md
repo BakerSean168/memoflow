@@ -67,7 +67,8 @@ Linux AppImage
 - `DU-1101` — **DONE**: renderer-safe Desktop Update schemas and the narrow replayable transport contract are established; legacy channels remain isolated until DU-1301 transport cutover.
 - `DU-1102` — **DONE**: installation ownership/capabilities are modeled independently from OS and fail closed for unknown/untrusted installation shapes.
 - `DU-1103` — **DONE**: immutable typed update state transitions, illegal-transition guards, intent propagation, and failure recovery are covered by focused tests.
-- Next: `DU-1104` — electron-updater infrastructure adapter.
+- `DU-1104` — **DONE**: electron-updater is isolated behind a MemoFlow engine port; SDK auto-download/auto-install are disabled, provider events/errors are normalized, and raw paths/errors do not cross the adapter boundary.
+- Next: `DU-1105` — shell-owned DesktopUpdateCoordinator.
 
 ## 2. Non-goals
 
