@@ -58,6 +58,19 @@ for (const locale of ['en-US', 'zh-CN']) {
         await capture(page, 'create-property-edit');
         await open(page, query);
         await capture(page, 'detail');
+        const recent = page.getByTestId('task-detail-occurrences');
+        await recent.scrollIntoViewIfNeeded();
+        await expect(
+          recent.getByRole('heading', {
+            name: locale === 'zh-CN' ? '最近执行' : 'Recent activity',
+            exact: true,
+          }),
+        ).toBeVisible();
+        await expect(recent).toContainText(
+          locale === 'zh-CN' ? '并非完整历史' : 'not the full history',
+        );
+        await capture(page, 'recent-activity');
+        await page.getByTestId('task-detail-metadata').scrollIntoViewIfNeeded();
         for (const row of ['task-goal-row', 'task-labels-row', 'task-reminders-row']) {
           await expect(page.getByTestId(row)).toBeVisible();
         }

@@ -8,6 +8,8 @@ import { instance, template } from '../components/task-quick-test-fixtures';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskDetailView from './TaskDetailView.vue';
+import enTask from '../../../locales/en-US/task';
+import zhTask from '../../../locales/zh-CN/task';
 
 const actions = vi.hoisted(() => ({
   completeOccurrence: vi.fn(),
@@ -263,4 +265,34 @@ describe('Task Detail optional property grammar', () => {
     });
     wrapper.unmount();
   });
+});
+
+describe('Task Detail bounded recent activity copy', () => {
+  it.each([
+    ['en-US', enTask, 'Recent activity', 'not the full history'],
+    ['zh-CN', zhTask, '最近执行', '并非完整历史'],
+  ] as const)(
+    'labels the recent workspace slice truthfully in %s',
+    (locale, task, heading, limitCopy) => {
+      detailWorkspace.value = {
+        plan: { ...template, occurrenceCount: 10000 },
+        recentOccurrences: Array.from({ length: 5 }, (_, index) =>
+          instance({ id: `recent-${index}` as ReturnType<typeof instance>['id'] }),
+        ),
+        linkedNotes: [],
+      };
+      const wrapper = shallowMount(TaskDetailView, {
+        global: {
+          plugins: [createI18n({ legacy: false, locale, messages: { [locale]: { task } } })],
+          renderStubDefaultSlot: true,
+        },
+      });
+      const recent = wrapper.get('[data-testid="task-detail-occurrences"]');
+      expect(recent.get('h2').text()).toBe(heading);
+      expect(recent.get('p').text()).toBe(task.detail.occurrencesDescription);
+      expect(recent.get('p').text()).toContain(limitCopy);
+      expect(wrapper.findAllComponents(TaskOccurrenceRow)).toHaveLength(5);
+      wrapper.unmount();
+    },
+  );
 });

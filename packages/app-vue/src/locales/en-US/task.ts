@@ -203,9 +203,9 @@ export default {
     reminderCount: '{count} reminder triggers',
     goalBindingConfigured: 'Goal contribution configured',
     goalBindingNone: 'No Goal contribution',
-    occurrences: 'Occurrences',
+    occurrences: 'Recent activity',
     occurrencesDescription:
-      'Correct occurrence state here without rewriting the plan or neighboring occurrences.',
+      'Shows only recent occurrences, not the full history. Correct an occurrence here without rewriting the plan or neighboring occurrences.',
     completedCount: '{count} completed',
     openCount: '{count} open',
     noOccurrences: 'This plan has not generated any occurrences yet.',

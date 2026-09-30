@@ -33,6 +33,21 @@ describe('TaskWorkspaceQueryService', () => {
     expect(occurrences.findRecentByPlan).toHaveBeenCalledWith('task-1', 'identity-1', 3);
   });
 
+  it('defaults to five recent occurrences independently of all-time counts', async () => {
+    const { service, occurrences } = harness();
+    occurrences.getStatusCountsForPlan.mockResolvedValue({
+      total: 10000,
+      completed: 9995,
+      missed: 0,
+      skipped: 0,
+      pending: 5,
+      inProgress: 0,
+    });
+    const result = await service.getWorkspace('identity-1', 'task-1');
+    expect(result).toMatchObject({ ok: true, data: { occurrenceSummary: { total: 10000 } } });
+    expect(occurrences.findRecentByPlan).toHaveBeenCalledExactlyOnceWith('task-1', 'identity-1', 5);
+  });
+
   it('maps goal NOT_FOUND and provider failures to distinct fail-soft states while retaining ids', async () => {
     const { service } = harness();
     const goalReadPort = (service as never as { deps: { goalReadPort: { getGoal: ReturnType<typeof vi.fn> } } }).deps.goalReadPort;
