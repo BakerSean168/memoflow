@@ -1117,6 +1117,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** 相同文档/目录交互外观一致，Web 仍 projection-only。
 
+**Execution (2026-10-01): Implemented / validated.** Added shared document-workspace presentation primitives for toolbar, catalog search/row selection, loading/error/empty state, and source/status presentation; the Web Knowledge catalog is the proving surface and now uses the standard Select instead of a native connection selector. Repository APIs, Web projection-only semantics, and Desktop local-vault ownership remain unchanged. Focused Knowledge 3 files / 21 tests and App-Vue typecheck PASS; inventory is 1290 files. See [implementation report](../archive/2026-10-01-pvc-know-6101-document-presentation-primitives.md).
+
 ---
 
 ## PVC-KNOW-6102 — Web/Desktop workspace composition migration

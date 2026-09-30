@@ -11,6 +11,7 @@ import type {
 } from '@memoflow/contracts/repository';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
+import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeProjectionWorkspaceView from './KnowledgeProjectionWorkspaceView.vue';
 
 const routerMocks = vi.hoisted(() => ({
@@ -839,9 +840,9 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     );
     await flushPromises();
 
-    await wrapper
-      .get('[data-testid="knowledge-projection-connection-select"]')
-      .setValue(String(SECOND_BINDING_ID));
+    wrapper
+      .getComponent(KnowledgeNoteCatalog)
+      .vm.$emit('connection-change', String(SECOND_BINDING_ID));
     await flushPromises();
 
     expect(listKnowledgeNoteTree).toHaveBeenCalledWith(
