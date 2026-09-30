@@ -4,6 +4,15 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+// DU-1401 intentionally shares this dependency-free Desktop-owned projection with release tooling.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import {
+  DESKTOP_UPDATE_FEED_CONTRACT,
+  resolveDesktopUpdateFeedProjection,
+  validateDesktopUpdateFeedContract,
+} from '../../../apps/desktop/desktop-update-feed-projection.mjs';
+import { createMacosTrustReceipt } from '../release-tools/verify-macos-trust.mjs';
+import { validateDesktopUpdateFeedEligibility } from '../release-tools/validate-desktop-update-feed-eligibility.mjs';
 import {
   DESKTOP_UPDATE_METADATA_BASELINE,
   parseElectronBuilderUpdateMetadata,
@@ -272,5 +281,240 @@ test('release workflow verifies update metadata closure before uploading Desktop
   assert.ok(
     uploadIndex > verifyIndex,
     'update metadata verification must run before release upload',
+  );
+});
+
+function macosTrustReceipt(platform, arch) {
+  return createMacosTrustReceipt({
+    platform,
+    arch,
+    appBundle: `MemoFlow-${arch}.app`,
+    dmg: `MemoFlow-${arch}.dmg`,
+    observation: {
+      appAuthority: 'Developer ID Application: MemoFlow Test (ABCDEFGHIJ)',
+      dmgAuthority: 'Developer ID Application: MemoFlow Test (ABCDEFGHIJ)',
+      teamIdentifier: 'ABCDEFGHIJ',
+      expectedArchitecture: arch === 'x64' ? 'x86_64' : 'arm64',
+    },
+  });
+}
+
+function feedEligibilityManifest({
+  projection,
+  signingState,
+  executableKind,
+  trustValidation = null,
+}) {
+  return {
+    schemaVersion: 2,
+    kind: 'desktop-release',
+    version: '1.2.3',
+    platforms: {
+      [projection.sourceReleasePlatform]: {
+        os: projection.platform === 'darwin' ? 'macos' : projection.platform,
+        arch: projection.arch,
+        signingState,
+        runtimeValidation: {
+          status: 'passed',
+          method: 'packaged-electron-playwright',
+          executableKind,
+        },
+        trustValidation,
+        assets: [projection.sourceMetadataAsset],
+      },
+    },
+    assets: [
+      {
+        platform: projection.sourceReleasePlatform,
+        name: projection.sourceMetadataAsset,
+      },
+    ],
+  };
+}
+
+test('desktop update feed projection resolves canonical lanes and channel substitutions', () => {
+  validateDesktopUpdateFeedContract(DESKTOP_UPDATE_FEED_CONTRACT);
+
+  const expectations = [
+    {
+      coordinates: {
+        platform: 'windows',
+        arch: 'x64',
+        installationKind: 'direct-nsis',
+      },
+      sourceReleasePlatform: 'windows-x64',
+      sourceMetadataAsset: 'latest.yml',
+      targetMetadata: 'latest.yml',
+    },
+    {
+      coordinates: {
+        platform: 'darwin',
+        arch: 'x64',
+        installationKind: 'direct-signed-macos',
+      },
+      sourceReleasePlatform: 'macos-x64',
+      sourceMetadataAsset: 'latest-mac-x64.yml',
+      targetMetadata: 'latest-mac.yml',
+    },
+    {
+      coordinates: {
+        platform: 'darwin',
+        arch: 'arm64',
+        installationKind: 'direct-signed-macos',
+      },
+      sourceReleasePlatform: 'macos-arm64',
+      sourceMetadataAsset: 'latest-mac-arm64.yml',
+      targetMetadata: 'latest-mac.yml',
+    },
+    {
+      coordinates: {
+        platform: 'linux',
+        arch: 'x64',
+        installationKind: 'direct-appimage',
+      },
+      sourceReleasePlatform: 'linux-x64',
+      sourceMetadataAsset: 'latest-linux.yml',
+      targetMetadata: 'latest-linux.yml',
+    },
+  ];
+
+  for (const channel of ['stable', 'beta', 'canary']) {
+    for (const expectation of expectations) {
+      const projection = resolveDesktopUpdateFeedProjection({
+        channel,
+        ...expectation.coordinates,
+      });
+      assert.ok(projection);
+      assert.equal(projection.sourceReleasePlatform, expectation.sourceReleasePlatform);
+      assert.equal(projection.sourceMetadataAsset, expectation.sourceMetadataAsset);
+      assert.equal(projection.targetMetadata, expectation.targetMetadata);
+      assert.equal(
+        projection.targetRelativePath,
+        `${channel}/${expectation.coordinates.platform}/${expectation.coordinates.arch}/${expectation.targetMetadata}`,
+      );
+    }
+  }
+});
+
+test('desktop update feed projection rejects unsupported and non-self-managed coordinates', () => {
+  const rejected = [
+    { channel: 'stable', platform: 'windows', arch: 'arm64', installationKind: 'direct-nsis' },
+    { channel: 'stable', platform: 'windows', arch: 'x64', installationKind: 'portable' },
+    { channel: 'stable', platform: 'linux', arch: 'x64', installationKind: 'package-manager' },
+    { channel: 'stable', platform: 'darwin', arch: 'x64', installationKind: 'system-store' },
+    { channel: 'enterprise', platform: 'windows', arch: 'x64', installationKind: 'direct-nsis' },
+  ];
+
+  for (const coordinates of rejected) {
+    assert.equal(resolveDesktopUpdateFeedProjection(coordinates), null);
+  }
+});
+
+test('desktop update feed contract fixtures fail closed on ambiguity or policy drift', () => {
+  const duplicateTarget = structuredClone(DESKTOP_UPDATE_FEED_CONTRACT);
+  duplicateTarget.lanes[1] = {
+    ...duplicateTarget.lanes[1],
+    platform: duplicateTarget.lanes[0].platform,
+    arch: duplicateTarget.lanes[0].arch,
+    targetMetadata: duplicateTarget.lanes[0].targetMetadata,
+  };
+  assert.throws(
+    () => validateDesktopUpdateFeedContract(duplicateTarget),
+    /duplicate Desktop update feed target/u,
+  );
+
+  const driftedPolicy = structuredClone(DESKTOP_UPDATE_FEED_CONTRACT);
+  driftedPolicy.lanes[2].eligibleSigningStates = ['unsigned-pilot'];
+  assert.throws(
+    () => validateDesktopUpdateFeedContract(driftedPolicy),
+    /invalid Desktop update feed lane/u,
+  );
+});
+
+test('desktop update feed eligibility accepts canonical Windows direct NSIS evidence', () => {
+  const coordinates = {
+    channel: 'stable',
+    platform: 'windows',
+    arch: 'x64',
+    installationKind: 'direct-nsis',
+  };
+  const projection = resolveDesktopUpdateFeedProjection(coordinates);
+  assert.ok(projection);
+  const manifest = feedEligibilityManifest({
+    projection,
+    signingState: 'unsigned',
+    executableKind: 'packaged-exe',
+  });
+
+  assert.equal(
+    validateDesktopUpdateFeedEligibility({ coordinates, manifest }).targetRelativePath,
+    'stable/windows/x64/latest.yml',
+  );
+});
+
+test('desktop update feed eligibility requires signed-notarized macOS trust evidence', () => {
+  const coordinates = {
+    channel: 'stable',
+    platform: 'darwin',
+    arch: 'arm64',
+    installationKind: 'direct-signed-macos',
+  };
+  const projection = resolveDesktopUpdateFeedProjection(coordinates);
+  assert.ok(projection);
+
+  const unsignedManifest = feedEligibilityManifest({
+    projection,
+    signingState: 'unsigned-pilot',
+    executableKind: 'packaged-app',
+  });
+  assert.throws(
+    () => validateDesktopUpdateFeedEligibility({ coordinates, manifest: unsignedManifest }),
+    /signing state is ineligible/u,
+  );
+
+  const signedWithoutTrustManifest = feedEligibilityManifest({
+    projection,
+    signingState: 'signed-notarized',
+    executableKind: 'packaged-app',
+  });
+  assert.throws(
+    () =>
+      validateDesktopUpdateFeedEligibility({
+        coordinates,
+        manifest: signedWithoutTrustManifest,
+      }),
+    /invalid macOS trust receipt identity/u,
+  );
+
+  const signedManifest = feedEligibilityManifest({
+    projection,
+    signingState: 'signed-notarized',
+    executableKind: 'packaged-app',
+    trustValidation: macosTrustReceipt('macos-arm64', 'arm64'),
+  });
+  assert.equal(
+    validateDesktopUpdateFeedEligibility({ coordinates, manifest: signedManifest }).targetRelativePath,
+    'stable/darwin/arm64/latest-mac.yml',
+  );
+});
+
+test('desktop update feed eligibility does not treat installed-deb proof as AppImage proof', () => {
+  const coordinates = {
+    channel: 'stable',
+    platform: 'linux',
+    arch: 'x64',
+    installationKind: 'direct-appimage',
+  };
+  const projection = resolveDesktopUpdateFeedProjection(coordinates);
+  assert.ok(projection);
+  const manifest = feedEligibilityManifest({
+    projection,
+    signingState: 'unsigned',
+    executableKind: 'installed-deb',
+  });
+
+  assert.throws(
+    () => validateDesktopUpdateFeedEligibility({ coordinates, manifest }),
+    /runtime evidence is ineligible/u,
   );
 });

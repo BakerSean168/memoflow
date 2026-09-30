@@ -81,7 +81,8 @@ Linux AppImage
 - `DU-1303` — **DONE**: Settings now exposes a Desktop-only `关于与更新 / About & Updates` group through capability presence rather than environment sniffing. It renders current version/channel/owner plus disabled, checking, explicit up-to-date, available, downloading, preparing, Ready, restarting, and failed/retry states from a pure presentation mapping; uses the sole restart/install command; receives live progress from `STATE_CHANGED`; bounds release-note presentation; has zh-CN/en-US coverage; and stays absent on Web. Focused state/section/i18n tests are green, app-vue typecheck/lint/inventory are green, and the full app-vue suite passes 233 files / 998 tests.
 - `DU-1304` — **DONE**: the Shell now projects only actionable updater states through an optional `DesktopUpdateService` consumer: verified Ready and retryable install failures that recover to Ready. Background checking/available/downloading/preparing remain silent; `WindowHeader` stays updater-agnostic through a generic `status-actions` slot; clicking the indicator only routes to `/settings?tab=updates` and never installs directly; stale initial reads cannot overwrite newer pushed state; subscriptions clean up across unmount/remount; Web/no-service hosts render nothing. 43 focused shell/i18n tests, direct app-vue `vue-tsc`, inventory check, targeted ESLint, and `git diff --check` are green.
 - **Phase 3 complete**: manual check, live replayable Settings state, durable Ready/retry UX, and the Shell Ready indicator now share one canonical updater snapshot without a duplicate renderer store.
-- Next: `DU-1401` — define the architecture-aware Update Feed Projection contract.
+- `DU-1401` — **DONE**: a dependency-free, provider-neutral Update Feed Projection contract now defines stable/beta/canary coordinates across Windows x64 direct NSIS, per-arch signed/notarized macOS, and Linux x64 direct AppImage. Release tooling derives its metadata baseline from the same lane table and validates schema-2 canonical release evidence before a lane is eligible; unsigned macOS, missing trust receipts, package-managed Linux evidence, unsupported coordinates, and ambiguous/drifted contract fixtures fail closed. Current GitHub runtime behavior is unchanged. Focused feed/metadata tests, the 141-test CI/CD platform suite, test inventory, targeted ESLint, and `git diff --check` are green.
+- Next: `DU-1402` — publish the architecture-aware feed deterministically from canonical release evidence.
 
 ## 2. Non-goals
 
@@ -746,6 +747,23 @@ installation kind
 ```
 
 **Decision:** feed 只投影已验证 canonical release。
+
+**DU-1401 implementation closure:**
+
+- `apps/desktop/desktop-update-feed-projection.mjs` owns the dependency-free,
+  provider-neutral lane contract and relative path resolution. Stable/beta/canary
+  are explicit coordinates; beta/canary reservation does not enable runtime rollout.
+- Release tooling derives its metadata baseline from that contract and validates
+  schema-2 canonical manifest evidence before declaring a lane eligible. No
+  separate version, artifact digest, provider URL, or publication truth is added.
+- macOS reuses the existing signed-notarized trust receipt validator. Windows
+  keeps signed/unsigned policy. Linux requires `direct-appimage` runtime evidence;
+  current `installed-deb` evidence cannot satisfy this future Phase-6 gate.
+- Contract fixtures are validated before resolution; unknown dimensions and
+  ambiguous paths fail closed. Focused node tests cover mapping and eligibility;
+  inventory and repository governance checks cover integration.
+- No runtime cutover, file copying, checksum generation, or workflow changes.
+
 
 ---
 

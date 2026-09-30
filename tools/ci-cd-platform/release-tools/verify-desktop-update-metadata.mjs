@@ -2,29 +2,34 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSON5 from 'json5';
+// DU-1401 intentionally shares this dependency-free Desktop-owned projection with release tooling.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import {
+  DESKTOP_UPDATE_FEED_CONTRACT,
+  validateDesktopUpdateFeedContract,
+} from '../../../apps/desktop/desktop-update-feed-projection.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const DEFAULT_RELEASE_CONFIG_PATH = path.join(repoRoot, 'apps/desktop/desktop-update-release.json');
 const DEFAULT_BUILDER_CONFIG_PATH = path.join(repoRoot, 'apps/desktop/electron-builder.json5');
 
-export const DESKTOP_UPDATE_METADATA_BASELINE = Object.freeze({
-  'windows-x64': Object.freeze({
-    metadata: 'latest.yml',
-    primaryArtifact: /\.exe$/u,
-  }),
-  'linux-x64': Object.freeze({
-    metadata: 'latest-linux.yml',
-    primaryArtifact: /\.AppImage$/u,
-  }),
-  'macos-x64': Object.freeze({
-    metadata: 'latest-mac-x64.yml',
-    primaryArtifact: /\.zip$/u,
-  }),
-  'macos-arm64': Object.freeze({
-    metadata: 'latest-mac-arm64.yml',
-    primaryArtifact: /\.zip$/u,
-  }),
-});
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
+
+validateDesktopUpdateFeedContract(DESKTOP_UPDATE_FEED_CONTRACT);
+
+export const DESKTOP_UPDATE_METADATA_BASELINE = Object.freeze(
+  Object.fromEntries(
+    DESKTOP_UPDATE_FEED_CONTRACT.lanes.map((lane) => [
+      lane.sourceReleasePlatform,
+      Object.freeze({
+        metadata: lane.sourceMetadataAsset,
+        primaryArtifact: new RegExp(`${escapeRegExp(lane.primaryArtifactExtension)}$`, 'u'),
+      }),
+    ]),
+  ),
+);
 
 function expandArtifactName(pattern, { productName, version, ext }) {
   return pattern
