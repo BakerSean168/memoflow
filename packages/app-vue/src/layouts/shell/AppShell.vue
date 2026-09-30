@@ -31,6 +31,7 @@ import { useAccountStore } from '../../modules/account/stores/account-store';
 import AIChatView from '../../modules/ai/views/AIChatView.vue';
 import type { ConversationSummary } from '../../modules/ai/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
+import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsulePreview.vue';
@@ -679,6 +680,10 @@ function openAccount() {
   void sync.openSettings('/settings?tab=account');
 }
 
+function openUpdateSettings() {
+  void sync.openSettings('/settings?tab=updates');
+}
+
 function openCloudConnection() {
   if (isDesktop) {
     cloudConnectionOpen.value = true;
@@ -755,6 +760,9 @@ function panelCacheKey(
       @window-toggle-maximize="windowControls.toggleMaximize()"
       @window-close="windowControls.closeWindow()"
     >
+      <template #status-actions>
+        <DesktopUpdateShellIndicator @open-updates="openUpdateSettings" />
+      </template>
       <template #capsule-preview-goal="{ closePreview }">
         <GoalCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'goal', route: '/goals' })"

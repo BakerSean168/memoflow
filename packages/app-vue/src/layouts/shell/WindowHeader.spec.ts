@@ -62,6 +62,22 @@ describe('WindowHeader desktop drag contract', () => {
 });
 
 describe('WindowHeader workspace navigation', () => {
+  it('renders generic shell status actions without owning their business domain', () => {
+    const wrapper = mount(WindowHeader, {
+      props: {
+        sidebarCollapsed: false,
+        rightPanelOpen: true,
+      },
+      slots: {
+        'status-actions': '<button data-testid="status-action-probe">Status</button>',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.get('[data-testid="shell-status-actions"]').classes()).toContain('no-drag');
+    expect(wrapper.get('[data-testid="status-action-probe"]').text()).toBe('Status');
+  });
+
   it('renders compound module capsules without the redundant workspace launcher', async () => {
     const wrapper = mount(WindowHeader, {
       props: {

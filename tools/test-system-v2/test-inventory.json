@@ -3532,6 +3532,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3565,6 +3573,22 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11653,7 +11677,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 234
+      "fileCount": 237
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12389,7 +12413,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1089,
+    "unit": 1092,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

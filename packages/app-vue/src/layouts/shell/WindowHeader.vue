@@ -168,8 +168,15 @@ const utilityCapsules = computed(() =>
       }}</span>
     </div>
 
-    <!-- 右：日程/通知入口、面板与桌面窗控。 -->
+    <!-- 右：轻量状态动作、日程/通知入口、面板与桌面窗控。 -->
     <div class="flex shrink-0 items-center gap-3">
+      <div
+        v-if="$slots['status-actions']"
+        class="no-drag flex items-center"
+        data-testid="shell-status-actions"
+      >
+        <slot name="status-actions" />
+      </div>
       <nav
         v-if="props.mode !== 'settings' && utilityCapsules.length"
         class="no-drag flex max-w-[35vw] items-center gap-1 overflow-x-auto"

@@ -1,12 +1,15 @@
 /** @vitest-environment happy-dom */
 
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { computed, defineComponent, h, inject, nextTick, onMounted, ref, Teleport } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SHELL_WORKFLOW_MOUNT_KEY } from '../../di/keys';
+import { DESKTOP_UPDATE_SERVICE_KEY, SHELL_WORKFLOW_MOUNT_KEY } from '../../di/keys';
+import type { DesktopUpdateService } from '../../di/types';
+import { ok } from '@memoflow/contracts/result';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
 import AppShell from './AppShell.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import { useAppShellStore } from './useAppShellStore';
@@ -89,6 +92,13 @@ const AIChatViewStub = defineComponent({
   },
 });
 
+const WindowHeaderStatusActionsStub = defineComponent({
+  name: 'WindowHeader',
+  setup(_props, { slots }) {
+    return () => h('header', { 'data-testid': 'window-header-stub' }, slots['status-actions']?.());
+  },
+});
+
 const ConversationSidebarStub = defineComponent({
   name: 'ConversationSidebar',
   setup() {
@@ -135,6 +145,11 @@ const i18n = createI18n({
         schedule: 'Schedule',
       },
       shell: {
+        update: {
+          ready: 'Update {version} ready',
+          attention: 'Update needs attention',
+          openSettings: 'Open update settings',
+        },
         conversation: { today: 'Today', last7Days: 'Last 7 days', earlier: 'Earlier' },
         panel: {
           home: 'Today',
@@ -150,7 +165,11 @@ const i18n = createI18n({
   },
 });
 
-async function mountShell(initialPath = '/', attachTo?: Element) {
+async function mountShell(
+  initialPath = '/',
+  attachTo?: Element,
+  updateService?: DesktopUpdateService,
+) {
   const pinia = createPinia();
   setActivePinia(pinia);
   const router = createRouter({
@@ -172,9 +191,10 @@ async function mountShell(initialPath = '/', attachTo?: Element) {
     attachTo,
     global: {
       plugins: [pinia, router, i18n],
+      provide: updateService ? { [DESKTOP_UPDATE_SERVICE_KEY as symbol]: updateService } : {},
       stubs: {
         AIChatView: AIChatViewStub,
-        WindowHeader: true,
+        WindowHeader: updateService ? WindowHeaderStatusActionsStub : true,
         ConversationSidebar: ConversationSidebarStub,
         BusinessPanel,
         TodayOverviewPanel: TodayOverviewPanelStub,
@@ -193,6 +213,53 @@ describe('AppShell right-panel integration', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
     goalRouteMountCount = 0;
     activeChatConversationId.value = null;
+  });
+
+  it('routes the update indicator through settings without starting an install', async () => {
+    const ready: DesktopUpdateSnapshotDTO = {
+      currentVersion: '1.2.0',
+      channel: 'stable',
+      owner: 'memoflow-direct',
+      capabilities: {
+        canCheck: true,
+        canBackgroundCheck: true,
+        canDownload: true,
+        canSelfInstall: true,
+        canAutoDownload: true,
+        installAuthority: 'memoflow',
+      },
+      state: {
+        type: 'ready',
+        intent: 'background',
+        release: {
+          version: '1.3.0',
+          channel: 'stable',
+          publishedAt: null,
+          releaseNotes: null,
+          releaseNotesUrl: null,
+        },
+      },
+    };
+    const unsubscribe = vi.fn();
+    const service: DesktopUpdateService = {
+      getSnapshot: vi.fn(async () => ok(ready)),
+      check: vi.fn(async () => ok(ready)),
+      restartAndInstall: vi.fn(async () => ok(ready)),
+      subscribe: vi.fn(() => unsubscribe),
+    };
+    const { wrapper, router, store } = await mountShell('/goals', undefined, service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="desktop-update-shell-indicator"]').trigger('click');
+    await flushPromises();
+
+    expect(router.currentRoute.value.fullPath).toBe('/settings?tab=updates');
+    expect(wrapper.get('[data-testid="settings-view"]').exists()).toBe(true);
+    expect(store.settingsOrigin?.route).toBe('/goals');
+    expect(service.check).not.toHaveBeenCalled();
+    expect(service.restartAndInstall).not.toHaveBeenCalled();
+    wrapper.unmount();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 
   it('mounts Home by default and teleports AI workflow content into the canonical panel', async () => {

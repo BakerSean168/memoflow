@@ -86,6 +86,11 @@ export default {
     maximize: 'Maximize',
     close: 'Close',
   },
+  update: {
+    ready: 'Update {version} ready',
+    attention: 'Update needs attention',
+    openSettings: 'Open update settings',
+  },
   composer: {
     placeholder: 'Message Zhixing AI…',
     send: 'Send',
