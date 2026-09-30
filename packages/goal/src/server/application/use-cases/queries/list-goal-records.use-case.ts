@@ -92,7 +92,7 @@ export class ListGoalRecordsUseCase {
             [...records]
               .sort(
                 (a, b) =>
-                  Number(a.createdAt) - Number(b.createdAt) ||
+                  Number(a.recordedAt) - Number(b.recordedAt) ||
                   String(a.id).localeCompare(String(b.id)),
               )
               .map((record) => record.value),
@@ -137,7 +137,7 @@ export class ListGoalRecordsUseCase {
       const history: number[] = [];
       const sorted = [...group].sort(
         (a, b) =>
-          Number(a.createdAt) - Number(b.createdAt) || String(a.id).localeCompare(String(b.id)),
+          Number(a.recordedAt) - Number(b.recordedAt) || String(a.id).localeCompare(String(b.id)),
       );
       for (const record of sorted) {
         history.push(record.value);
