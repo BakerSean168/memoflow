@@ -516,6 +516,7 @@
                 size="sm"
                 class="h-8 gap-1.5 text-muted-foreground"
                 data-testid="goal-add-key-result"
+                :disabled="isSaving || !!goal.archivedAt"
                 @click="openCreateKr"
               >
                 <Plus class="h-4 w-4" />
@@ -539,32 +540,17 @@
               :data-testid="`goal-kr-summary-${kr.id}`"
             >
               <div class="flex items-start justify-between gap-3">
-                <button
-                  type="button"
-                  class="min-w-0 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  :data-testid="`goal-kr-detail-${kr.id}`"
-                  @click="openKr(kr.id)"
-                >
-                  <h3 class="break-words font-medium">◇ {{ kr.title }}</h3>
-                </button>
+                <GoalKeyResultDirectControls
+                  class="flex-1"
+                  :key-result="kr"
+                  :goal-target="goal.target"
+                  :disabled="isSaving || !!goal.archivedAt"
+                  :on-save="(patch) => updateKrFields(kr.id, patch)"
+                />
                 <span class="shrink-0 text-sm font-medium tabular-nums"
                   >{{ Math.round(kr.progressPercentage) }}%</span
                 >
               </div>
-              <dl class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <div class="flex gap-1" data-testid="kr-method">
-                  <dt class="sr-only">{{ t('goal.dialog.krCalculationMethod') }}</dt>
-                  <dd>{{ getKeyResultCalculationLabel(kr.progress.aggregationMethod, t) }}</dd>
-                </div>
-                <div class="flex gap-1" data-testid="kr-weight">
-                  <dt>{{ t('goal.dialog.krWeightShort') }}</dt>
-                  <dd class="tabular-nums">{{ kr.weight }}</dd>
-                </div>
-                <div class="flex gap-1" data-testid="kr-timeframe">
-                  <dt>{{ t('goal.dialog.krTargetShort') }}</dt>
-                  <dd>{{ formatTarget(kr.target ?? goal.target) }}</dd>
-                </div>
-              </dl>
               <GoalKeyResultTrajectoryPlot
                 readonly
                 :initial-value="kr.progress.initialValue"
@@ -607,13 +593,16 @@
                       <ListTodo class="mr-2 h-4 w-4" />
                       {{ t('goal.detail.createBoundTask') }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @click="openEditKr(kr)">
-                      <Pencil class="mr-2 h-4 w-4" />
-                      {{ t('common.edit') }}
+                    <DropdownMenuItem
+                      :data-testid="`goal-kr-detail-${kr.id}`"
+                      @click="openKr(kr.id)"
+                    >
+                      {{ t('goal.route.krDetail') }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive"
+                      :disabled="isSaving || !!goal.archivedAt"
                       @click="removeKr(String(kr.id))"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />
@@ -714,7 +703,6 @@ import {
   ListTodo,
   MoreHorizontal,
   NotebookText,
-  Pencil,
   Plus,
   Tag,
   Trash2,
@@ -750,7 +738,7 @@ import {
   type ReminderTrigger,
   type GoalStatus as GoalStatusValue,
   type GoalTimeframe,
-  type KeyResultClientDTO,
+  type UpdateKeyResultReq,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
@@ -767,7 +755,7 @@ import {
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
 import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
-import { getKeyResultCalculationLabel } from '../utils';
+import GoalKeyResultDirectControls from '../components/GoalKeyResultDirectControls.vue';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
 import GoalRecordDialog from '../components/dialogs/GoalRecordDialog.vue';
 import { useGoal } from '../composables/useGoal';
@@ -1204,12 +1192,41 @@ function openCreateKr(): void {
   krDialog.value?.openForCreateKeyResult(goalId.value);
 }
 
-function openEditKr(kr: KeyResultClientDTO): void {
-  krDialog.value?.openForUpdateKeyResult(goalId.value, kr);
-}
-
 function openKr(keyResultId: string): void {
   void router.push({ name: 'key-result-detail', params: { goalId: goalId.value, keyResultId } });
+}
+
+async function updateKrFields(
+  keyResultId: string,
+  patch: Pick<
+    UpdateKeyResultReq,
+    'title' | 'description' | 'calculationMethod' | 'weight' | 'target'
+  >,
+): Promise<boolean> {
+  if (!goal.value || isSaving.value || goal.value.archivedAt) return false;
+  const requestedGoalId = goalId.value;
+  isSaving.value = true;
+  mutationError.value = null;
+  try {
+    const result = await service.updateKeyResult(requestedGoalId, keyResultId, {
+      ...patch,
+      expectedVersion: goal.value.version,
+    });
+    if (goalId.value !== requestedGoalId) return false;
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return false;
+    }
+    if (workspace.value) workspace.value.goal = result.data.readModel;
+    return true;
+  } catch (error) {
+    if (goalId.value === requestedGoalId) {
+      mutationError.value = error instanceof Error ? error.message : t('common.operationFailed');
+    }
+    return false;
+  } finally {
+    isSaving.value = false;
+  }
 }
 
 async function saveKr(payload: {
@@ -1218,19 +1235,24 @@ async function saveKr(payload: {
   isEditing: boolean;
   keyResultId?: string;
 }): Promise<boolean> {
-  if (!goal.value) return false;
-  mutationError.value = null;
-  const request = { ...payload.keyResult, expectedVersion: goal.value.version };
-  const result =
-    payload.isEditing && payload.keyResultId
-      ? await service.updateKeyResult(payload.goalId, payload.keyResultId, request)
-      : await service.createKeyResult(payload.goalId, request);
-  if (!result.ok) {
-    mutationError.value = presentErrorMessage(result.error);
-    return false;
+  if (!goal.value || isSaving.value) return false;
+  isSaving.value = true;
+  try {
+    mutationError.value = null;
+    const request = { ...payload.keyResult, expectedVersion: goal.value.version };
+    const result =
+      payload.isEditing && payload.keyResultId
+        ? await service.updateKeyResult(payload.goalId, payload.keyResultId, request)
+        : await service.createKeyResult(payload.goalId, request);
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return false;
+    }
+    await refresh();
+    return true;
+  } finally {
+    isSaving.value = false;
   }
-  await refresh();
-  return true;
 }
 
 async function removeKr(keyResultId: string): Promise<void> {
@@ -1242,15 +1264,20 @@ async function removeKr(keyResultId: string): Promise<void> {
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
-  if (!confirmed) return;
-  const result = await service.deleteKeyResult(goalId.value, keyResultId, {
-    expectedVersion: goal.value.version,
-  });
-  if (!result.ok) {
-    mutationError.value = presentErrorMessage(result.error);
-    return;
+  if (!confirmed || !goal.value || isSaving.value) return;
+  isSaving.value = true;
+  try {
+    const result = await service.deleteKeyResult(goalId.value, keyResultId, {
+      expectedVersion: goal.value.version,
+    });
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return;
+    }
+    await refresh();
+  } finally {
+    isSaving.value = false;
   }
-  await refresh();
 }
 
 function createTaskForGoal(keyResultId?: string): void {

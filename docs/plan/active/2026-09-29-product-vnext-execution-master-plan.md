@@ -346,6 +346,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 ## PVC-GOAL-1103 — KR direct manipulation
 
+**Execution (2026-09-30): Implemented / validated; ChatGPT Web final review/acceptance pending.** Goal Detail now provides Goal-owned inline title/description edits and direct method/weight/timeframe controls using the existing calculation vocabulary, Select/Popover primitives and GoalTimeframePicker. Metadata patches use the canonical updateKeyResult command with aggregate expectedVersion; a shared busy gate serializes writes and canonical mutation receipts provide the next displayed value/version. Failed edits reset to canonical values and expose existing error feedback. Current still opens the Goal Record composer; measurement values remain read-only. Normal KR Edit overflow is removed after parity checks; create/delete/bound-task/detail routes remain. No GOAL-1301, Review or Task domain changes.
+
+**Validation:** PASS — 8 focused/regression spec files / 143 tests, app-vue:typecheck, changed-file ESLint, git diff --check, memoflow:governance-check; isolated Chromium production-CSS keyboard/layout checks at 800px and 360px (not authenticated E2E). Evidence: [GOAL-1103 implementation report](../archive/2026-09-30-pvc-goal-1103-direct-manipulation.md).
+
 **Goal:** 常用 KR 修改不需要 Edit 按钮。
 
 **Implementation:**
