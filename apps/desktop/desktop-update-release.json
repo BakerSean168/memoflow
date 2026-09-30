@@ -1,0 +1,18 @@
+{
+  "provider": "github",
+  "owner": "BakerSean168",
+  "repo": "memoflow",
+  "tagNamePrefix": "v",
+  "releaseType": "release",
+  "channels": {
+    "stable": "latest",
+    "beta": "beta",
+    "canary": "canary"
+  },
+  "windows": {
+    "appId": "com.memoflow.app",
+    "productName": "MemoFlow",
+    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+    "metadata": "latest.yml"
+  }
+}

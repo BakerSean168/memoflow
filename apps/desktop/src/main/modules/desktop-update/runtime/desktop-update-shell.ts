@@ -1,9 +1,13 @@
-import type { DesktopUpdateDisableReasonDTO } from '@memoflow/contracts/electron';
+import type {
+  DesktopUpdateChannelDTO,
+  DesktopUpdateDisableReasonDTO,
+} from '@memoflow/contracts/electron';
 import {
   type DesktopUpdatePolicy,
   DesktopUpdateCoordinator,
 } from '../application/desktop-update-coordinator';
 import type { DesktopUpdateEngine } from '../application/desktop-update-engine';
+import { resolveDesktopUpdateFeed } from '../application/desktop-update-feed';
 import { ElectronUpdaterAdapter } from '../infrastructure/electron-updater.adapter';
 import {
   detectDesktopInstallationOwner,
@@ -23,6 +27,7 @@ export interface DesktopUpdateShellHost {
 
 export interface DesktopUpdateShellCompositionOptions {
   readonly engine?: DesktopUpdateEngine;
+  readonly channel?: DesktopUpdateChannelDTO;
   readonly policy?: Partial<DesktopUpdatePolicy>;
 }
 
@@ -83,13 +88,17 @@ export function composeDesktopUpdateShellRuntime(
 ): DesktopUpdateShellRuntime {
   const installation = detectDesktopInstallationOwner(collectDesktopInstallationEvidence(host));
   const engine = options.engine ?? new ElectronUpdaterAdapter();
+  const channel = options.channel ?? 'stable';
+  const feed = installation.capabilities.canCheck ? resolveDesktopUpdateFeed(channel) : undefined;
 
   const coordinator = new DesktopUpdateCoordinator({
     engine,
     currentVersion: host.currentVersion,
+    channel,
     owner: installation.owner,
     capabilities: installation.capabilities,
     disabledReason: disabledReasonForInstallation(installation),
+    ...(feed ? { feed } : {}),
     policy: options.policy,
   });
 

@@ -31,6 +31,7 @@ import {
   DesktopUpdateEngineError,
   type DesktopUpdateEngine,
   type DesktopUpdateEngineEvent,
+  type DesktopUpdateFeed,
 } from './desktop-update-engine';
 
 const logger = createLogger('DesktopUpdateCoordinator');
@@ -58,7 +59,7 @@ export interface DesktopUpdateCoordinatorOptions {
   readonly owner: DesktopInstallationOwnerDTO;
   readonly capabilities: DesktopUpdateCapabilitiesDTO;
   readonly disabledReason?: DesktopUpdateDisableReasonDTO;
-  readonly feedUrl?: string;
+  readonly feed?: DesktopUpdateFeed;
   readonly policy?: Partial<DesktopUpdatePolicy>;
   readonly now?: () => Date;
 }
@@ -111,7 +112,7 @@ export class DesktopUpdateCoordinator {
   private readonly owner: DesktopInstallationOwnerDTO;
   private readonly capabilities: DesktopUpdateCapabilitiesDTO;
   private readonly disabledReason?: DesktopUpdateDisableReasonDTO;
-  private readonly feedUrl?: string;
+  private readonly feed?: DesktopUpdateFeed;
   private readonly policy: DesktopUpdatePolicy;
   private readonly now: () => Date;
   private readonly listeners = new Set<UpdateListener>();
@@ -132,7 +133,7 @@ export class DesktopUpdateCoordinator {
     this.owner = options.owner;
     this.capabilities = options.capabilities;
     this.disabledReason = options.disabledReason;
-    this.feedUrl = options.feedUrl;
+    this.feed = options.feed;
     this.now = options.now ?? (() => new Date());
     this.policy = Object.freeze({
       ...DEFAULT_DESKTOP_UPDATE_POLICY,
@@ -163,7 +164,7 @@ export class DesktopUpdateCoordinator {
     try {
       await this.engine.initialize({
         channel: this.channel,
-        ...(this.feedUrl ? { feedUrl: this.feedUrl } : {}),
+        ...(this.feed ? { feed: this.feed } : {}),
       });
     } catch (error) {
       logger.error('Desktop Update engine initialization failed', undefined, {

@@ -14,9 +14,23 @@ export type DesktopUpdateEngineEvent =
   | { readonly type: 'downloaded'; readonly release: DesktopUpdateReleaseDTO }
   | { readonly type: 'engine-error'; readonly failure: DesktopUpdateFailureDTO };
 
+export type DesktopUpdateFeed =
+  | {
+      readonly provider: 'github';
+      readonly owner: string;
+      readonly repo: string;
+      readonly channel: string;
+      readonly tagNamePrefix?: string;
+    }
+  | {
+      readonly provider: 'generic';
+      readonly url: string;
+      readonly channel: string;
+    };
+
 export interface DesktopUpdateEngineInitOptions {
   readonly channel: DesktopUpdateChannelDTO;
-  readonly feedUrl?: string;
+  readonly feed?: DesktopUpdateFeed;
 }
 
 /**

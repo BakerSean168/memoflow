@@ -8,6 +8,7 @@ import {
   DESKTOP_UPDATE_METADATA_BASELINE,
   parseElectronBuilderUpdateMetadata,
   verifyDesktopUpdateMetadataClosure,
+  verifyDesktopUpdateReleaseConfiguration,
 } from '../release-tools/verify-desktop-update-metadata.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -129,6 +130,25 @@ test('parses the electron-builder update metadata fields owned by the release ga
   assert.deepEqual(parsed.references, ['MemoFlow-Windows-1.2.3-Setup.exe']);
 });
 
+test('runtime feed declaration stays aligned with electron-builder release identity', async () => {
+  const configuration = await verifyDesktopUpdateReleaseConfiguration();
+
+  assert.deepEqual(configuration, {
+    provider: 'github',
+    owner: 'BakerSean168',
+    repo: 'memoflow',
+    tagNamePrefix: 'v',
+    releaseType: 'release',
+    stableChannel: 'latest',
+    windows: {
+      appId: 'com.memoflow.app',
+      productName: 'MemoFlow',
+      artifactName: '${productName}-Windows-${version}-Setup.${ext}',
+      metadata: 'latest.yml',
+    },
+  });
+});
+
 test('desktop update metadata closes over the canonical platform release assets', async () => {
   const fixture = await createFixture();
   try {
@@ -163,6 +183,33 @@ test('desktop update metadata fails closed when it references an artifact outsid
     await assert.rejects(
       () => verifyDesktopUpdateMetadataClosure(fixture),
       /references missing windows-x64 release asset: MemoFlow-Windows-1\.2\.3-Missing\.exe/u,
+    );
+  } finally {
+    await rm(fixture.cwd, { recursive: true, force: true });
+  }
+});
+
+test('desktop update metadata fails closed when the Windows NSIS installer identity drifts', async () => {
+  const fixture = await createFixture();
+  try {
+    const driftedInstaller = 'MemoFlow-Windows-1.2.3-Alternate.exe';
+    const windowsDirectory = path.join(fixture.artifactRoot, 'desktop-windows-x64');
+    await writeFile(path.join(windowsDirectory, driftedInstaller), 'drifted installer\n');
+
+    const windows = fixture.platformFixtures['windows-x64'];
+    await writeFile(
+      path.join(windowsDirectory, windows.metadata),
+      updateMetadata({ primary: driftedInstaller, files: [driftedInstaller] }),
+    );
+
+    const manifest = JSON.parse(await readFile(fixture.manifestPath, 'utf8'));
+    manifest.assets.push({ name: driftedInstaller, platform: 'windows-x64' });
+    manifest.platforms['windows-x64'].assets.push(driftedInstaller);
+    await writeFile(fixture.manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    await assert.rejects(
+      () => verifyDesktopUpdateMetadataClosure(fixture),
+      /Desktop update Windows installer identity drift: MemoFlow-Windows-1\.2\.3-Alternate\.exe != MemoFlow-Windows-1\.2\.3-Setup\.exe/u,
     );
   } finally {
     await rm(fixture.cwd, { recursive: true, force: true });

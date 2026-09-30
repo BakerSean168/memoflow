@@ -192,8 +192,22 @@ export class ElectronUpdaterAdapter implements DesktopUpdateEngine {
     autoUpdater.allowPrerelease = options.channel !== 'stable';
     autoUpdater.disableWebInstaller = true;
 
-    if (options.feedUrl) {
-      autoUpdater.setFeedURL(options.feedUrl);
+    if (options.feed) {
+      if (options.feed.provider === 'github') {
+        autoUpdater.setFeedURL({
+          provider: 'github',
+          owner: options.feed.owner,
+          repo: options.feed.repo,
+          channel: options.feed.channel,
+          ...(options.feed.tagNamePrefix ? { tagNamePrefix: options.feed.tagNamePrefix } : {}),
+        });
+      } else {
+        autoUpdater.setFeedURL({
+          provider: 'generic',
+          url: options.feed.url,
+          channel: options.feed.channel,
+        });
+      }
     }
 
     autoUpdater.on('download-progress', this.onDownloadProgress);

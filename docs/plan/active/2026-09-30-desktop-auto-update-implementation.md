@@ -74,7 +74,8 @@ Linux AppImage
 - `DU-1201` — **DONE**: `DesktopShutdownCoordinator` now owns single-flight destructive cleanup, the 10s safety bound, failure/timeout settlement, shutdown reason ownership, and an explicit terminal-exit gate. Normal quit and update-install share this owner; update-install cleanup preserves the updater until handoff.
 - `DU-1202` — **DONE**: `UpdateInstallCoordinator` is the sole Restart-to-Update terminal path. It accepts only Ready, provides install single-flight, requires a durable pre-shutdown receipt, shares `DesktopShutdownCoordinator`, authorizes terminal exit immediately before `quitAndInstall()`, normalizes receipt/shutdown/handoff failures, and uses a 15s handoff watchdog to prevent a cleaned-but-alive zombie process.
 - `DU-1203` — **DONE**: pending install state is atomically stored at device-local `shared/update/install-receipt.json`, outside Profile/PowerSync. Startup verifies the expected version before `ProfileRegistry` initialization, clears successful receipts, preserves mismatches as recovery evidence, and ignores/removes corrupted receipts without blocking local access.
-- Next: `DU-1204` — close the Windows NSIS runtime feed and release gate.
+- `DU-1204` — **DONE**: runtime update discovery is explicit through MemoFlow-owned `desktop-update-release.json` + `DesktopUpdateFeed`; stable maps to GitHub `latest`, the adapter translates the typed feed into `electron-updater`, and CI verifies GitHub publish identity, tag prefix, Windows app/product/artifact identity, canonical `latest.yml`, referenced release assets, version, and exact NSIS installer name before upload.
+- Next: `DU-1205` — prove Windows N → N+1 with an installed-update E2E release gate.
 
 ## 2. Non-goals
 

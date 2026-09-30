@@ -60,7 +60,13 @@ describe('ElectronUpdaterAdapter', () => {
 
     await adapter.initialize({
       channel: 'stable',
-      feedUrl: 'https://updates.example.test/stable/windows/x64',
+      feed: {
+        provider: 'github',
+        owner: 'BakerSean168',
+        repo: 'memoflow',
+        channel: 'latest',
+        tagNamePrefix: 'v',
+      },
     });
 
     expect(updater.autoDownload).toBe(false);
@@ -68,9 +74,13 @@ describe('ElectronUpdaterAdapter', () => {
     expect(updater.allowDowngrade).toBe(false);
     expect(updater.allowPrerelease).toBe(false);
     expect(updater.disableWebInstaller).toBe(true);
-    expect(updater.setFeedURL).toHaveBeenCalledWith(
-      'https://updates.example.test/stable/windows/x64',
-    );
+    expect(updater.setFeedURL).toHaveBeenCalledWith({
+      provider: 'github',
+      owner: 'BakerSean168',
+      repo: 'memoflow',
+      channel: 'latest',
+      tagNamePrefix: 'v',
+    });
   });
 
   it('maps an available SDK result into provider-neutral release metadata', async () => {

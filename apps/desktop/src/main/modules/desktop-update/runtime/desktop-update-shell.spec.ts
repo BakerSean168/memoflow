@@ -75,7 +75,16 @@ describe('Desktop Update shell composition', () => {
       },
     });
     expect(engine.initialize).toHaveBeenCalledTimes(1);
-    expect(engine.initialize).toHaveBeenCalledWith({ channel: 'stable' });
+    expect(engine.initialize).toHaveBeenCalledWith({
+      channel: 'stable',
+      feed: {
+        provider: 'github',
+        owner: 'BakerSean168',
+        repo: 'memoflow',
+        channel: 'latest',
+        tagNamePrefix: 'v',
+      },
+    });
   });
 
   it('recognizes Windows Store and portable ownership before direct NSIS', () => {
