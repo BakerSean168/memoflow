@@ -5860,6 +5860,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10444,6 +10452,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/prisma-task-write-transaction-runner.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/infrastructure/adapters/prisma/task-occurrence-prisma.repository.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -11435,7 +11453,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 83
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -11736,7 +11754,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 92
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11869,7 +11887,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 83
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12441,6 +12459,7 @@
       "packages/task/src/server/infrastructure/adapters/prisma/mappers/__tests__/task-row-mapper.spec.ts",
       "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-occurrence-mapper.spec.ts",
       "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-plan-mapper.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/prisma/prisma-task-write-transaction-runner.test.ts",
       "packages/task/src/server/infrastructure/adapters/task-goal-progress-codec.spec.ts",
       "packages/task/src/server/infrastructure/adapters/task-occurrence-workspace-read.spec.ts",
       "packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts",
@@ -12461,7 +12480,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1097,
+    "unit": 1099,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

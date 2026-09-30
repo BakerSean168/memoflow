@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
+import { TaskChannels } from '@memoflow/contracts/electron';
+import { TaskOccurrenceIpcAdapter } from '../ipc/task-occurrence-ipc.adapter';
 import { TaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter';
 
 describe('TaskOccurrenceHttpAdapter', () => {
@@ -74,5 +76,26 @@ describe('TaskOccurrenceHttpAdapter', () => {
     expect(httpClient.post).toHaveBeenCalledWith(
       '/task-occurrences/TaskOccurrenceId_123/uncomplete',
     );
+  });
+  it('forwards measurement intent in the shared completion request', async () => {
+    const httpClient = { post: vi.fn().mockResolvedValue(ok({ status: 'Completed' })) } as any;
+    const adapter = new TaskOccurrenceHttpAdapter(httpClient);
+    const request = { note: 'Task note', goalMeasurement: { value: -2, note: null } };
+    await adapter.completeTaskOccurrence('TaskOccurrenceId_123', request);
+    expect(httpClient.post).toHaveBeenCalledWith(
+      '/task-occurrences/TaskOccurrenceId_123/complete',
+      request,
+    );
+  });
+
+  it('forwards the same intent over Desktop IPC', async () => {
+    const ipcClient = { invoke: vi.fn().mockResolvedValue(ok({ status: 'Completed' })) };
+    const adapter = new TaskOccurrenceIpcAdapter(ipcClient);
+    const request = { note: 'Task note', goalMeasurement: { value: 0, note: 'Goal note' } };
+    await adapter.completeTaskOccurrence('TaskOccurrenceId_123', request);
+    expect(ipcClient.invoke).toHaveBeenCalledWith(TaskChannels.OCCURRENCE_COMPLETE, {
+      id: 'TaskOccurrenceId_123',
+      request,
+    });
   });
 });

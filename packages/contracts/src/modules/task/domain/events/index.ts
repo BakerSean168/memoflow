@@ -11,6 +11,7 @@ export type { TaskOccurrenceCompletedEvent } from './task-occurrence-completed.e
 export type { TaskPlanOutcomeChangedEvent } from './task-plan-outcome-changed.event';
 export {
   TaskGoalSettlementSourceType,
+  TaskGoalRecordingMode,
   type TaskGoalSettlementSource,
   type TaskGoalSettlementSourceTypeValue,
   type TaskGoalProgressApplyEventV2,

@@ -1,6 +1,8 @@
 import type { IDomainEvent } from '@memoflow/contracts/shared';
 import {
   TaskGoalBindingTrigger,
+  TaskGoalRecordingMode,
+  TaskGoalMeasurementSchema,
   TaskGoalProgressConfigurationSchema,
   TaskGoalSettlementSourceType,
   TaskPlanOutcome,
@@ -69,15 +71,16 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
   const payload = event.payload as TaskOccurrenceCompletedEvent;
   const binding = payload.goalBinding;
   const rule = binding ? TaskGoalProgressConfigurationSchema.parse(binding).progressRule : null;
-  const contribution = rule?.mode === 'Fixed' ? rule : null;
-  if (
-    !binding ||
-    !contribution ||
-    !binding.keyResultId ||
-    contribution.trigger !== TaskGoalBindingTrigger.EachCompletion
-  ) {
-    return null;
-  }
+  const settlement =
+    rule?.mode === 'Prompt' && payload.goalMeasurement
+      ? {
+          recordingMode: TaskGoalRecordingMode.PromptedUserMeasurement,
+          ...TaskGoalMeasurementSchema.parse(payload.goalMeasurement),
+        }
+      : rule?.mode === 'Fixed' && rule.trigger === TaskGoalBindingTrigger.EachCompletion
+        ? { recordingMode: TaskGoalRecordingMode.FixedAutomatic, value: rule.value }
+        : null;
+  if (!binding?.keyResultId || !settlement) return null;
 
   const source = {
     type: TaskGoalSettlementSourceType.TaskOccurrence,
@@ -94,7 +97,7 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
     taskPlanId: payload.taskPlanId,
     goalId: binding.goalId,
     keyResultId: binding.keyResultId,
-    value: contribution.value,
+    ...settlement,
     source,
     taskTitle: payload.taskTitle,
     occurredAt: payload.completedAt,
@@ -141,6 +144,7 @@ function planOutcomeSettlementRecord(
       taskPlanId: payload.taskPlanId,
       goalId: binding.goalId,
       keyResultId: binding.keyResultId,
+      recordingMode: TaskGoalRecordingMode.FixedAutomatic,
       value: contribution.value,
       source: {
         type: TaskGoalSettlementSourceType.TaskPlan,

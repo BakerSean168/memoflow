@@ -239,7 +239,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     module.dispose();
   });
 
-  it('rolls back plan, occurrences, outbox and publishes no events when taskGoalOutbox append fails', async () => {
+  it.each(['Fixed', 'Prompt'] as const)('rolls back %s occurrence and outbox together when append fails', async (mode) => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
     const prisma = await getPrisma();
@@ -289,7 +289,9 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       goalBinding: {
         goalId,
         keyResultId,
-        contribution: { value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
+        progressRule: mode === 'Prompt'
+          ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
+          : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
       },
     });
     expect(createRes.ok).toBe(true);
@@ -334,7 +336,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       });
     }) as never);
 
-    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId);
+    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId,
+      mode === 'Prompt' ? { goalMeasurement: { value: -2, note: 'Measured' } } : undefined);
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
 
@@ -352,4 +355,100 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
     module.dispose();
   });
+  it.each([0, -2, undefined])(
+    'commits Prompt completion and optional fact %s atomically',
+    async (value) => {
+      const mode = 'Prompt';
+      const identityId = IdentityId.generate();
+      await seedAccount({ id: identityId });
+      const prisma = await getPrisma();
+
+      // Seed the Goal + KeyResult rows required by the goal-binding FK.
+      const goalId = `goal-${Date.now()}`;
+      const keyResultId = `kr-${Date.now()}`;
+      await prisma.goal.create({
+        data: {
+          id: goalId,
+          identityId,
+          name: 'Outbox Rollback Goal',
+          status: 'InProgress',
+        },
+      });
+      await prisma.keyResult.create({
+        data: {
+          id: keyResultId,
+          identityId,
+          goalId,
+          title: 'KR',
+          aggregationMethod: 'Sum',
+          initialValue: 0,
+          trackingBaseValue: 0,
+          currentValue: 0,
+          targetValue: 10,
+          weight: 1,
+        },
+      });
+      const module = createTaskPrismaModule(prisma, {
+        userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      });
+      const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
+
+      const createSchedule = canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
+        TASK_TEST_TIME_CONTEXT,
+      );
+      const createRes = await module.api.createTaskPlan({
+        identityId,
+        name: 'Goal Task',
+        schedule: createSchedule.toDTO(),
+        importance: ImportanceLevel.Moderate,
+        goalBinding: {
+          goalId,
+          keyResultId,
+          progressRule:
+            mode === 'Prompt'
+              ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
+              : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
+        },
+      });
+      expect(createRes.ok).toBe(true);
+      if (!createRes.ok) return;
+
+      const occurrences = await module.taskOccurrenceRepository.findByPlanId(
+        createRes.data.plan.id,
+        identityId,
+      );
+      expect(occurrences.length).toBeGreaterThan(0);
+      const occurrenceId = String(occurrences[0].id);
+
+      dispatchSpy.mockClear();
+
+      const result = await module.api.completeTaskOccurrence(
+        occurrenceId,
+        identityId,
+        value === undefined
+          ? { note: 'Task only' }
+          : { note: 'Task note', goalMeasurement: { value, note: 'Measured' } },
+      );
+      expect(result).toBeOk();
+      expect(
+        (await prisma.taskOccurrence.findUniqueOrThrow({ where: { id: occurrenceId } })).status,
+      ).toBe('Completed');
+      const outbox = await prisma.taskGoalOutbox.findMany({
+        where: { taskOccurrenceId: occurrenceId },
+      });
+      expect(outbox).toHaveLength(value === undefined ? 0 : 1);
+      if (value !== undefined)
+        expect(JSON.parse(outbox[0].payload)).toMatchObject({
+          recordingMode: 'PromptedUserMeasurement',
+          value,
+          note: 'Measured',
+          source: { type: 'TaskOccurrence', id: occurrenceId },
+        });
+      module.dispose();
+    },
+  );
 });

@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { TaskGoalMeasurementSchema } from '../value-objects/task-goal-binding';
 import { TaskOccurrenceResponseSchema } from './response-schemas';
 
 // ============================================================================
@@ -35,6 +36,7 @@ export type GetTaskOccurrencesByRangeRes = z.infer<typeof GetTaskOccurrencesByRa
 
 export const CompleteTaskOccurrenceSchema = z
   .object({
+    goalMeasurement: TaskGoalMeasurementSchema.optional(),
     duration: z.number().optional(),
     note: z.string().optional(),
     rating: z.number().int().min(1).max(5).optional(),
