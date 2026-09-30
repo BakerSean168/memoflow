@@ -222,6 +222,7 @@ export function createMockGoalReview(
     challenges: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     adjustments: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     systemContext: {
+      signals: [],
       windowStartAt: start,
       windowEndAt: now,
       overallProgress: { startPercentage: 20, endPercentage: 30, deltaPercentage: 10 },

@@ -19,13 +19,49 @@ export default {
     noTasks: 'No linked tasks.',
     viewTasks: 'View linked tasks',
     taskPlanSource: 'Source: Task plan. The source task title is unavailable in this record.',
-    taskOccurrenceSource: 'Source: Task occurrence. The source task title is unavailable in this record.',
+    taskOccurrenceSource:
+      'Source: Task occurrence. The source task title is unavailable in this record.',
     manualSource: 'Source: Manual Goal check-in.',
     methodSum: 'Adds each recorded change to the starting tracked value.',
-    methodAverage: 'Uses the average of recorded samples; the starting tracked value is used until a sample is recorded.',
-    methodMax: 'Uses the highest recorded sample; the starting tracked value is used until a sample is recorded.',
-    methodMin: 'Uses the lowest recorded sample; the starting tracked value is used until a sample is recorded.',
-    methodLast: 'Uses the latest recorded sample; the starting tracked value is used until a sample is recorded.',
+    methodAverage:
+      'Uses the average of recorded samples; the starting tracked value is used until a sample is recorded.',
+    methodMax:
+      'Uses the highest recorded sample; the starting tracked value is used until a sample is recorded.',
+    methodMin:
+      'Uses the lowest recorded sample; the starting tracked value is used until a sample is recorded.',
+    methodLast:
+      'Uses the latest recorded sample; the starting tracked value is used until a sample is recorded.',
+  },
+  reviewSnapshot: {
+    facts: 'Facts',
+    signals: 'Signals',
+    overall: 'Overall progress',
+    points: 'percentage points',
+    previewWindow: 'System facts · last {days} days',
+    saved: 'Authoritative progress snapshot',
+    counts:
+      '{recordCount} records · {manualRecordCount} manual · {taskContributionCount} task contributions',
+    legacy: 'No signals were saved with this review. The recorded facts are shown above.',
+    noActivity: 'No measurement records in this window',
+    activity: 'Measurement records in this window',
+    krMovement: 'Key result movement toward targets',
+    create: 'Create review',
+    detail: 'Goal review',
+    reflection: 'Reflection',
+    challenges: 'Challenges',
+    adjustments: 'Adjustments',
+    save: 'Save review',
+    reflectionPlaceholder: 'What happened, what did you learn?',
+    overallDirection: {
+      increased: 'Overall progress increased',
+      decreased: 'Overall progress decreased',
+      unchanged: 'Overall progress unchanged',
+    },
+    krDirection: {
+      improved: 'Progress toward target increased',
+      regressed: 'Progress toward target decreased',
+      unchanged: 'Progress toward target unchanged',
+    },
   },
   keyResultFallback: 'Key result',
   route: {

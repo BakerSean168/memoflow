@@ -1,4 +1,5 @@
-import type { KeyResultWeightSnapshotDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import type { KeyResultWeightSnapshotDTO } from '@memoflow/contracts/goal';
+import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import { Goal } from '../../../../domain';
 import { rawDataToGoalState } from '../../prisma/mappers/goal-state-mapper';
 import type {
@@ -42,11 +43,7 @@ export class PowerSyncGoalMapper {
       // first cloud refresh. Legacy Goal rows only had start_date, whose
       // product semantics were exact-day precision. Keep this compatibility
       // bridge PowerSync-local; Prisma rows remain fail-closed on partial pairs.
-      startKind: row.start_kind
-        ? String(row.start_kind)
-        : row.start_date
-          ? 'day'
-          : null,
+      startKind: row.start_kind ? String(row.start_kind) : row.start_date ? 'day' : null,
       startDate: row.start_date ? String(row.start_date) : null,
       targetKind: row.target_kind ? String(row.target_kind) : null,
       targetEndDate: row.target_end_date ? String(row.target_end_date) : null,
@@ -96,7 +93,7 @@ export class PowerSyncGoalMapper {
       reflection: String(row.reflection),
       challenges: row.challenges ? String(row.challenges) : null,
       adjustments: row.adjustments ? String(row.adjustments) : null,
-      systemContext: JSON.parse(String(row.system_context)) as GoalReviewSystemContext,
+      systemContext: GoalReviewSystemContextSchema.parse(JSON.parse(String(row.system_context))),
       reviewedAt: requiredMs(row.reviewed_at ? String(row.reviewed_at) : null),
       createdAt: requiredMs(row.created_at ? String(row.created_at) : null),
       updatedAt: requiredMs(row.updated_at ? String(row.updated_at) : null),

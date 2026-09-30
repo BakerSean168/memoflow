@@ -79,8 +79,9 @@ describe('MemoFlow product surface polish', () => {
       expect(source).not.toContain('rounded-lg border bg-card');
     }
 
-    expect(reviewCreate).toContain('surface-raised');
-    expect(reviewDetail).toContain('Authoritative progress snapshot');
+    expect(reviewCreate).toContain('<GoalReviewSnapshot');
+    expect(reviewDetail).toContain('<GoalReviewSnapshot');
+    expect(read('modules/goal/components/GoalReviewSnapshot.vue')).toContain('surface-raised');
     expect(keyResultDetail).toContain('<ProductDialogShell');
     expect(keyResultDetail).toContain('<GoalKeyResultTrajectoryPlot');
   });

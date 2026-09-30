@@ -228,6 +228,7 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
 
   it('parses required authoritative review system context', () => {
     const context = {
+      signals: [],
       windowStartAt: 1_000,
       windowEndAt: 1_700,
       overallProgress: { startPercentage: 25, endPercentage: 50, deltaPercentage: 25 },

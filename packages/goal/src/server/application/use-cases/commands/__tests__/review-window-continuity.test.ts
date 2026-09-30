@@ -94,6 +94,7 @@ describe('Review windows across query and command on authoritative Goal children
       createdAt: NOW,
       updatedAt: NOW,
       systemContext: {
+        signals: [],
         windowStartAt: NOW - 2000,
         windowEndAt: NOW - 1000,
         overallProgress: { startPercentage: 0, endPercentage: 0, deltaPercentage: 0 },
@@ -114,6 +115,60 @@ describe('Review windows across query and command on authoritative Goal children
       if (!input.windowDays && (!input.window || input.window.mode === 'since-last-review')) {
         expect(preview.data.windowStartAt).toBe(NOW - 1000);
       }
+    }
+  });
+
+  it('preview and saved receipt share non-empty KR and activity signals', async () => {
+    const f = fixture();
+    const kr = f.goal.createAndAddKeyResult({
+      title: 'Weight',
+      initialValue: 80,
+      targetValue: 70,
+      currentValue: 80,
+      aggregationMethod: 'Last',
+    });
+    vi.mocked(f.records.findByKeyResultIds).mockResolvedValue(
+      new Map([
+        [
+          String(kr.id),
+          [
+            { value: 78, recordedAt: NOW - 2000, sourceType: null },
+            { value: 75, recordedAt: NOW - 500, sourceType: 'TASK_INSTANCE' },
+          ] as never,
+        ],
+      ]),
+    );
+    const window = { mode: 'custom' as const, windowStartAt: NOW - 1000, windowEndAt: NOW };
+    const preview = await f.query.execute(String(f.goal.id), 'identity-1', { window });
+    const saved = await f.command.execute(String(f.goal.id), 'identity-1', {
+      expectedVersion: f.goal.version,
+      reflection: 'Progress',
+      window,
+    });
+    expect(preview.ok && saved.ok).toBe(true);
+    if (preview.ok && saved.ok) {
+      expect(f.goal.goalReviews[0].systemContext.signals).toEqual(preview.data.signals);
+      expect(saved.data.readModel.reviews?.[0].systemContext.signals).toEqual(preview.data.signals);
+      expect(preview.data.signals[1]).toMatchObject({
+        kind: 'key-result-movement',
+        evidence: [
+          {
+            keyResultId: kr.id,
+            direction: 'improved',
+            startPercentage: 20,
+            endPercentage: 50,
+            deltaPercentage: 30,
+          },
+        ],
+      });
+      expect(preview.data.signals[2]).toEqual({
+        kind: 'measurement-activity',
+        evidence: {
+          recordCount: 1,
+          manualRecordCount: 0,
+          taskContributionCount: 1,
+        },
+      });
     }
   });
 

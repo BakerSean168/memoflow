@@ -6,10 +6,8 @@ import type {
   Instant,
   TransferDate,
 } from '@memoflow/contracts/primitives';
-import type {
-  GoalReviewServerDTO,
-  GoalReviewSystemContext,
-} from '@memoflow/contracts/goal';
+import type { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import { GoalReviewId } from '../../domain';
 
 export interface GoalReviewState {
@@ -25,15 +23,7 @@ export interface GoalReviewState {
 }
 
 function cloneContext(context: GoalReviewSystemContext): GoalReviewSystemContext {
-  return {
-    ...context,
-    overallProgress: { ...context.overallProgress },
-    keyResults: context.keyResults.map((item) => ({
-      ...item,
-      trend: item.trend.map((point) => ({ ...point })),
-    })),
-    summary: { ...context.summary },
-  };
+  return GoalReviewSystemContextSchema.parse(context);
 }
 
 function optionalText(value?: string | null): string | null {
@@ -48,14 +38,30 @@ export class GoalReview extends Entity<IGoalReviewId> {
     this._props = { ...state, systemContext: cloneContext(state.systemContext) };
   }
 
-  get goalId(): IGoalId { return this._props.goalId; }
-  get reflection(): string { return this._props.reflection; }
-  get challenges(): string | null { return this._props.challenges; }
-  get adjustments(): string | null { return this._props.adjustments; }
-  get systemContext(): GoalReviewSystemContext { return cloneContext(this._props.systemContext); }
-  get reviewedAt(): Instant { return this._props.reviewedAt; }
-  get createdAt(): Instant { return this._props.createdAt; }
-  get updatedAt(): Instant { return this._props.updatedAt; }
+  get goalId(): IGoalId {
+    return this._props.goalId;
+  }
+  get reflection(): string {
+    return this._props.reflection;
+  }
+  get challenges(): string | null {
+    return this._props.challenges;
+  }
+  get adjustments(): string | null {
+    return this._props.adjustments;
+  }
+  get systemContext(): GoalReviewSystemContext {
+    return cloneContext(this._props.systemContext);
+  }
+  get reviewedAt(): Instant {
+    return this._props.reviewedAt;
+  }
+  get createdAt(): Instant {
+    return this._props.createdAt;
+  }
+  get updatedAt(): Instant {
+    return this._props.updatedAt;
+  }
 
   public static create(params: {
     id?: IGoalReviewId;
@@ -120,7 +126,9 @@ export class GoalReview extends Entity<IGoalReviewId> {
   public toClientDTO(): import('@memoflow/contracts/goal').GoalReviewClientDTO {
     return {
       id: String(this.id) as import('@memoflow/contracts/goal').GoalReviewClientDTO['id'],
-      goalId: String(this._props.goalId) as import('@memoflow/contracts/goal').GoalReviewClientDTO['goalId'],
+      goalId: String(
+        this._props.goalId,
+      ) as import('@memoflow/contracts/goal').GoalReviewClientDTO['goalId'],
       reflection: this._props.reflection,
       challenges: this._props.challenges,
       adjustments: this._props.adjustments,
@@ -131,5 +139,7 @@ export class GoalReview extends Entity<IGoalReviewId> {
     };
   }
 
-  private touch(): void { this._props.updatedAt = Date.now(); }
+  private touch(): void {
+    this._props.updatedAt = Date.now();
+  }
 }

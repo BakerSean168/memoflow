@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  GoalReviewOverallSignalSchema,
+  GoalReviewActivitySignalSchema,
+  GoalReviewKeyResultSignalSchema,
+  GoalReviewKeyResultMovementEvidenceSchema,
+} from './value-objects/goal-review-context';
 import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
 import { GoalReminderConfigDTOSchema } from './value-objects/goal-reminder-config';
 import { GoalStatus } from './value-objects/goal-status';
@@ -60,8 +66,21 @@ const GoalPortableReviewKeyResultContextV3Schema = z
   })
   .strict();
 
+const GoalPortableReviewSignalV3Schema = z.discriminatedUnion('kind', [
+  GoalReviewOverallSignalSchema,
+  GoalReviewActivitySignalSchema,
+  GoalReviewKeyResultSignalSchema.extend({
+    evidence: z.array(
+      GoalReviewKeyResultMovementEvidenceSchema.omit({ keyResultId: true }).extend({
+        keyResultRef: GoalPortableReferenceV3Schema,
+      }),
+    ),
+  }),
+]);
+
 export const GoalPortableReviewSystemContextV3Schema = z
   .object({
+    signals: z.array(GoalPortableReviewSignalV3Schema).default([]),
     windowStartAt: PortableInstantSchema,
     windowEndAt: PortableInstantSchema,
     overallProgress: z
@@ -187,6 +206,29 @@ export const GoalPortablePayloadV3Schema = z
       }
       for (const [reviewIndex, review] of goal.reviews.entries()) {
         addRef(review.ref, ['goals', goalIndex, 'reviews', reviewIndex, 'ref']);
+        for (const [signalIndex, signal] of review.systemContext.signals.entries()) {
+          if (signal.kind !== 'key-result-movement') continue;
+          for (const [evidenceIndex, item] of signal.evidence.entries()) {
+            if (!keyResultRefs.has(item.keyResultRef)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: [
+                  'goals',
+                  goalIndex,
+                  'reviews',
+                  reviewIndex,
+                  'systemContext',
+                  'signals',
+                  signalIndex,
+                  'evidence',
+                  evidenceIndex,
+                  'keyResultRef',
+                ],
+                message: 'Review signal Key Result reference must belong to its Goal',
+              });
+            }
+          }
+        }
         for (const [contextIndex, keyResult] of review.systemContext.keyResults.entries()) {
           if (!keyResultRefs.has(keyResult.keyResultRef)) {
             ctx.addIssue({

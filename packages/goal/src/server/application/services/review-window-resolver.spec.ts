@@ -11,6 +11,7 @@ function review(id: string, end: number, reviewedAt = end) {
     id: id as GoalReviewId,
     reviewedAt,
     systemContext: {
+      signals: [],
       windowStartAt: end - 1000,
       windowEndAt: end,
       overallProgress: { startPercentage: 0, endPercentage: 0, deltaPercentage: 0 },

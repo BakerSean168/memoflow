@@ -19,6 +19,12 @@ const inputs: (GoalReviewWindowInput | undefined)[] = [
   { window: { mode: 'custom', windowStartAt: 101, windowEndAt: 987 } },
 ];
 const context = {
+  signals: [
+    {
+      kind: 'measurement-activity',
+      evidence: { recordCount: 0, manualRecordCount: 0, taskContributionCount: 0 },
+    },
+  ],
   windowStartAt: 101,
   windowEndAt: 987,
   overallProgress: { startPercentage: 0, endPercentage: 0, deltaPercentage: 0 },

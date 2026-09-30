@@ -239,6 +239,7 @@ describe('GoalWorkspaceQueryService', () => {
     const review = h.goal.createAndAddReview({
       reflection: 'The composed read model is coherent.',
       systemContext: {
+        signals: [],
         windowStartAt: 1,
         windowEndAt: 2,
         overallProgress: { startPercentage: 50, endPercentage: 70, deltaPercentage: 20 },

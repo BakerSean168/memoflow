@@ -1,5 +1,6 @@
 /** Goal Review V2 read entity. */
 import type { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import { Entity } from '@memoflow/utils/domain';
 import { GoalReviewId, GoalId } from '../../server/domain';
 
@@ -17,16 +18,40 @@ export interface GoalReviewState {
 
 export class GoalReview extends Entity<GoalReviewId> {
   private readonly _props: GoalReviewState;
-  private constructor(props: GoalReviewState) { super(props.id); this._props = props; }
-  get goalId(): GoalId { return this._props.goalId; }
-  get reflection(): string { return this._props.reflection; }
-  get challenges(): string | null { return this._props.challenges; }
-  get adjustments(): string | null { return this._props.adjustments; }
-  get systemContext(): GoalReviewSystemContext { return this._props.systemContext; }
-  get reviewedAt(): number { return this._props.reviewedAt; }
-  get createdAt(): number { return this._props.createdAt; }
-  get updatedAt(): number { return this._props.updatedAt; }
-  public static load(state: GoalReviewState): GoalReview { return new GoalReview(state); }
+  private constructor(props: GoalReviewState) {
+    super(props.id);
+    this._props = {
+      ...props,
+      systemContext: GoalReviewSystemContextSchema.parse(props.systemContext),
+    };
+  }
+  get goalId(): GoalId {
+    return this._props.goalId;
+  }
+  get reflection(): string {
+    return this._props.reflection;
+  }
+  get challenges(): string | null {
+    return this._props.challenges;
+  }
+  get adjustments(): string | null {
+    return this._props.adjustments;
+  }
+  get systemContext(): GoalReviewSystemContext {
+    return this._props.systemContext;
+  }
+  get reviewedAt(): number {
+    return this._props.reviewedAt;
+  }
+  get createdAt(): number {
+    return this._props.createdAt;
+  }
+  get updatedAt(): number {
+    return this._props.updatedAt;
+  }
+  public static load(state: GoalReviewState): GoalReview {
+    return new GoalReview(state);
+  }
   public toDTO(): GoalReviewClientDTO {
     return {
       id: String(this.id) as GoalReviewClientDTO['id'],

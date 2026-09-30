@@ -37,13 +37,17 @@ const kr = {
   isCompleted: false,
 };
 const context = {
-  overallProgress: { endPercentage: 40, deltaPercentage: 10 },
+  windowStartAt: 1,
+  windowEndAt: 2,
+  signals: [],
+  overallProgress: { startPercentage: 30, endPercentage: 40, deltaPercentage: 10 },
   summary: { recordCount: 3, manualRecordCount: 2, taskContributionCount: 1 },
   keyResults: [
     {
       keyResultId: 'kr-1',
       title: 'Distance',
       unit: 'km',
+      deltaPercentage: 10,
       startPercentage: 30,
       endPercentage: 40,
       trend: [],

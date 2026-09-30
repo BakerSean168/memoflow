@@ -45,6 +45,7 @@ function createIntegrationGoal(identityId: string) {
     challenges: 'Need more frontend oracle depth',
     adjustments: 'Expand boundary tests',
     systemContext: {
+      signals: [],
       windowStartAt: Date.UTC(2026, 3, 1),
       windowEndAt: Date.UTC(2026, 3, 8),
       overallProgress: { startPercentage: 20, endPercentage: 40, deltaPercentage: 20 },
