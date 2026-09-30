@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 /**
  * Task Client Service
  *
@@ -79,7 +80,7 @@ function parseGoalBinding(dto: TaskGoalBindingDTO): TaskGoalBinding {
   return {
     goalId: dto.goalId,
     keyResultId: dto.keyResultId,
-    contribution: dto.contribution ? { ...dto.contribution } : null,
+    ...TaskGoalProgressConfigurationSchema.parse(dto),
   };
 }
 

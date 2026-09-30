@@ -2,6 +2,9 @@
  * Update Task Template Service
  */
 
+import { validateTaskGoalProgress } from './task-goal-progress-validation';
+import type { TaskGoalMeasurementReadPort } from '../../ports';
+import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskPlanSchedule } from '../../../domain/value-objects/task-plan-schedule';
@@ -43,6 +46,7 @@ export class UpdateTaskPlanUseCase {
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
+    private readonly goalReadPort?: TaskGoalMeasurementReadPort,
   ) {
     if (!transactionRunner) {
       throw new Error(
@@ -86,10 +90,10 @@ export class UpdateTaskPlanUseCase {
             JSON.stringify(plan.schedule.toDTO()) !== JSON.stringify(nextSchedule.toDTO());
           const importanceChanged =
             request.importance !== undefined && request.importance !== plan.importance;
-          const nextProgressTrigger =
-            request.goalBinding === undefined
-              ? plan.goalBinding?.contribution?.trigger
-              : request.goalBinding?.contribution?.trigger;
+          const nextBinding = request.goalBinding === undefined ? plan.goalBinding?.toDTO() : request.goalBinding;
+          const invalidProgress = await validateTaskGoalProgress(identityId, nextBinding, this.goalReadPort);
+          if (invalidProgress) return invalidProgress;
+          const nextProgressTrigger = nextBinding ? TaskGoalBinding.create(nextBinding).progressRule?.trigger : undefined;
 
           if (
             nextProgressTrigger === TaskGoalBindingTrigger.PlanCompletion &&
@@ -150,7 +154,7 @@ export class UpdateTaskPlanUseCase {
               plan.bindToGoal(
                 request.goalBinding.goalId,
                 request.goalBinding.keyResultId,
-                request.goalBinding.contribution ?? null,
+                TaskGoalBinding.create(request.goalBinding).progressRule,
               );
             }
           }

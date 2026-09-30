@@ -108,6 +108,8 @@ export class PowerSyncTaskPlanRepository
       ['version', data.version],
       ['updated_at', data.updatedAt],
       ['deleted_at', data.deletedAt],
+      ['goal_progress_mode', data.goalProgressMode],
+      ['goal_suggested_value', data.goalSuggestedValue],
     ];
 
     if (existing) {

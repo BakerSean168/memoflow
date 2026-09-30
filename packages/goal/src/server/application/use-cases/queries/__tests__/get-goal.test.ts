@@ -32,6 +32,19 @@ function createGoalFixture(overrides?: Record<string, any>) {
 // ============================================================
 
 describe('GetGoalUseCase', () => {
+  it('projects one KR measurement through an identity-scoped Goal read', async () => {
+    const kr = { id: 'kr-1', title: 'Temperature', progress: { aggregationMethod: 'Average', unit: '°C', initialValue: 0, currentValue: -2, targetValue: 0 } };
+    const goal = createGoalFixture({ toClientDTO: vi.fn().mockReturnValue({ keyResults: [kr] }) });
+    const goalRepo = createMockRepo<IGoalRepository>({ findByIdForIdentity: vi.fn().mockResolvedValue(goal) });
+    const useCase = new GetGoalUseCase(goalRepo);
+    const result = await useCase.getKeyResultMeasurementContext('goal-1', 'kr-1', 'identity-1');
+    expect(result).toEqual({ ok: true, data: kr });
+    expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-1', { includeChildren: true });
+    expect((await useCase.getKeyResultMeasurementContext('goal-1', 'foreign-kr', 'identity-1')).ok).toBe(false);
+    goalRepo.findByIdForIdentity.mockResolvedValue(null);
+    expect((await useCase.getKeyResultMeasurementContext('goal-1', 'kr-1', 'foreign-owner')).ok).toBe(false);
+  });
+
   it('should return a goal by ID', async () => {
     const goal = createGoalFixture();
     const goalRepo = createMockRepo<IGoalRepository>({

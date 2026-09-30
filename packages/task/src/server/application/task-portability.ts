@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 import { createHash } from 'node:crypto';
 import type {
   PortableCapability,
@@ -135,6 +136,7 @@ function throwIfPlanConflict(
         keyResultId: incoming.goalLink.keyResultRef
           ? resolveDryRunReference(context, incoming.goalLink.keyResultRef)
           : null,
+        progressRule: incoming.goalLink.progressRule,
         contribution: incoming.goalLink.contribution,
       }
     : null;
@@ -163,6 +165,13 @@ function throwIfPlanConflict(
     title: definition.title,
     order: definition.order,
   }));
+  const currentGoalBinding = dto.goalBinding
+    ? {
+        goalId: dto.goalBinding.goalId,
+        keyResultId: dto.goalBinding.keyResultId,
+        ...TaskGoalProgressConfigurationSchema.parse(dto.goalBinding),
+      }
+    : null;
   const same =
     dto.name === incoming.title.trim() &&
     dto.description === incoming.description &&
@@ -175,7 +184,8 @@ function throwIfPlanConflict(
     dto.closedAt === incoming.closedAt &&
     (dto.archivedAt !== null) === incoming.archived &&
     dto.abandonedReason === incoming.abandonedReason &&
-    (!goalBindingRefsResolved || JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding)) &&
+    (!goalBindingRefsResolved ||
+      JSON.stringify(currentGoalBinding) === JSON.stringify(goalBinding)) &&
     (!labelRefsResolved || sameStringSet(currentLabelIds, incomingLabelIds)) &&
     JSON.stringify(currentChecklist) === JSON.stringify(incomingChecklist);
   if (!same) {
@@ -264,7 +274,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
                         'goals',
                         String(dto.goalBinding.keyResultId),
                       ),
-                contribution: dto.goalBinding.contribution,
+                ...TaskGoalProgressConfigurationSchema.parse(dto.goalBinding),
               },
         labelRefs: plan.labels.map((label) =>
           context.references.resolveExportReference('labels', label.id),
@@ -411,6 +421,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
                   plan.goalLink.keyResultRef === null
                     ? null
                     : requireImportedReference(context, plan.goalLink.keyResultRef, 'key result'),
+                progressRule: plan.goalLink.progressRule,
                 contribution: plan.goalLink.contribution,
               },
         checklist: plan.checklist.map((definition) => ({

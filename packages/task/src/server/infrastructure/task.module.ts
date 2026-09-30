@@ -14,6 +14,7 @@
  * injection only, no hidden service locator.
  */
 
+import type { TaskGoalMeasurementReadPort } from '../application/ports';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import { createTaskOccurrenceMaintenanceRuntime } from './runtime/task-occurrence-maintenance-runtime';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
@@ -89,6 +90,7 @@ export interface TaskModuleDependencies {
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly taskWriteTransactionRunner: TaskWriteTransactionRunner;
   readonly userTimeContextPort: UserTimeContextPort;
+  readonly goalReadPort?: TaskGoalMeasurementReadPort;
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
 }
 
@@ -212,12 +214,15 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
+      dependencies.goalReadPort,
     ),
     updateTaskPlan: new UpdateTaskPlanUseCase(
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
+      Date.now,
+      dependencies.goalReadPort,
     ),
     activateTaskPlan: new ActivateTaskPlanUseCase(
       taskPlanRepository,
@@ -252,7 +257,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
     ),
-    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository, dependencies.userTimeContextPort),
+    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository, dependencies.userTimeContextPort, dependencies.goalReadPort),
     unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(
       taskPlanRepository,
       dependencies.userTimeContextPort,

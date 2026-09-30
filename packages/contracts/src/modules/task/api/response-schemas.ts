@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { TaskGoalProgressConfigurationSchema } from '../value-objects/task-goal-binding';
 import { LabelClientDTOSchema } from '../../label';
 import { brandedId } from '../../../primitives';
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '../../../primitives';
@@ -34,7 +35,9 @@ export const TaskPlanResponseSchema = z.object({
   schedule: TaskPlanScheduleSchema,
   reminderConfig: TaskReminderConfigSchema.nullable(),
   importance: z.enum(ImportanceLevel),
-  goalBinding: TaskGoalBindingSchema.nullable(),
+  goalBinding: TaskGoalBindingSchema.nullable().transform((binding) =>
+    binding ? { ...binding, ...TaskGoalProgressConfigurationSchema.parse(binding) } : null,
+  ),
   checklist: z.array(ChecklistItemDefinitionSchema),
   labels: z.array(LabelClientDTOSchema),
   status: z.enum(TaskPlanStatus),

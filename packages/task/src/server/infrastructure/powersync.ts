@@ -1,3 +1,4 @@
+import type { TaskGoalMeasurementReadPort } from '../application/ports';
 /**
  * Convenience factory — PowerSync-backed task module for Electron.
  * 便捷工厂 — 基于 PowerSync 的 Electron 任务模块。
@@ -56,6 +57,7 @@ export function createTaskPowerSyncModule(
   db: IElectronDatabase,
   options: {
     readonly userTimeContextPort: UserTimeContextPort;
+    readonly goalReadPort?: TaskGoalMeasurementReadPort;
     readonly runtimeContributions?: TaskRuntimeContributionsInput;
   },
 ): TaskModuleInstance {
@@ -70,6 +72,7 @@ export function createTaskPowerSyncModule(
     taskOccurrenceRepository,
     taskWriteTransactionRunner,
     userTimeContextPort: options.userTimeContextPort,
+    goalReadPort: options.goalReadPort,
     runtimeContributions: options.runtimeContributions,
   });
 }

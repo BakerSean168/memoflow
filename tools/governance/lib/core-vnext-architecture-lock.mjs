@@ -462,11 +462,14 @@ export function findCoreVnextArchitectureLockViolations(files) {
     fileMap,
     'packages/database/src/schema/task-goal-binding-constraint.ts',
     [
-      'memoflow.task-goal-binding/v3',
-      'goal_id IS NOT NULL AND key_result_id IS NULL',
+      'memoflow.task-goal-binding/v4',
+      'key_result_id IS NULL OR goal_id IS NOT NULL',
       'goal_record_value IS NULL AND goal_progress_trigger IS NULL',
+      "goal_progress_mode = 'Prompt' AND goal_record_value IS NULL",
+      'goal_record_value <> 0',
+      ') IS TRUE)',
     ],
-    'task-goal-binding-v3-missing',
+    'task-goal-binding-v4-missing',
   );
   requireTokens(
     violations,
@@ -548,8 +551,8 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
       'Task Key Result reads must include the owning Goal; ownerless findByKeyResultId queries are forbidden',
     'task-goal-null-kr-stringify':
       'Goal-only Task links must preserve keyResultId=null; stringifying a nullable KR id is forbidden',
-    'task-goal-binding-v3-missing':
-      'Task persistence must retain the v3 Goal-only / Goal+KR binding constraint',
+    'task-goal-binding-v4-missing':
+      'Task persistence must retain the v4 Goal-only / Goal+KR Fixed/Prompt binding constraint',
     'task-goal-context-read-port-missing':
       'Task must expose the ADR-069 owner-controlled Goal/KR context read port',
   };

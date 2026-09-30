@@ -1,6 +1,7 @@
 import type { IDomainEvent } from '@memoflow/contracts/shared';
 import {
   TaskGoalBindingTrigger,
+  TaskGoalProgressConfigurationSchema,
   TaskGoalSettlementSourceType,
   TaskPlanOutcome,
   type TaskGoalProgressOutboxEventV2,
@@ -67,7 +68,8 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
 
   const payload = event.payload as TaskOccurrenceCompletedEvent;
   const binding = payload.goalBinding;
-  const contribution = binding?.contribution;
+  const rule = binding ? TaskGoalProgressConfigurationSchema.parse(binding).progressRule : null;
+  const contribution = rule?.mode === 'Fixed' ? rule : null;
   if (
     !binding ||
     !contribution ||
@@ -115,7 +117,8 @@ function planOutcomeSettlementRecord(
   occurredAt: Date,
 ): TaskGoalOutboxRecord | null {
   const binding = payload.goalBinding;
-  const contribution = binding?.contribution;
+  const rule = binding ? TaskGoalProgressConfigurationSchema.parse(binding).progressRule : null;
+  const contribution = rule?.mode === 'Fixed' ? rule : null;
   if (
     !binding ||
     !contribution ||

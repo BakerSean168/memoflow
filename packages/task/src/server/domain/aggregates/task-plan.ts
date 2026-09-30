@@ -7,6 +7,7 @@ import type {
   TaskPlanClientDTO,
   TaskPlanServerDTO,
   TaskEventMap,
+  TaskGoalProgressRule,
   GoalContributionRule,
 } from '@memoflow/contracts/task';
 import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
@@ -462,9 +463,9 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   public bindToGoal(
     goalId: string,
     keyResultId: string | null = null,
-    contribution: GoalContributionRule | null = null,
+    rule: TaskGoalProgressRule | GoalContributionRule | null = null,
   ): void {
-    goalPolicy.bindToGoal(this, goalId, keyResultId, contribution);
+    goalPolicy.bindToGoal(this, goalId, keyResultId, rule);
   }
 
   public unbindFromGoal(): void {
@@ -570,6 +571,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       goalId: string;
       keyResultId?: string | null;
       contribution?: GoalContributionRule | null;
+      progressRule?: TaskGoalProgressRule | null;
     } | null;
     completionPolicy?: (typeof TaskPlanCompletionPolicy)[keyof typeof TaskPlanCompletionPolicy];
   }): TaskPlan {
@@ -593,7 +595,8 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
         ? TaskGoalBinding.create({
             goalId: params.goalBinding.goalId as TaskGoalBinding['goalId'],
             keyResultId: (params.goalBinding.keyResultId ?? null) as TaskGoalBinding['keyResultId'],
-            contribution: params.goalBinding.contribution ?? null,
+            contribution: params.goalBinding.contribution,
+            progressRule: params.goalBinding.progressRule,
           })
         : null,
       checklist: TaskPlan.toChecklistDefinitions(params.checklist ?? []),

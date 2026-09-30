@@ -1,3 +1,5 @@
+import type { TaskGoalProgressRule } from '@memoflow/contracts/task';
+import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import type {
   ChecklistItemDefinitionDTO,
   TaskGoalBindingTriggerValue,
@@ -35,6 +37,8 @@ export interface TaskGoalContributionViewModel {
 export interface TaskGoalBindingViewModel {
   goalId: string;
   keyResultId: string | null;
+  progressRule?: TaskGoalProgressRule | null;
+  /** @deprecated Input compatibility only. */
   contribution?: TaskGoalContributionViewModel;
 }
 
@@ -57,6 +61,12 @@ export interface GoalBindingOption {
 }
 
 export interface KeyResultBindingOption {
+  calculationMethod: KeyResultCalculationMethod;
+  methodLabel: string;
+  recordInputKind: 'delta' | 'sample';
+  unit: string | null;
+  currentValue: number;
+  targetValue: number;
   id: string;
   title: string;
   weight?: number;

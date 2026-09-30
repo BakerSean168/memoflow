@@ -1,4 +1,5 @@
 import type {
+  KeyResultClientDTO,
   CloneGoalReq,
   CreateGoalReq,
   GetGoalAggregateRes,
@@ -23,6 +24,7 @@ import type { ListGoalReviewsResult } from './use-cases/queries/list-goal-review
 /** Transport-neutral callable application surface. */
 export interface GoalApplicationPort {
   createGoal(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>>;
+  getKeyResultMeasurementContext(goalId: string, keyResultId: string, identityId: string): Promise<Result<Pick<KeyResultClientDTO, 'id' | 'title' | 'progress'>>>;
   getGoal(id: string, identityId: string, includeChildren?: boolean): Promise<Result<GetGoalRes>>;
   listGoals(input: ListGoalsQuery): Promise<Result<QueryGoalsRes>>;
   getHomeSummary(identityId: string): Promise<Result<GoalHomeProgressSummary>>;

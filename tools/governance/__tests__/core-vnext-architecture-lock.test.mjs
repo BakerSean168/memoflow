@@ -29,9 +29,12 @@ const canonicalTaskGoalFiles = [
   {
     relPath: 'packages/database/src/schema/task-goal-binding-constraint.ts',
     content: `
-      const VERSION = 'memoflow.task-goal-binding/v3';
-      const sql = 'goal_id IS NOT NULL AND key_result_id IS NULL';
+      const VERSION = 'memoflow.task-goal-binding/v4';
+      const sql = 'key_result_id IS NULL OR goal_id IS NOT NULL';
       const contribution = 'goal_record_value IS NULL AND goal_progress_trigger IS NULL';
+      const prompt = "goal_progress_mode = 'Prompt' AND goal_record_value IS NULL";
+      const fixed = 'goal_record_value <> 0';
+      const check = ') IS TRUE)';
     `,
   },
   {
@@ -267,7 +270,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
 
     const { violations } = findCoreVnextArchitectureLockViolations(files);
     const kinds = violations.map((violation) => violation.kind);
-    expect(kinds).toContain('task-goal-binding-v3-missing');
+    expect(kinds).toContain('task-goal-binding-v4-missing');
     expect(kinds).toContain('task-goal-context-read-port-missing');
   });
 

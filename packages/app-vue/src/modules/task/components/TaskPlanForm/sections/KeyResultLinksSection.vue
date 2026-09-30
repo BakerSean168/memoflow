@@ -2,7 +2,9 @@
   <section class="space-y-4">
     <div>
       <!-- 启用开关 -->
-      <div class="mb-4 flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]">
+      <div
+        class="mb-4 flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
+      >
         <div class="flex min-w-0 items-center gap-2">
           <Target class="h-4 w-4 shrink-0 text-muted-foreground" />
           <Label for="task-key-result-link-enabled" class="cursor-pointer">
@@ -128,26 +130,61 @@
           </p>
         </div>
 
-        <div
-          class="mb-3 flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
-        >
-          <div class="flex min-w-0 items-center gap-2">
-            <PlusCircle class="h-4 w-4 shrink-0 text-muted-foreground" />
-            <Label for="task-goal-contribution-enabled" class="cursor-pointer">
-              {{ t('task.krLinks.contributionEnable') }}
-            </Label>
+        <div v-if="selectedKeyResultId" class="mb-3">
+          <Label for="task-goal-mode" class="mb-2 block">{{ t('task.krLinks.updateMode') }}</Label>
+          <p v-if="selectedKeyResult" class="mb-2 text-xs text-muted-foreground">
+            {{ selectedKeyResult.title }} · {{ selectedKeyResult.methodLabel }} ·
+            {{ selectedKeyResult.currentValue }} / {{ selectedKeyResult.targetValue }}
+            {{ selectedKeyResult.unit }}
+          </p>
+          <Select :model-value="mode" @update:model-value="handleModeChange">
+            <SelectTrigger id="task-goal-mode" data-testid="task-goal-mode"
+              ><SelectValue
+            /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="LinkOnly" data-testid="task-goal-mode-LinkOnly">{{
+                t('task.krLinks.mode.LinkOnly')
+              }}</SelectItem>
+              <SelectItem
+                value="FixedAutomatic"
+                :disabled="!fixedAllowed"
+                data-testid="task-goal-mode-FixedAutomatic"
+                >{{ t('task.krLinks.mode.FixedAutomatic') }}</SelectItem
+              >
+              <SelectItem
+                value="PromptedMeasurement"
+                data-testid="task-goal-mode-PromptedMeasurement"
+                >{{ t('task.krLinks.mode.PromptedMeasurement') }}</SelectItem
+              >
+            </SelectContent>
+          </Select>
+          <p v-if="!fixedAllowed" class="mt-1 text-xs text-muted-foreground">
+            {{ t('task.krLinks.fixedSumOnly') }}
+          </p>
+        </div>
+        <div v-if="mode === 'PromptedMeasurement' && selectedKeyResultId" class="mb-3">
+          <Label for="task-goal-suggestion" class="mb-2 block"
+            >{{ t('task.krLinks.suggestedValue') }} · {{ recordPromptLabel }}</Label
+          >
+          <div class="flex items-center gap-2">
+            <Input
+              id="task-goal-suggestion"
+              data-testid="task-goal-suggestion-input"
+              type="number"
+              step="any"
+              :model-value="suggestedValue ?? ''"
+              @update:model-value="handleSuggestionChange"
+            />
+            <span class="text-sm text-muted-foreground">{{ selectedKeyResult?.unit }}</span>
           </div>
-          <Switch
-            id="task-goal-contribution-enabled"
-            data-testid="task-goal-contribution-toggle"
-            :model-value="contributionEnabled"
-            :disabled="!selectedGoalId || !selectedKeyResultId"
-            @update:model-value="handleContributionToggle"
-          />
+          <p class="mt-1 text-xs text-muted-foreground">{{ t('task.krLinks.suggestionHint') }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {{ t('task.krLinks.trigger.perInstance') }}
+          </p>
         </div>
 
         <!-- 增量值设置 -->
-        <div v-if="contributionEnabled" class="mb-3">
+        <div v-if="mode === 'FixedAutomatic'" class="mb-3">
           <Label for="task-goal-increment" class="mb-2 block">{{
             t('task.krLinks.progressValue')
           }}</Label>
@@ -158,22 +195,18 @@
               id="task-goal-increment"
               data-testid="task-goal-increment-input"
               type="number"
+              step="any"
               :placeholder="t('task.krLinks.progressPlaceholder')"
-              @update:model-value="
-                (val) => {
-                  incrementValue = Number(val);
-                  handleIncrementChange();
-                }
-              "
+              @update:model-value="handleFixedValueChange"
             />
-            <span class="text-sm text-muted-foreground">{{ t('task.krLinks.points') }}</span>
+            <span class="text-sm text-muted-foreground">{{ selectedKeyResult?.unit }}</span>
           </div>
           <p class="text-xs text-muted-foreground mt-1">
             {{ t('task.krLinks.progressText') }}
           </p>
         </div>
 
-        <div v-if="contributionEnabled" class="mb-3">
+        <div v-if="mode === 'FixedAutomatic'" class="mb-3">
           <Label for="task-goal-trigger" class="mb-2 block">{{
             t('task.krLinks.trigger.label')
           }}</Label>
@@ -207,7 +240,7 @@
 
         <!-- 预览卡片 -->
         <Card
-          v-if="hasCompleteBinding && contributionEnabled"
+          v-if="hasCompleteBinding && mode === 'FixedAutomatic'"
           class="mt-4 bg-success/10 dark:bg-success/20 border-success/40 dark:border-success/50"
         >
           <CardContent class="pt-4">
@@ -216,7 +249,12 @@
               <div class="flex-1">
                 <div class="text-sm font-medium mb-1">{{ t('task.krLinks.configPreview') }}</div>
                 <div class="text-xs text-muted-foreground">
-                  {{ t(`task.krLinks.previewText.${progressTrigger}`, { value: incrementValue }) }}
+                  {{
+                    t(`task.krLinks.previewText.${progressTrigger}`, {
+                      value: incrementValue,
+                      unit: selectedKeyResult?.unit ?? '',
+                    })
+                  }}
                 </div>
               </div>
             </div>
@@ -228,6 +266,8 @@
 </template>
 
 <script setup lang="ts">
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+
 import { ref, computed, watch, onMounted } from 'vue';
 import { TaskGoalBindingTrigger, type TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel, GoalBindingOption, KeyResultBindingOption } from '../../types';
@@ -247,6 +287,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Target, Flag, PlusCircle, Link2, LoaderCircle, RotateCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { getKeyResultRecordPromptLabel } from '../../../../goal';
 import { normalizeSelectString } from '../../../../../shared/utils/normalize-select-string';
 
 const { t } = useI18n();
@@ -272,7 +313,10 @@ const emit = defineEmits<{
 const linkEnabled = ref(false);
 const selectedGoalId = ref<string | null>(null);
 const selectedKeyResultId = ref<string | null>(null);
-const contributionEnabled = ref(false);
+type BindingMode = 'LinkOnly' | 'FixedAutomatic' | 'PromptedMeasurement';
+const mode = ref<BindingMode>('LinkOnly');
+const suggestedValue = ref<number | null>(null);
+const numericInputValid = ref(true);
 const incrementValue = ref<number>(1);
 const progressTrigger = ref<TaskGoalBindingTriggerValue>(TaskGoalBindingTrigger.EachCompletion);
 // ===== 计算属性 =====
@@ -281,8 +325,9 @@ const hasCompleteBinding = computed(() => {
     linkEnabled.value &&
     selectedGoalId.value &&
     selectedKeyResultId.value &&
-    contributionEnabled.value &&
-    incrementValue.value > 0 &&
+    mode.value === 'FixedAutomatic' &&
+    Number.isFinite(incrementValue.value) &&
+    incrementValue.value !== 0 &&
     !!progressTrigger.value
   );
 });
@@ -299,6 +344,16 @@ const keyResults = computed(() => {
   if (!selectedGoalId.value) return [];
   return props.keyResultsByGoal?.[selectedGoalId.value] ?? [];
 });
+
+const selectedKeyResult = computed(() =>
+  keyResults.value.find((kr) => kr.id === selectedKeyResultId.value),
+);
+const fixedAllowed = computed(() => selectedKeyResult.value?.calculationMethod === 'Sum');
+const recordPromptLabel = computed(() =>
+  selectedKeyResult.value
+    ? getKeyResultRecordPromptLabel(selectedKeyResult.value.calculationMethod, t)
+    : '',
+);
 
 const selectedGoalKeyResultsLoaded = computed(() => {
   if (!selectedGoalId.value) return false;
@@ -384,7 +439,9 @@ const handleLinkToggle = (enabled: boolean | null) => {
   if (!enabled) {
     selectedGoalId.value = null;
     selectedKeyResultId.value = null;
-    contributionEnabled.value = false;
+    mode.value = 'LinkOnly';
+    suggestedValue.value = null;
+    numericInputValid.value = true;
     incrementValue.value = 1;
     progressTrigger.value = TaskGoalBindingTrigger.EachCompletion;
   }
@@ -399,6 +456,9 @@ const handleGoalChange = async (value: unknown) => {
   const goalId = normalizeSelectString(value);
   selectedGoalId.value = goalId ?? null;
   selectedKeyResultId.value = null;
+  mode.value = 'LinkOnly';
+  numericInputValid.value = true;
+  suggestedValue.value = null;
   updateBinding();
   validateAndEmit();
 
@@ -409,21 +469,49 @@ const handleGoalChange = async (value: unknown) => {
 
 const handleKeyResultChange = (value: unknown) => {
   selectedKeyResultId.value = normalizeSelectString(value);
+  reconcileMode();
   updateBinding();
   validateAndEmit();
 };
 
-const handleContributionToggle = (enabled: boolean | null) => {
-  contributionEnabled.value = Boolean(enabled);
-  if (contributionEnabled.value && !progressTrigger.value) {
+// Deterministic safety transition: an explicitly known non-Sum KR moves Fixed to Prompt.
+const reconcileMode = () => {
+  if (!selectedKeyResultId.value) {
+    mode.value = 'LinkOnly';
+    numericInputValid.value = true;
+  } else if (mode.value === 'FixedAutomatic' && selectedKeyResult.value && !fixedAllowed.value) {
+    mode.value = 'PromptedMeasurement';
+    suggestedValue.value = null;
+    numericInputValid.value = true;
     progressTrigger.value = TaskGoalBindingTrigger.EachCompletion;
   }
+};
+const handleModeChange = (rawValue: unknown) => {
+  const next = normalizeSelectString(rawValue);
+  if (next !== 'LinkOnly' && next !== 'FixedAutomatic' && next !== 'PromptedMeasurement') return;
+  if (!selectedKeyResultId.value || (next === 'FixedAutomatic' && !fixedAllowed.value)) return;
+  mode.value = next;
+  numericInputValid.value = true;
+  if (next === 'PromptedMeasurement') progressTrigger.value = TaskGoalBindingTrigger.EachCompletion;
   updateBinding();
   validateAndEmit();
 };
-
-const handleIncrementChange = () => {
-  updateBinding();
+const handleFixedValueChange = (rawValue: string | number) => {
+  const value = Number(rawValue);
+  numericInputValid.value = String(rawValue).trim() !== '' && Number.isFinite(value) && value !== 0;
+  if (numericInputValid.value) {
+    incrementValue.value = value;
+    updateBinding();
+  }
+  validateAndEmit();
+};
+const handleSuggestionChange = (rawValue: string | number) => {
+  const value = String(rawValue).trim() === '' ? null : Number(rawValue);
+  numericInputValid.value = value === null || Number.isFinite(value);
+  if (numericInputValid.value) {
+    suggestedValue.value = value;
+    updateBinding();
+  }
   validateAndEmit();
 };
 
@@ -440,16 +528,23 @@ const handleTriggerChange = (rawValue: unknown) => {
 
 const updateBinding = () => {
   const hasGoal = linkEnabled.value && Boolean(selectedGoalId.value);
-  const canContribute = contributionEnabled.value && Boolean(selectedKeyResultId.value);
+
   const updated: TaskPlanViewModel = {
     ...props.modelValue,
     goalBinding: hasGoal
       ? {
           goalId: selectedGoalId.value!,
           keyResultId: selectedKeyResultId.value,
-          ...(canContribute
-            ? { contribution: { value: incrementValue.value, trigger: progressTrigger.value } }
-            : {}),
+          progressRule:
+            selectedKeyResultId.value && mode.value === 'FixedAutomatic'
+              ? { mode: 'Fixed', value: incrementValue.value, trigger: progressTrigger.value }
+              : selectedKeyResultId.value && mode.value === 'PromptedMeasurement'
+                ? {
+                    mode: 'Prompt',
+                    trigger: 'EachCompletion',
+                    suggestedValue: suggestedValue.value,
+                  }
+                : null,
         }
       : null,
   };
@@ -463,17 +558,23 @@ const retryKeyResults = () => {
 };
 
 const validateAndEmit = () => {
-  // Goal-level link is valid on its own; only automatic contribution requires a KR.
+  // Goal-level links are valid; both recording modes require a KR.
   const hasValidLink = !!selectedGoalId.value;
   const hasValidContribution =
-    !contributionEnabled.value ||
+    !(mode.value === 'FixedAutomatic') ||
     (!!selectedKeyResultId.value &&
       !!progressTrigger.value &&
       (progressTrigger.value !== TaskGoalBindingTrigger.PlanCompletion ||
         wholePlanTriggerAllowed.value) &&
-      incrementValue.value > 0 &&
-      incrementValue.value <= 1000);
-  const isValid = !linkEnabled.value || (hasValidLink && hasValidContribution);
+      Number.isFinite(incrementValue.value) &&
+      incrementValue.value !== 0 &&
+      fixedAllowed.value);
+  const isValid =
+    !linkEnabled.value ||
+    (hasValidLink &&
+      hasValidContribution &&
+      numericInputValid.value &&
+      (mode.value !== 'PromptedMeasurement' || !!selectedKeyResultId.value));
 
   emit('update:validation', isValid);
 };
@@ -485,18 +586,36 @@ const initializeFromModel = () => {
     linkEnabled.value = true;
     selectedGoalId.value = binding.goalId ?? null;
     selectedKeyResultId.value = binding.keyResultId ?? null;
-    contributionEnabled.value = !!binding.contribution;
-    incrementValue.value = binding.contribution?.value ?? 1;
-    progressTrigger.value = binding.contribution?.trigger ?? TaskGoalBindingTrigger.EachCompletion;
+    const rule = TaskGoalProgressConfigurationSchema.parse(binding).progressRule;
+    mode.value = !selectedKeyResultId.value
+      ? 'LinkOnly'
+      : rule?.mode === 'Fixed'
+        ? 'FixedAutomatic'
+        : rule?.mode === 'Prompt'
+          ? 'PromptedMeasurement'
+          : 'LinkOnly';
+    incrementValue.value = rule?.mode === 'Fixed' ? rule.value : 1;
+    suggestedValue.value = rule?.mode === 'Prompt' ? (rule.suggestedValue ?? null) : null;
+    progressTrigger.value = rule?.trigger ?? TaskGoalBindingTrigger.EachCompletion;
+    numericInputValid.value = true;
   } else {
     linkEnabled.value = false;
     selectedGoalId.value = null;
     selectedKeyResultId.value = null;
-    contributionEnabled.value = false;
+    mode.value = 'LinkOnly';
+    suggestedValue.value = null;
+    numericInputValid.value = true;
     incrementValue.value = 1;
     progressTrigger.value = TaskGoalBindingTrigger.EachCompletion;
   }
 };
+
+watch(selectedKeyResult, () => {
+  const previous = mode.value;
+  reconcileMode();
+  if (previous !== mode.value) updateBinding();
+  validateAndEmit();
+});
 
 // ===== 生命周期 =====
 onMounted(async () => {
@@ -504,7 +623,7 @@ onMounted(async () => {
   initializeFromModel();
 
   if (
-    contributionEnabled.value &&
+    mode.value === 'FixedAutomatic' &&
     progressTrigger.value === TaskGoalBindingTrigger.PlanCompletion &&
     !wholePlanTriggerAllowed.value
   ) {
@@ -526,6 +645,10 @@ watch(
   () => props.modelValue.goalBinding,
   () => {
     initializeFromModel();
+    const previous = mode.value;
+    reconcileMode();
+    if (previous !== mode.value) updateBinding();
+    validateAndEmit();
   },
   { deep: true },
 );
@@ -534,7 +657,7 @@ watch(
   () => props.modelValue.schedule,
   () => {
     if (
-      contributionEnabled.value &&
+      mode.value === 'FixedAutomatic' &&
       progressTrigger.value === TaskGoalBindingTrigger.PlanCompletion &&
       !wholePlanTriggerAllowed.value
     ) {

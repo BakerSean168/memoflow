@@ -404,6 +404,8 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
   const api: GoalApplicationPort = {
     // Goal CRUD / 目标增删改查
     createGoal: (input, cx) => useCases.createGoal.execute(input, cx),
+    getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
+      useCases.getGoal.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
     getGoal: (id, identityId, includeChildren) =>
       useCases.getGoal.execute(id, identityId, includeChildren),
     listGoals: (input) => useCases.listGoals.execute(input),

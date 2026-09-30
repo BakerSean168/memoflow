@@ -736,6 +736,8 @@
 </template>
 
 <script setup lang="ts">
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -987,7 +989,7 @@ async function quickBindGoal(goalId: string): Promise<void> {
     goalBinding: {
       goalId: goalId as GoalId,
       keyResultId: null,
-      contribution: null,
+      progressRule: null,
     },
   });
   if (saved) {
@@ -1060,7 +1062,7 @@ function goalBinding(vm: TaskPlanViewModel) {
   return {
     goalId: vm.goalBinding.goalId as GoalId,
     keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
-    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
+    progressRule: vm.goalBinding.keyResultId ? (TaskGoalProgressConfigurationSchema.parse(vm.goalBinding).progressRule) : null,
   };
 }
 

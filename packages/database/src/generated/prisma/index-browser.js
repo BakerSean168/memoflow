@@ -1105,6 +1105,8 @@ exports.Prisma.TaskPlanScalarFieldEnum = {
   reminderConfig: 'reminderConfig',
   goalId: 'goalId',
   keyResultId: 'keyResultId',
+  goalProgressMode: 'goalProgressMode',
+  goalSuggestedValue: 'goalSuggestedValue',
   goalRecordValue: 'goalRecordValue',
   goalProgressTrigger: 'goalProgressTrigger',
   checklist: 'checklist',

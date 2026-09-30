@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
@@ -136,12 +137,7 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
       ? {
           goalId: dto.goalBinding.goalId,
           keyResultId: dto.goalBinding.keyResultId,
-          contribution: dto.goalBinding.contribution
-            ? {
-                value: dto.goalBinding.contribution.value,
-                trigger: dto.goalBinding.contribution.trigger,
-              }
-            : undefined,
+          progressRule: TaskGoalProgressConfigurationSchema.parse(dto.goalBinding).progressRule,
         }
       : null,
     // TanStack Vue Query exposes cached DTOs through reactive proxies. Parse at the

@@ -214,6 +214,8 @@
 </template>
 
 <script setup lang="ts">
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+
 import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
@@ -600,7 +602,7 @@ function goalBinding(vm: TaskPlanViewModel) {
   return {
     goalId: vm.goalBinding.goalId as GoalId,
     keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
-    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
+    progressRule: vm.goalBinding.keyResultId ? (TaskGoalProgressConfigurationSchema.parse(vm.goalBinding).progressRule) : null,
   };
 }
 

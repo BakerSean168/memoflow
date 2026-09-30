@@ -355,6 +355,10 @@ async function registerBusinessModules(
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPowerSyncHandler(db),
     userTimeContextPort: settingElectronModule.userTimeContextPort,
+    goalReadPort: {
+      getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
+        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+    },
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based

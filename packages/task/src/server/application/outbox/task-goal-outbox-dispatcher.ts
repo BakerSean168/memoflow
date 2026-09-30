@@ -74,7 +74,7 @@ function decodeTaskGoalProgressEvent(
     for (const field of ['goalId', 'keyResultId', 'taskTitle'] as const) {
       requireNonEmptyString(value[field], `Task -> Goal ${field}`);
     }
-    if (!Number.isFinite(value.value) || Number(value.value) <= 0) {
+    if (!Number.isFinite(value.value) || Number(value.value) === 0) {
       throw new Error('Task -> Goal apply payload contains an invalid contribution value');
     }
     requireSettlementSource(value.source);

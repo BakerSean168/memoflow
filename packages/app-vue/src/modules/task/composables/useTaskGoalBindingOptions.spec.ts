@@ -1,3 +1,8 @@
+import {
+  KEY_RESULT_CALCULATION_METHODS,
+  getKeyResultCalculationLabel,
+  KEY_RESULT_CALCULATION_PRESENTATION,
+} from '../../goal';
 import { createApp, defineComponent, h } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -79,7 +84,13 @@ describe('useTaskGoalBindingOptions', () => {
             id: 'kr-a',
             title: 'Complete the product journey',
             weight: 1,
-            progress: { initialValue: 0, currentValue: 0, targetValue: 10 },
+            progress: {
+              initialValue: 0,
+              currentValue: 0,
+              targetValue: 10,
+              aggregationMethod: 'Sum',
+              unit: 'km',
+            },
           },
         ],
       }),
@@ -88,6 +99,14 @@ describe('useTaskGoalBindingOptions', () => {
 
     await result.loadGoalBinding('goal-a');
 
+    expect(result.keyResultsByGoal.value['goal-a'][0]).toMatchObject({
+      calculationMethod: 'Sum',
+      methodLabel: 'goal.dialog.krCalculationSum',
+      recordInputKind: 'delta',
+      unit: 'km',
+      currentValue: 0,
+      targetValue: 10,
+    });
     expect(getGoalAggregateView).toHaveBeenCalledWith('goal-a');
     expect(getGoalAggregateView).toHaveBeenCalledTimes(1);
     expect(result.resolveGoalBinding({ goalId: 'goal-a', keyResultId: 'kr-a' })).toMatchObject({
@@ -96,6 +115,43 @@ describe('useTaskGoalBindingOptions', () => {
     });
     unmount();
   });
+
+  it.each(KEY_RESULT_CALCULATION_METHODS)(
+    'projects canonical %s measurement and Goal-owned vocabulary',
+    async (method) => {
+      const getGoalAggregateView = vi.fn(async () =>
+        ok({
+          goal: { id: 'goal-a', name: 'Health' },
+          keyResults: [
+            {
+              id: 'kr-a',
+              title: 'Temperature',
+              weight: 3,
+              progress: {
+                initialValue: 0,
+                currentValue: -2,
+                targetValue: 10,
+                unit: '°C',
+                aggregationMethod: method,
+              },
+            },
+          ],
+        }),
+      );
+      const { result, unmount } = mountComposable({ getGoalAggregateView });
+      const options = await result.loadKeyResults('goal-a');
+      expect(options[0]).toMatchObject({
+        title: 'Temperature',
+        calculationMethod: method,
+        methodLabel: getKeyResultCalculationLabel(method, i18n.global.t),
+        recordInputKind: KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind,
+        unit: '°C',
+        currentValue: -2,
+        targetValue: 10,
+      });
+      unmount();
+    },
+  );
 
   it('marks a missing goal or key result as unavailable instead of retaining a title snapshot', () => {
     const { result, unmount } = mountComposable({ getGoalAggregateView: vi.fn() });

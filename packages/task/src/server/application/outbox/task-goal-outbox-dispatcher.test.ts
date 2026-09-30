@@ -37,6 +37,14 @@ describe('TaskGoalOutboxDispatcher', () => {
     expect(store.markRetry).not.toHaveBeenCalled();
   });
 
+  it('delivers a signed non-zero fixed delta', async () => {
+    const store = { claimPending: vi.fn(async () => [{ ...pendingEvent, payload: JSON.stringify({ ...JSON.parse(pendingEvent.payload), value: -2 }) }]), markDelivered: vi.fn(), markRetry: vi.fn(), replayDeadLetter: vi.fn() };
+    const handler = { handle: vi.fn(async () => {}) };
+    await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
+    expect(handler.handle).toHaveBeenCalledWith(expect.objectContaining({ value: -2 }));
+    expect(store.markRetry).not.toHaveBeenCalled();
+  });
+
   it('retries malformed persisted payloads instead of blocking the poll cycle', async () => {
     const malformed = { eventId: 'broken-1', payload: '{not-json' };
     const store = {

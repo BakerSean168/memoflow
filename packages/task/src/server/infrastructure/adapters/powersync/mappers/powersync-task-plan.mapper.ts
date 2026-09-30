@@ -1,3 +1,4 @@
+import { decodeTaskGoalProgress, encodeTaskGoalProgress } from '../../task-goal-progress-codec';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
@@ -35,6 +36,8 @@ export type PowerSyncTaskPlanRow = {
   reminder_config: string | null;
   goal_id: string | null;
   key_result_id: string | null;
+  goal_progress_mode?: string | null;
+  goal_suggested_value?: number | null;
   goal_record_value: number | null;
   goal_progress_trigger: string | null;
   checklist: string | null;
@@ -72,17 +75,11 @@ export class PowerSyncTaskPlanMapper {
         data.goal_id != null ||
         data.key_result_id != null ||
         data.goal_record_value != null ||
-        data.goal_progress_trigger != null
+        data.goal_progress_trigger != null || data.goal_progress_mode != null || data.goal_suggested_value != null
           ? TaskGoalBinding.fromDTO({
               goalId: data.goal_id,
               keyResultId: data.key_result_id,
-              contribution:
-                data.goal_record_value != null && data.goal_progress_trigger != null
-                  ? {
-                      value: data.goal_record_value,
-                      trigger: data.goal_progress_trigger as never,
-                    }
-                  : null,
+              progressRule: decodeTaskGoalProgress({ mode: data.goal_progress_mode, value: data.goal_record_value, trigger: data.goal_progress_trigger, suggestedValue: data.goal_suggested_value }),
             } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
           : null,
       checklist: data.checklist
@@ -117,8 +114,7 @@ export class PowerSyncTaskPlanMapper {
       reminderConfig: dto.reminderConfig ? JSON.stringify(dto.reminderConfig) : null,
       goalId: dto.goalBinding?.goalId ?? null,
       keyResultId: dto.goalBinding?.keyResultId ?? null,
-      goalRecordValue: dto.goalBinding?.contribution?.value ?? null,
-      goalProgressTrigger: dto.goalBinding?.contribution?.trigger ?? null,
+      ...encodeTaskGoalProgress(dto.goalBinding?.progressRule),
       checklist: dto.checklist.length ? JSON.stringify(dto.checklist) : null,
       version: dto.version,
       createdAt: new Date(dto.createdAt).toISOString(),

@@ -25,6 +25,7 @@ export {
   PowerSyncTaskBindingReadPort,
   type TaskApplicationPort,
   type TaskGoalContextReadPort,
+  type TaskGoalMeasurementReadPort,
   type TaskModuleDependencies,
   type TaskModuleInstance,
   type TaskModuleRuntimeContribution,

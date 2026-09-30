@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
 import { ImportanceLevel } from '../../shared/value-objects/importance';
-import { GoalContributionRuleSchema } from './value-objects/task-goal-binding';
+import {
+  GoalContributionRuleSchema,
+  TaskGoalProgressRuleSchema,
+  TaskGoalProgressConfigurationSchema,
+} from './value-objects/task-goal-binding';
 import { TaskOccurrenceChecklistItemSchema } from './value-objects/task-occurrence-checklist';
 import {
   TaskOccurrenceResultKind,
@@ -44,17 +48,27 @@ export const TaskPortableGoalLinkV3Schema = z
   .object({
     goalRef: GoalPortableReferenceV3Schema,
     keyResultRef: GoalPortableReferenceV3Schema.nullable(),
-    contribution: GoalContributionRuleSchema.nullable(),
+    contribution: GoalContributionRuleSchema.nullable().optional(),
+    progressRule: TaskGoalProgressRuleSchema.nullable().optional(),
   })
   .strict()
   .superRefine((link, ctx) => {
-    if (link.contribution !== null && link.keyResultRef === null) {
+    if ((link.contribution != null || link.progressRule != null) && link.keyResultRef === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['keyResultRef'],
         message: 'Portable Task contribution requires a Key Result reference',
       });
     }
+  })
+  .transform((link, ctx) => {
+    const parsed = TaskGoalProgressConfigurationSchema.safeParse(link);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues)
+        ctx.addIssue({ code: 'custom', path: issue.path, message: issue.message });
+      return z.NEVER;
+    }
+    return { goalRef: link.goalRef, keyResultRef: link.keyResultRef, ...parsed.data };
   });
 export type TaskPortableGoalLinkV3 = z.infer<typeof TaskPortableGoalLinkV3Schema>;
 

@@ -11,6 +11,7 @@ import {
   TaskPlanOutcome,
   type ChecklistItemDefinitionDTO,
   type GoalContributionRule,
+  type TaskGoalProgressRule,
   type TaskOccurrenceChecklistItem,
   type TaskOccurrenceResult,
   type TaskOccurrenceScheduleSnapshot as TaskOccurrenceScheduleSnapshotDTO,
@@ -38,7 +39,8 @@ import type { TaskWriteTransactionRunner } from '../use-cases/commands/task-writ
 export interface TaskCanonicalRestoreGoalBinding {
   readonly goalId: string;
   readonly keyResultId: string | null;
-  readonly contribution: GoalContributionRule | null;
+  readonly contribution?: GoalContributionRule | null;
+  readonly progressRule?: TaskGoalProgressRule | null;
 }
 
 /**
@@ -235,6 +237,7 @@ export class TaskCanonicalRestoreService {
               : TaskGoalBinding.fromDTO({
                   goalId: input.goalBinding.goalId as never,
                   keyResultId: input.goalBinding.keyResultId as never,
+                  progressRule: input.goalBinding.progressRule,
                   contribution: input.goalBinding.contribution,
                 }),
           checklist,

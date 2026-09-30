@@ -1,3 +1,4 @@
+import { decodeTaskGoalProgress, encodeTaskGoalProgress } from '../../task-goal-progress-codec';
 /** Prisma TaskPlan mapper for the canonical vNext persistence shape. */
 
 import type { TaskPlan as PrismaTaskPlan } from '@memoflow/database';
@@ -49,18 +50,12 @@ export class PrismaTaskPlanMapper {
       data.goalId != null ||
       data.keyResultId != null ||
       data.goalRecordValue != null ||
-      data.goalProgressTrigger != null;
+      data.goalProgressTrigger != null || data.goalProgressMode != null || data.goalSuggestedValue != null;
     const goalBinding = hasGoalBinding
       ? TaskGoalBinding.fromDTO({
           goalId: data.goalId,
           keyResultId: data.keyResultId,
-          contribution:
-            data.goalRecordValue != null && data.goalProgressTrigger != null
-              ? {
-                  value: data.goalRecordValue,
-                  trigger: data.goalProgressTrigger as never,
-                }
-              : null,
+          progressRule: decodeTaskGoalProgress({ mode: data.goalProgressMode, value: data.goalRecordValue, trigger: data.goalProgressTrigger, suggestedValue: data.goalSuggestedValue }),
         } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
       : null;
 
@@ -111,8 +106,7 @@ export class PrismaTaskPlanMapper {
       reminderConfig: dto.reminderConfig ? JSON.stringify(dto.reminderConfig) : null,
       goalId: dto.goalBinding?.goalId ?? null,
       keyResultId: dto.goalBinding?.keyResultId ?? null,
-      goalRecordValue: dto.goalBinding?.contribution?.value ?? null,
-      goalProgressTrigger: dto.goalBinding?.contribution?.trigger ?? null,
+      ...encodeTaskGoalProgress(dto.goalBinding?.progressRule),
       checklist: dto.checklist.length ? JSON.stringify(dto.checklist) : null,
       version: dto.version,
       deletedAt: toDateOrNull(dto.deletedAt),

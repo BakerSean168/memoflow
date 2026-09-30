@@ -1,3 +1,4 @@
+import { ok } from '@memoflow/contracts/result';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import type {
@@ -262,7 +263,9 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
           version: Number(prm[18] ?? 1),
           updated_at: prm[19] ?? new Date().toISOString(),
           deleted_at: prm[20] ?? null,
-          created_at: prm[21] ?? new Date().toISOString(),
+          goal_progress_mode: prm[21] ?? null,
+          goal_suggested_value: prm[22] ?? null,
+          created_at: prm[23] ?? new Date().toISOString(),
         };
         return rowShape as unknown as T;
       }
@@ -359,6 +362,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
     });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     vi.spyOn(PowerSyncTaskOccurrenceRepository.prototype, 'saveMany').mockRejectedValue(
@@ -390,6 +394,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
     });
     const identityId = anIdentityId();
     const plan = TaskPlan.create({
@@ -427,6 +432,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
     });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 

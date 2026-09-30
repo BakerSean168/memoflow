@@ -190,6 +190,8 @@ const task_plans = new Table({
   reminder_config: column.text, // JSON: TaskReminderConfig
   goal_id: column.text, // FK via key_result_id relation
   key_result_id: column.text, // FK
+  goal_progress_mode: column.text,
+  goal_suggested_value: column.real,
   goal_record_value: column.real,
   goal_progress_trigger: column.text,
   checklist: column.text, // JSON

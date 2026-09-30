@@ -35,6 +35,8 @@ function createBoundRow(): PowerSyncTaskPlanRow {
     reminder_config: null,
     goal_id: goalId,
     key_result_id: keyResultId,
+    goal_progress_mode: null,
+    goal_suggested_value: null,
     goal_record_value: 3,
     goal_progress_trigger: 'EachCompletion',
     checklist: null,
@@ -79,6 +81,39 @@ describe('PowerSync task plan goal binding', () => {
       goalRecordValue: 3,
       goalProgressTrigger: 'EachCompletion',
     });
+  });
+
+  it.each([0, -3, null])('persists Prompt suggestion %s without a Fixed value', async (suggestedValue) => {
+    const row = { ...createBoundRow(), goal_progress_mode: 'Prompt', goal_record_value: null, goal_suggested_value: suggestedValue };
+    const plan = PowerSyncTaskPlanMapper.toDomain(row);
+    expect(plan.goalBinding?.progressRule).toEqual({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue });
+    expect(plan.goalBinding?.contribution).toBeNull();
+    const db = createDatabase();
+    await new PowerSyncTaskPlanRepository(db, eventBus).save(plan);
+    const [sql, parameters] = db.execute.mock.calls[0];
+    expect(boundColumnParameters(sql, parameters!)).toMatchObject({ goal_progress_mode: 'Prompt', goal_suggested_value: suggestedValue, goal_record_value: null, goal_progress_trigger: 'EachCompletion' });
+  });
+  it.each([0, -2, null])('round-trips Prompt suggestion %s through real SQLite writes and reads', async (suggestedValue) => {
+    const sqlite = new Database(':memory:');
+    try {
+      const row = { ...createBoundRow(), goal_progress_mode: 'Prompt', goal_record_value: null, goal_suggested_value: suggestedValue };
+      sqlite.exec(`CREATE TABLE task_plans (${Object.keys(row).map((column) => `${column} ${['goal_record_value', 'goal_suggested_value', 'version'].includes(column) ? 'REAL' : 'TEXT'}`).join(',')})`);
+      const db = createDatabase({
+        execute: async (sql, parameters) => ({ rowsAffected: sqlite.prepare(sql).run(...(parameters ?? [])).changes }),
+        getOptional: async <T>(sql: string, parameters?: unknown[]) => (sqlite.prepare(sql).get(...(parameters ?? [])) as T) ?? null,
+      });
+      const repository = new PowerSyncTaskPlanRepository(db, eventBus);
+      const plan = PowerSyncTaskPlanMapper.toDomain(row);
+      await repository.save(plan);
+      const restored = await repository.findByIdForIdentity(identityId, String(plan.id));
+      expect(restored?.goalBinding?.progressRule).toEqual({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue });
+      expect(restored?.goalBinding?.contribution).toBeNull();
+    } finally { sqlite.close(); }
+  });
+
+  it('writes explicit Fixed mode after legacy decoding', () => {
+    const persistence = PowerSyncTaskPlanMapper.toPersistence(PowerSyncTaskPlanMapper.toDomain({ ...createBoundRow(), goal_record_value: -2 }));
+    expect(persistence).toMatchObject({ goalProgressMode: 'Fixed', goalRecordValue: -2, goalSuggestedValue: null });
   });
 
   it('queries the relational goal and key result columns directly', async () => {
@@ -224,7 +259,7 @@ it('pages real SQLite rows after owner, Goal/KR, status and label AND filtering'
   try {
     const row = createBoundRow();
     const columns = Object.keys(row);
-    sqlite.exec(`CREATE TABLE task_plans (${columns.map((column) => `${column} ${['goal_record_value', 'version'].includes(column) ? 'REAL' : 'TEXT'}`).join(',')});
+    sqlite.exec(`CREATE TABLE task_plans (${columns.map((column) => `${column} ${['goal_record_value', 'goal_suggested_value', 'version'].includes(column) ? 'REAL' : 'TEXT'}`).join(',')});
       CREATE TABLE task_labels (identity_id TEXT, task_plan_id TEXT, label_id TEXT);
       CREATE TABLE labels (id TEXT, identity_id TEXT, name TEXT);`);
     const insert = sqlite.prepare(

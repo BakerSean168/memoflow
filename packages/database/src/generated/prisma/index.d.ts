@@ -90252,11 +90252,13 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgAggregateOutputType = {
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     version: number | null
   }
 
   export type TaskPlanSumAggregateOutputType = {
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     version: number | null
   }
@@ -90276,6 +90278,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90300,6 +90304,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90325,6 +90331,8 @@ export namespace Prisma {
     reminderConfig: number
     goalId: number
     keyResultId: number
+    goalProgressMode: number
+    goalSuggestedValue: number
     goalRecordValue: number
     goalProgressTrigger: number
     checklist: number
@@ -90337,11 +90345,13 @@ export namespace Prisma {
 
 
   export type TaskPlanAvgAggregateInputType = {
+    goalSuggestedValue?: true
     goalRecordValue?: true
     version?: true
   }
 
   export type TaskPlanSumAggregateInputType = {
+    goalSuggestedValue?: true
     goalRecordValue?: true
     version?: true
   }
@@ -90361,6 +90371,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90385,6 +90397,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90410,6 +90424,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90522,6 +90538,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90566,6 +90584,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90597,6 +90617,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90624,6 +90646,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90651,6 +90675,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90660,7 +90686,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "schedule" | "reminderConfig" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
+  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "schedule" | "reminderConfig" | "goalId" | "keyResultId" | "goalProgressMode" | "goalSuggestedValue" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
   export type TaskPlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskPlan$keyResultArgs<ExtArgs>
@@ -90718,6 +90744,8 @@ export namespace Prisma {
       reminderConfig: string | null
       goalId: string | null
       keyResultId: string | null
+      goalProgressMode: string | null
+      goalSuggestedValue: number | null
       goalRecordValue: number | null
       goalProgressTrigger: string | null
       /**
@@ -91171,6 +91199,8 @@ export namespace Prisma {
     readonly reminderConfig: FieldRef<"TaskPlan", 'String'>
     readonly goalId: FieldRef<"TaskPlan", 'String'>
     readonly keyResultId: FieldRef<"TaskPlan", 'String'>
+    readonly goalProgressMode: FieldRef<"TaskPlan", 'String'>
+    readonly goalSuggestedValue: FieldRef<"TaskPlan", 'Float'>
     readonly goalRecordValue: FieldRef<"TaskPlan", 'Float'>
     readonly goalProgressTrigger: FieldRef<"TaskPlan", 'String'>
     readonly checklist: FieldRef<"TaskPlan", 'String'>
@@ -98721,6 +98751,8 @@ export namespace Prisma {
     reminderConfig: 'reminderConfig',
     goalId: 'goalId',
     keyResultId: 'keyResultId',
+    goalProgressMode: 'goalProgressMode',
+    goalSuggestedValue: 'goalSuggestedValue',
     goalRecordValue: 'goalRecordValue',
     goalProgressTrigger: 'goalProgressTrigger',
     checklist: 'checklist',
@@ -105213,6 +105245,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -105243,6 +105277,8 @@ export namespace Prisma {
     reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
+    goalProgressMode?: SortOrderInput | SortOrder
+    goalSuggestedValue?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
     goalProgressTrigger?: SortOrderInput | SortOrder
     checklist?: SortOrderInput | SortOrder
@@ -105277,6 +105313,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -105307,6 +105345,8 @@ export namespace Prisma {
     reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
+    goalProgressMode?: SortOrderInput | SortOrder
+    goalSuggestedValue?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
     goalProgressTrigger?: SortOrderInput | SortOrder
     checklist?: SortOrderInput | SortOrder
@@ -105340,6 +105380,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     goalId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableWithAggregatesFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableWithAggregatesFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     checklist?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
@@ -112798,6 +112840,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112828,6 +112872,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112853,6 +112899,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112883,6 +112931,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112911,6 +112961,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112933,6 +112985,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112958,6 +113012,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117915,6 +117971,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117925,6 +117983,7 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgOrderByAggregateInput = {
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -117944,6 +118003,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117968,6 +118029,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117978,6 +118041,7 @@ export namespace Prisma {
   }
 
   export type TaskPlanSumOrderByAggregateInput = {
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -123746,6 +123810,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -123774,6 +123840,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -125265,6 +125333,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -128220,6 +128290,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -128246,6 +128318,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -130326,6 +130400,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -130355,6 +130431,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -130523,6 +130601,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130552,6 +130632,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138508,6 +138590,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138537,6 +138621,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138678,6 +138764,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138707,6 +138795,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138826,6 +138916,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138855,6 +138947,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138996,6 +139090,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139025,6 +139121,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139773,6 +139871,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -140794,6 +140894,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140822,6 +140924,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140849,6 +140953,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142119,6 +142225,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -142164,6 +142272,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142190,6 +142300,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142215,6 +142327,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null

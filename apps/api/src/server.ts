@@ -272,6 +272,10 @@ async function bootstrap(): Promise<void> {
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPrismaHandler(prisma),
     userTimeContextPort: settingApiModule.userTimeContextPort,
+    goalReadPort: {
+      getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
+        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+    },
   });
   const taskDashboardUseCase = new GetTaskDashboardUseCase(
     taskComposed.taskPlanRepository,
