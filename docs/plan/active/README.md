@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-25T23:50:00+08:00
+updated: 2026-09-30T12:45:00+08:00
 ---
 
 # Active Plans
@@ -13,7 +13,9 @@ updated: 2026-09-25T23:50:00+08:00
 
 ## 当前计划
 
-No active plans.
+| 计划 | 当前状态 |
+| --- | --- |
+| [Desktop Auto-Update Exploration](./2026-09-30-desktop-auto-update-exploration.md) | 已完成现状取证与架构方案；待按 DU-100～170 分阶段实施。 |
 
 ## 本轮已归档（2026-09-25）
 
