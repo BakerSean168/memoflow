@@ -1,0 +1,14 @@
+apiVersion: pds/v1alpha1
+kind: Component
+metadata:
+  id: memoflow
+  name: MemoFlow
+spec:
+  type: productivity-system
+  domain: products
+  lifecycle: active
+  repository:
+    url: https://github.com/BakerSean168/memoflow.git
+    visibility: public
+  provides:
+    - pds://products/app/memoflow
