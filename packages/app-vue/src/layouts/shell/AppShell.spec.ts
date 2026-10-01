@@ -242,6 +242,10 @@ describe('AppShell right-panel integration', () => {
     };
     const unsubscribe = vi.fn();
     const service: DesktopUpdateService = {
+      getDiagnostics: vi.fn(async () => ({
+        ok: false as const,
+        error: { code: 'INTERNAL_ERROR', message: 'Unavailable' },
+      })),
       getSnapshot: vi.fn(async () => ok(ready)),
       check: vi.fn(async () => ok(ready)),
       restartAndInstall: vi.fn(async () => ok(ready)),

@@ -64,6 +64,18 @@ export default {
       "restarting": "Safely closing the current runtime and handing installation to the system updater.",
       "failed": "This update operation did not complete. A retry action is shown when recovery is available."
     },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "currentVersion": "Current version",
+      "targetVersion": "Target version",
+      "state": "State",
+      "feedClass": "Feed class",
+      "lastCheckedAt": "Last checked",
+      "lastCheckResult": "Last check result",
+      "receiptStatus": "Install receipt",
+      "failure": "Failure",
+      "unavailable": "Diagnostics are unavailable."
+    },
     "disabledReason": {
       "development-build": "Automatic updates are disabled for development builds.",
       "updates-disabled": "Automatic updates are disabled for this installation.",

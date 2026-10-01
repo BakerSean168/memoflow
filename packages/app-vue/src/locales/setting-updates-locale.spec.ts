@@ -19,6 +19,7 @@ describe('Desktop Update settings locale symmetry', () => {
   });
 
   it('keeps every About & Updates leaf key symmetric across en-US and zh-CN', () => {
+    expect(flattenKeys(enSetting.updates.troubleshooting)).toContain('receiptStatus');
     expect(flattenKeys(enSetting.updates).sort()).toEqual(flattenKeys(zhSetting.updates).sort());
   });
 });

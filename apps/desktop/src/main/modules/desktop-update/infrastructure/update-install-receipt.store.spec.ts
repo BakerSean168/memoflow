@@ -55,6 +55,15 @@ describe('FileDesktopUpdateInstallReceiptStore', () => {
     await expect(store.read()).resolves.toBeNull();
   });
 
+  it('leaves corrupt receipt storage untouched for read-only diagnostics', async () => {
+    await fs.mkdir(store.directory, { recursive: true });
+    await fs.writeFile(store.receiptPath, '{not-json', 'utf8');
+    await expect(store.read({ repairCorruption: false })).rejects.toThrow(
+      'Invalid Desktop update install receipt',
+    );
+    expect(await fs.readFile(store.receiptPath, 'utf8')).toBe('{not-json');
+  });
+
   it('ignores and removes corrupted JSON without blocking startup', async () => {
     await fs.mkdir(store.directory, { recursive: true });
     await fs.writeFile(store.receiptPath, '{not-json', 'utf8');

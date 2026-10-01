@@ -19,7 +19,10 @@ import {
   CardTitle,
   Progress,
 } from '@memoflow/ui-vue-shadcn';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type {
+  DesktopUpdateDiagnosticsDTO,
+  DesktopUpdateSnapshotDTO,
+} from '@memoflow/contracts/electron';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { presentDesktopUpdateSettings } from './desktop-update-settings.presentation';
@@ -28,6 +31,8 @@ const { t, locale } = useI18n();
 const updateService = useStrictInject(DESKTOP_UPDATE_SERVICE_KEY, 'DesktopUpdateService');
 
 const snapshot = ref<DesktopUpdateSnapshotDTO | null>(null);
+const diagnostics = ref<DesktopUpdateDiagnosticsDTO | null>(null);
+const diagnosticsUnavailable = ref(false);
 const transportError = ref<string | null>(null);
 const actionPending = ref(false);
 const explicitUpToDate = ref(false);
@@ -136,6 +141,12 @@ async function loadSnapshot(): Promise<void> {
   transportError.value = result.error.message;
 }
 
+async function loadDiagnostics(): Promise<void> {
+  const result = await updateService.getDiagnostics();
+  diagnosticsUnavailable.value = !result.ok;
+  diagnostics.value = result.ok ? result.data : null;
+}
+
 async function checkForUpdates(): Promise<void> {
   if (actionPending.value) return;
   actionPending.value = true;
@@ -154,6 +165,7 @@ async function checkForUpdates(): Promise<void> {
       result.data.state.type === 'idle' && result.data.state.lastOutcome === 'up-to-date';
   } finally {
     actionPending.value = false;
+    await loadDiagnostics();
   }
 }
 
@@ -172,6 +184,7 @@ async function restartAndUpdate(): Promise<void> {
     adoptSnapshot(result.data);
   } finally {
     actionPending.value = false;
+    await loadDiagnostics();
   }
 }
 
@@ -191,6 +204,7 @@ onMounted(() => {
     adoptSnapshot(next);
   });
   void loadSnapshot();
+  void loadDiagnostics();
 });
 
 onBeforeUnmount(() => {
@@ -324,6 +338,48 @@ onBeforeUnmount(() => {
 
         <p v-if="lastCheckedAt" class="text-xs text-muted-foreground">
           {{ t('setting.updates.lastChecked', { time: lastCheckedAt }) }}
+        </p>
+      </CardContent>
+    </Card>
+    <Card data-testid="desktop-update-troubleshooting">
+      <CardHeader class="pb-3">
+        <CardTitle class="text-sm">{{ t('setting.updates.troubleshooting.title') }}</CardTitle>
+      </CardHeader>
+      <CardContent class="space-y-3 text-sm">
+        <p v-if="diagnosticsUnavailable" data-testid="desktop-update-diagnostics-unavailable">
+          {{ t('setting.updates.troubleshooting.unavailable') }}
+        </p>
+        <dl v-if="diagnostics" class="grid gap-2 sm:grid-cols-2">
+          <div
+            v-for="field in [
+              'currentVersion',
+              'targetVersion',
+              'state',
+              'feedClass',
+              'lastCheckedAt',
+              'lastCheckResult',
+            ] as const"
+            :key="field"
+          >
+            <dt class="text-xs text-muted-foreground">
+              {{ t(`setting.updates.troubleshooting.${field}`) }}
+            </dt>
+            <dd :data-testid="`desktop-update-diagnostics-${field}`">
+              {{ diagnostics[field] ?? '—' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs text-muted-foreground">
+              {{ t('setting.updates.troubleshooting.receiptStatus') }}
+            </dt>
+            <dd data-testid="desktop-update-diagnostics-receipt">
+              {{ diagnostics.installReceipt.status }}
+            </dd>
+          </div>
+        </dl>
+        <p v-if="diagnostics?.failure" data-testid="desktop-update-diagnostics-failure">
+          {{ t('setting.updates.troubleshooting.failure') }}: {{ diagnostics.failure.operation }} ·
+          {{ diagnostics.failure.code }}
         </p>
       </CardContent>
     </Card>

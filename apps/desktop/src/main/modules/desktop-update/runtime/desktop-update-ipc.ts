@@ -2,6 +2,8 @@ import { BrowserWindow, ipcMain } from 'electron';
 import {
   DesktopUpdateChannels,
   DesktopUpdateSnapshotSchema,
+  DesktopUpdateDiagnosticsSchema,
+  type DesktopUpdateDiagnosticsDTO,
   type DesktopUpdateSnapshotDTO,
 } from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
@@ -19,6 +21,10 @@ export interface DesktopUpdateIpcInstallPort {
   requestRestartAndInstall(): Promise<DesktopUpdateSnapshotDTO>;
 }
 
+export interface DesktopUpdateIpcDiagnosticsPort {
+  getDiagnostics(): Promise<DesktopUpdateDiagnosticsDTO>;
+}
+
 export interface DesktopUpdateIpcMainPort {
   handle(channel: string, listener: (...args: unknown[]) => unknown): void;
   removeHandler(channel: string): void;
@@ -31,6 +37,7 @@ export interface DesktopUpdateIpcBroadcastPort {
 export interface DesktopUpdateIpcOptions {
   readonly update: DesktopUpdateIpcUpdatePort;
   readonly install: DesktopUpdateIpcInstallPort;
+  readonly diagnostics: DesktopUpdateIpcDiagnosticsPort;
   readonly ipc?: DesktopUpdateIpcMainPort;
   readonly broadcast?: DesktopUpdateIpcBroadcastPort;
 }
@@ -41,6 +48,7 @@ export interface DesktopUpdateIpcRuntime {
 
 const IPC_CHANNELS = [
   DesktopUpdateChannels.GET_SNAPSHOT,
+  DesktopUpdateChannels.GET_DIAGNOSTICS,
   DesktopUpdateChannels.CHECK,
   DesktopUpdateChannels.RESTART_AND_INSTALL,
 ] as const;
@@ -86,6 +94,17 @@ export function registerDesktopUpdateIpc(
       return ok(safeSnapshot(options.update.getSnapshot()));
     } catch (error) {
       logger.error('Desktop Update snapshot IPC failed', undefined, {
+        errorName: error instanceof Error ? error.name : typeof error,
+      });
+      return internalFailure();
+    }
+  });
+
+  mainIpc.handle(DesktopUpdateChannels.GET_DIAGNOSTICS, async () => {
+    try {
+      return ok(DesktopUpdateDiagnosticsSchema.parse(await options.diagnostics.getDiagnostics()));
+    } catch (error) {
+      logger.error('Desktop Update diagnostics IPC failed', undefined, {
         errorName: error instanceof Error ? error.name : typeof error,
       });
       return internalFailure();

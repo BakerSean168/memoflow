@@ -284,6 +284,7 @@ export const DevChannels = {
 /** Canonical Desktop Update transport (ADR-112 / DU-1301). */
 export const DesktopUpdateChannels = {
   GET_SNAPSHOT: 'desktop-update:get-snapshot',
+  GET_DIAGNOSTICS: 'desktop-update:get-diagnostics',
   CHECK: 'desktop-update:check',
   RESTART_AND_INSTALL: 'desktop-update:restart-and-install',
   STATE_CHANGED: 'desktop-update:state-changed',

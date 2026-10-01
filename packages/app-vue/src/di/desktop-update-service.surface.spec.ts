@@ -14,6 +14,7 @@ describe('DesktopUpdateService host-neutral DI surface', () => {
 
   it('exposes only snapshot operations and subscription to shared Vue', () => {
     expect(typesSource).toContain('export interface DesktopUpdateService');
+    expect(typesSource).toContain('getDiagnostics(): Promise<Result<DesktopUpdateDiagnosticsDTO>>');
     expect(typesSource).toContain('getSnapshot(): Promise<Result<DesktopUpdateSnapshotDTO>>');
     expect(typesSource).toContain('check(): Promise<Result<DesktopUpdateSnapshotDTO>>');
     expect(typesSource).toContain('restartAndInstall(): Promise<Result<DesktopUpdateSnapshotDTO>>');

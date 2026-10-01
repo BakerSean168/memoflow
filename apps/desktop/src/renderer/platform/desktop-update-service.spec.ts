@@ -71,6 +71,38 @@ function createHarness() {
 }
 
 describe('createDesktopUpdateService', () => {
+  it('invokes and validates bounded diagnostics', async () => {
+    const harness = createHarness();
+    const current = snapshot();
+    const diagnostics = {
+      currentVersion: current.currentVersion,
+      targetVersion: null,
+      owner: current.owner,
+      capabilities: current.capabilities,
+      state: 'idle',
+      feedClass: 'github',
+      lastCheckedAt: null,
+      lastCheckResult: null,
+      failure: null,
+      installReceipt: { status: 'none', requestedAt: null },
+    };
+    harness.invoke.mockResolvedValue(ok(diagnostics));
+    await expect(harness.service.getDiagnostics()).resolves.toEqual(ok(diagnostics));
+    expect(harness.invoke).toHaveBeenCalledWith(DesktopUpdateChannels.GET_DIAGNOSTICS);
+    for (const payload of [
+      {},
+      { ...diagnostics, state: 'invalid' },
+      { ...diagnostics, feedUrl: 'https://secret.test/token' },
+      { ...diagnostics, path: '/private/secret' },
+    ]) {
+      harness.invoke.mockResolvedValue(ok(payload));
+      await expect(harness.service.getDiagnostics()).resolves.toEqual({
+        ok: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Desktop update returned invalid diagnostics.' },
+        meta: undefined,
+      });
+    }
+  });
   it('maps the three host-neutral commands to canonical Desktop Update IPC', async () => {
     const harness = createHarness();
     const current = snapshot();

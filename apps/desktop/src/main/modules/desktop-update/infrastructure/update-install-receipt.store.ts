@@ -48,7 +48,9 @@ export class FileDesktopUpdateInstallReceiptStore implements DesktopUpdateInstal
     this.receiptPath = path.join(this.directory, RECEIPT_FILE_NAME);
   }
 
-  async read(): Promise<DesktopUpdateInstallReceipt | null> {
+  async read(options?: {
+    readonly repairCorruption?: boolean;
+  }): Promise<DesktopUpdateInstallReceipt | null> {
     let raw: string;
     try {
       raw = await fs.readFile(this.receiptPath, 'utf8');
@@ -65,6 +67,9 @@ export class FileDesktopUpdateInstallReceiptStore implements DesktopUpdateInstal
       logger.warn('Ignoring corrupted Desktop update install receipt', {
         errorName: error instanceof Error ? error.name : typeof error,
       });
+      if (options?.repairCorruption === false) {
+        throw new Error('Invalid Desktop update install receipt');
+      }
       await this.removeCorruptedReceiptBestEffort();
       return null;
     }

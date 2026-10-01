@@ -6,6 +6,7 @@ describe('Desktop Update preload allow-list', () => {
   const allowed = new Set<string>(ALLOWED_CHANNELS);
 
   it('exposes the complete narrow Desktop Update contract', () => {
+    expect(allowed.has('desktop-update:get-diagnostics')).toBe(true);
     expect(Object.values(DesktopUpdateChannels).every((channel) => allowed.has(channel))).toBe(
       true,
     );

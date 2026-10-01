@@ -77,6 +77,16 @@ export {
   type DesktopUpdateReleaseDTO,
   type DesktopUpdateSnapshotDTO,
   type DesktopUpdateStateDTO,
+  DesktopUpdateFeedClassSchema,
+  DesktopUpdateDiagnosticsStateSchema,
+  DesktopUpdateDiagnosticsFailureSchema,
+  DesktopUpdateInstallReceiptStatusSchema,
+  DesktopUpdateDiagnosticsSchema,
+  type DesktopUpdateFeedClassDTO,
+  type DesktopUpdateDiagnosticsStateDTO,
+  type DesktopUpdateDiagnosticsFailureDTO,
+  type DesktopUpdateInstallReceiptStatusDTO,
+  type DesktopUpdateDiagnosticsDTO,
 } from './desktop-update';
 export { AIStreamChannels } from './ipc-channels';
 export type {

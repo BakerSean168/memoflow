@@ -17,6 +17,7 @@ describe('Desktop Update shell ownership surface', () => {
   it('composes Desktop Update exactly once in initializeShellRuntime', () => {
     expect(mainSource.match(/composeDesktopUpdateShellRuntime\(/g)).toHaveLength(1);
     expect(mainSource.match(/new UpdateInstallCoordinator\(/g)).toHaveLength(1);
+    expect(mainSource.match(/new DesktopUpdateDiagnosticsService\(/g)).toHaveLength(1);
     expect(mainSource.match(/registerDesktopUpdateIpc\(/g)).toHaveLength(1);
 
     const shellStart = mainSource.indexOf('async function initializeShellRuntime');
@@ -38,6 +39,7 @@ describe('Desktop Update shell ownership surface', () => {
     for (const source of [profileRuntimeSource, windowManagerSource]) {
       expect(source).not.toContain('composeDesktopUpdateShellRuntime');
       expect(source).not.toContain('DesktopUpdateCoordinator');
+      expect(source).not.toContain('DesktopUpdateDiagnosticsService');
       expect(source).not.toContain('desktopUpdateCoordinator.destroy');
     }
   });

@@ -30,7 +30,7 @@ import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { SettingClientPort } from '@memoflow/setting/client';
 import type { TaskClientPort } from '@memoflow/task/client';
 import type { DataPortabilityClientPort } from '@memoflow/data-portability/client';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateDiagnosticsDTO, DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
 import type { Result } from '@memoflow/contracts/result';
 import type { Component } from 'vue';
 
@@ -67,6 +67,7 @@ export type IRuleService = GovernanceClientPort;
  * this capability entirely; Desktop provides the IPC-backed adapter.
  */
 export interface DesktopUpdateService {
+  getDiagnostics(): Promise<Result<DesktopUpdateDiagnosticsDTO>>;
   getSnapshot(): Promise<Result<DesktopUpdateSnapshotDTO>>;
   check(): Promise<Result<DesktopUpdateSnapshotDTO>>;
   restartAndInstall(): Promise<Result<DesktopUpdateSnapshotDTO>>;

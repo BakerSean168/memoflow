@@ -6,8 +6,10 @@ import {
   type DesktopUpdateChannelDTO,
   type DesktopUpdateDisableReasonDTO,
   type DesktopUpdateFailureDTO,
+  type DesktopUpdateFeedClassDTO,
   type DesktopUpdateIntentDTO,
   type DesktopUpdateOperationDTO,
+  type DesktopUpdateOutcomeDTO,
   type DesktopUpdateSnapshotDTO,
   type DesktopUpdateStateDTO,
 } from '@memoflow/contracts/electron';
@@ -64,6 +66,12 @@ export interface DesktopUpdateCoordinatorOptions {
   readonly now?: () => Date;
 }
 
+export interface DesktopUpdateDiagnosticsObservation {
+  readonly feedClass: DesktopUpdateFeedClassDTO;
+  readonly lastCheckedAt: string | null;
+  readonly lastCheckResult: DesktopUpdateOutcomeDTO | null;
+}
+
 type UpdateListener = (snapshot: DesktopUpdateSnapshotDTO) => void;
 
 function normalizeFailure(error: unknown): DesktopUpdateFailureDTO {
@@ -118,6 +126,8 @@ export class DesktopUpdateCoordinator {
   private readonly listeners = new Set<UpdateListener>();
 
   private state: DesktopUpdateStateDTO = createUninitializedDesktopUpdateState();
+  private lastCheckedAt: string | null = null;
+  private lastCheckResult: DesktopUpdateOutcomeDTO | null = null;
   private initialized = false;
   private destroyed = false;
   private startupTimer: ReturnType<typeof setTimeout> | null = null;
@@ -189,6 +199,14 @@ export class DesktopUpdateCoordinator {
       channel: this.channel,
       owner: this.owner,
       capabilities: this.capabilities,
+    });
+  }
+
+  getDiagnosticsObservation(): Readonly<DesktopUpdateDiagnosticsObservation> {
+    return Object.freeze({
+      feedClass: this.feed?.provider ?? 'none',
+      lastCheckedAt: this.lastCheckedAt,
+      lastCheckResult: this.lastCheckResult,
     });
   }
 
@@ -293,10 +311,11 @@ export class DesktopUpdateCoordinator {
       if (this.state.type !== 'checking') return this.getSnapshot();
 
       if (result.kind === 'up-to-date') {
+        const checkedAt = this.recordCheckOutcome('up-to-date');
         this.state = completeDesktopUpdateCheckWithoutRelease(
           this.state,
           this.currentVersion,
-          this.nowIso(),
+          checkedAt,
         );
         this.emit();
         return this.getSnapshot();
@@ -308,6 +327,7 @@ export class DesktopUpdateCoordinator {
         this.capabilities.canAutoDownload &&
         this.owner === 'memoflow-direct';
 
+      this.recordCheckOutcome('update-available');
       this.state = completeDesktopUpdateCheckWithRelease(
         this.state,
         result.release,
@@ -408,8 +428,16 @@ export class DesktopUpdateCoordinator {
 
     // The canonical state owns operation identity; stale async work must not
     // overwrite the operation classification of a newer state.
+    if (operation === 'check') this.recordCheckOutcome('failed');
     this.state = failDesktopUpdate(this.state, operation, normalizeFailure(error));
     this.emit();
+  }
+
+  private recordCheckOutcome(result: DesktopUpdateOutcomeDTO): string {
+    const checkedAt = this.nowIso();
+    this.lastCheckedAt = checkedAt;
+    this.lastCheckResult = result;
+    return checkedAt;
   }
 
   private scheduleBackgroundChecks(): void {

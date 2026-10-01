@@ -4,6 +4,7 @@ import { DesktopUpdateChannels } from '@memoflow/contracts/electron';
 import {
   registerDesktopUpdateIpc,
   type DesktopUpdateIpcBroadcastPort,
+  type DesktopUpdateIpcDiagnosticsPort,
   type DesktopUpdateIpcInstallPort,
   type DesktopUpdateIpcMainPort,
   type DesktopUpdateIpcUpdatePort,
@@ -75,10 +76,25 @@ function createHarness() {
     send: vi.fn(),
   };
 
-  const runtime = registerDesktopUpdateIpc({ update, install, ipc, broadcast });
+  const diagnostics: DesktopUpdateIpcDiagnosticsPort = {
+    getDiagnostics: vi.fn(async () => ({
+      currentVersion: '1.2.2',
+      targetVersion: null,
+      owner: 'memoflow-direct',
+      capabilities,
+      state: 'idle',
+      feedClass: 'github',
+      lastCheckedAt: null,
+      lastCheckResult: null,
+      failure: null,
+      installReceipt: { status: 'none', requestedAt: null },
+    })),
+  };
+  const runtime = registerDesktopUpdateIpc({ update, install, diagnostics, ipc, broadcast });
 
   return {
     runtime,
+    diagnostics,
     handlers,
     ipc,
     update,
@@ -94,12 +110,39 @@ function createHarness() {
 }
 
 describe('registerDesktopUpdateIpc', () => {
-  it('registers only the three request-response channels', () => {
+  it('reads validated diagnostics without broadcasting or initiating updates', async () => {
+    const harness = createHarness();
+    const expected = await harness.diagnostics.getDiagnostics();
+    expect(await harness.handlers.get(DesktopUpdateChannels.GET_DIAGNOSTICS)!()).toEqual({
+      ok: true,
+      data: expected,
+      meta: undefined,
+    });
+    expect(harness.update.check).not.toHaveBeenCalled();
+    expect(harness.broadcast.send).not.toHaveBeenCalled();
+  });
+
+  it('returns only a generic diagnostics failure for internal errors and extra secrets', async () => {
+    const harness = createHarness();
+    const expected = await harness.diagnostics.getDiagnostics();
+    vi.mocked(harness.diagnostics.getDiagnostics)
+      .mockRejectedValueOnce(new Error('/private/secret'))
+      .mockResolvedValueOnce({ ...expected, path: '/private/secret' } as typeof expected);
+    for (let i = 0; i < 2; i++) {
+      expect(await harness.handlers.get(DesktopUpdateChannels.GET_DIAGNOSTICS)!()).toEqual({
+        ok: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Desktop update operation failed.' },
+        meta: undefined,
+      });
+    }
+  });
+  it('registers only the four request-response channels', () => {
     const harness = createHarness();
 
     expect([...harness.handlers.keys()].sort()).toEqual(
       [
         DesktopUpdateChannels.GET_SNAPSHOT,
+        DesktopUpdateChannels.GET_DIAGNOSTICS,
         DesktopUpdateChannels.CHECK,
         DesktopUpdateChannels.RESTART_AND_INSTALL,
       ].sort(),
@@ -184,7 +227,7 @@ describe('registerDesktopUpdateIpc', () => {
     harness.runtime.destroy();
     harness.emit(snapshot('ready'));
 
-    expect(harness.ipc.removeHandler).toHaveBeenCalledTimes(3);
+    expect(harness.ipc.removeHandler).toHaveBeenCalledTimes(4);
     expect(harness.broadcast.send).not.toHaveBeenCalled();
   });
 });

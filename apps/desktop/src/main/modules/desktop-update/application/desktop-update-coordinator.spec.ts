@@ -71,6 +71,86 @@ afterEach(() => {
 });
 
 describe('DesktopUpdateCoordinator', () => {
+  it('keeps a frozen bounded observation with the exact idle settlement timestamp', async () => {
+    const engine = new FakeEngine();
+    const now = vi.fn(() => new Date('2026-10-01T12:00:00.000Z'));
+    const coordinator = directCoordinator(engine, {
+      now,
+      feed: { provider: 'generic', url: 'https://secret.test', channel: 'latest' },
+    });
+    expect(coordinator.getDiagnosticsObservation()).toEqual({
+      feedClass: 'generic',
+      lastCheckedAt: null,
+      lastCheckResult: null,
+    });
+    expect(Object.isFrozen(coordinator.getDiagnosticsObservation())).toBe(true);
+    await coordinator.initialize();
+    await coordinator.check();
+    const observation = coordinator.getDiagnosticsObservation();
+    expect(observation.lastCheckResult).toBe('up-to-date');
+    expect(coordinator.getSnapshot().state).toMatchObject({
+      lastCheckedAt: observation.lastCheckedAt,
+    });
+    expect(now).toHaveBeenCalledTimes(2); // start and settlement
+  });
+
+  it('settles a native check failure once despite duplicate events and promise rejection', async () => {
+    const engine = new FakeEngine();
+    let rejectCheck!: (error: unknown) => void;
+    engine.check.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectCheck = reject;
+        }),
+    );
+    const now = vi.fn(() => new Date('2026-10-01T12:00:00.000Z'));
+    const coordinator = directCoordinator(engine, { now });
+    await coordinator.initialize();
+    const pending = coordinator.check();
+    const event: DesktopUpdateEngineEvent = {
+      type: 'engine-error',
+      failure: { code: 'feed-unavailable', message: 'Failed', retryable: true },
+    };
+    engine.emit(event);
+    const settled = coordinator.getDiagnosticsObservation();
+    engine.emit(event);
+    rejectCheck(new Error('late failure'));
+    await pending;
+    expect(coordinator.getDiagnosticsObservation()).toEqual(settled);
+    expect(settled.lastCheckResult).toBe('failed');
+    expect(now).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['download', 'prepare', 'install'] as const)(
+    'keeps available observation after a later %s failure',
+    async (operation) => {
+      const engine = new FakeEngine();
+      engine.check.mockResolvedValue({ kind: 'available', release });
+      if (operation === 'download') engine.download.mockRejectedValue(new Error('Failed'));
+      if (operation === 'prepare') engine.prepare.mockRejectedValue(new Error('Failed'));
+      const coordinator = directCoordinator(engine);
+      await coordinator.initialize();
+      await coordinator.check();
+      await vi.waitFor(() =>
+        expect(coordinator.getSnapshot().state.type).toBe(
+          operation === 'install' ? 'ready' : 'failed',
+        ),
+      );
+      if (operation === 'install') {
+        coordinator.beginRestartAndInstall();
+        coordinator.failInstall({
+          code: 'install-handoff-failed',
+          message: 'Failed',
+          retryable: true,
+        });
+      }
+      expect(coordinator.getDiagnosticsObservation()).toEqual({
+        feedClass: 'none',
+        lastCheckedAt: '2026-09-30T01:00:00.000Z',
+        lastCheckResult: 'update-available',
+      });
+    },
+  );
   it('initializes the engine once and exposes an idle replayable snapshot', async () => {
     const engine = new FakeEngine();
     const coordinator = directCoordinator(engine);
@@ -203,6 +283,7 @@ describe('DesktopUpdateCoordinator', () => {
     expect(snapshots.some((snapshot) => snapshot.state.type === 'downloaded')).toBe(true);
     expect(snapshots.some((snapshot) => snapshot.state.type === 'preparing')).toBe(true);
     expect(snapshots.at(-1)?.state.type).toBe('ready');
+    expect(coordinator.getDiagnosticsObservation().lastCheckResult).toBe('update-available');
   });
 
   it('does not self-download a package-manager-owned update', async () => {

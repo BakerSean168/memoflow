@@ -114,6 +114,7 @@ import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repositor
 import { DesktopMainRuntime } from './desktop-main-runtime';
 import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
 import { resolveDesktopUpdateE2EConfig } from './modules/desktop-update/runtime/desktop-update-e2e-harness';
+import { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
 import { registerDesktopUpdateIpc } from './modules/desktop-update/runtime/desktop-update-ipc';
 import { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
 import { FileDesktopUpdateInstallReceiptStore } from './modules/desktop-update/infrastructure/update-install-receipt.store';
@@ -775,6 +776,11 @@ async function initializeShellRuntime(): Promise<void> {
     forceExit: () => app.exit(0),
   });
 
+  const desktopUpdateDiagnostics = new DesktopUpdateDiagnosticsService(
+    desktopUpdateShell.coordinator,
+    desktopUpdateReceiptStore,
+  );
+
   // Assemble the explicit process runtime owner. Profile lock/switch and
   // BrowserWindow recreation do not recreate or dispose Desktop Update.
   mainRuntime = new DesktopMainRuntime(
@@ -783,6 +789,7 @@ async function initializeShellRuntime(): Promise<void> {
     desktopUpdateShell.coordinator,
     desktopUpdateInstallCoordinator,
     desktopUpdateReceiptStore,
+    desktopUpdateDiagnostics,
   );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
 
@@ -790,6 +797,7 @@ async function initializeShellRuntime(): Promise<void> {
   const desktopUpdateIpc = registerDesktopUpdateIpc({
     update: desktopUpdateShell.coordinator,
     install: desktopUpdateInstallCoordinator,
+    diagnostics: desktopUpdateDiagnostics,
   });
   mainRuntime.setDesktopUpdateIpcDisposer(() => desktopUpdateIpc.destroy());
   logger.info('Desktop Update shell runtime initialized', {

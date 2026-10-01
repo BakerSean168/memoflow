@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
 import { DesktopMainRuntime } from './desktop-main-runtime';
 
 function createRuntimeHarness() {
@@ -20,12 +21,17 @@ function createRuntimeHarness() {
   } as unknown as ConstructorParameters<typeof DesktopMainRuntime>[4];
   const windowManager = {} as ConstructorParameters<typeof DesktopMainRuntime>[0];
 
+  const desktopUpdateDiagnostics = new DesktopUpdateDiagnosticsService(
+    desktopUpdateCoordinator,
+    desktopUpdateReceiptStore,
+  );
   const runtime = new DesktopMainRuntime(
     windowManager,
     profileRuntimeManager,
     desktopUpdateCoordinator,
     desktopUpdateInstallCoordinator,
     desktopUpdateReceiptStore,
+    desktopUpdateDiagnostics,
   );
   const disposeDesktopUpdateIpc = vi.fn();
   runtime.setDesktopUpdateIpcDisposer(disposeDesktopUpdateIpc);
@@ -41,6 +47,11 @@ function createRuntimeHarness() {
 }
 
 describe('DesktopMainRuntime Desktop Update ownership', () => {
+  it('exposes the process-owned diagnostics service', () => {
+    expect(createRuntimeHarness().runtime.desktopUpdateDiagnostics).toBeInstanceOf(
+      DesktopUpdateDiagnosticsService,
+    );
+  });
   it('disposes the process-owned updater during normal process shutdown', async () => {
     const {
       runtime,

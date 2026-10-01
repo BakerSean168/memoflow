@@ -210,3 +210,66 @@ export const DesktopUpdateSnapshotSchema = z
   })
   .strict();
 export type DesktopUpdateSnapshotDTO = z.infer<typeof DesktopUpdateSnapshotSchema>;
+
+export const DesktopUpdateFeedClassSchema = z.enum(['none', 'github', 'generic']);
+export type DesktopUpdateFeedClassDTO = z.infer<typeof DesktopUpdateFeedClassSchema>;
+
+export const DesktopUpdateDiagnosticsStateSchema = z.enum([
+  'uninitialized',
+  'disabled',
+  'idle',
+  'checking',
+  'available',
+  'downloading',
+  'downloaded',
+  'preparing',
+  'ready',
+  'restarting',
+  'failed',
+]);
+export type DesktopUpdateDiagnosticsStateDTO = z.infer<typeof DesktopUpdateDiagnosticsStateSchema>;
+
+export const DesktopUpdateDiagnosticsFailureSchema = z
+  .object({
+    operation: DesktopUpdateOperationSchema,
+    code: DesktopUpdateFailureCodeSchema,
+    retryable: z.boolean(),
+    recoverableTo: z.enum(['idle', 'available', 'ready']),
+  })
+  .strict();
+export type DesktopUpdateDiagnosticsFailureDTO = z.infer<
+  typeof DesktopUpdateDiagnosticsFailureSchema
+>;
+
+export const DesktopUpdateInstallReceiptStatusSchema = z.enum([
+  'none',
+  'restart-requested',
+  'shutdown-complete',
+  'installer-handoff',
+  'unavailable',
+]);
+export type DesktopUpdateInstallReceiptStatusDTO = z.infer<
+  typeof DesktopUpdateInstallReceiptStatusSchema
+>;
+
+/** Bounded troubleshooting projection, never updater configuration. */
+export const DesktopUpdateDiagnosticsSchema = z
+  .object({
+    currentVersion: z.string(),
+    targetVersion: z.string().nullable(),
+    owner: DesktopInstallationOwnerSchema,
+    capabilities: DesktopUpdateCapabilitiesSchema,
+    feedClass: DesktopUpdateFeedClassSchema,
+    lastCheckedAt: z.string().datetime().nullable(),
+    lastCheckResult: DesktopUpdateOutcomeSchema.nullable(),
+    state: DesktopUpdateDiagnosticsStateSchema,
+    failure: DesktopUpdateDiagnosticsFailureSchema.nullable(),
+    installReceipt: z
+      .object({
+        status: DesktopUpdateInstallReceiptStatusSchema,
+        requestedAt: z.string().datetime().nullable(),
+      })
+      .strict(),
+  })
+  .strict();
+export type DesktopUpdateDiagnosticsDTO = z.infer<typeof DesktopUpdateDiagnosticsSchema>;

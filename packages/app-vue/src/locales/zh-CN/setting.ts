@@ -64,6 +64,18 @@ export default {
       "restarting": "正在安全收尾当前运行时，并把安装交给系统更新器。",
       "failed": "本次更新操作没有完成。可重试时会保留对应操作入口。"
     },
+    "troubleshooting": {
+      "title": "更新故障排查",
+      "currentVersion": "当前版本",
+      "targetVersion": "目标版本",
+      "state": "状态",
+      "feedClass": "更新源类型",
+      "lastCheckedAt": "上次检查时间",
+      "lastCheckResult": "上次检查结果",
+      "receiptStatus": "安装回执",
+      "failure": "失败原因",
+      "unavailable": "暂时无法获取诊断信息。"
+    },
     "disabledReason": {
       "development-build": "开发构建不启用自动更新。",
       "updates-disabled": "此安装已关闭自动更新。",

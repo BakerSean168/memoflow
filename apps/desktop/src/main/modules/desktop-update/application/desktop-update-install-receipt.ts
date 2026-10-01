@@ -9,7 +9,9 @@ export interface DesktopUpdateInstallReceipt {
 }
 
 export interface DesktopUpdateInstallReceiptStore {
-  read(): Promise<DesktopUpdateInstallReceipt | null>;
+  read(options?: {
+    readonly repairCorruption?: boolean;
+  }): Promise<DesktopUpdateInstallReceipt | null>;
   write(receipt: DesktopUpdateInstallReceipt): Promise<void>;
   clear(): Promise<void>;
 }

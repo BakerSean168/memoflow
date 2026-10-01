@@ -1,6 +1,8 @@
 import {
   DesktopUpdateChannels,
   DesktopUpdateSnapshotSchema,
+  DesktopUpdateDiagnosticsSchema,
+  type DesktopUpdateDiagnosticsDTO,
   type DesktopUpdateSnapshotDTO,
 } from '@memoflow/contracts/electron';
 import { fail, ok, ResultCode, type Result } from '@memoflow/contracts/result';
@@ -30,6 +32,24 @@ async function invokeSnapshot(
   return ok(parsed.data, result.meta);
 }
 
+async function invokeDiagnostics(
+  ipc: IResultIpcClient,
+): Promise<Result<DesktopUpdateDiagnosticsDTO>> {
+  const result = await ipc.invoke<unknown>(DesktopUpdateChannels.GET_DIAGNOSTICS);
+  if (!result.ok) return result;
+  const parsed = DesktopUpdateDiagnosticsSchema.safeParse(result.data);
+  if (!parsed.success) {
+    return fail(
+      {
+        code: ResultCode.INTERNAL_ERROR,
+        message: 'Desktop update returned invalid diagnostics.',
+      },
+      result.meta,
+    );
+  }
+  return ok(parsed.data, result.meta);
+}
+
 /**
  * Desktop renderer adapter for the host-neutral DesktopUpdateService port.
  *
@@ -42,6 +62,7 @@ export function createDesktopUpdateService(
   bridge: ElectronBridge,
 ): DesktopUpdateService {
   return Object.freeze({
+    getDiagnostics: () => invokeDiagnostics(ipc),
     getSnapshot: () => invokeSnapshot(ipc, DesktopUpdateChannels.GET_SNAPSHOT),
     check: () => invokeSnapshot(ipc, DesktopUpdateChannels.CHECK),
     restartAndInstall: () => invokeSnapshot(ipc, DesktopUpdateChannels.RESTART_AND_INSTALL),

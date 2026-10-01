@@ -18,6 +18,7 @@ import type { NotificationPort, ExternalEditorPort } from './capabilities/ports'
 import type { DesktopFeaturesRuntime } from './desktop-features';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
+import type { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
 import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
 import type { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
 import type { DesktopUpdateInstallReceiptStore } from './modules/desktop-update/application/desktop-update-install-receipt';
@@ -41,6 +42,7 @@ export class DesktopMainRuntime {
     readonly desktopUpdateCoordinator: DesktopUpdateCoordinator,
     readonly desktopUpdateInstallCoordinator: UpdateInstallCoordinator,
     readonly desktopUpdateReceiptStore: DesktopUpdateInstallReceiptStore,
+    readonly desktopUpdateDiagnostics: DesktopUpdateDiagnosticsService,
   ) {}
 
   /** Get the auth context provider for the active profile (or null). */

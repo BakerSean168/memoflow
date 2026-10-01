@@ -101,7 +101,8 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1503` — **DEFERRED by user**: native Intel installed-update E2E and packaged provenance work are deferred.
 - `DU-1504` — **DEFERRED by user**: native Apple Silicon installed-update E2E and packaged provenance work are deferred.
 - macOS is not a gate for Windows feed/rollout work. DU-1402/DU-1403 consume whichever DU-1401 lanes are currently eligible; Windows-only publication is valid.
-- Next: `DU-1701` — non-macOS updater diagnostics for the existing Windows lane.
+- `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Governance retains only the unchanged HEAD platform-leakage finding in a surface-test assertion. macOS DU-1501..1504 remain DEFERRED.
+- Next: `DU-1702` — non-macOS failure injection matrix.
 
 ## 2. Non-goals
 
@@ -932,6 +933,35 @@ new version available
 # Phase 7 — Hardening and Operations
 
 ## DU-1701 — Add updater diagnostics
+
+Implementation plan (2026-10-01): strict contracts DTO → bounded coordinator check
+observation → stateless asynchronous receipt/feed projector → validated read-only IPC
+and renderer adapter → compact Settings troubleshooting → focused tests and checks.
+Guardrails: snapshot remains canonical; observation stores only last settled check;
+Main and renderer validate the DTO; receipt read errors become `unavailable`; diagnostics
+reads do not repair storage; no polling, extra listeners, support-bundle subsystem,
+or macOS behavior changes. DU-1501..1504 remain DEFERRED.
+
+**Status: DONE (2026-10-01).** Implemented the fixed strict DTO, frozen bounded
+coordinator observation, stateless receipt projector, process runtime ownership,
+validated read-only IPC and renderer service, and compact localized Settings card.
+Diagnostics refresh on mount and after explicit check/restart results; state/progress
+pushes do not read diagnostics. Receipt read failures expose only `unavailable`, and
+failure projections omit messages, provider configuration, URLs, and paths.
+
+Validation (from repository root; `NX_DAEMON=false` for Nx):
+
+- `pnpm nx run contracts:test --args='src/electron/desktop-update.spec.ts'` — 7 tests pass.
+- `pnpm nx run desktop:test --args='src/main/modules/desktop-update src/main/desktop-main-runtime.spec.ts src/main/desktop-update-shell-ownership.surface.spec.ts src/preload/allowed-channels.desktop-update.spec.ts src/renderer/platform/desktop-update'` — 16 files / 105 tests pass.
+- `pnpm nx run desktop:test:ipc --args='modules/desktop-update/runtime/desktop-update-ipc.spec.ts'` — 10 tests pass.
+- `pnpm nx run app-vue:test --args='src/modules/setting src/di/desktop-update-service.surface.spec.ts src/layouts/shell src/locales/setting-updates-locale.spec.ts'` — 45 files / 260 tests pass.
+- `pnpm nx run desktop:typecheck --excludeTaskDependencies` and `pnpm nx run app-vue:typecheck --excludeTaskDependencies` — both project typechecks pass; Desktop was rerun after rebuilding the contracts entrypoint.
+- `node tools/test-system-v2/inventory.mjs` and `node tools/test-system-v2/inventory.mjs --check` — pass.
+- `pnpm exec eslint` on all changed TypeScript/Vue files, including the new diagnostics service/spec and both locale files — pass.
+- `git diff --check` and `pnpm nx run memoflow:docs-check` — pass.
+- `pnpm nx run memoflow:governance-check` — stops at the one unchanged HEAD platform-leakage finding: `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` contains a negative `window.electronAPI` assertion. Changed lines introduce no new violation; intentionally left outside DU-1701.
+
+Next non-macOS ticket: **DU-1702**. DU-1501..1504 remain **DEFERRED**.
 
 最小 diagnostics：
 

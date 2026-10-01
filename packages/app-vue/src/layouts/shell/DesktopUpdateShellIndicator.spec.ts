@@ -60,6 +60,10 @@ function createService(initial: DesktopUpdateSnapshotDTO) {
   });
 
   const service: DesktopUpdateService = {
+    getDiagnostics: vi.fn(async () => ({
+      ok: false as const,
+      error: { code: 'INTERNAL_ERROR', message: 'Unavailable' },
+    })),
     getSnapshot: vi.fn(async () => ok(initial)),
     check: vi.fn(async () => ok(initial)),
     restartAndInstall: vi.fn(async () => ok(initial)),

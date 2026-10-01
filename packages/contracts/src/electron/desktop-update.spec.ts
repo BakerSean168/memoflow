@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DesktopUpdateCapabilitiesSchema,
+  DesktopUpdateDiagnosticsSchema,
   DesktopUpdateChannels,
   DesktopUpdateSnapshotSchema,
   DesktopUpdateStateSchema,
@@ -23,10 +24,50 @@ const capabilities = {
   installAuthority: 'memoflow' as const,
 };
 
+const diagnostics = {
+  currentVersion: '1.2.2',
+  targetVersion: null,
+  owner: 'memoflow-direct',
+  capabilities,
+  feedClass: 'github',
+  lastCheckedAt: null,
+  lastCheckResult: null,
+  state: 'idle',
+  failure: null,
+  installReceipt: { status: 'none', requestedAt: null },
+};
+
 describe('Desktop Update contract', () => {
+  it('accepts bounded diagnostics and rejects secret fields at every object boundary', () => {
+    expect(DesktopUpdateDiagnosticsSchema.safeParse(diagnostics).success).toBe(true);
+    for (const key of ['feedUrl', 'path', 'error', 'provider', 'releaseNotes', 'message']) {
+      expect(
+        DesktopUpdateDiagnosticsSchema.safeParse({ ...diagnostics, [key]: 'secret' }).success,
+      ).toBe(false);
+      expect(
+        DesktopUpdateDiagnosticsSchema.safeParse({
+          ...diagnostics,
+          installReceipt: { ...diagnostics.installReceipt, [key]: 'secret' },
+        }).success,
+      ).toBe(false);
+      expect(
+        DesktopUpdateDiagnosticsSchema.safeParse({
+          ...diagnostics,
+          failure: {
+            operation: 'check',
+            code: 'feed-unavailable',
+            retryable: true,
+            recoverableTo: 'idle',
+            [key]: 'secret',
+          },
+        }).success,
+      ).toBe(false);
+    }
+  });
   it('owns the narrow replayable IPC surface introduced by ADR-112', () => {
     expect(DesktopUpdateChannels).toEqual({
       GET_SNAPSHOT: 'desktop-update:get-snapshot',
+      GET_DIAGNOSTICS: 'desktop-update:get-diagnostics',
       CHECK: 'desktop-update:check',
       RESTART_AND_INSTALL: 'desktop-update:restart-and-install',
       STATE_CHANGED: 'desktop-update:state-changed',
