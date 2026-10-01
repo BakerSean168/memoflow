@@ -108,218 +108,26 @@
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Popover v-if="triggerType === 'Elapsed'">
-              <PopoverTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.durationMinutes')"
-                  data-testid="routine-duration-chip"
-                >
-                  <template #icon><Clock3 class="h-3.5 w-3.5" /></template>
-                  {{ t('routine.form.minutesValue', { value: durationMinutes }) }}
-                </ProductPropertyChip>
-              </PopoverTrigger>
-              <PopoverContent align="start" class="w-56 space-y-2 p-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  {{ t('routine.form.durationMinutes') }}
-                </p>
-                <div class="flex items-center gap-2">
-                  <NumberField
-                    v-model="durationMinutes"
-                    :min="1"
-                    :step="1"
-                    :disabled="saving"
-                    data-testid="routine-durationMinutes"
-                    class="w-36"
-                  >
-                    <NumberFieldContent>
-                      <NumberFieldDecrement
-                        :aria-label="t('routine.form.durationMinutes') + ' −'"
-                      />
-                      <NumberFieldInput
-                        :aria-label="t('routine.form.durationMinutes')"
-                        class="h-8"
-                      />
-                      <NumberFieldIncrement
-                        :aria-label="t('routine.form.durationMinutes') + ' +'"
-                      />
-                    </NumberFieldContent>
-                  </NumberField>
-                  <span class="shrink-0 text-xs text-muted-foreground">
-                    {{ t('routine.form.minutes') }}
-                  </span>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <ElapsedTriggerEditor
+              v-if="triggerType === 'Elapsed'"
+              v-model:duration-minutes="durationMinutes"
+              v-model:anchor="elapsedAnchor"
+              :disabled="saving"
+            />
 
-            <DropdownMenu v-if="triggerType === 'Elapsed'">
-              <DropdownMenuTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.anchor')"
-                  data-testid="routine-anchor-chip"
-                >
-                  <template #icon><Repeat2 class="h-3.5 w-3.5" /></template>
-                  {{ elapsedAnchorLabel }}
-                </ProductPropertyChip>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" class="w-52">
-                <DropdownMenuRadioGroup
-                  :model-value="elapsedAnchor"
-                  @update:model-value="updateElapsedAnchor"
-                >
-                  <DropdownMenuRadioItem
-                    v-for="option in elapsedAnchorOptions"
-                    :key="option.value"
-                    :value="option.value"
-                  >
-                    {{ option.label }}
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ActiveUsageTriggerEditor
+              v-if="triggerType === 'ActiveUsage'"
+              v-model:active-minutes="activeMinutes"
+              v-model:natural-break-minutes="naturalBreakMinutes"
+              v-model:anchor="activeAnchor"
+              :disabled="saving"
+            />
 
-            <Popover v-if="triggerType === 'ActiveUsage'">
-              <PopoverTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.activeMinutes')"
-                  data-testid="routine-active-duration-chip"
-                >
-                  <template #icon><Activity class="h-3.5 w-3.5" /></template>
-                  {{ t('routine.form.activeMinutesValue', { value: activeMinutes }) }}
-                </ProductPropertyChip>
-              </PopoverTrigger>
-              <PopoverContent align="start" class="w-56 space-y-2 p-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  {{ t('routine.form.activeMinutes') }}
-                </p>
-                <div class="flex items-center gap-2">
-                  <NumberField
-                    v-model="activeMinutes"
-                    :min="1"
-                    :step="1"
-                    :disabled="saving"
-                    data-testid="routine-activeMinutes"
-                    class="w-36"
-                  >
-                    <NumberFieldContent>
-                      <NumberFieldDecrement :aria-label="t('routine.form.activeMinutes') + ' −'" />
-                      <NumberFieldInput :aria-label="t('routine.form.activeMinutes')" class="h-8" />
-                      <NumberFieldIncrement :aria-label="t('routine.form.activeMinutes') + ' +'" />
-                    </NumberFieldContent>
-                  </NumberField>
-                  <span class="shrink-0 text-xs text-muted-foreground">
-                    {{ t('routine.form.minutes') }}
-                  </span>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover v-if="triggerType === 'ActiveUsage'">
-              <PopoverTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.naturalBreakMinutes')"
-                  data-testid="routine-natural-break-chip"
-                >
-                  <template #icon><Clock3 class="h-3.5 w-3.5" /></template>
-                  {{ t('routine.form.naturalBreakValue', { value: naturalBreakMinutes }) }}
-                </ProductPropertyChip>
-              </PopoverTrigger>
-              <PopoverContent align="start" class="w-56 space-y-2 p-3">
-                <p class="text-xs font-medium text-muted-foreground">
-                  {{ t('routine.form.naturalBreakMinutes') }}
-                </p>
-                <div class="flex items-center gap-2">
-                  <NumberField
-                    v-model="naturalBreakMinutes"
-                    :min="0"
-                    :step="1"
-                    :disabled="saving"
-                    data-testid="routine-naturalBreakMinutes"
-                    class="w-36"
-                  >
-                    <NumberFieldContent>
-                      <NumberFieldDecrement
-                        :aria-label="t('routine.form.naturalBreakMinutes') + ' −'"
-                      />
-                      <NumberFieldInput
-                        :aria-label="t('routine.form.naturalBreakMinutes')"
-                        class="h-8"
-                      />
-                      <NumberFieldIncrement
-                        :aria-label="t('routine.form.naturalBreakMinutes') + ' +'"
-                      />
-                    </NumberFieldContent>
-                  </NumberField>
-                  <span class="shrink-0 text-xs text-muted-foreground">
-                    {{ t('routine.form.minutes') }}
-                  </span>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <DropdownMenu v-if="triggerType === 'ActiveUsage'">
-              <DropdownMenuTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.anchor')"
-                  data-testid="routine-anchor-chip"
-                >
-                  <template #icon><Repeat2 class="h-3.5 w-3.5" /></template>
-                  {{ activeAnchorLabel }}
-                </ProductPropertyChip>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" class="w-52">
-                <DropdownMenuRadioGroup
-                  :model-value="activeAnchor"
-                  @update:model-value="updateActiveAnchor"
-                >
-                  <DropdownMenuRadioItem
-                    v-for="option in activeAnchorOptions"
-                    :key="option.value"
-                    :value="option.value"
-                  >
-                    {{ option.label }}
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.profiles')"
-                  data-testid="routine-profile-picker"
-                >
-                  <template #icon><Layers3 class="h-3.5 w-3.5" /></template>
-                  {{ selectedProfilesLabel }}
-                </ProductPropertyChip>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" class="w-64">
-                <DropdownMenuLabel>{{ t('routine.form.profiles') }}</DropdownMenuLabel>
-                <DropdownMenuItem v-if="profiles.length === 0" disabled>
-                  {{ t('routine.profile.noProfiles') }}
-                </DropdownMenuItem>
-                <DropdownMenuCheckboxItem
-                  v-for="profile in profiles"
-                  :key="profile.id"
-                  :model-value="selectedProfileIds.includes(profile.id)"
-                  :data-testid="`routine-profile-membership-${profile.id}`"
-                  @update:model-value="toggleProfileSelection(profile.id)"
-                  @select.prevent
-                >
-                  <span
-                    class="mr-2 h-1.5 w-1.5 shrink-0 rounded-full"
-                    :class="profile.active ? 'bg-success' : 'bg-muted-foreground/30'"
-                    aria-hidden="true"
-                  />
-                  <span class="min-w-0 flex-1 truncate">{{ profile.name }}</span>
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ProfileScopeControl
+              v-model:selected-profile-ids="selectedProfileIds"
+              :profiles="profiles"
+              :disabled="saving"
+            />
           </div>
 
           <p
@@ -332,127 +140,16 @@
           </p>
         </section>
 
-        <section
+        <WallClockTriggerEditor
           v-if="triggerType === 'WallClock'"
-          class="divide-y divide-border/60"
-          data-testid="routine-trigger-configuration"
-        >
-          <div class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.localTime') }}</span>
-            <ProductTimePicker
-              v-model="localTime"
-              test-id="routine-local-time"
-              :label="t('routine.form.localTime')"
-              :hour-label="t('routine.form.hour')"
-              :minute-label="t('routine.form.minute')"
-              :disabled="saving"
-              class="ml-auto"
-            />
-          </div>
-
-          <div class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.startDate') }}</span>
-            <ProductDatePicker
-              :model-value="parseYmd(startDate)"
-              :allowed-kinds="['day']"
-              test-id="routine-start-date"
-              :label="t('routine.form.startDate')"
-              :aria-label="t('routine.form.startDate')"
-              :disabled="saving"
-              class="ml-auto"
-              @update:model-value="startDate = $event ?? ''"
-            />
-          </div>
-
-          <div class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.frequency') }}</span>
-            <div class="flex justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <ProductPropertyChip
-                    :disabled="saving"
-                    :aria-label="t('routine.form.frequency')"
-                    data-testid="routine-frequency-chip"
-                  >
-                    <template #icon><Repeat2 class="h-3.5 w-3.5" /></template>
-                    {{ frequencyLabel }}
-                  </ProductPropertyChip>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" class="w-40">
-                  <DropdownMenuRadioGroup
-                    :model-value="frequency"
-                    @update:model-value="updateFrequency"
-                  >
-                    <DropdownMenuRadioItem
-                      v-for="option in frequencyOptions"
-                      :key="option.value"
-                      :value="option.value"
-                    >
-                      {{ option.label }}
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          <div class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.interval') }}</span>
-            <div class="flex items-center justify-end gap-2">
-              <NumberField
-                v-model="recurrenceInterval"
-                :min="1"
-                :step="1"
-                :disabled="saving"
-                data-testid="routine-recurrenceInterval"
-                class="w-36"
-              >
-                <NumberFieldContent>
-                  <NumberFieldDecrement :aria-label="t('routine.form.interval') + ' −'" />
-                  <NumberFieldInput :aria-label="t('routine.form.interval')" class="h-8" />
-                  <NumberFieldIncrement :aria-label="t('routine.form.interval') + ' +'" />
-                </NumberFieldContent>
-              </NumberField>
-              <span class="min-w-8 text-xs text-muted-foreground">{{ frequencyUnit }}</span>
-            </div>
-          </div>
-
-          <div v-if="frequency === 'weekly'" class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.weekdays') }}</span>
-            <div class="flex flex-wrap justify-end gap-1">
-              <button
-                v-for="weekday in weekdayOptions"
-                :key="weekday.value"
-                type="button"
-                class="h-7 min-w-7 rounded-md px-2 text-xs transition-colors"
-                :class="
-                  selectedWeekdays.includes(weekday.value)
-                    ? 'bg-muted text-foreground'
-                    : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
-                "
-                :aria-pressed="selectedWeekdays.includes(weekday.value)"
-                :disabled="saving"
-                @click="toggleWeekday(weekday.value)"
-              >
-                {{ weekday.label }}
-              </button>
-            </div>
-          </div>
-
-          <div class="routine-property-row">
-            <span class="routine-property-label">{{ t('routine.form.timeZone') }}</span>
-            <ProductTimeZoneSelector
-              v-model="timeZone"
-              test-id="routine-time-zone"
-              :label="t('routine.form.timeZone')"
-              :product-zone-label="t('routine.form.defaultTimeZone')"
-              :search-placeholder="t('routine.form.searchTimeZones')"
-              :empty-text="t('routine.form.noTimeZonesFound')"
-              :disabled="saving"
-              class="ml-auto"
-            />
-          </div>
-        </section>
+          v-model:local-time="localTime"
+          v-model:start-date="startDate"
+          v-model:frequency="frequency"
+          v-model:recurrence-interval="recurrenceInterval"
+          v-model:selected-weekdays="selectedWeekdays"
+          v-model:time-zone="timeZone"
+          :disabled="saving"
+        />
       </form>
 
       <template #footer>
@@ -482,26 +179,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Activity, CircleOff, Clock3, Layers3, Monitor, Repeat2 } from '@lucide/vue';
+import { Activity, CircleOff, Clock3, Monitor, Repeat2 } from '@lucide/vue';
 import {
   Button,
   Dialog,
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  NumberField,
-  NumberFieldContent,
-  NumberFieldDecrement,
-  NumberFieldIncrement,
-  NumberFieldInput,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   RoutineDefinitionDto,
@@ -518,23 +204,25 @@ import {
   ProductAutoTextarea,
   ProductDialogShell,
   ProductPropertyChip,
-  ProductDatePicker,
-  ProductTimePicker,
-  ProductTimeZoneSelector,
 } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
 import { getProductTime, getProductTodayYmd } from '../../../shared/utils/product-time';
+import ActiveUsageTriggerEditor from './ActiveUsageTriggerEditor.vue';
+import ElapsedTriggerEditor from './ElapsedTriggerEditor.vue';
+import ProfileScopeControl from './ProfileScopeControl.vue';
+import WallClockTriggerEditor from './WallClockTriggerEditor.vue';
+import type {
+  RoutineActiveAnchor,
+  RoutineEditorTriggerType,
+  RoutineElapsedAnchor,
+  RoutineFrequency,
+} from './routine-editor.types';
 
 export interface RoutineEditorPreset {
   readonly name: string;
   readonly description: string;
   readonly trigger: RoutineTriggerDto | null;
 }
-
-type TriggerType = 'None' | RoutineTriggerDto['type'];
-type Frequency = 'daily' | 'weekly' | 'monthly' | 'yearly';
-type ElapsedAnchor = 'routine-activation' | 'profile-activation' | 'last-satisfied';
-type ActiveAnchor = 'profile-activation' | 'last-satisfied';
 
 const props = withDefaults(
   defineProps<{
@@ -571,18 +259,18 @@ const { t } = useI18n();
 
 const name = ref('');
 const description = ref('');
-const triggerType = ref<TriggerType>('None');
+const triggerType = ref<RoutineEditorTriggerType>('None');
 const localTime = ref('09:00');
 const timeZone = ref('UTC');
 const startDate = ref(String(getProductTodayYmd()));
-const frequency = ref<Frequency>('daily');
+const frequency = ref<RoutineFrequency>('daily');
 const recurrenceInterval = ref(1);
 const selectedWeekdays = ref<number[]>([]);
 const durationMinutes = ref(50);
-const elapsedAnchor = ref<ElapsedAnchor>('last-satisfied');
+const elapsedAnchor = ref<RoutineElapsedAnchor>('last-satisfied');
 const activeMinutes = ref(50);
 const naturalBreakMinutes = ref(5);
-const activeAnchor = ref<ActiveAnchor>('last-satisfied');
+const activeAnchor = ref<RoutineActiveAnchor>('last-satisfied');
 const selectedProfileIds = ref<string[]>([]);
 const nameLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
@@ -610,59 +298,6 @@ const requiresDesktopRuntime = computed(
     (triggerType.value === 'ActiveUsage' ||
       (triggerType.value === 'Elapsed' && elapsedAnchor.value === 'profile-activation')),
 );
-
-const selectedProfilesLabel = computed(() => {
-  const selected = props.profiles.filter((profile) =>
-    selectedProfileIds.value.includes(profile.id),
-  );
-  if (selected.length === 0) return t('routine.form.profiles');
-  if (selected.length === 1) return selected[0]!.name;
-  return t('routine.form.profilesSummary', {
-    name: selected[0]!.name,
-    count: selected.length - 1,
-  });
-});
-
-const frequencyOptions = computed(() => [
-  { value: 'daily' as const, label: t('routine.trigger.daily') },
-  { value: 'weekly' as const, label: t('routine.trigger.weekly') },
-  { value: 'monthly' as const, label: t('routine.trigger.monthly') },
-  { value: 'yearly' as const, label: t('routine.trigger.yearly') },
-]);
-const frequencyLabel = computed(
-  () => frequencyOptions.value.find((option) => option.value === frequency.value)?.label ?? '',
-);
-
-const elapsedAnchorOptions = computed(() => [
-  { value: 'last-satisfied' as const, label: t('routine.trigger.lastSatisfied') },
-  { value: 'routine-activation' as const, label: t('routine.trigger.routineActivation') },
-  { value: 'profile-activation' as const, label: t('routine.trigger.profileActivation') },
-]);
-const elapsedAnchorLabel = computed(
-  () =>
-    elapsedAnchorOptions.value.find((option) => option.value === elapsedAnchor.value)?.label ?? '',
-);
-
-const activeAnchorOptions = computed(() => [
-  { value: 'last-satisfied' as const, label: t('routine.trigger.lastSatisfied') },
-  { value: 'profile-activation' as const, label: t('routine.trigger.profileActivation') },
-]);
-const activeAnchorLabel = computed(
-  () =>
-    activeAnchorOptions.value.find((option) => option.value === activeAnchor.value)?.label ?? '',
-);
-
-const weekdayOptions = computed(() => [
-  { value: 1, label: t('routine.form.weekdaysShort.mon') },
-  { value: 2, label: t('routine.form.weekdaysShort.tue') },
-  { value: 3, label: t('routine.form.weekdaysShort.wed') },
-  { value: 4, label: t('routine.form.weekdaysShort.thu') },
-  { value: 5, label: t('routine.form.weekdaysShort.fri') },
-  { value: 6, label: t('routine.form.weekdaysShort.sat') },
-  { value: 0, label: t('routine.form.weekdaysShort.sun') },
-]);
-
-const frequencyUnit = computed(() => t(`routine.form.frequencyUnits.${frequency.value}`));
 
 function localYmd(): string {
   return String(getProductTodayYmd());
@@ -741,36 +376,6 @@ function updateTriggerType(value: unknown): void {
   if (option) triggerType.value = option.value;
 }
 
-function updateFrequency(value: unknown): void {
-  if (typeof value !== 'string') return;
-  const option = frequencyOptions.value.find((candidate) => candidate.value === value);
-  if (option) frequency.value = option.value;
-}
-
-function updateElapsedAnchor(value: unknown): void {
-  if (typeof value !== 'string') return;
-  const option = elapsedAnchorOptions.value.find((candidate) => candidate.value === value);
-  if (option) elapsedAnchor.value = option.value;
-}
-
-function updateActiveAnchor(value: unknown): void {
-  if (typeof value !== 'string') return;
-  const option = activeAnchorOptions.value.find((candidate) => candidate.value === value);
-  if (option) activeAnchor.value = option.value;
-}
-
-function toggleProfileSelection(profileId: string): void {
-  selectedProfileIds.value = selectedProfileIds.value.includes(profileId)
-    ? selectedProfileIds.value.filter((id) => id !== profileId)
-    : [...selectedProfileIds.value, profileId];
-}
-
-function toggleWeekday(weekday: number): void {
-  selectedWeekdays.value = selectedWeekdays.value.includes(weekday)
-    ? selectedWeekdays.value.filter((value) => value !== weekday)
-    : [...selectedWeekdays.value, weekday];
-}
-
 function buildTrigger(): RoutineTriggerDto | null {
   if (triggerType.value === 'None') return null;
 
@@ -839,26 +444,3 @@ function handleOpenChange(value: boolean): void {
   emit('update:open', value);
 }
 </script>
-
-<style scoped>
-.routine-property-row {
-  display: grid;
-  grid-template-columns: minmax(7.5rem, 0.42fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 1rem;
-  padding-block: 0.75rem;
-}
-
-.routine-property-label {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: hsl(var(--muted-foreground));
-}
-
-@media (max-width: 640px) {
-  .routine-property-row {
-    grid-template-columns: minmax(6.5rem, 0.45fr) minmax(0, 1fr);
-    gap: 0.75rem;
-  }
-}
-</style>
