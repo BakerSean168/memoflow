@@ -1083,6 +1083,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** toolbar 更紧凑且 Profile 一等语义仍清晰。
 
+**Execution (2026-10-01): Accepted / frozen after independent review.** Routine keeps the existing status filter on the left and now groups the current Profile scope with its durable enabled gate into one compact right-side control; Add Routine remains a separate primary action. Profile runtime/edit/delete/create stay in the Profile menu. Unsupported local-runtime hosts no longer silently lose the runtime action: it remains visible, disabled, and carries the existing Desktop-required hint. Global/Profile gates and runtime actions still route to the same `updatePreferences`, `updateProfile`, and `setProfileActive` owner commands. Full Routine App-Vue regression passed 5 files / 25 tests uncached; `app-vue:typecheck --skip-nx-cache` completed through `vue-tsc`; changed-file ESLint/Prettier, 1,295-file inventory, governance and diff checks passed. The existing authenticated Routine browser lane was intentionally not run because its API bootstrap can execute `prisma db push --accept-data-loss`; no browser/live-backend claim is made. Exact hierarchy, test evidence and limitation: [ROUTINE-5102 toolbar/profile hierarchy](../archive/2026-10-01-pvc-routine-5102-toolbar-profile-hierarchy.md).
+
 ---
 
 ## PVC-ROUTINE-5103 — Routine editor semantic decomposition
