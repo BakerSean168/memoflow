@@ -11609,6 +11609,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/workflow-history-contract.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/workspace-receipt.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12123,7 +12131,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 30
+      "fileCount": 31
     },
     {
       "id": "memoflow:test:governance",
@@ -13052,6 +13060,6 @@
     "boundary-main": 8,
     "e2e": 63,
     "perf": 1,
-    "governance": 62
+    "governance": 63
   }
 }
