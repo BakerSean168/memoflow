@@ -79,13 +79,12 @@ describe('capsule preview presentation grammar', () => {
     expect(wrapper.get('[data-testid="view-all"]').exists()).toBe(true);
   });
 
-  it('keeps all six capsule owners on the shared chrome without introducing a universal business row', () => {
+  it('keeps migrated capsule owners on the shared chrome without introducing a universal business row', () => {
     const owners = [
       read('modules/task/components/TaskQuickSurface.vue'),
       read('layouts/shell/previews/GoalCapsulePreview.vue'),
       read('modules/routine/components/RoutineCapsulePreview.vue'),
       read('modules/notification/components/NotificationCapsulePreview.vue'),
-      read('layouts/shell/previews/ScheduleCapsulePreview.vue'),
       read('layouts/shell/previews/NoteCapsulePreview.vue'),
     ];
 

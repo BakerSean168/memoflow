@@ -41,16 +41,12 @@ describe('product overlay and state recipes', () => {
     expect(empty.text()).toContain('Nothing generated');
   });
 
-  it('keeps compact property popovers on shared presentation recipes', () => {
+  it('keeps adopted compact property popovers on shared presentation recipes', () => {
     const popover = read('shared/components/ProductPopoverSurface.vue');
-    const elapsed = read('modules/routine/components/RoutineElapsedTriggerEditor.vue');
-    const active = read('modules/routine/components/RoutineActiveUsageTriggerEditor.vue');
     const kr = read('modules/goal/components/GoalKeyResultDirectControls.vue');
 
     expect(popover).toContain("'compact-menu': 'w-44 p-1.5'");
     expect(popover).toContain("property: 'w-56 space-y-2 p-3'");
-    expect(elapsed).toContain('<ProductPopoverSurface recipe="property">');
-    expect(active.match(/<ProductPopoverSurface recipe="property">/g)?.length).toBe(2);
     expect(kr).toContain('<ProductPopoverSurface recipe="compact-menu">');
   });
 

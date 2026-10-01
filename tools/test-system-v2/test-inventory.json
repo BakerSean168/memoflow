@@ -3356,6 +3356,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/components/shared/ModuleHeader.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/components/shared/iconButtonAccessibility.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4262,6 +4270,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4327,6 +4343,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5044,6 +5068,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/CapsulePreviewShell.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/LabelCommandPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5100,6 +5132,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductEntityMetadataPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ProductExpandableSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5108,7 +5148,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductOverlayStateRecipes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSurfaceHeader.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11995,7 +12051,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 256
+      "fileCount": 264
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12749,7 +12805,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1121,
+    "unit": 1129,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
