@@ -66,11 +66,15 @@ describe('Routine form UI convergence', () => {
   it('puts the durable context enabled gate beside the context selector', () => {
     const view = source('app-vue/src/modules/routine/views/RoutineConfigurationView.vue');
 
+    expect(view).toContain('data-testid="routine-profile-scope-control"');
     expect(view).toContain('data-testid="routine-global-enabled-switch"');
-    expect(view).toContain('data-testid="routine-global-paused-badge"');
+    expect(view).toContain('data-testid="routine-profile-enabled-switch"');
+    expect(view).toContain('data-testid="routine-global-paused-indicator"');
+    expect(view).not.toContain('data-testid="routine-global-paused-badge"');
+    expect(view).toContain('data-testid="routine-profile-runtime-action"');
+    expect(view).toContain('!snapshot.capabilities.localRuntime');
     expect(view).toContain('toggleGlobalEnabled');
     expect(view).toContain('snapshot.preferences.globalEnabled');
-    expect(view).toContain('data-testid="routine-profile-enabled-switch"');
     expect(view).toContain('toggleProfileEnabled(selectedProfile, $event)');
     expect(view).toContain('await updateProfile(profile.id');
     expect(view).toContain('enabled,');
