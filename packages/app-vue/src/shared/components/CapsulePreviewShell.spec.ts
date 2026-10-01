@@ -79,10 +79,11 @@ describe('capsule preview presentation grammar', () => {
     expect(wrapper.get('[data-testid="view-all"]').exists()).toBe(true);
   });
 
-  it('keeps migrated capsule owners on the shared chrome without introducing a universal business row', () => {
+  it('keeps all six capsule owner families on the shared chrome', () => {
     const owners = [
       read('modules/task/components/TaskQuickSurface.vue'),
       read('layouts/shell/previews/GoalCapsulePreview.vue'),
+      read('layouts/shell/previews/ScheduleCapsulePreview.vue'),
       read('modules/routine/components/RoutineCapsulePreview.vue'),
       read('modules/notification/components/NotificationCapsulePreview.vue'),
       read('layouts/shell/previews/NoteCapsulePreview.vue'),
@@ -93,7 +94,26 @@ describe('capsule preview presentation grammar', () => {
       expect(source).toContain('<CapsulePreviewHeader');
       expect(source).toContain('<CapsulePreviewFooter');
       expect(source).toContain('<CapsulePreviewState');
-      expect(source).not.toContain('CapsuleBusinessRow');
+    }
+  });
+
+  it('keeps shared capsule primitives free of universal business rows and owner actions', () => {
+    const primitives = [
+      'CapsulePreviewShell',
+      'CapsulePreviewHeader',
+      'CapsulePreviewFooter',
+      'CapsulePreviewState',
+    ];
+    const exports = read('shared/components/index.ts');
+    expect([...exports.matchAll(/default as (Capsule\w+)/g)].map((match) => match[1])).toEqual(
+      primitives,
+    );
+
+    for (const primitive of primitives) {
+      const source = read(`shared/components/${primitive}.vue`);
+      // Rows, owner data and business actions must stay in each owner's surface.
+      expect(source).not.toMatch(/@memoflow\/contracts|modules\/|defineEmits|v-for|<button\b/);
+      expect(source).toContain('<slot');
     }
   });
 });

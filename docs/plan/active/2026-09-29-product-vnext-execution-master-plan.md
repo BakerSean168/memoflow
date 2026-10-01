@@ -1289,6 +1289,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** capsule chrome 一致，无 universal business row。
 
+**Execution (2026-10-01): Accepted / frozen after delegated implementation and independent review.** All six capsule owner families now share `CapsulePreviewShell/Header/Footer/State` while business rows and owner actions remain local. The canonical tree already had Task (through `TaskQuickSurface`), Goal, Routine, Notification and Knowledge/Note converged; Schedule was the final production gap and now adopts the shared chrome without changing its owner script/event-rendering semantics. A shared architecture guard prevents capsule primitives from acquiring owner contracts/actions, and Schedule contract coverage locks loading/snapshot sequencing, current/upcoming/all-day rendering, Product Time boundaries, ordering/limits, selection and view-all. AppShell focus/pinned/stale-window behavior was untouched. Codex Team `gpt-6.1-sol`/medium delivered the implementation; independent acceptance passed 2 files / 12 changed-contract tests, uncached App-Vue typecheck, the 1,336-file inventory, full uncached governance, targeted ESLint/Prettier and diff checks. Evidence: [SHELL-8201 capsule host shell convergence](../archive/2026-10-01-pvc-shell-8201-capsule-host-shell.md).
+
 ---
 
 # 13. Phase 7 — Owner Native Edit Session + AI Surface Orchestration

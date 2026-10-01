@@ -1151,26 +1151,19 @@ The workflow surface is not deleted earlier.
 
 ### PVC-SHELL-8201 — Capsule convergence
 
-**Audit status:** behavior is generally correct; presentation duplication remains.
+**Status (2026-10-01): Accepted / frozen.** All six capsule owner families now share the host chrome through `CapsulePreviewShell`, `CapsulePreviewHeader`, `CapsulePreviewFooter` and `CapsulePreviewState`. Task reaches the grammar through `TaskQuickSurface`; Goal, Schedule, Routine, Notification and Knowledge/Note consume it directly. Schedule was the final production migration. Shared primitives remain presentation-only: no owner contracts, business iteration or owner actions were promoted into a universal row.
 
-Protect:
+Protected behavior remains unchanged:
 
 - hover/pinned dismissal;
 - focus behavior;
 - stale-window query reuse;
 - repeated request avoidance;
-- owner navigation.
+- owner navigation;
+- Task occurrence actions through the canonical Task action coordinator;
+- Schedule Product Time, source identity, selection and view-all behavior.
 
-Promote only the repeated shell grammar:
-
-- CapsulePreviewShell;
-- CapsulePreviewHeader;
-- CapsulePreviewFooter;
-- loading/error/empty state surface.
-
-Do not create one universal capsule item row.
-
-Task capsule/Today quick completion must also route through the canonical Task occurrence action coordinator.
+Evidence: [SHELL-8201 capsule host shell convergence](../archive/2026-10-01-pvc-shell-8201-capsule-host-shell.md).
 
 ---
 

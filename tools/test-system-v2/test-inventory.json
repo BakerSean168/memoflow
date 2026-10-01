@@ -3724,6 +3724,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12307,7 +12315,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 271
+      "fileCount": 272
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13061,7 +13069,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1154,
+    "unit": 1155,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
