@@ -301,7 +301,8 @@ async function refreshPlannerAfterConflict(
 ): Promise<void> {
   if (!windowStart.value || !windowEnd.value) return;
   try {
-    await fetchForRange(windowStart.value, windowEnd.value);
+    await fetchForRange(windowStart.value, windowEnd.value, { force: true });
+    if (schedule.error.value || task.error.value) toast.warning(t(warningKey));
   } catch {
     toast.warning(t(warningKey));
   }
@@ -337,6 +338,7 @@ function handlePlannerMutation(outcome: PlannerMutationOutcome): void {
 }
 
 function handleDayClick(date: Date): void {
+  if (showCreateDialog.value) return;
   selectedDate.value = date;
   dayDetailOpen.value = true;
 }
@@ -349,12 +351,15 @@ function switchToDayView(date: Date | null): void {
 }
 
 function openCreateDialog(): void {
+  if (showCreateDialog.value) return;
   editingSchedule.value = null;
   pendingCreateRange.value = null;
   showCreateDialog.value = true;
 }
 
 function handleSelectRange(range: { start: number; end: number; allDay: boolean }): void {
+  if (showCreateDialog.value) return;
+  dayDetailOpen.value = false;
   editingSchedule.value = null;
   pendingCreateRange.value = range;
   showCreateDialog.value = true;

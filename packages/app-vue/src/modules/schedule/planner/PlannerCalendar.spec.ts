@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import FullCalendar from '@fullcalendar/vue3';
+import type { EventDropInfo } from '@fullcalendar/vue3';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
@@ -219,6 +221,37 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       'true',
     );
     expect(wrapper.find('[data-testid="schedule-calendar-loading"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+  it('reports one outcome for a replayed FullCalendar gesture, then accepts a distinct gesture', async () => {
+    const route = vi.fn().mockResolvedValue({
+      status: 'conflict',
+      code: 'CONFLICT',
+      reason: 'generic',
+      message: 'conflict',
+      ownerType: 'schedule.calendar-entry',
+    });
+    const wrapper = mount(PlannerCalendar, {
+      props: { projections: [scheduleProjection], ownerCommands: { route }, view: 'week' },
+    });
+    const options = wrapper.getComponent(FullCalendar).props('options');
+    const info = {
+      event: {
+        start: new Date(Number(scheduleProjection.start) + 60_000),
+        end: new Date(Number(scheduleProjection.end) + 60_000),
+        allDay: false,
+        extendedProps: { projection: scheduleProjection },
+      },
+      revert: vi.fn(),
+    } as unknown as EventDropInfo;
+    options.eventDrop?.(info);
+    options.eventDrop?.({ ...info });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(1));
+    expect(route).toHaveBeenCalledOnce();
+    expect(info.revert).toHaveBeenCalledOnce();
+    options.eventDrop?.({ ...info, revert: vi.fn() });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(2));
+    expect(route).toHaveBeenCalledTimes(2);
     wrapper.unmount();
   });
 });

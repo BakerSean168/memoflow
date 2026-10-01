@@ -1810,6 +1810,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/schedule/presentation-authority/collision-regression.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.schedule-presentation-authority.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/schedule/presentation-authority/schedule-presentation-authority.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -11759,7 +11767,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 2
+      "fileCount": 3
     },
     {
       "id": "apps/web/playwright.shell.config.ts",
@@ -12714,7 +12722,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 6,
-    "e2e": 62,
+    "e2e": 63,
     "perf": 1,
     "governance": 59
   }

@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
   narrow: false,
   scheduleError: { value: null as string | null },
+  taskError: { value: null as string | null },
   fetchForRange: vi.fn(),
   calendarEntries: { value: [] as CalendarEntryClientDTO[] },
   updateCalendarEntry: vi.fn(),
@@ -36,7 +37,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../../layouts/shell/usePanelWidth', () => ({
   usePanelWidth: () => ({ isNarrow: ref(mocks.narrow) }),
 }));
-vi.mock('vue-sonner', () => ({ toast: { error: vi.fn(), warning: vi.fn(), success: vi.fn() } }));
+vi.mock('vue-sonner', () => ({
+  toast: { error: vi.fn(), warning: vi.fn(), success: vi.fn(), info: vi.fn() },
+}));
 
 vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>()),
@@ -53,6 +56,7 @@ vi.mock('../composables/useSchedule', () => ({
 }));
 vi.mock('../../task/composables/useTask', () => ({
   useTask: () => ({
+    error: mocks.taskError,
     rescheduleOccurrence: mocks.rescheduleOccurrence,
     completeOccurrence: mocks.completeOccurrence,
   }),
@@ -108,7 +112,7 @@ const projection: CalendarEventProjection = {
 
 const planner = defineComponent({
   name: 'PlannerCalendar',
-  emits: ['event-click'],
+  emits: ['event-click', 'select-range', 'day-click', 'mutation'],
   setup:
     (_, { emit }) =>
     () =>
@@ -203,6 +207,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     vi.clearAllMocks();
     mocks.narrow = false;
     mocks.scheduleError.value = null;
+    mocks.taskError.value = null;
     mocks.fetchForRange.mockResolvedValue(undefined);
     mocks.calendarEntries.value = [entry];
     mocks.confirm.mockResolvedValue(true);
@@ -483,4 +488,92 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     expect(day.emitted('event-click')?.[0]).toEqual([projection]);
     expect(day.text()).toContain('09:00');
   });
+  it('keeps one create session and its original selection across repeated select/create callbacks', async () => {
+    const wrapper = await mountView();
+    const calendar = wrapper.getComponent({ name: 'PlannerCalendar' });
+    const range = { start: Number(projection.start), end: Number(projection.end), allDay: false };
+    calendar.vm.$emit('day-click', new Date(range.start));
+    calendar.vm.$emit('select-range', range);
+    await flushPromises();
+    const editor = wrapper.getComponent({ name: 'CreateScheduleDialog' });
+    calendar.vm.$emit('select-range', { ...range, start: range.start + 60_000 });
+    await wrapper.get('[data-testid="create-schedule-button"]').trigger('click');
+    await flushPromises();
+    calendar.vm.$emit('day-click', new Date(range.start));
+    await flushPromises();
+    expect(wrapper.getComponent({ name: 'PlannerDayDialog' }).props('open')).toBe(false);
+    expect(editor.props('initialRange')).toEqual(range);
+    expect(wrapper.findAll('[data-testid="create-schedule-dialog-stub"]')).toHaveLength(1);
+    expect(mocks.createCalendarEntry).not.toHaveBeenCalled();
+    editor.vm.$emit('update:modelValue', false);
+    await flushPromises();
+    calendar.vm.$emit('select-range', { ...range, start: range.start + 60_000 });
+    await flushPromises();
+    expect(editor.props('initialRange').start).toBe(range.start + 60_000);
+  });
+
+  it.each(['target-date-occupied', 'stale-version', 'generic'] as const)(
+    'reports %s after rollback and refreshes only stale outcomes',
+    async (reason) => {
+      const wrapper = await mountView();
+      wrapper.getComponent({ name: 'PlannerCalendar' }).vm.$emit('mutation', {
+        status: 'conflict',
+        code: 'CONFLICT',
+        message: 'conflict',
+        reason,
+        ownerType: 'task.occurrence',
+      });
+      await flushPromises();
+      expect(toast.warning).toHaveBeenCalledOnce();
+      expect(mocks.fetchForRange).toHaveBeenCalledTimes(reason === 'stale-version' ? 1 : 0);
+      if (reason === 'stale-version')
+        expect(mocks.fetchForRange).toHaveBeenCalledWith(1, 2, { force: true });
+      expect(mocks.rescheduleOccurrence).not.toHaveBeenCalled();
+      expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['failed', 'invalid', 'unsupported', 'read-only', 'applied'] as const)(
+    'reports %s without a second mutation or refresh',
+    async (status) => {
+      const wrapper = await mountView();
+      wrapper.getComponent({ name: 'PlannerCalendar' }).vm.$emit('mutation', {
+        status,
+        message: 'outcome',
+        code: 'INTERNAL_ERROR',
+        ownerType: 'schedule.calendar-entry',
+      });
+      await flushPromises();
+      expect(toast.error).toHaveBeenCalledTimes(
+        ['failed', 'invalid', 'unsupported'].includes(status) ? 1 : 0,
+      );
+      expect(toast.info).toHaveBeenCalledTimes(status === 'read-only' ? 1 : 0);
+      expect(mocks.fetchForRange).not.toHaveBeenCalled();
+      expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
+    },
+  );
+  it.each(['scheduleError', 'taskError'] as const)(
+    'warns about a stored %s refresh failure without issuing another mutation',
+    async (ownerError) => {
+      mocks.fetchForRange.mockImplementation(async () => {
+        mocks[ownerError].value = 'Owner read failed';
+      });
+      const wrapper = await mountView();
+      wrapper.getComponent({ name: 'PlannerCalendar' }).vm.$emit('mutation', {
+        status: 'conflict',
+        code: 'CONFLICT',
+        reason: 'stale-version',
+        ownerType: 'schedule.calendar-entry',
+      });
+      await flushPromises();
+      expect(toast.warning).toHaveBeenCalledTimes(2);
+      expect(toast.warning).toHaveBeenLastCalledWith(
+        expect.stringContaining('could not be refreshed'),
+      );
+      expect(mocks.fetchForRange).toHaveBeenCalledOnce();
+      expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
+      expect(mocks.rescheduleOccurrence).not.toHaveBeenCalled();
+      expect(mocks.calendarEntries.value).toEqual([entry]);
+    },
+  );
 });

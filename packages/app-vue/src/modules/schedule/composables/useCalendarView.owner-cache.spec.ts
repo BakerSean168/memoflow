@@ -100,4 +100,81 @@ describe('useCalendarView Planner owner cache', () => {
     second.wrapper.unmount();
     runtime.dispose();
   });
+  it('forces canonical Schedule/Task/Goal/Routine reads after a stale owner outcome', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(ok({ goals: [], pagination: { hasMore: false } })),
+    };
+    const routineService = {
+      getUpcomingOccurrences: vi.fn().mockResolvedValue(ok({ occurrences: [] })),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchForRange(start, end);
+    await api.fetchForRange(start, end, { force: true });
+    expect(fetchCalendarEntries).toHaveBeenLastCalledWith(start, end, { force: true });
+    expect(fetchInstancesByDateRange).toHaveBeenLastCalledWith(start, end, { force: true });
+    expect(goalService.listGoals).toHaveBeenCalledTimes(2);
+    expect(routineService.getUpcomingOccurrences).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+    runtime.dispose();
+  });
+  it('retains loaded marker projections when forced canonical reads fail, then accepts an authoritative empty result', async () => {
+    const runtime = createTestServerStateRuntime();
+    const goalService = {
+      listGoals: vi.fn().mockResolvedValue(
+        ok({
+          goals: [
+            {
+              toDTO: () => ({
+                id: 'goal',
+                identityId: 'identity-1',
+                name: 'Goal',
+                status: 'InProgress',
+                start: { kind: 'day', date: '2026-09-28' },
+                target: null,
+                version: 3,
+              }),
+            },
+          ],
+          pagination: { hasMore: false },
+        }),
+      ),
+    };
+    const routineService = {
+      getUpcomingOccurrences: vi.fn().mockResolvedValue(
+        ok({
+          occurrences: [
+            {
+              identityId: 'identity-1',
+              routineId: 'routine',
+              occurrenceKey: 'routine-1',
+              title: 'Routine',
+              occurrenceAt: Date.UTC(2026, 8, 28, 12),
+              endAt: null,
+              revision: 2,
+            },
+          ],
+        }),
+      ),
+    };
+    const { wrapper, api } = mountCalendar(runtime, goalService, routineService);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchForRange(start, end);
+    const before = structuredClone(api.projections.value);
+    expect(before.map((p) => p.sourceType)).toEqual(['goal', 'routine']);
+    goalService.listGoals.mockRejectedValueOnce(new Error('offline'));
+    routineService.getUpcomingOccurrences.mockRejectedValueOnce(new Error('offline'));
+    const refreshed = await Promise.allSettled([api.fetchForRange(start, end, { force: true })]);
+    expect(api.projections.value).toEqual(before);
+    expect(refreshed[0]?.status).toBe('rejected');
+    goalService.listGoals.mockResolvedValueOnce(ok({ goals: [], pagination: { hasMore: false } }));
+    routineService.getUpcomingOccurrences.mockResolvedValueOnce(ok({ occurrences: [] }));
+    await api.fetchForRange(start, end, { force: true });
+    expect(api.projections.value).toEqual([]);
+    wrapper.unmount();
+    runtime.dispose();
+  });
 });

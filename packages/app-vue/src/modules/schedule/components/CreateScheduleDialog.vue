@@ -73,11 +73,7 @@
               for="all-day"
             >
               {{ t('schedule.calendar.allDay') }}
-              <Switch
-                id="all-day"
-                :model-value="formData.allDay"
-                @update:model-value="setAllDay"
-              />
+              <Switch id="all-day" :model-value="formData.allDay" @update:model-value="setAllDay" />
             </label>
           </div>
 
@@ -101,7 +97,9 @@
               />
             </div>
 
-            <ArrowRight class="hidden h-4 w-4 self-end text-muted-foreground/70 sm:block sm:mb-2.5" />
+            <ArrowRight
+              class="hidden h-4 w-4 self-end text-muted-foreground/70 sm:block sm:mb-2.5"
+            />
 
             <div class="space-y-1.5">
               <p class="text-[11px] font-medium text-muted-foreground">
@@ -250,7 +248,9 @@
           >
             <ShieldCheck class="h-4 w-4 shrink-0 text-success" />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium">{{ t('schedule.createDialog.autoDetectConflicts') }}</p>
+              <p class="text-sm font-medium">
+                {{ t('schedule.createDialog.autoDetectConflicts') }}
+              </p>
               <p class="mt-0.5 text-xs text-muted-foreground">
                 {{ t('schedule.createDialog.autoDetectConflictsDescription') }}
               </p>
@@ -341,15 +341,7 @@ import {
   Users,
   X,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Dialog,
-  Input,
-  Label,
-  Switch,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Dialog, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-shadcn';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/contracts/schedule';
 import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitives';
 import {
@@ -359,10 +351,7 @@ import {
   ProductPropertyChip,
 } from '../../../shared/components';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
-import {
-  formatProductDateTime,
-  getProductTime,
-} from '../../../shared/utils/product-time';
+import { formatProductDateTime, getProductTime } from '../../../shared/utils/product-time';
 
 type ScheduleProperty = 'location' | 'attendees';
 
@@ -629,7 +618,7 @@ function removeAttendee(index: number): void {
 }
 
 async function handleSubmit(): Promise<void> {
-  if (busy.value) return;
+  if (!props.modelValue || busy.value) return;
   const time = getProductTime();
   const startDate = time.input.parseDateValue(formData.startDate);
   const endDate = time.input.parseDateValue(formData.endDate);
