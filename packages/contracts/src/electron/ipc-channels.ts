@@ -281,12 +281,13 @@ export const DevChannels = {
   MEMORY_FORCE_GC: 'dev:memory:force-gc',
 } as const;
 
-export const AutoUpdateChannels = {
-  CHECK: 'auto-update:check',
-  DOWNLOAD: 'auto-update:download',
-  INSTALL: 'auto-update:install',
-  STATUS: 'auto-update:status',
-  CONFIG: 'auto-update:config',
+/** Canonical Desktop Update transport (ADR-114 / DU-1301). */
+export const DesktopUpdateChannels = {
+  GET_SNAPSHOT: 'desktop-update:get-snapshot',
+  GET_DIAGNOSTICS: 'desktop-update:get-diagnostics',
+  CHECK: 'desktop-update:check',
+  RESTART_AND_INSTALL: 'desktop-update:restart-and-install',
+  STATE_CHANGED: 'desktop-update:state-changed',
 } as const;
 
 // V3-only portable user-data surface — no server-held disclosure IPC channel.

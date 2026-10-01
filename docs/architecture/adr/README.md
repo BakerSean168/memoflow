@@ -130,6 +130,7 @@ updated: 2026-09-11T00:02:00+08:00
 | [ADR-111](./ADR-111-zero-legacy-data-destructive-cutover-policy.md) | Zero-Legacy-Data Destructive Cutover Policy | 已采纳（立即生效） | 2026-09-09 |
 | [ADR-112](./ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md) | Owner Native Surface Orchestration + Quick Surface Reuse | 已采纳（target-design，待实施） | 2026-09-29 |
 | [ADR-113](./ADR-113-retire-product-governance-runtime-keep-engineering-governance.md) | Retire Product Governance Runtime, Keep Engineering Governance | 提议（待最终确认） | 2026-09-29 |
+| [ADR-114](./ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) | Desktop Update Domain、Runtime Boundary 与 Installation Ownership | 已采纳并实施（Windows / Linux；macOS 延后） | 2026-09-30 |
 
 ## 维护规则
 

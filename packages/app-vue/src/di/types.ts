@@ -30,6 +30,8 @@ import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { SettingClientPort } from '@memoflow/setting/client';
 import type { TaskClientPort } from '@memoflow/task/client';
 import type { DataPortabilityClientPort } from '@memoflow/data-portability/client';
+import type { DesktopUpdateDiagnosticsDTO, DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/contracts/result';
 import type { Component } from 'vue';
 
 // ── Service Interfaces (structural, no private members) ──
@@ -56,6 +58,21 @@ export type IRuntimeUsageService = RuntimeUsageClient;
 /** Mastra-native durable Workflow seam for goal/task/knowledge product workflows. */
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
 export type IRuleService = GovernanceClientPort;
+
+/**
+ * Host-neutral Desktop Update capability exposed to shared Vue UI.
+ *
+ * The port deliberately contains no Electron bridge, updater provider, feed,
+ * file-system, or mutable updater configuration concepts. Web hosts may omit
+ * this capability entirely; Desktop provides the IPC-backed adapter.
+ */
+export interface DesktopUpdateService {
+  getDiagnostics(): Promise<Result<DesktopUpdateDiagnosticsDTO>>;
+  getSnapshot(): Promise<Result<DesktopUpdateSnapshotDTO>>;
+  check(): Promise<Result<DesktopUpdateSnapshotDTO>>;
+  restartAndInstall(): Promise<Result<DesktopUpdateSnapshotDTO>>;
+  subscribe(listener: (snapshot: DesktopUpdateSnapshotDTO) => void): () => void;
+}
 
 // ── Module Capsules (UI Redesign V2 shell) ──
 /**

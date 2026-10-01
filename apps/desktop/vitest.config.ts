@@ -73,7 +73,6 @@ export default defineConfig({
     // Boundary files have one primary owner and are run by the boundary target.
     exclude: [
       'src/main/ipc/**/*.{test,spec}.{ts,tsx}',
-      'src/main/modules/auto-update/ipc/**/*.{test,spec}.{ts,tsx}',
       'src/main/**/*-ipc.{test,spec}.{ts,tsx}',
       'src/main/**/*ipc*.{test,spec}.{ts,tsx}',
       'src/main/database/**/*.{test,spec}.{ts,tsx}',

@@ -1,5 +1,6 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { validateDesktopRuntimeValidations } from './desktop-runtime-validations.mjs';
 import { validateMacosTrustReceipt } from './verify-macos-trust.mjs';
 
 const [
@@ -14,6 +15,7 @@ const [
   runtimeMethod,
   runtimeExecutableKind,
   trustReceiptPath,
+  additionalRuntimeKinds = '',
 ] = process.argv.slice(2);
 if (
   !root ||
@@ -28,7 +30,7 @@ if (
   !runtimeExecutableKind
 ) {
   throw new Error(
-    'usage: write-desktop-platform-receipt.mjs <artifact-root> <platform> <os> <arch> <signing-state> <tag> <git-sha> <runtime-status> <runtime-method> <runtime-executable-kind> [macos-trust-receipt]',
+    'usage: write-desktop-platform-receipt.mjs <artifact-root> <platform> <os> <arch> <signing-state> <tag> <git-sha> <runtime-status> <runtime-method> <runtime-executable-kind> [macos-trust-receipt] [additional-runtime-kinds-comma-separated]',
   );
 }
 
@@ -78,6 +80,28 @@ if (runtimeExecutableKind !== policy.runtimeExecutableKind) {
     `Desktop runtime executable kind mismatch for ${platform}: expected ${policy.runtimeExecutableKind}, got ${runtimeExecutableKind}`,
   );
 }
+
+const runtimeValidation = {
+  status: runtimeStatus,
+  method: runtimeMethod,
+  executableKind: runtimeExecutableKind,
+};
+const runtimeValidations = validateDesktopRuntimeValidations(
+  {
+    runtimeValidations: [
+      runtimeValidation,
+      ...additionalRuntimeKinds
+        .split(',')
+        .filter(Boolean)
+        .map((executableKind) => ({
+          status: runtimeStatus,
+          method: runtimeMethod,
+          executableKind,
+        })),
+    ],
+  },
+  platform,
+);
 
 const selected = (name) =>
   /(?:\.exe|\.zip|\.dmg|\.blockmap|\.AppImage|\.deb|\.rpm|latest.*\.ya?ml)$/u.test(name);
@@ -129,11 +153,8 @@ const receipt = {
   version: tag.replace(/^v/u, ''),
   tag,
   gitSha,
-  runtimeValidation: {
-    status: runtimeStatus,
-    method: runtimeMethod,
-    executableKind: runtimeExecutableKind,
-  },
+  runtimeValidation,
+  runtimeValidations,
   trustValidation,
   assets,
 };

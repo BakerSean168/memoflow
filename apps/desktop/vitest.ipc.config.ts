@@ -65,7 +65,6 @@ export default defineConfig({
     root: resolve(import.meta.dirname, 'src/main'),
     include: [
       'ipc/**/*.{test,spec}.ts',
-      'modules/auto-update/ipc/**/*.{test,spec}.ts',
       '*-ipc.{test,spec}.ts',
       '**/*-ipc.{test,spec}.ts',
       'desktop-shared-ipc*.{test,spec}.ts',

@@ -6,7 +6,15 @@
  * loading/error/mutation state. `?tab=` and `settings-tab-{value}` remain the stable
  * deep-link/E2E contract.
  */
-import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ArrowLeft } from '@lucide/vue';
@@ -16,6 +24,7 @@ import SettingsNavigation from '../components/SettingsNavigation.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import { returnFromSettingsScene } from '../../../layouts/shell/useShellRouterSync';
 import { ProductSurfaceHeader } from '../../../shared/components';
+import { DESKTOP_UPDATE_SERVICE_KEY } from '../../../di/keys';
 
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
@@ -30,11 +39,15 @@ const AccountSettingsSection = defineAsyncComponent(
 const DataSettingsSection = defineAsyncComponent(
   () => import('../components/DataSettingsSection.vue'),
 );
+const DesktopUpdateSettingsSection = defineAsyncComponent(
+  () => import('../components/DesktopUpdateSettingsSection.vue'),
+);
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const shellStore = useAppShellStore();
+const desktopUpdateService = inject(DESKTOP_UPDATE_SERVICE_KEY, null);
 const SETTINGS_NARROW_VIEWPORT = 1024;
 const contentWidth = ref(
   typeof window !== 'undefined' ? window.innerWidth : SETTINGS_NARROW_VIEWPORT,
@@ -43,7 +56,8 @@ const isNarrow = computed(() => contentWidth.value < SETTINGS_NARROW_VIEWPORT);
 const settingsContentRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
-type SettingsGroup = 'appearance' | 'repository' | 'ai' | 'notifications' | 'account' | 'data';
+type SettingsGroup =
+  'appearance' | 'repository' | 'ai' | 'notifications' | 'account' | 'data' | 'updates';
 
 const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string }> = [
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
@@ -52,16 +66,25 @@ const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string 
   { value: 'notifications', labelKey: 'setting.groups.notifications' },
   { value: 'account', labelKey: 'setting.groups.account' },
   { value: 'data', labelKey: 'setting.groups.data' },
+  { value: 'updates', labelKey: 'setting.groups.updates' },
 ];
 const GROUP_VALUES: SettingsGroup[] = GROUP_DEFINITIONS.map((group) => group.value);
 
+function isGroupAvailable(group: SettingsGroup): boolean {
+  return group !== 'updates' || desktopUpdateService !== null;
+}
+
 function normalizeGroup(value: unknown): SettingsGroup {
-  return GROUP_VALUES.includes(value as SettingsGroup) ? (value as SettingsGroup) : 'appearance';
+  const candidate = value as SettingsGroup;
+  return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate) ? candidate : 'appearance';
 }
 
 const activeTab = ref<SettingsGroup>(normalizeGroup(route.query.tab));
 const groups = computed(() =>
-  GROUP_DEFINITIONS.map((group) => ({ value: group.value, label: t(group.labelKey) })),
+  GROUP_DEFINITIONS.filter((group) => isGroupAvailable(group.value)).map((group) => ({
+    value: group.value,
+    label: t(group.labelKey),
+  })),
 );
 
 watch(
@@ -145,6 +168,7 @@ onBeforeUnmount(() => {
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection v-else-if="activeTab === 'account'" />
             <DataSettingsSection v-else-if="activeTab === 'data'" />
+            <DesktopUpdateSettingsSection v-else-if="activeTab === 'updates'" />
           </div>
         </div>
       </main>

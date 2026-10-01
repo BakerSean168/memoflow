@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { execFileSync, execFile } from 'node:child_process';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -254,6 +254,7 @@ test('release evidence builders bind Desktop assets to the exact server candidat
           'packaged-electron-playwright',
           fixture.runtimeKind,
           trustPath,
+          fixture.platform === 'linux-x64' ? 'packaged-appimage' : '',
         ],
         { cwd: repoRoot },
       );
@@ -328,6 +329,48 @@ test('release evidence builders bind Desktop assets to the exact server candidat
     assert.equal(
       manifest.desktop.platforms['linux-x64'].runtimeValidation.executableKind,
       'installed-deb',
+    );
+    assert.deepEqual(
+      manifest.desktop.platforms['linux-x64'].runtimeValidations.map(
+        (proof) => proof.executableKind,
+      ),
+      ['installed-deb', 'packaged-appimage'],
+    );
+    for (const platform of ['windows-x64', 'macos-x64', 'macos-arm64']) {
+      assert.deepEqual(manifest.desktop.platforms[platform].runtimeValidations, [
+        manifest.desktop.platforms[platform].runtimeValidation,
+      ]);
+    }
+    const linuxReceiptPath = path.join(
+      artifacts,
+      'desktop-linux-x64',
+      'desktop-platform-receipt.json',
+    );
+    const linuxReceipt = JSON.parse(await readFile(linuxReceiptPath, 'utf8'));
+    for (const proofs of [
+      [],
+      [linuxReceipt.runtimeValidation, linuxReceipt.runtimeValidation],
+      [{ ...linuxReceipt.runtimeValidation, status: 'failed' }],
+      [{ ...linuxReceipt.runtimeValidation, executableKind: 'unknown' }],
+    ]) {
+      await writeFile(
+        linuxReceiptPath,
+        JSON.stringify({ ...linuxReceipt, runtimeValidations: proofs }),
+      );
+      assert.throws(
+        () =>
+          execFileSync(process.execPath, [desktopTool, artifacts, 'v1.2.3', gitSha, desktopPath], {
+            stdio: 'pipe',
+          }),
+        /runtime validation missing or failed/u,
+      );
+    }
+    delete linuxReceipt.runtimeValidations;
+    await writeFile(linuxReceiptPath, JSON.stringify(linuxReceipt));
+    execFileSync(process.execPath, [desktopTool, artifacts, 'v1.2.3', gitSha, desktopPath]);
+    assert.deepEqual(
+      JSON.parse(await readFile(desktopPath, 'utf8')).platforms['linux-x64'].runtimeValidations,
+      [linuxReceipt.runtimeValidation],
     );
     assert.equal(manifest.docker.schemaVersion, 2);
     assert.equal(manifest.docker.candidateSet.digest, candidate.digest);
@@ -669,3 +712,119 @@ test('packaged executable resolver follows electron-builder output conventions a
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test(
+  'Linux AppImage runner orchestration verifies replacement and fails closed (synthetic processes, not native E2E)',
+  { skip: process.platform !== 'linux' },
+  async () => {
+    const cwd = await mkdtemp(path.join(os.tmpdir(), 'memoflow-appimage-runner-'));
+    const runner = path.join(repoRoot, 'apps/desktop/scripts/run-linux-appimage-update-e2e.mjs');
+    try {
+      const feed = path.join(cwd, 'feed');
+      await mkdir(feed);
+      await writeFile(path.join(feed, 'latest-linux.yml'), 'version: 1.2.3\n');
+      const candidateBody = `#!/usr/bin/env node
+const fs = require('node:fs');
+const path = require('node:path');
+const userData = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
+const status = process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH;
+const receipt = path.join(userData, 'shared/update/install-receipt.json');
+const registry = path.join(userData, 'shared/profiles/registry.json');
+const value = JSON.parse(fs.readFileSync(registry, 'utf8'));
+value.updatedAt = 'incidental';
+if (process.env.RUNNER_TEST_CASE === 'registry') value.activeProfileId = 'changed';
+fs.writeFileSync(registry, JSON.stringify(value));
+if (process.env.RUNNER_TEST_CASE === 'sentinel') fs.appendFileSync(path.join(userData, 'shared/update-e2e-preservation.txt'), 'changed');
+if (process.env.RUNNER_TEST_CASE !== 'receipt') fs.rmSync(receipt);
+fs.writeFileSync(status, JSON.stringify({phase: 'candidate-verified', currentVersion: '1.2.3', expectedVersion: '1.2.3'}));
+setInterval(() => {}, 1000);
+`;
+      await writeFile(path.join(feed, 'candidate.AppImage'), candidateBody);
+      const base = path.join(cwd, 'base.AppImage');
+      await writeFile(
+        base,
+        `#!/usr/bin/env node
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawn } = require('node:child_process');
+const userData = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
+const receipt = path.join(userData, 'shared/update/install-receipt.json');
+fs.mkdirSync(path.dirname(receipt), {recursive: true});
+fs.writeFileSync(receipt, '{}');
+fs.writeFileSync(process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH,
+  JSON.stringify({phase: 'install-requested', currentVersion: '1.2.2', expectedVersion: '1.2.3'}));
+(async () => {
+  if (process.env.RUNNER_TEST_CASE === 'timeout') { setInterval(() => {}, 1000); return; }
+  await new Promise(resolve => setTimeout(resolve, 350));
+  const response = await fetch(process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL + '/candidate.AppImage');
+  fs.writeFileSync(process.argv[1], Buffer.from(await response.arrayBuffer()));
+  fs.chmodSync(process.argv[1], 0o755);
+  const candidate = spawn(process.argv[1], [], {env: process.env, detached: true, stdio: 'ignore'});
+  fs.writeFileSync(path.join(userData, 'candidate.pid'), String(candidate.pid));
+  candidate.unref();
+})();
+`,
+      );
+      for (const scenario of ['success', 'registry', 'sentinel', 'receipt', 'timeout']) {
+        const runtime = path.join(cwd, scenario);
+        const report = path.join(cwd, `${scenario}.json`);
+        const result = await new Promise((resolve) =>
+          execFile(
+            process.execPath,
+            [runner, base, feed, '1.2.3', report, runtime, '2'],
+            { env: { ...process.env, RUNNER_TEST_CASE: scenario }, timeout: 10_000 },
+            (error, stdout, stderr) => resolve({ error, stdout, stderr }),
+          ),
+        );
+        if (scenario === 'success') {
+          assert.equal(result.error, null, result.stderr);
+          const evidence = JSON.parse(await readFile(report, 'utf8'));
+          assert.equal(evidence.platform, 'linux-appimage');
+          assert.equal(evidence.receiptCleared, true);
+          assert.equal(evidence.finalStatus.phase, 'candidate-verified');
+          assert.equal(evidence.installedSha256, evidence.candidate.appImageSha256);
+          assert.equal(
+            evidence.profileRegistrySemanticSha256Before,
+            evidence.profileRegistrySemanticSha256After,
+          );
+          assert.equal(
+            evidence.preservationSentinelSha256Before,
+            evidence.preservationSentinelSha256After,
+          );
+        } else {
+          assert.ok(result.error, scenario);
+          const diagnostics = JSON.parse(
+            await readFile(path.join(runtime, 'failure-diagnostics.json'), 'utf8'),
+          );
+          assert.match(
+            diagnostics.error,
+            new RegExp(
+              {
+                registry: 'semantic identity changed',
+                sentinel: 'sentinel changed',
+                receipt: 'receipt still exists',
+                timeout: 'did not reach candidate-verified',
+              }[scenario],
+              'u',
+            ),
+          );
+          await assert.rejects(readFile(report), { code: 'ENOENT' });
+        }
+        if (scenario !== 'timeout') {
+          const candidatePid = Number(
+            await readFile(path.join(runtime, 'user-data/candidate.pid'), 'utf8'),
+          );
+          // A killed orphan may briefly remain a zombie until the host reaps it.
+          try {
+            const state = await readFile(`/proc/${candidatePid}/stat`, 'utf8');
+            assert.match(state, /\) Z /u, 'detached candidate must not survive runner cleanup');
+          } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+          }
+        }
+      }
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  },
+);

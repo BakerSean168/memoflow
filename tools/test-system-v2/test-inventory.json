@@ -860,10 +860,26 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/desktop-main-runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/desktop-shared-ipc-channels-dual.surface.spec.ts",
       "primarySuite": "boundary-ipc",
       "collectors": [
         "apps/desktop/vitest.ipc.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/desktop-update-shell-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -888,6 +904,22 @@
       "primarySuite": "boundary-ipc",
       "collectors": [
         "apps/desktop/vitest.ipc.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/lifecycle/app-lifecycle.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/lifecycle/desktop-shutdown-coordinator.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -940,7 +972,111 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/modules/auto-update/ipc/auto-update-ipc.surface.spec.ts",
+      "path": "apps/desktop/src/main/modules/autolaunch/auto-launch-manager.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/application/desktop-update-coordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/application/desktop-update-diagnostics.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/application/desktop-update-feed.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/application/update-install-coordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/application/verify-pending-update-install.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/domain/desktop-update-state.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/electron-updater.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/installation-owner.detector.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/linux-package-type.resolver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/infrastructure/update-install-receipt.store.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-e2e-harness.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-failure-matrix.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-ipc.spec.ts",
       "primarySuite": "boundary-ipc",
       "collectors": [
         "apps/desktop/vitest.ipc.config.ts"
@@ -948,7 +1084,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/modules/autolaunch/auto-launch-manager.spec.ts",
+      "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-shell.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1388,6 +1524,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/preload/allowed-channels.desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/renderer/bootstrap/app.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1445,6 +1589,22 @@
     },
     {
       "path": "apps/desktop/src/renderer/intervention-window/intervention-window-entry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/desktop-update-di.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/desktop-update-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3388,6 +3548,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/di/__tests__/desktop-update-service.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/di/desktop-auth-api-key-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3444,6 +3612,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3477,6 +3653,22 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -3589,6 +3781,14 @@
     },
     {
       "path": "packages/app-vue/src/locales/localePresentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4576,6 +4776,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4617,6 +4825,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5548,6 +5764,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/electron/desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/electron/device-notification-preference.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5573,14 +5797,6 @@
     },
     {
       "path": "packages/contracts/src/electron/ipc-channels.ai-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.auto-update-surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -11201,6 +11417,30 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/desktop-update-feed-publication.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/ci-cd-platform/__tests__/desktop-update-metadata.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/ci-cd-platform/__tests__/desktop-update-rollout.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/esm-entrypoint.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11778,7 +12018,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 8
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -11883,7 +12123,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 27
+      "fileCount": 30
     },
     {
       "id": "memoflow:test:governance",
@@ -12016,7 +12256,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 88
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12051,7 +12291,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 264
+      "fileCount": 271
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12805,13 +13045,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1129,
+    "unit": 1154,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
-    "boundary-main": 6,
+    "boundary-main": 8,
     "e2e": 63,
     "perf": 1,
-    "governance": 59
+    "governance": 62
   }
 }

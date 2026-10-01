@@ -16,9 +16,10 @@
 import './runtime-init';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { powerMonitor } from 'electron';
+import { app, powerMonitor } from 'electron';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
+import { DesktopShutdownCoordinator } from './lifecycle/desktop-shutdown-coordinator';
 import { ElectronBootstrapper } from './bootstrap';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
@@ -111,11 +112,30 @@ import { DesktopKnowledgeRepositoryReconciliationService } from './modules/repos
 import { DesktopKnowledgeRepositorySyncService } from './modules/repository/desktop-knowledge-repository-sync.service';
 import { DesktopKnowledgeRepositoryAutoSyncScheduler } from './modules/repository/desktop-knowledge-repository-auto-sync.scheduler';
 import { DesktopMainRuntime } from './desktop-main-runtime';
+import { composeDesktopUpdateShellRuntime } from './modules/desktop-update/runtime/desktop-update-shell';
+import { resolveDesktopUpdateE2EConfig } from './modules/desktop-update/runtime/desktop-update-e2e-harness';
+import { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
+import { registerDesktopUpdateIpc } from './modules/desktop-update/runtime/desktop-update-ipc';
+import { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
+import { FileDesktopUpdateInstallReceiptStore } from './modules/desktop-update/infrastructure/update-install-receipt.store';
+import { verifyPendingDesktopUpdateInstall } from './modules/desktop-update/application/verify-pending-update-install';
 
 configureDesktopShellIdentity();
 
 const logger = createLogger('DesktopMain');
 let mainRuntime: DesktopMainRuntime | null = null;
+const desktopShutdownCoordinator = new DesktopShutdownCoordinator({
+  cleanup: async (reason) => {
+    const runtime = mainRuntime;
+    if (!runtime) return;
+
+    await runtime.dispose({
+      // UpdateInstallCoordinator must retain the updater engine until it calls
+      // quitAndInstall() after all other destructive cleanup has settled.
+      preserveDesktopUpdateForHandoff: reason === 'update-install',
+    });
+  },
+});
 const windowManager = new WindowManager();
 let activeFocusWindowController: FocusWindowController | null = null;
 let activeInterventionWindowController: InterventionWindowController | null = null;
@@ -682,11 +702,24 @@ async function registerBusinessModules(
  * any profile is selected. This is what runs at app startup.
  */
 async function initializeShellRuntime(): Promise<void> {
+  if (mainRuntime) {
+    logger.warn('Shell runtime is already initialized; reusing process-owned runtime');
+    return;
+  }
+
   const startTime = performance.now();
   console.log('[Shell] Initializing shell runtime...');
 
   const sharedResolver = getSharedPathResolver();
   console.log(`[Shell] Root path: ${sharedResolver.rootDir}`);
+
+  // Verify a pending update receipt before any Profile is opened. Update
+  // verification is device-local shell state and must never depend on a
+  // Profile DB or cloud session.
+  const desktopUpdateReceiptStore = new FileDesktopUpdateInstallReceiptStore(
+    sharedResolver.rootDir,
+  );
+  await verifyPendingDesktopUpdateInstall(app.getVersion(), desktopUpdateReceiptStore);
 
   // Initialize ProfileRegistry
   const profileRegistry = new ProfileRegistry(sharedResolver);
@@ -712,9 +745,72 @@ async function initializeShellRuntime(): Promise<void> {
     cloudConnectionService,
   );
 
-  // Assemble the explicit runtime owner
-  mainRuntime = new DesktopMainRuntime(windowManager, profileRuntimeManager);
+  // Desktop Update is a process/Shell capability. Compose it before any
+  // Profile is activated and never pass Profile/Window dependencies into it.
+  const electronProcess = process as typeof process & {
+    readonly mas?: boolean;
+    readonly windowsStore?: boolean;
+  };
+  const desktopUpdateE2EConfig = resolveDesktopUpdateE2EConfig({
+    isPackaged: app.isPackaged,
+    env: process.env,
+  });
+  const desktopUpdateShell = composeDesktopUpdateShellRuntime(
+    {
+      currentVersion: app.getVersion(),
+      isPackaged: app.isPackaged,
+      platform: process.platform,
+      resourcesPath: process.resourcesPath,
+      isMacAppStore: electronProcess.mas === true,
+      isWindowsStore: electronProcess.windowsStore === true,
+      env: process.env,
+    },
+    desktopUpdateE2EConfig
+      ? {
+          feedOverride: desktopUpdateE2EConfig.feed,
+          policy: { mode: 'manual' },
+        }
+      : {},
+  );
+
+  const desktopUpdateInstallCoordinator = new UpdateInstallCoordinator({
+    update: desktopUpdateShell.coordinator,
+    shutdown: desktopShutdownCoordinator,
+    receiptStore: desktopUpdateReceiptStore,
+    // app.exit bypasses before-quit by design. It is used only after the shared
+    // destructive cleanup path has settled and updater handoff failed/stalled.
+    forceExit: () => app.exit(0),
+  });
+
+  const desktopUpdateDiagnostics = new DesktopUpdateDiagnosticsService(
+    desktopUpdateShell.coordinator,
+    desktopUpdateReceiptStore,
+  );
+
+  // Assemble the explicit process runtime owner. Profile lock/switch and
+  // BrowserWindow recreation do not recreate or dispose Desktop Update.
+  mainRuntime = new DesktopMainRuntime(
+    windowManager,
+    profileRuntimeManager,
+    desktopUpdateShell.coordinator,
+    desktopUpdateInstallCoordinator,
+    desktopUpdateReceiptStore,
+    desktopUpdateDiagnostics,
+  );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
+
+  const desktopUpdateSnapshot = await desktopUpdateShell.coordinator.initialize();
+  const desktopUpdateIpc = registerDesktopUpdateIpc({
+    update: desktopUpdateShell.coordinator,
+    install: desktopUpdateInstallCoordinator,
+    diagnostics: desktopUpdateDiagnostics,
+  });
+  mainRuntime.setDesktopUpdateIpcDisposer(() => desktopUpdateIpc.destroy());
+  logger.info('Desktop Update shell runtime initialized', {
+    owner: desktopUpdateShell.installation.owner,
+    ownershipReason: desktopUpdateShell.installation.reason,
+    state: desktopUpdateSnapshot.state.type,
+  });
   registerProfileAccessIpc(
     profileRegistry,
     profileRuntimeManager,
@@ -809,4 +905,9 @@ async function initializeShellRuntime(): Promise<void> {
 // Lifecycle
 // ═══════════════════════════════════════════════════════════════════════
 
-registerAppLifecycleHandlers(initializeShellRuntime, () => mainRuntime, windowManager);
+registerAppLifecycleHandlers(
+  initializeShellRuntime,
+  () => mainRuntime,
+  windowManager,
+  desktopShutdownCoordinator,
+);
