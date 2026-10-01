@@ -37,21 +37,33 @@ describe('planner projection presentation', () => {
         labelI18nKey: 'schedule.source.schedule',
         sourceClass: 'planner-source-schedule',
         dotClass: 'bg-primary',
+        badgeClass: 'bg-primary/10 text-primary',
+        calendarColor: 'var(--primary)',
+        calendarForeground: 'var(--primary-foreground)',
       }),
       task: expect.objectContaining({
         labelI18nKey: 'schedule.source.task',
         sourceClass: 'planner-source-task',
         dotClass: 'bg-info',
+        badgeClass: 'bg-info/15 text-info',
+        calendarColor: 'var(--info)',
+        calendarForeground: 'var(--info-foreground)',
       }),
       goal: expect.objectContaining({
         labelI18nKey: 'schedule.source.goal',
         sourceClass: 'planner-source-goal',
         dotClass: 'bg-warning',
+        badgeClass: 'bg-warning/15 text-warning',
+        calendarColor: 'var(--warning)',
+        calendarForeground: 'var(--warning-foreground)',
       }),
       routine: expect.objectContaining({
         labelI18nKey: 'schedule.source.routine',
         sourceClass: 'planner-source-routine',
         dotClass: 'bg-success',
+        badgeClass: 'bg-success/15 text-success',
+        calendarColor: 'var(--success)',
+        calendarForeground: 'var(--success-foreground)',
       }),
     });
 

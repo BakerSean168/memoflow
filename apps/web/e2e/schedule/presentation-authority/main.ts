@@ -128,6 +128,7 @@ const Root = defineComponent({
                   conflicts: [],
                   ownerCommands: ownerCommands as never,
                   view,
+                  locale,
                   initialDate: Date.parse('2026-10-01T12:00:00Z'),
                 }),
               ])

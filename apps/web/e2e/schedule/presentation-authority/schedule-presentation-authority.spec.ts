@@ -14,24 +14,28 @@ const sourceIdentity = {
     sourceClass: 'planner-source-schedule',
     dotClass: 'bg-primary',
     badgeClass: 'bg-primary/10',
+    colorToken: 'primary',
   },
   task: {
     label: { 'en-US': 'Task', 'zh-CN': '任务' },
     sourceClass: 'planner-source-task',
     dotClass: 'bg-info',
     badgeClass: 'bg-info/15',
+    colorToken: 'info',
   },
   goal: {
     label: { 'en-US': 'Goal', 'zh-CN': '目标' },
     sourceClass: 'planner-source-goal',
     dotClass: 'bg-warning',
     badgeClass: 'bg-warning/15',
+    colorToken: 'warning',
   },
   routine: {
     label: { 'en-US': 'Routine', 'zh-CN': '例程' },
     sourceClass: 'planner-source-routine',
     dotClass: 'bg-success',
     badgeClass: 'bg-success/15',
+    colorToken: 'success',
   },
 } as const;
 
@@ -49,6 +53,11 @@ function query(params: Record<string, string>) {
 }
 
 async function capture(page: Page, name: string) {
+  await expect(page).toHaveScreenshot(name + '.png', {
+    fullPage: true,
+    animations: 'disabled',
+    maxDiffPixelRatio: 0.002,
+  });
   await page.screenshot({
     path: path.join(captureDir, name + '.png'),
     fullPage: true,
@@ -110,6 +119,16 @@ for (const scenario of [
           await expect(event).toBeVisible();
           await expect(event).toHaveClass(
             new RegExp('\\b' + sourceIdentity[source].sourceClass + '\\b'),
+          );
+          await expect(event).toHaveCSS(
+            '--planner-event-hsl',
+            await event.evaluate(
+              (element, token) =>
+                getComputedStyle(element)
+                  .getPropertyValue('--' + token)
+                  .trim(),
+              sourceIdentity[source].colorToken,
+            ),
           );
         }
         await capture(

@@ -8,6 +8,8 @@ export interface PlannerProjectionSourcePresentation {
   readonly sourceClass: string;
   readonly dotClass: string;
   readonly badgeClass: string;
+  readonly calendarColor: string;
+  readonly calendarForeground: string;
 }
 
 /**
@@ -26,24 +28,32 @@ export const plannerProjectionSourcePresentation: Record<
     sourceClass: 'planner-source-schedule',
     dotClass: 'bg-primary',
     badgeClass: 'bg-primary/10 text-primary',
+    calendarColor: 'var(--primary)',
+    calendarForeground: 'var(--primary-foreground)',
   },
   task: {
     labelI18nKey: 'schedule.source.task',
     sourceClass: 'planner-source-task',
     dotClass: 'bg-info',
     badgeClass: 'bg-info/15 text-info',
+    calendarColor: 'var(--info)',
+    calendarForeground: 'var(--info-foreground)',
   },
   goal: {
     labelI18nKey: 'schedule.source.goal',
     sourceClass: 'planner-source-goal',
     dotClass: 'bg-warning',
     badgeClass: 'bg-warning/15 text-warning',
+    calendarColor: 'var(--warning)',
+    calendarForeground: 'var(--warning-foreground)',
   },
   routine: {
     labelI18nKey: 'schedule.source.routine',
     sourceClass: 'planner-source-routine',
     dotClass: 'bg-success',
     badgeClass: 'bg-success/15 text-success',
+    calendarColor: 'var(--success)',
+    calendarForeground: 'var(--success-foreground)',
   },
 };
 
