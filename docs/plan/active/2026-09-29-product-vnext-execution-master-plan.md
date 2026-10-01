@@ -1258,6 +1258,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 4. narrow Sheet recipe。
 5. Collection/Workspace/Dialog state families。
 
+**Execution (2026-10-01): Accepted / frozen after reconciliation repair.** The canonical overlay grammar now has real owner adoption for both `ProductPopoverSurface` recipes: Goal KR weight uses `compact-menu`, while Routine elapsed/active/natural-break numeric controls use `property` instead of repeating raw `PopoverContent` geometry. `ProductDialogShell` retains explicit form/inspect/config/workspace recipes with owner overrides; Knowledge narrow panels keep the shared `ProductSheetSurface`; and Knowledge/Notification/Task AI continue to prove workspace/collection/dialog `ProductSurfaceState` families. The Routine repair is presentation-only and preserves ROUTINE-5103 model/save ownership. Fresh acceptance passed 7 App-Vue files / 55 tests, uncached App-Vue typecheck, 1,335-file inventory, full uncached governance, targeted ESLint/Prettier and diff checks. Evidence: [UI-2103 overlay/state recipes](../archive/2026-10-01-pvc-ui-2103-overlay-state-recipes.md).
+
 ---
 
 ## PVC-UI-2104 — Semantic elevation/status/source tones

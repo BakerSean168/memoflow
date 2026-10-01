@@ -10,7 +10,7 @@
         {{ t('routine.form.minutesValue', { value: durationMinutes }) }}
       </ProductPropertyChip>
     </PopoverTrigger>
-    <PopoverContent align="start" class="w-56 space-y-2 p-3">
+    <ProductPopoverSurface recipe="property">
       <p class="text-xs font-medium text-muted-foreground">
         {{ t('routine.form.durationMinutes') }}
       </p>
@@ -33,7 +33,7 @@
           {{ t('routine.form.minutes') }}
         </span>
       </div>
-    </PopoverContent>
+    </ProductPopoverSurface>
   </Popover>
 
   <DropdownMenu>
@@ -77,10 +77,9 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
   Popover,
-  PopoverContent,
   PopoverTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import { ProductPropertyChip } from '../../../shared/components';
+import { ProductPopoverSurface, ProductPropertyChip } from '../../../shared/components';
 import type { RoutineElapsedAnchor } from './routine-editor.types';
 
 defineProps<{ disabled?: boolean }>();
