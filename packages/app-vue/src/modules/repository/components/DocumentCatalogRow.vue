@@ -20,6 +20,12 @@
         <div v-if="$slots.meta" class="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground">
           <slot name="meta" />
         </div>
+        <div
+          v-if="$slots.description"
+          class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground"
+        >
+          <slot name="description" />
+        </div>
       </div>
       <div v-if="$slots.trailing" class="shrink-0">
         <slot name="trailing" />

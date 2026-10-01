@@ -14,185 +14,177 @@
 
     <div
       v-if="!isBound"
-      class="grid min-h-0 flex-1 place-items-center overflow-auto px-6 py-10"
+      class="grid min-h-0 flex-1 place-items-center overflow-auto"
       data-testid="local-vault-empty"
     >
-      <div class="flex max-w-md flex-col items-center text-center">
-        <div class="grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]">
-          <FolderOpen class="h-7 w-7 text-muted-foreground" />
-        </div>
-        <h1 class="mt-5 text-xl font-semibold">{{ t('repository.localVault.selectTitle') }}</h1>
-        <p class="mt-2 text-sm leading-6 text-muted-foreground">
-          {{ t('repository.localVault.selectDescription') }}
-        </p>
-        <Button
-          class="mt-6"
-          :disabled="loading"
-          data-testid="local-vault-select"
-          @click="selectVault"
-        >
-          <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-          <FolderOpen v-else class="mr-2 h-4 w-4" />
-          {{ t('repository.localVault.selectAction') }}
-        </Button>
-      </div>
+      <DocumentWorkspaceState
+        kind="empty"
+        :title="t('repository.localVault.selectTitle')"
+        :description="t('repository.localVault.selectDescription')"
+      >
+        <template #icon>
+          <div
+            class="grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]"
+          >
+            <FolderOpen class="h-7 w-7 text-muted-foreground" />
+          </div>
+        </template>
+        <template #actions>
+          <Button :disabled="loading" data-testid="local-vault-select" @click="selectVault">
+            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+            <FolderOpen v-else class="mr-2 h-4 w-4" />
+            {{ t('repository.localVault.selectAction') }}
+          </Button>
+        </template>
+      </DocumentWorkspaceState>
     </div>
 
     <template v-else>
-      <header class="flex min-h-11 min-w-0 flex-wrap items-center gap-3 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-2 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4">
-        <div class="min-w-0 flex-1">
-          <div class="flex min-w-0 items-center gap-2">
-            <HardDrive class="h-3.5 w-3.5 shrink-0 text-[hsl(var(--foreground-subtle))]" />
-            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em]">{{ binding?.displayName }}</h1>
-            <Badge variant="secondary" class="shrink-0">{{ notes.length }}</Badge>
-          </div>
-          <p class="mt-0.5 truncate text-[11px] text-[hsl(var(--foreground-subtle))]" :title="binding?.rootPath">
-            {{ binding?.rootPath }}
-          </p>
-        </div>
-        <div class="flex shrink-0 items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-            :aria-label="t('repository.localVault.rescan')"
-            :title="t('repository.localVault.rescan')"
-            :disabled="loading"
-            data-testid="local-vault-rescan"
-            @click="scan"
+      <DocumentWorkspaceToolbar data-testid="local-vault-document-toolbar">
+        <template v-if="activeNote">
+          <h1 class="min-w-0 max-w-[46%] truncate text-[13px] font-semibold tracking-[-0.01em]">
+            {{ activeNote.title }}
+          </h1>
+          <span class="min-w-0 truncate text-[11px] text-[hsl(var(--foreground-subtle))]">
+            {{ activeNote.relativePath }}
+          </span>
+          <Badge
+            v-for="tag in activeNote.tags.slice(0, 3)"
+            :key="tag"
+            variant="outline"
+            class="hidden shrink-0 @3xl/panel:inline-flex"
           >
-            <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
-          </Button>
+            {{ tag }}
+          </Badge>
+        </template>
+        <span v-else class="truncate text-sm font-medium text-muted-foreground">
+          {{ t('repository.localVault.selectNote') }}
+        </span>
+
+        <template #actions>
           <Button
+            v-if="activeNote"
             variant="ghost"
-            size="icon"
-            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-            :aria-label="t('repository.localVault.openRoot')"
-            :title="t('repository.localVault.openRoot')"
-            @click="openInObsidian()"
+            size="sm"
+            class="h-7 shrink-0 px-2 text-xs"
+            data-testid="local-vault-open-note-obsidian"
+            @click="openInObsidian(activeNote.relativePath)"
           >
-            <ExternalLink class="h-4 w-4" />
+            <ExternalLink class="mr-1.5 h-3.5 w-3.5" />
+            {{ t('repository.localVault.openNote') }}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-            :aria-label="t('repository.localVault.changeVault')"
-            :title="t('repository.localVault.changeVault')"
-            @click="selectVault"
-          >
-            <FolderSync class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-7 w-7 rounded-md text-destructive/75 hover:bg-destructive/10 hover:text-destructive"
-            :aria-label="t('repository.localVault.detach')"
-            :title="t('repository.localVault.detach')"
-            data-testid="local-vault-detach"
-            @click="confirmDetach"
-          >
-            <Unplug class="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
+        </template>
+      </DocumentWorkspaceToolbar>
 
       <div
         class="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(12rem,38%)_minmax(0,1fr)] @3xl/panel:grid-cols-[minmax(15rem,21rem)_minmax(0,1fr)] @3xl/panel:grid-rows-1"
       >
         <aside
           class="flex min-h-0 flex-col border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.55)] @3xl/panel:border-b-0 @3xl/panel:border-r"
+          data-testid="local-vault-catalog"
         >
-          <div class="border-b border-[hsl(var(--border-subtle))] px-2.5 py-2">
-            <div class="relative w-full max-w-[15rem]">
-              <Search
-                class="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                v-model="searchQuery"
-                class="h-8 rounded-lg border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] pl-8 pr-8 text-[12px] shadow-none"
-                :placeholder="t('repository.localVault.searchPlaceholder')"
-                data-testid="local-vault-search"
-                @keyup.enter="search"
-                @keyup.esc="clearSearch"
-              />
-              <button
-                v-if="searchQuery"
-                type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                :aria-label="t('common.clear')"
-                @click="clearSearch"
-              >
-                <X class="h-3.5 w-3.5" />
-              </button>
-            </div>
+          <div class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5">
+            <DocumentSourceStatus
+              :title="binding?.displayName ?? ''"
+              :subtitle="binding?.rootPath ?? ''"
+              :count-label="String(notes.length)"
+            >
+              <template #icon>
+                <HardDrive class="h-4 w-4" />
+              </template>
+              <template #actions>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.rescan')"
+                  :title="t('repository.localVault.rescan')"
+                  :disabled="loading"
+                  data-testid="local-vault-rescan"
+                  @click="scan"
+                >
+                  <RefreshCw class="h-3.5 w-3.5" :class="{ 'animate-spin': loading }" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.openRoot')"
+                  :title="t('repository.localVault.openRoot')"
+                  @click="openInObsidian()"
+                >
+                  <ExternalLink class="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.changeVault')"
+                  :title="t('repository.localVault.changeVault')"
+                  @click="selectVault"
+                >
+                  <FolderSync class="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7 text-destructive/75 hover:bg-destructive/10 hover:text-destructive"
+                  :aria-label="t('repository.localVault.detach')"
+                  :title="t('repository.localVault.detach')"
+                  data-testid="local-vault-detach"
+                  @click="confirmDetach"
+                >
+                  <Unplug class="h-3.5 w-3.5" />
+                </Button>
+              </template>
+            </DocumentSourceStatus>
           </div>
 
-          <div class="min-h-0 flex-1 overflow-auto">
-            <button
-              v-for="note in displayedNotes"
-              :key="note.relativePath"
-              type="button"
-              class="mx-1.5 my-0.5 block w-[calc(100%-0.75rem)] rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[hsl(var(--hover))]"
-              :class="{
-                'bg-[hsl(var(--selected)/0.82)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]':
-                  activeNote?.relativePath === note.relativePath,
-              }"
-              :data-testid="`local-vault-note-${note.relativePath}`"
-              @click="openNote(note)"
-              @dblclick="openInObsidian(note.relativePath)"
-            >
-              <span class="block truncate text-sm font-medium">{{ note.title }}</span>
-              <span class="mt-1 block truncate text-xs text-muted-foreground">{{
-                note.relativePath
-              }}</span>
-              <span
-                v-if="resultExcerpt(note.relativePath)"
-                class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground"
+          <div class="px-2.5 pb-2 pt-2.5">
+            <DocumentCatalogSearch
+              v-model="searchQuery"
+              :placeholder="t('repository.localVault.searchPlaceholder')"
+              :clear-label="t('common.clear')"
+              test-id="local-vault-search"
+              @submit="search"
+              @clear="clearSearch"
+            />
+          </div>
+
+          <div class="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
+            <div v-if="displayedNotes.length" class="space-y-0.5 py-0.5">
+              <DocumentCatalogRow
+                v-for="note in displayedNotes"
+                :key="note.relativePath"
+                :selected="activeNote?.relativePath === note.relativePath"
+                :data-testid="`local-vault-note-${note.relativePath}`"
+                @activate="openNote(note)"
+                @dblclick="openInObsidian(note.relativePath)"
               >
-                {{ resultExcerpt(note.relativePath) }}
-              </span>
-            </button>
-            <div
-              v-if="!loading && displayedNotes.length === 0"
-              class="grid h-32 place-items-center px-4 text-center text-sm text-muted-foreground"
-            >
-              {{
+                {{ note.title }}
+                <template #meta>{{ note.relativePath }}</template>
+                <template v-if="resultExcerpt(note.relativePath)" #description>
+                  {{ resultExcerpt(note.relativePath) }}
+                </template>
+              </DocumentCatalogRow>
+            </div>
+
+            <DocumentWorkspaceState v-if="loading && displayedNotes.length === 0" kind="loading" />
+            <DocumentWorkspaceState
+              v-else-if="displayedNotes.length === 0"
+              kind="empty"
+              :title="
                 searchActive
                   ? t('repository.localVault.noSearchResults')
                   : t('repository.localVault.noNotes')
-              }}
-            </div>
+              "
+            />
           </div>
         </aside>
 
         <main class="min-h-0 overflow-hidden">
-          <div v-if="activeNote" class="flex h-full min-h-0 flex-col">
-            <div class="flex min-h-11 min-w-0 items-start gap-3 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-4 py-2.5">
-              <FileText class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div class="min-w-0 flex-1">
-                <h2 class="truncate text-sm font-semibold">{{ activeNote.title }}</h2>
-                <p class="mt-1 truncate text-xs text-muted-foreground">
-                  {{ activeNote.relativePath }}
-                </p>
-                <div v-if="activeNote.tags.length" class="mt-2 flex flex-wrap gap-1">
-                  <Badge v-for="tag in activeNote.tags" :key="tag" variant="outline">{{
-                    tag
-                  }}</Badge>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                class="h-8 shrink-0"
-                data-testid="local-vault-open-note-obsidian"
-                @click="openInObsidian(activeNote.relativePath)"
-              >
-                <ExternalLink class="mr-1.5 h-4 w-4" />
-                {{ t('repository.localVault.openNote') }}
-              </Button>
-            </div>
-            <div class="min-h-0 flex-1 overflow-y-auto" data-scroll-host="local-vault-preview">
+          <div v-if="activeNote" class="h-full min-h-0">
+            <div class="h-full min-h-0 overflow-y-auto" data-scroll-host="local-vault-preview">
               <KnowledgeMarkdownPreview
                 :markdown="activeNote.contentMarkdown"
                 :title="activeNote.title"
@@ -201,15 +193,17 @@
               />
             </div>
           </div>
-          <div v-else class="grid h-full min-h-48 place-items-center px-6 text-center">
-            <div>
-              <BookOpen class="mx-auto h-8 w-8 text-muted-foreground" />
-              <p class="mt-3 text-sm font-medium">{{ t('repository.localVault.selectNote') }}</p>
-              <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('repository.localVault.selectNoteDescription') }}
-              </p>
-            </div>
-          </div>
+          <DocumentWorkspaceState
+            v-else
+            class="h-full"
+            kind="empty"
+            :title="t('repository.localVault.selectNote')"
+            :description="t('repository.localVault.selectNoteDescription')"
+          >
+            <template #icon>
+              <BookOpen class="h-8 w-8 text-muted-foreground" />
+            </template>
+          </DocumentWorkspaceState>
         </main>
       </div>
     </template>
@@ -223,17 +217,19 @@ import { useRoute } from 'vue-router';
 import {
   BookOpen,
   ExternalLink,
-  FileText,
   FolderOpen,
   FolderSync,
   HardDrive,
   Loader2,
   RefreshCw,
-  Search,
   Unplug,
-  X,
 } from '@lucide/vue';
-import { Badge, Button, Input, useConfirm } from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, useConfirm } from '@memoflow/ui-vue-shadcn';
+import DocumentCatalogRow from '../components/DocumentCatalogRow.vue';
+import DocumentCatalogSearch from '../components/DocumentCatalogSearch.vue';
+import DocumentSourceStatus from '../components/DocumentSourceStatus.vue';
+import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';
+import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue';
 import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
 import { useLocalVault } from '../composables/useLocalVault';
 
@@ -322,5 +318,4 @@ async function confirmDetach(): Promise<void> {
   });
   if (confirmed) await detachVault();
 }
-
 </script>

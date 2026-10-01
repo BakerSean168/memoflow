@@ -11,6 +11,7 @@ import type {
 } from '@memoflow/contracts/repository';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
+import { providePanelWidth } from '../../../layouts/shell/usePanelWidth';
 import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeProjectionWorkspaceView from './KnowledgeProjectionWorkspaceView.vue';
 
@@ -328,8 +329,19 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
   } as unknown as IRepositoryService;
 }
 
-function mountWorkspace(service: IRepositoryService) {
-  return mount(KnowledgeProjectionWorkspaceView, {
+function mountWorkspace(service: IRepositoryService, options: { narrow?: boolean } = {}) {
+  const component = options.narrow
+    ? defineComponent({
+        name: 'NarrowKnowledgeProjectionWorkspaceHost',
+        setup() {
+          const { width } = providePanelWidth();
+          width.value = 600;
+          return () => h(KnowledgeProjectionWorkspaceView);
+        },
+      })
+    : KnowledgeProjectionWorkspaceView;
+
+  return mount(component, {
     global: {
       plugins: [i18n],
       provide: {
@@ -694,6 +706,26 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('keeps narrow catalog and context interactions in Sheets while preserving selection behavior', async () => {
+    const wrapper = mountWorkspace(createService(), { narrow: true });
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="knowledge-note-catalog"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="knowledge-projection-toggle-catalog"]').trigger('click');
+    expect(wrapper.get('[data-testid="knowledge-note-catalog"]')).toBeDefined();
+
+    await wrapper.get('[data-testid="knowledge-tree-note-projection-1"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="knowledge-note-catalog"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="knowledge-projection-context-toggle"]').trigger('click');
+    expect(wrapper.get('[data-testid="knowledge-context-stub"]')).toBeDefined();
+
+    await wrapper.get('[data-testid="knowledge-context-close-stub"]').trigger('click');
+    expect(wrapper.find('[data-testid="knowledge-context-stub"]').exists()).toBe(false);
   });
 
   it('keeps content primary and opens links/outline in a contextual side panel', async () => {

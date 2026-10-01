@@ -1137,6 +1137,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** KNOW-6101.
 
+**Execution (2026-10-01): Implemented / validated.** Web `KnowledgeProjectionWorkspaceView` and Desktop `LocalVaultWorkspaceView` now share the document toolbar/source/search/row/state presentation grammar without merging host capabilities. Web narrow Catalog/Context Sheet behavior is regression-tested; Desktop Vault/Obsidian operations remain host-only and Web remains GitHub projection-only. Focused Knowledge/UI 5 files / 27 tests PASS; App-Vue typecheck, targeted lint, inventory 1291, governance, and diff gates PASS. See [implementation report](../archive/2026-10-01-pvc-know-6102-web-desktop-workspace-composition.md).
+
 ---
 
 ## PVC-NOTIF-7101 — Notification collection + semantic tone convergence
