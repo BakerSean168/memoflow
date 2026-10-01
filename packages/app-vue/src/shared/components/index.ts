@@ -21,3 +21,5 @@ export { default as ProductTimeframePicker } from './ProductTimeframePicker.vue'
 export { default as ResponsiveSegmentedFilter } from './ResponsiveSegmentedFilter.vue';
 export { default as ResponsivePrimaryAction } from './ResponsivePrimaryAction.vue';
 export type { ResponsiveSegmentedFilterOption } from './responsive-segmented-filter.types';
+export { default as ProductTimePicker } from './ProductTimePicker.vue';
+export { default as ProductTimeZoneSelector } from './ProductTimeZoneSelector.vue';
