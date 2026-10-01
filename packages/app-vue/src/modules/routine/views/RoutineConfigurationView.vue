@@ -169,10 +169,15 @@
 
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button size="sm" class="h-8" data-testid="routine-create-button">
-                <Plus class="mr-1.5 h-4 w-4" />
-                {{ t('routine.create') }}
-                <ChevronDown class="ml-1.5 h-3.5 w-3.5 opacity-70" />
+              <Button
+                size="sm"
+                class="h-8 shrink-0 px-2 shadow-sm shadow-primary/15 @2xl/panel:px-3"
+                :aria-label="t('routine.create')"
+                data-testid="routine-create-button"
+              >
+                <Plus class="h-4 w-4 @2xl/panel:mr-1.5" />
+                <span class="hidden @2xl/panel:inline">{{ t('routine.create') }}</span>
+                <ChevronDown class="ml-1 hidden h-3.5 w-3.5 opacity-70 @2xl/panel:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-72" data-testid="routine-create-menu">
@@ -524,10 +529,8 @@ const selectedProfile = computed(
   () => snapshot.value.profiles.find((profile) => profile.id === selectedProfileId.value) ?? null,
 );
 
-const selectedProfileLabel = computed(() =>
-  selectedProfile.value
-    ? t('routine.profile.filterValue', { name: selectedProfile.value.name })
-    : t('routine.profile.filterAll'),
+const selectedProfileLabel = computed(
+  () => selectedProfile.value?.name ?? t('routine.profile.all'),
 );
 
 const visibleDefinitions = computed(() => {
