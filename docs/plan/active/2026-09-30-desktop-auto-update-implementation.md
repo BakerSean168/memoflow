@@ -62,7 +62,7 @@ Linux AppImage
 
 ## User scope decision — 2026-10-01
 
-macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503, and DU-1504 are DEFERRED. macOS is not a gate for Windows feed/rollout work. Phase 6 is complete; remaining macOS work is deferred, with optional DU-1703/DU-1704 work as already planned. DU-1402 and DU-1403 remain DONE only with passing cleanup validation. There is no live pointer cutover/CDN deployment in this scope.
+macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503, and DU-1504 are DEFERRED. macOS is not a gate for Windows feed/rollout work. Phase 6 is complete; remaining macOS work is deferred. DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested. All non-mac implementation/runbook work is closed. DU-1402 and DU-1403 remain DONE only with passing cleanup validation. There is no live pointer cutover/CDN deployment in this scope.
 
 ## Cleanup validation — 2026-10-01
 
@@ -105,7 +105,8 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1702` — **DONE**: the executable non-macOS failure matrix locks all 14 required scenarios; focused coordinator retry/race and Settings action tests pass. Validation evidence is recorded under DU-1702 below.
 - `DU-1601` — **DONE**: Linux release evidence now preserves both installed-deb and actual AppImage runtime proofs, direct-AppImage feed eligibility requires the AppImage proof, release CI smokes the real AppImage separately from the installed Debian package, and the reusable installed-update gate now runs both Windows NSIS and Linux AppImage N→N+1 lanes. A native GCP Dev proof completed `0.14.0 → 0.14.1` with candidate byte replacement, relaunch/version verification, receipt clearance, and unchanged Profile/sentinel hashes.
 - `DU-1602` — **DONE**: packaged Linux reads only the bounded electron-builder resources/package-type marker for deb/rpm, preserving AppImage/Snap precedence. Settings explains external package-manager upgrades and hides install/download retry actions; release CI requires the installed Debian marker before runtime smoke. Focused resolver/Shell/coordinator, Settings/locales, workflow contracts, both typechecks, and targeted checks pass. Native RPM installation is not claimed.
-- **Phase 6 complete**: remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned.
+- `DU-1704` — **DONE**: operator runbook closes non-mac operations scope; current GitHub full eligible exposure and future gated feed/pointer controls are explicitly separated.
+- **Phase 6 complete**: remaining macOS DU-1501..1504 are deferred; DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested.
 
 ## 2. Non-goals
 
@@ -939,7 +940,7 @@ Validation evidence:
 - Native GCP Dev AppImage packaging produced base `0.14.0` SHA-256 `44724264588408f74f8e51af648765d4cdccdf6e641f39b3a06c00334dfe5684`, candidate `0.14.1` SHA-256 `26110a27ac3c2968cecc946a351f8ab406230c737239b2f33b1097826e987370`, and candidate metadata SHA-256 `19b8ae9eec9fcb2fd62ca170e76761c5e145ce1aae4ef217e85fd8e4994db382`.
 - Native GCP Dev AppImage N→N+1 proof — **PASS**: `checking (0.14.0) → install-requested → candidate-verified (0.14.1)`; installed bytes equal the candidate SHA-256, receipt cleared, Profile semantic hash stayed `4106a41c1ecab8c6140bdaba07f59ced8c758583dd034194f7cf3f7451002719`, and preservation sentinel hash stayed `bcdc7986817317d4ad8a55bc283892a9beeef5f089261a70b50586e8832fafbb`.
 
-Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned.
+Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested.
 DU-1501..1504 remain **DEFERRED**.
 
 ---
@@ -987,8 +988,8 @@ Validation:
 - Prettier passes for changed implementation/tests/workflow/docs/inventory; locale files retain their pre-existing formatting (HEAD also fails Prettier).
 - Governance stops at the known unchanged `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` window.electronAPI finding.
 
-Phase 6 is complete. Remaining macOS DU-1501..1504 stay DEFERRED; optional
-DU-1703/DU-1704 remain as already planned.
+Phase 6 is complete. Remaining macOS DU-1501..1504 stay DEFERRED; DU-1704 is DONE;
+DU-1703 remains OPTIONAL and is not pursued unless separately requested.
 
 ---
 
@@ -1023,7 +1024,7 @@ Validation (from repository root; `NX_DAEMON=false` for Nx):
 - `git diff --check` and `pnpm nx run memoflow:docs-check` — pass.
 - `pnpm nx run memoflow:governance-check` — stops at the one unchanged HEAD platform-leakage finding: `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` contains a negative `window.electronAPI` assertion. Changed lines introduce no new violation; intentionally left outside DU-1701.
 
-DU-1702 and DU-1601 are now DONE (see evidence below / Phase 6). Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned. DU-1501..1504 remain **DEFERRED**.
+DU-1702 and DU-1601 are now DONE (see evidence below / Phase 6). Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested. DU-1501..1504 remain **DEFERRED**.
 
 最小 diagnostics：
 
@@ -1083,7 +1084,7 @@ Validation evidence (focused runs only):
   generation/check (**1268 files; 1094 unit**), `git diff --check`, and
   `pnpm nx run memoflow:docs-check` passed.
 
-DU-1601 is now DONE (see Phase 6 evidence). Phase 6 is complete. Remaining macOS work is deferred; optional DU-1703/DU-1704 remain as already planned. DU-1501..1504 remain deferred.
+DU-1601 is now DONE (see Phase 6 evidence). Phase 6 is complete. Remaining macOS work is deferred; DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested. DU-1501..1504 remain deferred.
 
 Covered behavior:
 
@@ -1107,6 +1108,8 @@ Covered behavior:
 ---
 
 ## DU-1703 — Evaluate electron-updater v27+ migration
+
+**Status: OPTIONAL / not pursued unless separately requested.** No updater upgrade is included in DU-1704.
 
 **Goal:** 在版本稳定且仓库 tech-stack gate 允许时评估：
 
@@ -1133,27 +1136,16 @@ Domain / UI contract 不应因此改变。
 
 ## DU-1704 — Write release/update operator runbook
 
-Runbook 至少覆盖：
+**Status: DONE (2026-10-01).** Added the operator-oriented [Desktop Auto-Update Release Runbook](../../runbooks/desktop-auto-update-release.md), grounded in current release workflows, materializers, metadata/remote asset validators, ADR-112, and delivery-platform operations.
 
-1. 创建 candidate；
-2. build/sign/notarize；
-3. package smoke；
-4. update E2E；
-5. publish feed；
-6. rollout 10%；
-7. diagnostics observation；
-8. raise rollout；
-9. pause；
-10. hotfix；
-11. bad release 处理；
-12. feed rollback pointer；
-13. 禁止同版本覆盖。
+The runbook covers exact-SHA release/candidate/Draft publication, Windows + Linux installed-update gates, evidence identities, bounded diagnostics, retry/containment/hotfix rules, and immutable version/tag policy. It explicitly separates current GitHub Published/latest exposure from evidence-only p10 controls and future gated live feed/pointer rollout/rollback. macOS DU-1501..1504 remain DEFERRED; DU-1703 remains OPTIONAL. All non-mac implementation/runbook work is closed; no provider cutover, updater upgrade, runtime or workflow changes are included.
 
-完成后放：
-
-```text
-docs/runbooks/desktop-auto-update-release.md
-```
+Validation: repository Prettier, `node tools/docs/check-docs-config.mjs`, and
+`git diff --check` pass. The full `memoflow:governance-check` ran with a temporary
+lockfile-identical canonical dependency tree and completed all prerequisite checks;
+it stopped only at the known unchanged platform-leakage finding:
+`packages/app-vue/src/di/desktop-update-service.surface.spec.ts: contains window.electronAPI`.
+All preceding governance checks passed, and DU-1704 introduced no new finding.
 
 ---
 
