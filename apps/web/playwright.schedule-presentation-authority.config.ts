@@ -12,6 +12,8 @@ export default defineConfig({
     browserName: 'chromium',
     reducedMotion: 'reduce',
   },
+  snapshotPathTemplate:
+    '../../reports/test-system-v2/schedule-presentation-authority/baselines/{testName}/{arg}{ext}',
   outputDir: './test-results/schedule-presentation-authority',
   reporter: [['list']],
   webServer: {
