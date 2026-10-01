@@ -170,10 +170,11 @@
           <div
             v-if="recentKnowledgeNotesEmailVerificationRequired"
             class="space-y-1 rounded-lg px-3 py-2 text-sm"
+            :class="semanticToneStatusClass('warning')"
             data-testid="ai-sidebar-email-verification"
             role="status"
           >
-            <p class="font-medium text-amber-950 dark:text-amber-100">
+            <p class="font-medium">
               {{ t(recentKnowledgeNotesErrorMessageKey || 'errors.EMAIL_VERIFICATION_REQUIRED') }}
             </p>
             <p class="text-xs text-muted-foreground">
@@ -195,6 +196,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { semanticToneStatusClass } from '../../../shared/constants/semantic-tone';
 import {
   Bot,
   ChevronDown,

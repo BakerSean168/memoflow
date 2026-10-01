@@ -726,7 +726,7 @@ Normalize:
 
 ### PVC-UI-2104 — Semantic elevation/status tokens
 
-Remove repeated raw palette/elevation recipes from feature surfaces where semantic tokens cover the intent.
+Accepted: reuse the existing semantic tone/elevation vocabulary where product meaning is stable; keep specialized interaction effects local and avoid palette-wide churn. AI verification/composer gaps are closed, while Notification, Schedule, Settings and Routine retain their already-semantic production implementations.
 
 ### PVC-UI-2105 — Visual regression harness
 

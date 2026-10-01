@@ -38,7 +38,8 @@
           <span
             v-for="attachment in attachments"
             :key="attachment.id"
-            class="group inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-1.5 pr-1 text-[11px] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
+            class="group inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-1.5 pr-1 text-[11px] text-foreground"
+            :class="semanticElevationClass('inset')"
             data-testid="ai-composer-attachment-chip"
           >
             <img
@@ -64,7 +65,8 @@
           <span
             v-for="entity in contextEntities"
             :key="`${entity.entityType}:${entity.id}`"
-            class="inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-2 pr-1 text-[11px] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
+            class="inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-2 pr-1 text-[11px] text-foreground"
+            :class="semanticElevationClass('inset')"
             data-testid="ai-composer-entity-chip"
             :title="
               entity.origin === 'surface'

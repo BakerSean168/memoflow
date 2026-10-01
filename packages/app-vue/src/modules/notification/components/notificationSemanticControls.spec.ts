@@ -85,6 +85,12 @@ describe('notification semantic controls', () => {
     expect(resolveNotificationSemanticTone('schedule', 'Info')).toBe('info');
     expect(resolveNotificationSemanticTone('general', 'Error')).toBe('destructive');
     expect(resolveNotificationSemanticTone('system', 'Error')).toBe('info');
+    expect(resolveNotificationSemanticTone('account', 'Error')).toBe('primary');
+    expect(resolveNotificationSemanticTone('general', 'Success')).toBe('success');
+    expect(resolveNotificationSemanticTone('general', 'Warning')).toBe('warning');
+    expect(resolveNotificationSemanticTone('general', 'Info')).toBe('info');
+    expect(resolveNotificationSemanticTone('general', 'Reminder')).toBe('primary');
+    expect(resolveNotificationSemanticTone('general', 'Unknown')).toBe('muted');
 
     expect(semanticToneSurfaceClass('primary')).toBe('bg-primary/10 text-primary');
     expect(semanticToneSurfaceClass('info')).toBe('bg-info/10 text-info');
@@ -201,6 +207,39 @@ describe('notification semantic controls', () => {
     expect(wrapper.text()).not.toContain('worker-job-9');
     expect(wrapper.text()).not.toContain('Open related item');
   });
+
+  it.each([
+    ['LOW', 'border-l-muted-foreground/45'],
+    ['NORMAL', 'border-l-info/70'],
+    ['HIGH', 'border-l-warning/70'],
+    ['URGENT', 'border-l-destructive/70'],
+    ['UNKNOWN', 'border-l-info/70'],
+  ])(
+    'maps toast priority %s without changing click or close behavior',
+    async (priority, border) => {
+      const notification = {
+        id: 'toast-1',
+        title: 'Reminder',
+        message: 'Due',
+        type: 'REMINDER',
+        priority,
+      };
+      const wrapper = mount(InAppNotification, {
+        props: { notifications: [notification] },
+        global: { plugins: [i18n], stubs: { Teleport: true, TransitionGroup: false } },
+      });
+      const toast = wrapper.get('button').element.parentElement!;
+      expect(toast.classList.contains(border)).toBe(true);
+      expect(toast.classList.contains('animate-pulse-shadow')).toBe(priority === 'URGENT');
+
+      const buttons = wrapper.findAll('button');
+      await buttons[0].trigger('click');
+      await buttons[1].trigger('click');
+      expect(wrapper.emitted('notification-click')).toEqual([[notification]]);
+      expect(wrapper.emitted('close')).toEqual([['toast-1']]);
+      wrapper.unmount();
+    },
+  );
 
   it('keeps toast content and close as separate named buttons', () => {
     const wrapper = mount(InAppNotification, {

@@ -1270,6 +1270,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** semantic token vocabulary 覆盖核心 surface；不做无意义 mass replace。
 
+**Execution (2026-10-01): Accepted / frozen after delegated implementation and independent review.** The existing semantic tone/elevation vocabulary remains the single presentation authority. The only production gaps justified by the current canonical tree were the AI sidebar email-verification state, which now uses `semanticToneStatusClass('warning')`, and AI composer attachment/context chips, which now use `semanticElevationClass('inset')`. Notification priority/category tones, Planner source identity tones, Settings status semantics and active Routine surfaces were already converged and therefore received contract coverage rather than production churn. Specialized interaction hover shadows remain local rather than being mass-replaced. Codex Team `gpt-6.1-sol`/medium delivered the implementation; independent acceptance reran 5 files / 43 changed-contract tests, uncached App-Vue typecheck, the 1,335-file inventory, full uncached governance, targeted ESLint/Prettier and diff checks. Evidence: [UI-2104 semantic elevation/status/source tones](../archive/2026-10-01-pvc-ui-2104-semantic-elevation-status-source-tones.md).
+
 ---
 
 ## PVC-SHELL-8201 — Capsule host shell

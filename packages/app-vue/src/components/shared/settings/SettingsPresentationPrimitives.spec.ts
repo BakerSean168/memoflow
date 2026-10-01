@@ -49,6 +49,22 @@ describe('settings presentation primitives', () => {
     expect(stacked.get('[class*="space-y-2"]').exists()).toBe(true);
   });
 
+  it.each([
+    ['loading', 'bg-muted/45 text-muted-foreground', 'status', 'true'],
+    ['error', 'bg-destructive/8 text-destructive', 'alert', undefined],
+    ['info', 'bg-info/8 text-foreground', 'status', undefined],
+    ['success', 'bg-success/8 text-foreground', 'status', undefined],
+  ] as const)(
+    'maps %s to semantic status tone and accessibility state',
+    (kind, classes, role, busy) => {
+      const wrapper = mount(SettingsStatusBlock, { props: { kind } });
+      expect(wrapper.classes()).toEqual(expect.arrayContaining(classes.split(' ')));
+      expect(wrapper.attributes('role')).toBe(role);
+      expect(wrapper.attributes('aria-busy')).toBe(busy);
+      wrapper.unmount();
+    },
+  );
+
   it('provides consistent loading and error semantics without owner behavior', () => {
     const loading = mount(SettingsStatusBlock, {
       props: { kind: 'loading', testId: 'loading' },

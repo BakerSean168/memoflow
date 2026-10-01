@@ -66,16 +66,15 @@ describe('AIConversationSidebar email verification degrade', () => {
     // Open recent notes section content is always in DOM via Collapsible stubs
     const degrade = wrapper.find('[data-testid="ai-sidebar-email-verification"]');
     expect(degrade.exists()).toBe(true);
+    expect(degrade.attributes('role')).toBe('status');
+    expect(degrade.classes()).toEqual(expect.arrayContaining(['bg-warning/8', 'text-foreground']));
+    expect(degrade.html()).not.toMatch(/(?:amber|yellow)-\d+/);
     expect(wrapper.find('[data-testid="ai-sidebar-no-recent-notes"]').exists()).toBe(false);
 
     const text = degrade.text();
     expect(text).not.toMatch(/errors\.EMAIL_VERIFICATION|noRecentKnowledgeNotes/);
-    expect(text).toContain(
-      productionLocaleMessages['en-US'].errors.EMAIL_VERIFICATION_REQUIRED,
-    );
-    expect(text).toContain(
-      productionLocaleMessages['en-US'].common.emailVerificationRequiredHint,
-    );
+    expect(text).toContain(productionLocaleMessages['en-US'].errors.EMAIL_VERIFICATION_REQUIRED);
+    expect(text).toContain(productionLocaleMessages['en-US'].common.emailVerificationRequiredHint);
 
     wrapper.unmount();
   });
