@@ -1,7 +1,11 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { RoutineDefinitionDto, RoutineTriggerDto } from '@memoflow/contracts/routine';
+import type {
+  RoutineDefinitionDto,
+  RoutineProfileDto,
+  RoutineTriggerDto,
+} from '@memoflow/contracts/routine';
 import { RoutineTriggerSchema } from '@memoflow/contracts/routine';
 import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
@@ -38,7 +42,13 @@ function testId(id: string) {
   return element(`[data-testid="${id}"]`);
 }
 
-async function openEditor(trigger?: RoutineTriggerDto, saving = false, locale = 'en-US') {
+async function openEditor(
+  trigger?: RoutineTriggerDto,
+  saving = false,
+  locale = 'en-US',
+  profiles: RoutineProfileDto[] = [],
+  membershipProfileIds: string[] = [],
+) {
   vi.spyOn(Intl, 'supportedValuesOf').mockReturnValue(['Asia/Tokyo', 'America/New_York']);
   const profile = createDefaultUserPreferenceProfile();
   setProductTimePreferences({
@@ -58,7 +68,7 @@ async function openEditor(trigger?: RoutineTriggerDto, saving = false, locale = 
       }
     : null;
   const wrapper = mount(RoutineEditorDialog, {
-    props: { open: true, profiles: [], routine, saving },
+    props: { open: true, profiles, membershipProfileIds, routine, saving },
     global: {
       plugins: [createI18n({ legacy: false, locale, messages: productionLocaleMessages })],
     },
@@ -228,6 +238,30 @@ describe('RoutineEditorDialog Product controls', () => {
       });
     },
   );
+
+  it('round-trips profile scope through the extracted control without moving membership ownership', async () => {
+    const profiles: RoutineProfileDto[] = [
+      {
+        id: 'profile-1',
+        name: 'Work',
+        description: null,
+        enabled: true,
+        active: true,
+        version: 1,
+        createdAt: '2026-10-01T00:00:00.000Z',
+        updatedAt: '2026-10-01T00:00:00.000Z',
+      },
+    ];
+    const wrapper = await openEditor(undefined, false, 'en-US', profiles, ['profile-1']);
+    await testId('routine-name-input').setValue('Scoped routine');
+    expect(testId('routine-profile-picker').text()).toContain('Work');
+
+    await element('#routine-editor-form').trigger('submit');
+    const saved = wrapper.emitted('save')?.at(-1)?.[0] as
+      { profileIds: string[]; trigger: RoutineTriggerDto | null } | undefined;
+    expect(saved?.profileIds).toEqual(['profile-1']);
+    expect(saved?.trigger).toBeNull();
+  });
 
   it('blocks edits and saving while busy', async () => {
     const wrapper = await openEditor(wallClock, true);
