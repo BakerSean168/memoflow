@@ -4350,6 +4350,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5093,6 +5101,22 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimePicker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11963,7 +11987,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 253
+      "fileCount": 256
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12717,7 +12741,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1118,
+    "unit": 1121,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

@@ -124,14 +124,27 @@
                   {{ t('routine.form.durationMinutes') }}
                 </p>
                 <div class="flex items-center gap-2">
-                  <Input
-                    v-model.number="durationMinutes"
-                    type="number"
-                    min="1"
-                    step="1"
-                    class="h-8"
+                  <NumberField
+                    v-model="durationMinutes"
+                    :min="1"
+                    :step="1"
                     :disabled="saving"
-                  />
+                    data-testid="routine-durationMinutes"
+                    class="w-36"
+                  >
+                    <NumberFieldContent>
+                      <NumberFieldDecrement
+                        :aria-label="t('routine.form.durationMinutes') + ' −'"
+                      />
+                      <NumberFieldInput
+                        :aria-label="t('routine.form.durationMinutes')"
+                        class="h-8"
+                      />
+                      <NumberFieldIncrement
+                        :aria-label="t('routine.form.durationMinutes') + ' +'"
+                      />
+                    </NumberFieldContent>
+                  </NumberField>
                   <span class="shrink-0 text-xs text-muted-foreground">
                     {{ t('routine.form.minutes') }}
                   </span>
@@ -182,14 +195,20 @@
                   {{ t('routine.form.activeMinutes') }}
                 </p>
                 <div class="flex items-center gap-2">
-                  <Input
-                    v-model.number="activeMinutes"
-                    type="number"
-                    min="1"
-                    step="1"
-                    class="h-8"
+                  <NumberField
+                    v-model="activeMinutes"
+                    :min="1"
+                    :step="1"
                     :disabled="saving"
-                  />
+                    data-testid="routine-activeMinutes"
+                    class="w-36"
+                  >
+                    <NumberFieldContent>
+                      <NumberFieldDecrement :aria-label="t('routine.form.activeMinutes') + ' −'" />
+                      <NumberFieldInput :aria-label="t('routine.form.activeMinutes')" class="h-8" />
+                      <NumberFieldIncrement :aria-label="t('routine.form.activeMinutes') + ' +'" />
+                    </NumberFieldContent>
+                  </NumberField>
                   <span class="shrink-0 text-xs text-muted-foreground">
                     {{ t('routine.form.minutes') }}
                   </span>
@@ -213,14 +232,27 @@
                   {{ t('routine.form.naturalBreakMinutes') }}
                 </p>
                 <div class="flex items-center gap-2">
-                  <Input
-                    v-model.number="naturalBreakMinutes"
-                    type="number"
-                    min="0"
-                    step="1"
-                    class="h-8"
+                  <NumberField
+                    v-model="naturalBreakMinutes"
+                    :min="0"
+                    :step="1"
                     :disabled="saving"
-                  />
+                    data-testid="routine-naturalBreakMinutes"
+                    class="w-36"
+                  >
+                    <NumberFieldContent>
+                      <NumberFieldDecrement
+                        :aria-label="t('routine.form.naturalBreakMinutes') + ' −'"
+                      />
+                      <NumberFieldInput
+                        :aria-label="t('routine.form.naturalBreakMinutes')"
+                        class="h-8"
+                      />
+                      <NumberFieldIncrement
+                        :aria-label="t('routine.form.naturalBreakMinutes') + ' +'"
+                      />
+                    </NumberFieldContent>
+                  </NumberField>
                   <span class="shrink-0 text-xs text-muted-foreground">
                     {{ t('routine.form.minutes') }}
                   </span>
@@ -307,25 +339,28 @@
         >
           <div class="routine-property-row">
             <span class="routine-property-label">{{ t('routine.form.localTime') }}</span>
-            <input
+            <ProductTimePicker
               v-model="localTime"
-              type="time"
-              data-testid="routine-local-time"
-              :aria-label="t('routine.form.localTime')"
+              test-id="routine-local-time"
+              :label="t('routine.form.localTime')"
+              :hour-label="t('routine.form.hour')"
+              :minute-label="t('routine.form.minute')"
               :disabled="saving"
-              class="routine-borderless-control w-32"
+              class="ml-auto"
             />
           </div>
 
           <div class="routine-property-row">
             <span class="routine-property-label">{{ t('routine.form.startDate') }}</span>
-            <input
-              v-model="startDate"
-              type="date"
-              data-testid="routine-start-date"
+            <ProductDatePicker
+              :model-value="parseYmd(startDate)"
+              :allowed-kinds="['day']"
+              test-id="routine-start-date"
+              :label="t('routine.form.startDate')"
               :aria-label="t('routine.form.startDate')"
               :disabled="saving"
-              class="routine-borderless-control w-40"
+              class="ml-auto"
+              @update:model-value="startDate = $event ?? ''"
             />
           </div>
 
@@ -364,15 +399,20 @@
           <div class="routine-property-row">
             <span class="routine-property-label">{{ t('routine.form.interval') }}</span>
             <div class="flex items-center justify-end gap-2">
-              <input
-                v-model.number="recurrenceInterval"
-                type="number"
-                min="1"
-                step="1"
-                :aria-label="t('routine.form.interval')"
+              <NumberField
+                v-model="recurrenceInterval"
+                :min="1"
+                :step="1"
                 :disabled="saving"
-                class="routine-borderless-control w-20"
-              />
+                data-testid="routine-recurrenceInterval"
+                class="w-36"
+              >
+                <NumberFieldContent>
+                  <NumberFieldDecrement :aria-label="t('routine.form.interval') + ' −'" />
+                  <NumberFieldInput :aria-label="t('routine.form.interval')" class="h-8" />
+                  <NumberFieldIncrement :aria-label="t('routine.form.interval') + ' +'" />
+                </NumberFieldContent>
+              </NumberField>
               <span class="min-w-8 text-xs text-muted-foreground">{{ frequencyUnit }}</span>
             </div>
           </div>
@@ -401,12 +441,15 @@
 
           <div class="routine-property-row">
             <span class="routine-property-label">{{ t('routine.form.timeZone') }}</span>
-            <input
+            <ProductTimeZoneSelector
               v-model="timeZone"
-              type="text"
-              :aria-label="t('routine.form.timeZone')"
+              test-id="routine-time-zone"
+              :label="t('routine.form.timeZone')"
+              :product-zone-label="t('routine.form.defaultTimeZone')"
+              :search-placeholder="t('routine.form.searchTimeZones')"
+              :empty-text="t('routine.form.noTimeZonesFound')"
               :disabled="saving"
-              class="routine-borderless-control w-full max-w-64"
+              class="ml-auto"
             />
           </div>
         </section>
@@ -451,7 +494,11 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  Input,
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -471,6 +518,9 @@ import {
   ProductAutoTextarea,
   ProductDialogShell,
   ProductPropertyChip,
+  ProductDatePicker,
+  ProductTimePicker,
+  ProductTimeZoneSelector,
 } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
 import { getProductTime, getProductTodayYmd } from '../../../shared/utils/product-time';
@@ -618,7 +668,7 @@ function localYmd(): string {
   return String(getProductTodayYmd());
 }
 
-function browserTimeZone(): string {
+function productTimeZone(): string {
   return String(getProductTime().context.timeZone);
 }
 
@@ -634,7 +684,7 @@ function resetForm(): void {
   const trigger = source?.trigger ?? preset?.trigger ?? null;
   triggerType.value = trigger?.type ?? 'None';
   localTime.value = trigger?.type === 'WallClock' ? trigger.localTime : '09:00';
-  timeZone.value = trigger?.type === 'WallClock' ? trigger.timeZone : browserTimeZone();
+  timeZone.value = trigger?.type === 'WallClock' ? trigger.timeZone : productTimeZone();
   startDate.value = trigger?.type === 'WallClock' ? trigger.recurrence.startDate : localYmd();
   frequency.value = trigger?.type === 'WallClock' ? trigger.recurrence.frequency : 'daily';
   recurrenceInterval.value = trigger?.type === 'WallClock' ? trigger.recurrence.interval : 1;
@@ -673,8 +723,8 @@ const canSubmit = computed(() => {
   if (!name.value.trim()) return false;
   if (triggerType.value === 'WallClock') {
     return Boolean(
-      localTime.value &&
-      parseTimeZoneId(timeZone.value.trim()) &&
+      getProductTime().codec.parseHm(localTime.value) &&
+      parseTimeZoneId(timeZone.value) &&
       parseYmd(startDate.value) &&
       recurrenceInterval.value > 0 &&
       (frequency.value !== 'weekly' || selectedWeekdays.value.length > 0),
@@ -729,7 +779,7 @@ function buildTrigger(): RoutineTriggerDto | null {
       type: 'WallClock',
       timingOwner: 'scheduler',
       localTime: localTime.value,
-      timeZone: requireTimeZoneId(timeZone.value.trim()),
+      timeZone: requireTimeZoneId(timeZone.value),
       recurrence: {
         startDate: requireYmd(startDate.value),
         frequency: frequency.value,
@@ -803,32 +853,6 @@ function handleOpenChange(value: boolean): void {
   font-size: 0.875rem;
   line-height: 1.25rem;
   color: hsl(var(--muted-foreground));
-}
-
-.routine-borderless-control {
-  margin-left: auto;
-  height: 2rem;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-  text-align: right;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: hsl(var(--foreground));
-  box-shadow: none;
-  outline: none;
-}
-
-.routine-borderless-control:focus,
-.routine-borderless-control:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.routine-borderless-control:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 @media (max-width: 640px) {

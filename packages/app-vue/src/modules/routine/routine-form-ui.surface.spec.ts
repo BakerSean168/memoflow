@@ -16,8 +16,23 @@ describe('Routine form UI convergence', () => {
     expect(editor).toContain('data-testid="routine-property-chips"');
     expect(editor).toContain('ProductAutoTextarea');
     expect(editor).toContain('ProductPropertyChip');
-    expect(editor).toContain('type="date"');
-    expect(editor).toContain('routine-borderless-control');
+    for (const type of ['date', 'time', 'number']) {
+      expect(editor).not.toContain(`type="${type}"`);
+    }
+    expect(editor).not.toMatch(/<(?:input|Input)\b[^>]*v-model="timeZone"/s);
+    expect(editor).toContain('ProductDatePicker');
+    expect(editor).toContain(`:allowed-kinds="['day']"`);
+    expect(editor).toContain('ProductTimePicker');
+    expect(editor).toContain('ProductTimeZoneSelector');
+    for (const component of [
+      'NumberField',
+      'NumberFieldContent',
+      'NumberFieldInput',
+      'NumberFieldIncrement',
+      'NumberFieldDecrement',
+    ]) {
+      expect(editor).toContain(component);
+    }
     expect(editor).toContain('DropdownMenuCheckboxItem');
     expect(editor).toContain('data-testid="routine-duration-chip"');
     expect(editor).toContain('data-testid="routine-anchor-chip"');
