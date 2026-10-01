@@ -39,6 +39,19 @@ test('gives every Desktop primary file exactly one owner', async () => {
   assert.deepEqual(inventory.measurementOnly, []);
 });
 
+test('primary collectors always own at least one test file', async () => {
+  const inventory = await buildInventory(process.cwd());
+  const emptyPrimaryCollectors = inventory.collectors
+    .filter((collector) => collector.type === 'primary' && collector.fileCount === 0)
+    .map((collector) => collector.id);
+
+  assert.deepEqual(
+    emptyPrimaryCollectors,
+    [],
+    'a configured primary test target must not silently collect zero files',
+  );
+});
+
 test('reports missing, duplicate, unexpected and measurement-only collectors', () => {
   const files = [
     'apps/example/src/unit.spec.ts',
