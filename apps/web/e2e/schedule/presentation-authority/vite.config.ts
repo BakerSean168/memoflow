@@ -27,6 +27,14 @@ export default defineConfig({
         ) {
           return capsuleCalendarFixture;
         }
+        if (
+          importer?.includes(
+            '/packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue',
+          ) &&
+          source.endsWith('composables/useCalendarView')
+        ) {
+          return path.resolve(root, 'plannerCalendar.fixture.ts');
+        }
         return null;
       },
     },

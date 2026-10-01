@@ -197,4 +197,53 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
     wrapper.unmount();
   }, 20_000);
+  it.each(['Timed', 'AllDay'] as const)(
+    'seeds %s edit facts and saves the same range',
+    async (kind) => {
+      const range =
+        kind === 'Timed'
+          ? {
+              kind,
+              start: Date.parse('2026-08-14T09:30:00Z'),
+              end: Date.parse('2026-08-14T11:00:00Z'),
+            }
+          : { kind, start: '2026-08-14', end: null };
+      const onSubmit = vi.fn().mockResolvedValue(true);
+      const wrapper = mount(CreateScheduleDialog, {
+        props: {
+          modelValue: true,
+          schedule: {
+            title: 'Existing entry',
+            description: 'Seeded note',
+            location: 'Desk',
+            attendees: ['Ada'],
+            range,
+          } as unknown as import('@memoflow/contracts/schedule').CalendarEntryClientDTO,
+          onSubmit,
+        },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      await nextTick();
+      expect(
+        document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')?.value,
+      ).toBe('Existing entry');
+      await new DOMWrapper(
+        document.querySelector<HTMLButtonElement>('[data-testid="schedule-save-button"]')!,
+      ).trigger('click');
+      await nextTick();
+      await nextTick();
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Existing entry',
+          description: 'Seeded note',
+          location: 'Desk',
+          attendees: ['Ada'],
+          range,
+        }),
+      );
+      wrapper.unmount();
+    },
+    20_000,
+  );
 });

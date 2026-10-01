@@ -144,7 +144,10 @@ for (const scenario of [
           theme: scenario.theme,
         }),
       );
-      await expect(page.getByTestId('schedule-day-event-list')).toBeVisible();
+      await expect(
+        page.getByTestId(scenario.width < 900 ? 'planner-day-sheet' : 'planner-day-dialog'),
+      ).toBeVisible();
+      await expect(page.getByTestId('planner-day-event-list')).toBeVisible();
       for (const source of Object.keys(sourceIdentity) as Source[]) {
         const event = page.getByTestId('schedule-event-' + source + '-' + sourceIds[source]);
         const dotClass = await event.locator('span.rounded-full').first().getAttribute('class');
@@ -169,7 +172,9 @@ for (const scenario of [
             theme: scenario.theme,
           }),
         );
-        const sheet = page.getByTestId('event-detail-sheet');
+        const sheet = page.getByTestId(
+          scenario.width < 900 ? 'planner-event-sheet' : 'planner-event-dialog',
+        );
         await expect(sheet).toBeVisible();
         const dotClass = await sheet.locator('span.rounded-full').first().getAttribute('class');
         const badge = sheet
@@ -216,4 +221,87 @@ for (const scenario of [
       expect(errors).toEqual([]);
     },
   );
+}
+
+for (const panelWidth of [1280, 600]) {
+  test(`CalendarEntry CRUD with ${panelWidth}px panel in a wide viewport`, async ({ page }) => {
+    const errors = await installErrorCollector(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.clock.setFixedTime(new Date('2026-10-01T09:30:00Z'));
+    await page.goto(
+      query({ surface: 'crud', panelWidth: String(panelWidth), refreshFailure: '1' }),
+    );
+    const inspect = page.getByTestId(
+      panelWidth < 900 ? 'planner-event-sheet' : 'planner-event-dialog',
+    );
+    const event = page.getByTestId('schedule-event-schedule-entry-1');
+    await event.click();
+    await expect(inspect).toBeVisible();
+    await capture(page, `crud-${panelWidth}-inspect`);
+    await page.getByTestId('planner-event-edit').click();
+    const title = page.getByTestId('schedule-title-input');
+    await expect(title).toHaveValue('Deep work / 深度工作');
+    await title.fill('Edited calendar entry');
+    await page.getByTestId('schedule-save-button').click();
+    await expect(title).not.toBeVisible();
+    await expect(page.getByText('Schedule updated', { exact: true })).toBeVisible();
+    await expect(page.getByText(/updated.*refresh|saved.*refresh/i)).toBeVisible();
+    await expect(event).toContainText('Edited calendar entry');
+    await event.click();
+    await page.getByTestId('planner-event-delete').click();
+    await page.getByTestId('global-confirm-cancel').click();
+    await expect(inspect).toBeVisible();
+    await page.getByTestId('planner-event-delete').click();
+    await expect(page.getByTestId('global-confirm-confirm')).toHaveClass(/bg-destructive/);
+    await page.getByTestId('global-confirm-confirm').click();
+    await expect(event).toHaveCount(0);
+    await expect(page.getByText('Schedule deleted', { exact: true })).toBeVisible();
+    await expect(page.getByText(/deleted.*refresh/i)).toBeVisible();
+    const calls = await page.evaluate(() =>
+      (window as unknown as { scheduleCrudEvidence(): unknown }).scheduleCrudEvidence(),
+    );
+    expect(calls).toEqual([
+      expect.objectContaining({ command: 'update', id: 'entry-1', version: 1 }),
+      { command: 'delete', id: 'entry-1', version: 2 },
+    ]);
+    await page.getByTestId('create-schedule-button').click();
+    await page.getByTestId('schedule-title-input').fill('New calendar entry');
+    await page.getByTestId('schedule-save-button').click();
+    await expect(page.getByText('Schedule created', { exact: true })).toBeVisible();
+    await expect(page.getByText(/created.*refresh/i)).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          (window as unknown as { scheduleCrudEvidence(): { command: string }[] })
+            .scheduleCrudEvidence()
+            .at(-1)?.command,
+      ),
+    ).toBe('create');
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const kind of ['missing', 'stale']) {
+  test(`CalendarEntry ${kind} inspect has deterministic feedback`, async ({ page }) => {
+    const errors = await installErrorCollector(page);
+    await page.clock.setFixedTime(new Date('2026-10-01T09:30:00Z'));
+    await page.goto(query({ surface: 'crud' }));
+    await page.getByTestId('schedule-event-schedule-entry-1').click();
+    await page.evaluate(
+      (kind) =>
+        (
+          window as unknown as { invalidateScheduleInspect(kind: string): void }
+        ).invalidateScheduleInspect(kind),
+      kind,
+    );
+    await page.getByTestId('planner-event-edit').click();
+    await expect(page.getByText(/changed or is no longer available/)).toBeVisible();
+    await expect(page.getByTestId('schedule-title-input')).toHaveCount(0);
+    expect(
+      await page.evaluate(() =>
+        (window as unknown as { scheduleCrudEvidence(): unknown[] }).scheduleCrudEvidence(),
+      ),
+    ).toEqual([]);
+    expect(errors).toEqual([]);
+  });
 }
