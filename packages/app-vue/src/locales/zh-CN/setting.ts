@@ -20,6 +20,7 @@ export default {
     "check": "检查更新",
     "restartAndUpdate": "重新启动并更新",
     "retryInstall": "重试安装",
+    "retryDownload": "重试下载",
     "retryCheck": "重新检查",
     "restartHint": "更新将在重启后完成，当前工作区会先正常收尾。",
     "releaseNotes": "版本说明",

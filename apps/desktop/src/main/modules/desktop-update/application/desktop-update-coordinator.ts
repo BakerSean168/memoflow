@@ -223,6 +223,17 @@ export class DesktopUpdateCoordinator {
     if (this.checkPromise) return this.checkPromise;
     if (this.state.type === 'disabled') return Promise.resolve(this.getSnapshot());
 
+    if (
+      this.state.type === 'failed' &&
+      this.state.failure.retryable &&
+      this.state.recoverableTo === 'available'
+    ) {
+      this.checkPromise = this.retryDownloadAndPrepare(intent).finally(() => {
+        this.checkPromise = null;
+      });
+      return this.checkPromise;
+    }
+
     if (this.state.type === 'failed' && this.state.recoverableTo === 'idle') {
       this.state = recoverDesktopUpdateFailure(this.state, {
         currentVersion: this.currentVersion,
@@ -349,6 +360,32 @@ export class DesktopUpdateCoordinator {
       this.failCurrentOperation(error);
       return this.getSnapshot();
     }
+  }
+
+  private async retryDownloadAndPrepare(
+    intent: DesktopUpdateIntentDTO,
+  ): Promise<DesktopUpdateSnapshotDTO> {
+    // Native errors can project failed before the old download/prepare promise
+    // settles. Drain that flight before recovery so late work cannot advance
+    // the recovered state or overlap a new download. checkPromise owns retries.
+    await this.downloadPromise;
+    if (this.destroyed) return this.getSnapshot();
+    const state = this.readState();
+    if (
+      state.type !== 'failed' ||
+      !state.failure.retryable ||
+      state.recoverableTo !== 'available'
+    ) {
+      return this.getSnapshot();
+    }
+
+    this.state = recoverDesktopUpdateFailure(state, {
+      currentVersion: this.currentVersion,
+      recoveredAt: this.nowIso(),
+      intent,
+    });
+    this.emit();
+    return this.ensureDownload();
   }
 
   private ensureDownload(): Promise<DesktopUpdateSnapshotDTO> {

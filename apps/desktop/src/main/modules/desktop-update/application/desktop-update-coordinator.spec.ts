@@ -339,6 +339,99 @@ describe('DesktopUpdateCoordinator', () => {
     });
   });
 
+  it.each(['download', 'prepare'] as const)(
+    'retries a retryable %s failure through the full download/prepare flight',
+    async (operation) => {
+      const engine = new FakeEngine();
+      engine.check.mockResolvedValue({ kind: 'available', release });
+      engine[operation].mockRejectedValueOnce(
+        new DesktopUpdateEngineError({
+          code: operation === 'download' ? 'download-failed' : 'prepare-failed',
+          message: 'Attempt failed',
+          retryable: true,
+        }),
+      );
+      const coordinator = directCoordinator(engine);
+      await coordinator.initialize();
+      await coordinator.check();
+      await vi.waitFor(() =>
+        expect(coordinator.getSnapshot().state).toMatchObject({
+          type: 'failed',
+          recoverableTo: 'available',
+        }),
+      );
+      expect((await coordinator.check()).state.type).toBe('ready');
+      expect(engine.check).toHaveBeenCalledTimes(1);
+      expect(engine.download).toHaveBeenCalledTimes(2);
+      expect(engine.prepare).toHaveBeenCalledTimes(operation === 'prepare' ? 2 : 1);
+      coordinator.destroy();
+    },
+  );
+
+  it('cannot retry a non-retryable checksum failure programmatically', async () => {
+    const engine = new FakeEngine();
+    engine.check.mockResolvedValue({ kind: 'available', release });
+    engine.download.mockRejectedValueOnce(
+      new DesktopUpdateEngineError({
+        code: 'checksum-mismatch',
+        message: 'Integrity failure',
+        retryable: false,
+      }),
+    );
+    const coordinator = directCoordinator(engine);
+    await coordinator.initialize();
+    await coordinator.check();
+    await vi.waitFor(() =>
+      expect(coordinator.getSnapshot().state).toMatchObject({
+        type: 'failed',
+        recoverableTo: 'available',
+      }),
+    );
+    const failed = coordinator.getSnapshot();
+    expect(await coordinator.check()).toEqual(failed);
+    expect(engine.check).toHaveBeenCalledTimes(1);
+    expect(engine.download).toHaveBeenCalledTimes(1);
+    expect(engine.prepare).not.toHaveBeenCalled();
+    coordinator.destroy();
+  });
+
+  it('drains a native failed download before starting exactly one immediate retry', async () => {
+    const engine = new FakeEngine();
+    let settleDownload!: () => void;
+    engine.check.mockResolvedValue({ kind: 'available', release });
+    engine.download.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          settleDownload = resolve;
+        }),
+    );
+    const coordinator = directCoordinator(engine);
+    await coordinator.initialize();
+    await coordinator.check();
+    engine.emit({
+      type: 'engine-error',
+      failure: {
+        code: 'download-failed',
+        message: 'Interrupted',
+        retryable: true,
+      },
+    });
+    const first = coordinator.check();
+    const second = coordinator.check();
+    expect(first).toBe(second);
+    await Promise.resolve();
+    expect(engine.download).toHaveBeenCalledTimes(1);
+    expect(engine.prepare).not.toHaveBeenCalled();
+    expect(coordinator.getSnapshot().state.type).toBe('failed');
+    engine.emit({ type: 'downloaded', release });
+    settleDownload();
+    expect((await first).state.type).toBe('ready');
+    expect(engine.check).toHaveBeenCalledTimes(1);
+    expect(engine.download).toHaveBeenCalledTimes(2);
+    expect(engine.prepare).toHaveBeenCalledTimes(1);
+    coordinator.destroy();
+  });
+
   it('recovers a retryable install failure back through ready before restarting again', async () => {
     const engine = new FakeEngine();
     engine.check.mockResolvedValue({ kind: 'available', release });

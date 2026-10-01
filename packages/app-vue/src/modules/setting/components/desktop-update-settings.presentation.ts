@@ -165,7 +165,9 @@ export function presentDesktopUpdateSettings(
         actionKey: canRetryInstall
           ? 'setting.updates.retryInstall'
           : canRetryCheck
-            ? 'setting.updates.retryCheck'
+            ? state.recoverableTo === 'available'
+              ? 'setting.updates.retryDownload'
+              : 'setting.updates.retryCheck'
             : null,
         progressPercent: null,
         release,

@@ -20,6 +20,7 @@ export default {
     "check": "Check for updates",
     "restartAndUpdate": "Restart to update",
     "retryInstall": "Retry install",
+    "retryDownload": "Retry download",
     "retryCheck": "Check again",
     "restartHint": "MemoFlow finishes runtime cleanup before handing the update to the installer.",
     "releaseNotes": "Release notes",

@@ -163,6 +163,34 @@ describe('presentDesktopUpdateSettings', () => {
     expect(presentDesktopUpdateSettings(current, true).kind).toBe('up-to-date');
   });
 
+  it.each([
+    {
+      recoverableTo: 'available',
+      retryable: true,
+      action: 'check',
+      actionKey: 'setting.updates.retryDownload',
+    },
+    {
+      recoverableTo: 'idle',
+      retryable: true,
+      action: 'check',
+      actionKey: 'setting.updates.retryCheck',
+    },
+    { recoverableTo: 'available', retryable: false, action: 'none', actionKey: null },
+  ] as const)(
+    'maps retry action for $recoverableTo / $retryable',
+    ({ recoverableTo, retryable, action, actionKey }) => {
+      const failed = snapshot({
+        type: 'failed',
+        operation: recoverableTo === 'idle' ? 'check' : 'download',
+        failure: { code: 'download-failed', message: 'Failed', retryable },
+        recoverableTo,
+        ...(recoverableTo === 'available' ? { release } : {}),
+      });
+      expect(presentDesktopUpdateSettings(failed)).toMatchObject({ action, actionKey });
+    },
+  );
+
   it('uses restart retry only for a retryable Ready recovery surface', () => {
     const failed = snapshot({
       type: 'failed',

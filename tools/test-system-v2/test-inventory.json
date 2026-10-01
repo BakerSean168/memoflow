@@ -1060,6 +1060,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-failure-matrix.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-ipc.spec.ts",
       "primarySuite": "boundary-ipc",
       "collectors": [
@@ -11666,7 +11674,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12437,7 +12445,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1093,
+    "unit": 1094,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

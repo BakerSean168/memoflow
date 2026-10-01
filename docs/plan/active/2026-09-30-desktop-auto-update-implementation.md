@@ -102,7 +102,8 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1504` — **DEFERRED by user**: native Apple Silicon installed-update E2E and packaged provenance work are deferred.
 - macOS is not a gate for Windows feed/rollout work. DU-1402/DU-1403 consume whichever DU-1401 lanes are currently eligible; Windows-only publication is valid.
 - `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Governance retains only the unchanged HEAD platform-leakage finding in a surface-test assertion. macOS DU-1501..1504 remain DEFERRED.
-- Next: `DU-1702` — non-macOS failure injection matrix.
+- `DU-1702` — **DONE**: the executable non-macOS failure matrix locks all 14 required scenarios; focused coordinator retry/race and Settings action tests pass. Validation evidence is recorded under DU-1702 below.
+- Next non-macOS dependency: `DU-1601` — Linux AppImage self-update lane; it is not implemented in this scope.
 
 ## 2. Non-goals
 
@@ -961,7 +962,7 @@ Validation (from repository root; `NX_DAEMON=false` for Nx):
 - `git diff --check` and `pnpm nx run memoflow:docs-check` — pass.
 - `pnpm nx run memoflow:governance-check` — stops at the one unchanged HEAD platform-leakage finding: `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` contains a negative `window.electronAPI` assertion. Changed lines introduce no new violation; intentionally left outside DU-1701.
 
-Next non-macOS ticket: **DU-1702**. DU-1501..1504 remain **DEFERRED**.
+DU-1702 is now DONE (see evidence below). Next non-macOS dependency: **DU-1601 — Linux AppImage self-update lane**. DU-1501..1504 remain **DEFERRED**.
 
 最小 diagnostics：
 
@@ -982,7 +983,50 @@ Next non-macOS ticket: **DU-1702**. DU-1501..1504 remain **DEFERRED**.
 
 ## DU-1702 — Add failure injection matrix
 
-至少覆盖：
+**Status: DONE (2026-10-01).** macOS DU-1501..1504 remain **DEFERRED**.
+
+The executable matrix at
+`apps/desktop/src/main/modules/desktop-update/runtime/desktop-update-failure-matrix.spec.ts`
+uses real DesktopUpdateCoordinator, DesktopUpdateEngineError,
+ElectronUpdaterAdapter, UpdateInstallCoordinator, DesktopShutdownCoordinator,
+and DesktopUpdateDiagnosticsService with small provider/receipt-store fakes.
+Its completeness lock requires exactly **14 scenarios**, with no duplicate or
+missing executed IDs:
+
+`offline-check`, `malformed-metadata`, `missing-artifact`, `checksum-mismatch`,
+`download-interrupted`, `app-closed-during-download`, `cleanup-failure`,
+`cleanup-timeout`, `handoff-throw`, `renderer-recreated`, `duplicate-check`,
+`duplicate-install`, `superseding-release`, `os-session-end`.
+
+DU-1702 closes one real production gap: retryable failures recovering to
+Available now drain the previous download flight, recover the canonical release,
+and repeat download/prepare without another provider check. Non-retryable
+checksum failures cannot be bypassed by programmatic check. Settings labels
+that action Retry download in both locales. Focused tests additionally cover
+prepare retry and immediate concurrent retry after a native failure.
+No new failure code, IPC, release workflow, or macOS implementation was introduced.
+
+Validation evidence (focused runs only):
+
+- Desktop coordinator **20**, matrix **14**, electron-updater adapter **9**,
+  and update-install coordinator **8**: **4 files / 51 tests passed**.
+- Desktop shutdown coordinator: **1 file / 7 tests passed**.
+- app-vue presentation **16** and locale symmetry **2**:
+  **2 files / 18 tests passed**.
+- Total: **7 files / 76 tests passed**, including **21 new tests**
+  (4 coordinator, 14 matrix, 3 presentation).
+- Direct Desktop `pnpm exec tsc --noEmit -p tsconfig.typecheck.json` and
+  app-vue `vue-tsc --noEmit --declaration false --declarationMap false -p tsconfig.json`
+  passed.
+- Targeted ESLint on the seven changed TypeScript files, test inventory
+  generation/check (**1268 files; 1094 unit**), `git diff --check`, and
+  `pnpm nx run memoflow:docs-check` passed.
+
+Next non-macOS dependency: **DU-1601 — Linux AppImage self-update lane**;
+not implemented here. DU-1402/1403 and release workflows remain unchanged.
+
+Covered behavior:
+
 
 | Failure                    | Expected behavior                   |
 | -------------------------- | ----------------------------------- |
