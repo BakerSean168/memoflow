@@ -95,6 +95,15 @@ async function mountRoutineView(client: RoutineClientPort, initialPath = '/routi
           template:
             '<header><slot name="leading" /><slot name="actions" /><slot name="subnav" /></header>',
         },
+        DropdownMenu: { template: '<div><slot /></div>' },
+        DropdownMenuTrigger: { template: '<div><slot /></div>' },
+        DropdownMenuContent: { template: '<div><slot /></div>' },
+        DropdownMenuLabel: { template: '<div><slot /></div>' },
+        DropdownMenuSeparator: { template: '<hr />' },
+        DropdownMenuItem: {
+          inheritAttrs: false,
+          template: '<button type="button" v-bind="$attrs"><slot /></button>',
+        },
       },
     },
   });
@@ -131,6 +140,8 @@ describe('RoutineConfigurationView', () => {
 
     const scope = wrapper.find('[data-testid="routine-profile-scope-control"]');
     expect(scope.exists()).toBe(true);
+    const createButton = wrapper.find('[data-testid="routine-create-button"]');
+    expect(createButton.classes()).toContain('@2xl/panel:px-3');
     expect(scope.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(true);
     expect(scope.find('[data-testid="routine-create-profile-button"]').exists()).toBe(true);
     expect(scope.find('[data-testid="routine-create-button"]').exists()).toBe(false);
@@ -148,6 +159,9 @@ describe('RoutineConfigurationView', () => {
 
     expect(scope.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(false);
     expect(scope.find('[data-testid="routine-profile-enabled-control"]').exists()).toBe(true);
+    const profileTrigger = wrapper.find('[data-testid="routine-profile-filter"]');
+    expect(profileTrigger.text()).toContain('Work');
+    expect(profileTrigger.text()).not.toContain('Context:');
     expect(scope.find('[data-testid="routine-profile-runtime-action"]').exists()).toBe(true);
     expect(scope.find('[data-testid="routine-profile-delete-profile-1"]').exists()).toBe(true);
 
@@ -162,6 +176,28 @@ describe('RoutineConfigurationView', () => {
       expectedVersion: 1,
       enabled: false,
     });
+  });
+
+  it('uses a compact paused indicator when a selected profile is gated by the global switch', async () => {
+    const client = createRoutineClient();
+    vi.mocked(client.getConfigurationSnapshot).mockResolvedValue(
+      ok({
+        ...snapshot,
+        preferences: { globalEnabled: false, version: 1 },
+      } as never),
+    );
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+    await wrapper.find('[data-testid="routine-profile-profile-1"]').trigger('click');
+    await flushPromises();
+
+    const scope = wrapper.find('[data-testid="routine-profile-scope-control"]');
+    expect(scope.find('[data-testid="routine-global-paused-indicator"]').exists()).toBe(true);
+    expect(scope.find('[data-testid="routine-global-paused-indicator"]').text()).toContain(
+      'All paused',
+    );
+    expect(wrapper.find('[data-testid="routine-global-paused-badge"]').exists()).toBe(false);
   });
 
   it('keeps unsupported profile runtime actions visible but disabled with a host-capability hint', async () => {
@@ -180,7 +216,7 @@ describe('RoutineConfigurationView', () => {
 
     const runtimeAction = wrapper.findComponent('[data-testid="routine-profile-runtime-action"]');
     expect(runtimeAction.exists()).toBe(true);
-    expect(runtimeAction.props('disabled')).toBe(true);
+    expect(runtimeAction.attributes('disabled')).toBeDefined();
     expect(runtimeAction.text()).toContain('Desktop required');
     expect(client.setProfileActive).not.toHaveBeenCalled();
   });
