@@ -2,7 +2,7 @@
 
 Date: 2026-10-01. Branch: `product/vnext-sched-4301`. Baseline: `f0ea96eeed05e0cfa7d4e2a6fb637e0da265f738`.
 
-Implementation evidence only. ChatGPT Web retains architecture, final review, acceptance, commit and merge. Changes remain uncommitted; no push was performed.
+Implementation and acceptance evidence. ChatGPT Web retains architecture, final review, acceptance, commit and merge.
 
 ## Audit and reproduced causes
 
@@ -132,7 +132,7 @@ Existing en-US/light/1280 and zh-CN/dark/360 presentation scenarios and 1280/600
 
 ChatGPT Web independently reviewed the production boundaries after delegated implementation. The review confirmed that owner writes remain CAS-based and are never silently retried; FullCalendar callback replay is deduplicated by rollback-closure identity while a fresh closure remains a distinct gesture; thrown owner commands become a failed planner outcome and revert exactly once; structured Schedule version evidence is classified as stale without changing target-date or generic conflict semantics; forced canonical reads bypass freshness without replacing failed owner-marker reads; and one open create session cannot be retargeted by repeated select/day/create callbacks.
 
-Fresh independent reviewer evidence passed **7 files / 97 tests** with Nx cache disabled. The new collision-only Chromium strict comparison passed **5/5** with snapshot updates disabled, and representative success, stale rollback, Task rollback, selected-range create and committed-card captures were visually inspected. The delegated full isolated harness remains **15/15** for baseline generation and **15/15** for strict comparison, preserving SCHED-4101/4201/4202 presentation, CRUD, Task Quick and Prompt scenarios.
+Fresh independent reviewer evidence passed **7 files / 97 tests** with Nx cache disabled. The final reviewer rerun used the complete isolated Chromium matrix with snapshot updates disabled and passed **15/15 in 1.4m**, preserving SCHED-4101/4201/4202 presentation, CRUD, Task Quick and Prompt scenarios while also covering all five SCHED-4301 collision regressions. Representative Task rollback, Schedule success/stale rollback, selected-range create and committed-card captures were visually inspected. A preceding reviewer runner was interrupted by the execution environment after eight passing scenarios and produced no exit marker, so it was not counted as acceptance evidence; the subsequent complete rerun exited 0.
 
 The reviewer also repaired the worktree dependency links after a tool timeout interrupted a `pnpm` dependency status check. `pnpm install --frozen-lockfile` completed successfully and only regenerated/normalized Prisma client artifacts; no database command was executed and no tracked source diff was introduced by that repair.
 
