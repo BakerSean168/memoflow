@@ -111,6 +111,7 @@ const emit = defineEmits<{
 
 const calendarRef = ref<{ getApi(): CalendarApi } | null>(null);
 const lastVisibleRangeKey = ref<string | null>(null);
+const reportedMutations = new WeakSet<() => void>();
 
 const fullCalendarView: Record<PlannerCalendarView, string> = {
   day: 'timeGridDay',
@@ -165,6 +166,8 @@ async function applyMutation(
     | Parameters<NonNullable<CalendarOptions['eventDrop']>>[0]
     | Parameters<NonNullable<CalendarOptions['eventResize']>>[0],
 ): Promise<void> {
+  if (reportedMutations.has(info.revert)) return;
+  reportedMutations.add(info.revert);
   const outcome = await applyFullCalendarPlannerMutation(
     kind,
     info,

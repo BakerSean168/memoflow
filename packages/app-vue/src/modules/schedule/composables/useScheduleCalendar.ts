@@ -45,6 +45,7 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
   async function fetchCalendarEntries(
     startTime: number,
     endTime: number,
+    options: { force?: boolean } = {},
   ): Promise<CalendarEntryClientDTO[]> {
     const queryKey = scheduleCalendarQueryKeys.entries(resolveIdentityScope());
     const cachedEntries = runtime.queryClient.getQueryData<CalendarEntryClientDTO[]>(queryKey);
@@ -60,14 +61,16 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
       // The cache survives shell Popover unmounts and prevents hover-driven duplicate I/O.
       const allEntries = await runtime.queryClient.fetchQuery<CalendarEntryClientDTO[]>({
         queryKey,
-        staleTime: SCHEDULE_CALENDAR_STALE_TIME_MS,
+        staleTime: options.force ? 0 : SCHEDULE_CALENDAR_STALE_TIME_MS,
         queryFn: async () => {
           const result = await service.getSchedulesByAccount();
           if (!result.ok) throw result.error;
           return result.data;
         },
       });
-      const entries = allEntries.filter((entry) => overlapsPlannerWindow(entry, startTime, endTime));
+      const entries = allEntries.filter((entry) =>
+        overlapsPlannerWindow(entry, startTime, endTime),
+      );
       store.setCalendarEntries(entries);
       return entries;
     } catch (error) {

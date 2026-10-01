@@ -322,13 +322,13 @@ export function useCalendarView() {
     () => schedule.isLoading.value || task.isLoading.value || plannerOwnerReadsLoading.value,
   );
 
-  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
+  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number, force = false) {
     plannerOwnerReadsLoading.value = true;
     const identityScope = resolveIdentityScope();
     try {
       const goalsPromise = runtime.queryClient.fetchQuery<GoalClientDTO[]>({
         queryKey: plannerOwnerQueryKeys.goals(identityScope),
-        staleTime: PLANNER_OWNER_STALE_TIME_MS,
+        staleTime: force ? 0 : PLANNER_OWNER_STALE_TIME_MS,
         queryFn: async () => {
           const collectedGoals: PlannerGoalEntity[] = [];
           let page = 1;
@@ -356,6 +356,7 @@ export function useCalendarView() {
         start: startTime,
         end: endTime,
         limit: 500,
+        force,
       });
 
       const [goalsResult, routinesResult] = await Promise.allSettled([
@@ -363,7 +364,8 @@ export function useCalendarView() {
         routinesPromise,
       ]);
 
-      plannerGoals.value = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
+      plannerGoals.value =
+        goalsResult.status === 'fulfilled' ? goalsResult.value : force ? plannerGoals.value : [];
       plannerRoutineOccurrences.value =
         routinesResult.status === 'fulfilled'
           ? routinesResult.value.map((occurrence) => ({
@@ -377,22 +379,31 @@ export function useCalendarView() {
               revision: occurrence.revision,
               editable: false,
             }))
-          : [];
+          : force
+            ? plannerRoutineOccurrences.value
+            : [];
+      if (force && (goalsResult.status === 'rejected' || routinesResult.status === 'rejected')) {
+        throw new Error('Planner canonical marker refresh failed');
+      }
     } finally {
       plannerOwnerReadsLoading.value = false;
     }
   }
 
   /** Fetch all owner facts for the given Planner time window. */
-  async function fetchForRange(startTime: number, endTime: number) {
+  async function fetchForRange(
+    startTime: number,
+    endTime: number,
+    options: { force?: boolean } = {},
+  ) {
     windowStart.value = startTime;
     windowEnd.value = endTime;
 
     await Promise.all([
-      schedule.fetchCalendarEntries(startTime, endTime),
-      task.fetchInstancesByDateRange(startTime, endTime),
+      schedule.fetchCalendarEntries(startTime, endTime, options),
+      task.fetchInstancesByDateRange(startTime, endTime, options),
       task.fetchTemplates({ page: 1, limit: PLANNER_TASK_PLAN_LIMIT }),
-      fetchPlannerOwnerMarkers(startTime, endTime),
+      fetchPlannerOwnerMarkers(startTime, endTime, options.force),
     ]);
   }
 

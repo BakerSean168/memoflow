@@ -120,4 +120,22 @@ describe('useScheduleCalendar shared owner cache', () => {
     wrapper.unmount();
     runtime.dispose();
   });
+  it('forces a canonical read after a stale conflict even while cached facts are fresh', async () => {
+    const runtime = createTestServerStateRuntime();
+    const service = {
+      getSchedulesByAccount: vi
+        .fn()
+        .mockResolvedValueOnce(ok([scheduleEntry()]))
+        .mockResolvedValueOnce(ok([{ ...scheduleEntry(), version: 2 }])),
+    };
+    const { wrapper, api } = mountSchedule(runtime, createTestPinia(), service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchCalendarEntries(start, end);
+    await api.fetchCalendarEntries(start, end, { force: true });
+    expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(2);
+    expect(api.calendarEntries.value[0]?.version).toBe(2);
+    wrapper.unmount();
+    runtime.dispose();
+  });
 });

@@ -18,7 +18,17 @@ export async function applyPlannerOptimisticMutation(
   router: PlannerOwnerCommandRouter,
   input: PlannerOptimisticMutationInput,
 ): Promise<PlannerMutationOutcome> {
-  const outcome = await router.route(input);
+  let outcome: PlannerMutationOutcome;
+  try {
+    outcome = await router.route(input);
+  } catch {
+    outcome = {
+      status: 'failed',
+      code: 'OWNER_COMMAND_EXCEPTION',
+      message: 'Planner owner command failed',
+      ownerType: input.projection.ownerCommandTarget.ownerType,
+    };
+  }
   if (outcome.status !== 'applied') input.revert();
   return outcome;
 }

@@ -10,8 +10,11 @@ export { toLocalDateKey } from './useCalendarView.fixture';
 // Only owner aggregation is doubled; Schedule and Task reads/actions use production composables.
 export function useCalendarView() {
   const schedule = useSchedule();
-  const task =
-    new URLSearchParams(location.search).get('surface') === 'task-quick' ? useTask() : null;
+  const task = ['task-quick', 'collision'].includes(
+    new URLSearchParams(location.search).get('surface') ?? '',
+  )
+    ? useTask()
+    : null;
   const windowStart = ref<number | null>(null);
   const windowEnd = ref<number | null>(null);
   let loaded = false;
@@ -30,15 +33,18 @@ export function useCalendarView() {
     isLoading: schedule.isLoading,
     windowStart,
     windowEnd,
-    async fetchForRange(start: number, end: number) {
+    async fetchForRange(start: number, end: number, options: { force?: boolean } = {}) {
       windowStart.value = start;
       windowEnd.value = end;
       if (loaded && new URLSearchParams(location.search).has('refreshFailure')) {
         throw new Error('Service-double planner refresh failure');
       }
-      await schedule.fetchCalendarEntries(start, end);
+      await schedule.fetchCalendarEntries(start, end, options);
       if (task)
-        await Promise.all([task.fetchInstancesByDateRange(start, end), task.fetchTemplates()]);
+        await Promise.all([
+          task.fetchInstancesByDateRange(start, end, options),
+          task.fetchTemplates(),
+        ]);
       loaded = true;
     },
   };

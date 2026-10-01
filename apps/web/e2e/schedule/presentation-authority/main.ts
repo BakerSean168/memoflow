@@ -18,7 +18,7 @@ import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-m
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
-import { ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/contracts/result';
 import {
   TaskHmSchema,
   TaskYmdSchema,
@@ -137,6 +137,9 @@ const ownerCommands = {
   },
 };
 
+let scheduleReads = 0;
+let finishWrite: (() => void) | undefined;
+const collision = params.get('collision');
 const calls: { command: string; id?: string; version?: number; request?: unknown }[] = [];
 let entries: CalendarEntryClientDTO[] = [
   {
@@ -158,10 +161,15 @@ let entries: CalendarEntryClientDTO[] = [
 ];
 const scheduleService = {
   async getSchedulesByAccount() {
+    scheduleReads += 1;
     return { ok: true, data: entries };
   },
   async createSchedule(request: CreateScheduleRequest) {
     calls.push({ command: 'create', request });
+    if (params.has('holdCreate'))
+      await new Promise<void>((resolve) => {
+        finishWrite = resolve;
+      });
     const entry = {
       identityId: 'acceptance',
       createdAt: 0,
@@ -181,11 +189,21 @@ const scheduleService = {
   async updateSchedule(id: string, request: UpdateScheduleRequest) {
     calls.push({ command: 'update', id, version: request.expectedVersion, request });
     const current = entries.find((entry) => entry.id === id)!;
+    if (collision === 'stale' && calls.filter((call) => call.command === 'update').length === 1) {
+      entries = entries.map((entry) => (entry.id === id ? { ...entry, version: 2 } : entry));
+      return fail({
+        code: 'CONFLICT',
+        message: 'Version conflict',
+        context: { currentVersion: 2, expectedVersion: request.expectedVersion },
+      });
+    }
+    if (collision === 'conflict') return fail({ code: 'CONFLICT', message: 'Owner conflict' });
+
     const entry = {
       ...current,
-      title: request.name,
-      range: request.range,
-      description: request.description,
+      title: request.name ?? current.title,
+      range: request.range ?? current.range,
+      description: request.description ?? current.description,
       location: request.location,
       attendees: request.attendees,
       version: current.version + 1,
@@ -241,15 +259,29 @@ function taskResult(command: string, status: TaskOccurrenceClientDTO['status'], 
   return ok({ toDTO: () => occurrence });
 }
 const taskService = {
+  rescheduleOccurrence: async (id: string, request: unknown) => {
+    calls.push({ command: 'reschedule', id, request });
+    return fail({
+      code: 'CONFLICT',
+      message: 'Target day occupied',
+      details: [
+        {
+          field: 'scheduleSnapshot.date',
+          code: 'TASK_OCCURRENCE_TARGET_DATE_CONFLICT',
+          message: 'occupied',
+        },
+      ],
+    });
+  },
   getOccurrence: async () => ok({ toDTO: () => occurrence }),
   getPlan: async () => ok({ toDTO: () => taskPlan }),
   listPlans: async () =>
     ok({
-      plans: surface === 'task-quick' ? [{ toDTO: () => taskPlan }] : [],
-      total: surface === 'task-quick' ? 1 : 0,
+      plans: surface === 'task-quick' || surface === 'collision' ? [{ toDTO: () => taskPlan }] : [],
+      total: surface === 'task-quick' || surface === 'collision' ? 1 : 0,
     }),
   listOccurrencesByDateRange: async () =>
-    ok(surface === 'task-quick' ? [{ toDTO: () => occurrence }] : []),
+    ok(surface === 'task-quick' || surface === 'collision' ? [{ toDTO: () => occurrence }] : []),
   completeOccurrence: async (_id: string, request?: unknown) =>
     taskResult('complete', 'Completed', request),
   uncompleteOccurrence: async () => taskResult('uncomplete', 'Pending'),
@@ -306,7 +338,9 @@ const Root = defineComponent({
           h(RouterView),
           h(GlobalConfirmDialog),
           h(Toaster),
-          surface === 'crud' || (surface === 'task-quick' && router.currentRoute.value.path === '/')
+          surface === 'crud' ||
+          surface === 'collision' ||
+          (surface === 'task-quick' && router.currentRoute.value.path === '/')
             ? h('section', { class: 'h-[800px]' }, [h(ScheduleCalendarView)])
             : null,
           surface === 'calendar'
@@ -389,6 +423,8 @@ app.mount('#app');
 
 Object.assign(window, {
   scheduleCrudEvidence: () => calls,
+  scheduleCollisionEvidence: () => ({ calls, scheduleReads, entries }),
+  finishScheduleWrite: () => finishWrite?.(),
   invalidateScheduleInspect: (kind: string) => {
     const store = useScheduleStore();
     store.setCalendarEntries(

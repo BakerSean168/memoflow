@@ -27,7 +27,9 @@ export function fullCalendarEventToPlannerRange(
   projection: CalendarEventProjection,
   time: PlannerMutationTimePort,
 ): PlannerEventRange | null {
-  if (event.start == null) return null;
+  if (event.start == null || !Number.isFinite(event.start.getTime())) return null;
+  if (event.end != null && (!Number.isFinite(event.end.getTime()) || event.end <= event.start))
+    return null;
   const start = asInstant(event.start.getTime());
 
   if (event.allDay) {
@@ -48,8 +50,34 @@ export function fullCalendarEventToPlannerRange(
   };
 }
 
+// FullCalendar creates one rollback closure per visual mutation. Replaying that
+// callback must share its outcome; a new closure always represents a new gesture.
+const mutations = new WeakMap<
+  PlannerOwnerCommandRouter,
+  WeakMap<() => void, Promise<PlannerMutationOutcome>>
+>();
+
+export function applyFullCalendarPlannerMutation(
+  kind: PlannerMutationKind,
+  info: PlannerFullCalendarMutationInfo,
+  router: PlannerOwnerCommandRouter,
+  time: PlannerMutationTimePort,
+): Promise<PlannerMutationOutcome> {
+  let ownerMutations = mutations.get(router);
+  if (!ownerMutations) {
+    ownerMutations = new WeakMap();
+    mutations.set(router, ownerMutations);
+  }
+  const existing = ownerMutations.get(info.revert);
+  if (existing) return existing;
+  // Register before dispatch so concurrent callbacks cannot issue a second write.
+  const outcome = Promise.resolve().then(() => applyMutation(kind, info, router, time));
+  ownerMutations.set(info.revert, outcome);
+  return outcome;
+}
+
 /** Concrete eventDrop/eventResize bridge used by the FullCalendar migration slice. */
-export async function applyFullCalendarPlannerMutation(
+async function applyMutation(
   kind: PlannerMutationKind,
   info: PlannerFullCalendarMutationInfo,
   router: PlannerOwnerCommandRouter,
@@ -60,7 +88,12 @@ export async function applyFullCalendarPlannerMutation(
     info.revert();
     return { status: 'invalid', message: 'FullCalendar event is missing CalendarEventProjection' };
   }
-  const nextRange = fullCalendarEventToPlannerRange(info.event, projection, time);
+  let nextRange: PlannerEventRange | null;
+  try {
+    nextRange = fullCalendarEventToPlannerRange(info.event, projection, time);
+  } catch {
+    nextRange = null;
+  }
   if (!nextRange) {
     info.revert();
     return { status: 'invalid', message: 'FullCalendar event has no valid start' };

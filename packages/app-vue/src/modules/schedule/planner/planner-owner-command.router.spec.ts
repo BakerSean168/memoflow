@@ -290,4 +290,29 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     expect(outcome).toMatchObject({ status: 'invalid' });
     expect(rescheduleOccurrence).not.toHaveBeenCalled();
   });
+  it.each([
+    ['CONFLICT', { currentVersion: 4, expectedVersion: 3 }, [], 'stale-version'],
+    [
+      'CONFLICT',
+      undefined,
+      [{ field: 'expectedVersion', code: 'TASK_OCCURRENCE_VERSION_CONFLICT', message: 'stale' }],
+      'stale-version',
+    ],
+    ['VERSION_CONFLICT', undefined, [], 'stale-version'],
+    ['OPTIMISTIC_CONCURRENCY', undefined, [], 'stale-version'],
+    ['CONFLICT', undefined, [], 'generic'],
+  ] as const)('classifies %s with version evidence %j', async (code, context, details, reason) => {
+    const rescheduleOccurrence = vi
+      .fn()
+      .mockResolvedValue(fail({ code, message: 'conflict', context, details: [...details] }));
+    const router = createPlannerOwnerCommandRouter({ task: { rescheduleOccurrence }, time });
+    expect(
+      await router.route({
+        kind: 'move',
+        projection: taskProjection(),
+        nextRange: { allDay: false, start: at16, end: null },
+      }),
+    ).toMatchObject({ status: 'conflict', reason });
+    expect(rescheduleOccurrence).toHaveBeenCalledOnce();
+  });
 });
