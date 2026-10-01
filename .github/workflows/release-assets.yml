@@ -425,11 +425,22 @@ jobs:
         run: |
           node ./tools/ci-cd-platform/release-tools/create-desktop-manifest.mjs artifacts "$RELEASE_TAG" "$RELEASE_SHA" desktop-release-manifest.json
           node ./tools/ci-cd-platform/release-tools/verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts
+          node ./tools/ci-cd-platform/release-tools/materialize-desktop-update-feed.mjs \
+            desktop-release-manifest.json artifacts desktop-update-feed stable
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           const manifest = JSON.parse(await readFile('desktop-release-manifest.json', 'utf8'));
           await writeFile('SHA256SUMS.txt', `${manifest.assets.map((asset) => `${asset.sha256}  ${asset.name}`).join('\n')}\n`);
           NODE
+
+      - name: Retain Desktop update feed evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-update-feed-evidence
+          path: desktop-update-feed
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 30
 
       - name: Upload the manifest-owned asset set to the draft GitHub Release
         env:
