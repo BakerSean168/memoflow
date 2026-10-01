@@ -111,13 +111,6 @@
       :conflicts="conflicts"
       @event-click="handleProjectionClick"
       @view-in-day="switchToDayView"
-      @complete-task="handleCompleteTask"
-    />
-
-    <TaskEventActionPanel
-      v-model:open="taskPanelOpen"
-      :event="selectedTaskEvent"
-      @complete-task="handleCompleteTask"
     />
 
     <PlannerEventDialog
@@ -126,7 +119,16 @@
       :has-conflict="selectedDetailHasConflict"
       @edit="handleEditCalendarEntry"
       @delete="handleDeleteCalendarEntry"
-    />
+    >
+      <template #owner-content="{ event }">
+        <TaskOccurrenceQuickSurface
+          v-if="eventDetailOpen && event.sourceType === 'task'"
+          :key="event.ownerCommandTarget.ownerId"
+          :occurrence-id="event.ownerCommandTarget.ownerId"
+          @open-plan="openTaskPlan"
+        />
+      </template>
+    </PlannerEventDialog>
     <CreateScheduleDialog
       v-model="showCreateDialog"
       :schedule="editingSchedule"
@@ -151,7 +153,8 @@ import {
 import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import CreateScheduleDialog from '../components/CreateScheduleDialog.vue';
 import PlannerDayDialog from '../components/PlannerDayDialog.vue';
-import TaskEventActionPanel from '../components/TaskEventActionPanel.vue';
+import TaskOccurrenceQuickSurface from '../../task/components/TaskOccurrenceQuickSurface.vue';
+import { useRouter } from 'vue-router';
 import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView';
 import { useSchedule } from '../composables/useSchedule';
@@ -180,6 +183,7 @@ import { plannerConflictSourceKeys } from '@memoflow/schedule/client';
 import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 const { t, locale } = useI18n();
+const router = useRouter();
 const { projections, conflicts, isLoading, fetchForRange, windowStart, windowEnd } =
   useCalendarView();
 const schedule = useSchedule();
@@ -203,10 +207,6 @@ const activeView = ref<PlannerCalendarView>('week');
 const currentPeriodTitle = ref('');
 const dayDetailOpen = ref(false);
 const selectedDate = ref<Date | null>(null);
-const taskPanelOpen = ref(false);
-const selectedTaskEvent = ref<Extract<CalendarEventProjection, { sourceType: 'task' }> | null>(
-  null,
-);
 const eventDetailOpen = ref(false);
 const selectedDetailEvent = ref<CalendarEventProjection | null>(null);
 
@@ -272,22 +272,14 @@ function goToToday(): void {
 }
 
 function handleProjectionClick(projection: CalendarEventProjection): void {
-  if (projection.sourceType === 'task') {
-    selectedTaskEvent.value = projection;
-    taskPanelOpen.value = true;
-    return;
-  }
-
   dayDetailOpen.value = false;
   selectedDetailEvent.value = projection;
   eventDetailOpen.value = true;
 }
 
-async function handleCompleteTask(originalId: string): Promise<void> {
-  const result = await task.completeOccurrence(originalId);
-  if (result && windowStart.value && windowEnd.value) {
-    await fetchForRange(windowStart.value, windowEnd.value);
-  }
+function openTaskPlan(id: string): void {
+  eventDetailOpen.value = false;
+  void router.push({ name: 'task-detail', params: { id } });
 }
 
 function plannerConflictMessage(

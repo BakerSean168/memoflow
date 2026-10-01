@@ -39,17 +39,6 @@
           </span>
           <AlertCircle v-if="hasConflict(event)" class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
         </button>
-
-        <button
-          v-if="event.sourceType === 'task' && event.displayMetadata.status !== 'Completed'"
-          type="button"
-          :aria-label="t('task.action.complete')"
-          class="m-2 ml-0 shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-success/10 hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          :title="t('task.action.complete')"
-          @click="emit('complete-task', event.ownerCommandTarget.ownerId)"
-        >
-          <CheckCircle2 class="h-4 w-4" />
-        </button>
       </div>
     </div>
   </DefineBody>
@@ -109,7 +98,7 @@ import { computed } from 'vue';
 import { createReusableTemplate } from '@vueuse/core';
 import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';
 import { useI18n } from 'vue-i18n';
-import { AlertCircle, Calendar, CalendarDays, CheckCircle2 } from '@lucide/vue';
+import { AlertCircle, Calendar, CalendarDays } from '@lucide/vue';
 import type {
   CalendarEventProjection,
   PlannerConflictProjection,
@@ -148,7 +137,6 @@ const emit = defineEmits<{
   (e: 'update:open', value: boolean): void;
   (e: 'event-click', event: CalendarEventProjection): void;
   (e: 'view-in-day', date: Date | null): void;
-  (e: 'complete-task', originalId: string): void;
 }>();
 
 const { t } = useI18n();

@@ -34,7 +34,7 @@
         </div>
 
         <div
-          v-if="event.displayMetadata.status"
+          v-if="event.sourceType !== 'task' && event.displayMetadata.status"
           class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3"
         >
           <dt class="text-xs font-medium text-muted-foreground">
@@ -63,7 +63,12 @@
         </AlertDescription>
       </Alert>
 
-      <p v-if="!isScheduleEntry" class="text-xs leading-5 text-muted-foreground">
+      <slot name="owner-content" :event="event" />
+
+      <p
+        v-if="!isScheduleEntry && event.sourceType !== 'task'"
+        class="text-xs leading-5 text-muted-foreground"
+      >
         {{ t('schedule.eventDetail.readOnlyHint') }}
       </p>
     </div>

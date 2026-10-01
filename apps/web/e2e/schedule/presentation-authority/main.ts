@@ -17,6 +17,17 @@ import ScheduleCapsulePreview from '@memoflow/app-vue/layouts/shell/previews/Sch
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
+import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
+import { ok } from '@memoflow/contracts/result';
+import {
+  TaskHmSchema,
+  TaskYmdSchema,
+  type TaskOccurrenceClientDTO,
+} from '@memoflow/contracts/task';
+import {
+  instance,
+  template,
+} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
 import { createPinia } from 'pinia';
 import { Toaster } from 'vue-sonner';
 import ScheduleCalendarView from '@memoflow/app-vue/modules/schedule/views/ScheduleCalendarView.vue';
@@ -189,6 +200,90 @@ const scheduleService = {
   },
 };
 
+// Isolated production-component acceptance: deterministic service doubles, no live backend.
+let occurrence = instance({
+  id: 'task-occurrence-1' as TaskOccurrenceClientDTO['id'],
+  dueAt: Date.parse('2026-10-01T10:30:00Z'),
+  scheduleSnapshot: {
+    date: TaskYmdSchema.parse('2026-10-01'),
+    timing: { kind: 'At', time: TaskHmSchema.parse('10:30') },
+  },
+  checklistState: [
+    {
+      definitionId: 'step',
+      titleSnapshot: 'Review checklist',
+      completed: false,
+      completedAt: null,
+    },
+  ],
+});
+const taskPlan = {
+  ...template,
+  name: 'Review task / 复盘任务',
+  goalBinding:
+    params.get('prompt') === '1'
+      ? {
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          contribution: null,
+          progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 2 },
+        }
+      : null,
+};
+function taskResult(command: string, status: TaskOccurrenceClientDTO['status'], request?: unknown) {
+  calls.push({ command, id: String(occurrence.id), request });
+  occurrence = {
+    ...occurrence,
+    status,
+    result: instance({ status }).result,
+    version: occurrence.version + 1,
+  };
+  return ok({ toDTO: () => occurrence });
+}
+const taskService = {
+  getOccurrence: async () => ok({ toDTO: () => occurrence }),
+  getPlan: async () => ok({ toDTO: () => taskPlan }),
+  listPlans: async () =>
+    ok({
+      plans: surface === 'task-quick' ? [{ toDTO: () => taskPlan }] : [],
+      total: surface === 'task-quick' ? 1 : 0,
+    }),
+  listOccurrencesByDateRange: async () =>
+    ok(surface === 'task-quick' ? [{ toDTO: () => occurrence }] : []),
+  completeOccurrence: async (_id: string, request?: unknown) =>
+    taskResult('complete', 'Completed', request),
+  uncompleteOccurrence: async () => taskResult('uncomplete', 'Pending'),
+  markOccurrenceMissed: async () => taskResult('missed', 'Missed'),
+  skipOccurrence: async () => taskResult('skip', 'Skipped'),
+  setOccurrenceChecklistItem: async (
+    _id: string,
+    request: { completed: boolean; expectedVersion: number },
+  ) => {
+    occurrence = {
+      ...occurrence,
+      checklistState: occurrence.checklistState.map((item) => ({
+        ...item,
+        completed: request.completed,
+      })),
+    };
+    return taskResult('checklist', occurrence.status, request);
+  },
+};
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    { path: '/', component: { render: () => null } },
+    {
+      path: '/tasks/:id',
+      name: 'task-detail',
+      component: {
+        render: () =>
+          h('div', { 'data-testid': 'task-plan-sentinel' }, 'Canonical Task plan destination'),
+      },
+    },
+  ],
+});
+
 const Root = defineComponent({
   setup() {
     const { width } = providePanelWidth();
@@ -208,9 +303,10 @@ const Root = defineComponent({
           'data-view': view,
         },
         [
+          h(RouterView),
           h(GlobalConfirmDialog),
           h(Toaster),
-          surface === 'crud'
+          surface === 'crud' || (surface === 'task-quick' && router.currentRoute.value.path === '/')
             ? h('section', { class: 'h-[800px]' }, [h(ScheduleCalendarView)])
             : null,
           surface === 'calendar'
@@ -257,10 +353,26 @@ const Root = defineComponent({
 
 const app = createApp(Root);
 app.use(createPinia());
+app.use(router);
 installServerStateRuntime(app, 'web', { identityScope: 'acceptance' });
 app.provide(SCHEDULE_SERVICE_KEY, scheduleService as never);
-app.provide(TASK_SERVICE_KEY, {} as never);
+app.provide(TASK_SERVICE_KEY, taskService as never);
 app.provide(GOAL_SERVICE_KEY, {
+  listGoals: async () => ok({ goals: [], pagination: { hasMore: false } }),
+  getGoalRecordsByKeyResult: async () =>
+    ok({
+      records: [],
+      previewContext: {
+        keyResultId: 'kr-1',
+        aggregationMethod: 'Sum',
+        unit: 'units',
+        initialValue: 0,
+        currentValue: 40,
+        trackingBaseValue: 40,
+        targetValue: 100,
+        aggregationSnapshot: { count: 0, sum: 0, min: null, max: null, last: null },
+      },
+    }),
   updateGoal: async () => {
     throw new Error('Unexpected Goal mutation');
   },
