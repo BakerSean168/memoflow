@@ -1,9 +1,14 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
 import ProductEntityIdentity from './ProductEntityIdentity.vue';
 import ProductMetadataRow from './ProductMetadataRow.vue';
 import ProductMoreProperties from './ProductMoreProperties.vue';
+
+const appRoot = resolve(import.meta.dirname, '..', '..');
+const read = (relative: string) => readFileSync(resolve(appRoot, relative), 'utf8');
 
 describe('product entity metadata primitives', () => {
   it('keeps entity identity presentation-only', () => {
@@ -47,5 +52,31 @@ describe('product entity metadata primitives', () => {
     const trigger = wrapper.get('[data-testid="more-properties"]');
     expect(trigger.attributes('aria-label')).toBe('More properties');
     expect(trigger.attributes('data-slot')).toBe('product-more-properties-trigger');
+  });
+
+  it('keeps Goal and Task on the same metadata grammar while domain actions stay owner-owned', () => {
+    const goal = read('modules/goal/views/GoalDetailView.vue');
+    const task = read('modules/task/views/TaskDetailView.vue');
+
+    for (const source of [goal, task]) {
+      expect(source).toContain('<ProductEntityIdentity');
+      expect(source).toContain('<ProductMetadataRow');
+      expect(source).toContain('<ProductMoreProperties');
+    }
+
+    expect(task).toContain('<ProductPropertyChip');
+    expect(goal).toContain('createTaskForGoal');
+    expect(task).toContain('req.goalBinding = nextGoalBinding');
+
+    for (const primitive of [
+      'shared/components/ProductEntityIdentity.vue',
+      'shared/components/ProductMetadataRow.vue',
+      'shared/components/ProductMoreProperties.vue',
+      'shared/components/ProductPropertyChip.vue',
+    ]) {
+      const source = read(primitive);
+      expect(source).not.toContain('modules/goal');
+      expect(source).not.toContain('modules/task');
+    }
   });
 });

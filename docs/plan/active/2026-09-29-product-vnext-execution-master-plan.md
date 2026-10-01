@@ -1236,9 +1236,13 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Goal:** Goal/Task 已验证的 metadata/property 视觉复用。
 
-**Candidates:** ProductEntityIdentity / ProductMetadataRow / ProductMetadataChip / ProductMoreProperties。
+**Primitives:** ProductEntityIdentity / ProductMetadataRow / ProductPropertyChip / ProductMoreProperties。
+
+`ProductPropertyChip` is the accepted chip name; do not introduce a duplicate `ProductMetadataChip` alias.
 
 **Rule:** 只抽 presentation，domain decisions 留 owner。
+
+**Execution (2026-10-01): Accepted / frozen after reconciliation re-validation.** Goal and Task detail now share the accepted presentation-only entity grammar — `ProductEntityIdentity`, `ProductMetadataRow`, `ProductPropertyChip`, and `ProductMoreProperties` — while owner routing, queries and mutations remain in their modules. The stale `ProductMetadataChip` candidate name is retired in favor of the already-proven `ProductPropertyChip`; no alias/duplicate component is added. Acceptance also repaired a reconciled GoalDetailView test fixture so the existing KR weight tests render the shared `ProductPopoverSurface` slot after the overlay migration; production behavior was unchanged. Fresh verification passed 7 App-Vue files / 65 tests, uncached App-Vue typecheck, 1,335-file inventory, full uncached governance, targeted ESLint/Prettier and diff checks. Evidence: [UI-2102 entity property/metadata grammar](../archive/2026-10-01-pvc-ui-2102-entity-property-metadata-grammar.md).
 
 ---
 

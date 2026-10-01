@@ -119,6 +119,7 @@ function mountDetail(locale = 'en-US') {
         Popover: SlotStub,
         PopoverTrigger: SlotStub,
         PopoverContent: SlotStub,
+        ProductPopoverSurface: SlotStub,
         DropdownMenu: SlotStub,
         DropdownMenuTrigger: SlotStub,
         DropdownMenuContent: SlotStub,

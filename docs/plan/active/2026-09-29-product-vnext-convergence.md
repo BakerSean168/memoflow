@@ -264,6 +264,7 @@ Create a stable point from which product convergence can proceed on top of the m
 **Goal:** Ensure this cycle starts from the merged UI baseline rather than a stale integration branch.
 
 **Implementation:**
+
 1. Fetch the merged `origin/main` after PR #398 completion.
 2. Rebase `product/vnext-convergence` onto `main@d3a32135709`.
 3. Verify the previous base `2b62c037a18` is contained in `main`.
@@ -277,6 +278,7 @@ Create a stable point from which product convergence can proceed on top of the m
 **Goal:** Replace ad-hoc `tmp-*.png` evidence with repeatable fixtures.
 
 **Surfaces:**
+
 - Goal create;
 - Goal detail with 0/1/multiple KR;
 - Task list + Task detail;
@@ -288,6 +290,7 @@ Create a stable point from which product convergence can proceed on top of the m
 - module capsule previews.
 
 **Matrix:**
+
 - light + dark;
 - zh-CN + en-US for representative locale-sensitive surfaces;
 - business-panel widths near 520 / 700 / 900+ CSS px;
@@ -300,6 +303,7 @@ Create a stable point from which product convergence can proceed on top of the m
 **Goal:** Characterize existing KR/Review routes before retiring their pages.
 
 **Tests:**
+
 - direct deep link opens correct Goal/KR or Review context;
 - refresh preserves context;
 - invalid object id has bounded not-found behavior;
@@ -345,11 +349,13 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Goal:** Goal creation does not ask the user to configure reminders.
 
 **Scope:**
+
 - `GoalDialog.vue`;
 - focused Goal dialog tests;
 - create-mode visual baseline.
 
 **Implementation:**
+
 1. Remove `GoalReminderChip` from create-mode property row.
 2. Keep reminder configuration available for existing Goal edit/detail paths.
 3. Ensure create payload remains valid with `reminderConfig = null`.
@@ -365,11 +371,13 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Goal:** A KR explains its current state without requiring navigation.
 
 **Scope:**
+
 - Goal Detail KR section;
 - `GoalKeyResultTrajectoryPlot`;
 - KR summary/inline surface.
 
 **Implementation:**
+
 1. Promote trajectory visualization into the Goal Detail KR surface.
 2. Show Initial / Current / Target, unit, calculation method, weight and target timeframe around the trajectory.
 3. Preserve compact density when multiple KR exist.
@@ -386,6 +394,7 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Goal:** Routine KR edits require no explicit Edit action.
 
 **Implementation:**
+
 1. Title and description become inline-editable.
 2. Calculation method opens an inline menu/popover.
 3. Weight uses the existing compact popover.
@@ -406,14 +415,15 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Mapping:**
 
 | Contract | Product label | Record prompt |
-| --- | --- | --- |
-| Sum | 累计 | 本次增加 |
-| Average | 平均值 | 本次测量 |
-| Max | 最高值 | 本次测量 |
-| Min | 最低值 | 本次测量 |
-| Last | 最新值 | 当前值 |
+| -------- | ------------- | ------------- |
+| Sum      | 累计          | 本次增加      |
+| Average  | 平均值        | 本次测量      |
+| Max      | 最高值        | 本次测量      |
+| Min      | 最低值        | 本次测量      |
+| Last     | 最新值        | 当前值        |
 
 **Implementation:**
+
 1. Define a single presentation mapping.
 2. Reuse it in create/edit, Goal Detail and Inspect Dialog.
 3. Add one-sentence explanations/examples.
@@ -430,6 +440,7 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Current defect:** Existing `GoalRecordDialog` presents increment semantics and `+1/+2/+5/+10` quick values for every calculation method.
 
 **Implementation:**
+
 1. Resolve the KR measurement/calculation method before rendering the dialog.
 2. Render `本次增加` for Sum.
 3. Render `当前值` for Last.
@@ -449,6 +460,7 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Goal:** A Record can be added in seconds from the KR surface.
 
 **Implementation:**
+
 1. Provide a clear current-point/current-value affordance.
 2. Open a compact check-in Dialog/Popover with value focus.
 3. Preserve keyboard submit/cancel.
@@ -464,6 +476,7 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 **Goal:** Replace `KeyResultDetailView` with an inspect surface.
 
 **Inspect content:**
+
 - larger trajectory;
 - full Record history;
 - linked Task context;
@@ -472,6 +485,7 @@ Once this loop is coherent, it becomes a credible reference for product-wide con
 - optional AI analysis.
 
 **Implementation:**
+
 1. Introduce a KR Inspect Dialog controlled by Goal Detail.
 2. Keep routine edits direct inside the parent/inspect surface.
 3. Route existing `key-result-detail` deep link into Goal Detail + inspect state.
@@ -510,6 +524,7 @@ User-selectable alternatives:
 - 自定义.
 
 **Implementation:**
+
 1. Add/derive previous-review context in the owner service/use-case without making the UI guess from stale local lists.
 2. Preserve existing explicit `windowDays` compatibility while introducing the default-resolution behavior.
 3. Ensure adjacent windows do not create silent gaps because `reviewedAt` differs from `windowEndAt`.
@@ -524,6 +539,7 @@ User-selectable alternatives:
 **Goal:** Review starts with evidence rather than blank fields.
 
 **Facts:**
+
 - overall start/end/delta;
 - KR start/end/delta;
 - trend;
@@ -532,6 +548,7 @@ User-selectable alternatives:
 - review period.
 
 **Deterministic signals may include:**
+
 - no KR updates for a meaningful portion of the review window;
 - trend moving away from target;
 - Task activity with no corresponding KR movement;
@@ -539,6 +556,7 @@ User-selectable alternatives:
 - material change concentrated in one KR.
 
 **Rules:**
+
 - signals must be explainable from owner data;
 - no LLM is required to produce them;
 - avoid pretending causal inference is certain.
@@ -568,6 +586,7 @@ Large Review Dialog
 ```
 
 **Implementation:**
+
 1. Replace create-page entry with Goal Detail dialog state.
 2. Replace review-detail route rendering with read-only Dialog state.
 3. Preserve explicit save/cancel and unsaved-change behavior.
@@ -583,10 +602,12 @@ Large Review Dialog
 **Goal:** AI helps analyze and draft; it does not own Review truth.
 
 **Capabilities:**
+
 - `帮我分析本周期`;
 - `使用这些内容生成复盘草稿`.
 
 **Context:**
+
 - Goal/KR current state;
 - Record history in selected window;
 - Task contributions;
@@ -594,6 +615,7 @@ Large Review Dialog
 - authorized Knowledge context where supported.
 
 **Guardrails:**
+
 - system facts are rendered separately from AI prose;
 - AI output is visibly a suggestion/draft;
 - saving Review still requires user action;
@@ -629,6 +651,7 @@ Large Review Dialog
 **Goal:** Freeze Goal as the first product reference surface.
 
 **Required states:**
+
 - create empty;
 - create with KR;
 - Goal with no KR;
@@ -645,6 +668,7 @@ Large Review Dialog
 - zh-CN/en-US.
 
 **Acceptance evidence:**
+
 - focused unit tests;
 - integration/flow tests;
 - visual baselines;
@@ -681,11 +705,11 @@ Each variant owns:
 
 ### PVC-UI-2102 — Entity identity + metadata grammar
 
-Candidate shared pieces:
+Accepted shared pieces:
 
 - `ProductEntityIdentity`
 - `ProductMetadataRow`
-- `ProductMetadataChip`
+- `ProductPropertyChip` (accepted existing name; do not add a parallel `ProductMetadataChip`)
 - `ProductMoreProperties`
 
 Do not move domain decisions into these components.
