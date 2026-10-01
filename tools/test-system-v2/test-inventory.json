@@ -3372,6 +3372,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/di/desktop-auth-api-key-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [

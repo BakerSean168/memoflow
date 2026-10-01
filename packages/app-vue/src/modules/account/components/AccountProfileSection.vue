@@ -25,6 +25,7 @@ import {
   Switch,
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
+import { SettingsDangerZone, SettingsSection } from '../../../components/shared/settings';
 import { LockKeyhole, LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
@@ -301,15 +302,13 @@ onMounted(() => {
       </CardFooter>
     </Card>
 
-    <Card v-if="lockProfile" class="border-border/70">
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2">
-          <LockKeyhole class="h-4 w-4" />
-          {{ t('account.actions.lockProfile') }}
-        </CardTitle>
-        <CardDescription>{{ t('account.lockProfileHint') }}</CardDescription>
-      </CardHeader>
-      <CardContent class="flex justify-end">
+    <SettingsSection
+      v-if="lockProfile"
+      :title="t('account.actions.lockProfile')"
+      :description="t('account.lockProfileHint')"
+      test-id="account-lock-profile-section"
+    >
+      <template #actions>
         <Button
           data-testid="account-lock-profile-button"
           variant="outline"
@@ -318,8 +317,8 @@ onMounted(() => {
           <LockKeyhole class="mr-2 h-4 w-4" />
           {{ t('account.actions.lockProfile') }}
         </Button>
-      </CardContent>
-    </Card>
+      </template>
+    </SettingsSection>
 
     <Card v-if="canConfigureLocalPin" class="border-border/70">
       <CardHeader>
@@ -387,21 +386,18 @@ onMounted(() => {
       </CardContent>
     </Card>
 
-    <!-- 登出：破坏性动作分区（§0.1 危险区约定） -->
-    <Card v-if="authStore.isAuthenticated" class="border-destructive/30 bg-destructive/8">
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2 text-destructive">
-          <LogOut class="h-4 w-4" />
-          {{ t('account.actions.logout') }}
-        </CardTitle>
-        <CardDescription>{{ t('account.logoutHint') }}</CardDescription>
-      </CardHeader>
+    <!-- Destructive account actions stay explicit while sharing the Settings danger-zone grammar. -->
+    <SettingsDangerZone
+      v-if="authStore.isAuthenticated"
+      :title="t('account.actions.logout')"
+      :description="t('account.logoutHint')"
+      test-id="account-logout-section"
+    >
+      <p class="mt-2 text-xs leading-5 text-muted-foreground">
+        {{ t('account.logoutConfirm.description') }}
+      </p>
 
-      <CardContent class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <p class="text-sm leading-6 text-muted-foreground">
-          {{ t('account.logoutConfirm.description') }}
-        </p>
-
+      <template #actions>
         <Button
           data-testid="account-logout-button"
           variant="destructive"
@@ -411,7 +407,7 @@ onMounted(() => {
           <LogOut class="mr-2 h-4 w-4" />
           {{ t('account.actions.logout') }}
         </Button>
-      </CardContent>
-    </Card>
+      </template>
+    </SettingsDangerZone>
   </div>
 </template>

@@ -53,18 +53,29 @@ const ButtonStub = defineComponent({
   },
 });
 
-function mountSection(props: { currentTheme?: 'light' | 'dark' | 'auto' | null; resetting?: boolean } = {}) {
+const SelectStub = defineComponent({
+  name: 'SelectStub',
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  setup(_, { slots }) {
+    return () => h('div', { 'data-testid': 'reset-select-stub' }, slots.default?.());
+  },
+});
+
+function mountSection(
+  props: { currentTheme?: 'light' | 'dark' | 'auto' | null; resetting?: boolean } = {},
+) {
   return mount(SettingsResetSection, {
     props,
     global: {
       plugins: [i18n],
       stubs: {
         Button: ButtonStub,
-        Card: PassthroughStub,
-        CardContent: PassthroughStub,
-        CardDescription: PassthroughStub,
-        CardHeader: PassthroughStub,
-        CardTitle: PassthroughStub,
+        Select: SelectStub,
+        SelectTrigger: PassthroughStub,
+        SelectContent: PassthroughStub,
+        SelectItem: PassthroughStub,
+        SelectValue: PassthroughStub,
         RotateCcw: true,
       },
     },
@@ -77,13 +88,17 @@ describe('SettingsResetSection canonical reset scope', () => {
     expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('dark');
   });
 
-  it('emits presentation/regional owner reset targets', async () => {
+  it('emits presentation/regional owner reset targets through the standard Select surface', async () => {
     const wrapper = mountSection();
-    await wrapper.get('[data-testid="settings-reset-category"]').setValue('presentation');
+    const select = wrapper.findComponent(SelectStub);
+
+    select.vm.$emit('update:modelValue', 'presentation');
+    await wrapper.vm.$nextTick();
     await wrapper.get('[data-testid="settings-reset-button"]').trigger('click');
     expect(wrapper.emitted('reset')).toEqual([['presentation']]);
 
-    await wrapper.get('[data-testid="settings-reset-category"]').setValue('regional');
+    select.vm.$emit('update:modelValue', 'regional');
+    await wrapper.vm.$nextTick();
     await wrapper.get('[data-testid="settings-reset-button"]').trigger('click');
     expect(wrapper.emitted('reset')).toEqual([['presentation'], ['regional']]);
   });
@@ -94,7 +109,9 @@ describe('SettingsResetSection canonical reset scope', () => {
     expect(wrapper.emitted('reset')).toEqual([['all']]);
 
     await wrapper.setProps({ resetting: true });
-    expect(wrapper.get('[data-testid="settings-reset-button"]').attributes('disabled')).toBeDefined();
+    expect(
+      wrapper.get('[data-testid="settings-reset-button"]').attributes('disabled'),
+    ).toBeDefined();
     expect(wrapper.text()).toContain('Resetting...');
   });
 });

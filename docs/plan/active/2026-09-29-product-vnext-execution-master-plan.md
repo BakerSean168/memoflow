@@ -1191,6 +1191,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** 简单 preference 不再默认包一层 heavy Card。
 
+**Execution (2026-10-01): Implemented / validated.** Added presentation-only Settings primitives for lightweight sections, property rows, status blocks, bounded object cards, danger zones, and dialog shells. Appearance/Locale now use section/property-row grammar instead of heavy Cards, reset uses the standard Select inside a danger zone, canonical preference loading/errors use the shared status block, and Account lock/logout prove the same section/danger semantics without changing Profile/Auth/PIN ownership. Focused Settings/Account tests, App-Vue typecheck, targeted lint/format, inventory 1292, governance, diff gates, and the canonical Web theme-persistence E2E pass. See [implementation report](../archive/2026-10-01-pvc-set-7201-settings-section-property-primitives.md).
+
 ---
 
 ## PVC-SET-7202 — Settings owner-section migration
