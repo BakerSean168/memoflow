@@ -1,10 +1,9 @@
 import { defineConfig, mergeConfig, type UserConfig } from 'vitest/config';
 import { createSharedConfig } from '../../vitest.shared.ts';
-import { taskPerformanceAliases } from './vitest.performance.config';
+import { taskPerformanceAliases } from './vitest.performance.config.ts';
 
 const experimentIncludes = [
-  'src/server/application/__tests__/benchmarks/memory.bench.ts',
-  'src/server/application/__tests__/benchmarks/stability.bench.ts',
+  'src/server/domain/performance/task-vnext.performance-experiment.bench.ts',
 ];
 
 export default mergeConfig(
