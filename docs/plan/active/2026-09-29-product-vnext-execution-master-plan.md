@@ -1066,6 +1066,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** 用户无需手输 `Asia/Shanghai`；WallClock semantics 不变。
 
+**Execution (2026-10-01): Accepted / frozen after independent review.** Routine WallClock retains exact Ymd + Hm + IANA semantics through day-only ProductDatePicker, shared ProductTimePicker and searchable ProductTimeZoneSelector; Product zone/today defaults and persisted overrides round-trip without Instant conversion. All four numeric controls use the existing NumberField family with minima 1/1/0/1; its missing UI-package public export is added. Review repairs restore invalid time parts from the committed model on blur without emission and base invalid arrow steps on committed parts; Routine explicitly supplies localized hour/minute and timezone default/search/empty labels, verified in zh-CN. Shared controls plus all Routine tests passed 8 files / 54 tests, including 12 runtime editor cases. After rebasing onto accepted batch `bb90af8f52a4`, ChatGPT Web independently reviewed the control/WallClock boundaries and reran the same 8-file / 54-test matrix uncached; `app-vue:typecheck --skip-nx-cache` completed through `vue-tsc`, and changed-file ESLint/Prettier, 1,295-file inventory, governance and diff checks passed. Browser harness not added; no browser/live-backend acceptance is claimed. ROUTINE-5102/5103 remain unchanged. Exact files, red-first evidence, fallback scope and validation: [ROUTINE-5101 Product Time controls](../archive/2026-10-01-pvc-routine-5101-product-time-controls.md).
+
 ---
 
 ## PVC-ROUTINE-5102 — Routine toolbar/profile hierarchy
