@@ -362,6 +362,8 @@ jobs:
           sudo apt-get install -y "$deb_path"
           test -x /opt/MemoFlow/memoflow
           test -f /usr/share/applications/memoflow.desktop
+          test -f /opt/MemoFlow/resources/package-type
+          test "$(cat /opt/MemoFlow/resources/package-type)" = 'deb'
 
       - name: Run installed Linux Debian runtime smoke
         timeout-minutes: 5

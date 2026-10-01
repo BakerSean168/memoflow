@@ -96,9 +96,12 @@ export function presentDesktopUpdateSettings(
       return {
         kind: 'available',
         titleKey: 'setting.updates.status.available',
-        descriptionKey: state.autoDownloadEligible
-          ? 'setting.updates.description.availableAutoDownload'
-          : 'setting.updates.description.available',
+        descriptionKey:
+          snapshot.owner === 'package-manager'
+            ? 'setting.updates.description.availablePackageManager'
+            : state.autoDownloadEligible
+              ? 'setting.updates.description.availableAutoDownload'
+              : 'setting.updates.description.available',
         action: 'none',
         actionKey: null,
         progressPercent: null,
@@ -155,7 +158,11 @@ export function presentDesktopUpdateSettings(
         state.recoverableTo === 'ready' &&
         state.operation === 'install' &&
         snapshot.capabilities.canSelfInstall;
-      const canRetryCheck = state.failure.retryable && snapshot.capabilities.canCheck;
+      const canRetryCheck =
+        state.failure.retryable &&
+        (state.recoverableTo === 'available'
+          ? snapshot.capabilities.canDownload
+          : snapshot.capabilities.canCheck);
 
       return {
         kind: 'failed',

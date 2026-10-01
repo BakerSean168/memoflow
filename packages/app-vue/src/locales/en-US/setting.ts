@@ -58,6 +58,7 @@ export default {
       "upToDate": "This installation is already on the latest version in the stable channel.",
       "checking": "Connecting to the update source and validating the latest release metadata.",
       "available": "A new version is available and will follow this installation's download policy.",
+      "availablePackageManager": "A new version is available. Updates are managed by your system package manager. Use it or your system software updater to upgrade.",
       "availableAutoDownload": "A new version is available. MemoFlow will download it in the background without interrupting your work.",
       "downloading": "The update is downloading in the background. You can keep using MemoFlow.",
       "preparing": "The package is downloaded and is being verified and prepared for installation.",

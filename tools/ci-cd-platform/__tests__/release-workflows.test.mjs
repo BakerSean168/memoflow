@@ -493,6 +493,9 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   const installDeb = workflowStep(workflow, 'Install Linux Debian package');
   assert.match(installDeb, /deb_path="\$\(realpath/u);
   assert.match(installDeb, /apt-get install -y "\$deb_path"/u);
+  assert.match(installDeb, /test -f \/opt\/MemoFlow\/resources\/package-type/u);
+  assert.match(installDeb, /test "\$\(cat \/opt\/MemoFlow\/resources\/package-type\)" = 'deb'/u);
+  assert.doesNotMatch(installDeb, /continue-on-error\s*:\s*true|\|\|\s*true/u);
   assert.doesNotMatch(installDeb, /apt-get install -y "\$\{debs\[0\]\}"/u);
   for (const step of [packagedSmoke, installedSmoke]) {
     assert.match(step, /timeout-minutes:\s*5/u);

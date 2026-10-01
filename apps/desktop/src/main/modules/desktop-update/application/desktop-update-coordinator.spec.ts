@@ -286,27 +286,37 @@ describe('DesktopUpdateCoordinator', () => {
     expect(coordinator.getDiagnosticsObservation().lastCheckResult).toBe('update-available');
   });
 
-  it('does not self-download a package-manager-owned update', async () => {
-    const engine = new FakeEngine();
-    engine.check.mockResolvedValue({ kind: 'available', release });
+  it.each(['explicit', 'background'] as const)(
+    'keeps a package-manager release available after a %s check without download or install',
+    async (intent) => {
+      const engine = new FakeEngine();
+      engine.check.mockResolvedValue({ kind: 'available', release });
 
-    const coordinator = new DesktopUpdateCoordinator({
-      engine,
-      currentVersion: '1.2.2',
-      owner: 'package-manager',
-      capabilities: capabilitiesForInstallationOwner('package-manager'),
-      policy: { mode: 'manual', autoDownload: true },
-    });
-    await coordinator.initialize();
+      const coordinator = new DesktopUpdateCoordinator({
+        engine,
+        currentVersion: '1.2.2',
+        owner: 'package-manager',
+        capabilities: capabilitiesForInstallationOwner('package-manager'),
+        policy: { mode: 'manual', autoDownload: true },
+      });
+      await coordinator.initialize();
 
-    const snapshot = await coordinator.check('explicit');
+      const snapshot = await coordinator.check(intent);
 
-    expect(snapshot.state).toMatchObject({
-      type: 'available',
-      autoDownloadEligible: false,
-    });
-    expect(engine.download).not.toHaveBeenCalled();
-  });
+      expect(snapshot.state).toMatchObject({
+        type: 'available',
+        autoDownloadEligible: false,
+      });
+      engine.emit({ type: 'downloaded' });
+      expect(() => coordinator.beginRestartAndInstall()).toThrow();
+      expect(() => coordinator.handoffInstall()).toThrow();
+      expect(coordinator.getSnapshot().state.type).toBe('available');
+      expect(engine.download).not.toHaveBeenCalled();
+      expect(engine.prepare).not.toHaveBeenCalled();
+      expect(engine.quitAndInstall).not.toHaveBeenCalled();
+      coordinator.destroy();
+    },
+  );
 
   it('recovers a failed check before an explicit retry', async () => {
     const engine = new FakeEngine();

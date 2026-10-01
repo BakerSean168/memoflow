@@ -62,7 +62,7 @@ Linux AppImage
 
 ## User scope decision — 2026-10-01
 
-macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503, and DU-1504 are DEFERRED. macOS is not a gate for Windows feed/rollout work; next work must be non-macOS. DU-1402 and DU-1403 remain DONE only with passing cleanup validation. There is no live pointer cutover/CDN deployment in this scope.
+macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503, and DU-1504 are DEFERRED. macOS is not a gate for Windows feed/rollout work. Phase 6 is complete; remaining macOS work is deferred, with optional DU-1703/DU-1704 work as already planned. DU-1402 and DU-1403 remain DONE only with passing cleanup validation. There is no live pointer cutover/CDN deployment in this scope.
 
 ## Cleanup validation — 2026-10-01
 
@@ -81,7 +81,7 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1103` — **DONE**: immutable typed update state transitions, illegal-transition guards, intent propagation, and failure recovery are covered by focused tests.
 - `DU-1104` — **DONE**: electron-updater is isolated behind a MemoFlow engine port; SDK auto-download/auto-install are disabled, provider events/errors are normalized, and raw paths/errors do not cross the adapter boundary.
 - `DU-1105` — **DONE**: DesktopUpdateCoordinator owns scheduling, single-flight checks/downloads, explicit/background intent, automatic-download policy, replayable snapshots, and engine lifecycle; async error/check races preserve the first terminal state.
-- `DU-1106` — **DONE**: Desktop Update is composed exactly once at the process/Shell boundary, owned by `DesktopMainRuntime`, survives Profile/window lifecycle changes, and is destroyed only with the process runtime. Host installation evidence is conservative: packaged Windows NSIS and AppImage are self-managed, Snap is package-manager owned, dev/unknown Linux/direct macOS without signed provenance fail closed.
+- `DU-1106` — **DONE**: Desktop Update is composed exactly once at the process/Shell boundary, owned by `DesktopMainRuntime`, survives Profile/window lifecycle changes, and is destroyed only with the process runtime. Host installation evidence is conservative: packaged Windows NSIS and AppImage are self-managed, Snap and deb/rpm with a valid resources/package-type marker are package-manager owned, dev/unknown Linux/direct macOS without signed provenance fail closed.
 - **Phase 1 complete**: Desktop Update now has contracts, ownership, state machine, adapter, coordinator, and Shell singleton wiring with 52 focused update tests, Desktop main-process tests, full Desktop typecheck, and targeted ESLint green.
 - `DU-1201` — **DONE**: `DesktopShutdownCoordinator` now owns single-flight destructive cleanup, the 10s safety bound, failure/timeout settlement, shutdown reason ownership, and an explicit terminal-exit gate. Normal quit and update-install share this owner; update-install cleanup preserves the updater until handoff.
 - `DU-1202` — **DONE**: `UpdateInstallCoordinator` is the sole Restart-to-Update terminal path. It accepts only Ready, provides install single-flight, requires a durable pre-shutdown receipt, shares `DesktopShutdownCoordinator`, authorizes terminal exit immediately before `quitAndInstall()`, normalizes receipt/shutdown/handoff failures, and uses a 15s handoff watchdog to prevent a cleaned-but-alive zombie process.
@@ -104,7 +104,8 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Governance retains only the unchanged HEAD platform-leakage finding in a surface-test assertion. macOS DU-1501..1504 remain DEFERRED.
 - `DU-1702` — **DONE**: the executable non-macOS failure matrix locks all 14 required scenarios; focused coordinator retry/race and Settings action tests pass. Validation evidence is recorded under DU-1702 below.
 - `DU-1601` — **DONE**: Linux release evidence now preserves both installed-deb and actual AppImage runtime proofs, direct-AppImage feed eligibility requires the AppImage proof, release CI smokes the real AppImage separately from the installed Debian package, and the reusable installed-update gate now runs both Windows NSIS and Linux AppImage N→N+1 lanes. A native GCP Dev proof completed `0.14.0 → 0.14.1` with candidate byte replacement, relaunch/version verification, receipt clearance, and unchanged Profile/sentinel hashes.
-- Next non-macOS dependency: `DU-1602` — deb/rpm package-manager UX. macOS DU-1501..1504 remain deferred.
+- `DU-1602` — **DONE**: packaged Linux reads only the bounded electron-builder resources/package-type marker for deb/rpm, preserving AppImage/Snap precedence. Settings explains external package-manager upgrades and hides install/download retry actions; release CI requires the installed Debian marker before runtime smoke. Focused resolver/Shell/coordinator, Settings/locales, workflow contracts, both typechecks, and targeted checks pass. Native RPM installation is not claimed.
+- **Phase 6 complete**: remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned.
 
 ## 2. Non-goals
 
@@ -938,29 +939,56 @@ Validation evidence:
 - Native GCP Dev AppImage packaging produced base `0.14.0` SHA-256 `44724264588408f74f8e51af648765d4cdccdf6e641f39b3a06c00334dfe5684`, candidate `0.14.1` SHA-256 `26110a27ac3c2968cecc946a351f8ab406230c737239b2f33b1097826e987370`, and candidate metadata SHA-256 `19b8ae9eec9fcb2fd62ca170e76761c5e145ce1aae4ef217e85fd8e4994db382`.
 - Native GCP Dev AppImage N→N+1 proof — **PASS**: `checking (0.14.0) → install-requested → candidate-verified (0.14.1)`; installed bytes equal the candidate SHA-256, receipt cleared, Profile semantic hash stayed `4106a41c1ecab8c6140bdaba07f59ced8c758583dd034194f7cf3f7451002719`, and preservation sentinel hash stayed `bcdc7986817317d4ad8a55bc283892a9beeef5f089261a70b50586e8832fafbb`.
 
-Next non-macOS dependency: **DU-1602 — deb/rpm package-manager UX**.
+Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned.
 DU-1501..1504 remain **DEFERRED**.
 
 ---
 
 ## DU-1602 — deb/rpm package-manager UX
 
-**Goal:** 不向 package-managed 用户显示错误的“Restart to Update”。
+**Status: DONE (2026-10-01).**
 
-**Behavior:**
+Packaged Linux without APPIMAGE or SNAP reads exactly
+`process.resourcesPath/package-type` at the process-owned Shell boundary. The
+infrastructure resolver accepts only trimmed `deb`/`rpm`, bounds reads to 64 bytes,
+and fails closed for missing, unreadable, directory, oversized, unknown, or garbage
+markers. It does not infer provenance from distro, executable paths, or marker
+content as a path. Main supplies resourcesPath once; AppImage remains highest
+priority and Snap remains package-manager owned. Existing enterprise/store/portable
+precedence and all macOS behavior are unchanged.
 
-```text
-new version available
-→ “更新由系统包管理器管理”
-```
+Package-manager capabilities retain check/background-check permission and deny
+download, automatic download, and self-install. Release discovery settles at
+Available; coordinator tests prove explicit/background checks cannot download,
+prepare, enter Ready, restart, or hand off installation, even after a stray
+downloaded event. No package-manager commands or installation APIs were added to
+the application.
 
-可提供：
+Settings uses an owner-specific presentation key for Available in zh-CN/en-US,
+telling users to upgrade through their system software updater or package manager.
+Target version and release notes remain visible. Available and defensive Ready
+fixtures have no primary install action; failed download recovery respects
+canDownload rather than canCheck. Idle manual checks remain available.
 
-- documentation；
-- package repository action；
-- manual download；
+Release CI now requires `/opt/MemoFlow/resources/package-type` to exist and equal
+`deb` in the Debian installation step before installed runtime smoke. The workflow
+contract tests lock that gate and ordering. Existing actual AppImage smoke and
+DU-1601 N→N+1 gates are unchanged. This session did not execute native Debian/RPM
+installation; RPM provenance is covered by resolver and Shell unit tests only.
 
-但不模拟无感 install。
+Validation:
+
+- Desktop linux-package-type resolver (17), Shell composition (14), installation-owner detector (13), and desktop-update coordinator (21): 4 files / 65 tests passed.
+- app-vue presentation, Settings component, and locale symmetry: 3 files / 29 tests passed.
+- Release workflow contracts: 17 tests passed.
+- Full ci-cd-platform test suite: 161/161 tests passed.
+- Desktop typecheck passed; the final app-vue background typecheck run exited 0 using existing tools directly.
+- Targeted ESLint, test inventory generation/check, docs-check, and git diff whitespace checks passed.
+- Prettier passes for changed implementation/tests/workflow/docs/inventory; locale files retain their pre-existing formatting (HEAD also fails Prettier).
+- Governance stops at the known unchanged `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` window.electronAPI finding.
+
+Phase 6 is complete. Remaining macOS DU-1501..1504 stay DEFERRED; optional
+DU-1703/DU-1704 remain as already planned.
 
 ---
 
@@ -995,7 +1023,7 @@ Validation (from repository root; `NX_DAEMON=false` for Nx):
 - `git diff --check` and `pnpm nx run memoflow:docs-check` — pass.
 - `pnpm nx run memoflow:governance-check` — stops at the one unchanged HEAD platform-leakage finding: `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` contains a negative `window.electronAPI` assertion. Changed lines introduce no new violation; intentionally left outside DU-1701.
 
-DU-1702 and DU-1601 are now DONE (see evidence below / Phase 6). Next non-macOS dependency: **DU-1602 — deb/rpm package-manager UX**. DU-1501..1504 remain **DEFERRED**.
+DU-1702 and DU-1601 are now DONE (see evidence below / Phase 6). Phase 6 is complete. Remaining macOS DU-1501..1504 are deferred; optional DU-1703/DU-1704 remain as already planned. DU-1501..1504 remain **DEFERRED**.
 
 最小 diagnostics：
 
@@ -1055,8 +1083,7 @@ Validation evidence (focused runs only):
   generation/check (**1268 files; 1094 unit**), `git diff --check`, and
   `pnpm nx run memoflow:docs-check` passed.
 
-DU-1601 is now DONE (see Phase 6 evidence). Next non-macOS dependency:
-**DU-1602 — deb/rpm package-manager UX**. DU-1501..1504 remain deferred.
+DU-1601 is now DONE (see Phase 6 evidence). Phase 6 is complete. Remaining macOS work is deferred; optional DU-1703/DU-1704 remain as already planned. DU-1501..1504 remain deferred.
 
 Covered behavior:
 

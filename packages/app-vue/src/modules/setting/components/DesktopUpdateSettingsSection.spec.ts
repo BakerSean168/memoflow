@@ -10,6 +10,7 @@ import type {
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../../di/keys';
 import type { DesktopUpdateService } from '../../../di/types';
 import enSetting from '../../../locales/en-US/setting';
+import zhSetting from '../../../locales/zh-CN/setting';
 import DesktopUpdateSettingsSection from './DesktopUpdateSettingsSection.vue';
 
 function snapshot(
@@ -36,7 +37,7 @@ function snapshot(
   };
 }
 
-function createHarness(initial = snapshot()) {
+function createHarness(initial = snapshot(), locale = 'en-US') {
   const listeners = new Set<(value: DesktopUpdateSnapshotDTO) => void>();
   const unsubscribe = vi.fn((listener: (value: DesktopUpdateSnapshotDTO) => void) => {
     listeners.delete(listener);
@@ -94,8 +95,9 @@ function createHarness(initial = snapshot()) {
 
   const i18n = createI18n({
     legacy: false,
-    locale: 'en-US',
+    locale,
     messages: {
+      'zh-CN': { setting: zhSetting },
       'en-US': {
         setting: enSetting,
       },
@@ -189,6 +191,48 @@ function createHarness(initial = snapshot()) {
 }
 
 describe('DesktopUpdateSettingsSection', () => {
+  it.each([
+    { locale: 'en-US', setting: enSetting },
+    { locale: 'zh-CN', setting: zhSetting },
+  ])(
+    'renders externally managed available updates in $locale with version and notes',
+    async ({ locale, setting }) => {
+      const current = snapshot({
+        type: 'available',
+        intent: 'explicit',
+        autoDownloadEligible: false,
+        release: {
+          version: '1.3.0',
+          channel: 'stable',
+          publishedAt: null,
+          releaseNotes: 'Package release notes.',
+          releaseNotesUrl: null,
+        },
+      });
+      current.owner = 'package-manager';
+      current.capabilities = {
+        canCheck: true,
+        canBackgroundCheck: true,
+        canDownload: false,
+        canSelfInstall: false,
+        canAutoDownload: false,
+        installAuthority: 'package-manager',
+      };
+      const harness = createHarness(current, locale);
+      await flushPromises();
+      expect(harness.wrapper.text()).toContain(setting.updates.description.availablePackageManager);
+      expect(harness.wrapper.get('[data-testid="desktop-update-available-version"]').text()).toBe(
+        'v1.3.0',
+      );
+      expect(harness.wrapper.text()).toContain('Package release notes.');
+      expect(harness.wrapper.find('[data-testid="desktop-update-primary-action"]').exists()).toBe(
+        false,
+      );
+      expect(harness.restartAndInstall).not.toHaveBeenCalled();
+      harness.wrapper.unmount();
+    },
+  );
+
   it('shows safe diagnostics and bounded failure without URLs, paths or messages', async () => {
     const harness = createHarness();
     await flushPromises();

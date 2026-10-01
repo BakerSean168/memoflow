@@ -18,6 +18,11 @@ describe('Desktop Update settings locale symmetry', () => {
     expect(zhSetting.groups.updates).toBe('关于与更新');
   });
 
+  it('explains external package-manager upgrades in both locales', () => {
+    expect(enSetting.updates.description.availablePackageManager).toContain('package manager');
+    expect(zhSetting.updates.description.availablePackageManager).toContain('系统包管理器');
+  });
+
   it('keeps every About & Updates leaf key symmetric across en-US and zh-CN', () => {
     expect(flattenKeys(enSetting.updates.troubleshooting)).toContain('receiptStatus');
     expect(flattenKeys(enSetting.updates).sort()).toEqual(flattenKeys(zhSetting.updates).sort());

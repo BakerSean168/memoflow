@@ -9,6 +9,7 @@ import {
 import type { DesktopUpdateEngine, DesktopUpdateFeed } from '../application/desktop-update-engine';
 import { resolveDesktopUpdateFeed } from '../application/desktop-update-feed';
 import { ElectronUpdaterAdapter } from '../infrastructure/electron-updater.adapter';
+import { resolveLinuxPackageType } from '../infrastructure/linux-package-type.resolver';
 import {
   detectDesktopInstallationOwner,
   type DesktopInstallationDetection,
@@ -20,6 +21,7 @@ export interface DesktopUpdateShellHost {
   readonly currentVersion: string;
   readonly isPackaged: boolean;
   readonly platform: NodeJS.Platform | string;
+  readonly resourcesPath?: string;
   readonly isMacAppStore?: boolean;
   readonly isWindowsStore?: boolean;
   readonly env?: Readonly<NodeJS.ProcessEnv>;
@@ -48,8 +50,8 @@ function normalizePlatform(platform: string): DesktopInstallationPlatform {
  * Keep this conservative:
  * - AppImage self-identifies through APPIMAGE.
  * - Snap self-identifies through SNAP and remains package-manager owned.
- * - deb/rpm do not expose a trustworthy generic runtime marker, so they stay
- *   unsupported until DU-1602 adds package-specific ownership evidence.
+ * - deb/rpm self-identify through electron-builder's resources/package-type.
+ *   Missing or invalid markers remain unsupported.
  * - direct macOS remains untrusted until the signed/notarized lane can project
  *   durable build provenance in Phase 5.
  */
@@ -58,6 +60,15 @@ export function collectDesktopInstallationEvidence(
 ): DesktopInstallationEvidence {
   const env = host.env ?? process.env;
   const platform = normalizePlatform(host.platform);
+  const appImage = platform === 'linux' && Boolean(env.APPIMAGE);
+  const linuxPackageManager =
+    platform === 'linux' && !appImage
+      ? Boolean(env.SNAP)
+        ? 'snap'
+        : host.isPackaged
+          ? resolveLinuxPackageType(host.resourcesPath)
+          : undefined
+      : undefined;
 
   return {
     isPackaged: host.isPackaged,
@@ -65,8 +76,8 @@ export function collectDesktopInstallationEvidence(
     isMacAppStore: platform === 'darwin' && host.isMacAppStore === true,
     isWindowsStore: platform === 'win32' && host.isWindowsStore === true,
     portableExecutable: platform === 'win32' && Boolean(env.PORTABLE_EXECUTABLE_FILE),
-    appImage: platform === 'linux' && Boolean(env.APPIMAGE),
-    linuxPackageManager: platform === 'linux' && Boolean(env.SNAP) ? 'snap' : undefined,
+    appImage,
+    linuxPackageManager,
     macosTrust: platform === 'darwin' ? 'unknown' : undefined,
   };
 }

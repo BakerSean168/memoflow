@@ -151,6 +151,50 @@ describe('presentDesktopUpdateSettings', () => {
     });
   }
 
+  it.each(['available', 'ready'] as const)(
+    'keeps package-manager %s without an install action',
+    (type) => {
+      const current = snapshot({
+        type,
+        intent: 'explicit',
+        release,
+        ...(type === 'available' ? { autoDownloadEligible: true } : {}),
+      });
+      current.owner = 'package-manager';
+      current.capabilities = {
+        canCheck: true,
+        canBackgroundCheck: true,
+        canDownload: false,
+        canSelfInstall: false,
+        canAutoDownload: false,
+        installAuthority: 'package-manager',
+      };
+      const presentation = presentDesktopUpdateSettings(current);
+      expect(presentation).toMatchObject({ action: 'none', actionKey: null, release });
+      if (type === 'available')
+        expect(presentation.descriptionKey).toBe(
+          'setting.updates.description.availablePackageManager',
+        );
+    },
+  );
+
+  it('does not offer download retry when the installation cannot download', () => {
+    const current = snapshot({
+      type: 'failed',
+      operation: 'download',
+      failure: { code: 'download-failed', message: 'Failed', retryable: true },
+      recoverableTo: 'available',
+      release,
+    });
+    current.owner = 'package-manager';
+    current.capabilities.canDownload = false;
+    current.capabilities.canSelfInstall = false;
+    expect(presentDesktopUpdateSettings(current)).toMatchObject({
+      action: 'none',
+      actionKey: null,
+    });
+  });
+
   it('shows explicit up-to-date feedback only after an explicit successful check', () => {
     const current = snapshot({
       type: 'idle',

@@ -58,6 +58,7 @@ export default {
       "upToDate": "当前安装已经是稳定通道中的最新版本。",
       "checking": "正在连接更新源并验证最新版本信息。",
       "available": "新版本可用，下载会按照当前安装策略继续。",
+      "availablePackageManager": "发现新版本，更新由系统包管理器负责。请使用系统的软件更新工具或包管理器完成升级。",
       "availableAutoDownload": "新版本可用，MemoFlow 将在后台下载，不会打断当前工作。",
       "downloading": "下载在后台进行，你可以继续使用 MemoFlow。",
       "preparing": "安装包已下载，正在完成校验与安装准备。",

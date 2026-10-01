@@ -1,4 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
   DesktopUpdateEngine,
   DesktopUpdateEngineCheckResult,
@@ -24,6 +27,21 @@ class FakeEngine implements DesktopUpdateEngine {
     return () => undefined;
   }
 }
+
+const temporaryDirectories: string[] = [];
+
+function resourcesWithMarker(marker?: string): string {
+  const directory = mkdtempSync(join(tmpdir(), 'memoflow-package-type-'));
+  temporaryDirectories.push(directory);
+  const resourcesPath = join(directory, 'resources');
+  mkdirSync(resourcesPath);
+  if (marker !== undefined) writeFileSync(join(resourcesPath, 'package-type'), marker);
+  return resourcesPath;
+}
+
+afterEach(() => {
+  for (const directory of temporaryDirectories.splice(0)) rmSync(directory, { recursive: true });
+});
 
 describe('Desktop Update shell composition', () => {
   it('keeps development builds fail-closed without initializing electron-updater', async () => {
@@ -185,21 +203,78 @@ describe('Desktop Update shell composition', () => {
     });
   });
 
-  it('fails closed for deb/rpm-shaped Linux installs until durable package provenance exists', () => {
+  it.each([undefined, 'unknown', '../deb'])(
+    'fails closed for absent or invalid Linux marker %s',
+    (marker) => {
+      const runtime = composeDesktopUpdateShellRuntime(
+        {
+          currentVersion: '0.14.1',
+          isPackaged: true,
+          platform: 'linux',
+          resourcesPath: resourcesWithMarker(marker),
+          env: {},
+        },
+        { engine: new FakeEngine(), policy: { mode: 'manual' } },
+      );
+
+      expect(runtime.installation).toMatchObject({
+        owner: 'unsupported',
+        reason: 'unknown-installation',
+      });
+    },
+  );
+
+  it.each(['deb', 'rpm'])('composes the %s marker as package-manager owned', async (marker) => {
+    const engine = new FakeEngine();
     const runtime = composeDesktopUpdateShellRuntime(
       {
         currentVersion: '0.14.1',
         isPackaged: true,
         platform: 'linux',
+        resourcesPath: resourcesWithMarker(marker),
         env: {},
+      },
+      { engine, policy: { mode: 'manual' } },
+    );
+    expect(runtime.installation).toMatchObject({
+      owner: 'package-manager',
+      reason: 'package-manager',
+      capabilities: {
+        canCheck: true,
+        canBackgroundCheck: true,
+        canDownload: false,
+        canSelfInstall: false,
+        canAutoDownload: false,
+        installAuthority: 'package-manager',
+      },
+    });
+    await runtime.coordinator.initialize();
+    await runtime.coordinator.check();
+    expect(engine.check).toHaveBeenCalledTimes(1);
+    expect(engine.download).not.toHaveBeenCalled();
+    expect(engine.prepare).not.toHaveBeenCalled();
+    runtime.coordinator.destroy();
+  });
+
+  it.each([
+    {
+      env: { APPIMAGE: '/MemoFlow.AppImage', SNAP: '/snap/memoflow' },
+      owner: 'memoflow-direct',
+      reason: 'direct-appimage',
+    },
+    { env: { SNAP: '/snap/memoflow' }, owner: 'package-manager', reason: 'package-manager' },
+  ])('preserves environment precedence over the deb marker: $reason', ({ env, owner, reason }) => {
+    const runtime = composeDesktopUpdateShellRuntime(
+      {
+        currentVersion: '0.14.1',
+        isPackaged: true,
+        platform: 'linux',
+        resourcesPath: resourcesWithMarker('deb'),
+        env,
       },
       { engine: new FakeEngine(), policy: { mode: 'manual' } },
     );
-
-    expect(runtime.installation).toMatchObject({
-      owner: 'unsupported',
-      reason: 'unknown-installation',
-    });
+    expect(runtime.installation).toMatchObject({ owner, reason });
   });
 
   it('does not claim direct macOS auto-update readiness without signed/notarized provenance', () => {

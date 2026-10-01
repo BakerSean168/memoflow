@@ -755,6 +755,7 @@ async function initializeShellRuntime(): Promise<void> {
       currentVersion: app.getVersion(),
       isPackaged: app.isPackaged,
       platform: process.platform,
+      resourcesPath: process.resourcesPath,
       isMacAppStore: electronProcess.mas === true,
       isWindowsStore: electronProcess.windowsStore === true,
       env: process.env,
