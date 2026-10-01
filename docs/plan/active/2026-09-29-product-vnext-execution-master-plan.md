@@ -1095,6 +1095,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** editor 更易维护，但不引入 UniversalRoutineField schema renderer。
 
+**Execution (2026-10-01): Accepted / frozen after semantic-boundary review.** `RoutineEditorDialog` now composes `WallClockTriggerEditor`, `ElapsedTriggerEditor`, `ActiveUsageTriggerEditor`, and `ProfileScopeControl`, while reset/validation, `buildTrigger()`, timing-owner decisions and the final save payload remain parent-owned. The extracted components contain presentation/local editing behavior only; no `RoutineTriggerDto` construction, owner commands, `UniversalRoutineField`, or field-schema renderer was introduced. Mounted regression passed 2 files / 16 focused tests and the full Routine suite passed 5 files / 27 tests; `app-vue:typecheck --skip-nx-cache`, changed-file ESLint/Prettier, the 1,295-file inventory, governance and diff checks passed. No browser/live-backend claim is made. Exact boundaries and evidence: [ROUTINE-5103 editor decomposition](../archive/2026-10-01-pvc-routine-5103-editor-decomposition.md).
+
 **Dependencies:** ROUTINE-5101.
 
 ---
