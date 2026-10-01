@@ -8,17 +8,17 @@
 
 import type { Router } from 'vue-router';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
-import type { ElectronBridge } from '../../../di/keys';
 import type { NotificationNavigationIntentDTO } from '@memoflow/contracts/notification';
+import type { ElectronBridge } from '../../../di/keys';
 import { createLogger } from '@memoflow/utils/logger';
+import { resolveNotificationDestination } from '../notification-destination';
+
+export {
+  hasNotificationExternalDestination,
+  resolveNotificationDestination,
+} from '../notification-destination';
 
 const logger = createLogger('notification:click-nav');
-
-const CATEGORY_ROUTE: Readonly<Record<string, string>> = {
-  goal: '/goals',
-  schedule: '/schedule',
-  task: '/tasks',
-};
 
 interface ClickedPayload {
   notificationId?: string;
@@ -28,39 +28,6 @@ interface ClickedPayload {
   navigationIntent?: NotificationNavigationIntentDTO | null;
   route?: string;
   params?: Record<string, string>;
-}
-
-function isNavigationIntent(value: unknown): value is NotificationNavigationIntentDTO {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as NotificationNavigationIntentDTO).route === 'string' &&
-    (value as NotificationNavigationIntentDTO).route.trim().length > 0
-  );
-}
-
-function normalizeCategory(category: unknown): string {
-  return typeof category === 'string' ? category.trim().toLowerCase() : '';
-}
-
-export function resolveNotificationDestination(
-  payload: Pick<ClickedPayload, 'navigationIntent' | 'notificationCategory' | 'category'>,
-): { path: string; query?: Record<string, string> } {
-  if (isNavigationIntent(payload.navigationIntent)) {
-    return {
-      path: payload.navigationIntent.route,
-      ...(payload.navigationIntent.params ? { query: payload.navigationIntent.params } : {}),
-    };
-  }
-
-  const category = normalizeCategory(payload.notificationCategory ?? payload.category);
-  return { path: CATEGORY_ROUTE[category] ?? '/notifications' };
-}
-
-export function hasNotificationExternalDestination(
-  payload: Pick<ClickedPayload, 'navigationIntent' | 'notificationCategory' | 'category'>,
-): boolean {
-  return resolveNotificationDestination(payload).path !== '/notifications';
 }
 
 export function createNotificationClickNavigation(

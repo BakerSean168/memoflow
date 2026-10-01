@@ -157,7 +157,7 @@ import { ActionableWrapper, menuLabel } from '../../../components/shared';
 import type { MenuAction } from '../../../components/shared';
 import { presentNotification } from '../presentation/notification-presentation';
 import { semanticToneSurfaceClass } from '../../../shared/constants/semantic-tone';
-import { hasNotificationExternalDestination } from '../desktop/notification-click-navigation';
+import { hasNotificationExternalDestination } from '../notification-destination';
 
 interface Props {
   notification: NotificationClientDTO;

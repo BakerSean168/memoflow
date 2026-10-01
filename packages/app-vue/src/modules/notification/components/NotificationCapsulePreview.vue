@@ -4,7 +4,9 @@
     data-testid="notification-capsule-preview"
     data-capsule-workspace="notification"
   >
-    <div class="mb-2 flex items-center justify-between gap-2 border-b border-[hsl(var(--border-subtle))] pb-1.5">
+    <div
+      class="mb-2 flex items-center justify-between gap-2 border-b border-[hsl(var(--border-subtle))] pb-1.5"
+    >
       <div class="flex items-center gap-2">
         <p class="text-xs font-semibold">{{ t('notification.drawer.title') }}</p>
         <span
@@ -135,7 +137,7 @@ import { toast } from 'vue-sonner';
 import { ArrowRight } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { formatProductRelative } from '../../../shared/utils/product-time';
-import { resolveNotificationDestination } from '../desktop/notification-click-navigation';
+import { resolveNotificationDestination } from '../notification-destination';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';

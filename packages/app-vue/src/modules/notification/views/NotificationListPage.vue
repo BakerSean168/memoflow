@@ -127,7 +127,7 @@ import { useNotificationUnreadQuery } from '../composables/useNotificationUnread
 import { useNotificationMutations } from '../composables/useNotificationMutations';
 import { useNotificationStore } from '../stores/notification-store';
 import type { NotificationClientDTO } from '@memoflow/contracts/notification';
-import { resolveNotificationDestination } from '../desktop/notification-click-navigation';
+import { resolveNotificationDestination } from '../notification-destination';
 
 const { notifications, isLoading, isError, refetch } = useNotificationListQuery();
 const { unreadCount, hasUnread } = useNotificationUnreadQuery();

@@ -205,6 +205,7 @@ async function registerBusinessModules(
           identityId: payload.identityId,
           notificationType: payload.type,
           notificationCategory: payload.category,
+          navigationIntent: payload.navigationIntent,
         },
       });
     },

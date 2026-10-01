@@ -196,6 +196,17 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(notification).toContain('requestedWriter: repositories.requestedWriter');
   });
 
+  it('forwards canonical Notification navigation intent into desktop click data', () => {
+    const rendererStart = main.indexOf('desktopRenderer: (dto) =>');
+    const rendererEnd = main.indexOf('channelCapabilities:', rendererStart);
+    const rendererSource = main.slice(rendererStart, rendererEnd);
+
+    expect(rendererStart).toBeGreaterThanOrEqual(0);
+    expect(rendererEnd).toBeGreaterThan(rendererStart);
+    expect(rendererSource).toContain('notificationCategory: payload.category');
+    expect(rendererSource).toContain('navigationIntent: payload.navigationIntent');
+  });
+
   it('window-manager and profile runtime drive the bound schedule runtime controller', () => {
     const windowManager = readFileSync(resolve(mainDir, 'lifecycle/window-manager.ts'), 'utf8');
     const profileManager = readFileSync(

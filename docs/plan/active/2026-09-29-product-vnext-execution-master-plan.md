@@ -1172,6 +1172,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** 三种 host click destination 一致。
 
+**Execution (2026-10-01): Implemented / validated.** Browser OS notifications now resolve Task/Goal typed destinations through the same canonical destination policy used by in-app/Desktop surfaces, preserve query params, fall back to Notification Center for unknown destinations, and fail closed for external origins. Desktop host wiring now forwards the persisted navigation intent into native/custom click data instead of relying on category fallback only. Focused cross-host destination tests and Desktop composition regression pass; App-Vue/Desktop typecheck, targeted lint, inventory 1291, governance, and diff gates pass. A fresh Playwright launch was blocked by an occupied strict E2E mock port; NOTIF-7102 has no visual delta and the immediately preceding Notification Center browser layout/inbox regressions remain green. See [implementation report](../archive/2026-10-01-pvc-notif-7102-browser-notification-destination-parity.md).
+
 ---
 
 ## PVC-SET-7201 — Settings section/property primitives
