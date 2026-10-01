@@ -1,19 +1,22 @@
 import type { ComposerTranslation } from 'vue-i18n';
 import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { SemanticTone } from '../../../shared/constants/semantic-tone';
+
+export type NotificationCategoryToken =
+  'account' | 'general' | 'goal' | 'reminder' | 'schedule' | 'system' | 'task';
 
 export interface NotificationPresentation {
+  categoryToken: NotificationCategoryToken;
   categoryLabel: string;
   workflowLabel: string;
   relatedEntityLabel: string | null;
+  tone: SemanticTone;
 }
 
 type PresentationNotification = Pick<
   NotificationClientDTO,
-  'category' | 'workflowKey' | 'relatedEntityType'
+  'category' | 'type' | 'workflowKey' | 'relatedEntityType'
 >;
-
-type NotificationCategoryToken =
-  'account' | 'general' | 'goal' | 'reminder' | 'schedule' | 'system' | 'task';
 
 type NotificationWorkflowToken =
   | 'accountSecurity'
@@ -86,6 +89,43 @@ function resolveEntityToken(relatedEntityType: unknown): NotificationEntityToken
   }
 }
 
+export function resolveNotificationSemanticTone(
+  category: NotificationCategoryToken,
+  type: unknown,
+): SemanticTone {
+  switch (category) {
+    case 'task':
+      return 'success';
+    case 'goal':
+      return 'warning';
+    case 'reminder':
+      return 'primary';
+    case 'schedule':
+      return 'info';
+    case 'account':
+      return 'primary';
+    case 'system':
+      return 'info';
+    default:
+      break;
+  }
+
+  switch (normalizeContractValue(type)) {
+    case 'success':
+      return 'success';
+    case 'warning':
+      return 'warning';
+    case 'error':
+      return 'destructive';
+    case 'info':
+      return 'info';
+    case 'reminder':
+      return 'primary';
+    default:
+      return 'muted';
+  }
+}
+
 export function presentNotification(
   notification: PresentationNotification,
   t: ComposerTranslation,
@@ -96,8 +136,10 @@ export function presentNotification(
   const entityToken = resolveEntityToken(notification.relatedEntityType);
 
   return {
+    categoryToken,
     categoryLabel,
     workflowLabel: workflowToken ? t(`notification.workflow.${workflowToken}`) : categoryLabel,
     relatedEntityLabel: entityToken ? t(`notification.entity.${entityToken}`) : null,
+    tone: resolveNotificationSemanticTone(categoryToken, notification.type),
   };
 }

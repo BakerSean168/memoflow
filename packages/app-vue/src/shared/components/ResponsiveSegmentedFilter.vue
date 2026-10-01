@@ -3,8 +3,12 @@
     <ToggleGroup
       type="single"
       :model-value="modelValue"
-      class="hidden items-center justify-start gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.5)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:flex"
+      :class="[
+        'items-center justify-start gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.5)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]',
+        collapseMode === 'dropdown' ? 'hidden @2xl/panel:flex' : 'flex',
+      ]"
       :aria-label="accessibleLabel"
+      :role="optionRole === 'tab' ? 'tablist' : undefined"
       :data-testid="testId ? `${testId}-expanded` : undefined"
       @update:model-value="handleUpdate"
     >
@@ -15,13 +19,28 @@
         size="sm"
         class="h-7 rounded-md px-2.5 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground data-[state=on]:bg-[hsl(var(--surface-overlay))] data-[state=on]:text-foreground data-[state=on]:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62)]"
         :disabled="disabled || option.disabled"
-        :data-testid="testId ? `${testId}-expanded-${option.value}` : undefined"
+        :role="optionRole"
+        :aria-selected="optionRole === 'tab' ? modelValue === option.value : undefined"
+        :data-testid="
+          expandedOptionTestIdPrefix
+            ? `${expandedOptionTestIdPrefix}-${option.value}`
+            : testId
+              ? `${testId}-expanded-${option.value}`
+              : undefined
+        "
       >
-        {{ option.label }}
+        <span>{{ option.label }}</span>
+        <span
+          v-if="option.count !== undefined"
+          :data-testid="option.countTestId"
+          class="ml-1 min-w-4 text-center text-[10px] tabular-nums opacity-65"
+        >
+          {{ option.count }}
+        </span>
       </ToggleGroupItem>
     </ToggleGroup>
 
-    <DropdownMenu>
+    <DropdownMenu v-if="collapseMode === 'dropdown'">
       <DropdownMenuTrigger as-child>
         <Button
           type="button"
@@ -34,6 +53,12 @@
         >
           <ListFilter class="h-3.5 w-3.5 shrink-0" />
           <span class="truncate text-foreground">{{ currentLabel }}</span>
+          <span
+            v-if="currentOption?.count !== undefined"
+            class="text-[10px] tabular-nums text-muted-foreground"
+          >
+            {{ currentOption.count }}
+          </span>
           <ChevronDown class="h-3.5 w-3.5 shrink-0 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
@@ -46,7 +71,13 @@
             :disabled="disabled || option.disabled"
             :data-testid="testId ? `${testId}-compact-${option.value}` : undefined"
           >
-            {{ option.label }}
+            <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
+            <span
+              v-if="option.count !== undefined"
+              class="ml-2 text-[10px] tabular-nums text-muted-foreground"
+            >
+              {{ option.count }}
+            </span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
@@ -76,10 +107,16 @@ const props = withDefaults(
     accessibleLabel: string;
     testId?: string;
     disabled?: boolean;
+    collapseMode?: 'dropdown' | 'none';
+    expandedOptionTestIdPrefix?: string;
+    optionRole?: 'tab';
   }>(),
   {
     testId: undefined,
     disabled: false,
+    collapseMode: 'dropdown',
+    expandedOptionTestIdPrefix: undefined,
+    optionRole: undefined,
   },
 );
 
@@ -87,10 +124,10 @@ const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
-const currentLabel = computed(
-  () =>
-    props.options.find((option) => option.value === props.modelValue)?.label ?? props.modelValue,
+const currentOption = computed(() =>
+  props.options.find((option) => option.value === props.modelValue),
 );
+const currentLabel = computed(() => currentOption.value?.label ?? props.modelValue);
 
 function handleUpdate(value: unknown): void {
   if (typeof value !== 'string' || !value || value === props.modelValue) return;

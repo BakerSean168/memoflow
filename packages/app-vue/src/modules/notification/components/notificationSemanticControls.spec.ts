@@ -7,6 +7,8 @@ import type { NotificationClientDTO } from '@memoflow/contracts/notification';
 import enNotification from '../../../locales/en-US/notification';
 import InAppNotification from './InAppNotification.vue';
 import NotificationItem from './NotificationItem.vue';
+import { semanticToneSurfaceClass } from '../../../shared/constants/semantic-tone';
+import { resolveNotificationSemanticTone } from '../presentation/notification-presentation';
 
 vi.mock('../../../components/shared', async () => {
   const { defineComponent, h } = await import('vue');
@@ -74,6 +76,25 @@ describe('notification semantic controls', () => {
     expect(action.element.tagName).toBe('BUTTON');
     expect(action.attributes('type')).toBe('button');
     expect(action.attributes('aria-label')).toBe('Build finished');
+  });
+
+  it('maps notification categories and fallback types onto shared semantic tones', () => {
+    expect(resolveNotificationSemanticTone('task', 'Info')).toBe('success');
+    expect(resolveNotificationSemanticTone('goal', 'Info')).toBe('warning');
+    expect(resolveNotificationSemanticTone('reminder', 'Info')).toBe('primary');
+    expect(resolveNotificationSemanticTone('schedule', 'Info')).toBe('info');
+    expect(resolveNotificationSemanticTone('general', 'Error')).toBe('destructive');
+    expect(resolveNotificationSemanticTone('system', 'Error')).toBe('info');
+
+    expect(semanticToneSurfaceClass('primary')).toBe('bg-primary/10 text-primary');
+    expect(semanticToneSurfaceClass('info')).toBe('bg-info/10 text-info');
+
+    const reminder = mountItem({ category: 'Reminder', type: 'Info' });
+    const schedule = mountItem({ category: 'Schedule', type: 'Info' });
+    expect(reminder.html()).toContain('bg-primary/10 text-primary');
+    expect(schedule.html()).toContain('bg-info/10 text-info');
+    expect(reminder.html()).not.toContain('purple-');
+    expect(schedule.html()).not.toContain('cyan-');
   });
 
   it('renders a known Task workflow without exposing contract or delivery internals', () => {

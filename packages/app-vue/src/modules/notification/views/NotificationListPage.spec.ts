@@ -132,12 +132,61 @@ vi.mock('../../../components/shared/AppEmptyState.vue', async () => {
         description: String,
         testid: String,
       },
-      setup(props) {
+      setup(props, { slots }) {
         return () =>
           h('section', { 'data-testid': props.testid }, [
             h('h2', props.title),
             h('p', props.description),
+            slots.action?.(),
           ]);
+      },
+    }),
+  };
+});
+
+vi.mock('../../../shared/components', async () => {
+  const { defineComponent, h } = await import('vue');
+  return {
+    ResponsiveSegmentedFilter: defineComponent({
+      name: 'ResponsiveSegmentedFilter',
+      props: {
+        modelValue: String,
+        options: { type: Array, default: () => [] },
+        expandedOptionTestIdPrefix: String,
+      },
+      emits: ['update:modelValue'],
+      setup(props, { emit }) {
+        return () =>
+          h(
+            'div',
+            (
+              props.options as Array<{
+                value: string;
+                label: string;
+                count?: number;
+                countTestId?: string;
+              }>
+            ).map((option) =>
+              h(
+                'button',
+                {
+                  type: 'button',
+                  role: 'tab',
+                  'aria-selected': String(props.modelValue === option.value),
+                  'data-testid': props.expandedOptionTestIdPrefix
+                    ? `${props.expandedOptionTestIdPrefix}-${option.value}`
+                    : undefined,
+                  onClick: () => emit('update:modelValue', option.value),
+                },
+                [
+                  option.label,
+                  option.count !== undefined
+                    ? h('span', { 'data-testid': option.countTestId }, String(option.count))
+                    : null,
+                ],
+              ),
+            ),
+          );
       },
     }),
   };
@@ -365,6 +414,21 @@ describe('NotificationListPage', () => {
     ).resolves.toBeUndefined();
     await flushPromises();
     expect(wrapper.text()).not.toContain('raw router failure');
+  });
+
+  it('routes collection filter changes through the existing read-filter store contract', async () => {
+    viewMocks.notifications.value = [createNotification()];
+    viewMocks.unreadCount.value = 1;
+    viewMocks.hasUnread.value = true;
+    const { wrapper } = await mountPage();
+
+    const unreadFilter = wrapper.get('[data-testid="notification-filter-unread"]');
+    expect(unreadFilter.attributes('aria-selected')).toBe('false');
+    expect(wrapper.get('[data-testid="notification-unread-badge"]').text()).toBe('1');
+
+    await unreadFilter.trigger('click');
+
+    expect(viewMocks.store.setReadFilter).toHaveBeenCalledWith('unread');
   });
 
   it('preserves Notification Center toolbar, filters, and scroll-host contracts', async () => {

@@ -85,7 +85,9 @@
         <div
           class="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground/75"
         >
-          <span class="rounded-md bg-[hsl(var(--selected)/0.7)] px-1.5 py-0.5 text-[hsl(var(--foreground-muted))]">
+          <span
+            class="rounded-md bg-[hsl(var(--selected)/0.7)] px-1.5 py-0.5 text-[hsl(var(--foreground-muted))]"
+          >
             {{ presentation.categoryLabel }}
           </span>
           <span class="truncate">{{ presentation.workflowLabel }}</span>
@@ -154,6 +156,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ActionableWrapper, menuLabel } from '../../../components/shared';
 import type { MenuAction } from '../../../components/shared';
 import { presentNotification } from '../presentation/notification-presentation';
+import { semanticToneSurfaceClass } from '../../../shared/constants/semantic-tone';
 import { hasNotificationExternalDestination } from '../desktop/notification-click-navigation';
 
 interface Props {
@@ -237,26 +240,18 @@ const menuActions = computed<MenuAction[]>(() => {
   return actions;
 });
 
-const typeIconMap: Record<string, unknown> = {
-  SYSTEM: Info,
-  TASK: CheckCircle2,
-  GOAL: Target,
-  REMINDER: BellRing,
-  SCHEDULE: CalendarClock,
+const categoryIconMap: Record<ReturnType<typeof presentNotification>['categoryToken'], unknown> = {
+  account: Info,
+  general: Bell,
+  goal: Target,
+  reminder: BellRing,
+  schedule: CalendarClock,
+  system: Info,
+  task: CheckCircle2,
 };
 
-const typeColorClassMap: Record<string, string> = {
-  SYSTEM: 'bg-info/10 text-info',
-  TASK: 'bg-success/10 text-success',
-  GOAL: 'bg-warning/10 text-warning',
-  REMINDER: 'bg-purple-500/10 text-purple-500',
-  SCHEDULE: 'bg-cyan-500/10 text-cyan-500',
-};
-
-const typeIcon = computed(() => typeIconMap[props.notification.type] || Bell);
-const typeColorClass = computed(
-  () => typeColorClassMap[props.notification.type] || 'bg-muted text-muted-foreground',
-);
+const typeIcon = computed(() => categoryIconMap[presentation.value.categoryToken]);
+const typeColorClass = computed(() => semanticToneSurfaceClass(presentation.value.tone));
 
 const priorityVariant = computed(() => {
   switch (props.notification.importance) {

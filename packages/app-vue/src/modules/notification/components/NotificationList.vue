@@ -1,6 +1,6 @@
 <template>
   <div
-    class="notification-list overflow-hidden rounded-xl bg-[hsl(var(--surface-raised)/0.28)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
+    class="notification-list border-y border-[hsl(var(--border-subtle))]"
     data-testid="notification-list"
   >
     <!-- Loading -->
@@ -18,7 +18,11 @@
     </div>
 
     <!-- Notification List -->
-    <div v-else class="divide-y divide-[hsl(var(--border-subtle))]" data-testid="notifications-list">
+    <div
+      v-else
+      class="divide-y divide-[hsl(var(--border-subtle))]"
+      data-testid="notifications-list"
+    >
       <slot
         v-for="notification in notifications"
         :key="notification.id"

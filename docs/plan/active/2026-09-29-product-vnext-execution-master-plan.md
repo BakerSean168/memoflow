@@ -1155,6 +1155,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** Notification 属于同一产品语言，无 owner behavior regression。
 
+**Execution (2026-10-01): Implemented / validated.** Notification Inbox now uses the shared collection segmented-filter and empty-state grammar, sparse cardless rows, and a shared semantic tone vocabulary while preserving stable filter DOM identity, read/unread/archive semantics, typed owner actions, and destination behavior. Full App-Vue Notification regression 15 files / 76 tests PASS; shared filter/Routine regression 2 files / 10 tests PASS; App-Vue typecheck, targeted lint, inventory 1291, governance, and diff gates PASS. Browser panel-layout/filter behavior and the inbox read-count closed loop also passed; a transient auth self-registration timeout on one aggregate run passed on isolated rerun. See [implementation report](../archive/2026-10-01-pvc-notif-7101-notification-collection-semantic-tone.md).
+
 ---
 
 ## PVC-NOTIF-7102 — Browser notification destination parity

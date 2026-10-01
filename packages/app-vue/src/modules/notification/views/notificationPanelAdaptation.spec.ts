@@ -18,6 +18,10 @@ describe('Notification single-page architecture', () => {
     expect(notificationSource).not.toContain('usePanelWidth');
     expect(notificationSource).not.toContain('isNarrow');
     expect(notificationSource).toContain('data-testid="mark-all-read-button"');
-    expect(notificationSource).toContain(':aria-selected="selectedFilter === tab.value"');
+    expect(notificationSource).toContain('data-testid="notifications-list"');
+    expect(notificationSource).toContain('<ResponsiveSegmentedFilter');
+    expect(notificationSource).toContain('expanded-option-test-id-prefix="notification-filter"');
+    expect(notificationSource).toContain('collapse-mode="none"');
+    expect(notificationSource).toContain('option-role="tab"');
   });
 });
