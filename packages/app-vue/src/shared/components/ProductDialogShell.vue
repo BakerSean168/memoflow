@@ -9,10 +9,13 @@
       )
     "
     :data-testid="testId"
+    :data-product-dialog-recipe="recipe"
     @open-auto-focus="handleOpenAutoFocus"
     @interact-outside="handleInteractOutside"
   >
-    <DialogHeader class="shrink-0 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.5)] px-5 py-4 text-left">
+    <DialogHeader
+      class="shrink-0 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.5)] px-5 py-4 text-left"
+    >
       <div class="flex min-w-0 items-start justify-between gap-4">
         <div class="flex min-w-0 items-start gap-3">
           <slot name="icon" />
@@ -75,6 +78,7 @@ const props = withDefaults(
   defineProps<{
     open: boolean;
     testId: string;
+    recipe?: 'form' | 'inspect' | 'config' | 'workspace';
     size?: 'sm' | 'md' | 'lg';
     heightMode?: 'content' | 'workspace';
     contentClass?: HTMLAttributes['class'];
@@ -83,8 +87,7 @@ const props = withDefaults(
     preventInteractOutside?: boolean;
   }>(),
   {
-    size: 'md',
-    heightMode: 'content',
+    recipe: 'form',
     contentClass: undefined,
     bodyClass: undefined,
     initialFocusSelector: undefined,
@@ -92,13 +95,23 @@ const props = withDefaults(
   },
 );
 
+const resolvedSize = computed<'sm' | 'md' | 'lg'>(() => {
+  if (props.size) return props.size;
+  return props.recipe === 'inspect' ? 'sm' : props.recipe === 'workspace' ? 'lg' : 'md';
+});
+
+const resolvedHeightMode = computed<'content' | 'workspace'>(() => {
+  if (props.heightMode) return props.heightMode;
+  return props.recipe === 'workspace' ? 'workspace' : 'content';
+});
+
 const sizeClass = computed(
   () =>
     ({
       sm: 'sm:max-w-[440px]',
       md: 'sm:max-w-[680px]',
       lg: 'sm:max-w-[960px]',
-    })[props.size],
+    })[resolvedSize.value],
 );
 
 const heightClass = computed(
@@ -106,7 +119,7 @@ const heightClass = computed(
     ({
       content: 'max-h-[min(90vh,760px)]',
       workspace: 'h-[calc(100dvh-2rem)] max-h-[1100px] sm:h-[calc(100dvh-3rem)]',
-    })[props.heightMode],
+    })[resolvedHeightMode.value],
 );
 
 function handleOpenAutoFocus(event: Event): void {

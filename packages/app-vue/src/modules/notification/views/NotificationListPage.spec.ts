@@ -147,6 +147,25 @@ vi.mock('../../../components/shared/AppEmptyState.vue', async () => {
 vi.mock('../../../shared/components', async () => {
   const { defineComponent, h } = await import('vue');
   return {
+    ProductSurfaceState: defineComponent({
+      name: 'ProductSurfaceState',
+      props: {
+        family: String,
+        kind: String,
+        title: String,
+        description: String,
+        testId: String,
+      },
+      setup(props, { slots }) {
+        return () =>
+          h('section', { 'data-testid': props.testId, 'data-state': props.kind }, [
+            slots.icon?.(),
+            h('h2', props.title),
+            h('p', props.description),
+            slots.actions?.(),
+          ]);
+      },
+    }),
     ResponsiveSegmentedFilter: defineComponent({
       name: 'ResponsiveSegmentedFilter',
       props: {

@@ -20,7 +20,8 @@
         >
           <div
             v-if="item.role === 'user'"
-            class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3.5 py-2.5 text-[13.5px] leading-6 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5),inset_0_1px_0_hsl(var(--foreground)/0.02)] @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
+            class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3.5 py-2.5 text-[13.5px] leading-6 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
+            :class="semanticElevationClass('raised')"
           >
             <div v-if="item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
               <span
@@ -44,7 +45,8 @@
 
           <div v-else class="flex w-full min-w-0 gap-3">
             <div
-              class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-subtle))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
+              class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-subtle))]"
+              :class="semanticElevationClass('inset')"
               aria-hidden="true"
             >
               <Bot class="h-3.5 w-3.5" />
@@ -75,7 +77,8 @@
       <div v-else class="flex min-h-[27rem] flex-col items-center justify-center py-10">
         <div class="w-full max-w-xl text-center" data-testid="ai-welcome-state">
           <div
-            class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.72)] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.6),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
+            class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.72)] text-[hsl(var(--foreground-muted))]"
+            :class="semanticElevationClass('raised')"
           >
             <component
               :is="
@@ -99,7 +102,9 @@
                 : t(`aiAssistant.chatPage.toolIntro.${getToolLocaleKey(toolMode)}.title`)
             }}
           </h2>
-          <p class="mx-auto mt-2 max-w-md text-[13px] leading-6 text-[hsl(var(--foreground-muted))]">
+          <p
+            class="mx-auto mt-2 max-w-md text-[13px] leading-6 text-[hsl(var(--foreground-muted))]"
+          >
             {{
               toolMode === 'chat'
                 ? t('aiAssistant.chatPage.welcomeDescription')
@@ -113,7 +118,8 @@
             data-testid="ai-welcome-no-model"
           >
             <div
-              class="mx-auto flex max-w-md items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+              class="mx-auto flex max-w-md items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-3 py-2.5 text-left"
+              :class="semanticElevationClass('inset')"
             >
               <Settings2 class="h-4 w-4 shrink-0 text-muted-foreground" />
               <span class="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
@@ -182,7 +188,9 @@
                 <span class="block truncate font-medium text-foreground">
                   {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.title`) }}
                 </span>
-                <span class="mt-0.5 block truncate text-[11px] leading-4 text-[hsl(var(--foreground-subtle))]">
+                <span
+                  class="mt-0.5 block truncate text-[11px] leading-4 text-[hsl(var(--foreground-subtle))]"
+                >
                   {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`) }}
                 </span>
               </span>
@@ -219,6 +227,7 @@ import {
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { getToolLocaleKey, type ChatItem, type WorkflowMode } from '../composables/types';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import { useAIFormatters } from '../composables/useAIFormatters';
 
 withDefaults(

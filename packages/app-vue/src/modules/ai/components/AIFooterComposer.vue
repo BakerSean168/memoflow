@@ -8,8 +8,9 @@
       <slot name="action-rail" />
 
       <div
-        class="relative rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] shadow-[inset_0_1px_0_hsl(var(--foreground)/0.03),0_14px_36px_-24px_rgba(0,0,0,0.72)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))] focus-within:shadow-[inset_0_1px_0_hsl(var(--foreground)/0.035),0_16px_40px_-24px_rgba(0,0,0,0.82)]"
+        class="relative rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))]"
         :class="[
+          semanticElevationClass('floating'),
           density === 'comfortable' ? 'px-3 pb-2.5 pt-3' : 'px-2 pb-2 pt-2.5',
           dragging ? 'border-primary/60 bg-muted/20' : '',
         ]"
@@ -94,7 +95,8 @@
 
         <div
           v-if="mentionSuggestions.length"
-          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1 shadow-[0_16px_40px_rgba(0,0,0,0.28)]"
+          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
+          :class="semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
         >
           <div class="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -364,6 +366,7 @@ import type {
   ComposerAttachment,
   ComposerContextEntity,
 } from '../composables/types';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import {
   COMPOSER_TEXTAREA_MAX_PX,
   type ComposerDensity,

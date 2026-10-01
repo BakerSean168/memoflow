@@ -7,6 +7,7 @@ import { createI18n } from 'vue-i18n';
 import { instance, template } from '../components/task-quick-test-fixtures';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
+import { ProductMoreProperties } from '../../../shared/components';
 import TaskDetailView from './TaskDetailView.vue';
 import enTask from '../../../locales/en-US/task';
 import zhTask from '../../../locales/zh-CN/task';
@@ -61,7 +62,7 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).toContain('data-testid="task-plan-workspace-properties"');
     expect(source).toContain('data-testid="task-detail-metadata"');
     expect(source).toContain('data-testid="task-properties-row"');
-    expect(source).toContain('data-testid="task-properties-more"');
+    expect(source).toContain('test-id="task-properties-more"');
     expect(source).toContain('v-if="viewModel.goalBinding || showGoalEditor"');
     expect(source).toContain('v-if="labelIds.length || showLabelsEditor"');
     expect(source).toContain('v-if="reminderTriggers.length || showReminderEditor"');
@@ -219,7 +220,8 @@ describe('Task Detail optional property grammar', () => {
     for (const row of ['goal', 'labels', 'reminders']) {
       expect(wrapper.find(`[data-testid="task-${row}-row"]`).exists()).toBe(false);
     }
-    expect(wrapper.find('[data-testid="task-properties-more"]').exists()).toBe(true);
+    const moreProperties = wrapper.getComponent(ProductMoreProperties);
+    expect(moreProperties.props('testId')).toBe('task-properties-more');
     wrapper.unmount();
   });
 

@@ -225,5 +225,7 @@ describe('notification semantic controls', () => {
     expect(buttons).toHaveLength(2);
     expect(buttons[0].attributes('aria-label')).toBe('Reminder due');
     expect(buttons[1].attributes('aria-label')).toBe('Close');
+    expect(wrapper.html()).toContain('border-l-info/70');
+    expect(wrapper.html()).not.toMatch(/border-l-(blue|orange|red|gray)-\d+/);
   });
 });

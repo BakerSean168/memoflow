@@ -5,17 +5,22 @@
       <template #title>{{ t('task.aiGeneration.title') }}</template>
 
       <div>
-        <div v-if="loading" class="text-center py-8">
-          <Loader2 class="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
-          <p class="text-lg font-semibold">
-            {{ loadingText || t('task.aiGeneration.generating') }}
-          </p>
-          <p class="text-xs text-muted-foreground">{{ t('task.aiGeneration.generatingHint') }}</p>
-        </div>
+        <ProductSurfaceState
+          v-if="loading"
+          family="dialog"
+          kind="loading"
+          :title="loadingText || t('task.aiGeneration.generating')"
+          :description="t('task.aiGeneration.generatingHint')"
+          test-id="task-ai-generation-loading"
+        />
 
-        <Alert v-else-if="error" variant="destructive" class="mb-4">
-          <AlertDescription>{{ error }}</AlertDescription>
-        </Alert>
+        <ProductSurfaceState
+          v-else-if="error"
+          family="dialog"
+          kind="error"
+          :title="error"
+          test-id="task-ai-generation-error"
+        />
 
         <div v-else-if="localTasks.length > 0">
           <Alert v-if="!importing" class="mb-4 bg-success/10 border-success/40">
@@ -127,7 +132,7 @@ import {
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
 import { CheckCircle, Clock, Loader2, Sparkles } from '@lucide/vue';
-import { ProductDialogShell } from '../../../shared/components';
+import { ProductDialogShell, ProductSurfaceState } from '../../../shared/components';
 
 const props = defineProps<{
   modelValue: boolean;

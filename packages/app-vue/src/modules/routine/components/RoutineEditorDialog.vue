@@ -3,8 +3,7 @@
     <ProductDialogShell
       :open="open"
       test-id="routine-editor-dialog"
-      size="lg"
-      height-mode="workspace"
+      recipe="workspace"
       initial-focus-selector="[data-testid='routine-name-input']"
     >
       <template #title>{{ routine ? t('routine.edit') : t('routine.create') }}</template>

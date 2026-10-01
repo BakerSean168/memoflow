@@ -1,8 +1,5 @@
 <template>
-  <header
-    class="z-10 flex min-h-11 shrink-0 items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
-    data-testid="goal-page-toolbar"
-  >
+  <ProductSurfaceHeader family="collection" data-testid="goal-page-toolbar">
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <Button variant="ghost" size="sm" class="h-8 gap-1.5">
@@ -45,7 +42,7 @@
       data-primary-action="create-goal"
       @click="emit('create-goal')"
     />
-  </header>
+  </ProductSurfaceHeader>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +59,7 @@ import {
 import type { GoalSystemView } from '@memoflow/contracts/goal';
 import {
   LabelFilterPopover,
+  ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
 } from '../../../shared/components';

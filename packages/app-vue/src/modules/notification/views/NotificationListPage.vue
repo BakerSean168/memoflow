@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full min-h-0 flex-col overflow-hidden" data-testid="notification-center">
     <!-- 与 Goal / Task 共用 ModuleHeader：筛选、计数、批量动作只占一层。 -->
-    <ModuleHeader data-testid="notification-page-toolbar">
+    <ModuleHeader family="collection" data-testid="notification-page-toolbar">
       <template #leading>
         <ResponsiveSegmentedFilter
           :model-value="selectedFilter"
@@ -59,15 +59,16 @@
           </div>
         </div>
 
-        <AppEmptyState
+        <ProductSurfaceState
           v-else-if="isError"
-          :icon="CircleAlert"
+          family="collection"
+          kind="error"
           :title="t('notification.error.fetchFailed')"
           :description="t('notification.error.fetchFailedDescription')"
-          testid="notifications-error-state"
-          role="alert"
+          test-id="notifications-error-state"
         >
-          <template #action>
+          <template #icon><CircleAlert class="h-8 w-8" /></template>
+          <template #actions>
             <Button
               variant="outline"
               size="sm"
@@ -78,23 +79,29 @@
               {{ t('notification.action.retry') }}
             </Button>
           </template>
-        </AppEmptyState>
+        </ProductSurfaceState>
 
-        <AppEmptyState
+        <ProductSurfaceState
           v-else-if="filteredNotifications.length === 0 && selectedFilter === 'unread'"
-          :icon="CheckCheck"
+          family="collection"
+          kind="empty"
           :title="t('notification.allCaughtUp')"
           :description="t('notification.unreadEmptyDescription')"
-          testid="notifications-unread-empty"
-        />
+          test-id="notifications-unread-empty"
+        >
+          <template #icon><CheckCheck class="h-8 w-8" /></template>
+        </ProductSurfaceState>
 
-        <AppEmptyState
+        <ProductSurfaceState
           v-else-if="filteredNotifications.length === 0"
-          :icon="Bell"
+          family="collection"
+          kind="empty"
           :title="t('notification.empty')"
           :description="t('notification.emptyDescription')"
-          testid="notifications-empty-state"
-        />
+          test-id="notifications-empty-state"
+        >
+          <template #icon><Bell class="h-8 w-8" /></template>
+        </ProductSurfaceState>
 
         <div v-else data-testid="notifications-list">
           <NotificationList
@@ -119,8 +126,7 @@ import { toast } from 'vue-sonner';
 import { Bell, CheckCheck, CircleAlert } from '@lucide/vue';
 import { Button, Skeleton } from '@memoflow/ui-vue-shadcn';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
-import { ResponsiveSegmentedFilter } from '../../../shared/components';
+import { ProductSurfaceState, ResponsiveSegmentedFilter } from '../../../shared/components';
 import NotificationList from '../components/NotificationList.vue';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';

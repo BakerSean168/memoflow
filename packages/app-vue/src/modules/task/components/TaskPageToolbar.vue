@@ -1,8 +1,5 @@
 <template>
-  <header
-    class="z-10 flex min-h-11 shrink-0 items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
-    data-testid="task-page-toolbar"
-  >
+  <ProductSurfaceHeader family="collection" data-testid="task-page-toolbar">
     <div class="flex min-w-0 flex-1 items-center gap-1.5" data-testid="task-filter-bar">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
@@ -296,7 +293,7 @@
       data-primary-action="create-task"
       @click="emit('createTask')"
     />
-  </header>
+  </ProductSurfaceHeader>
 </template>
 
 <script setup lang="ts">
@@ -327,6 +324,7 @@ import {
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import {
   LabelFilterPopover,
+  ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
 } from '../../../shared/components';

@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.resolve(__dirname, 'TaskPlanDialog.vue'), 'u
 describe('TaskPlanDialog vNext', () => {
   it('uses the same stable workspace dialog shell as Goal', () => {
     expect(source).toContain('TaskPlanForm');
-    expect(source).toContain('height-mode="workspace"');
+    expect(source).toContain('recipe="workspace"');
     expect(source).not.toContain('content-class="h-[min(88vh,760px)]"');
     for (const retired of ['DependencyManager', 'parentTaskId', 'folderId', 'TaskForDAG']) {
       expect(source).not.toContain(retired);

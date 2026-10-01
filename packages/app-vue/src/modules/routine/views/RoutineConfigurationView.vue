@@ -3,7 +3,7 @@
     class="flex h-full min-h-0 flex-col overflow-hidden"
     data-testid="routine-configuration-center"
   >
-    <ModuleHeader data-testid="routine-list-toolbar">
+    <ModuleHeader family="collection" data-testid="routine-list-toolbar">
       <template #leading>
         <ResponsiveSegmentedFilter
           :model-value="selectedState"

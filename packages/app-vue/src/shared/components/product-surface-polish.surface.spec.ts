@@ -124,7 +124,7 @@ describe('MemoFlow product surface polish', () => {
     const task = read('modules/task/views/TaskDetailView.vue');
     expect(task).toContain('data-testid="task-detail-metadata"');
     expect(task).toContain('data-testid="task-properties-row"');
-    expect(task).toContain('data-testid="task-properties-more"');
+    expect(task).toContain('test-id="task-properties-more"');
     expect(task).toContain('<DropdownMenuSub');
     expect(task).toContain('<DropdownMenuCheckboxItem');
     expect(task).toContain('<TaskReminderMenuItems');
@@ -203,5 +203,27 @@ describe('MemoFlow product surface polish', () => {
     expect(goal).not.toContain('type="date"');
     expect(task).not.toContain('type="date"');
     expect(schedule).not.toContain('type="date"');
+  });
+
+  it('keeps legal surface-header families explicit at their owner boundaries', () => {
+    expect(read('modules/task/components/TaskPageToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="collection"',
+    );
+    expect(read('modules/goal/components/GoalPageToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="collection"',
+    );
+    expect(read('modules/schedule/views/ScheduleCalendarView.vue')).toContain(
+      '<ProductSurfaceHeader family="calendar"',
+    );
+    expect(read('modules/repository/components/DocumentWorkspaceToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="document"',
+    );
+    expect(read('modules/setting/views/UserSettingsView.vue')).toContain('family="settings"');
+    expect(read('modules/notification/views/SSEMonitorPage.vue')).toContain(
+      '<ModuleHeader family="diagnostic">',
+    );
+    expect(read('modules/task/views/TaskDetailView.vue')).toContain(
+      '<ModuleHeader data-testid="task-detail-toolbar">',
+    );
   });
 });

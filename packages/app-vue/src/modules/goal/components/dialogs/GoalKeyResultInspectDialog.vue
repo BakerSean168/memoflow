@@ -10,6 +10,7 @@
     <ProductDialogShell
       :open="true"
       test-id="goal-kr-inspect"
+      recipe="inspect"
       size="lg"
       height-mode="workspace"
       initial-focus-selector="[data-testid=goal-kr-inspect-close]"

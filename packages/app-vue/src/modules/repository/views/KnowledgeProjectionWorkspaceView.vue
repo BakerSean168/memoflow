@@ -239,10 +239,12 @@
       </div>
 
       <Sheet :open="catalogOpen && isNarrow" @update:open="catalogOpen = $event">
-        <SheetContent hide-close side="left" class="w-[min(88vw,22rem)] p-0">
-          <SheetHeader class="sr-only">
-            <SheetTitle>{{ t('repository.projection.catalogTitle') }}</SheetTitle>
-          </SheetHeader>
+        <ProductSheetSurface
+          side="left"
+          width="sm"
+          :title="t('repository.projection.catalogTitle')"
+          test-id="knowledge-projection-catalog-sheet"
+        >
           <KnowledgeNoteCatalog
             v-model:search-query="searchQuery"
             :notes="notes"
@@ -283,21 +285,23 @@
             @toggle-directory="toggleDirectory"
             @toggle-hidden="toggleHiddenDirectories"
           />
-        </SheetContent>
+        </ProductSheetSurface>
       </Sheet>
 
       <Sheet :open="contextOpen && isNarrow" @update:open="contextOpen = $event">
-        <SheetContent hide-close side="right" class="w-[min(92vw,24rem)] p-0">
-          <SheetHeader class="sr-only">
-            <SheetTitle>{{ t('repository.projection.contextTitle') }}</SheetTitle>
-          </SheetHeader>
+        <ProductSheetSurface
+          side="right"
+          width="md"
+          :title="t('repository.projection.contextTitle')"
+          test-id="knowledge-projection-context-sheet"
+        >
           <KnowledgeNoteContextPanel
             v-if="selectedNote"
             :note="selectedNote"
             @select="handleContextSelect"
             @close="contextOpen = false"
           />
-        </SheetContent>
+        </ProductSheetSurface>
       </Sheet>
     </template>
 
@@ -383,9 +387,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
 } from '@memoflow/ui-vue-shadcn';
 import {
   AdoptKnowledgeDocumentSchema,
@@ -400,7 +401,7 @@ import {
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
-import { ProductDialogShell } from '../../../shared/components';
+import { ProductDialogShell, ProductSheetSurface } from '../../../shared/components';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';

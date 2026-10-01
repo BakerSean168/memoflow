@@ -83,7 +83,15 @@ function mountToolbar() {
       occurrenceSort: 'time',
       goalScopeLabel: null,
     },
-    global: { plugins: [i18n] },
+    global: {
+      plugins: [i18n],
+      stubs: {
+        ProductSurfaceHeader: {
+          name: 'ProductSurfaceHeader',
+          template: '<header><slot /></header>',
+        },
+      },
+    },
   });
 }
 
@@ -92,6 +100,7 @@ describe('TaskPageToolbar', () => {
     const wrapper = mountToolbar();
 
     expect(wrapper.findAll('[data-testid="task-page-toolbar"]')).toHaveLength(1);
+    expect(wrapper.findComponent({ name: 'ProductSurfaceHeader' }).exists()).toBe(true);
     expect(wrapper.findAll('[data-testid="task-filter-bar"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-primary-action="create-task"]')).toHaveLength(1);
     for (const selector of [
@@ -129,7 +138,7 @@ describe('TaskPageToolbar', () => {
     const wrapper = mountToolbar();
     await wrapper.setProps({ activeSurface: 'plans', planStateFilter: 'failed' });
 
-    expect(source).toContain("v-if=\"activeSurface === 'today'\"");
+    expect(source).toContain('v-if="activeSurface === \'today\'"');
     expect(source).toContain('data-testid="task-plan-state-filter"');
     expect(source).toContain("props.planStateFilter === 'all'");
     expect(source).toContain('planStateLabel(props.planStateFilter)');

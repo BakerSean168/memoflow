@@ -3,6 +3,12 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CheckCircle2, Plus, RotateCcw } from '@lucide/vue';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
+import {
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import {
   useTaskOccurrenceActionCoordinator,
@@ -88,15 +94,9 @@ async function createQuickTask() {
 </script>
 
 <template>
-  <div class="flex max-h-[32rem] min-h-0 flex-col" data-testid="task-quick-preview">
-    <div class="shrink-0 border-b border-border/50 pb-2">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold text-foreground">{{ title }}</p>
-          <p class="mt-0.5 text-[10px] text-muted-foreground">
-            {{ subtitle }}
-          </p>
-        </div>
+  <CapsulePreviewShell max-height="32rem" data-testid="task-quick-preview">
+    <CapsulePreviewHeader :title="title" :subtitle="subtitle">
+      <template #actions>
         <span
           v-if="summary"
           class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground"
@@ -104,7 +104,7 @@ async function createQuickTask() {
         >
           {{ completedCount }}/{{ occurrences.length }}
         </span>
-      </div>
+      </template>
 
       <div
         v-if="summary && occurrences.length"
@@ -117,21 +117,17 @@ async function createQuickTask() {
           :data-progress="progressPct"
         />
       </div>
-    </div>
+    </CapsulePreviewHeader>
 
-    <div
+    <CapsulePreviewState
       v-if="loading && occurrences.length === 0"
-      class="space-y-1.5 py-3"
+      kind="loading"
       data-testid="task-quick-loading"
     >
       <div v-for="index in 4" :key="index" class="h-10 animate-pulse rounded-lg bg-muted/70" />
-    </div>
+    </CapsulePreviewState>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center gap-2 py-5 text-center"
-      data-testid="task-quick-error"
-    >
+    <CapsulePreviewState v-else-if="error" kind="error" data-testid="task-quick-error">
       <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ error }}</p>
       <Button
         type="button"
@@ -143,16 +139,16 @@ async function createQuickTask() {
         <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
         {{ t('common.retry') }}
       </Button>
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="occurrences.length === 0"
-      class="flex flex-col items-center justify-center py-7 text-center"
+      kind="empty"
       data-testid="task-quick-empty"
     >
-      <CheckCircle2 class="mb-2 h-6 w-6 text-muted-foreground/45" />
+      <CheckCircle2 class="h-6 w-6 text-muted-foreground/45" />
       <p class="text-[11px] text-muted-foreground">{{ t('task.quickSurface.empty') }}</p>
-    </div>
+    </CapsulePreviewState>
 
     <div v-else class="min-h-0 flex-1 overflow-y-auto py-1.5 pr-0.5" data-testid="task-quick-list">
       <TaskOccurrenceCompactList
@@ -167,10 +163,10 @@ async function createQuickTask() {
       />
     </div>
 
-    <div v-if="quickCreate || viewAll" class="shrink-0 border-t border-border/50 pt-2">
+    <CapsulePreviewFooter v-if="quickCreate || viewAll" align="between">
       <form
         v-if="quickCreate && quickTaskOpen"
-        class="flex items-center gap-1.5"
+        class="flex w-full items-center gap-1.5"
         data-testid="task-quick-quick-create"
         @submit.prevent="createQuickTask"
       >
@@ -197,7 +193,7 @@ async function createQuickTask() {
         </Button>
       </form>
 
-      <div v-else class="flex items-center justify-between gap-2">
+      <div v-else class="flex w-full items-center justify-between gap-2">
         <button
           type="button"
           class="flex h-8 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -220,10 +216,10 @@ async function createQuickTask() {
           <ArrowRight class="h-3.5 w-3.5" />
         </button>
       </div>
-    </div>
+    </CapsulePreviewFooter>
     <TaskCompletionMeasurementDialog
       :coordinator="actionCoordinator"
       @completed="emit('completed', $event)"
     />
-  </div>
+  </CapsulePreviewShell>
 </template>

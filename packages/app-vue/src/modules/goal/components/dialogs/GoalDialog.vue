@@ -3,8 +3,7 @@
     <ProductDialogShell
       :open="open"
       test-id="goal-dialog"
-      size="lg"
-      height-mode="workspace"
+      recipe="workspace"
       initial-focus-selector="[data-testid='goal-name-input']"
     >
       <template #title>

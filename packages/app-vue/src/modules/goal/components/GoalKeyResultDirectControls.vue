@@ -70,7 +70,7 @@
                 >{{ keyResult.weight }}</Button
               >
             </PopoverTrigger>
-            <PopoverContent align="start" class="w-44 p-1.5">
+            <ProductPopoverSurface recipe="compact-menu">
               <Button
                 v-for="level in [1, 2, 3, 4, 5]"
                 :key="level"
@@ -83,7 +83,7 @@
                 @click="changeWeight(level)"
                 >{{ level }}</Button
               >
-            </PopoverContent>
+            </ProductPopoverSurface>
           </Popover>
         </dd>
       </div>
@@ -118,14 +118,13 @@ import {
 import {
   Button,
   Popover,
-  PopoverContent,
   PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import { ProductAutoTextarea } from '../../../shared/components';
+import { ProductAutoTextarea, ProductPopoverSurface } from '../../../shared/components';
 import { KEY_RESULT_CALCULATION_METHODS, getKeyResultCalculationLabel } from '../utils';
 import GoalTimeframePicker from './GoalTimeframePicker.vue';
 

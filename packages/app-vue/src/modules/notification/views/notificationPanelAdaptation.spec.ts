@@ -12,7 +12,9 @@ describe('Notification single-page architecture', () => {
   it('owns one inbox toolbar without panel-tier structure branches', () => {
     expect(notificationSource).toContain('data-testid="notification-page-toolbar"');
     // Notification shares the same product header primitive as Goal / Task.
-    expect(notificationSource).toContain('<ModuleHeader data-testid="notification-page-toolbar">');
+    expect(notificationSource).toContain(
+      '<ModuleHeader family="collection" data-testid="notification-page-toolbar">',
+    );
     expect(notificationSource).not.toContain('<header');
     expect(notificationSource).not.toContain('FilterBar');
     expect(notificationSource).not.toContain('usePanelWidth');

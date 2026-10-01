@@ -45,7 +45,7 @@
           class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="goal-workspace-header"
         >
-          <div class="space-y-1" data-testid="goal-detail-identity">
+          <ProductEntityIdentity data-testid="goal-detail-identity">
             <ProductAutoTextarea
               v-model="nameDraft"
               :max-length="80"
@@ -70,16 +70,13 @@
               @keydown.enter.exact.prevent="commitSummaryFromKeyboard"
               @keydown.esc.prevent="resetInlineDrafts"
             />
-          </div>
+          </ProductEntityIdentity>
 
           <div class="space-y-0.5" data-testid="goal-detail-metadata">
-            <div
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+            <ProductMetadataRow
+              :label="t('goal.detail.properties')"
               data-testid="goal-properties-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.detail.properties') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-2">
                 <div data-testid="goal-status" :data-goal-status="goal.status">
                   <GoalStatusPicker
@@ -123,134 +120,122 @@
                   {{ t('goal.list.pastTarget') }}
                 </Badge>
 
-                <DropdownMenu v-if="hasMorePropertiesMenuItems">
-                  <DropdownMenuTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-8 w-8 rounded-full text-muted-foreground"
-                      :aria-label="t('goal.detail.moreProperties')"
-                      data-testid="goal-properties-more"
-                    >
-                      <MoreHorizontal class="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" class="w-52">
-                    <DropdownMenuItem
-                      v-if="!startDraft && !showStartEditor"
-                      @click="showStartEditor = true"
-                    >
-                      <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
-                      {{ t('goal.dialog.startDate') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      v-if="!targetDraft && !showTargetEditor"
-                      @click="showTargetEditor = true"
-                    >
-                      <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
-                      {{ t('goal.detail.target') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuSub v-if="pendingReminderTriggers.length === 0">
-                      <DropdownMenuSubTrigger>
-                        <BellRing class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.reminder.reminder') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-96 max-w-[calc(100vw-2rem)]">
-                        <GoalReminderMenuItems
-                          :model-value="reminderConfigDraft"
-                          :start="startDraft"
-                          :target="targetDraft"
-                          :disabled="isSaving || !!goal.archivedAt"
-                          @update:model-value="saveReminderConfig"
-                          @request-custom-time="openCustomReminderPicker"
+                <ProductMoreProperties
+                  v-if="hasMorePropertiesMenuItems"
+                  :label="t('goal.detail.moreProperties')"
+                  test-id="goal-properties-more"
+                >
+                  <DropdownMenuItem
+                    v-if="!startDraft && !showStartEditor"
+                    @click="showStartEditor = true"
+                  >
+                    <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
+                    {{ t('goal.dialog.startDate') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="!targetDraft && !showTargetEditor"
+                    @click="showTargetEditor = true"
+                  >
+                    <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
+                    {{ t('goal.detail.target') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuSub v-if="pendingReminderTriggers.length === 0">
+                    <DropdownMenuSubTrigger>
+                      <BellRing class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.reminder.reminder') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-96 max-w-[calc(100vw-2rem)]">
+                      <GoalReminderMenuItems
+                        :model-value="reminderConfigDraft"
+                        :start="startDraft"
+                        :target="targetDraft"
+                        :disabled="isSaving || !!goal.archivedAt"
+                        @update:model-value="saveReminderConfig"
+                        @request-custom-time="openCustomReminderPicker"
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuSub v-if="labelIdsDraft.length === 0 && !showLabelsEditor">
+                    <DropdownMenuSubTrigger>
+                      <Tag class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.dialog.labels') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-60">
+                      <DropdownMenuCheckboxItem
+                        v-for="option in labelOptions"
+                        :key="option.id"
+                        :model-value="labelIdsDraft.includes(option.id)"
+                        @update:model-value="toggleLabelSelection(option.id)"
+                        @select.prevent
+                      >
+                        <span
+                          v-if="option.color"
+                          class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
+                          :style="{ backgroundColor: option.color }"
                         />
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                        <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuItem v-if="labelOptions.length === 0" disabled>
+                        {{ t('goal.list.noLabels') }}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem @click="openLabelsEditor">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createOrManageLabels') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="labelIdsDraft.length === 0 && !showLabelsEditor">
-                      <DropdownMenuSubTrigger>
-                        <Tag class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.dialog.labels') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-60">
-                        <DropdownMenuCheckboxItem
-                          v-for="option in labelOptions"
-                          :key="option.id"
-                          :model-value="labelIdsDraft.includes(option.id)"
-                          @update:model-value="toggleLabelSelection(option.id)"
-                          @select.prevent
-                        >
-                          <span
-                            v-if="option.color"
-                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
-                            :style="{ backgroundColor: option.color }"
-                          />
-                          <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuItem v-if="labelOptions.length === 0" disabled>
-                          {{ t('goal.list.noLabels') }}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem @click="openLabelsEditor">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createOrManageLabels') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                  <DropdownMenuSub v-if="taskCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <ListTodo class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.tasks') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-52">
+                      <DropdownMenuItem @click="createTaskForGoal()">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createBoundTask') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="taskCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <ListTodo class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.tasks') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-52">
-                        <DropdownMenuItem @click="createTaskForGoal()">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createBoundTask') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                  <DropdownMenuSub v-if="knowledgeCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <NotebookText class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.knowledge') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-72">
+                      <GoalKnowledgeMenuItems
+                        :goal-id="goalId"
+                        :linked-document-ids="linkedKnowledgeDocumentIds"
+                        :disabled="isSaving || !!goal.archivedAt"
+                        @changed="handleKnowledgeChanged"
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="knowledgeCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <NotebookText class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.knowledge') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-72">
-                        <GoalKnowledgeMenuItems
-                          :goal-id="goalId"
-                          :linked-document-ids="linkedKnowledgeDocumentIds"
-                          :disabled="isSaving || !!goal.archivedAt"
-                          @changed="handleKnowledgeChanged"
-                        />
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-
-                    <DropdownMenuSub v-if="reviewCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <History class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.reviews') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-48">
-                        <DropdownMenuItem @click="openReviewCreate">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createReview') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  <DropdownMenuSub v-if="reviewCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <History class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.reviews') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-48">
+                      <DropdownMenuItem @click="openReviewCreate">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createReview') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </ProductMoreProperties>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="pendingReminderTriggers.length"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.reminder.reminder')"
               data-testid="goal-reminders-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.reminder.reminder') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <DropdownMenu
                   v-for="trigger in pendingReminderTriggers"
@@ -301,16 +286,13 @@
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="labelIdsDraft.length || showLabelsEditor"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.dialog.labels')"
               data-testid="goal-labels-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.dialog.labels') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <Badge
                   v-for="option in selectedLabelOptions"
@@ -352,16 +334,13 @@
                   </PopoverContent>
                 </Popover>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="taskCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.tasks')"
               data-testid="goal-tasks-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.tasks') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button
                   v-for="task in taskPreviewItems"
@@ -394,16 +373,13 @@
                   <Plus class="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="knowledgeCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.knowledge')"
               data-testid="goal-knowledge-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.knowledge') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button
                   v-for="note in knowledgePreviewItems"
@@ -449,16 +425,13 @@
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="reviewCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.reviews')"
               data-testid="goal-reviews-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.reviews') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button type="button" class="max-w-72" @click="openLatestReview">
                   <Badge
@@ -485,7 +458,7 @@
                   <Plus class="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </div>
+            </ProductMetadataRow>
           </div>
 
           <p v-if="mutationError || labelCreateError" role="alert" class="text-sm text-destructive">
@@ -793,7 +766,13 @@ import {
 import { presentErrorMessage } from '@memoflow/http-client';
 import { addYmdDays } from '@memoflow/time';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { ProductAutoTextarea, ProductDateTimePicker } from '../../../shared/components';
+import {
+  ProductAutoTextarea,
+  ProductDateTimePicker,
+  ProductEntityIdentity,
+  ProductMetadataRow,
+  ProductMoreProperties,
+} from '../../../shared/components';
 import LabelCommandPanel from '../../../shared/components/LabelCommandPanel.vue';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import {

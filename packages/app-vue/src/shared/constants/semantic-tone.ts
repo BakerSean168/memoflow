@@ -9,6 +9,32 @@ const SEMANTIC_TONE_SURFACE_CLASS: Record<SemanticTone, string> = {
   muted: 'bg-muted text-muted-foreground',
 };
 
+const SEMANTIC_TONE_STATUS_CLASS: Record<SemanticTone, string> = {
+  primary: 'bg-primary/8 text-foreground',
+  info: 'bg-info/8 text-foreground',
+  success: 'bg-success/8 text-foreground',
+  warning: 'bg-warning/8 text-foreground',
+  destructive: 'bg-destructive/8 text-destructive',
+  muted: 'bg-muted/45 text-muted-foreground',
+};
+
+const SEMANTIC_TONE_BORDER_CLASS: Record<SemanticTone, string> = {
+  primary: 'border-l-primary/70',
+  info: 'border-l-info/70',
+  success: 'border-l-success/70',
+  warning: 'border-l-warning/70',
+  destructive: 'border-l-destructive/70',
+  muted: 'border-l-muted-foreground/45',
+};
+
 export function semanticToneSurfaceClass(tone: SemanticTone): string {
   return SEMANTIC_TONE_SURFACE_CLASS[tone];
+}
+
+export function semanticToneStatusClass(tone: SemanticTone): string {
+  return SEMANTIC_TONE_STATUS_CLASS[tone];
+}
+
+export function semanticToneBorderClass(tone: SemanticTone): string {
+  return SEMANTIC_TONE_BORDER_CLASS[tone];
 }

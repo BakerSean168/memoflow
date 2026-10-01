@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import {
+  calendarEventSourceLabel,
   formatCapsuleTime,
   formatScheduleCapsuleLabel,
   resolveScheduleCapsule,
@@ -59,6 +60,14 @@ describe('schedule capsule helpers (V2 §2 / §6.3)', () => {
     const snap = resolveScheduleCapsule([next], now);
     expect(snap.kind).toBe('upcoming');
     expect(snap.minutesUntilStart).toBe(25);
+  });
+
+  it('delegates capsule source copy to the Schedule presentation authority', () => {
+    const t = (key: string) => key;
+    expect(calendarEventSourceLabel('schedule', t)).toBe('schedule.source.schedule');
+    expect(calendarEventSourceLabel('task', t)).toBe('schedule.source.task');
+    expect(calendarEventSourceLabel('goal', t)).toBe('schedule.source.goal');
+    expect(calendarEventSourceLabel('routine', t)).toBe('schedule.source.routine');
   });
 
   it('formats capsule labels for current and upcoming', () => {

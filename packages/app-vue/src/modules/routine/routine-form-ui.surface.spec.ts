@@ -19,7 +19,7 @@ describe('Routine form UI convergence', () => {
     const profileScope = source('app-vue/src/modules/routine/components/ProfileScopeControl.vue');
     const extractedSurface = [wallClock, elapsed, activeUsage, profileScope].join('\n');
 
-    expect(editor).toContain('height-mode="workspace"');
+    expect(editor).toContain('recipe="workspace"');
     expect(editor).toContain('data-testid="routine-property-chips"');
     expect(editor).toContain('ProductAutoTextarea');
     expect(editor).toContain('ProductPropertyChip');

@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full flex-col overflow-hidden bg-background">
-    <ModuleHeader>
+    <ModuleHeader family="diagnostic">
       <template #leading>
         <Button
           variant="ghost"

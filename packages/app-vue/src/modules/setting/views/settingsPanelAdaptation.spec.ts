@@ -17,6 +17,8 @@ describe('Settings scene three-state responsive contract', () => {
 
   it('shows a compact local Settings header when the category sidebar is hidden by width', () => {
     expect(view).toContain('v-if="isNarrow"');
+    expect(view).toContain('<ProductSurfaceHeader');
+    expect(view).toContain('family="settings"');
     expect(view).toContain('data-testid="settings-compact-header"');
     expect(view).toContain('data-testid="settings-compact-back"');
   });

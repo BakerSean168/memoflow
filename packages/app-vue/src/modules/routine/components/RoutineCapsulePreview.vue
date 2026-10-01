@@ -1,48 +1,42 @@
 <template>
-  <div
-    class="flex max-h-[28rem] min-h-0 flex-col"
+  <CapsulePreviewShell
+    max-height="28rem"
     data-testid="routine-capsule-preview"
     data-capsule-workspace="routine"
   >
-    <div class="flex items-center justify-between gap-3 border-b border-[hsl(var(--border-subtle))] pb-2">
-      <div>
-        <p class="text-xs font-semibold text-foreground">{{ t('routine.title') }}</p>
-        <p class="mt-0.5 text-[10px] text-muted-foreground">{{ t('routine.home.title') }}</p>
-      </div>
-      <span
-        class="rounded-full bg-[hsl(var(--surface-raised)/0.68)] px-2 py-0.5 font-mono text-[10px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]"
-      >
-        {{ occurrences.length }}
-      </span>
-    </div>
+    <CapsulePreviewHeader :title="t('routine.title')" :subtitle="t('routine.home.title')">
+      <template #actions>
+        <span
+          class="rounded-full bg-[hsl(var(--surface-raised)/0.68)] px-2 py-0.5 font-mono text-[10px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]"
+        >
+          {{ occurrences.length }}
+        </span>
+      </template>
+    </CapsulePreviewHeader>
 
-    <div v-if="loading && occurrences.length === 0" class="space-y-1.5 py-3">
+    <CapsulePreviewState v-if="loading && occurrences.length === 0" kind="loading">
       <div
         v-for="index in 3"
         :key="index"
         class="h-10 animate-pulse rounded-lg bg-[hsl(var(--surface-raised)/0.6)]"
       />
-    </div>
+    </CapsulePreviewState>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center gap-2 py-5 text-center"
-      data-testid="routine-capsule-error"
-    >
+    <CapsulePreviewState v-else-if="error" kind="error" data-testid="routine-capsule-error">
       <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ error }}</p>
       <Button type="button" size="sm" variant="ghost" class="h-7 text-[11px]" @click="load(true)">
         <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
         {{ t('common.retry') }}
       </Button>
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="occurrences.length === 0"
-      class="py-7 text-center text-[11px] text-muted-foreground"
+      kind="empty"
       data-testid="routine-capsule-empty"
     >
-      {{ t('routine.home.empty') }}
-    </div>
+      <p class="text-[11px] text-muted-foreground">{{ t('routine.home.empty') }}</p>
+    </CapsulePreviewState>
 
     <div v-else class="min-h-0 flex-1 overflow-y-auto py-1.5">
       <div
@@ -90,7 +84,7 @@
       </div>
     </div>
 
-    <div class="flex shrink-0 justify-end border-t border-[hsl(var(--border-subtle))] pt-2">
+    <CapsulePreviewFooter>
       <button
         type="button"
         class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
@@ -100,8 +94,8 @@
         {{ t('routine.home.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
       </button>
-    </div>
-  </div>
+    </CapsulePreviewFooter>
+  </CapsulePreviewShell>
 </template>
 
 <script setup lang="ts">
@@ -111,12 +105,14 @@ import { ArrowRight, Clock3, Loader2, RotateCcw } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/contracts/routine';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import {
-  endOfDayMs,
-  formatProductHm,
-  startOfDayMs,
-} from '../../../shared/utils/product-time';
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { endOfDayMs, formatProductHm, startOfDayMs } from '../../../shared/utils/product-time';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
 import { routineUpcomingQueryKeys } from '../../../platform/server-state/query-keys';
 import { fetchRoutineUpcomingCached } from '../composables/routineUpcomingCache';
@@ -139,10 +135,7 @@ function todayRange(now = Date.now()) {
   return { start: startOfDayMs(now), end: endOfDayMs(now), limit: 500 };
 }
 
-function applyUpcoming(
-  source: RoutineUpcomingOccurrence[],
-  now = Date.now(),
-): void {
+function applyUpcoming(source: RoutineUpcomingOccurrence[], now = Date.now()): void {
   occurrences.value = source.filter((occurrence) => occurrence.occurrenceAt >= now);
 }
 

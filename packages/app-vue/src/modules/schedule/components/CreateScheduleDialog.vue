@@ -3,7 +3,7 @@
     <ProductDialogShell
       :open="modelValue"
       test-id="schedule-dialog"
-      size="md"
+      recipe="config"
       content-class="sm:max-w-[620px]"
       initial-focus-selector="[data-testid='schedule-title-input']"
     >

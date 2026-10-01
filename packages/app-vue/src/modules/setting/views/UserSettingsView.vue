@@ -15,6 +15,7 @@ import UserPreferenceSettingsSection from '../components/UserPreferenceSettingsS
 import SettingsNavigation from '../components/SettingsNavigation.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import { returnFromSettingsScene } from '../../../layouts/shell/useShellRouterSync';
+import { ProductSurfaceHeader } from '../../../shared/components';
 
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
@@ -121,11 +122,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      <header
-        v-if="isNarrow"
-        class="flex h-12 shrink-0 items-center border-b border-border px-3"
-        data-testid="settings-compact-header"
-      >
+      <ProductSurfaceHeader v-if="isNarrow" family="settings" data-testid="settings-compact-header">
         <Button
           type="button"
           variant="ghost"
@@ -137,7 +134,7 @@ onBeforeUnmount(() => {
           <ArrowLeft class="h-4 w-4" />
           <span class="font-semibold">{{ t('setting.title') }}</span>
         </Button>
-      </header>
+      </ProductSurfaceHeader>
 
       <main class="min-h-0 flex-1 overflow-y-auto" data-testid="settings-content-scroll">
         <div class="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-10">

@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Loader2 } from '@lucide/vue';
+import {
+  semanticToneStatusClass,
+  type SemanticTone,
+} from '../../../shared/constants/semantic-tone';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     kind: 'loading' | 'error' | 'info' | 'success';
     title?: string;
@@ -14,16 +19,21 @@ withDefaults(
     testId: undefined,
   },
 );
+
+const statusTone = computed<SemanticTone>(() => {
+  if (props.kind === 'error') return 'destructive';
+  if (props.kind === 'success') return 'success';
+  if (props.kind === 'info') return 'info';
+  return 'muted';
+});
+
+const statusToneClass = computed(() => semanticToneStatusClass(statusTone.value));
 </script>
 
 <template>
   <div
     class="flex min-w-0 items-start gap-3 rounded-md px-3 py-2.5 text-sm"
-    :class="{
-      'bg-muted/45 text-muted-foreground': kind === 'loading' || kind === 'info',
-      'bg-destructive/8 text-destructive': kind === 'error',
-      'bg-[hsl(var(--success)/0.08)] text-foreground': kind === 'success',
-    }"
+    :class="statusToneClass"
     :role="kind === 'error' ? 'alert' : 'status'"
     :aria-busy="kind === 'loading' ? 'true' : undefined"
     :data-testid="testId"

@@ -3,8 +3,7 @@
     <ProductDialogShell
       :open="visible"
       test-id="task-plan-dialog"
-      size="lg"
-      height-mode="workspace"
+      recipe="workspace"
       body-class="flex flex-col"
       initial-focus-selector="[data-testid='task-plan-title-input']"
     >

@@ -21,9 +21,9 @@ describe('document presentation primitives', () => {
       },
     });
 
-    expect(wrapper.get('[data-testid="document-workspace-toolbar"]').classes()).toContain(
-      'min-h-11',
-    );
+    const toolbar = wrapper.get('[data-testid="document-workspace-toolbar"]');
+    expect(toolbar.classes()).toContain('min-h-11');
+    expect(toolbar.attributes('data-surface-header-family')).toBe('document');
     expect(wrapper.get('[data-testid="leading"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="content"]').text()).toBe('note.md');
     expect(wrapper.get('[data-testid="action"]').exists()).toBe(true);

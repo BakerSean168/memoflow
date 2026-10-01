@@ -312,7 +312,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(source).toContain('initialKeyResults');
     expect(source).toContain('keyResults');
     expect(source).toContain('ProductDialogShell');
-    expect(source).toContain('height-mode="workspace"');
+    expect(source).toContain('recipe="workspace"');
     expect(source).toContain('ProductAutoTextarea');
     expect(source).toContain('class="flex min-h-full flex-col gap-6"');
     expect(source).toContain('GoalKeyResultDraftEditor');

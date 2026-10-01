@@ -10,8 +10,9 @@
         :key="notification.id"
         :class="[
           'flex items-start gap-3 min-w-[320px] max-w-[400px] p-4 mb-3',
-          'rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.96)] shadow-[0_18px_46px_-24px_rgba(0,0,0,0.62),inset_0_1px_0_hsl(var(--foreground)/0.03)] backdrop-blur-xl pointer-events-auto',
-          'transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-px hover:bg-[hsl(var(--surface-overlay))] hover:shadow-[0_20px_50px_-24px_rgba(0,0,0,0.68),inset_0_1px_0_hsl(var(--foreground)/0.03)]',
+          'rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.96)] backdrop-blur-xl pointer-events-auto',
+          'transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-px hover:bg-[hsl(var(--surface-overlay))]',
+          semanticElevationClass('floating-interactive'),
           priorityBorderClass(notification.priority),
           notification.priority === 'URGENT' && 'animate-pulse-shadow',
         ]"
@@ -58,6 +59,11 @@ import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { X } from '@lucide/vue';
 import type { NotificationItem } from './types';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
+import {
+  semanticToneBorderClass,
+  type SemanticTone,
+} from '../../../shared/constants/semantic-tone';
 
 const { t } = useI18n();
 
@@ -84,13 +90,13 @@ function getIcon(type: string): string {
 }
 
 function priorityBorderClass(priority: string): string {
-  const classes: Record<string, string> = {
-    LOW: 'border-l-4 border-l-gray-400',
-    NORMAL: 'border-l-4 border-l-blue-500',
-    HIGH: 'border-l-4 border-l-orange-500',
-    URGENT: 'border-l-4 border-l-red-500',
+  const tones: Record<string, SemanticTone> = {
+    LOW: 'muted',
+    NORMAL: 'info',
+    HIGH: 'warning',
+    URGENT: 'destructive',
   };
-  return classes[priority] || classes.NORMAL;
+  return `border-l-4 ${semanticToneBorderClass(tones[priority] ?? 'info')}`;
 }
 </script>
 
@@ -119,10 +125,10 @@ function priorityBorderClass(priority: string): string {
 @keyframes pulse-shadow {
   0%,
   100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px hsl(var(--foreground) / 0.14);
   }
   50% {
-    box-shadow: 0 4px 12px rgba(245, 108, 108, 0.4);
+    box-shadow: 0 4px 12px hsl(var(--destructive) / 0.34);
   }
 }
 

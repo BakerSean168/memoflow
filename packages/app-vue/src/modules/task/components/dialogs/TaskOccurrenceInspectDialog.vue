@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="modelValue" @update:open="emit('update:modelValue', $event)">
-    <ProductDialogShell :open="modelValue" test-id="task-occurrence-inspect" size="sm">
+    <ProductDialogShell :open="modelValue" test-id="task-occurrence-inspect" recipe="inspect">
       <template #title>{{ planName }}</template>
       <template #description>{{ t('task.inspect.description') }}</template>
       <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-3 text-sm">

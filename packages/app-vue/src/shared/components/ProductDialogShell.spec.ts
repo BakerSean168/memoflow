@@ -179,6 +179,30 @@ describe('ProductDialogShell', () => {
     wrapper.unmount();
   });
 
+  it('maps semantic recipes to stable default dialog geometry', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="recipe-dialog" recipe="workspace">
+            <template #title>Workspace</template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    const dialog = document.body.querySelector<HTMLElement>('[data-testid="recipe-dialog"]')!;
+
+    expect(dialog.dataset.productDialogRecipe).toBe('workspace');
+    expect(dialog.classList.contains('sm:max-w-[960px]')).toBe(true);
+    expect(dialog.classList.contains('h-[calc(100dvh-2rem)]')).toBe(true);
+    wrapper.unmount();
+  });
+
   it('can preserve selection-style dialogs by preventing outside interaction', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

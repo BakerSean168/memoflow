@@ -364,6 +364,7 @@ function mountWorkspace(service: IRepositoryService, options: { narrow?: boolean
         DropdownMenuSeparator: true,
         Input: InputStub,
         ProductDialogShell: ProductDialogShellStub,
+        ProductSheetSurface: PassthroughStub,
         BookOpen: true,
         Check: true,
         CloudOff: true,

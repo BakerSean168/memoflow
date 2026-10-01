@@ -3,10 +3,7 @@
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="schedule-calendar-view"
   >
-    <header
-      class="z-10 flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-2 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
-      data-testid="schedule-page-toolbar"
-    >
+    <ProductSurfaceHeader family="calendar" data-testid="schedule-page-toolbar">
       <div
         class="flex min-w-0 items-center gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.55)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
         role="tablist"
@@ -84,7 +81,7 @@
         data-testid="create-schedule-button"
         @click="openCreateDialog"
       />
-    </header>
+    </ProductSurfaceHeader>
 
     <div class="min-h-0 flex-1 overflow-hidden" data-testid="schedule-calendar-content">
       <PlannerCalendar
@@ -160,7 +157,7 @@ import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView'
 import { useSchedule } from '../composables/useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { ResponsivePrimaryAction } from '../../../shared/components';
+import { ProductSurfaceHeader, ResponsivePrimaryAction } from '../../../shared/components';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
