@@ -1228,6 +1228,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 3. 不强制一个 literal height。
 4. 迁最少两个真实 surface 后再标 stable。
 
+**Execution (2026-10-01): Accepted / frozen after reconciliation re-validation.** The canonical tree now exposes one runtime/type authority for the six legal header families — collection/entity/calendar/document/settings/diagnostic — and derives `ProductSurfaceHeaderFamily` from that list. `ProductSurfaceHeader` remains presentation-only while `ModuleHeader` keeps owner slot composition and defaults detail surfaces to entity. Current Goal/Task/Routine/Notification collections, Goal/Task detail, Schedule, Knowledge, narrow Settings and SSE diagnostic surfaces all use the legal family contract; AI host and Product Governance headers remain explicitly deferred to their own tracks rather than being mass-rewritten. Fresh acceptance passed 9 App-Vue files / 48 tests, uncached App-Vue typecheck, 1,335-file inventory, full uncached governance, targeted ESLint/Prettier and diff checks. The closeout diff does not change rendered classes/markup, so no new pixel-diff claim is made. Evidence: [UI-2101 legal surface/header variants](../archive/2026-10-01-pvc-ui-2101-legal-surface-header-variants.md).
+
 ---
 
 ## PVC-UI-2102 — Entity property/metadata grammar

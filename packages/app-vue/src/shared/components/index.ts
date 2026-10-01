@@ -9,7 +9,10 @@ export { default as ProductPopoverSurface } from './ProductPopoverSurface.vue';
 export { default as ProductSheetSurface } from './ProductSheetSurface.vue';
 export { default as ProductSurfaceState } from './ProductSurfaceState.vue';
 export { default as ProductSurfaceHeader } from './ProductSurfaceHeader.vue';
-export type { ProductSurfaceHeaderFamily } from './product-surface-header.types';
+export {
+  PRODUCT_SURFACE_HEADER_FAMILIES,
+  type ProductSurfaceHeaderFamily,
+} from './product-surface-header.types';
 export { default as CapsulePreviewShell } from './CapsulePreviewShell.vue';
 export { default as CapsulePreviewHeader } from './CapsulePreviewHeader.vue';
 export { default as CapsulePreviewFooter } from './CapsulePreviewFooter.vue';
