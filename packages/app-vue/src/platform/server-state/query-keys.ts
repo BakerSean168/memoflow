@@ -116,7 +116,8 @@ function normalizeStringArray<T extends string>(value: T[] | undefined): T[] | u
 export function canonicalizeTaskPlanListQuery(
   query?: TaskPlanListQueryInput,
 ): CanonicalTaskPlanListQuery {
-  const { page, limit, status, goalId, keyResultId, labelIdsAll, outcome, archiveState } = query ?? {};
+  const { page, limit, status, goalId, keyResultId, labelIdsAll, outcome, archiveState } =
+    query ?? {};
   const normalizedStatus = normalizeStringArray(status);
   const normalizedLabelIds = normalizeStringArray(labelIdsAll);
   const normalizedOutcome = normalizeStringArray(outcome);
@@ -139,8 +140,7 @@ export function canonicalizeTaskPlanListQuery(
 export const taskPlanQueryKeys = {
   all: ['server-state', 'task-plan'] as const,
   identity: (identityScope: string) => [...taskPlanQueryKeys.all, identityScope] as const,
-  lists: (identityScope: string) =>
-    [...taskPlanQueryKeys.identity(identityScope), 'list'] as const,
+  lists: (identityScope: string) => [...taskPlanQueryKeys.identity(identityScope), 'list'] as const,
   list: (identityScope: string, query: CanonicalTaskPlanListQuery) =>
     [...taskPlanQueryKeys.lists(identityScope), query] as const,
   details: (identityScope: string) =>
@@ -158,6 +158,8 @@ export const taskPlanQueryKeys = {
 export const taskOccurrenceQueryKeys = {
   all: ['server-state', 'task-occurrence'] as const,
   identity: (identityScope: string) => [...taskOccurrenceQueryKeys.all, identityScope] as const,
+  detail: (identityScope: string, id: string) =>
+    [...taskOccurrenceQueryKeys.identity(identityScope), 'detail', id] as const,
   ranges: (identityScope: string) =>
     [...taskOccurrenceQueryKeys.identity(identityScope), 'range'] as const,
   range: (identityScope: string, start: number, end: number, includeOverdueOpen = false) =>

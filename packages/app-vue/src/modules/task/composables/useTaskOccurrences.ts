@@ -81,6 +81,10 @@ export function useTaskOccurrences() {
   ): Promise<TaskOccurrenceDTO> {
     const dto = entity.toDTO();
     store.updateInstance(dto);
+    runtime.queryClient.setQueryData(
+      taskOccurrenceQueryKeys.detail(resolveIdentityScope(), String(dto.id)),
+      dto,
+    );
     runtime.queryClient.setQueriesData<TaskOccurrenceDTO[]>(
       { queryKey: taskOccurrenceQueryKeys.ranges(resolveIdentityScope()) },
       (current) =>
@@ -224,10 +228,16 @@ export function useTaskOccurrences() {
     return result;
   }
 
-  async function setOccurrenceChecklistItem(id: string, request: SetTaskOccurrenceChecklistItemReq) {
+  async function setOccurrenceChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ) {
     const result = await executeTaskOperation(
       () =>
-        service.setOccurrenceChecklistItem(id, sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq),
+        service.setOccurrenceChecklistItem(
+          id,
+          sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq,
+        ),
       'task.error.operationFailed',
     );
     if (result.ok) {

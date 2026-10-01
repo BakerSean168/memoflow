@@ -14,6 +14,8 @@ import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import ScheduleCalendarView from './ScheduleCalendarView.vue';
 import PlannerDayDialog from '../components/PlannerDayDialog.vue';
+import { createMemoryHistory, createRouter } from 'vue-router';
+import TaskOccurrenceQuickSurface from '../../task/components/TaskOccurrenceQuickSurface.vue';
 import { toast } from 'vue-sonner';
 import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 
@@ -157,15 +159,28 @@ const createDialog = defineComponent({
       : null,
 });
 
-function mountView() {
+async function mountView() {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/tasks/:id', name: 'task-detail', component: { template: '<div />' } },
+    ],
+  });
+  await router.push('/');
+  await router.isReady();
+
   return mount(ScheduleCalendarView, {
     global: {
-      plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
+      plugins: [
+        createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
+        router,
+      ],
       provide: { [GOAL_SERVICE_KEY as symbol]: { updateGoal: mocks.updateGoal } },
       stubs: {
         PlannerCalendar: planner,
         PlannerDayDialog: true,
-        TaskEventActionPanel: true,
+        TaskOccurrenceQuickSurface: true,
         CreateScheduleDialog: createDialog,
         Dialog: dialog,
         Sheet: dialog,
@@ -203,7 +218,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
   it.each(['calendar', 'day-dialog'])(
     'opens the shared dialog from %s without owner mutation',
     async (source) => {
-      const wrapper = mountView();
+      const wrapper = await mountView();
       expect(wrapper.getComponent(PlannerEventDialog).props('open')).toBe(false);
 
       if (source === 'calendar') await wrapper.get('[data-testid="entry-click"]').trigger('click');
@@ -220,12 +235,12 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
       expect(detail.find('[data-testid="planner-event-delete"]').exists()).toBe(true);
       expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
       expect(mocks.deleteCalendarEntry).not.toHaveBeenCalled();
-      expect(wrapper.getComponent({ name: 'TaskEventActionPanel' }).props('open')).toBe(false);
+      expect(wrapper.findComponent(TaskOccurrenceQuickSurface).exists()).toBe(false);
     },
   );
 
   it('reuses CreateScheduleDialog edit mode and sends the current version to the owner command', async () => {
-    const wrapper = mountView();
+    const wrapper = await mountView();
     await wrapper.get('[data-testid="entry-click"]').trigger('click');
     await flushPromises();
 
@@ -268,7 +283,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
   });
 
   it('confirms and deletes a CalendarEntry through the Schedule owner command', async () => {
-    const wrapper = mountView();
+    const wrapper = await mountView();
     await wrapper.get('[data-testid="entry-click"]').trigger('click');
     await flushPromises();
 
@@ -284,7 +299,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     async (kind) => {
       mocks.calendarEntries.value = kind === 'missing' ? [] : [{ ...entry, version: 4 }];
       mocks.fetchForRange.mockRejectedValue(new Error('owner refresh failed'));
-      const wrapper = mountView();
+      const wrapper = await mountView();
       const detail = wrapper.getComponent(PlannerEventDialog);
       detail.vm.$emit('edit', projection);
       detail.vm.$emit('delete', projection);
@@ -300,7 +315,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
   );
 
   it('preserves inspect after cancellation and failed delete', async () => {
-    const wrapper = mountView();
+    const wrapper = await mountView();
     await wrapper.get('[data-testid="entry-click"]').trigger('click');
     const detail = wrapper.getComponent(PlannerEventDialog);
     mocks.confirm.mockResolvedValueOnce(false);
@@ -320,7 +335,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
       mocks.calendarEntries.value = [{ ...entry, version: 4 }];
       return true;
     });
-    const wrapper = mountView();
+    const wrapper = await mountView();
     wrapper.getComponent(PlannerEventDialog).vm.$emit('delete', projection);
     await flushPromises();
     expect(mocks.deleteCalendarEntry).not.toHaveBeenCalled();
@@ -331,7 +346,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     'reports committed %s plus refresh warning without false failure',
     async (command) => {
       mocks.fetchForRange.mockRejectedValue(new Error('refresh failed'));
-      const wrapper = mountView();
+      const wrapper = await mountView();
       const detail = wrapper.getComponent(PlannerEventDialog);
       if (command === 'delete') {
         detail.vm.$emit('delete', projection);
@@ -355,7 +370,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     mocks.fetchForRange.mockImplementation(async () => {
       mocks.scheduleError.value = 'Owner read failed';
     });
-    const wrapper = mountView();
+    const wrapper = await mountView();
     const saved = await wrapper.getComponent({ name: 'CreateScheduleDialog' }).props('onSubmit')({
       name: entry.title,
       range: entry.range,
@@ -367,7 +382,7 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
   });
 
   it('keeps an edit draft on owner rejection or owner facts changing during editing', async () => {
-    const wrapper = mountView();
+    const wrapper = await mountView();
     wrapper.getComponent(PlannerEventDialog).vm.$emit('edit', projection);
     await flushPromises();
     const editor = wrapper.getComponent({ name: 'CreateScheduleDialog' });
@@ -384,33 +399,61 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     expect(toast.success).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['calendar', false],
+    ['day-dialog', false],
+    ['calendar', true],
+    ['day-dialog', true],
+  ] as const)('opens Task inspect from %s with narrow=%s', async (source, narrow) => {
+    mocks.narrow = narrow;
+    const wrapper = await mountView();
+    const event: CalendarEventProjection = {
+      ...projection,
+      sourceType: 'task',
+      sourceId: 'occurrence-1',
+      displayMetadata: { semantic: 'task-occurrence', status: 'Pending' },
+      ownerCommandTarget: { ownerType: 'task.occurrence', ownerId: 'occurrence-1' },
+    };
+    wrapper
+      .getComponent({ name: source === 'calendar' ? 'PlannerCalendar' : 'PlannerDayDialog' })
+      .vm.$emit('event-click', event);
+    await flushPromises();
+    expect(wrapper.getComponent(PlannerEventDialog).props('open')).toBe(true);
+    expect(wrapper.getComponent(TaskOccurrenceQuickSurface).props('occurrenceId')).toBe(
+      'occurrence-1',
+    );
+    expect(wrapper.getComponent({ name: 'PlannerDayDialog' }).props('open')).toBe(false);
+    expect(mocks.completeOccurrence).not.toHaveBeenCalled();
+  });
+
   it.each(['goal', 'routine', 'task'] as const)(
     'preserves %s inspect routing without Schedule CRUD',
     async (sourceType) => {
-      const wrapper = mountView();
+      const wrapper = await mountView();
       const event = { ...projection, sourceType };
       wrapper.getComponent({ name: 'PlannerDayDialog' }).vm.$emit('event-click', event);
       await flushPromises();
       const detail = wrapper.getComponent(PlannerEventDialog);
+      expect(detail.props('open')).toBe(true);
+      expect(detail.find('[data-testid="planner-event-edit"]').exists()).toBe(false);
+      expect(detail.find('[data-testid="planner-event-delete"]').exists()).toBe(false);
       if (sourceType === 'task') {
-        expect(wrapper.getComponent({ name: 'TaskEventActionPanel' }).props('open')).toBe(true);
-        wrapper
-          .getComponent({ name: 'TaskEventActionPanel' })
-          .vm.$emit('complete-task', 'occurrence-1');
+        expect(wrapper.getComponent(TaskOccurrenceQuickSurface).props('occurrenceId')).toBe(
+          'entry-1',
+        );
+        wrapper.getComponent(TaskOccurrenceQuickSurface).vm.$emit('open-plan', 'plan-1');
         await flushPromises();
-        expect(mocks.completeOccurrence).toHaveBeenCalledWith('occurrence-1');
-      } else {
-        expect(detail.props('open')).toBe(true);
-        expect(detail.find('[data-testid="planner-event-edit"]').exists()).toBe(false);
-        expect(detail.find('[data-testid="planner-event-delete"]').exists()).toBe(false);
+        expect(wrapper.vm.$router.currentRoute.value.path).toBe('/tasks/plan-1');
+        expect(detail.props('open')).toBe(false);
       }
+      expect(mocks.completeOccurrence).not.toHaveBeenCalled();
       expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
     },
   );
 
   it.each([false, true])('shares day/event bodies and actions in narrow=%s', async (narrow) => {
     mocks.narrow = narrow;
-    const wrapper = mountView();
+    const wrapper = await mountView();
     await wrapper.get('[data-testid="entry-click"]').trigger('click');
     expect(wrapper.get('[data-testid="event-detail-properties"]').text()).toContain('09:00');
     await wrapper.get('[data-testid="planner-event-edit"]').trigger('click');

@@ -1,16 +1,31 @@
 import { computed, ref } from 'vue';
 import { useSchedule } from '@memoflow/app-vue/modules/schedule/composables/useSchedule';
-import { projectCalendarEntry } from '@memoflow/app-vue/modules/schedule/planner/calendar-event-projection';
+import { useTask } from '@memoflow/app-vue/modules/task/composables/useTask';
+import {
+  projectCalendarEntry,
+  projectTaskOccurrence,
+} from '@memoflow/app-vue/modules/schedule/planner/calendar-event-projection';
 export { toLocalDateKey } from './useCalendarView.fixture';
 
-// Only the owner aggregation read is doubled; CRUD uses the production Schedule composable.
+// Only owner aggregation is doubled; Schedule and Task reads/actions use production composables.
 export function useCalendarView() {
   const schedule = useSchedule();
+  const task =
+    new URLSearchParams(location.search).get('surface') === 'task-quick' ? useTask() : null;
   const windowStart = ref<number | null>(null);
   const windowEnd = ref<number | null>(null);
   let loaded = false;
   return {
-    projections: computed(() => schedule.calendarEntries.value.map(projectCalendarEntry)),
+    projections: computed(() => [
+      ...schedule.calendarEntries.value.map(projectCalendarEntry),
+      ...(task?.instances.value ?? []).flatMap((occurrence) => {
+        const projection = projectTaskOccurrence(
+          occurrence,
+          task?.templates.value.find((plan) => plan.id === occurrence.planId),
+        );
+        return projection ? [projection] : [];
+      }),
+    ]),
     conflicts: ref([]),
     isLoading: schedule.isLoading,
     windowStart,
@@ -22,6 +37,8 @@ export function useCalendarView() {
         throw new Error('Service-double planner refresh failure');
       }
       await schedule.fetchCalendarEntries(start, end);
+      if (task)
+        await Promise.all([task.fetchInstancesByDateRange(start, end), task.fetchTemplates()]);
       loaded = true;
     },
   };

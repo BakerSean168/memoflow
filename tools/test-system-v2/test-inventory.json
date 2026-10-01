@@ -1818,6 +1818,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/schedule/presentation-authority/task-quick.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.schedule-presentation-authority.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/schedule/schedule-calendar.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -4674,6 +4682,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4819,6 +4835,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11735,7 +11759,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "apps/web/playwright.shell.config.ts",
@@ -11931,7 +11955,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 251
+      "fileCount": 253
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12685,12 +12709,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1116,
+    "unit": 1118,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 6,
-    "e2e": 61,
+    "e2e": 62,
     "perf": 1,
     "governance": 59
   }
