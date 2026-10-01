@@ -35,6 +35,7 @@ import type {
   IRuntimeUsageService,
   IWorkflowRuntimeService,
   IRuleService,
+  DesktopUpdateService,
   ModuleCapsule,
 } from './types';
 
@@ -94,6 +95,10 @@ export const DESKTOP_AUTH_API_KEY: InjectionKey<DesktopAuthApi> = Symbol('Deskto
 export type { ElectronBridge };
 
 export const DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge> = Symbol('DesktopBridge');
+
+/** Optional host-neutral Desktop Update capability. Web hosts intentionally omit it. */
+export const DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<DesktopUpdateService> =
+  Symbol('DesktopUpdateService');
 
 /** Shell-owned Global Composer teleport mount (HTMLElement). */
 export const SHELL_COMPOSER_MOUNT_KEY: InjectionKey<ShallowRef<HTMLElement | null>> =

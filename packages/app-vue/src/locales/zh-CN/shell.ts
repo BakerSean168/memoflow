@@ -84,6 +84,11 @@ export default {
     maximize: '最大化',
     close: '关闭',
   },
+  update: {
+    ready: '更新 {version} 已准备好',
+    attention: '更新需要处理',
+    openSettings: '打开更新设置',
+  },
   composer: {
     placeholder: '给知行 AI 发消息…',
     send: '发送',

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { validateDesktopRuntimeValidations } from './desktop-runtime-validations.mjs';
 import { validateMacosTrustReceipt } from './verify-macos-trust.mjs';
 
 const [root, tag, gitSha, output] = process.argv.slice(2);
@@ -52,6 +53,7 @@ for (const receiptFile of receiptFiles) {
   ) {
     throw new Error(`Desktop platform runtime validation missing or failed: ${receipt.platform}`);
   }
+  receipt.runtimeValidations = validateDesktopRuntimeValidations(receipt, receipt.platform);
   if (receipt.os === 'macos' && receipt.signingState === 'signed-notarized') {
     try {
       const trust = validateMacosTrustReceipt(receipt.trustValidation);
@@ -127,6 +129,7 @@ const platformEvidence = Object.fromEntries(
         arch: receipt.arch,
         signingState: receipt.signingState,
         runtimeValidation: receipt.runtimeValidation,
+        runtimeValidations: receipt.runtimeValidations,
         trustValidation: receipt.trustValidation ?? null,
         assets: receipt.assets,
       },

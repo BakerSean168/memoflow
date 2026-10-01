@@ -7,7 +7,85 @@ export default {
     "ai": "AI",
     "notifications": "Notifications & Reminders",
     "account": "Account & Privacy",
-    "data": "Data"
+    "data": "Data",
+    "updates": "About & Updates"
+  },
+  "updates": {
+    "title": "About & Updates",
+    "overviewDescription": "Review the installed version and update state, then restart when a verified update is ready.",
+    "versionLabel": "Version {version}",
+    "currentVersion": "Current version",
+    "releaseChannel": "Release channel",
+    "updateOwner": "Update management",
+    "check": "Check for updates",
+    "restartAndUpdate": "Restart to update",
+    "retryInstall": "Retry install",
+    "retryDownload": "Retry download",
+    "retryCheck": "Check again",
+    "restartHint": "MemoFlow finishes runtime cleanup before handing the update to the installer.",
+    "releaseNotes": "Release notes",
+    "lastChecked": "Last checked: {time}",
+    "downloadProgress": "{transferred} of {total} · {speed}/s",
+    "channel": {
+      "stable": "Stable",
+      "beta": "Beta",
+      "canary": "Canary"
+    },
+    "owner": {
+      "memoflow-direct": "MemoFlow",
+      "system-store": "System store",
+      "package-manager": "Package manager",
+      "portable": "Portable install",
+      "enterprise-managed": "Organization managed",
+      "unsupported": "Unsupported"
+    },
+    "status": {
+      "loading": "Reading update status",
+      "disabled": "Automatic updates unavailable",
+      "readyToCheck": "Updates are enabled",
+      "upToDate": "You're up to date",
+      "checking": "Checking for updates",
+      "available": "A new version is available",
+      "downloading": "Downloading in the background",
+      "preparing": "Preparing the update",
+      "updateReady": "Update ready",
+      "restarting": "Restarting to update",
+      "failed": "Update did not complete"
+    },
+    "description": {
+      "loading": "Reading version and update capabilities from the Desktop runtime.",
+      "readyToCheck": "MemoFlow checks the stable channel in the background. You can also check now.",
+      "upToDate": "This installation is already on the latest version in the stable channel.",
+      "checking": "Connecting to the update source and validating the latest release metadata.",
+      "available": "A new version is available and will follow this installation's download policy.",
+      "availablePackageManager": "A new version is available. Updates are managed by your system package manager. Use it or your system software updater to upgrade.",
+      "availableAutoDownload": "A new version is available. MemoFlow will download it in the background without interrupting your work.",
+      "downloading": "The update is downloading in the background. You can keep using MemoFlow.",
+      "preparing": "The package is downloaded and is being verified and prepared for installation.",
+      "updateReady": "The package is verified. You choose when to restart; MemoFlow will not interrupt active work.",
+      "restarting": "Safely closing the current runtime and handing installation to the system updater.",
+      "failed": "This update operation did not complete. A retry action is shown when recovery is available."
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "currentVersion": "Current version",
+      "targetVersion": "Target version",
+      "state": "State",
+      "feedClass": "Feed class",
+      "lastCheckedAt": "Last checked",
+      "lastCheckResult": "Last check result",
+      "receiptStatus": "Install receipt",
+      "failure": "Failure",
+      "unavailable": "Diagnostics are unavailable."
+    },
+    "disabledReason": {
+      "development-build": "Automatic updates are disabled for development builds.",
+      "updates-disabled": "Automatic updates are disabled for this installation.",
+      "unsupported-installation": "This installation type cannot be updated directly by MemoFlow.",
+      "managed-externally": "Updates for this installation are managed by the system or your organization.",
+      "missing-configuration": "The update source is not configured.",
+      "invalid-configuration": "The update source configuration is invalid."
+    }
   },
   "knowledgeRepository": {
     "localTitle": "Local Obsidian Vault",

@@ -7,7 +7,85 @@ export default {
     "ai": "AI",
     "notifications": "通知与提醒",
     "account": "账户与隐私",
-    "data": "数据"
+    "data": "数据",
+    "updates": "关于与更新"
+  },
+  "updates": {
+    "title": "关于与更新",
+    "overviewDescription": "查看当前版本、更新状态，并在新版本准备好后重新启动完成安装。",
+    "versionLabel": "版本 {version}",
+    "currentVersion": "当前版本",
+    "releaseChannel": "更新通道",
+    "updateOwner": "更新管理",
+    "check": "检查更新",
+    "restartAndUpdate": "重新启动并更新",
+    "retryInstall": "重试安装",
+    "retryDownload": "重试下载",
+    "retryCheck": "重新检查",
+    "restartHint": "更新将在重启后完成，当前工作区会先正常收尾。",
+    "releaseNotes": "版本说明",
+    "lastChecked": "上次检查：{time}",
+    "downloadProgress": "已下载 {transferred} / {total} · {speed}/s",
+    "channel": {
+      "stable": "稳定版",
+      "beta": "Beta",
+      "canary": "Canary"
+    },
+    "owner": {
+      "memoflow-direct": "MemoFlow",
+      "system-store": "系统应用商店",
+      "package-manager": "系统包管理器",
+      "portable": "便携版",
+      "enterprise-managed": "组织管理",
+      "unsupported": "不支持"
+    },
+    "status": {
+      "loading": "正在读取更新状态",
+      "disabled": "自动更新不可用",
+      "readyToCheck": "更新已启用",
+      "upToDate": "已是最新版本",
+      "checking": "正在检查更新",
+      "available": "发现新版本",
+      "downloading": "正在后台下载",
+      "preparing": "正在准备更新",
+      "updateReady": "更新已准备好",
+      "restarting": "正在重新启动并更新",
+      "failed": "更新未完成"
+    },
+    "description": {
+      "loading": "正在从桌面运行时读取版本与更新能力。",
+      "readyToCheck": "MemoFlow 会在后台检查稳定版更新，你也可以立即手动检查。",
+      "upToDate": "当前安装已经是稳定通道中的最新版本。",
+      "checking": "正在连接更新源并验证最新版本信息。",
+      "available": "新版本可用，下载会按照当前安装策略继续。",
+      "availablePackageManager": "发现新版本，更新由系统包管理器负责。请使用系统的软件更新工具或包管理器完成升级。",
+      "availableAutoDownload": "新版本可用，MemoFlow 将在后台下载，不会打断当前工作。",
+      "downloading": "下载在后台进行，你可以继续使用 MemoFlow。",
+      "preparing": "安装包已下载，正在完成校验与安装准备。",
+      "updateReady": "安装包已验证完成。你决定何时重新启动，不会强制打断当前工作。",
+      "restarting": "正在安全收尾当前运行时，并把安装交给系统更新器。",
+      "failed": "本次更新操作没有完成。可重试时会保留对应操作入口。"
+    },
+    "troubleshooting": {
+      "title": "更新故障排查",
+      "currentVersion": "当前版本",
+      "targetVersion": "目标版本",
+      "state": "状态",
+      "feedClass": "更新源类型",
+      "lastCheckedAt": "上次检查时间",
+      "lastCheckResult": "上次检查结果",
+      "receiptStatus": "安装回执",
+      "failure": "失败原因",
+      "unavailable": "暂时无法获取诊断信息。"
+    },
+    "disabledReason": {
+      "development-build": "开发构建不启用自动更新。",
+      "updates-disabled": "此安装已关闭自动更新。",
+      "unsupported-installation": "当前安装方式不支持 MemoFlow 自助更新。",
+      "managed-externally": "此安装由系统或组织策略负责更新。",
+      "missing-configuration": "更新源配置缺失。",
+      "invalid-configuration": "更新源配置无效。"
+    }
   },
   "knowledgeRepository": {
     "localTitle": "本地知识库",

@@ -18,6 +18,15 @@ import type { NotificationPort, ExternalEditorPort } from './capabilities/ports'
 import type { DesktopFeaturesRuntime } from './desktop-features';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
+import type { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
+import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
+import type { UpdateInstallCoordinator } from './modules/desktop-update/application/update-install-coordinator';
+import type { DesktopUpdateInstallReceiptStore } from './modules/desktop-update/application/desktop-update-install-receipt';
+
+export interface DesktopMainRuntimeDisposeOptions {
+  /** Keep the updater engine alive until UpdateInstallCoordinator hands off to the installer. */
+  readonly preserveDesktopUpdateForHandoff?: boolean;
+}
 
 const logger = createLogger('DesktopMainRuntime');
 
@@ -25,12 +34,16 @@ export class DesktopMainRuntime {
   private _notification: NotificationPort | null = null;
   private _desktopFeaturesRuntime: DesktopFeaturesRuntime | null = null;
   private _deviceAuthCoordinator: DeviceAuthCoordinator | null = null;
+  private _desktopUpdateIpcDisposer: (() => void) | null = null;
 
   constructor(
     readonly windowManager: WindowManager,
     readonly profileRuntimeManager: DesktopProfileRuntimeManager,
-  ) {
-  }
+    readonly desktopUpdateCoordinator: DesktopUpdateCoordinator,
+    readonly desktopUpdateInstallCoordinator: UpdateInstallCoordinator,
+    readonly desktopUpdateReceiptStore: DesktopUpdateInstallReceiptStore,
+    readonly desktopUpdateDiagnostics: DesktopUpdateDiagnosticsService,
+  ) {}
 
   /** Get the auth context provider for the active profile (or null). */
   get authContextProvider() {
@@ -66,6 +79,11 @@ export class DesktopMainRuntime {
     this._deviceAuthCoordinator = coordinator;
   }
 
+  setDesktopUpdateIpcDisposer(dispose: () => void): void {
+    this._desktopUpdateIpcDisposer?.();
+    this._desktopUpdateIpcDisposer = dispose;
+  }
+
   /**
    * Dispose all owned resources.
    * Called during application shutdown (before-quit).
@@ -73,11 +91,26 @@ export class DesktopMainRuntime {
    * Note: WindowManager cleanup is handled by Electron's window close
    * lifecycle, not here.
    */
-  async dispose(): Promise<void> {
-    logger.info('Disposing DesktopMainRuntime...');
+  async dispose(options: DesktopMainRuntimeDisposeOptions = {}): Promise<void> {
+    logger.info('Disposing DesktopMainRuntime...', {
+      preserveDesktopUpdateForHandoff: options.preserveDesktopUpdateForHandoff === true,
+    });
 
     this._deviceAuthCoordinator?.dispose();
     this._deviceAuthCoordinator = null;
+
+    // Renderer transport is no longer useful once shutdown begins, even when
+    // the updater engine itself must survive until installer handoff.
+    this._desktopUpdateIpcDisposer?.();
+    this._desktopUpdateIpcDisposer = null;
+
+    // Desktop Update is normally disposed with the process runtime. During an
+    // update-install shutdown it must survive destructive application cleanup
+    // long enough to perform the final installer handoff (DU-1202).
+    if (!options.preserveDesktopUpdateForHandoff) {
+      this.desktopUpdateInstallCoordinator.destroy();
+      this.desktopUpdateCoordinator.destroy();
+    }
 
     // Release profile resources without forgetting which local Profile should reopen next launch.
     try {
