@@ -101,12 +101,21 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - `DU-1503` — **DEFERRED by user**: native Intel installed-update E2E and packaged provenance work are deferred.
 - `DU-1504` — **DEFERRED by user**: native Apple Silicon installed-update E2E and packaged provenance work are deferred.
 - macOS is not a gate for Windows feed/rollout work. DU-1402/DU-1403 consume whichever DU-1401 lanes are currently eligible; Windows-only publication is valid.
-- `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Governance retains only the unchanged HEAD platform-leakage finding in a surface-test assertion. macOS DU-1501..1504 remain DEFERRED.
+- `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Final branch integration moved the negative DI surface test into `src/di/__tests__/`, preserving the test while removing the governance false-positive; full governance now passes. macOS DU-1501..1504 remain DEFERRED.
 - `DU-1702` — **DONE**: the executable non-macOS failure matrix locks all 14 required scenarios; focused coordinator retry/race and Settings action tests pass. Validation evidence is recorded under DU-1702 below.
 - `DU-1601` — **DONE**: Linux release evidence now preserves both installed-deb and actual AppImage runtime proofs, direct-AppImage feed eligibility requires the AppImage proof, release CI smokes the real AppImage separately from the installed Debian package, and the reusable installed-update gate now runs both Windows NSIS and Linux AppImage N→N+1 lanes. A native GCP Dev proof completed `0.14.0 → 0.14.1` with candidate byte replacement, relaunch/version verification, receipt clearance, and unchanged Profile/sentinel hashes.
 - `DU-1602` — **DONE**: packaged Linux reads only the bounded electron-builder resources/package-type marker for deb/rpm, preserving AppImage/Snap precedence. Settings explains external package-manager upgrades and hides install/download retry actions; release CI requires the installed Debian marker before runtime smoke. Focused resolver/Shell/coordinator, Settings/locales, workflow contracts, both typechecks, and targeted checks pass. Native RPM installation is not claimed.
 - `DU-1704` — **DONE**: operator runbook closes non-mac operations scope; current GitHub full eligible exposure and future gated feed/pointer controls are explicitly separated.
 - **Phase 6 complete**: remaining macOS DU-1501..1504 are deferred; DU-1704 is DONE; DU-1703 remains OPTIONAL and is not pursued unless separately requested.
+
+## Final branch integration validation — 2026-10-01
+
+- `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` was a test-placement false positive for `platform-leakage-audit`: the negative assertion itself contained the forbidden literal. The test now lives under `src/di/__tests__/`, which is the audit's explicit test boundary; its assertions remain unchanged in intent and pass **3/3**.
+- `node tools/governance/platform-leakage-audit.mjs` — **PASS**, no shared-package platform leakage.
+- Test inventory regenerate/check — **1269 files / 1095 unit**, pass.
+- Full `memoflow:governance-check` — **PASS** including all prerequisite governance/test-system tasks and the complete audit chain.
+- `origin/main...HEAD` showed no main-side divergence before this integration repair; the feature branch was fully based on current `origin/main`.
+- All in-scope non-macOS tickets are closed. DU-1501..1504 remain deferred by user; DU-1703 remains optional and intentionally not pursued.
 
 ## 2. Non-goals
 
@@ -1141,11 +1150,10 @@ Domain / UI contract 不应因此改变。
 The runbook covers exact-SHA release/candidate/Draft publication, Windows + Linux installed-update gates, evidence identities, bounded diagnostics, retry/containment/hotfix rules, and immutable version/tag policy. It explicitly separates current GitHub Published/latest exposure from evidence-only p10 controls and future gated live feed/pointer rollout/rollback. macOS DU-1501..1504 remain DEFERRED; DU-1703 remains OPTIONAL. All non-mac implementation/runbook work is closed; no provider cutover, updater upgrade, runtime or workflow changes are included.
 
 Validation: repository Prettier, `node tools/docs/check-docs-config.mjs`, and
-`git diff --check` pass. The full `memoflow:governance-check` ran with a temporary
-lockfile-identical canonical dependency tree and completed all prerequisite checks;
-it stopped only at the known unchanged platform-leakage finding:
-`packages/app-vue/src/di/desktop-update-service.surface.spec.ts: contains window.electronAPI`.
-All preceding governance checks passed, and DU-1704 introduced no new finding.
+`git diff --check` pass. Final branch integration relocated the negative DI surface
+test into the audit-excluded `__tests__` boundary; the test remains **3/3** green,
+`platform-leakage-audit` passes, inventory regenerate/check passes, and the full
+`memoflow:governance-check` now passes end-to-end.
 
 ---
 

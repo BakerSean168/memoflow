@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DESKTOP_UPDATE_SERVICE_KEY } from './keys';
+import { DESKTOP_UPDATE_SERVICE_KEY } from '../keys';
 
 describe('DesktopUpdateService host-neutral DI surface', () => {
-  const typesSource = readFileSync(resolve(__dirname, 'types.ts'), 'utf8');
-  const keysSource = readFileSync(resolve(__dirname, 'keys.ts'), 'utf8');
+  const typesSource = readFileSync(resolve(__dirname, '../types.ts'), 'utf8');
+  const keysSource = readFileSync(resolve(__dirname, '../keys.ts'), 'utf8');
 
   it('exports one optional host-neutral service key', () => {
     expect(typeof DESKTOP_UPDATE_SERVICE_KEY).toBe('symbol');
