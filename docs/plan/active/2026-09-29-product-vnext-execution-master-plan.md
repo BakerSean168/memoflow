@@ -1044,6 +1044,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** SCHED-4201.
 
+**Execution (2026-10-01): Accepted / frozen after delegated implementation and independent review.** Exception rollback and callback replay are hardened at the existing FullCalendar/owner boundaries; fresh gestures keep their exact projected CAS revision. Structured Schedule version conflicts now trigger forced canonical reads after revert, while target-date/generic conflicts do not retry a write. Failed forced marker reads retain prior Calendar state and report refresh warnings. Empty-cell selection keeps one create session across repeated select/click callbacks; busy/closed submission guards preserve one owner create and committed success with refresh warning. Delegated validation passed focused App-Vue 7 files / 97 tests, full Schedule 18 / 134, app-vue typecheck, changed-file ESLint/Prettier, 1,292-file inventory, governance/diff checks, and isolated Chromium baseline + strict comparison 15/15 each with 24 comparisons/captures. ChatGPT Web independently reviewed owner/CAS/cache/create-session boundaries, reran the 7-file / 97-test matrix uncached, reran the new collision-only Chromium strict matrix 5/5, and visually inspected success/revert/create captures. Live backend E2E remains intentionally unrun because its bootstrap can invoke `prisma db push --accept-data-loss`; no guard was bypassed. Root causes, exact files, commands, browser artifacts and limitations: [SCHED-4301 implementation report](../archive/2026-10-01-pvc-sched-4301-collision-regression.md).
+
 ---
 
 # 11. Phase 5 — Remaining owner UI convergence
