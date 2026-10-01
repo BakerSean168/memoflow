@@ -15,6 +15,7 @@
           type="button"
           variant="ghost"
           size="sm"
+          :disabled="isBusy"
           data-testid="goal-create-with-ai"
           @click="emit('create-with-ai')"
         >
@@ -32,7 +33,9 @@
             <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
             <ProductAutoTextarea
               id="goal-name"
+              ref="nameInput"
               v-model="draft.name"
+              :disabled="isBusy"
               :max-length="80"
               :rows="1"
               data-testid="goal-name-input"
@@ -61,7 +64,9 @@
             <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
             <ProductAutoTextarea
               id="goal-summary"
+              ref="summaryInput"
               v-model="draft.summary"
+              :disabled="isBusy"
               :max-length="255"
               :rows="1"
               data-testid="goal-summary-input"
@@ -90,10 +95,11 @@
             <GoalStatusPicker
               v-model="draft.status"
               :base-status="persistedStatus"
-              :disabled="isSaving"
+              :disabled="isBusy"
             />
             <GoalTimeframePicker
               v-model="draft.start"
+              :disabled="isBusy"
               :label="t('goal.dialog.startDate')"
               test-id="goal-start-chip"
               :aria-label="t('goal.dialog.startDate')"
@@ -106,6 +112,7 @@
 
             <GoalTimeframePicker
               v-model="draft.target"
+              :disabled="isBusy"
               test-id="goal-target-chip"
               :aria-label="t('goal.dialog.target')"
               :placeholder="t('goal.dialog.target')"
@@ -116,7 +123,7 @@
             <LabelPicker
               v-model="draft.labelIds"
               :options="labelOptions"
-              :disabled="labelsLoading || isSaving"
+              :disabled="labelsLoading || isBusy"
               :placeholder="t('goal.dialog.labels')"
               :search-placeholder="t('goal.list.searchLabels')"
               :empty-text="t('goal.list.noLabels')"
@@ -129,6 +136,7 @@
             <GoalReminderChip
               v-if="mode === 'edit'"
               v-model="draft.reminderConfig"
+              :disabled="isBusy"
               :start="draft.start"
               :target="draft.target"
             />
@@ -147,6 +155,8 @@
                   type="button"
                   variant="outline"
                   size="sm"
+                  :disabled="isBusy"
+                  data-testid="goal-notes-open-knowledge"
                   @click="emit('open-knowledge', String(goal.id))"
                 >
                   {{ t('goal.dialog.openKnowledge') }}
@@ -156,6 +166,8 @@
                   type="button"
                   variant="outline"
                   size="sm"
+                  :disabled="isBusy"
+                  data-testid="goal-notes-create-with-ai"
                   @click="emit('create-with-ai')"
                 >
                   <Sparkles class="mr-1 h-4 w-4" />
@@ -177,7 +189,9 @@
           <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
           <ProductAutoTextarea
             id="goal-description"
+            ref="descriptionInput"
             v-model="draft.description"
+            :disabled="isBusy"
             :max-length="10000"
             :rows="5"
             data-testid="goal-description-input"
@@ -206,7 +220,7 @@
           :key="mode"
           v-model="draft.keyResults"
           class="mt-auto"
-          :disabled="isSaving"
+          :disabled="isBusy"
           :goal-start="draft.start"
           :goal-target="draft.target"
           @editing-change="krEditorOpen = $event"
@@ -214,14 +228,14 @@
       </form>
 
       <template #footer>
-        <Button variant="ghost" :disabled="isSaving" @click="setOpen(false)">
+        <Button variant="ghost" :disabled="isBusy" @click="setOpen(false)">
           {{ t('common.cancel') }}
         </Button>
         <Button
           type="submit"
           form="goal-form"
           data-testid="save-goal-button"
-          :disabled="!draft.name.trim() || isSaving || krEditorOpen"
+          :disabled="!draft.name.trim() || isBusy || krEditorOpen"
         >
           {{ mode === 'edit' ? t('goal.dialog.saveChanges') : t('goal.dialog.createGoal') }}
         </Button>
@@ -231,10 +245,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NotebookText, Sparkles } from '@lucide/vue';
 import {
+  CreateGoalSchema,
+  UpdateGoalSchema,
   GoalStatus,
   ReminderTriggerType,
   goalTimeframeEndBoundary,
@@ -265,29 +290,39 @@ import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalKeyResultDraftEditor from '../GoalKeyResultDraftEditor.vue';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
+import { isGoalStatusTransitionAllowed } from '../../composables/goalStatusTransitions';
 import { useGoal } from '../../composables/useGoal';
 import { useTransientFeedback } from '../../../../shared/composables/useTransientFeedback';
 
-type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
+import type {
+  GoalDraftKeyResult as DraftKeyResult,
+  GoalNativeDraft,
+  GoalNativeEditSession,
+} from '../../composables/goalNativeEditSession';
 
 const props = withDefaults(
   defineProps<{ open: boolean; mode?: 'create' | 'edit'; goal?: GoalClientDTO | null }>(),
   { mode: 'create', goal: null },
 );
 const emit = defineEmits<{
+  'session-change': [session: GoalNativeEditSession | null];
   'update:open': [boolean];
   created: [GoalClientDTO];
   updated: [GoalClientDTO];
   'dirty-change': [boolean];
+  'busy-change': [boolean];
   'create-with-ai': [];
   'open-knowledge': [goalId: string];
 }>();
 
 const { t } = useI18n();
 const { createGoal, updateGoal, transitionGoalStatus, isSaving } = useGoal();
+const submitting = ref(false);
+const isBusy = computed(() => submitting.value || isSaving.value);
+watch(isBusy, (busy) => emit('busy-change', busy), { immediate: true, flush: 'sync' });
 const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
 
-const draft = reactive({
+const draft = reactive<GoalNativeDraft>({
   name: '',
   summary: '',
   description: '',
@@ -298,6 +333,145 @@ const draft = reactive({
   labelIds: [] as string[],
   keyResults: [] as DraftKeyResult[],
 });
+const nameInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
+const summaryInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
+const descriptionInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
+let invalidateSession: (() => void) | null = null;
+
+// Only JSON value fields enter this owner contract; detach inbound and outbound values.
+function copyValue<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+function publishSession(): void {
+  invalidateSession?.();
+  let active = true;
+  invalidateSession = () => {
+    active = false;
+  };
+  function assertActive(): void {
+    if (!active || !props.open) throw new Error('Goal edit session is closed');
+  }
+  function assertEditable(): void {
+    assertActive();
+    if (isBusy.value) throw new Error('Goal edit session is busy');
+  }
+  const session: GoalNativeEditSession = {
+    patch(changes) {
+      assertEditable();
+      // Preflight the whole patch before touching the canonical draft.
+      if (changes.keyResult) {
+        if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+        const { index } = changes.keyResult;
+        if (!Number.isInteger(index) || !draft.keyResults[index])
+          throw new Error('Key Result position is invalid');
+      }
+      const detached = copyValue(changes);
+      changes = detached;
+      // Explicit field allowlist: arbitrary component state cannot be patched.
+      if (changes.name !== undefined) draft.name = changes.name;
+      if (changes.summary !== undefined) draft.summary = changes.summary;
+      if (changes.description !== undefined) draft.description = changes.description;
+      if (changes.status !== undefined) draft.status = changes.status;
+      if (changes.start !== undefined) draft.start = copyValue(changes.start);
+      if (changes.target !== undefined) draft.target = copyValue(changes.target);
+      if (changes.reminderConfig !== undefined)
+        draft.reminderConfig = copyValue(changes.reminderConfig);
+      if (changes.labelIds !== undefined) draft.labelIds = [...changes.labelIds];
+      if (changes.keyResult) {
+        const { index, changes: childChanges } = changes.keyResult;
+        const child = draft.keyResults[index];
+        const fields = [
+          'title',
+          'description',
+          'calculationMethod',
+          'initialValue',
+          'currentValue',
+          'targetValue',
+          'target',
+          'unit',
+          'weight',
+        ] as const;
+        for (const field of fields) {
+          if (childChanges[field] !== undefined) {
+            Object.assign(child, { [field]: copyValue(childChanges[field]) });
+          }
+        }
+      }
+    },
+    addChild(child) {
+      assertEditable();
+      if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+      const {
+        title,
+        description,
+        calculationMethod,
+        initialValue,
+        currentValue,
+        targetValue,
+        target,
+        unit,
+        weight,
+      } = child;
+      draft.keyResults.push(
+        copyValue({
+          title,
+          description,
+          calculationMethod,
+          initialValue,
+          currentValue,
+          targetValue,
+          target,
+          unit,
+          weight,
+        }),
+      );
+    },
+    removeChild(index) {
+      assertEditable();
+      if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+      if (!Number.isInteger(index) || !draft.keyResults[index])
+        throw new Error('Key Result position is invalid');
+      draft.keyResults.splice(index, 1);
+    },
+    async focus(field) {
+      assertActive();
+      await nextTick();
+      assertActive();
+      const inputs = { name: nameInput, summary: summaryInput, description: descriptionInput };
+      inputs[field].value?.$el.focus();
+    },
+    async requestSubmit() {
+      assertEditable();
+      await save();
+    },
+    requestCancel() {
+      assertEditable();
+      setOpen(false);
+    },
+    readDraftState() {
+      assertActive();
+      return {
+        mode: props.mode,
+        goalId: props.mode === 'edit' && props.goal ? String(props.goal.id) : null,
+        draft: copyValue(draft),
+        dirty: snapshotDraft() !== initialSnapshot.value,
+        busy: isBusy.value,
+        error: formError.value,
+      };
+    },
+  };
+  emit('session-change', session);
+}
+function retireSession(): void {
+  invalidateSession?.();
+  emit('session-change', null);
+}
+onBeforeUnmount(retireSession);
+onDeactivated(retireSession);
+onActivated(() => {
+  if (props.open) publishSession();
+});
+
 const initialSnapshot = ref('');
 const labelCreateError = ref<string | null>(null);
 const formError = ref<string | null>(null);
@@ -320,7 +494,7 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
     initialValue: goalKr.progress.initialValue,
     currentValue: goalKr.progress.currentValue,
     targetValue: goalKr.progress.targetValue,
-    target: goalKr.target,
+    target: copyValue(goalKr.target),
     unit: goalKr.progress.unit,
     weight: goalKr.weight,
   };
@@ -354,7 +528,11 @@ function reset(): void {
 watch(
   () => [props.open, props.mode, props.goal?.id] as const,
   ([isOpen]) => {
-    if (isOpen) reset();
+    retireSession();
+    if (isOpen) {
+      reset();
+      publishSession();
+    }
   },
   { immediate: true, deep: false },
 );
@@ -363,15 +541,22 @@ watch(draft, () => emit('dirty-change', props.open && snapshotDraft() !== initia
 });
 
 function setOpen(value: boolean): void {
+  if (!value && isBusy.value) return;
+  publishOpen(value);
+}
+
+function publishOpen(value: boolean): void {
+  if (!value) retireSession();
   emit('update:open', value);
   if (!value) emit('dirty-change', false);
 }
 
 async function createAndSelectLabel(name: string): Promise<void> {
+  if (isBusy.value) return;
   labelCreateError.value = null;
   try {
     const label = await createLabel(name);
-    if (!draft.labelIds.includes(label.id)) draft.labelIds.push(label.id);
+    if (!isBusy.value && !draft.labelIds.includes(label.id)) draft.labelIds.push(label.id);
   } catch {
     labelCreateError.value = t('common.operationFailed');
   }
@@ -406,14 +591,40 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
+  if (isBusy.value) return;
+  submitting.value = true;
+  try {
+    await persistDraft();
+  } finally {
+    submitting.value = false;
+  }
+}
+
+async function persistDraft(): Promise<void> {
   formError.value = null;
   if (
+    isSaving.value ||
     !draft.name.trim() ||
     krEditorOpen.value ||
     !validatePlanningWindow() ||
-    (props.mode === 'edit' && !validateReminderConfig())
+    !validateReminderConfig()
   )
     return;
+  const requestedStatus = draft.status;
+  if (!isGoalStatusTransitionAllowed(persistedStatus.value, requestedStatus)) {
+    formError.value = t('goal.dialog.invalidStatusTransition');
+    return;
+  }
+  // Semantic edits share the same owner validation as manual submission, including
+  // constraints normally enforced while committing a native KR row.
+  if (draft.keyResults.some((item) => !item.title.trim())) {
+    formError.value = t('common.operationFailed');
+    return;
+  }
+  if (draft.keyResults.some((item) => item.initialValue === item.targetValue)) {
+    formError.value = t('goal.dialog.krInitialTargetConflict');
+    return;
+  }
   const labelIds = [...draft.labelIds];
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
   const common = {
@@ -436,32 +647,33 @@ async function save(): Promise<void> {
       reminderConfig: draft.reminderConfig,
       keyResults,
     };
-    const saved = await updateGoal(String(props.goal.id), req);
-    if (!saved) return;
-    const finalGoal = await transitionGoalStatus(saved, draft.status);
-    if (!finalGoal) {
-      emit('updated', saved);
-      setOpen(false);
+    const parsed = UpdateGoalSchema.safeParse(req);
+    if (!parsed.success) {
+      formError.value = parsed.error.issues[0]?.message ?? t('common.operationFailed');
       return;
     }
-    emit('updated', finalGoal);
-    setOpen(false);
+    const saved = await updateGoal(String(props.goal.id), parsed.data);
+    if (!saved) return;
+    const finalGoal = await transitionGoalStatus(saved, requestedStatus);
+    emit('updated', finalGoal ?? saved);
+    publishOpen(false);
     return;
   }
 
   const req: CreateGoalReq = {
     ...common,
+    ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
   };
-  const saved = await createGoal(req);
-  if (!saved) return;
-  const finalGoal = await transitionGoalStatus(saved, draft.status);
-  if (!finalGoal) {
-    emit('created', saved);
-    setOpen(false);
+  const parsed = CreateGoalSchema.safeParse(req);
+  if (!parsed.success) {
+    formError.value = parsed.error.issues[0]?.message ?? t('common.operationFailed');
     return;
   }
-  emit('created', finalGoal);
-  setOpen(false);
+  const saved = await createGoal(parsed.data);
+  if (!saved) return;
+  const finalGoal = await transitionGoalStatus(saved, requestedStatus);
+  emit('created', finalGoal ?? saved);
+  publishOpen(false);
 }
 </script>

@@ -1101,17 +1101,11 @@ If ADR-113 is accepted, create a destructive retirement batch only after Enginee
 
 ### PVC-AI-8001 — Owner Native Edit Session + Surface Orchestrator foundation
 
-**Status:** target-design frozen by ADR-112; implementation pending.
+**Status (2026-10-01): Accepted / frozen.** ADR-112 now has a concrete Goal reference implementation. The shell exposes a typed owner-native surface handle, GoalModuleLayout lifecycle-registers the live owner session, and GoalDialog adapts its existing canonical draft without exposing reactive/component internals. Manual edits and semantic patch/add/remove/focus operate on the same draft; submit/cancel, validation, dirty/busy state, lifecycle legality, route/tab leave guards, aggregate readiness, stale response rejection and KeepAlive cleanup remain owner/shell controlled.
 
-Define a typed UI/application seam that lets AI:
+Mastra `draftRef / revision / receipt / referenceMap` remain runtime-internal. AI Goal workflow/editor migration is intentionally deferred to AI-8101.
 
-- open an owner create/edit surface in BusinessPanel;
-- project internal workflow proposal data into the owner edit session;
-- patch/add/remove/focus fields through owner-defined semantic actions;
-- reuse owner validation, dirty state, submit/cancel and leave guards;
-- observe resulting owner state without direct Pinia/DOM mutation.
-
-Mastra `draftRef / revision / receipt / referenceMap` may remain runtime-internal.
+Evidence: [AI-8001 Owner Native Edit Session](../archive/2026-10-01-pvc-ai-8001-owner-native-edit-session.md).
 
 ### PVC-AI-8101 — Goal native workflow vertical slice
 

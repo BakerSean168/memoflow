@@ -2,7 +2,7 @@
 
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { nextTick } from 'vue';
+import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,14 +11,17 @@ import { createMockGoal, createMockKeyResult } from '@memoflow/contracts/mocks';
 import {
   CreateGoalSchema,
   GoalStatus,
+  KeyResultCalculationMethod,
   ReminderTriggerType,
   type GoalReminderConfigDTO,
 } from '@memoflow/contracts/goal';
+import { Dialog } from '@memoflow/ui-vue-shadcn';
 import { LabelPicker } from '../../../../shared/components';
 import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalDialog from './GoalDialog.vue';
+import type { GoalNativeEditSession } from '../../composables/goalNativeEditSession';
 
 const mocks = vi.hoisted(() => ({
   createGoal: vi.fn(),
@@ -108,7 +111,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     wrapper.unmount();
   });
 
-  it('ignores non-null reminder draft state when creating a Goal', async () => {
+  it('validates and persists semantic create reminders through the canonical create request', async () => {
     const created = createMockGoal({ name: 'New Goal', status: GoalStatus.Planned });
     mocks.createGoal.mockResolvedValue(created);
     const wrapper = mount(GoalDialog, {
@@ -116,24 +119,22 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       attachTo: document.body,
       global: { plugins: [i18n] },
     });
-    await nextTick();
-
-    // Fault injection: a hidden stale reminder must neither block create nor enter its request.
-    const state = wrapper.vm as unknown as { draft: { reminderConfig: GoalReminderConfigDTO } };
-    state.draft.reminderConfig = {
+    const session = nativeSession(wrapper);
+    const reminderConfig: GoalReminderConfigDTO = {
       enabled: true,
       triggers: [{ type: ReminderTriggerType.RemainingDays, value: 1, enabled: true }],
     };
-    await dom('goal-name-input').setValue('New Goal');
-    await dom('save-goal-button').trigger('click');
-    await flushPromises();
-
+    session.patch({ name: 'New Goal', reminderConfig });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(session.readDraftState().error).toBeTruthy();
+    session.patch({ target: { kind: 'year', year: 2027 } });
+    await session.requestSubmit();
     expect(mocks.createGoal).toHaveBeenCalledOnce();
-    expect(mocks.createGoal.mock.calls[0][0]).not.toHaveProperty('reminderConfig');
+    expect(mocks.createGoal.mock.calls[0][0].reminderConfig).toEqual(reminderConfig);
+    expect(CreateGoalSchema.safeParse(mocks.createGoal.mock.calls[0][0]).success).toBe(true);
     expect(wrapper.emitted('created')?.at(-1)).toEqual([created]);
-    expect(document.body.textContent).not.toContain(
-      'Remaining-days reminders require a target date.',
-    );
+    expect(wrapper.findComponent(GoalReminderChip).exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -260,6 +261,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       if (transition === 'reopen') await wrapper.setProps({ open: true });
       await flushPromises();
 
+      expect(nativeSession(wrapper).readDraftState().goalId).toBeNull();
       expect(wrapper.findComponent(GoalReminderChip).exists()).toBe(false);
       expect((dom('goal-name-input').element as HTMLTextAreaElement).value).toBe('');
       expect((dom('goal-summary-input').element as HTMLTextAreaElement).value).toBe('');
@@ -699,9 +701,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
 
     const editor = dom('goal-key-results-editor');
     expect(editor.classes()).toContain('bg-[hsl(var(--surface-raised)/0.24)]');
-    expect(editor.classes()).toContain(
-      'shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]',
-    );
+    expect(editor.classes()).toContain('shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]');
     expect(document.querySelector('[data-testid="goal-key-results-empty"]')).toBeNull();
 
     timeframePicker(wrapper, 'goal-target-chip').vm.$emit('update:modelValue', {
@@ -839,6 +839,429 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       ],
     });
     expect(mocks.updateGoal).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+});
+
+function nativeSession(wrapper: ReturnType<typeof mount>): GoalNativeEditSession {
+  const session = wrapper.emitted<[GoalNativeEditSession | null]>('session-change')?.at(-1)?.[0];
+  if (!session) throw new Error('Missing native session');
+  return session;
+}
+
+describe('Goal owner native edit session (PVC-AI-8001)', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.clearAllMocks();
+    mocks.createGoal.mockReset();
+    mocks.updateGoal.mockReset();
+    mocks.transitionGoalStatus.mockReset();
+    mocks.transitionGoalStatus.mockImplementation(async (goal) => goal);
+  });
+
+  it('shares manual edits, semantic fields, KR rows and dirty state in one detached draft', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    const session = nativeSession(wrapper);
+    expect(session.readDraftState().dirty).toBe(false);
+    await dom('goal-name-input').setValue('Manual Goal');
+    expect(session.readDraftState().draft.name).toBe('Manual Goal');
+    const target = { kind: 'quarter' as const, year: 2027, quarter: 4 as const };
+    const labels = ['label-work'];
+    session.patch({ name: 'Semantic Goal', summary: 'Summary', target, labelIds: labels });
+    target.year = 2030;
+    labels.push('external');
+    await nextTick();
+    expect((dom('goal-name-input').element as HTMLTextAreaElement).value).toBe('Semantic Goal');
+    expect(session.readDraftState().draft.target?.year).toBe(2027);
+    expect(session.readDraftState().draft.labelIds).toEqual(['label-work']);
+    const snapshot = session.readDraftState();
+    snapshot.draft.name = 'Detached';
+    snapshot.draft.labelIds.push('detached');
+    expect(session.readDraftState().draft.name).toBe('Semantic Goal');
+    expect(session.readDraftState().draft.labelIds).toEqual(['label-work']);
+    const child = {
+      title: 'Native KR',
+      calculationMethod: KeyResultCalculationMethod.Sum,
+      initialValue: 0,
+      currentValue: 0,
+      targetValue: 12,
+      weight: 3,
+    };
+    session.addChild(child);
+    child.title = 'Detached child';
+    await nextTick();
+    expect(dom('goal-key-result-draft-row').text()).toContain('Native KR');
+    session.patch({ keyResult: { index: 0, changes: { title: 'Patched KR' } } });
+    await nextTick();
+    expect(dom('goal-key-result-draft-row').text()).toContain('Patched KR');
+    // Manual row deletion updates the very same session snapshot.
+    const row = dom('goal-key-result-draft-row');
+    await row.get('button[aria-label="Delete"]').trigger('click');
+    expect(session.readDraftState().draft.keyResults).toEqual([]);
+    session.addChild({ ...child, title: 'Another KR' });
+    session.removeChild(0);
+    await nextTick();
+    expect(document.querySelector('[data-testid="goal-key-result-draft-row"]')).toBeNull();
+    expect(session.readDraftState().dirty).toBe(true);
+    expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([true]);
+    wrapper.unmount();
+    expect(() => session.patch({ name: 'Stale' })).toThrow('closed');
+  });
+
+  it('keeps semantic invalid edits on the owner form and submits valid edits through create', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({
+      name: 'Goal',
+      start: { kind: 'year', year: 2028 },
+      target: { kind: 'year', year: 2027 },
+    });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(session.readDraftState().error).toBeTruthy();
+    session.patch({ start: null, name: 'x'.repeat(81) });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    session.patch({ name: 'Valid Goal', labelIds: [''] });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    session.patch({ labelIds: [] });
+    session.addChild({
+      title: 'KR',
+      calculationMethod: KeyResultCalculationMethod.Sum,
+      initialValue: 0,
+      targetValue: 0,
+      weight: 3,
+    });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    session.patch({ keyResult: { index: 0, changes: { targetValue: 12, weight: 9 } } });
+    await session.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    session.patch({ keyResult: { index: 0, changes: { weight: 3 } } });
+    mocks.createGoal.mockResolvedValue(createMockGoal({ name: 'Valid Goal' }));
+    await session.requestSubmit();
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Valid Goal',
+        initialKeyResults: [expect.objectContaining({ title: 'KR', targetValue: 12 })],
+      }),
+    );
+    expect(wrapper.emitted('created')).toHaveLength(1);
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(() => session.readDraftState()).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it('retains edit aggregate version, reminder validation and status transition', async () => {
+    const goal = createMockGoal({
+      name: 'Existing',
+      version: 7,
+      keyResults: [createMockKeyResult({ title: 'Existing KR' })],
+    });
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({
+      target: null,
+      reminderConfig: {
+        enabled: true,
+        triggers: [{ type: ReminderTriggerType.RemainingDays, value: 1, enabled: true }],
+      },
+    });
+    await session.requestSubmit();
+    expect(mocks.updateGoal).not.toHaveBeenCalled();
+    expect(session.readDraftState().error).toBeTruthy();
+    session.patch({ name: 'Updated', reminderConfig: null, status: GoalStatus.InProgress });
+    const updated = createMockGoal({ ...goal, name: 'Updated', version: 8 });
+    const finalGoal = createMockGoal({ ...updated, status: GoalStatus.InProgress, version: 9 });
+    mocks.updateGoal.mockResolvedValue(updated);
+    mocks.transitionGoalStatus.mockResolvedValue(finalGoal);
+    await session.requestSubmit();
+    expect(mocks.updateGoal).toHaveBeenCalledWith(
+      String(goal.id),
+      expect.objectContaining({
+        name: 'Updated',
+        expectedVersion: 7,
+        keyResults: [expect.objectContaining({ id: goal.keyResults![0].id })],
+      }),
+    );
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(updated, GoalStatus.InProgress);
+    expect(wrapper.emitted('updated')?.at(-1)).toEqual([finalGoal]);
+    wrapper.unmount();
+  });
+
+  it('detaches inbound nested KR targets and returned snapshots', async () => {
+    const goal = createMockGoal({
+      keyResults: [createMockKeyResult({ target: { kind: 'year', year: 2027 } })],
+    });
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    const sourceTarget = goal.keyResults![0].target!;
+    sourceTarget.year = 2030;
+    expect(session.readDraftState().draft.keyResults[0].target?.year).toBe(2027);
+    const state = wrapper.vm as unknown as {
+      draft: { keyResults: { target: { year: number } }[] };
+    };
+    state.draft.keyResults[0].target.year = 2028;
+    expect(sourceTarget.year).toBe(2030);
+    const snapshot = session.readDraftState();
+    snapshot.draft.keyResults[0].target!.year = 2040;
+    expect(session.readDraftState().draft.keyResults[0].target?.year).toBe(2028);
+    wrapper.unmount();
+  });
+
+  it('rejects combined patches atomically for invalid KR positions and active native editors', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    const before = session.readDraftState();
+    expect(() =>
+      session.patch({ name: 'Partial', keyResult: { index: -1, changes: { title: 'KR' } } }),
+    ).toThrow('position');
+    expect(session.readDraftState()).toEqual(before);
+    await nextTick();
+    await dom('add-key-result-entry').trigger('click');
+    const editing = session.readDraftState();
+    expect(() =>
+      session.patch({ summary: 'Partial', keyResult: { index: 0, changes: { title: 'KR' } } }),
+    ).toThrow('editor');
+    expect(session.readDraftState()).toEqual(editing);
+    wrapper.unmount();
+  });
+
+  it.each(['edit', 'create'] as const)(
+    'rejects illegal %s lifecycle intent before any persistence',
+    async (mode) => {
+      const goal = createMockGoal({ status: GoalStatus.Planned, keyResults: [] });
+      const wrapper = mount(GoalDialog, {
+        props: { open: true, mode, goal },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      const session = nativeSession(wrapper);
+      session.patch({ name: 'Changed', status: GoalStatus.Completed });
+      await session.requestSubmit();
+      expect(mocks.updateGoal).not.toHaveBeenCalled();
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+      expect(mocks.transitionGoalStatus).not.toHaveBeenCalled();
+      expect(session.readDraftState().error).toBe('This status transition is not allowed.');
+      expect(document.body.textContent).toContain(session.readDraftState().error);
+      expect(wrapper.emitted('update:open')).toBeUndefined();
+      wrapper.unmount();
+    },
+  );
+
+  it('emits the saved edit and retires the session when the status transition fails', async () => {
+    const goal = createMockGoal({ status: GoalStatus.Planned, version: 7, keyResults: [] });
+    const updated = createMockGoal({ ...goal, version: 8 });
+    mocks.updateGoal.mockResolvedValue(updated);
+    mocks.transitionGoalStatus.mockResolvedValue(null);
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({ status: GoalStatus.InProgress });
+    await session.requestSubmit();
+    expect(mocks.updateGoal).toHaveBeenCalledOnce();
+    expect(mocks.updateGoal).toHaveBeenCalledWith(
+      String(goal.id),
+      expect.objectContaining({ expectedVersion: 7 }),
+    );
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledOnce();
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(updated, GoalStatus.InProgress);
+    expect(wrapper.emitted('updated')).toEqual([[updated]]);
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    expect(wrapper.emitted('session-change')?.at(-1)).toEqual([null]);
+    expect(() => session.readDraftState()).toThrow('closed');
+    await expect(session.requestSubmit()).rejects.toThrow('closed');
+    expect(mocks.updateGoal).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('emits the saved create and retires the session when the status transition fails', async () => {
+    const saved = createMockGoal({ name: 'Created Goal', status: GoalStatus.Planned });
+    mocks.createGoal.mockResolvedValue(saved);
+    mocks.transitionGoalStatus.mockResolvedValue(null);
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({ name: 'Created Goal', status: GoalStatus.InProgress });
+    await session.requestSubmit();
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Created Goal' }),
+    );
+    expect(mocks.updateGoal).not.toHaveBeenCalled();
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledOnce();
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(saved, GoalStatus.InProgress);
+    expect(wrapper.emitted('created')).toEqual([[saved]]);
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+    expect(wrapper.emitted('session-change')?.at(-1)).toEqual([null]);
+    expect(() => session.readDraftState()).toThrow('closed');
+    await expect(session.requestSubmit()).rejects.toThrow('closed');
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('guards native dismissal through update and deferred transition and snapshots lifecycle intent', async () => {
+    const goal = createMockGoal({ status: GoalStatus.Planned, version: 7, keyResults: [] });
+    const updated = createMockGoal({ ...goal, version: 8 });
+    const finalGoal = createMockGoal({ ...updated, status: GoalStatus.InProgress, version: 9 });
+    let resolveUpdate!: (goal: typeof updated) => void;
+    let resolveTransition!: (goal: typeof finalGoal) => void;
+    mocks.updateGoal.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolveUpdate = done;
+        }),
+    );
+    mocks.transitionGoalStatus.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolveTransition = done;
+        }),
+    );
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({ status: GoalStatus.InProgress });
+    const submitting = session.requestSubmit();
+    await nextTick();
+    wrapper.getComponent(Dialog).vm.$emit('update:open', false);
+    expect(wrapper.emitted('update:open')).toBeUndefined();
+    expect(session.readDraftState().busy).toBe(true);
+    for (const id of ['goal-name-input', 'goal-summary-input', 'goal-description-input']) {
+      expect((dom(id).element as HTMLTextAreaElement).disabled).toBe(true);
+    }
+    expect(timeframePicker(wrapper, 'goal-start-chip').props('disabled')).toBe(true);
+    expect(timeframePicker(wrapper, 'goal-target-chip').props('disabled')).toBe(true);
+    expect(wrapper.getComponent(GoalReminderChip).props('disabled')).toBe(true);
+    // Fault injection proves completion uses the captured submission intent.
+    const state = wrapper.vm as unknown as { draft: { status: typeof GoalStatus.Completed } };
+    state.draft.status = GoalStatus.Completed;
+    resolveUpdate(updated);
+    await flushPromises();
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(updated, GoalStatus.InProgress);
+    wrapper.getComponent(Dialog).vm.$emit('update:open', false);
+    expect(wrapper.emitted('update:open')).toBeUndefined();
+    expect(session.readDraftState().busy).toBe(true);
+    expect(() => session.requestCancel()).toThrow('busy');
+    expect(wrapper.emitted('busy-change')?.at(-1)).toEqual([true]);
+    resolveTransition(finalGoal);
+    await submitting;
+    expect(wrapper.emitted('updated')?.at(-1)).toEqual([finalGoal]);
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(wrapper.emitted('busy-change')?.at(-1)).toEqual([false]);
+    wrapper.unmount();
+  });
+
+  it('retires handles on KeepAlive deactivation and republishes the preserved native draft', async () => {
+    const visible = ref(true);
+    const Empty = defineComponent({ setup: () => () => h('div') });
+    const Host = defineComponent({
+      setup: () => () =>
+        h(
+          KeepAlive,
+          {},
+          {
+            default: () => (visible.value ? h(GoalDialog, { open: true }) : h(Empty)),
+          },
+        ),
+    });
+    const wrapper = mount(Host, { attachTo: document.body, global: { plugins: [i18n] } });
+    await nextTick();
+    const dialog = wrapper.findComponent(GoalDialog);
+    const session = nativeSession(dialog);
+    session.patch({ name: 'Preserved draft' });
+    visible.value = false;
+    await nextTick();
+    expect(() => session.readDraftState()).toThrow('closed');
+    visible.value = true;
+    await nextTick();
+    const restored = nativeSession(wrapper.findComponent(GoalDialog));
+    expect(restored).not.toBe(session);
+    expect(restored.readDraftState().draft.name).toBe('Preserved draft');
+    expect(restored.readDraftState().dirty).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('keeps the canonical submit busy and rejects edits/cancel/repeated submission until it settles', async () => {
+    let resolve!: (goal: ReturnType<typeof createMockGoal>) => void;
+    mocks.createGoal.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const session = nativeSession(wrapper);
+    session.patch({ name: 'Saving Goal' });
+    const saved = session.requestSubmit();
+    expect(session.readDraftState().busy).toBe(true);
+    expect(() => session.patch({ name: 'Race' })).toThrow('busy');
+    expect(() => session.requestCancel()).toThrow('busy');
+    await expect(session.requestSubmit()).rejects.toThrow('busy');
+    expect(wrapper.emitted('busy-change')?.at(-1)).toEqual([true]);
+    resolve(createMockGoal({ name: 'Saving Goal' }));
+    await saved;
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('busy-change')?.at(-1)).toEqual([false]);
+    wrapper.unmount();
+  });
+
+  it('focuses by owner refs and cancels through native close, retiring old handles on reopen', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    const session = nativeSession(wrapper);
+    const element = dom('goal-summary-input').element;
+    const selectorSpy = vi.spyOn(document, 'querySelector');
+    await session.focus('summary');
+    expect(document.activeElement).toBe(element);
+    expect(selectorSpy).not.toHaveBeenCalled();
+    selectorSpy.mockRestore();
+    session.patch({ name: 'Unsaved' });
+    session.requestCancel();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
+    await wrapper.setProps({ open: false });
+    await wrapper.setProps({ open: true });
+    expect(nativeSession(wrapper).readDraftState().draft.name).toBe('');
+    expect(() => session.requestCancel()).toThrow('closed');
     wrapper.unmount();
   });
 });

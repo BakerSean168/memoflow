@@ -498,6 +498,7 @@ export default {
     returnToToday: '返回今天',
     startAfterTarget: '开始时间不能晚于目标时间范围的结束。',
     targetBeforeStart: '目标时间范围的结束不能早于开始时间。',
+    invalidStatusTransition: '不允许此目标状态变更。',
     invalidPlanningWindow: '开始时间不能晚于目标时间范围的结束。',
     reminder: '提醒',
     reminderCount: '提醒：{count}',

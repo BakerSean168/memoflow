@@ -1315,6 +1315,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** GOAL-1601, UI overlay primitives 可后置。
 
+**Execution (2026-10-01): Accepted / frozen.** ADR-112 foundation is now implemented with a small owner-neutral OwnerNativeEditSession/Surface contract, an AppShell-scoped Goal surface host, GoalModuleLayout lifecycle registration, and a GoalDialog adapter over the existing canonical draft. Manual input and semantic patch share one draft; values are detached across the boundary; Goal KR add/remove/patch, semantic focus, owner submit/cancel, dirty/busy state, lifecycle validation, reminder/schema validation, route/tab/leave-guard orchestration, aggregate readiness and KeepAlive cleanup are covered. Existing AI Goal editors/workflow remain untouched for AI-8101. Delegated Codex Team gpt-6.1-sol/medium implementation plus independent review/repair closed lifecycle/disposal/atomicity races. Independent acceptance passed 4 files / 86 focused tests, uncached App-Vue typecheck, uncached full governance, targeted ESLint/Prettier, 1,336-file inventory and diff checks. Evidence: [AI-8001 Owner Native Edit Session](../archive/2026-10-01-pvc-ai-8001-owner-native-edit-session.md).
+
 ---
 
 ## PVC-AI-8101 — Goal native AI workflow vertical slice

@@ -511,6 +511,7 @@ export default {
     returnToToday: 'Return to today',
     startAfterTarget: 'Start time cannot begin after the target timeframe ends.',
     targetBeforeStart: 'Target timeframe cannot end before the start time.',
+    invalidStatusTransition: 'This status transition is not allowed.',
     invalidPlanningWindow: 'Start time cannot begin after the target timeframe ends.',
     reminder: 'Reminder',
     reminderCount: 'Reminder: {count}',

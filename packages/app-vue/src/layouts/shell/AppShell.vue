@@ -22,6 +22,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
+import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
@@ -95,6 +96,7 @@ const {
 provide(DialogDraftScopeKey, activeTabId);
 
 const sync = useShellRouterSync();
+provideGoalNativeSurface();
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).
@@ -161,10 +163,7 @@ const effectiveSidebarWidth = computed(() => {
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
   const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
-  const dynamicMax = Math.max(
-    SIDEBAR_HARD_MIN,
-    effectiveViewportWidth.value - reserved - chrome,
-  );
+  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved - chrome);
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
