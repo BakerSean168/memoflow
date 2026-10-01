@@ -237,3 +237,155 @@ jobs:
           path: apps/desktop/update-e2e-evidence
           if-no-files-found: warn
           retention-days: 14
+
+  linux-appimage-update:
+    name: Linux AppImage N to N+1
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact update source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Setup pnpm
+        run: corepack enable
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: apps/desktop/.python-version
+
+      - name: Install Linux runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb dbus-x11 gnome-keyring libsecret-tools libglib2.0-bin libgtk-3-0t64 libnss3 libasound2t64
+          # Extracted AppImages cannot use the SUID sandbox. On Ubuntu runners
+          # that expose AppArmor's userns restriction, permit Chromium's user
+          # namespace sandbox for both N and the updater's argument-free N+1.
+          if sysctl -n kernel.apparmor_restrict_unprivileged_userns >/dev/null 2>&1; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+
+      - name: Install dependencies
+        env:
+          PYTHON: ${{ env.pythonLocation }}/python
+          npm_config_python: ${{ env.pythonLocation }}/python
+        run: pnpm install --frozen-lockfile --reporter=append-only
+
+      - name: Build Desktop application
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          PYTHON: ${{ env.pythonLocation }}/python
+          npm_config_python: ${{ env.pythonLocation }}/python
+        run: pnpm nx run desktop:build:production --outputStyle=static
+
+      - name: Rebuild native dependencies for Electron
+        run: >-
+          node apps/desktop/scripts/rebuild-native-dependencies.mjs
+          --workspace-root "${{ github.workspace }}" --platform linux --arch x64
+
+      - name: Package synthetic N and current N+1 AppImage fixtures
+        id: fixtures
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          PYTHON: ${{ env.pythonLocation }}/python
+          npm_config_python: ${{ env.pythonLocation }}/python
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile, mkdir, rm, cp, readdir } from 'node:fs/promises';
+          import { spawnSync } from 'node:child_process';
+          import path from 'node:path';
+          const packagePath = path.resolve('apps/desktop/package.json');
+          const originalText = await readFile(packagePath, 'utf8');
+          const original = JSON.parse(originalText);
+          if (!/^\d+\.\d+\.\d+$/u.test(original.version)) throw new Error('AppImage E2E requires stable x.y.z');
+          const [major, minor, patch] = original.version.split('.').map(Number);
+          const baseVersion = patch > 0 ? `${major}.${minor}.${patch - 1}`
+            : minor > 0 ? `${major}.${minor - 1}.999`
+            : major > 0 ? `${major - 1}.999.999` : null;
+          if (!baseVersion) throw new Error('cannot synthesize lower version from 0.0.0');
+          const fixturesRoot = path.resolve('apps/desktop/update-e2e-fixtures');
+          const dist = path.resolve('apps/desktop/dist-package');
+          await rm(fixturesRoot, { recursive: true, force: true });
+          try {
+            for (const [lane, version] of [['base', baseVersion], ['candidate', original.version]]) {
+              await writeFile(packagePath, `${JSON.stringify({ ...original, version }, null, 2)}\n`);
+              await rm(dist, { recursive: true, force: true });
+              const result = spawnSync('pnpm', ['exec', 'electron-builder', '--linux', 'AppImage', '--x64',
+                '--publish', 'never', '--config', 'electron-builder.json5'], {
+                cwd: path.dirname(packagePath), env: process.env, stdio: 'inherit', timeout: 600_000,
+              });
+              if (result.error || result.status !== 0) throw result.error ?? new Error(`AppImage build failed: ${result.status}`);
+              const destination = path.join(fixturesRoot, lane);
+              await mkdir(destination, { recursive: true });
+              const entries = await readdir(dist, { withFileTypes: true });
+              const images = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.AppImage'));
+              if (images.length !== 1) throw new Error(`${lane} must contain exactly one AppImage`);
+              await cp(path.join(dist, images[0].name), path.join(destination, images[0].name));
+              if (lane === 'base') {
+                await writeFile(process.env.GITHUB_OUTPUT, `base_appimage=${path.join(destination, images[0].name)}\n`, { flag: 'a' });
+              } else {
+                await cp(path.join(dist, 'latest-linux.yml'), path.join(destination, 'latest-linux.yml'));
+              }
+            }
+          } finally {
+            await writeFile(packagePath, originalText);
+          }
+          await writeFile(process.env.GITHUB_OUTPUT,
+            `candidate_version=${original.version}\ncandidate_feed_dir=${path.join(fixturesRoot, 'candidate')}\n`, { flag: 'a' });
+          NODE
+
+      - name: Run Linux AppImage updater proof with local HTTP feed
+        timeout-minutes: 7
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          MEMOFLOW_PACKAGED_EXECUTABLE: ${{ steps.fixtures.outputs.base_appimage }}
+          MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS: '390'
+          MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_BASE: ${{ steps.fixtures.outputs.base_appimage }}
+          MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_FEED: ${{ steps.fixtures.outputs.candidate_feed_dir }}
+          MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_VERSION: ${{ steps.fixtures.outputs.candidate_version }}
+          MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_REPORT: ${{ github.workspace }}/apps/desktop/update-e2e-evidence/desktop-update-installed-e2e.json
+          MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_RUNTIME: ${{ github.workspace }}/apps/desktop/update-e2e-evidence/runtime
+        run: |
+          mkdir -p apps/desktop/update-e2e-evidence
+          apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh
+
+      - name: Verify Linux AppImage updater evidence
+        env:
+          EXPECTED_VERSION: ${{ steps.fixtures.outputs.candidate_version }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          const report = JSON.parse(await readFile('apps/desktop/update-e2e-evidence/desktop-update-installed-e2e.json', 'utf8'));
+          assert.equal(report.kind, 'desktop-update-installed-e2e');
+          assert.equal(report.schemaVersion, 1);
+          assert.equal(report.platform, 'linux-appimage');
+          assert.equal(report.result, 'passed');
+          assert.equal(report.expectedVersion, process.env.EXPECTED_VERSION);
+          assert.equal(report.finalStatus.phase, 'candidate-verified');
+          assert.equal(report.finalStatus.currentVersion, process.env.EXPECTED_VERSION);
+          assert.equal(report.receiptCleared, true);
+          assert.equal(report.installedSha256, report.candidate.appImageSha256);
+          assert.notEqual(report.baseAppImage.sha256, report.installedSha256);
+          assert.equal(report.profileRegistrySemanticSha256Before, report.profileRegistrySemanticSha256After);
+          assert.equal(report.preservationSentinelSha256Before, report.preservationSentinelSha256After);
+          NODE
+
+      - name: Upload Linux AppImage updater evidence and diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-update-installed-e2e-linux-appimage
+          path: apps/desktop/update-e2e-evidence
+          if-no-files-found: warn
+          retention-days: 14

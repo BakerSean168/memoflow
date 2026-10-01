@@ -25,7 +25,7 @@ export MEMOFLOW_WORKSPACE_ROOT="$workspace_root"
 # keyring startup regression, Xvfb/D-Bus teardown stall, or application smoke
 # hang must fail closed without stranding a release runner.
 # shellcheck disable=SC2016 # Inner bash must expand HOME/RANDOM/$$, not this outer shell.
-timeout --signal=TERM --kill-after=15s 210s \
+timeout --signal=TERM --kill-after=15s "${MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS:-210}s" \
   xvfb-run -a dbus-run-session -- bash -lc '
   set -euo pipefail
   export HOME="$MEMOFLOW_CI_KEYRING_HOME"
@@ -94,6 +94,15 @@ timeout --signal=TERM --kill-after=15s 210s \
   # Invoke the workspace Nx CLI directly. Changing HOME is required for keyring
   # isolation, but asking pnpm to spawn Nx makes pnpm treat that HOME change as
   # a package-store migration and attempt to reinstall node_modules.
+  if [[ -n "${MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_BASE:-}" ]]; then
+    node "$MEMOFLOW_WORKSPACE_ROOT/apps/desktop/scripts/run-linux-appimage-update-e2e.mjs" \
+      "$MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_BASE" \
+      "$MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_FEED" \
+      "$MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_VERSION" \
+      "$MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_REPORT" \
+      "$MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_RUNTIME" 300
+    exit
+  fi
   timeout --signal=TERM --kill-after=15s 150s \
     node "$MEMOFLOW_WORKSPACE_ROOT/node_modules/nx/dist/bin/nx.js" \
     run desktop:test:packaged-smoke --outputStyle=static

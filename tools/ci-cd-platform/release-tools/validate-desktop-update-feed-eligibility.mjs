@@ -1,6 +1,7 @@
 // DU-1401 intentionally shares this dependency-free Desktop-owned projection with release tooling.
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { resolveDesktopUpdateFeedProjection } from '../../../apps/desktop/desktop-update-feed-projection.mjs';
+import { validateDesktopRuntimeValidations } from './desktop-runtime-validations.mjs';
 import { validateMacosTrustReceipt } from './verify-macos-trust.mjs';
 
 /**
@@ -21,11 +22,10 @@ export function validateDesktopUpdateFeedEligibility({ coordinates, manifest, co
   if (!projection.eligibleSigningStates.includes(evidence.signingState)) {
     throw new Error('Desktop update feed signing state is ineligible');
   }
-  if (
-    evidence.runtimeValidation?.status !== 'passed' ||
-    evidence.runtimeValidation.method !== 'packaged-electron-playwright' ||
-    evidence.runtimeValidation.executableKind !== projection.requiredRuntimeExecutableKind
-  ) throw new Error('Desktop update feed runtime evidence is ineligible');
+  const proofs = validateDesktopRuntimeValidations(evidence, projection.sourceReleasePlatform);
+  if (!proofs.some((proof) => proof.executableKind === projection.requiredRuntimeExecutableKind)) {
+    throw new Error('Desktop update feed runtime evidence is ineligible');
+  }
   if (projection.installationKind === 'direct-signed-macos') {
     const trust = validateMacosTrustReceipt(evidence.trustValidation);
     if (trust.platform !== projection.sourceReleasePlatform || trust.arch !== projection.arch) {
@@ -33,10 +33,15 @@ export function validateDesktopUpdateFeedEligibility({ coordinates, manifest, co
     }
   }
   if (
-    !Array.isArray(evidence.assets) || !evidence.assets.includes(projection.sourceMetadataAsset) ||
-    !Array.isArray(manifest.assets) || manifest.assets.filter((asset) =>
-      asset?.platform === projection.sourceReleasePlatform &&
-      asset.name === projection.sourceMetadataAsset).length !== 1
-  ) throw new Error('Desktop update feed source metadata evidence is missing or ambiguous');
+    !Array.isArray(evidence.assets) ||
+    !evidence.assets.includes(projection.sourceMetadataAsset) ||
+    !Array.isArray(manifest.assets) ||
+    manifest.assets.filter(
+      (asset) =>
+        asset?.platform === projection.sourceReleasePlatform &&
+        asset.name === projection.sourceMetadataAsset,
+    ).length !== 1
+  )
+    throw new Error('Desktop update feed source metadata evidence is missing or ambiguous');
   return projection;
 }

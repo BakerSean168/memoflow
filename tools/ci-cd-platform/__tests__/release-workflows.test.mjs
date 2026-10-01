@@ -521,7 +521,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(helper, /Invalid packaged-smoke workspace root/u);
   assert.match(
     helper,
-    /timeout --signal=TERM --kill-after=15s 210s[\s\S]*?xvfb-run -a dbus-run-session -- bash -lc/u,
+    /timeout --signal=TERM --kill-after=15s "\$\{MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS:-210\}s"[\s\S]*?xvfb-run -a dbus-run-session -- bash -lc/u,
   );
   assert.match(
     helper,
@@ -566,4 +566,61 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(helper, /secret-tool lookup/u);
   assert.match(workflow, /libglib2\.0-bin/u);
   assert.doesNotMatch(helper, /setUsePlainTextEncryption|password-store=basic/u);
+});
+
+test('Linux release uses actual AppImage plus installed Debian proofs and gates N to N+1 alongside Windows', async () => {
+  const [release, workflow, runner, keyring] = await Promise.all([
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('.github/workflows/desktop-update-e2e.yml'),
+    readRepoFile('apps/desktop/scripts/run-linux-appimage-update-e2e.mjs'),
+    readRepoFile('apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh'),
+  ]);
+  const resolve = workflowStep(release, 'Resolve packaged Desktop executable');
+  assert.match(resolve, /dist-package\/\*\.AppImage/u);
+  assert.match(resolve, /test "\$\{#appimages\[@\]\}" -eq 1/u);
+  assert.match(resolve, /realpath "\$\{appimages\[0\]\}"/u);
+  assert.match(resolve, /chmod \+x "\$executable"/u);
+  const smoke = workflowStep(release, 'Run packaged Desktop runtime smoke');
+  assert.match(smoke, /MEMOFLOW_PACKAGED_EXECUTABLE:.*packaged-executable.outputs.path/u);
+  assert.match(smoke, /APPIMAGE_EXTRACT_AND_RUN=1/u);
+  assert.match(
+    workflowStep(release, 'Run installed Linux Debian runtime smoke'),
+    /\/opt\/MemoFlow\/memoflow/u,
+  );
+  const receipt = workflowStep(release, 'Write Desktop platform receipt');
+  assert.match(receipt, /runtime_executable_kind/u);
+  assert.match(receipt, /runner.os == 'Linux' && 'packaged-appimage'/u);
+  assert.doesNotMatch(
+    receipt,
+    /runtime_executable_kind[^\n]*\n(?:\s*[^\n]+\n)*?\s*\n\s*"\$\{\{ runner\.os == 'Linux'/u,
+  );
+  assert.match(release, /runtime_executable_kind: installed-deb/u);
+  assert.match(release, /name: Desktop Installed Update Gate/u);
+  assert.match(workflow, /windows-installed-update:/u);
+  assert.match(workflow, /linux-appimage-update:[\s\S]*runs-on: ubuntu-latest/u);
+  const linux = workflow.slice(workflow.indexOf('  linux-appimage-update:'));
+  assert.match(linux, /--linux', 'AppImage', '--x64'/u);
+  assert.match(linux, /writeFile\(packagePath.*version/u);
+  assert.match(linux, /finally[\s\S]*writeFile\(packagePath, originalText\)/u);
+  assert.match(linux, /latest-linux.yml/u);
+  assert.match(linux, /images.length !== 1/u);
+  assert.match(linux, /APPIMAGE_EXTRACT_AND_RUN: '1'/u);
+  assert.match(linux, /PYTHON: \$\{\{ env\.pythonLocation \}\}\/python/u);
+  assert.match(linux, /npm_config_python: \$\{\{ env\.pythonLocation \}\}\/python/u);
+  assert.match(linux, /timeout-minutes: 7/u);
+  assert.match(linux, /if: always\(\)/u);
+  assert.match(linux, /desktop-update-installed-e2e-linux-appimage/u);
+  assert.match(keyring, /run-linux-appimage-update-e2e.mjs/u);
+  assert.match(runner, /createServer/u);
+  assert.match(runner, /server.listen\(0, '127.0.0.1'/u);
+  assert.match(runner, /MemoFlow.AppImage/u);
+  assert.match(runner, /delete env.APPIMAGE/u);
+  assert.match(runner, /MEMOFLOW_DESKTOP_UPDATE_E2E: '1'/u);
+  assert.match(runner, /CI: 'true'/u);
+  assert.match(runner, /deadline = Date.now\(\) \+ timeoutSeconds/u);
+  assert.match(runner, /installedSha256 !== candidateSha256/u);
+  assert.match(runner, /receipt still exists after candidate verification/u);
+  assert.match(runner, /failure-diagnostics.json/u);
+  assert.match(runner, /server.closeAllConnections\(\)/u);
+  assert.match(release, /uses: \.\/\.github\/workflows\/desktop-update-e2e.yml/u);
 });

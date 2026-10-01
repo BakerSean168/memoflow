@@ -103,7 +103,8 @@ macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503,
 - macOS is not a gate for Windows feed/rollout work. DU-1402/DU-1403 consume whichever DU-1401 lanes are currently eligible; Windows-only publication is valid.
 - `DU-1701` — **DONE**: strict, bounded diagnostics now project canonical updater state, coordinator check observation, and read-only install receipt status through validated IPC/renderer adapters into Settings troubleshooting. Focused contracts (7), Desktop updater/ownership/preload/renderer (105), IPC (10), and app-vue settings/DI/shell/locales (260) tests pass; both typechecks, inventory generate/check, targeted ESLint, docs check, and whitespace checks pass. Governance retains only the unchanged HEAD platform-leakage finding in a surface-test assertion. macOS DU-1501..1504 remain DEFERRED.
 - `DU-1702` — **DONE**: the executable non-macOS failure matrix locks all 14 required scenarios; focused coordinator retry/race and Settings action tests pass. Validation evidence is recorded under DU-1702 below.
-- Next non-macOS dependency: `DU-1601` — Linux AppImage self-update lane; it is not implemented in this scope.
+- `DU-1601` — **DONE**: Linux release evidence now preserves both installed-deb and actual AppImage runtime proofs, direct-AppImage feed eligibility requires the AppImage proof, release CI smokes the real AppImage separately from the installed Debian package, and the reusable installed-update gate now runs both Windows NSIS and Linux AppImage N→N+1 lanes. A native GCP Dev proof completed `0.14.0 → 0.14.1` with candidate byte replacement, relaunch/version verification, receipt clearance, and unchanged Profile/sentinel hashes.
+- Next non-macOS dependency: `DU-1602` — deb/rpm package-manager UX. macOS DU-1501..1504 remain deferred.
 
 ## 2. Non-goals
 
@@ -785,7 +786,6 @@ installation kind
   inventory and repository governance checks cover integration.
 - No runtime cutover, file copying, checksum generation, or workflow changes.
 
-
 ---
 
 ## DU-1402 — Publish feed from release evidence
@@ -908,6 +908,39 @@ GitHub Release 仍可保留 arch-specific human assets。
 
 **Acceptance:** AppImage N → N+1 E2E。
 
+**Status: DONE (2026-10-01).** Linux release evidence now carries an additive
+`runtimeValidations` set while retaining legacy `runtimeValidation` compatibility.
+The Linux release lane records both `installed-deb` and `packaged-appimage`; feed
+eligibility fails closed unless the exact DU-1401 projection-required executable
+kind is present. The release workflow resolves and smokes the actual AppImage with
+`APPIMAGE_EXTRACT_AND_RUN=1`, then separately installs/smokes the Debian package, so
+package-manager ownership is not conflated with direct AppImage self-update.
+
+The reusable installed-update workflow now contains an Ubuntu AppImage lane in
+addition to Windows NSIS. It synthesizes N and N+1 AppImages, serves
+`latest-linux.yml` plus the candidate over a local HTTP feed, launches N from a
+stable absolute `MemoFlow.AppImage` path inside an isolated userData root, and reuses
+the existing Main-process updater harness. The Linux runner verifies candidate
+relaunch/version, on-disk byte replacement, install-receipt clearance, Profile
+registry semantic identity, and a userData preservation sentinel; failures retain
+bounded diagnostics. The workflow is wired into the release gate but was not run on
+a GitHub-hosted runner in this local implementation session.
+
+Validation evidence:
+
+- `node --test tools/ci-cd-platform/__tests__/desktop-update-metadata.test.mjs` — **15/15** pass.
+- `node --test tools/ci-cd-platform/__tests__/release-tooling.test.mjs` — **11/11** pass, including synthetic Linux runner success plus registry/sentinel/receipt/timeout fail-closed cases.
+- `node --test tools/ci-cd-platform/__tests__/release-workflows.test.mjs` — **17/17** pass.
+- `pnpm nx run ci-cd-platform:test --output-style=static` — **161/161** pass.
+- Targeted ESLint, `bash -n apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh`, and `git diff --check` — pass.
+- `pnpm nx run desktop:build:production --output-style=static` — pass (32-task Desktop production build).
+- `node apps/desktop/scripts/rebuild-native-dependencies.mjs --workspace-root "$PWD" --platform linux --arch x64` — pass for Electron `44.4.5` native `argon2` and `better-sqlite3`.
+- Native GCP Dev AppImage packaging produced base `0.14.0` SHA-256 `44724264588408f74f8e51af648765d4cdccdf6e641f39b3a06c00334dfe5684`, candidate `0.14.1` SHA-256 `26110a27ac3c2968cecc946a351f8ab406230c737239b2f33b1097826e987370`, and candidate metadata SHA-256 `19b8ae9eec9fcb2fd62ca170e76761c5e145ce1aae4ef217e85fd8e4994db382`.
+- Native GCP Dev AppImage N→N+1 proof — **PASS**: `checking (0.14.0) → install-requested → candidate-verified (0.14.1)`; installed bytes equal the candidate SHA-256, receipt cleared, Profile semantic hash stayed `4106a41c1ecab8c6140bdaba07f59ced8c758583dd034194f7cf3f7451002719`, and preservation sentinel hash stayed `bcdc7986817317d4ad8a55bc283892a9beeef5f089261a70b50586e8832fafbb`.
+
+Next non-macOS dependency: **DU-1602 — deb/rpm package-manager UX**.
+DU-1501..1504 remain **DEFERRED**.
+
 ---
 
 ## DU-1602 — deb/rpm package-manager UX
@@ -962,7 +995,7 @@ Validation (from repository root; `NX_DAEMON=false` for Nx):
 - `git diff --check` and `pnpm nx run memoflow:docs-check` — pass.
 - `pnpm nx run memoflow:governance-check` — stops at the one unchanged HEAD platform-leakage finding: `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` contains a negative `window.electronAPI` assertion. Changed lines introduce no new violation; intentionally left outside DU-1701.
 
-DU-1702 is now DONE (see evidence below). Next non-macOS dependency: **DU-1601 — Linux AppImage self-update lane**. DU-1501..1504 remain **DEFERRED**.
+DU-1702 and DU-1601 are now DONE (see evidence below / Phase 6). Next non-macOS dependency: **DU-1602 — deb/rpm package-manager UX**. DU-1501..1504 remain **DEFERRED**.
 
 最小 diagnostics：
 
@@ -1022,11 +1055,10 @@ Validation evidence (focused runs only):
   generation/check (**1268 files; 1094 unit**), `git diff --check`, and
   `pnpm nx run memoflow:docs-check` passed.
 
-Next non-macOS dependency: **DU-1601 — Linux AppImage self-update lane**;
-not implemented here. DU-1402/1403 and release workflows remain unchanged.
+DU-1601 is now DONE (see Phase 6 evidence). Next non-macOS dependency:
+**DU-1602 — deb/rpm package-manager UX**. DU-1501..1504 remain deferred.
 
 Covered behavior:
-
 
 | Failure                    | Expected behavior                   |
 | -------------------------- | ----------------------------------- |

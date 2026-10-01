@@ -493,7 +493,8 @@ test('desktop update feed eligibility requires signed-notarized macOS trust evid
     trustValidation: macosTrustReceipt('macos-arm64', 'arm64'),
   });
   assert.equal(
-    validateDesktopUpdateFeedEligibility({ coordinates, manifest: signedManifest }).targetRelativePath,
+    validateDesktopUpdateFeedEligibility({ coordinates, manifest: signedManifest })
+      .targetRelativePath,
     'stable/darwin/arm64/latest-mac.yml',
   );
 });
@@ -517,4 +518,47 @@ test('desktop update feed eligibility does not treat installed-deb proof as AppI
     () => validateDesktopUpdateFeedEligibility({ coordinates, manifest }),
     /runtime evidence is ineligible/u,
   );
+});
+
+test('Linux additive runtime proofs select AppImage and reject malformed evidence before fallback', () => {
+  const coordinates = {
+    channel: 'stable',
+    platform: 'linux',
+    arch: 'x64',
+    installationKind: 'direct-appimage',
+  };
+  const projection = resolveDesktopUpdateFeedProjection(coordinates);
+  const manifest = feedEligibilityManifest({
+    projection,
+    signingState: 'unsigned',
+    executableKind: 'installed-deb',
+  });
+  const evidence = manifest.platforms['linux-x64'];
+  const deb = evidence.runtimeValidation;
+  const appImage = { ...deb, executableKind: 'packaged-appimage' };
+  evidence.runtimeValidations = [deb];
+  assert.throws(
+    () => validateDesktopUpdateFeedEligibility({ coordinates, manifest }),
+    /runtime evidence is ineligible/u,
+  );
+  evidence.runtimeValidations = [deb, appImage];
+  assert.deepEqual(validateDesktopUpdateFeedEligibility({ coordinates, manifest }), projection);
+  for (const invalid of [
+    null,
+    {},
+    [],
+    [deb, deb],
+    [deb, appImage, appImage],
+    [{ ...appImage, status: 'failed' }],
+    [{ ...appImage, method: 'unknown' }],
+    [{ ...appImage, executableKind: 'installed-rpm' }],
+    [{ ...appImage, executableKind: 'packaged-exe' }],
+  ]) {
+    evidence.runtimeValidations = invalid;
+    evidence.runtimeValidation = appImage; // A valid legacy proof must not mask a bad array.
+    assert.throws(
+      () => validateDesktopUpdateFeedEligibility({ coordinates, manifest }),
+      /runtime validation missing or failed/u,
+    );
+  }
 });
