@@ -1209,6 +1209,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Acceptance:** Settings scene 一致，但各 capability owner API 不集中化。
 
+**Execution (2026-10-01): Wave A implemented / validated.** Notification browser/device/delivery settings and Data user-files/transfer settings now use the SET-7201 section/property/status grammar without moving browser permission, Desktop device preference, NotificationPreference, preference portability, Data Portability, or user-files owner APIs. Focused Notification/Data tests, Settings scene/navigation contracts, App-Vue typecheck, targeted lint/format, inventory 1292, governance, residual native-control/raw-palette scan, and diff check pass. AI provider and Knowledge repository presentation migration remain before this ticket can close. See [Wave A report](../archive/2026-10-01-pvc-set-7202-wave-a-notification-data-settings.md).
+
 **Dependencies:** SET-7201.
 
 ---

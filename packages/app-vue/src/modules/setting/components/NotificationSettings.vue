@@ -1,30 +1,23 @@
 <template>
-  <div class="space-y-6" data-testid="notification-settings">
-    <Card v-if="!devicePreferencePort" data-testid="notification-browser-card">
-      <CardHeader>
-        <CardTitle class="text-lg font-medium">
-          {{ t('setting.notifications.browserTitle') }}
-        </CardTitle>
-        <CardDescription>
-          {{ t('setting.notifications.browserDescription') }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="p-6">
-        <div class="flex items-center justify-between gap-6">
-          <div class="space-y-0.5">
-            <Label for="browser-notification-switch" class="text-base font-medium">
-              {{ t('setting.notifications.browserSystemNotification') }}
-            </Label>
-            <p class="max-w-sm text-[13px] text-muted-foreground">
-              {{
-                !browserNotificationAvailable
-                  ? t('setting.notifications.browserSecureContextRequired')
-                  : browserNotificationPermission === 'denied'
-                    ? t('setting.notifications.browserPermissionDenied')
-                    : t('setting.notifications.browserSystemNotificationDescription')
-              }}
-            </p>
-          </div>
+  <div class="space-y-8" data-testid="notification-settings">
+    <SettingsSection
+      v-if="!devicePreferencePort"
+      :title="t('setting.notifications.browserTitle')"
+      :description="t('setting.notifications.browserDescription')"
+      test-id="notification-browser-card"
+    >
+      <SettingsPropertyRow
+        :label="t('setting.notifications.browserSystemNotification')"
+        :description="
+          !browserNotificationAvailable
+            ? t('setting.notifications.browserSecureContextRequired')
+            : browserNotificationPermission === 'denied'
+              ? t('setting.notifications.browserPermissionDenied')
+              : t('setting.notifications.browserSystemNotificationDescription')
+        "
+        html-for="browser-notification-switch"
+      >
+        <div class="flex justify-end">
           <Switch
             id="browser-notification-switch"
             data-testid="notification-browser-system-switch"
@@ -37,28 +30,21 @@
             @update:model-value="updateBrowserNotification"
           />
         </div>
-      </CardContent>
-    </Card>
+      </SettingsPropertyRow>
+    </SettingsSection>
 
-    <Card v-if="devicePreferenceAvailable" data-testid="notification-device-card">
-      <CardHeader>
-        <CardTitle class="text-lg font-medium">{{
-          t('setting.notifications.deviceTitle')
-        }}</CardTitle>
-        <CardDescription>
-          {{ t('setting.notifications.description') }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="p-6 space-y-6">
-        <div class="flex items-center justify-between">
-          <div class="space-y-0.5">
-            <Label for="notification-switch" class="text-base font-medium">{{
-              t('setting.notifications.presentationMode')
-            }}</Label>
-            <p class="text-[13px] text-muted-foreground max-w-sm">
-              {{ t('setting.notifications.presentationModeDescription') }}
-            </p>
-          </div>
+    <SettingsSection
+      v-if="devicePreferenceAvailable"
+      :title="t('setting.notifications.deviceTitle')"
+      :description="t('setting.notifications.description')"
+      test-id="notification-device-card"
+    >
+      <SettingsPropertyRow
+        :label="t('setting.notifications.presentationMode')"
+        :description="t('setting.notifications.presentationModeDescription')"
+        html-for="notification-switch"
+      >
+        <div class="flex justify-end">
           <Switch
             id="notification-switch"
             data-testid="notification-settings-switch"
@@ -67,15 +53,14 @@
             @update:model-value="updatePresentationMode"
           />
         </div>
-        <div class="flex items-center justify-between">
-          <div class="space-y-0.5">
-            <Label for="notification-sound-switch" class="text-base font-medium">{{
-              t('setting.notifications.soundEnabled')
-            }}</Label>
-            <p class="text-[13px] text-muted-foreground max-w-sm">
-              {{ t('setting.notifications.soundEnabledDescription') }}
-            </p>
-          </div>
+      </SettingsPropertyRow>
+
+      <SettingsPropertyRow
+        :label="t('setting.notifications.soundEnabled')"
+        :description="t('setting.notifications.soundEnabledDescription')"
+        html-for="notification-sound-switch"
+      >
+        <div class="flex justify-end">
           <Switch
             id="notification-sound-switch"
             data-testid="notification-sound-switch"
@@ -84,54 +69,52 @@
             @update:model-value="updateSoundEnabled"
           />
         </div>
-      </CardContent>
-    </Card>
+      </SettingsPropertyRow>
+    </SettingsSection>
 
-    <Card data-testid="notification-delivery-card">
-      <CardHeader>
-        <CardTitle class="text-lg font-medium">{{
-          t('setting.notifications.deliveryTitle')
-        }}</CardTitle>
-        <CardDescription>
-          {{ t('setting.notifications.deliveryDescription') }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="p-6 space-y-4">
-        <p
-          v-if="preferenceError"
-          class="text-sm text-destructive"
-          data-testid="notification-preferences-error"
-        >
-          {{ preferenceError }}
-        </p>
-        <div class="rounded-lg border p-4 space-y-3" data-testid="notification-global-channels">
-          <p class="text-sm font-medium">{{ t('setting.notifications.globalChannelsTitle') }}</p>
-          <div class="flex flex-wrap gap-4">
-            <div v-for="channel in globalChannels" :key="channel" class="flex items-center gap-2">
-              <Label :for="`global-${channel}`" class="text-sm">{{
-                t(`setting.notifications.channels.${channel}`)
-              }}</Label>
-              <Switch
-                :id="`global-${channel}`"
-                :data-testid="`notification-global-${channel}`"
-                :model-value="hasGlobalChannel(channel)"
-                :disabled="preferenceBusy"
-                @update:model-value="(value) => onGlobalChannelChange(channel, value)"
-              />
-            </div>
+    <SettingsSection
+      :title="t('setting.notifications.deliveryTitle')"
+      :description="t('setting.notifications.deliveryDescription')"
+      test-id="notification-delivery-card"
+    >
+      <SettingsStatusBlock
+        v-if="preferenceError"
+        kind="error"
+        :description="preferenceError"
+        test-id="notification-preferences-error"
+        class="mb-4"
+      />
+
+      <SettingsPropertyRow
+        :label="t('setting.notifications.globalChannelsTitle')"
+        layout="stacked"
+        test-id="notification-global-channels"
+      >
+        <div class="flex flex-wrap gap-x-5 gap-y-3">
+          <div v-for="channel in globalChannels" :key="channel" class="flex items-center gap-2">
+            <Label :for="`global-${channel}`" class="text-sm">{{
+              t(`setting.notifications.channels.${channel}`)
+            }}</Label>
+            <Switch
+              :id="`global-${channel}`"
+              :data-testid="`notification-global-${channel}`"
+              :model-value="hasGlobalChannel(channel)"
+              :disabled="preferenceBusy"
+              @update:model-value="(value) => onGlobalChannelChange(channel, value)"
+            />
           </div>
         </div>
-        <div
+      </SettingsPropertyRow>
+
+      <div class="mt-4 divide-y divide-[hsl(var(--border-subtle)/0.72)]">
+        <SettingsPropertyRow
           v-for="moduleName in modules"
           :key="moduleName"
-          class="rounded-lg border p-4 space-y-3"
-          :data-testid="`notification-module-${moduleName}`"
+          :label="t(`setting.notifications.modules.${moduleName}`)"
+          :test-id="`notification-module-${moduleName}`"
         >
-          <p class="text-sm font-medium">
-            {{ t(`setting.notifications.modules.${moduleName}`) }}
-          </p>
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center justify-between gap-4 sm:justify-start">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-5">
+            <div class="flex items-center justify-between gap-3 sm:justify-start">
               <Label :for="`${moduleName}-in-app`" class="text-sm">{{
                 t('setting.notifications.channels.inApp')
               }}</Label>
@@ -143,7 +126,7 @@
                 @update:model-value="(value) => onChannelChange(moduleName, 'inApp', value)"
               />
             </div>
-            <div class="flex items-center justify-between gap-4 sm:justify-start">
+            <div class="flex items-center justify-between gap-3 sm:justify-start">
               <Label :for="`${moduleName}-push`" class="text-sm">{{
                 t('setting.notifications.channels.push')
               }}</Label>
@@ -156,18 +139,21 @@
               />
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </SettingsPropertyRow>
+      </div>
+    </SettingsSection>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@memoflow/ui-vue-shadcn';
-import { Label } from '@memoflow/ui-vue-shadcn';
-import { Switch } from '@memoflow/ui-vue-shadcn';
+import { Label, Switch } from '@memoflow/ui-vue-shadcn';
+import {
+  SettingsPropertyRow,
+  SettingsSection,
+  SettingsStatusBlock,
+} from '../../../components/shared/settings';
 import { DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY } from '../../../di/keys';
 import type { DesktopNotificationPreference } from '@memoflow/contracts/electron';
 import {

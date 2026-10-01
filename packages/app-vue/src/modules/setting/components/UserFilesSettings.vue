@@ -1,90 +1,79 @@
 <template>
-  <Card class="border-0 bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
-    <CardHeader>
-      <CardTitle class="flex items-center">
-        <FolderOpen class="h-5 w-5 mr-2" />
-        {{ t('setting.userFiles.title') }}
-      </CardTitle>
-      <p class="text-sm text-muted-foreground mt-1">
-        {{ t('setting.userFiles.description') }}
-      </p>
-    </CardHeader>
-
-    <Separator class="bg-[hsl(var(--border-subtle))]" />
-
-    <CardContent class="p-4 space-y-4">
-      <!-- Current path -->
-      <div class="space-y-2">
-        <Label class="text-sm font-medium">{{ t('setting.userFiles.currentDirectory') }}</Label>
-        <div class="flex items-center gap-2">
-          <code
-            class="flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-[hsl(var(--surface)/0.72)] px-3 py-2 text-[12px] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.45)]"
-          >
-            {{ currentPath || '...' }}
-          </code>
-          <Badge v-if="isCustom" variant="secondary">{{ t('setting.userFiles.customBadge') }}</Badge>
-        </div>
-      </div>
-
-      <!-- Default path (shown when custom) -->
-      <div v-if="isCustom" class="space-y-2">
-        <Label class="text-sm font-medium text-muted-foreground">
-          {{ t('setting.userFiles.defaultDirectory') }}
-        </Label>
-        <code class="block rounded-lg bg-[hsl(var(--surface)/0.5)] px-3 py-2 text-[12px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]">
-          {{ defaultPath }}
-        </code>
-      </div>
-
-      <!-- Feedback message -->
-      <div
-        v-if="feedback"
-        class="flex items-center gap-2 text-sm rounded-md px-3 py-2"
-        :class="feedback.type === 'success'
-          ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-          : 'bg-destructive/10 text-destructive'"
-      >
-        <CheckCircle2 v-if="feedback.type === 'success'" class="h-4 w-4 shrink-0" />
-        <AlertCircle v-else class="h-4 w-4 shrink-0" />
-        <span>{{ feedback.message }}</span>
-      </div>
-
-      <!-- Actions -->
-      <div class="grid grid-cols-1 gap-3 pt-2 @2xl/panel:grid-cols-3">
-        <Button variant="outline" class="w-full" :disabled="loading" @click="pickDirectory">
-          <Loader2 v-if="pickLoading" class="h-4 w-4 mr-2 animate-spin" />
-          <FolderInput v-else class="h-4 w-4 mr-2" />
-          {{ t('setting.userFiles.changeDirectory') }}
-        </Button>
-
-        <Button variant="outline" class="w-full" :disabled="openLoading" @click="openDirectory">
-          <Loader2 v-if="openLoading" class="h-4 w-4 mr-2 animate-spin" />
-          <ExternalLink v-else class="h-4 w-4 mr-2" />
-          {{ t('setting.userFiles.openDirectory') }}
-        </Button>
-
-        <Button
-          variant="outline"
-          class="w-full"
-          :disabled="!isCustom || loading"
-          @click="confirmReset"
+  <SettingsSection
+    :title="t('setting.userFiles.title')"
+    :description="t('setting.userFiles.description')"
+    test-id="user-files-settings"
+  >
+    <SettingsPropertyRow :label="t('setting.userFiles.currentDirectory')" layout="stacked">
+      <div class="flex items-center gap-2">
+        <code
+          class="flex-1 overflow-x-auto whitespace-nowrap rounded-md bg-muted/45 px-3 py-2 text-[12px] text-foreground"
         >
-          <Loader2 v-if="resetLoading" class="h-4 w-4 mr-2 animate-spin" />
-          <RotateCcw v-else class="h-4 w-4 mr-2" />
-          {{ t('setting.userFiles.resetToDefault') }}
-        </Button>
+          {{ currentPath || '...' }}
+        </code>
+        <Badge v-if="isCustom" variant="secondary">{{ t('setting.userFiles.customBadge') }}</Badge>
       </div>
-    </CardContent>
-  </Card>
+    </SettingsPropertyRow>
+
+    <SettingsPropertyRow
+      v-if="isCustom"
+      :label="t('setting.userFiles.defaultDirectory')"
+      layout="stacked"
+    >
+      <code
+        class="block overflow-x-auto whitespace-nowrap rounded-md bg-muted/30 px-3 py-2 text-[12px] text-muted-foreground"
+      >
+        {{ defaultPath }}
+      </code>
+    </SettingsPropertyRow>
+
+    <SettingsStatusBlock
+      v-if="feedback"
+      :kind="feedback.type"
+      :description="feedback.message"
+      test-id="user-files-feedback"
+      class="my-3"
+    />
+
+    <div class="grid grid-cols-1 gap-3 pt-3 @2xl/panel:grid-cols-3">
+      <Button variant="outline" class="w-full" :disabled="loading" @click="pickDirectory">
+        <Loader2 v-if="pickLoading" class="mr-2 h-4 w-4 animate-spin" />
+        <FolderInput v-else class="mr-2 h-4 w-4" />
+        {{ t('setting.userFiles.changeDirectory') }}
+      </Button>
+
+      <Button variant="outline" class="w-full" :disabled="openLoading" @click="openDirectory">
+        <Loader2 v-if="openLoading" class="mr-2 h-4 w-4 animate-spin" />
+        <ExternalLink v-else class="mr-2 h-4 w-4" />
+        {{ t('setting.userFiles.openDirectory') }}
+      </Button>
+
+      <Button
+        variant="outline"
+        class="w-full"
+        :disabled="!isCustom || loading"
+        @click="confirmReset"
+      >
+        <Loader2 v-if="resetLoading" class="mr-2 h-4 w-4 animate-spin" />
+        <RotateCcw v-else class="mr-2 h-4 w-4" />
+        {{ t('setting.userFiles.resetToDefault') }}
+      </Button>
+    </div>
+  </SettingsSection>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Separator, Label } from '@memoflow/ui-vue-shadcn';
-import { FolderOpen, FolderInput, ExternalLink, RotateCcw, Loader2, CheckCircle2, AlertCircle } from '@lucide/vue';
+import { Badge, Button } from '@memoflow/ui-vue-shadcn';
+import { ExternalLink, FolderInput, Loader2, RotateCcw } from '@lucide/vue';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import { isOk, type Result } from '@memoflow/contracts/result';
+import {
+  SettingsPropertyRow,
+  SettingsSection,
+  SettingsStatusBlock,
+} from '../../../components/shared/settings';
 import { DESKTOP_AUTH_API_KEY } from '../../../di/keys';
 
 const { t } = useI18n();
@@ -198,9 +187,9 @@ async function resetToDefault() {
   if (!electronApi?.invoke) return;
   resetLoading.value = true;
   try {
-    const response = (await electronApi.invoke(
-      SystemChannels.USER_FILES_RESET_PATH,
-    )) as Result<{ path: string }>;
+    const response = (await electronApi.invoke(SystemChannels.USER_FILES_RESET_PATH)) as Result<{
+      path: string;
+    }>;
     if (!isOk(response)) {
       showFeedback('error', t('setting.userFiles.resetFailed', '恢复默认失败，请重试'));
       return;

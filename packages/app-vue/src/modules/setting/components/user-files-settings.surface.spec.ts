@@ -16,4 +16,12 @@ describe('UserFilesSettings Result surface', () => {
     expect(source).toContain('SystemChannels.USER_FILES_PICK_DIRECTORY');
     expect(source).not.toMatch(/\) as UserFilesPathResult;/);
   });
+
+  it('uses shared Settings presentation primitives without raw success palette classes', () => {
+    expect(source).toContain('<SettingsSection');
+    expect(source).toContain('<SettingsPropertyRow');
+    expect(source).toContain('<SettingsStatusBlock');
+    expect(source).not.toContain('<Card');
+    expect(source).not.toMatch(/green-\d+/);
+  });
 });
