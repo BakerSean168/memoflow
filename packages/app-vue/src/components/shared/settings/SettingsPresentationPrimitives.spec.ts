@@ -112,5 +112,35 @@ describe('settings presentation primitives', () => {
 
     expect(dialogShell).toContain('<DialogContent');
     expect(dialogShell).toContain('<DialogFooter');
+    expect(dialogShell).toContain("size?: 'default' | 'wide'");
+    expect(dialogShell).toContain(':class="bodyClass"');
+  });
+
+  it('converges AI and Knowledge owner sections on shared settings presentation grammar', () => {
+    const ai = readFileSync(resolve(settingsRoot, 'AISettings.vue'), 'utf8');
+    const knowledge = readFileSync(
+      resolve(settingsRoot, 'KnowledgeRepositorySettings.vue'),
+      'utf8',
+    );
+
+    expect(ai).toContain('<SettingsSection');
+    expect(ai).toContain('<SettingsObjectCard');
+    expect(ai).toContain('<SettingsStatusBlock');
+    expect(ai).toContain('<SettingsDialogShell');
+    expect(ai).toContain('useAI()');
+    expect(ai).toContain('commitProviderOnboarding');
+    expect(ai).not.toContain('<Card');
+    expect(ai).not.toContain('<DialogContent');
+    expect(ai).not.toMatch(/(?:amber|emerald)-\d+/);
+
+    expect(knowledge).toContain('<SettingsSection');
+    expect(knowledge).toContain('<SettingsObjectCard');
+    expect(knowledge).toContain('<SettingsStatusBlock');
+    expect(knowledge).toContain('<SettingsDialogShell');
+    expect(knowledge).toContain('service.startKnowledgeRepositoryInstallation');
+    expect(knowledge).toContain('service.syncKnowledgeRepository');
+    expect(knowledge).not.toContain('<Card');
+    expect(knowledge).not.toContain('<DialogContent');
+    expect(knowledge).not.toMatch(/(?:amber|emerald)-\d+/);
   });
 });

@@ -1,15 +1,11 @@
 <template>
   <div class="space-y-6" data-testid="knowledge-repository-settings">
-    <Card>
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2 text-lg">
-          <HardDrive class="h-5 w-5" />
-          {{ t('setting.knowledgeRepository.localTitle') }}
-        </CardTitle>
-        <CardDescription>{{ t('setting.knowledgeRepository.localDescription') }}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div v-if="desktopBridge" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <SettingsSection
+      :title="t('setting.knowledgeRepository.localTitle')"
+      :description="t('setting.knowledgeRepository.localDescription')"
+    >
+      <SettingsObjectCard v-if="desktopBridge">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium">
               {{
@@ -47,49 +43,43 @@
             </Button>
           </div>
         </div>
-        <p v-else class="text-sm text-muted-foreground">
-          {{ t('setting.knowledgeRepository.localDesktopOnly') }}
-        </p>
-      </CardContent>
-    </Card>
+      </SettingsObjectCard>
+      <SettingsStatusBlock
+        v-else
+        kind="info"
+        :description="t('setting.knowledgeRepository.localDesktopOnly')"
+      />
+    </SettingsSection>
 
-    <Card>
-      <CardHeader>
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <CardTitle class="flex items-center gap-2 text-lg">
-              <GitBranch class="h-5 w-5" />
-              {{ t('setting.knowledgeRepository.githubTitle') }}
-            </CardTitle>
-            <CardDescription class="mt-1">
-              {{ t('setting.knowledgeRepository.githubDescription') }}
-            </CardDescription>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            :aria-label="t('common.refresh')"
-            :disabled="busy"
-            @click="loadConnections"
-          >
-            <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': busyAction === 'load' }" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <Alert v-if="errorMessage" variant="destructive">
-          <AlertCircle class="h-4 w-4" />
-          <AlertTitle>{{ t('setting.knowledgeRepository.errorTitle') }}</AlertTitle>
-          <AlertDescription>{{ errorMessage }}</AlertDescription>
-        </Alert>
+    <SettingsSection
+      :title="t('setting.knowledgeRepository.githubTitle')"
+      :description="t('setting.knowledgeRepository.githubDescription')"
+    >
+      <template #actions>
+        <Button
+          variant="ghost"
+          size="icon"
+          :aria-label="t('common.refresh')"
+          :disabled="busy"
+          @click="loadConnections"
+        >
+          <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': busyAction === 'load' }" />
+        </Button>
+      </template>
 
-        <Alert>
-          <ShieldCheck class="h-4 w-4" />
-          <AlertTitle>{{ t('setting.knowledgeRepository.permissionTitle') }}</AlertTitle>
-          <AlertDescription>{{
-            t('setting.knowledgeRepository.permissionDescription')
-          }}</AlertDescription>
-        </Alert>
+      <div class="space-y-4">
+        <SettingsStatusBlock
+          v-if="errorMessage"
+          kind="error"
+          :title="t('setting.knowledgeRepository.errorTitle')"
+          :description="errorMessage"
+        />
+
+        <SettingsStatusBlock
+          kind="info"
+          :title="t('setting.knowledgeRepository.permissionTitle')"
+          :description="t('setting.knowledgeRepository.permissionDescription')"
+        />
 
         <div v-if="installationRepositories.length" class="space-y-3">
           <div>
@@ -138,10 +128,10 @@
         </div>
 
         <div v-if="connections.length" class="space-y-3">
-          <div
+          <SettingsObjectCard
             v-for="connection in connections"
             :key="connection.id"
-            class="flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center"
+            class="flex flex-col gap-3 sm:flex-row sm:items-center"
           >
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center gap-2">
@@ -173,47 +163,47 @@
                   })
                 }}
               </p>
-              <p
+              <SettingsStatusBlock
                 v-if="providerBlockReason(connection)"
-                class="mt-2 text-xs leading-5 text-amber-700 dark:text-amber-300"
-                data-testid="knowledge-repository-provider-diagnostic"
-              >
-                {{ providerDiagnostic(connection) }}
-              </p>
-              <p
+                class="mt-2"
+                kind="error"
+                :description="providerDiagnostic(connection)"
+                test-id="knowledge-repository-provider-diagnostic"
+              />
+              <SettingsStatusBlock
                 v-if="syncCompleted[connection.id]"
-                class="mt-2 text-xs leading-5 text-emerald-600 dark:text-emerald-400"
-                data-testid="knowledge-repository-sync-completed"
-              >
-                {{
+                class="mt-2"
+                kind="success"
+                :description="
                   t(
                     `setting.knowledgeRepository.sync.outcome.${syncCompleted[connection.id]!.outcome}`,
                     { sha: syncCompleted[connection.id]!.headSha.slice(0, 8) },
                   )
-                }}
-              </p>
-              <p
+                "
+                test-id="knowledge-repository-sync-completed"
+              />
+              <SettingsStatusBlock
                 v-else-if="reconciliationCompleted[connection.id]"
-                class="mt-2 text-xs leading-5 text-emerald-600 dark:text-emerald-400"
-                data-testid="reconciliation-completed"
-              >
-                {{
+                class="mt-2"
+                kind="success"
+                :description="
                   t('setting.knowledgeRepository.reconciliation.completed', {
                     sha: reconciliationCompleted[connection.id]!.slice(0, 8),
                   })
-                }}
-              </p>
-              <p
+                "
+                test-id="reconciliation-completed"
+              />
+              <SettingsStatusBlock
                 v-else-if="reconciliationPreviews[connection.id]"
-                class="mt-2 text-xs leading-5 text-muted-foreground"
-                data-testid="reconciliation-preview"
-              >
-                {{
+                class="mt-2"
+                kind="info"
+                :description="
                   t(
                     `setting.knowledgeRepository.reconciliation.action.${reconciliationPreviews[connection.id]!.action}`,
                   )
-                }}
-              </p>
+                "
+                test-id="reconciliation-preview"
+              />
               <div
                 v-if="syncConflicts[connection.id]"
                 class="mt-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs leading-5 text-destructive"
@@ -263,20 +253,18 @@
                   {{ t('setting.knowledgeRepository.sync.openInObsidian') }}
                 </Button>
               </div>
-              <div
+              <SettingsStatusBlock
                 v-else-if="syncPending[connection.id]"
-                class="mt-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-xs leading-5 text-amber-700 dark:text-amber-300"
-                data-testid="knowledge-repository-sync-pending"
-              >
-                <p class="font-medium">{{ t('setting.knowledgeRepository.sync.pendingTitle') }}</p>
-                <p>
-                  {{
-                    t('setting.knowledgeRepository.sync.pendingDescription', {
-                      sha: syncPending[connection.id]!.localHeadSha.slice(0, 8),
-                    })
-                  }}
-                </p>
-              </div>
+                class="mt-2"
+                kind="info"
+                :title="t('setting.knowledgeRepository.sync.pendingTitle')"
+                :description="
+                  t('setting.knowledgeRepository.sync.pendingDescription', {
+                    sha: syncPending[connection.id]!.localHeadSha.slice(0, 8),
+                  })
+                "
+                test-id="knowledge-repository-sync-pending"
+              />
             </div>
             <div class="flex shrink-0 flex-wrap gap-2">
               <Button
@@ -346,40 +334,32 @@
                 {{ t('setting.knowledgeRepository.disconnect') }}
               </Button>
             </div>
-          </div>
+          </SettingsObjectCard>
           <KnowledgeWriteRequestLedger />
         </div>
 
-        <div
+        <SettingsStatusBlock
           v-else-if="webInstallationPending"
-          class="rounded-md border border-dashed p-5"
-          data-testid="knowledge-repository-installation-pending"
-        >
-          <p class="text-sm font-medium">
-            {{ t('setting.knowledgeRepository.pendingAuthorizationTitle') }}
-          </p>
-          <p class="mt-1 text-xs leading-5 text-muted-foreground">
-            {{ t('setting.knowledgeRepository.pendingAuthorizationDescription') }}
-          </p>
-        </div>
+          kind="info"
+          :title="t('setting.knowledgeRepository.pendingAuthorizationTitle')"
+          :description="t('setting.knowledgeRepository.pendingAuthorizationDescription')"
+          test-id="knowledge-repository-installation-pending"
+        />
 
-        <div
+        <SettingsStatusBlock
           v-else-if="!installationRepositories.length"
-          class="rounded-md border border-dashed p-5"
-        >
-          <p class="text-sm font-medium">{{ t('setting.knowledgeRepository.notConnected') }}</p>
-          <p class="mt-1 text-xs leading-5 text-muted-foreground">
-            {{
-              isGuest
-                ? t('setting.knowledgeRepository.guestCloudBlocked')
-                : !canUseCloudKnowledgeRepo
-                  ? t('setting.knowledgeRepository.offlineCloudBlocked')
-                  : desktopBridge
-                    ? t('setting.knowledgeRepository.desktopConnectHint')
-                    : t('setting.knowledgeRepository.webConnectHint')
-            }}
-          </p>
-        </div>
+          kind="info"
+          :title="t('setting.knowledgeRepository.notConnected')"
+          :description="
+            isGuest
+              ? t('setting.knowledgeRepository.guestCloudBlocked')
+              : !canUseCloudKnowledgeRepo
+                ? t('setting.knowledgeRepository.offlineCloudBlocked')
+                : desktopBridge
+                  ? t('setting.knowledgeRepository.desktopConnectHint')
+                  : t('setting.knowledgeRepository.webConnectHint')
+          "
+        />
 
         <div v-if="canUseCloudKnowledgeRepo" class="flex flex-wrap gap-2">
           <Button
@@ -408,27 +388,24 @@
             }}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </SettingsSection>
 
     <Dialog
       v-if="disconnectTarget"
       :open="disconnectDialogOpen"
       @update:open="setDisconnectDialogOpen"
     >
-      <DialogContent class="sm:max-w-lg" data-testid="knowledge-repository-disconnect-dialog">
-        <DialogHeader>
-          <DialogTitle>{{ t('setting.knowledgeRepository.disconnectTitle') }}</DialogTitle>
-          <DialogDescription>
-            {{
-              t('setting.knowledgeRepository.disconnectDescription', {
-                repository: repositoryDisplayName(disconnectTarget),
-              })
-            }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="rounded-md border p-3">
+      <SettingsDialogShell
+        :title="t('setting.knowledgeRepository.disconnectTitle')"
+        :description="
+          t('setting.knowledgeRepository.disconnectDescription', {
+            repository: repositoryDisplayName(disconnectTarget),
+          })
+        "
+        test-id="knowledge-repository-disconnect-dialog"
+      >
+        <SettingsObjectCard>
           <div class="flex items-start gap-3">
             <Checkbox
               id="purge-knowledge-repository-cloud-data"
@@ -445,9 +422,9 @@
               </p>
             </div>
           </div>
-        </div>
+        </SettingsObjectCard>
 
-        <p class="text-xs leading-5 text-muted-foreground">
+        <p class="mt-3 text-xs leading-5 text-muted-foreground">
           {{
             purgeCloudData
               ? t('setting.knowledgeRepository.purgeLocalAndGithubPreserved')
@@ -455,7 +432,7 @@
           }}
         </p>
 
-        <DialogFooter>
+        <template #footer>
           <Button variant="outline" :disabled="busy" @click="setDisconnectDialogOpen(false)">
             {{ t('common.cancel') }}
           </Button>
@@ -472,8 +449,8 @@
             <Unplug v-else class="mr-2 h-4 w-4" />
             {{ t('setting.knowledgeRepository.disconnect') }}
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </template>
+      </SettingsDialogShell>
     </Dialog>
   </div>
 </template>
@@ -483,39 +460,16 @@ import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
-  AlertCircle,
   ExternalLink,
   FolderOpen,
   GitBranch,
-  HardDrive,
   Link2,
   Loader2,
   Plus,
   RefreshCw,
-  ShieldCheck,
   Unplug,
 } from '@lucide/vue';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Label,
-  useConfirm,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Checkbox, Dialog, Label, useConfirm } from '@memoflow/ui-vue-shadcn';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import type {
   GitHubInstallationRepositoryDTO,
@@ -534,6 +488,12 @@ import {
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { readDesktopAccessSnapshot } from '../../../shared/utils/desktop-profile-access';
+import {
+  SettingsDialogShell,
+  SettingsObjectCard,
+  SettingsSection,
+  SettingsStatusBlock,
+} from '../../../components/shared/settings';
 import { KnowledgeWriteRequestLedger } from '../../repository/components';
 
 const { t } = useI18n();
@@ -583,8 +543,7 @@ const busy = computed(() => busyAction.value !== null);
 const GITHUB_NEW_PRIVATE_REPOSITORY_URL =
   'https://github.com/new?name=memory-flow-notes&visibility=private';
 const INSTALLATION_POLL_INTERVAL_MS = 1_500;
-const WEB_INSTALLATION_INTENT_SESSION_KEY =
-  'memoflow:knowledge-repository:web-installation-intent';
+const WEB_INSTALLATION_INTENT_SESSION_KEY = 'memoflow:knowledge-repository:web-installation-intent';
 let installationPollGeneration = 0;
 
 function rememberWebInstallationIntent(intentId: string): void {
