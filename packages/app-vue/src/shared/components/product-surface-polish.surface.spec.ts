@@ -173,9 +173,9 @@ describe('MemoFlow product surface polish', () => {
   });
 
   it('keeps Schedule day and event details on compact row surfaces', () => {
-    const day = read('modules/schedule/components/DayDetailSheet.vue');
-    const detail = read('modules/schedule/components/EventDetailSheet.vue');
-    expect(day).toContain('data-testid="schedule-day-event-list"');
+    const day = read('modules/schedule/components/PlannerDayDialog.vue');
+    const detail = read('modules/schedule/components/PlannerEventDialog.vue');
+    expect(day).toContain('data-testid="planner-day-event-list"');
     expect(day).toContain(
       'class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"',
     );

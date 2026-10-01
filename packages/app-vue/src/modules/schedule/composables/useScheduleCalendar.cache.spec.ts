@@ -96,4 +96,28 @@ describe('useScheduleCalendar shared owner cache', () => {
     second.wrapper.unmount();
     runtime.dispose();
   });
+  it('returns the update Result and delete boolean while patching owner facts and cache', async () => {
+    const runtime = createTestServerStateRuntime();
+    const updated = { ...scheduleEntry(), title: 'Updated', version: 2 };
+    const service = {
+      getSchedulesByAccount: vi.fn().mockResolvedValue(ok([scheduleEntry()])),
+      updateSchedule: vi.fn().mockResolvedValue(ok(updated)),
+      deleteSchedule: vi.fn().mockResolvedValue(ok(undefined)),
+    };
+    const { wrapper, api } = mountSchedule(runtime, createTestPinia(), service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchCalendarEntries(start, end);
+    expect(
+      await api.updateCalendarEntry('schedule-1', { name: 'Updated', expectedVersion: 1 }),
+    ).toEqual(ok(updated));
+    expect(api.calendarEntries.value[0]?.version).toBe(2);
+    expect(await api.deleteCalendarEntry('schedule-1', 2)).toBe(true);
+    expect(service.deleteSchedule).toHaveBeenCalledWith('schedule-1', 2);
+    await api.fetchCalendarEntries(start, end);
+    expect(api.calendarEntries.value).toEqual([]);
+    expect(service.getSchedulesByAccount).toHaveBeenCalledOnce();
+    wrapper.unmount();
+    runtime.dispose();
+  });
 });

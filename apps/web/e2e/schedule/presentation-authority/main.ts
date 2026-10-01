@@ -1,16 +1,33 @@
-import { createApp, defineComponent, h } from 'vue';
+import { createApp, defineComponent, h, onMounted, onUnmounted } from 'vue';
 import { createI18n } from 'vue-i18n';
-import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEntryClientDTO,
+  CalendarEventProjection,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '@memoflow/contracts/schedule';
 import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/contracts/setting';
 import { asInstant, asYmd } from '@memoflow/time';
 import PlannerCalendar, {
   type PlannerCalendarView,
 } from '@memoflow/app-vue/modules/schedule/planner/PlannerCalendar.vue';
-import DayDetailSheet from '@memoflow/app-vue/modules/schedule/components/DayDetailSheet.vue';
-import EventDetailSheet from '@memoflow/app-vue/modules/schedule/components/EventDetailSheet.vue';
+import PlannerDayDialog from '@memoflow/app-vue/modules/schedule/components/PlannerDayDialog.vue';
+import PlannerEventDialog from '@memoflow/app-vue/modules/schedule/components/PlannerEventDialog.vue';
 import ScheduleCapsulePreview from '@memoflow/app-vue/layouts/shell/previews/ScheduleCapsulePreview.vue';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
+import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
+import { createPinia } from 'pinia';
+import { Toaster } from 'vue-sonner';
+import ScheduleCalendarView from '@memoflow/app-vue/modules/schedule/views/ScheduleCalendarView.vue';
+import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
+import {
+  SCHEDULE_SERVICE_KEY,
+  TASK_SERVICE_KEY,
+  GOAL_SERVICE_KEY,
+} from '@memoflow/app-vue/di/keys';
+import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
+import { useScheduleStore } from '@memoflow/app-vue/modules/schedule/stores/schedule-store';
 import '../../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);
@@ -109,8 +126,78 @@ const ownerCommands = {
   },
 };
 
+const calls: { command: string; id?: string; version?: number; request?: unknown }[] = [];
+let entries: CalendarEntryClientDTO[] = [
+  {
+    id: 'entry-1',
+    identityId: 'acceptance',
+    title: 'Deep work / 深度工作',
+    description: 'Focus block',
+    location: 'Desk',
+    attendees: ['Ada'],
+    range: {
+      kind: 'Timed',
+      start: asInstant(Date.parse('2026-10-01T09:00:00Z')),
+      end: asInstant(Date.parse('2026-10-01T10:00:00Z')),
+    },
+    version: 1,
+    createdAt: 0,
+    updatedAt: 0,
+  } as CalendarEntryClientDTO,
+];
+const scheduleService = {
+  async getSchedulesByAccount() {
+    return { ok: true, data: entries };
+  },
+  async createSchedule(request: CreateScheduleRequest) {
+    calls.push({ command: 'create', request });
+    const entry = {
+      identityId: 'acceptance',
+      createdAt: 0,
+      updatedAt: 0,
+      id: 'entry-created',
+      title: request.name,
+      range: request.range,
+      version: 1,
+    } as CalendarEntryClientDTO;
+    entries = [...entries, entry];
+    return { ok: true, data: entry };
+  },
+  async createScheduleWithConflictDetection(request: CreateScheduleRequest) {
+    const result = await scheduleService.createSchedule(request);
+    return { ok: true, data: { schedule: result.data } };
+  },
+  async updateSchedule(id: string, request: UpdateScheduleRequest) {
+    calls.push({ command: 'update', id, version: request.expectedVersion, request });
+    const current = entries.find((entry) => entry.id === id)!;
+    const entry = {
+      ...current,
+      title: request.name,
+      range: request.range,
+      description: request.description,
+      location: request.location,
+      attendees: request.attendees,
+      version: current.version + 1,
+    };
+    entries = entries.map((current) => (current.id === id ? entry : current));
+    return { ok: true, data: entry };
+  },
+  async deleteSchedule(id: string, version: number) {
+    calls.push({ command: 'delete', id, version });
+    entries = entries.filter((entry) => entry.id !== id);
+    return { ok: true, data: undefined };
+  },
+};
+
 const Root = defineComponent({
   setup() {
+    const { width } = providePanelWidth();
+    const updateWidth = () => {
+      width.value = Number(params.get('panelWidth')) || window.innerWidth;
+    };
+    updateWidth();
+    onMounted(() => window.addEventListener('resize', updateWidth));
+    onUnmounted(() => window.removeEventListener('resize', updateWidth));
     return () =>
       h(
         'main',
@@ -121,6 +208,11 @@ const Root = defineComponent({
           'data-view': view,
         },
         [
+          h(GlobalConfirmDialog),
+          h(Toaster),
+          surface === 'crud'
+            ? h('section', { class: 'h-[800px]' }, [h(ScheduleCalendarView)])
+            : null,
           surface === 'calendar'
             ? h('section', { class: 'h-[760px] min-w-0 rounded-xl border bg-card p-3' }, [
                 h(PlannerCalendar, {
@@ -134,7 +226,7 @@ const Root = defineComponent({
               ])
             : null,
           surface === 'day-detail'
-            ? h(DayDetailSheet, {
+            ? h(PlannerDayDialog, {
                 open: true,
                 date: new Date('2026-10-01T12:00:00Z'),
                 events: projections,
@@ -142,7 +234,7 @@ const Root = defineComponent({
               })
             : null,
           surface === 'event-detail'
-            ? h(EventDetailSheet, {
+            ? h(PlannerEventDialog, {
                 open: true,
                 event: selectedEvent,
                 hasConflict: false,
@@ -164,6 +256,15 @@ const Root = defineComponent({
 });
 
 const app = createApp(Root);
+app.use(createPinia());
+installServerStateRuntime(app, 'web', { identityScope: 'acceptance' });
+app.provide(SCHEDULE_SERVICE_KEY, scheduleService as never);
+app.provide(TASK_SERVICE_KEY, {} as never);
+app.provide(GOAL_SERVICE_KEY, {
+  updateGoal: async () => {
+    throw new Error('Unexpected Goal mutation');
+  },
+} as never);
 app.use(
   createI18n({
     legacy: false,
@@ -175,6 +276,15 @@ app.use(
 app.mount('#app');
 
 Object.assign(window, {
+  scheduleCrudEvidence: () => calls,
+  invalidateScheduleInspect: (kind: string) => {
+    const store = useScheduleStore();
+    store.setCalendarEntries(
+      kind === 'missing'
+        ? []
+        : store.calendarEntries.map((entry) => ({ ...entry, version: entry.version + 1 })),
+    );
+  },
   schedulePresentationEvidence: () => ({
     locale,
     theme,

@@ -104,7 +104,7 @@
       />
     </div>
 
-    <DayDetailSheet
+    <PlannerDayDialog
       v-model:open="dayDetailOpen"
       :date="selectedDate"
       :events="selectedDayEvents"
@@ -120,21 +120,24 @@
       @complete-task="handleCompleteTask"
     />
 
-    <EventDetailSheet
+    <PlannerEventDialog
       v-model:open="eventDetailOpen"
       :event="selectedDetailEvent"
       :has-conflict="selectedDetailHasConflict"
+      @edit="handleEditCalendarEntry"
+      @delete="handleDeleteCalendarEntry"
     />
     <CreateScheduleDialog
       v-model="showCreateDialog"
+      :schedule="editingSchedule"
       :initial-range="pendingCreateRange"
-      :on-submit="handleCreateSchedule"
+      :on-submit="handleSaveSchedule"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import {
@@ -145,11 +148,11 @@ import {
   ChevronRight,
   Plus,
 } from '@lucide/vue';
-import { Button } from '@memoflow/ui-vue-shadcn';
+import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import CreateScheduleDialog from '../components/CreateScheduleDialog.vue';
-import DayDetailSheet from '../components/DayDetailSheet.vue';
+import PlannerDayDialog from '../components/PlannerDayDialog.vue';
 import TaskEventActionPanel from '../components/TaskEventActionPanel.vue';
-import EventDetailSheet from '../components/EventDetailSheet.vue';
+import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView';
 import { useSchedule } from '../composables/useSchedule';
 import { useTask } from '../../task/composables/useTask';
@@ -158,7 +161,12 @@ import { ResponsivePrimaryAction } from '../../../shared/components';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
-import type { CalendarEventProjection, CreateScheduleRequest } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEntryClientDTO,
+  CalendarEventProjection,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '@memoflow/contracts/schedule';
 import PlannerCalendar, {
   type PlannerCalendarView,
   type PlannerVisibleRange,
@@ -190,6 +198,7 @@ const ownerCommands = createPlannerOwnerCommandRouter({
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
 const showCreateDialog = ref(false);
 const pendingCreateRange = ref<{ start: number; end: number; allDay: boolean } | null>(null);
+const editingSchedule = ref<CalendarEntryClientDTO | null>(null);
 const activeView = ref<PlannerCalendarView>('week');
 const currentPeriodTitle = ref('');
 const dayDetailOpen = ref(false);
@@ -269,6 +278,7 @@ function handleProjectionClick(projection: CalendarEventProjection): void {
     return;
   }
 
+  dayDetailOpen.value = false;
   selectedDetailEvent.value = projection;
   eventDetailOpen.value = true;
 }
@@ -294,12 +304,14 @@ function plannerConflictMessage(
   return t('schedule.plannerMutation.conflict');
 }
 
-async function refreshPlannerAfterConflict(): Promise<void> {
+async function refreshPlannerAfterConflict(
+  warningKey = 'schedule.plannerMutation.refreshFailed',
+): Promise<void> {
   if (!windowStart.value || !windowEnd.value) return;
   try {
     await fetchForRange(windowStart.value, windowEnd.value);
   } catch {
-    toast.warning(t('schedule.plannerMutation.refreshFailed'));
+    toast.warning(t(warningKey));
   }
 }
 
@@ -345,30 +357,130 @@ function switchToDayView(date: Date | null): void {
 }
 
 function openCreateDialog(): void {
+  editingSchedule.value = null;
   pendingCreateRange.value = null;
   showCreateDialog.value = true;
 }
 
 function handleSelectRange(range: { start: number; end: number; allDay: boolean }): void {
+  editingSchedule.value = null;
   pendingCreateRange.value = range;
   showCreateDialog.value = true;
 }
 
-async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolean> {
-  const result = await schedule.createCalendarEntry(data);
-  if (result) {
-    if (windowStart.value && windowEnd.value) {
-      try {
-        await fetchForRange(windowStart.value, windowEnd.value);
-      } catch {
-        // The command already committed and the local Schedule store contains the returned DTO.
-        // A read-model refresh failure must never be reported as a failed create.
-        toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'));
-      }
-    }
+function resolveCalendarEntry(event: CalendarEventProjection): CalendarEntryClientDTO | null {
+  if (event.sourceType !== 'schedule') return null;
+  const entry = schedule.calendarEntries.value.find(
+    (entry) => String(entry.id) === event.ownerCommandTarget.ownerId,
+  );
+  if (!entry || entry.version !== event.revision) {
+    toast.error(t('schedule.eventDetail.entryUnavailable'));
+    void refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return null;
+  }
+  return entry;
+}
+
+function handleEditCalendarEntry(event: CalendarEventProjection): void {
+  const entry = resolveCalendarEntry(event);
+  if (!entry) return;
+
+  selectedDetailEvent.value = event;
+  eventDetailOpen.value = false;
+  editingSchedule.value = entry;
+  pendingCreateRange.value = null;
+  showCreateDialog.value = true;
+}
+
+async function handleDeleteCalendarEntry(event: CalendarEventProjection): Promise<void> {
+  const entry = resolveCalendarEntry(event);
+  if (!entry) return;
+
+  eventDetailOpen.value = false;
+  const confirmed = await useConfirm({
+    title: t('schedule.confirm.deleteCalendarEntryTitle', { name: entry.title }),
+    description: t('schedule.confirm.deleteCalendarEntryDescription'),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) {
+    eventDetailOpen.value = true;
+    return;
+  }
+
+  // Confirmation may remain open while owner facts change.
+  if (!resolveCalendarEntry(event)) {
+    eventDetailOpen.value = true;
+    return;
+  }
+  const deleted = await schedule.deleteCalendarEntry(String(entry.id), entry.version);
+  if (!deleted) {
+    eventDetailOpen.value = true;
+    toast.error(schedule.error.value ?? t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return;
+  }
+
+  eventDetailOpen.value = false;
+  selectedDetailEvent.value = null;
+  await refreshAfterScheduleWrite('schedule.toast.scheduleDeletedRefreshFailed');
+  toast.success(t('schedule.toast.scheduleDeleted'));
+}
+
+async function refreshAfterScheduleWrite(refreshFailureKey: string): Promise<void> {
+  if (!windowStart.value || !windowEnd.value) return;
+  try {
+    await fetchForRange(windowStart.value, windowEnd.value);
+    // Schedule owner reads report failures in the store rather than rejecting.
+    if (schedule.error.value) toast.warning(t(refreshFailureKey));
+  } catch {
+    toast.warning(t(refreshFailureKey));
+  }
+}
+
+async function handleSaveSchedule(data: CreateScheduleRequest): Promise<boolean> {
+  const editing = editingSchedule.value;
+  if (!editing) {
+    const result = await schedule.createCalendarEntry(data);
+    if (!result) return false;
+
+    await refreshAfterScheduleWrite('schedule.toast.scheduleCreatedRefreshFailed');
     toast.success(t('schedule.toast.scheduleCreated'));
     return true;
   }
-  return false;
+
+  const current = schedule.calendarEntries.value.find((entry) => entry.id === editing.id);
+  if (!current || current.version !== editing.version) {
+    toast.error(t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return false;
+  }
+
+  const update: UpdateScheduleRequest = {
+    name: data.name,
+    description: data.description ?? '',
+    range: data.range,
+    location: data.location ?? '',
+    attendees: data.attendees ?? [],
+    expectedVersion: editing.version,
+  };
+  const result = await schedule.updateCalendarEntry(String(editing.id), update);
+  if (!result.ok) {
+    toast.error(schedule.error.value ?? t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return false;
+  }
+
+  await refreshAfterScheduleWrite('schedule.toast.scheduleUpdatedRefreshFailed');
+  selectedDetailEvent.value = null;
+  toast.success(t('schedule.toast.scheduleUpdated'));
+  return true;
 }
+
+watch(showCreateDialog, (open) => {
+  if (open) return;
+  editingSchedule.value = null;
+  pendingCreateRange.value = null;
+});
 </script>

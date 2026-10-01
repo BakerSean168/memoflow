@@ -20,7 +20,7 @@ describe('schedule time-range presentation boundary', () => {
     'utf8',
   );
   const dayDetail = readFileSync(
-    resolve(dir, '../../modules/schedule/components/DayDetailSheet.vue'),
+    resolve(dir, '../../modules/schedule/components/PlannerDayDialog.vue'),
     'utf8',
   );
   const panel = readFileSync(
