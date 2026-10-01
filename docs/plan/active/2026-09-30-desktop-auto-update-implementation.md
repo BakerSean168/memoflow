@@ -60,6 +60,18 @@ macOS x64 + arm64
 Linux AppImage
 ```
 
+## User scope decision — 2026-10-01
+
+macOS auto-update implementation is deferred by user. DU-1501, DU-1502, DU-1503, and DU-1504 are DEFERRED. macOS is not a gate for Windows feed/rollout work; next work must be non-macOS. DU-1402 and DU-1403 remain DONE only with passing cleanup validation. There is no live pointer cutover/CDN deployment in this scope.
+
+## Cleanup validation — 2026-10-01
+
+- Focused DU-1402 publication tests: 4/4 passed; focused DU-1403 rollout tests: 13/13 passed.
+- Affected metadata, release tooling, and workflow tests: 40/40 passed; full `node --test tools/ci-cd-platform/__tests__/*.test.mjs`: 158/158 passed.
+- Inventory generation/check: 1266 files passed; `git diff --check` passed.
+- Additional `pnpm nx run memoflow:governance-check` fails at the existing platform-leakage finding in `packages/app-vue/src/di/desktop-update-service.surface.spec.ts` (`window.electronAPI`); that file and the audit are unchanged from HEAD.
+- All uncommitted Desktop TypeScript macOS changes were restored to HEAD; no Desktop TypeScript typecheck is needed for this cleanup.
+
 ## Current progress
 
 - `DU-1001` — **DONE**: legacy updater dormancy / preload / ad-hoc event / mutable policy baseline locked by characterization tests.
@@ -82,7 +94,14 @@ Linux AppImage
 - `DU-1304` — **DONE**: the Shell now projects only actionable updater states through an optional `DesktopUpdateService` consumer: verified Ready and retryable install failures that recover to Ready. Background checking/available/downloading/preparing remain silent; `WindowHeader` stays updater-agnostic through a generic `status-actions` slot; clicking the indicator only routes to `/settings?tab=updates` and never installs directly; stale initial reads cannot overwrite newer pushed state; subscriptions clean up across unmount/remount; Web/no-service hosts render nothing. 43 focused shell/i18n tests, direct app-vue `vue-tsc`, inventory check, targeted ESLint, and `git diff --check` are green.
 - **Phase 3 complete**: manual check, live replayable Settings state, durable Ready/retry UX, and the Shell Ready indicator now share one canonical updater snapshot without a duplicate renderer store.
 - `DU-1401` — **DONE**: a dependency-free, provider-neutral Update Feed Projection contract now defines stable/beta/canary coordinates across Windows x64 direct NSIS, per-arch signed/notarized macOS, and Linux x64 direct AppImage. Release tooling derives its metadata baseline from the same lane table and validates schema-2 canonical release evidence before a lane is eligible; unsigned macOS, missing trust receipts, package-managed Linux evidence, unsupported coordinates, and ambiguous/drifted contract fixtures fail closed. Current GitHub runtime behavior is unchanged. Focused feed/metadata tests, the 141-test CI/CD platform suite, test inventory, targeted ESLint, and `git diff --check` are green.
-- Next: `DU-1402` — publish the architecture-aware feed deterministically from canonical release evidence.
+- `DU-1402` — **DONE**: release tooling now deterministically materializes a versioned-prefix feed bundle from the canonical schema-2 Desktop release manifest. Only DU-1401-eligible lanes are projected; metadata is renamed only at the projected feed boundary, referenced artifacts and companion blockmaps retain canonical bytes, SHA-256, and size evidence, and traversal/ambiguity/identity drift fail closed. The draft-release workflow materializes the bundle after metadata-closure verification and retains the publication receipt + versioned files as workflow evidence without changing the current GitHub runtime provider or prematurely enabling macOS/Linux rollout. Cleanup validation is recorded below.
+- `DU-1403` — **DONE**: staged rollout is projected as immutable control metadata on top of DU-1402 evidence using electron-updater 6.8.9 native `stagingPercentage`; active stages are exactly 10/30/50/100, pause maps to 0%, and cohort selection mirrors the provider-owned persisted `.updaterId` UUID semantics. Control receipts record increase/decrease/pause/resume/hold transitions, re-bind every lane to the DU-1401 contract plus DU-1402 metadata identity, and never mutate canonical release bytes. Initial p10 evidence is retained in release CI without a live provider cutover. Windows-only publication is valid; rollout requires neither a publication class nor macOS lanes. Cleanup validation is recorded below.
+- `DU-1501` — **DEFERRED by user**: macOS production signing/updater gate work is deferred; no publication class is introduced.
+- `DU-1502` — **DEFERRED by user**: canonical per-architecture macOS metadata and runtime feed work is deferred; the committed arch-specific release behavior remains.
+- `DU-1503` — **DEFERRED by user**: native Intel installed-update E2E and packaged provenance work are deferred.
+- `DU-1504` — **DEFERRED by user**: native Apple Silicon installed-update E2E and packaged provenance work are deferred.
+- macOS is not a gate for Windows feed/rollout work. DU-1402/DU-1403 consume whichever DU-1401 lanes are currently eligible; Windows-only publication is valid.
+- Next: `DU-1701` — non-macOS updater diagnostics for the existing Windows lane.
 
 ## 2. Non-goals
 
@@ -782,6 +801,15 @@ installation kind
 
 **Acceptance:** 不存在手工 checksum。
 
+**DU-1402 implementation closure:**
+
+- `materialize-desktop-update-feed.mjs` consumes only the canonical schema-2 Desktop release manifest and the canonical artifact root; it does not create a second release/version truth.
+- Publication uses `versions/<tag>/<gitSha>/<channel>/<platform>/<arch>/...`, with a deterministic receipt describing the future channel-pointer switch. The current runtime provider is intentionally unchanged.
+- Each eligible lane reuses DU-1401 eligibility. Source updater metadata is copied to the projected target name; every referenced artifact plus an available companion `.blockmap` is copied byte-for-byte and bound to canonical SHA-256/size evidence.
+- Unsigned macOS and current `installed-deb` Linux evidence are skipped as policy-ineligible, while malformed signed trust, missing/ambiguous canonical assets, metadata version drift, unsafe references, or conflicting targets fail closed.
+- `release-assets.yml` materializes the stable feed only after canonical update-metadata closure and retains the complete versioned bundle plus `desktop-update-feed-publication.json` as workflow evidence. No live feed host or runtime cutover is introduced here.
+- Focused publication tests cover Windows materialization, current unsigned-pilot macOS / installed-deb Linux skips, blockmap closure, deterministic output, traversal/ambiguity failures, and workflow ordering. Windows-only feed publication is valid; the receipt is provider-neutral and records lanes/skippedLanes without a publication class.
+
 ---
 
 ## DU-1403 — Add staged rollout control
@@ -797,9 +825,21 @@ installation kind
 
 **Acceptance:** fixture 测试证明同一 installation ID 多次 check eligibility 稳定。
 
+**DU-1403 implementation closure:**
+
+- Rollout control is an explicit Desktop-owned contract with only `10 / 30 / 50 / 100` active stages plus fail-closed pause. It mirrors electron-updater 6.8.9 cohort semantics exactly: the provider-owned persisted `.updaterId` UUID remains the sole installation identity, and eligibility derives from its final 32 bits rather than a MemoFlow-owned random identifier.
+- `materialize-desktop-update-rollout.mjs` consumes the immutable DU-1402 publication receipt, re-validates every lane against the DU-1401 projection contract, verifies source metadata SHA-256/size and release identity, and emits immutable control-specific metadata containing exactly one native `stagingPercentage`. Canonical release metadata and artifact bytes are never mutated.
+- Decrease, pause, resume, increase, and hold are explicit transition evidence. Pause projects `stagingPercentage: 0`, while a bad release remains immutable and must be superseded by a higher-version hotfix rather than same-version byte replacement.
+- The release workflow prepares initial `p10` rollout evidence only after immutable feed materialization and retains it separately. No live pointer switch, CDN/provider cutover, or macOS/Linux rollout enablement is introduced by DU-1403.
+- Windows-only rollout consumes the eligible lanes present in the DU-1402 receipt, without publication-class or macOS-lane requirements. Cleanup validation is recorded below.
+
+Next: `DU-1701` — non-macOS updater diagnostics for the existing Windows lane.
+
 ---
 
-# Phase 5 — macOS Production Lane
+# Phase 5 — macOS Production Lane (DEFERRED by user)
+
+macOS production updater work is deferred and is not a gate for Windows feed/rollout. Next work must be non-macOS.
 
 ## DU-1501 — Make signing a production updater gate
 
@@ -818,6 +858,8 @@ installation kind
 - trust verify。
 
 **Acceptance:** production feed publisher 对 unsigned-pilot fail closed。
+
+**Status: DEFERRED by user.** No implementation completion is claimed; resume only after a new user decision.
 
 ---
 
@@ -838,13 +880,19 @@ GitHub Release 仍可保留 arch-specific human assets。
 
 **Acceptance:** client 不依赖 `latest-mac-x64.yml` 这种非默认 provider hack。
 
+**Status: DEFERRED by user.** No implementation completion is claimed; resume only after a new user decision.
+
 ---
 
 ## DU-1503 — macOS x64 N → N+1 E2E
 
+**Status: DEFERRED by user.**
+
 **Acceptance:** signed installed app 完成 update 并验证版本。
 
 ## DU-1504 — macOS arm64 N → N+1 E2E
+
+**Status: DEFERRED by user.**
 
 与 x64 独立 gate，不以 cross-compile package smoke 替代。
 

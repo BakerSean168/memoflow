@@ -10856,6 +10856,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/desktop-update-rollout.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/esm-entrypoint.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11517,7 +11525,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 29
+      "fileCount": 30
     },
     {
       "id": "memoflow:test:governance",
@@ -12428,6 +12436,6 @@
     "boundary-main": 8,
     "e2e": 58,
     "perf": 1,
-    "governance": 61
+    "governance": 62
   }
 }

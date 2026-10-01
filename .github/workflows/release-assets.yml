@@ -427,6 +427,8 @@ jobs:
           node ./tools/ci-cd-platform/release-tools/verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts
           node ./tools/ci-cd-platform/release-tools/materialize-desktop-update-feed.mjs \
             desktop-release-manifest.json artifacts desktop-update-feed stable
+          node ./tools/ci-cd-platform/release-tools/materialize-desktop-update-rollout.mjs \
+            desktop-update-feed/desktop-update-feed-publication.json desktop-update-feed desktop-update-rollout 10
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           const manifest = JSON.parse(await readFile('desktop-release-manifest.json', 'utf8'));
@@ -438,6 +440,15 @@ jobs:
         with:
           name: desktop-update-feed-evidence
           path: desktop-update-feed
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 30
+
+      - name: Retain Desktop update rollout evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-update-rollout-evidence
+          path: desktop-update-rollout
           if-no-files-found: error
           compression-level: 9
           retention-days: 30
