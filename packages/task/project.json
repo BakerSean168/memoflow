@@ -93,7 +93,7 @@
       "executor": "nx:run-commands",
       "cache": false,
       "options": {
-        "command": "node --expose-gc ../../node_modules/vitest/vitest.mjs run --config vitest.performance-experiment.config.ts --reporter=json --outputFile=../../reports/test-system-v2/performance-experiment.json",
+        "command": "node --expose-gc ../../node_modules/vitest/vitest.mjs run --config vitest.performance-experiment.config.ts --reporter=json --outputFile=../../reports/test-system-v2/raw/performance-experiment.vitest.json",
         "cwd": "packages/task"
       }
     },

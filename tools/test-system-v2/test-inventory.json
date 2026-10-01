@@ -10167,6 +10167,14 @@
       ]
     },
     {
+      "path": "packages/task/src/server/domain/performance/task-vnext.performance-experiment.bench.ts",
+      "primarySuite": "perf",
+      "collectors": [
+        "packages/task/vitest.performance-experiment.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/server/domain/performance/task-vnext.performance.bench.ts",
       "primarySuite": "perf",
       "collectors": [
@@ -11056,6 +11064,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/workflow-history-contract.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/workspace-receipt.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11549,7 +11565,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 30
+      "fileCount": 31
     },
     {
       "id": "memoflow:test:governance",
@@ -11654,7 +11670,7 @@
       "type": "primary",
       "suite": "perf",
       "runner": "vitest",
-      "fileCount": 0
+      "fileCount": 1
     },
     {
       "id": "packages/task/vitest.performance.config.ts",
@@ -12459,7 +12475,7 @@
     "boundary-ipc": 8,
     "boundary-main": 8,
     "e2e": 58,
-    "perf": 1,
-    "governance": 62
+    "perf": 2,
+    "governance": 63
   }
 }
