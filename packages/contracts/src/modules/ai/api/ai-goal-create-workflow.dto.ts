@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import {
   GoalTimeframeSchema,
+  GoalReminderConfigDTOSchema,
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,
   KEY_RESULT_TITLE_MAX_LENGTH,
   KeyResultCalculationMethod,
@@ -67,6 +68,8 @@ export const GoalPlanGoalSchema = z
     draftRef: GoalDraftRefSchema,
     name: z.string().trim().min(1).max(256),
     summary: z.string().trim().max(500).nullable().optional(),
+    description: z.string().trim().max(10000).nullable().optional(),
+    reminderConfig: GoalReminderConfigDTOSchema.nullable().optional(),
     status: z.enum(['Planned', 'InProgress']).default('Planned'),
     start: GoalTimeframeSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),

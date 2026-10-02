@@ -64,10 +64,51 @@ export function useLabelCatalog() {
 
   return {
     query,
+    async existingNames(names: readonly string[]) {
+      const result = await query.refetch();
+      if (result.error) throw result.error;
+      return names.map((name) => ({
+        name,
+        label:
+          result.data?.find(
+            (item) =>
+              item.name.normalize('NFKC').trim().toLowerCase() ===
+              name.normalize('NFKC').trim().toLowerCase(),
+          ) ?? null,
+      }));
+    },
     labels,
     options,
     isLoading: computed(() => query.isPending.value),
     createLabel,
+    async resolveNames(names: readonly string[]): Promise<string[]> {
+      // Label commands own validation/uniqueness. Re-read after a concurrent create.
+      const catalog = await query.refetch();
+      if (catalog.error) throw catalog.error;
+      const resolved: string[] = [];
+      for (const name of names) {
+        let label = catalog.data?.find(
+          (item) =>
+            item.name.normalize('NFKC').trim().toLowerCase() ===
+            name.normalize('NFKC').trim().toLowerCase(),
+        );
+        if (!label) {
+          try {
+            label = await createLabel(name);
+          } catch (cause) {
+            const fresh = await query.refetch();
+            label = fresh.data?.find(
+              (item) =>
+                item.name.normalize('NFKC').trim().toLowerCase() ===
+                name.normalize('NFKC').trim().toLowerCase(),
+            );
+            if (!label) throw cause;
+          }
+        }
+        resolved.push(label.id);
+      }
+      return [...new Set(resolved)];
+    },
     isCreating: computed(() => createMutation.isPending.value),
   };
 }

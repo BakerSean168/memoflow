@@ -88,6 +88,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -949,6 +959,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/desktop-analytics-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -11895,7 +11913,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 74
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12273,14 +12291,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 74
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 89
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12505,6 +12523,7 @@
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
+      "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
@@ -13069,7 +13088,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1155,
+    "unit": 1157,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

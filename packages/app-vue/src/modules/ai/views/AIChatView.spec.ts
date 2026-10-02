@@ -142,4 +142,17 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).not.toContain('knowledge-generate');
     expect(actionBar).not.toContain('knowledge-generate');
   });
+  it('restores durable Goal/supporting state before independently attempting native projection', () => {
+    const projection = viewComposable.indexOf('await goalWorkflow.projectRun(run, false)');
+    const overlay = viewComposable.indexOf(
+      'persistence.applyEditorOverlay(persisted.editorOverlay, run)',
+    );
+    const opening = viewComposable.indexOf(
+      "if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview()",
+    );
+    expect(projection).toBeGreaterThan(0);
+    expect(overlay).toBeGreaterThan(projection);
+    expect(opening).toBeGreaterThan(overlay);
+    expect(viewComposable).toContain('error instanceof AIWorkflowRestoreError &&');
+  });
 });

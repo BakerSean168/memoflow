@@ -1336,6 +1336,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** AI-8001.
 
+**Execution (2026-10-02): Accepted / frozen.** Normal `goal.create` review now uses native GoalDialog / owner session; deterministic `ownerCreate` Goal/KR identities remain internal orchestration metadata. Native owner Goal/KR mutation occurs first through the real canonical Goal API, before Mastra approve; replay remains idempotent. Task/Knowledge supporting projection, restart/retry/recovery, ambiguous owner-create reconciliation and raw-ID-hidden normal UI remain intact. Independent acceptance passed App-Vue 8 files / 116 tests, AI 3 / 25, contracts 1 / 7, API + Desktop adapter 8 tests, typechecks, governance, Prettier, inventory (1,338 files) and diff checks. Isolated confirmation P0 passed (23.4s); isolated restore P0 passed (29.3s). Strengthened confirmation telemetry proves real `POST /api/v1/goals` with the same deterministic Goal/KR IDs before mocked Mastra approve and the final canonical deep-link. Later repeated AI-workspace reruns were intermittently invalidated by Vite/auth `net::ERR_NETWORK_CHANGED` / dynamic-import failures; in the latest restore trace, `workflow/get` returned 200 and owner aggregate lookup had begun before the network-change page failure. Those invalidated runs do not establish a product failure. Evidence: [AI-8101 Goal native workflow plan](../archive/2026-10-01-pvc-ai-8101-goal-native-workflow.md).
+
 ---
 
 ## PVC-AI-8111 — Task native AI workflow

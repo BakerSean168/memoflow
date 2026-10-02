@@ -8,7 +8,7 @@ import {
   KnowledgeNoteDraftContentSchema,
   TaskPlanDraftContentSchema,
 } from '@memoflow/contracts/ai';
-import { ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
@@ -101,6 +101,7 @@ function context(identityId: string, requestId: string): ExecutionContext {
 
 function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
+    readGoal: vi.fn(async () => error('NOT_FOUND', 'Goal not created')),
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),

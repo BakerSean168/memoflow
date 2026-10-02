@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => ({
   updateGoal: vi.fn(),
   transitionGoalStatus: vi.fn(async (goal) => goal),
   createLabel: vi.fn(),
+  resolveNames: vi.fn(),
 }));
 
 vi.mock('../../composables/useGoal', async () => {
@@ -52,6 +53,7 @@ vi.mock('../../../../shared/composables/useLabelCatalog', async () => {
       ]),
       isLoading: ref(false),
       createLabel: mocks.createLabel,
+      resolveNames: mocks.resolveNames,
     }),
   };
 });
@@ -850,6 +852,85 @@ function nativeSession(wrapper: ReturnType<typeof mount>): GoalNativeEditSession
 }
 
 describe('Goal owner native edit session (PVC-AI-8001)', () => {
+  it('coordinates native Save/Enter and resolves pending labels only after validation on typed owner submit', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    const session = nativeSession(wrapper);
+    const coordinator = vi.fn(async () => {});
+    session.coordinateSubmit(coordinator);
+    session.patch({
+      name: 'Native review',
+      keyResults: [
+        {
+          title: 'Measure',
+          description: null,
+          calculationMethod: 'Sum',
+          initialValue: 0,
+          currentValue: 0,
+          targetValue: 2,
+          unit: '',
+          weight: 3,
+        },
+      ],
+    });
+    await new DOMWrapper(document.querySelector('#goal-form')!).trigger('submit');
+    expect(coordinator).toHaveBeenCalledOnce();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(mocks.resolveNames).not.toHaveBeenCalled();
+    await expect(session.requestSubmit()).rejects.toThrow('requires owner context');
+    const beforeRejectedPatch = session.readDraftState();
+    expect(() =>
+      session.patch({
+        name: 'Must not mutate',
+        keyResults: [],
+        keyResult: { index: 0, changes: { title: 'Invalid position' } },
+      }),
+    ).toThrow('position');
+    expect(session.readDraftState()).toEqual(beforeRejectedPatch);
+    const onCreateAttempt = vi.fn();
+    const context = () => ({
+      onCreateAttempt,
+      createId:
+        'GoalId_550e8400-e29b-41d4-a716-446655440001' as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['createId'],
+      keyResultIds: [
+        'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
+      ] as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['keyResultIds'],
+      pendingLabelNames: ['New proposed label'],
+      expectedDraft: session.readDraftState().draft,
+    });
+    session.patch({ name: '' });
+    expect(await session.requestSubmit(context())).toBeNull();
+    expect(mocks.resolveNames).not.toHaveBeenCalled();
+    expect(onCreateAttempt).not.toHaveBeenCalled();
+    session.patch({ name: 'Native review' });
+    const stale = context();
+    session.patch({ summary: 'Changed while saving review' });
+    expect(await session.requestSubmit(stale)).toBeNull();
+    expect(mocks.resolveNames).not.toHaveBeenCalled();
+    mocks.resolveNames.mockResolvedValue(['label-canonical']);
+    mocks.createGoal.mockResolvedValue(createMockGoal({ id: context().createId }));
+    expect(onCreateAttempt).not.toHaveBeenCalled();
+    const approvedContext = context();
+    const saved = await session.requestSubmit(approvedContext);
+    expect(saved?.id).toBe(approvedContext.createId);
+    expect(onCreateAttempt).toHaveBeenCalledOnce();
+    expect(onCreateAttempt.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.createGoal.mock.invocationCallOrder[0],
+    );
+    expect(mocks.resolveNames).toHaveBeenCalledWith(['New proposed label']);
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: approvedContext.createId,
+        labelIds: ['label-canonical'],
+        initialKeyResults: [expect.objectContaining({ id: approvedContext.keyResultIds[0] })],
+      }),
+    );
+    wrapper.unmount();
+  });
   afterEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
@@ -1262,6 +1343,23 @@ describe('Goal owner native edit session (PVC-AI-8001)', () => {
     await wrapper.setProps({ open: true });
     expect(nativeSession(wrapper).readDraftState().draft.name).toBe('');
     expect(() => session.requestCancel()).toThrow('closed');
+    wrapper.unmount();
+  });
+  it('blocks native draft mutation until an unresolved owner attempt is reconciled', async () => {
+    const wrapper = mount(GoalDialog, { props: { open: true }, global: { plugins: [i18n] } });
+    await nextTick();
+    const session = nativeSession(wrapper);
+    session.patch({ name: 'Frozen owner draft' });
+    session.setEditingBlocked(true);
+    await nextTick();
+    expect(session.readDraftState().busy).toBe(true);
+    expect(() => session.patch({ name: 'Second draft' })).toThrow('busy');
+    expect(() => session.removeChild(0)).toThrow('busy');
+    expect(() => session.requestCancel()).toThrow('busy');
+    expect(session.readDraftState().draft.name).toBe('Frozen owner draft');
+    session.setEditingBlocked(false);
+    session.patch({ name: 'Reconciled editable draft' });
+    expect(session.readDraftState().draft.name).toBe('Reconciled editable draft');
     wrapper.unmount();
   });
 });

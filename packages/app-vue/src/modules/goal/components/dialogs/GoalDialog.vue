@@ -297,6 +297,7 @@ import { useTransientFeedback } from '../../../../shared/composables/useTransien
 import type {
   GoalDraftKeyResult as DraftKeyResult,
   GoalNativeDraft,
+  GoalNativeSubmitContext,
   GoalNativeEditSession,
 } from '../../composables/goalNativeEditSession';
 
@@ -318,9 +319,15 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const { createGoal, updateGoal, transitionGoalStatus, isSaving } = useGoal();
 const submitting = ref(false);
-const isBusy = computed(() => submitting.value || isSaving.value);
+const editingBlocked = ref(false);
+const isBusy = computed(() => submitting.value || isSaving.value || editingBlocked.value);
 watch(isBusy, (busy) => emit('busy-change', busy), { immediate: true, flush: 'sync' });
-const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
+const {
+  options: labelOptions,
+  isLoading: labelsLoading,
+  createLabel,
+  resolveNames,
+} = useLabelCatalog();
 
 const draft = reactive<GoalNativeDraft>({
   name: '',
@@ -336,6 +343,7 @@ const draft = reactive<GoalNativeDraft>({
 const nameInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
 const summaryInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
 const descriptionInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
+let submitCoordinator: (() => Promise<void>) | null = null;
 let invalidateSession: (() => void) | null = null;
 
 // Only JSON value fields enter this owner contract; detach inbound and outbound values.
@@ -356,18 +364,25 @@ function publishSession(): void {
     if (isBusy.value) throw new Error('Goal edit session is busy');
   }
   const session: GoalNativeEditSession = {
+    setEditingBlocked(blocked) {
+      assertActive();
+      editingBlocked.value = blocked;
+    },
     patch(changes) {
       assertEditable();
       // Preflight the whole patch before touching the canonical draft.
+      if (changes.keyResults && krEditorOpen.value)
+        throw new Error('Finish the native Key Result editor first');
       if (changes.keyResult) {
         if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
         const { index } = changes.keyResult;
-        if (!Number.isInteger(index) || !draft.keyResults[index])
+        if (!Number.isInteger(index) || !(changes.keyResults ?? draft.keyResults)[index])
           throw new Error('Key Result position is invalid');
       }
       const detached = copyValue(changes);
       changes = detached;
       // Explicit field allowlist: arbitrary component state cannot be patched.
+      if (changes.keyResults !== undefined) draft.keyResults = copyValue(changes.keyResults);
       if (changes.name !== undefined) draft.name = changes.name;
       if (changes.summary !== undefined) draft.summary = changes.summary;
       if (changes.description !== undefined) draft.description = changes.description;
@@ -402,6 +417,7 @@ function publishSession(): void {
       assertEditable();
       if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
       const {
+        id,
         title,
         description,
         calculationMethod,
@@ -414,6 +430,7 @@ function publishSession(): void {
       } = child;
       draft.keyResults.push(
         copyValue({
+          ...(id ? { id } : {}),
           title,
           description,
           calculationMethod,
@@ -440,9 +457,16 @@ function publishSession(): void {
       const inputs = { name: nameInput, summary: summaryInput, description: descriptionInput };
       inputs[field].value?.$el.focus();
     },
-    async requestSubmit() {
+    coordinateSubmit(coordinator) {
       assertEditable();
-      await save();
+      if (props.mode !== 'create') throw new Error('Submission coordination requires create mode');
+      submitCoordinator = coordinator;
+    },
+    async requestSubmit(context) {
+      assertEditable();
+      if (submitCoordinator && !context)
+        throw new Error('Coordinated Goal submit requires owner context');
+      return saveOwner(context);
     },
     requestCancel() {
       assertEditable();
@@ -521,6 +545,8 @@ function reset(): void {
   summaryLimitFeedback.hide();
   descriptionLimitFeedback.hide();
   krEditorOpen.value = false;
+  submitCoordinator = null;
+  editingBlocked.value = false;
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
 }
@@ -591,17 +617,34 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
-  if (isBusy.value) return;
+  if (submitCoordinator) {
+    await submitCoordinator();
+    return;
+  }
+  await saveOwner();
+}
+
+async function saveOwner(context?: GoalNativeSubmitContext): Promise<GoalClientDTO | null> {
+  if (isBusy.value) return null;
   submitting.value = true;
   try {
-    await persistDraft();
+    return (await persistDraft(context)) ?? null;
   } finally {
     submitting.value = false;
   }
 }
 
-async function persistDraft(): Promise<void> {
+async function persistDraft(context?: GoalNativeSubmitContext): Promise<GoalClientDTO | undefined> {
   formError.value = null;
+  if (
+    context &&
+    (props.mode !== 'create' ||
+      JSON.stringify(context.expectedDraft) !== snapshotDraft() ||
+      context.keyResultIds.length !== draft.keyResults.length)
+  ) {
+    formError.value = t('common.operationFailed');
+    return;
+  }
   if (
     isSaving.value ||
     !draft.name.trim() ||
@@ -657,23 +700,33 @@ async function persistDraft(): Promise<void> {
     const finalGoal = await transitionGoalStatus(saved, requestedStatus);
     emit('updated', finalGoal ?? saved);
     publishOpen(false);
-    return;
+    return finalGoal ?? saved;
   }
 
   const req: CreateGoalReq = {
     ...common,
+    ...(context ? { id: context.createId } : {}),
     ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
-    initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
+    initialKeyResults: keyResults.map(({ id: _id, ...item }, index) => ({
+      ...item,
+      ...(context ? { id: context.keyResultIds[index] } : {}),
+    })),
   };
   const parsed = CreateGoalSchema.safeParse(req);
   if (!parsed.success) {
     formError.value = parsed.error.issues[0]?.message ?? t('common.operationFailed');
     return;
   }
+  if (context?.pendingLabelNames.length) {
+    const resolved = await resolveNames(context.pendingLabelNames);
+    parsed.data.labelIds = [...new Set([...labelIds, ...resolved])];
+  }
+  context?.onCreateAttempt?.();
   const saved = await createGoal(parsed.data);
   if (!saved) return;
   const finalGoal = await transitionGoalStatus(saved, requestedStatus);
   emit('created', finalGoal ?? saved);
   publishOpen(false);
+  return finalGoal ?? saved;
 }
 </script>

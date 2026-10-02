@@ -1,4 +1,3 @@
-import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import type { Ref } from 'vue';
 import type {
   AIContextEntityType,
@@ -24,9 +23,6 @@ export interface UseAIGoalWorkflowOptions {
   buildConversationTranscript: () => string;
   scrollMessagesToBottom: () => void;
   maybeRenameCurrentConversation: (name: string) => Promise<void>;
-  createGoal: (
-    req: import('@memoflow/contracts/goal').CreateGoalReq,
-  ) => Promise<{ id: string } | null>;
 }
 
 export interface UseAITaskWorkflowOptions {
@@ -223,8 +219,6 @@ export type PersistedWorkflowEditorOverlay =
       runId: string;
       /** GoalPlanDraft.revision for the authoritative draft being edited. */
       revision: number;
-      editableGoal: EditableGoal;
-      editableKeyResults: EditableKeyResult[];
       editableTasks: EditableGoalTask[];
       editableKnowledge: EditableGoalKnowledge[];
     };

@@ -1,4 +1,6 @@
 import type {
+  CreateGoalReq,
+  GoalClientDTO,
   GoalReminderConfigDTO,
   GoalStatus,
   GoalTimeframe,
@@ -21,6 +23,7 @@ export interface GoalNativeDraft {
 
 /** Child positions refer to the current snapshot, just like the native KR rows. */
 export type GoalNativePatch = Partial<Omit<GoalNativeDraft, 'keyResults'>> & {
+  keyResults?: GoalDraftKeyResult[];
   keyResult?: { index: number; changes: Partial<Omit<GoalDraftKeyResult, 'id'>> };
 };
 export type GoalNativeField = 'name' | 'summary' | 'description';
@@ -34,8 +37,24 @@ export interface GoalNativeDraftState {
 }
 export type GoalNativeEditSession = OwnerNativeEditSession<
   GoalNativePatch,
-  Omit<GoalDraftKeyResult, 'id'>,
+  GoalDraftKeyResult,
   number,
   GoalNativeField,
-  GoalNativeDraftState
->;
+  GoalNativeDraftState,
+  GoalNativeSubmitContext,
+  GoalClientDTO | null
+> & {
+  /** Native Save/Enter delegates to this coordinator; semantic submit still runs owner validation. */
+  setEditingBlocked(blocked: boolean): void;
+  coordinateSubmit(coordinator: () => Promise<void>): void;
+};
+
+export interface GoalNativeSubmitContext {
+  /** Called after validation/label resolution, immediately before owner persistence. */
+  onCreateAttempt?: () => void;
+  createId: NonNullable<CreateGoalReq['id']>;
+  keyResultIds: NonNullable<NonNullable<CreateGoalReq['initialKeyResults']>[number]['id']>[];
+  pendingLabelNames: string[];
+  /** Refuse submission if the user changed the native draft while its durable revision was saved. */
+  expectedDraft: GoalNativeDraft;
+}

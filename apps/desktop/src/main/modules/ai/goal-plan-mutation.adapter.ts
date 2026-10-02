@@ -17,6 +17,17 @@ export class DesktopGoalPlanMutationAdapter implements GoalPlanMutationPort {
     private readonly goalKnowledge: Pick<GoalKnowledgeService, 'link'>,
   ) {}
 
+  async readGoal(goalId: string, context: Parameters<GoalPlanMutationPort['readGoal']>[1]) {
+    const result = await this.goal.getGoalAggregate(goalId, context.identityId);
+    if (!result.ok) return result;
+    return ok({
+      goalId: String(result.data.goal.id),
+      goalVersion: result.data.goal.version,
+      goalStatus: result.data.goal.status,
+      keyResultIds: result.data.keyResults.map((item) => String(item.id)),
+    });
+  }
+
   async resolveLabels(
     names: readonly string[],
     context: Parameters<GoalPlanMutationPort['resolveLabels']>[1],
@@ -41,6 +52,7 @@ export class DesktopGoalPlanMutationAdapter implements GoalPlanMutationPort {
     return ok({
       goalId: String(result.data.goalId),
       goalVersion: result.data.goalVersion,
+      goalStatus: result.data.readModel.goal.status,
       keyResultIds: result.data.affectedEntityIds.keyResultIds.map(String),
     });
   }

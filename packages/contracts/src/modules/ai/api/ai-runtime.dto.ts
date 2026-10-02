@@ -276,37 +276,61 @@ export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation'
 ]);
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;
 
-export const AIWorkflowSuspensionSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('clarification_required'),
-    questions: z.array(z.string().min(1)).min(1).max(3),
-    round: z.number().int().positive().optional(),
-  }),
-  z.object({
-    type: z.literal('goal_draft_review'),
-    draft: GoalPlanDraftSchema,
-    warnings: z.array(z.string()).default([]),
-    revision: z.number().int().positive(),
-  }),
-  z.object({
-    type: z.literal('knowledge_draft_review'),
-    draft: KnowledgeDraftSchema,
-    warnings: z.array(z.string()).default([]),
-    revision: z.number().int().positive(),
-  }),
-  z.object({
-    type: z.literal('task_draft_review'),
-    draft: TaskPlanDraftSchema,
-    warnings: z.array(z.string()).default([]),
-    revision: z.number().int().positive(),
-  }),
-  z.object({
-    type: z.literal('recovery_required'),
-    message: z.string().min(1),
-    retryable: z.boolean(),
-    failures: z.array(AIWorkflowExecutionFailureSchema).default([]),
-  }),
-]);
+export const AIWorkflowSuspensionSchema = z
+  .discriminatedUnion('type', [
+    z.object({
+      type: z.literal('clarification_required'),
+      questions: z.array(z.string().min(1)).min(1).max(3),
+      round: z.number().int().positive().optional(),
+    }),
+    z.object({
+      type: z.literal('goal_draft_review'),
+      draft: GoalPlanDraftSchema,
+      warnings: z.array(z.string()).default([]),
+      revision: z.number().int().positive(),
+      ownerCreate: z
+        .object({
+          goalId: z.string().min(1),
+          keyResultIds: z.record(z.string().regex(/^kr:/), z.string().min(1)),
+        })
+        .strict(),
+    }),
+    z.object({
+      type: z.literal('knowledge_draft_review'),
+      draft: KnowledgeDraftSchema,
+      warnings: z.array(z.string()).default([]),
+      revision: z.number().int().positive(),
+    }),
+    z.object({
+      type: z.literal('task_draft_review'),
+      draft: TaskPlanDraftSchema,
+      warnings: z.array(z.string()).default([]),
+      revision: z.number().int().positive(),
+    }),
+    z.object({
+      type: z.literal('recovery_required'),
+      message: z.string().min(1),
+      retryable: z.boolean(),
+      failures: z.array(AIWorkflowExecutionFailureSchema).default([]),
+    }),
+  ])
+  .superRefine((suspension, ctx) => {
+    if (suspension.type !== 'goal_draft_review') return;
+    const refs = suspension.draft.keyResults.map((item) => item.draftRef);
+    const ids = suspension.ownerCreate.keyResultIds;
+    if (
+      suspension.revision !== suspension.draft.revision ||
+      Object.keys(ids).length !== refs.length ||
+      refs.some((ref) => !ids[ref]) ||
+      new Set(Object.values(ids)).size !== refs.length
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'Goal owner identity hints must cover exactly the current review revision and Key Results',
+      });
+    }
+  });
 export type AIWorkflowSuspension = z.infer<typeof AIWorkflowSuspensionSchema>;
 
 export const AIWorkflowResumeCommandSchema = z.discriminatedUnion('type', [

@@ -140,6 +140,7 @@
             :automated-goal-id="automatedGoalId"
             :goal-agent-resuming="goalAgentResuming"
             :show-goal-draft-editor="showGoalDraftEditor"
+            :goal-owner-submitted="goalOwnerSubmitted"
             :can-resume-goal-agent-clarification="canResumeGoalAgentClarification"
             :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
             :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
@@ -228,10 +229,15 @@
           :editable-tasks="editableTasks"
           :editable-knowledge="editableKnowledge"
           :show-goal-draft-editor="showGoalDraftEditor"
+          :goal-owner-submitted="goalOwnerSubmitted"
+          :supporting-editing-blocked="
+            goalAgentResuming || creatingGoal || goalOwnerSubmitted || goalOwnerAttemptPending
+          "
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
           @update:clarification-answers="handleClarificationAnswersUpdate"
           @confirm="handleCreateGoalFromDraft"
+          @open-native-review="openGoalNativeReview"
           @add-key-result="addKeyResultDraft"
           @remove-key-result="removeKeyResultDraft"
           @update-goal="handleUpdateGoalDraft"
@@ -391,7 +397,10 @@ const {
   goalWorkflowRun,
   clarificationAnswers,
   showGoalDraftEditor,
+  goalOwnerSubmitted,
+  goalOwnerAttemptPending,
   goalAgentResuming,
+  creatingGoal,
   editableGoal,
   editableKeyResults,
   editableTasks,
@@ -411,6 +420,7 @@ const {
   retryGoalAgentExecution,
   openAutomatedGoal,
   handleCreateGoalFromDraft,
+  openGoalNativeReview,
   addKeyResultDraft,
   removeKeyResultDraft,
   updateKeyResultDraft,

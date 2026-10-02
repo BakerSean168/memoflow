@@ -20,10 +20,7 @@ import { useAIKnowledgeQaWorkflow } from './useAIKnowledgeQaWorkflow';
 import { useAIWorkflowPersistence } from './useAIWorkflowPersistence';
 import { useAIFormatters } from './useAIFormatters';
 import { getToolLocaleKey, normalizeWorkflowMode } from './types';
-import {
-  surfaceDescriptorToContextEntity,
-  type AIActiveSurfaceDescriptor,
-} from './surfaceContext';
+import { surfaceDescriptorToContextEntity, type AIActiveSurfaceDescriptor } from './surfaceContext';
 import {
   adjustComposerHeight as createAdjustComposerHeight,
   bindChatViewLifecycle,
@@ -68,7 +65,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
-  const { goals, fetchGoals, createGoal } = useGoal();
+  const { goals, fetchGoals } = useGoal();
   const task = useTask();
   const recentKnowledgeNotes = useRecentKnowledgeNotes();
   const referenceableKnowledgeNotes = useReferenceableKnowledgeNotes();
@@ -208,7 +205,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     buildConversationTranscript: chatSession.buildConversationTranscript,
     scrollMessagesToBottom: chatSession.scrollMessagesToBottom,
     maybeRenameCurrentConversation,
-    createGoal,
   });
 
   const knowledgeQaWorkflow = useAIKnowledgeQaWorkflow({
@@ -280,7 +276,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       switch (run.kind) {
         case 'goal.create':
           toolMode.value = 'goal-create';
-          goalWorkflow.projectRun(run);
+          await goalWorkflow.projectRun(run, false);
           break;
         case 'task.create':
           toolMode.value = 'task-create';
@@ -294,11 +290,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       persistence.applyEditorOverlay(persisted.editorOverlay, run);
       // Rebase or discard any stale overlay against the runtime revision.
       persistence.persistWorkflowState(conversationId);
+      if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview();
     } catch (error) {
       // Runtime failure is an explicit empty/blocked restore. The reset above
       // ensures no stale local run or draft remains visible as authority.
       if (
-        !(error instanceof AIWorkflowRestoreError) ||
+        error instanceof AIWorkflowRestoreError &&
         error.code !== 'AI_WORKFLOW_RUNTIME_UNAVAILABLE'
       ) {
         persistence.clearWorkflowState(conversationId);

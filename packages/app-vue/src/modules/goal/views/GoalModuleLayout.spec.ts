@@ -327,7 +327,9 @@ const sessionProbe: GoalNativeEditSession = {
   addChild: vi.fn(),
   removeChild: vi.fn(),
   focus: vi.fn(async () => undefined),
-  requestSubmit: vi.fn(async () => undefined),
+  coordinateSubmit: vi.fn(),
+  setEditingBlocked: vi.fn(),
+  requestSubmit: vi.fn(async () => null),
   requestCancel: vi.fn(),
   readDraftState: vi.fn(),
 };

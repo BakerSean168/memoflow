@@ -1,9 +1,12 @@
+import { createHash } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
 import type {
   AIWorkflowRunView,
   GoalPlanDraft,
   GoalPlanExecutionFailure,
 } from '@memoflow/contracts/ai';
+import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
@@ -257,30 +260,33 @@ test.describe('AI Goal Workflow', () => {
       seedConversation: true,
     });
 
-    // ADR-052: the durable Mastra Workflow panel (AIWorkflowRunView) owns this
-    // surface — not a legacy goal-agent-panel AgentRun / Host Proposal.
+    // Native GoalDialog owns visible review; the durable Workflow projection may be hidden.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
-    await expect(workflowPanel).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
-    await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText('Complete the restored workflow approval');
+    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     // Full main-app remount after reload needs NAVIGATION budget (same as bootstrap).
-    await expect(page.getByTestId('ai-chat-view')).toBeVisible({
+    await expect(page.getByTestId('goal-dialog')).toBeVisible({
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
 
-    await expect(workflowPanel).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText('Complete the restored workflow approval');
+    await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
   });
 
@@ -288,6 +294,7 @@ test.describe('AI Goal Workflow', () => {
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
+    const draft = createGoalAgentWorkflowDraft();
 
     await sendComposerMessage(
       page,
@@ -302,6 +309,13 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(workflowPanel).toContainText(/suspended/i);
+    const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
+    expect(ownerGoalId).toBeTruthy();
+    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText(draft.keyResults[0].title);
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
     // Task and Knowledge details render inside the optional draft editor; the review card
@@ -311,7 +325,15 @@ test.describe('AI Goal Workflow', () => {
     );
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
-    await page.getByTestId('goal-agent-confirm-run').click();
+    // Owner-native controlled confirmation: native Save delegates through the workflow
+    // coordinator; it is not an independent direct create.
+    await page.getByTestId('goal-dialog').getByTestId('save-goal-button').click();
+    await expect(page.getByTestId('goal-dialog')).toBeHidden({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+
+    // Native Goal creation returns to Goals; select Workflow to inspect recovery.
+    await page.getByTestId('business-panel-workflow').click();
 
     // Controlled executor: the first approved execution is partial, so the
     // durable runtime suspends with a recovery_required suspension.
@@ -326,6 +348,8 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
     expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
+    expect(telemetry.ownerGoalCreateCount).toBe(1);
+    expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
     expect(telemetry.goalAgentApprovalResumeCount).toBe(1);
     expect(telemetry.goalAgentExecuteRequestCount).toBe(1);
 
@@ -342,12 +366,7 @@ test.describe('AI Goal Workflow', () => {
     await expect(retryButton).toHaveCount(0, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByTestId('goal-workflow-result'))
-      .toContainText(/goal-e2e-1/i, {
-        timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-      })
-      .catch(() => undefined);
-    await expect(page).toHaveURL(/\/goals\/goal-e2e-1/, {
+    await expect(page).toHaveURL(new RegExp(`/goals/${ownerGoalId}$`), {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     expect(telemetry.goalAgentRetryResumeCount).toBe(1);
@@ -436,9 +455,7 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('knowledge-citation-open')).toBeVisible();
 
     await page.getByTestId('knowledge-citation-open').click();
-    await expect(page).toHaveURL(
-      /\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/,
-    );
+    await expect(page).toHaveURL(/\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
@@ -536,7 +553,11 @@ type GoalWorkflowMockOptions = {
 };
 
 type GoalWorkflowMockTelemetry = {
+  ownerGoalCreateCount: number;
+  lastOwnerGoalCreateBody: CreateGoalReq | null;
+  goalConfirmationEvents: ('owner_create' | 'approve')[];
   goalAgentStartCount: number;
+  lastGoalWorkflowOwnerCreate: GoalReviewSuspension['ownerCreate'] | null;
   lastGoalAgentStart?: {
     idea?: string;
     providerId?: string;
@@ -556,11 +577,17 @@ type GoalWorkflowMockTelemetry = {
   legacyEndpointCallCount: number;
 };
 
+type GoalReviewSuspension = Extract<
+  NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']>,
+  { type: 'goal_draft_review' }
+>;
+
 type GoalWorkflowMockRun = {
   runId: string;
   conversationId: string;
   createdAt: number;
   draft: GoalPlanDraft;
+  ownerCreate: GoalReviewSuspension['ownerCreate'];
   /** Durable V2 apply receipt state after approved child mutations. */
   referenceMap: Record<string, string>;
   relationIds: Record<string, string>;
@@ -842,16 +869,41 @@ function createGoalAgentWorkflowDraft(): GoalPlanDraft {
   };
 }
 
+function createOwnerIdentities(
+  runId: string,
+  draft: GoalPlanDraft,
+): GoalReviewSuspension['ownerCreate'] {
+  const entityId = (prefix: 'IGoalId' | 'IKeyResultId', draftRef: string) => {
+    const hash = createHash('sha256')
+      .update(`${runId}:${draft.revision}:${prefix}:${draftRef}`)
+      .digest('hex');
+    const uuid = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    return `${prefix}_${uuid}`;
+  };
+  return {
+    goalId: entityId('IGoalId', draft.goal.draftRef),
+    keyResultIds: Object.fromEntries(
+      draft.keyResults.map((keyResult) => [
+        keyResult.draftRef,
+        entityId('IKeyResultId', keyResult.draftRef),
+      ]),
+    ),
+  };
+}
+
 function createGoalWorkflowMockRun(request: {
   runId?: string;
   conversationId?: string | null;
+  draft?: GoalPlanDraft;
 }): GoalWorkflowMockRun {
-  const draft = createGoalAgentWorkflowDraft();
+  const runId = request.runId ?? 'workflow-e2e-goal-1';
+  const draft = request.draft ?? createGoalAgentWorkflowDraft();
   return {
-    runId: request.runId ?? 'workflow-e2e-goal-1',
+    runId,
     conversationId: request.conversationId ?? e2eConversationId,
     createdAt: Date.now(),
     draft,
+    ownerCreate: createOwnerIdentities(runId, draft),
     referenceMap: {},
     relationIds: {},
     failures: [],
@@ -859,36 +911,27 @@ function createGoalWorkflowMockRun(request: {
   };
 }
 
-function goalReviewSuspension(
-  draft: GoalPlanDraft,
-): NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']> {
-  // E2E mock: draft fields carry the canonical GoalPlanDraft contract shape at
-  // runtime; the loose local type is only for authoring ergonomics. The client
-  // re-validates with AIWorkflowRunViewSchema before projection, so malformed
-  // fixtures fail loudly rather than silently.
+function goalReviewSuspension(mockRun: GoalWorkflowMockRun): GoalReviewSuspension {
   return {
     type: 'goal_draft_review',
-    draft: draft as unknown as NonNullable<
-      Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']
-    > extends { type: 'goal_draft_review' }
-      ? Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']
-      : never,
-    warnings: draft.warnings,
-    revision: draft.revision,
-  } as NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']>;
+    draft: mockRun.draft,
+    ownerCreate: mockRun.ownerCreate,
+    warnings: mockRun.draft.warnings,
+    revision: mockRun.draft.revision,
+  };
 }
 
 function createGoalReviewRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView {
   const now = Date.now();
-  return {
+  return AIWorkflowRunViewSchema.parse({
     runId: mockRun.runId,
     kind: 'goal.create',
     conversationId: mockRun.conversationId,
     status: 'suspended',
-    suspension: goalReviewSuspension(mockRun.draft),
+    suspension: goalReviewSuspension(mockRun),
     createdAt: mockRun.createdAt,
     updatedAt: now,
-  };
+  });
 }
 
 function createGoalRecoveryRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView {
@@ -963,8 +1006,8 @@ function executeGoalWorkflowMockRun(
   const retrySucceeded = telemetry.goalAgentExecuteRequestCount > 1;
 
   mockRun.referenceMap = {
-    goal: 'goal-e2e-1',
-    'kr:end-to-end': 'kr-e2e-1',
+    [mockRun.draft.goal.draftRef]: mockRun.ownerCreate.goalId,
+    ...mockRun.ownerCreate.keyResultIds,
     'note:goal-brief': 'kdoc_e2e_goal_brief',
     ...(retrySucceeded ? { 'task:review-execution': 'task-plan-e2e-1' } : {}),
   };
@@ -996,7 +1039,11 @@ async function installGoalWorkflowMocks(
   let conversationName = 'Goal Workflow Session';
   let generateGoalStep = options.seedConversation ? 1 : 0;
   const telemetry: GoalWorkflowMockTelemetry = {
+    ownerGoalCreateCount: 0,
+    lastOwnerGoalCreateBody: null,
+    goalConfirmationEvents: [],
     goalAgentStartCount: 0,
+    lastGoalWorkflowOwnerCreate: null,
     goalAgentApprovalResumeCount: 0,
     goalAgentRetryResumeCount: 0,
     goalAgentCancelCount: 0,
@@ -1010,6 +1057,21 @@ async function installGoalWorkflowMocks(
     knowledgeCaptureCancelCount: 0,
     legacyEndpointCallCount: 0,
   };
+  // Observe only native owner create; Goal reads/status/updates remain real API calls.
+  await page.route(
+    (url) => url.pathname === '/api/v1/goals',
+    async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.fallback();
+        return;
+      }
+      telemetry.ownerGoalCreateCount += 1;
+      telemetry.lastOwnerGoalCreateBody = route.request().postDataJSON() as CreateGoalReq;
+      telemetry.goalConfirmationEvents.push('owner_create');
+      await route.continue();
+    },
+  );
+
   await page.route('**/api/v1/settings/preferences', async (route) => {
     if (route.request().method() !== 'GET') {
       await route.continue();
@@ -1317,8 +1379,8 @@ async function installGoalWorkflowMocks(
   const restoredApprovalRun = createGoalWorkflowMockRun({
     runId: 'workflow-e2e-restored-approval',
     conversationId,
+    draft: createRestoredGoalWorkflowDraft(),
   });
-  restoredApprovalRun.draft = createRestoredGoalWorkflowDraft();
   const restoredTaskApprovalRun: TaskWorkflowMockRun = {
     runId: 'workflow-e2e-restored-task-approval',
     conversationId,
@@ -1352,7 +1414,11 @@ async function installGoalWorkflowMocks(
         providerId: request.providerId,
         model: request.modelId,
       };
-      const mockRun = createGoalWorkflowMockRun({ conversationId: request.conversationId });
+      const mockRun = createGoalWorkflowMockRun({
+        runId: `workflow-e2e-goal-${telemetry.goalAgentStartCount}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        conversationId: request.conversationId,
+      });
+      telemetry.lastGoalWorkflowOwnerCreate = mockRun.ownerCreate;
       workflowRunsByRunId.set(mockRun.runId, mockRun);
       await fulfillJson(route, createGoalReviewRun(mockRun));
       return;
@@ -1498,6 +1564,16 @@ async function installGoalWorkflowMocks(
       return;
     }
     if (commandType === 'approve') {
+      const ownerCreateRun = mockRun ?? restoredApprovalRun;
+      telemetry.goalConfirmationEvents.push('approve');
+      expect(telemetry.ownerGoalCreateCount).toBe(1);
+      expect(telemetry.lastOwnerGoalCreateBody?.id).toBe(ownerCreateRun.ownerCreate.goalId);
+      expect(telemetry.lastOwnerGoalCreateBody?.initialKeyResults?.map((kr) => kr.id)).toEqual(
+        ownerCreateRun.draft.keyResults.map(
+          (kr) => ownerCreateRun.ownerCreate.keyResultIds[kr.draftRef],
+        ),
+      );
+      expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
       telemetry.goalAgentApprovalResumeCount += 1;
       if (mockRun) executeGoalWorkflowMockRun(mockRun, telemetry);
       const completed = mockRun && mockRun.executionStatus === 'success';
