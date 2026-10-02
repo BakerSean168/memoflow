@@ -1,7 +1,7 @@
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, reactive } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type {
   LocalVaultBindingSnapshotDTO,
@@ -10,17 +10,22 @@ import type {
 } from '@memoflow/contracts/repository';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
 import LocalVaultWorkspaceView from './LocalVaultWorkspaceView.vue';
 
 const routerMocks = vi.hoisted(() => ({
+  replace: vi.fn(async () => undefined),
   route: {
     query: {} as Record<string, string | string[] | undefined>,
   },
 }));
 
 vi.mock('vue-router', () => ({
-  useRoute: () => routerMocks.route,
+  useRoute: () => route,
+  useRouter: () => ({ replace: routerMocks.replace }),
 }));
+
+const route = reactive(routerMocks.route);
 
 const messages = {
   common: {
@@ -203,6 +208,7 @@ function mountWorkspace(service: IRepositoryService) {
         [REPOSITORY_SERVICE_KEY as symbol]: service,
       },
       stubs: {
+        KnowledgeCaptureReviewDialog: true,
         Badge: PassthroughStub,
         Button: ButtonStub,
         Input: InputStub,
@@ -211,6 +217,10 @@ function mountWorkspace(service: IRepositoryService) {
     },
   });
 }
+
+beforeEach(() => {
+  route.query = {};
+});
 
 describe('LocalVaultWorkspaceView', () => {
   it('uses shared document composition while preserving local-vault and Obsidian actions', async () => {
@@ -259,5 +269,59 @@ describe('LocalVaultWorkspaceView', () => {
     );
 
     wrapper.unmount();
+  });
+  it('exports a host-neutral Local Vault source only while bound', async () => {
+    const mocks = createService();
+    const wrapper = mountWorkspace(mocks.service);
+    const dialog = wrapper.getComponent(KnowledgeCaptureReviewDialog);
+    expect(dialog.props('sourceOptions')).toEqual([]);
+    await flushPromises();
+    expect(dialog.props('sourceOptions')).toEqual([
+      { key: 'local_vault', label: 'Thought Forest', source: { kind: 'local_vault' } },
+    ]);
+    expect(JSON.stringify(dialog.props('sourceOptions'))).not.toContain('/vault');
+    wrapper.unmount();
+  });
+  it('opens the created document by stable identity after the catalog loads', async () => {
+    const id = 'kdoc_550e8400-e29b-41d4-a716-446655440701';
+    route.query = { note: id };
+    const mocks = createService();
+    mocks.scanLocalVault.mockResolvedValueOnce(
+      ok({
+        binding: snapshot().binding,
+        health: snapshot().health,
+        notes: [noteSummary({ knowledgeDocumentId: id as never })],
+        scannedAt: 2,
+      }),
+    );
+    const wrapper = mountWorkspace(mocks.service);
+    await flushPromises();
+    expect(mocks.readLocalVaultNote).toHaveBeenCalledWith({
+      relativePath: 'notes/architecture.md',
+    });
+    wrapper.unmount();
+    route.query = {};
+  });
+  it('refreshes a cached Vault catalog to locate a newly persisted stable document', async () => {
+    const id = 'kdoc_550e8400-e29b-41d4-a716-446655440705';
+    const mocks = createService();
+    const wrapper = mountWorkspace(mocks.service);
+    await flushPromises();
+    mocks.scanLocalVault.mockResolvedValueOnce(
+      ok({
+        binding: snapshot().binding,
+        health: snapshot().health,
+        notes: [noteSummary({ knowledgeDocumentId: id as never })],
+        scannedAt: 3,
+      }),
+    );
+    route.query = { note: id };
+    await flushPromises();
+    expect(mocks.scanLocalVault).toHaveBeenCalledTimes(2);
+    expect(mocks.readLocalVaultNote).toHaveBeenCalledWith({
+      relativePath: 'notes/architecture.md',
+    });
+    wrapper.unmount();
+    route.query = {};
   });
 });

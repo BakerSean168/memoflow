@@ -1,11 +1,21 @@
 import { createHash } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
-import { AIWorkflowRunViewSchema, TaskPlanDraftContentSchema } from '@memoflow/contracts/ai';
+import {
+  AIWorkflowRunViewSchema,
+  KnowledgeDraftSchema,
+  TaskPlanDraftContentSchema,
+} from '@memoflow/contracts/ai';
 import type {
   AIWorkflowRunView,
   GoalPlanDraft,
   GoalPlanExecutionFailure,
 } from '@memoflow/contracts/ai';
+import {
+  KnowledgeNoteProjectionClientSchema,
+  KnowledgeNoteProjectionListResponseSchema,
+  KnowledgeNoteTreeResponseSchema,
+  ListKnowledgeRepositoryConnectionsResSchema,
+} from '@memoflow/contracts/repository';
 import { CreateTaskPlanSchema, type CreateTaskPlanReq } from '@memoflow/contracts/task';
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
@@ -477,18 +487,68 @@ test.describe('AI Goal Workflow', () => {
       'Capture this conversation as a reusable note about durable Mastra workflow recovery.',
     );
 
-    const workflowPanel = page.getByTestId('knowledge-capture-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Conversation Agent Checkpoints/i);
-    await expect(page.getByTestId('knowledge-capture-agent-confirm-run')).toBeVisible();
-    await page.getByTestId('knowledge-capture-agent-confirm-run').click();
-
-    await expect(page).toHaveURL(/\/repository\?note=resource-note-e2e-mastra-1/i, {
+    const native = page.getByTestId('knowledge-capture-native-dialog');
+    await expect(native).toBeVisible();
+    await expect(page.getByTestId('knowledge-capture-draft-editor')).toHaveCount(0);
+    await expect(page.getByTestId('knowledge-capture-agent-confirm-run')).toHaveCount(0);
+    await expect(page.getByTestId('knowledge-capture-native-source')).toContainText(
+      'owner/knowledge',
+    );
+    await page.getByTestId('knowledge-capture-native-title').fill('Owner-reviewed durable note');
+    await page.getByTestId('knowledge-capture-native-confirm').click();
+    await expect(page).toHaveURL(/\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440701/i, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(page.getByTestId('knowledge-projection-preview')).toBeVisible();
+    expect(telemetry.knowledgeCaptureEvents).toEqual([
+      'edit_structured',
+      'approve',
+      'host_persist',
+    ]);
+    expect(telemetry.knowledgeCapturePersistedDraft).toMatchObject({
+      title: 'Owner-reviewed durable note',
+      revision: 2,
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
+      source: {
+        kind: 'repository',
+        connectionId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+      },
     });
     expect(telemetry.knowledgeCaptureStartCount).toBe(1);
     expect(telemetry.knowledgeCaptureApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
+  });
+
+  test('[P0] cancels native Knowledge review without a note', async ({ page }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page);
+    await sendComposerMessage(page, 'Capture this conversation as a reusable note.');
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible();
+    await page.getByTestId('knowledge-capture-native-cancel').click();
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toHaveCount(0);
+    await expect.poll(() => telemetry.knowledgeCaptureCancelCount).toBe(1);
+    expect(telemetry.knowledgeCaptureEvents).toEqual([]);
+    expect(telemetry.knowledgeCapturePersistedDraft).toBeNull();
+    expect(telemetry.knowledgeCaptureApproveCount).toBe(0);
+  });
+
+  test('[P0] restores native Knowledge review after refresh', async ({ page }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page);
+    await sendComposerMessage(page, 'Capture this conversation as a reusable note.');
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible();
+    const activeRunId = telemetry.knowledgeCaptureRunId;
+    expect(activeRunId).toBeTruthy();
+    await page.reload();
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('knowledge-capture-native-title')).toHaveValue(
+      'Conversation Agent Checkpoints',
+    );
+    expect(telemetry.knowledgeCaptureRestoredRunIds).toContain(activeRunId);
+    expect(telemetry.knowledgeCaptureRunId).toBe(activeRunId);
+    expect(telemetry.knowledgeCaptureStartCount).toBe(1);
+    expect(telemetry.knowledgeCapturePersistedDraft).toBeNull();
+    await page.getByTestId('knowledge-capture-native-cancel').click();
   });
 
   test('[P0] shows insufficient evidence when knowledge citations are missing', async ({
@@ -585,6 +645,10 @@ type GoalWorkflowMockTelemetry = {
   knowledgeCaptureStartCount: number;
   knowledgeCaptureApproveCount: number;
   knowledgeCaptureCancelCount: number;
+  knowledgeCaptureRunId: string | null;
+  knowledgeCaptureRestoredRunIds: string[];
+  knowledgeCaptureEvents: string[];
+  knowledgeCapturePersistedDraft: KnowledgeCaptureMockRun['draft'] | null;
   legacyEndpointCallCount: number;
 };
 
@@ -622,6 +686,7 @@ type KnowledgeCaptureMockRun = {
   runId: string;
   conversationId: string;
   createdAt: number;
+  status: 'suspended' | 'completed' | 'cancelled';
   draft: Extract<
     NonNullable<Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>['suspension']>,
     { type: 'knowledge_draft_review' }
@@ -769,7 +834,7 @@ function createKnowledgeCaptureCompletedRun(mockRun: KnowledgeCaptureMockRun): A
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      noteId: 'resource-note-e2e-mastra-1',
+      noteId: mockRun.draft.knowledgeDocumentId,
       noteName: `${mockRun.draft.title}.md`,
       notePath: `notes/ai/${mockRun.draft.title}.md`,
       failures: [],
@@ -1087,8 +1152,104 @@ async function installGoalWorkflowMocks(
     knowledgeCaptureStartCount: 0,
     knowledgeCaptureApproveCount: 0,
     knowledgeCaptureCancelCount: 0,
+    knowledgeCaptureRunId: null,
+    knowledgeCaptureRestoredRunIds: [],
+    knowledgeCaptureEvents: [],
+    knowledgeCapturePersistedDraft: null,
     legacyEndpointCallCount: 0,
   };
+  await page.route('**/api/v1/repositories/**', async (route) => {
+    if (telemetry.knowledgeCaptureStartCount === 0) {
+      await route.fallback();
+      return;
+    }
+    expect(route.request().method()).toBe('GET');
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname.endsWith('/knowledge-connections')) {
+      await fulfillJson(
+        route,
+        ListKnowledgeRepositoryConnectionsResSchema.parse({
+          connections: [
+            {
+              id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+              knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440703',
+              identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440704',
+              provider: 'GitHub',
+              installationId: 'installation-e2e',
+              repositoryId: 'repository-e2e',
+              repositoryFullNameSnapshot: 'owner/knowledge',
+              connectedAt: 1,
+              disconnectedAt: null,
+              observation: {
+                bindingId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+                observedAt: 1,
+                accountId: '42',
+                repositoryFullName: 'owner/knowledge',
+                defaultBranch: 'main',
+                private: true,
+                archived: false,
+                disabled: false,
+                contentsPermission: 'write',
+                installationSuspended: false,
+                eligibility: { state: 'Ready' },
+              },
+              historyFence: null,
+              projectionCheckpoint: null,
+            },
+          ],
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes/resolve') && telemetry.knowledgeCapturePersistedDraft) {
+      const draft = telemetry.knowledgeCapturePersistedDraft;
+      expect(new URL(route.request().url()).searchParams.get('reference')).toBe(
+        draft.knowledgeDocumentId,
+      );
+      await fulfillJson(
+        route,
+        KnowledgeNoteProjectionClientSchema.parse({
+          id: 'projection-created-note',
+          connectionId: draft.source!.kind === 'repository' ? draft.source!.connectionId : '',
+          knowledgeDocumentId: draft.knowledgeDocumentId,
+          relativePath: `notes/ai/${draft.title}.md`,
+          title: draft.title,
+          commitSha: 'b'.repeat(40),
+          blobSha: 'c'.repeat(40),
+          contentHash: 'd'.repeat(64),
+          markdownContent: draft.markdown,
+          frontmatter: {},
+          createdAt: 1,
+          updatedAt: 2,
+          deletedAt: null,
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes/tree')) {
+      await fulfillJson(
+        route,
+        KnowledgeNoteTreeResponseSchema.parse({
+          parent: new URL(route.request().url()).searchParams.get('parent') ?? '',
+          metadata: null,
+          nodes: [],
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes')) {
+      await fulfillJson(
+        route,
+        KnowledgeNoteProjectionListResponseSchema.parse({
+          notes: [],
+          total: 0,
+          nextCursor: null,
+        }),
+      );
+      return;
+    }
+    await route.fallback();
+  });
   // Pass-through Task telemetry exercises the real owner API and test database.
   await page.route(
     (url) => url.pathname === '/api/v1/task-plans',
@@ -1494,7 +1655,9 @@ async function installGoalWorkflowMocks(
         conversationId: request.conversationId ?? conversationId,
         createdAt: Date.now(),
         draft: createKnowledgeCaptureDraft(),
+        status: 'suspended',
       };
+      telemetry.knowledgeCaptureRunId = mockRun.runId;
       knowledgeCaptureRunsByRunId.set(mockRun.runId, mockRun);
       await fulfillJson(route, createKnowledgeCaptureReviewRun(mockRun));
       return;
@@ -1530,7 +1693,17 @@ async function installGoalWorkflowMocks(
       return;
     }
     const captureRun = knowledgeCaptureRunsByRunId.get(request.runId ?? '');
-    await fulfillJson(route, captureRun ? createKnowledgeCaptureReviewRun(captureRun) : null);
+    if (captureRun) telemetry.knowledgeCaptureRestoredRunIds.push(captureRun.runId);
+    await fulfillJson(
+      route,
+      captureRun
+        ? captureRun.status === 'completed'
+          ? createKnowledgeCaptureCompletedRun(captureRun)
+          : captureRun.status === 'cancelled'
+            ? createKnowledgeCaptureCancelledRun(captureRun)
+            : createKnowledgeCaptureReviewRun(captureRun)
+        : null,
+    );
   });
 
   await page.route('**/api/v1/ai/runtime/workflow/list', async (route) => {
@@ -1550,7 +1723,7 @@ async function installGoalWorkflowMocks(
     }
     const request = route.request().postDataJSON() as {
       runId?: string;
-      command?: { type?: string };
+      command?: { type?: string; patch?: Record<string, unknown> };
     };
     expect(request).not.toHaveProperty('identityId');
     const commandType = request.command?.type;
@@ -1587,16 +1760,30 @@ async function installGoalWorkflowMocks(
     const captureRun = knowledgeCaptureRunsByRunId.get(runId);
     if (captureRun) {
       if (commandType === 'cancel') {
+        captureRun.status = 'cancelled';
         telemetry.knowledgeCaptureCancelCount += 1;
         await fulfillJson(route, createKnowledgeCaptureCancelledRun(captureRun));
         return;
       }
       if (commandType === 'approve') {
+        expect(captureRun.draft.source).toEqual({
+          kind: 'repository',
+          connectionId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+        });
+        captureRun.status = 'completed';
+        telemetry.knowledgeCaptureEvents.push('approve', 'host_persist');
+        telemetry.knowledgeCapturePersistedDraft = captureRun.draft;
         telemetry.knowledgeCaptureApproveCount += 1;
         await fulfillJson(route, createKnowledgeCaptureCompletedRun(captureRun));
         return;
       }
       if (commandType === 'edit_structured') {
+        telemetry.knowledgeCaptureEvents.push('edit_structured');
+        captureRun.draft = KnowledgeDraftSchema.parse({
+          ...captureRun.draft,
+          ...(request.command?.patch as Record<string, unknown>),
+          revision: captureRun.draft.revision + 1,
+        });
         await fulfillJson(route, createKnowledgeCaptureReviewRun(captureRun));
         return;
       }

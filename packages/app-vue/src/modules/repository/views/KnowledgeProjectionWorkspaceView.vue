@@ -358,6 +358,13 @@
         </template>
       </ProductDialogShell>
     </Dialog>
+
+    <KnowledgeCaptureReviewDialog
+      :open="knowledgeCaptureDialogOpen"
+      :source-options="knowledgeCaptureSourceOptions"
+      :default-source-key="knowledgeCaptureDefaultSourceKey"
+      @update:open="handleKnowledgeCaptureOpenChange"
+    />
   </div>
 </template>
 
@@ -409,6 +416,11 @@ import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue
 import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
 import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeNoteContextPanel from '../components/KnowledgeNoteContextPanel.vue';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
+import {
+  knowledgeCaptureSourceKey,
+  type KnowledgeCaptureSourceOption,
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -475,6 +487,29 @@ const selectedConnection = computed(
 const projectionSyncing = computed(() => {
   const state = selectedConnection.value?.projectionCheckpoint?.state;
   return state === 'Lagging' || state === 'Rebuilding';
+});
+const knowledgeCaptureDialogOpen = computed(() => route.query.dialog === 'knowledge-capture');
+const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>(() =>
+  connections.value
+    .filter(
+      (connection) =>
+        connection.disconnectedAt === null && connection.observation?.eligibility.state === 'Ready',
+    )
+    .map((connection) => {
+      const source = { kind: 'repository' as const, connectionId: String(connection.id) };
+      return {
+        key: knowledgeCaptureSourceKey(source),
+        label: repositoryDisplayName(connection),
+        source,
+      };
+    }),
+);
+const knowledgeCaptureDefaultSourceKey = computed(() => {
+  const option = knowledgeCaptureSourceOptions.value.find(
+    (item) =>
+      item.source.kind === 'repository' && item.source.connectionId === selectedConnectionId.value,
+  );
+  return option?.key;
 });
 const repositoryShortName = computed(() => {
   const fullName = selectedConnection.value ? repositoryDisplayName(selectedConnection.value) : '';
@@ -567,21 +602,39 @@ async function applyNoteQuerySelection(): Promise<void> {
   detailAbortController = abortController;
   const sequence = ++detailLoadSequence;
   loadingDetail.value = true;
+  const stableReference = KnowledgeDocumentIdSchema.safeParse(requested).success;
   const result = await service.resolveKnowledgeNoteReference(
-    { connectionId, reference: requested },
+    { ...(stableReference ? {} : { connectionId }), reference: requested },
     { signal: abortController.signal },
   );
-  if (sequence !== detailLoadSequence) return;
+  if (sequence !== detailLoadSequence || selectedConnectionId.value !== connectionId) return;
   if (detailAbortController === abortController) detailAbortController = null;
   loadingDetail.value = false;
-  if (!result.ok || result.data.connectionId !== connectionId) {
+  if (
+    !result.ok ||
+    (!stableReference && result.data.connectionId !== connectionId) ||
+    (result.ok &&
+      !connections.value.some(
+        (item) => item.id === result.data.connectionId && item.disconnectedAt === null,
+      ))
+  ) {
     if (!result.ok && result.error.code !== 'NOT_FOUND') errorMessage.value = result.error.message;
     return;
   }
 
+  const sourceChanged = result.data.connectionId !== connectionId;
+  if (sourceChanged) {
+    selectedConnectionId.value = result.data.connectionId;
+    notes.value = [];
+    totalNotes.value = 0;
+    repositoryTotalNotes.value = 0;
+    nextCursor.value = null;
+    resetTree();
+  }
   selectedNoteId.value = result.data.id;
   selectedNote.value = result.data;
   setCachedDetail(result.data);
+  if (sourceChanged) await loadTreeDirectory('', true);
   if (!searchQuery.value.trim()) await revealTreePath(result.data.relativePath);
 }
 
@@ -629,6 +682,13 @@ function formatUpdatedAt(timestamp: number): string {
     month: 'short',
     day: 'numeric',
   }).format(new Date(timestamp));
+}
+
+async function handleKnowledgeCaptureOpenChange(open: boolean): Promise<void> {
+  if (open) return;
+  const query = { ...route.query };
+  delete query.dialog;
+  await router.replace({ name: 'repository', query });
 }
 
 function clearSearchTimer(): void {

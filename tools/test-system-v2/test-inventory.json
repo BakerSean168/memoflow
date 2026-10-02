@@ -3800,6 +3800,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4523,6 +4531,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5953,6 +5969,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -12369,7 +12393,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 273
+      "fileCount": 275
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12390,7 +12414,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 94
+      "fileCount": 95
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13126,7 +13150,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1161,
+    "unit": 1164,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

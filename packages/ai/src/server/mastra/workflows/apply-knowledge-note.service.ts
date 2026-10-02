@@ -81,6 +81,7 @@ export class ApplyKnowledgeNoteService {
         workflowRunId,
         revision: draft.revision,
         knowledgeDocumentId: draft.knowledgeDocumentId,
+        source: draft.source!,
         path: draft.targetSubpath,
         fileName,
         title: draft.title,

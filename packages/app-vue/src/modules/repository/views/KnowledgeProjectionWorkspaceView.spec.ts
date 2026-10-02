@@ -12,6 +12,7 @@ import type {
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
 import { providePanelWidth } from '../../../layouts/shell/usePanelWidth';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
 import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeProjectionWorkspaceView from './KnowledgeProjectionWorkspaceView.vue';
 
@@ -348,6 +349,7 @@ function mountWorkspace(service: IRepositoryService, options: { narrow?: boolean
         [REPOSITORY_SERVICE_KEY as symbol]: service,
       },
       stubs: {
+        KnowledgeCaptureReviewDialog: true,
         Badge: PassthroughStub,
         Button: ButtonStub,
         Dialog: DialogStub,
@@ -954,5 +956,90 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     expect(wrapper.get('[data-testid="knowledge-projection-document-id"]').text()).not.toContain(
       managedId,
     );
+  });
+  it('offers only Ready connected sources and defaults to the selected repository without a write action', async () => {
+    const ready = connection();
+    const blocked = {
+      ...ready,
+      id: 'binding-blocked' as never,
+      observation: {
+        ...ready.observation!,
+        eligibility: { state: 'Blocked' as const, reasons: [] },
+      },
+    };
+    const disconnected = { ...ready, id: 'binding-disconnected' as never, disconnectedAt: 1 };
+    const wrapper = mountWorkspace(
+      createService({
+        listKnowledgeRepositoryConnections: vi.fn(async () =>
+          ok({ connections: [ready, blocked, disconnected] }),
+        ) as never,
+      }),
+    );
+    await flushPromises();
+    const dialog = wrapper.getComponent(KnowledgeCaptureReviewDialog);
+    expect(dialog.props('sourceOptions')).toEqual([
+      expect.objectContaining({
+        key: `repository:${ready.id}`,
+        source: { kind: 'repository', connectionId: ready.id },
+      }),
+    ]);
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${ready.id}`);
+    expect(wrapper.find('[data-testid="repository-create-note"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+  it('tracks the owner-selected default with multiple ready repositories', async () => {
+    const first = connection();
+    const second = connection({
+      id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440999' as never,
+      repositoryFullNameSnapshot: 'owner/second',
+    });
+    const service = createService({
+      listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [first, second] })),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+    const dialog = wrapper.getComponent(KnowledgeCaptureReviewDialog);
+    expect(dialog.props('sourceOptions')).toHaveLength(2);
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${first.id}`);
+    wrapper.getComponent(KnowledgeNoteCatalog).vm.$emit('connection-change', second.id);
+    await flushPromises();
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${second.id}`);
+    expect(service.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it('resolves a completed stable document across repositories and selects its actual source', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440706';
+    routerMocks.route.query = { note: documentId };
+    const second = connection({
+      id: SECOND_BINDING_ID,
+      repositoryFullNameSnapshot: 'owner/second',
+    });
+    const resolveKnowledgeNoteReference = vi.fn(async () =>
+      ok(
+        projection({
+          connectionId: SECOND_BINDING_ID,
+          knowledgeDocumentId: documentId as never,
+          title: 'Created in selected source',
+        }),
+      ),
+    );
+    const wrapper = mountWorkspace(
+      createService({
+        listKnowledgeRepositoryConnections: vi.fn(async () =>
+          ok({ connections: [connection(), second] }),
+        ),
+        resolveKnowledgeNoteReference,
+      }),
+    );
+    await flushPromises();
+    expect(resolveKnowledgeNoteReference).toHaveBeenCalledWith(
+      { reference: documentId },
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    expect(wrapper.getComponent(KnowledgeNoteCatalog).props('selectedConnectionId')).toBe(
+      SECOND_BINDING_ID,
+    );
+    expect(wrapper.text()).toContain('Created in selected source');
+    wrapper.unmount();
   });
 });

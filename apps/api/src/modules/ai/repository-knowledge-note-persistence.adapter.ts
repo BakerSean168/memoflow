@@ -36,6 +36,11 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
     if (!input.proposalId || !input.proposalRevision || !input.requestId) {
       throw new Error('A confirmed knowledge-note proposal is required for GitHub writes');
     }
+    if (input.source && input.source.kind !== 'repository') {
+      throw new Error('Web knowledge persistence requires a repository source');
+    }
+    const explicitConnectionId =
+      input.source?.kind === 'repository' ? input.source.connectionId : input.connectionId;
 
     const listed = await this.repositoryApi.listKnowledgeRepositoryConnections(input.context);
     if (!listed.ok) {
@@ -53,15 +58,15 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
       (binding) =>
         binding.disconnectedAt === null && binding.observation?.eligibility.state === 'Ready',
     );
-    const connection = input.connectionId
-      ? active.find((c) => c.id === input.connectionId)
+    const connection = explicitConnectionId
+      ? active.find((c) => c.id === explicitConnectionId)
       : active.length === 1
         ? active[0]
         : undefined;
 
     if (!connection) {
       throw new Error(
-        input.connectionId
+        explicitConnectionId
           ? 'The selected knowledge repository binding is not ready'
           : active.length > 1
             ? 'An explicit knowledge repository binding is required'

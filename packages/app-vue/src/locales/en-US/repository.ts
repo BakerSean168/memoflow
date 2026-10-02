@@ -68,6 +68,24 @@ export default {
       "Unchecked": "GitHub not checked"
     }
   },
+  capture: {
+    title: 'Review AI knowledge note',
+    description:
+      'Review the note and choose where to save it. Approve when you are ready.',
+    noteTitle: 'Title',
+    topic: 'Topic',
+    path: 'Relative path',
+    pathHint:
+      'Use a repository/Vault-relative Markdown path. Absolute filesystem paths are never accepted.',
+    source: 'Knowledge source',
+    sourcePlaceholder: 'Select a Knowledge source',
+    tags: 'Tags',
+    markdown: 'Markdown',
+    openReview: 'Open Knowledge review',
+    confirm: 'Approve note',
+    confirming: 'Approving…',
+    validationFailed: 'Review the required fields before approving.',
+  },
   "writeRequestLedger": {
     "title": "Write request ledger",
     "description": "Every committed write has a Git commit status and a separate projection status. Pending or Failed projections can be replayed.",

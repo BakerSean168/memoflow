@@ -57,6 +57,7 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
       fileName: 'Approved.md',
       content: '# Approved\n\nReviewed body',
       knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
+      source: { kind: 'local_vault' },
       proposalId: 'proposal-1',
       proposalRevision: 4,
       requestId: 'request-1',
@@ -78,5 +79,25 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
       mimeType: 'text/markdown',
       repositoryScopeId: 'local-vault-identity-1',
     });
+  });
+
+  it('rejects a Web repository source on the Desktop persistence host', async () => {
+    const localVault = createLocalVaultPort();
+    const adapter = new DesktopKnowledgeNotePersistenceAdapter(localVault);
+
+    await expect(
+      adapter.createKnowledgeNote({
+        identityId: 'identity-1',
+        path: 'Research/Approved.md',
+        fileName: 'Approved.md',
+        content: '# Approved',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
+        source: { kind: 'repository', connectionId: 'binding-1' },
+        proposalId: 'proposal-1',
+        proposalRevision: 1,
+        requestId: 'request-1',
+      }),
+    ).rejects.toThrow(/requires a local Vault source/i);
+    expect(localVault.writeConfirmedNote).not.toHaveBeenCalled();
   });
 });

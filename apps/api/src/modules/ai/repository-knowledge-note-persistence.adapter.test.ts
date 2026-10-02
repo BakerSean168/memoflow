@@ -136,11 +136,25 @@ describe('RepositoryKnowledgeNotePersistenceAdapter', () => {
     const api = createApi([binding('binding-1'), binding('binding-2')]);
     const adapter = new RepositoryKnowledgeNotePersistenceAdapter(api);
 
-    await adapter.createKnowledgeNote({ ...confirmedInput, connectionId: 'binding-2' });
+    await adapter.createKnowledgeNote({
+      ...confirmedInput,
+      source: { kind: 'repository', connectionId: 'binding-2' },
+    });
 
     expect(api.createConfirmedKnowledgeNote).toHaveBeenCalledWith(
       confirmedContext,
       expect.objectContaining({ connectionId: 'binding-2' }),
     );
+  });
+
+  it('rejects a Desktop local-vault source on the Web persistence host', async () => {
+    const api = createApi([binding('binding-1')]);
+    const adapter = new RepositoryKnowledgeNotePersistenceAdapter(api);
+
+    await expect(
+      adapter.createKnowledgeNote({ ...confirmedInput, source: { kind: 'local_vault' } }),
+    ).rejects.toThrow(/requires a repository source/i);
+    expect(api.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();
+    expect(api.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
   });
 });

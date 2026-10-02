@@ -286,7 +286,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           break;
         case 'knowledge.capture':
           toolMode.value = 'knowledge-capture';
-          knowledgeCaptureWorkflow.projectRun(run);
+          await knowledgeCaptureWorkflow.projectRun(run, false);
           break;
       }
       persistence.applyEditorOverlay(persisted.editorOverlay, run);
@@ -294,6 +294,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       persistence.persistWorkflowState(conversationId);
       if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview();
       if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview();
+      if (run.kind === 'knowledge.capture')
+        await knowledgeCaptureWorkflow.openKnowledgeNativeReview();
     } catch (error) {
       // Runtime failure is an explicit empty/blocked restore. The reset above
       // ensures no stale local run or draft remains visible as authority.

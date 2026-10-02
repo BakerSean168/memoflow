@@ -1,4 +1,7 @@
-import type { KnowledgeCaptureExecutionFailure } from '@memoflow/contracts/ai';
+import type {
+  KnowledgeCaptureExecutionFailure,
+  KnowledgeCaptureSource,
+} from '@memoflow/contracts/ai';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
@@ -27,6 +30,7 @@ export interface KnowledgeCaptureMutationPort {
     readonly workflowRunId: string;
     readonly revision: number;
     readonly knowledgeDocumentId: KnowledgeDocumentId;
+    readonly source: KnowledgeCaptureSource;
     /** Vault-relative target subpath (never an absolute Desktop path). */
     readonly path: string;
     readonly fileName: string;

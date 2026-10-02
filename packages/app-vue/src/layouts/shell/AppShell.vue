@@ -24,6 +24,7 @@ import { storeToRefs } from 'pinia';
 import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
+import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
@@ -99,6 +100,7 @@ provide(DialogDraftScopeKey, activeTabId);
 const sync = useShellRouterSync();
 provideGoalNativeSurface();
 provideTaskNativeSurface();
+provideKnowledgeNativeSurface();
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).

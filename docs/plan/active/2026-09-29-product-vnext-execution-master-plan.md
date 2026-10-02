@@ -1375,6 +1375,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** KNOW-6102, AI-8001.
 
+**Execution (2026-10-02): Accepted / frozen.** `knowledge.capture` now reviews through the native Repository owner surface while preserving KNOW-6102's Web projection-only boundary and Desktop Local Vault ownership. Owner-selected source identity (`repository(connectionId)` / `local_vault`) is durable workflow state, planner revise/regenerate cannot replace it, native edits reconcile through `edit_structured`, and host persistence remains post-approval behind the canonical API/Desktop ports. Normal AI capture shows no raw stable ID or AI-owned Knowledge business editor; restore/cancel/retry and stable-document deep-link parity are covered. Final evidence includes 16 files / 105 delegated focused tests, independent critical acceptance 49/49, serial uncached contracts/ai/app-vue typechecks, full governance, inventory/docs/diff checks, and passing isolated current-worktree P0 evidence for capture, cancel and refresh/restore. Evidence: [AI-8112 Knowledge native capture](../archive/2026-10-02-pvc-ai-8112-knowledge-native-capture.md).
+
 ---
 
 ## PVC-AI-8121 — Retire AI-owned product editors

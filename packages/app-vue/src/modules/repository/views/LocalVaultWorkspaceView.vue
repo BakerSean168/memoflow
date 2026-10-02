@@ -207,13 +207,20 @@
         </main>
       </div>
     </template>
+
+    <KnowledgeCaptureReviewDialog
+      :open="knowledgeCaptureDialogOpen"
+      :source-options="knowledgeCaptureSourceOptions"
+      default-source-key="local_vault"
+      @update:open="handleKnowledgeCaptureOpenChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   BookOpen,
   ExternalLink,
@@ -231,10 +238,16 @@ import DocumentSourceStatus from '../components/DocumentSourceStatus.vue';
 import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';
 import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue';
 import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
 import { useLocalVault } from '../composables/useLocalVault';
+import {
+  knowledgeCaptureSourceKey,
+  type KnowledgeCaptureSourceOption,
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const {
   binding,
   activeNote,
@@ -257,6 +270,26 @@ const {
   notes,
 } = useLocalVault();
 
+const knowledgeCaptureDialogOpen = computed(() => route.query.dialog === 'knowledge-capture');
+const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>(() => {
+  if (!isBound.value || !binding.value) return [];
+  const source = { kind: 'local_vault' as const };
+  return [
+    {
+      key: knowledgeCaptureSourceKey(source),
+      label: binding.value.displayName || t('repository.localVault.selectTitle'),
+      source,
+    },
+  ];
+});
+
+async function handleKnowledgeCaptureOpenChange(open: boolean): Promise<void> {
+  if (open) return;
+  const query = { ...route.query };
+  delete query.dialog;
+  await router.replace({ name: 'repository', query });
+}
+
 function noteQueryId(): string {
   const raw = route.query.note;
   if (typeof raw === 'string') return raw;
@@ -264,13 +297,26 @@ function noteQueryId(): string {
   return '';
 }
 
+let refreshedNoteQuery = '';
+
 async function applyNoteQuerySelection(): Promise<void> {
   const requested = noteQueryId();
-  if (!requested) return;
-  const target =
+  if (!requested || loading.value) return;
+  let target =
+    notes.value.find((note) => note.knowledgeDocumentId === requested) ??
     notes.value.find((note) => note.relativePath === requested) ??
     notes.value.find((note) => note.title === requested) ??
     null;
+  if (
+    !target &&
+    isBound.value &&
+    requested.startsWith('kdoc_') &&
+    refreshedNoteQuery !== requested
+  ) {
+    refreshedNoteQuery = requested;
+    await scan();
+    target = notes.value.find((note) => note.knowledgeDocumentId === requested) ?? null;
+  }
   if (!target) return;
   if (activeNote.value?.relativePath === target.relativePath) return;
   await openNote(target);
@@ -281,7 +327,12 @@ onMounted(() => {
 });
 
 watch(
-  () => [route.query.note, notes.value.map((note) => note.relativePath).join('|')],
+  () => [
+    route.query.note,
+    isBound.value,
+    loading.value,
+    notes.value.map((note) => `${note.knowledgeDocumentId}:${note.relativePath}`).join('|'),
+  ],
   () => {
     void applyNoteQuerySelection();
   },

@@ -86,11 +86,13 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@confirm="confirmTaskAgentRun"');
     expect(source).toContain('@cancel="cancelTaskAgentRun"');
     expect(source).toContain('@retry="retryTaskAgentExecution"');
-    expect(source).toContain('@confirm="confirmKnowledgeCaptureRun"');
+    expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
+    expect(source).toContain('@submit-clarification="submitKnowledgeClarification"');
     expect(source).toContain('@cancel="cancelKnowledgeCaptureRun"');
     expect(source).toContain('@retry="retryKnowledgeCaptureExecution"');
     expect(taskPanel).toContain('data-testid="task-agent-confirm-run"');
-    expect(capturePanel).toContain('data-testid="knowledge-capture-agent-confirm-run"');
+    expect(capturePanel).toContain('data-testid="knowledge-capture-open-native-review"');
+    expect(capturePanel).not.toContain('data-testid="knowledge-capture-agent-confirm-run"');
   });
 
   it('wires completed Task workflow results to the canonical Task detail route', () => {

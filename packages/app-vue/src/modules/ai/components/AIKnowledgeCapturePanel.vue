@@ -27,13 +27,42 @@
       <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {{ reviewDraft.topic }}
       </p>
-      <p
-        v-if="reviewDraft"
-        class="font-mono text-xs text-muted-foreground"
-        data-testid="knowledge-capture-workflow-document-id"
+    </div>
+
+    <div
+      v-if="knowledgeCaptureRun.suspension?.type === 'clarification_required'"
+      class="space-y-3"
+      data-testid="knowledge-capture-clarification"
+    >
+      <label
+        v-for="(question, index) in knowledgeCaptureRun.suspension.questions"
+        :key="index"
+        class="block space-y-2 text-sm"
       >
-        memoflow_id: {{ reviewDraft.knowledgeDocumentId }}
-      </p>
+        <span>{{ question }}</span>
+        <textarea
+          :value="clarificationAnswers?.[index] ?? ''"
+          :disabled="busy"
+          class="w-full rounded-md border bg-background p-2"
+          @input="
+            $emit(
+              'update-clarification-answer',
+              index,
+              ($event.target as HTMLTextAreaElement).value,
+            )
+          "
+        />
+      </label>
+      <Button
+        :disabled="busy || !canSubmitClarification"
+        data-testid="knowledge-capture-submit-clarification"
+        @click="$emit('submit-clarification')"
+      >
+        {{ t('aiAssistant.dialogs.automation.confirm') }}
+      </Button>
+      <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
+        t('common.cancel')
+      }}</Button>
     </div>
 
     <div v-if="reviewDraft?.tags.length" class="flex flex-wrap gap-2">
@@ -68,11 +97,15 @@
       <Button
         v-if="knowledgeCaptureRun.suspension.retryable"
         variant="outline"
+        :disabled="busy"
         data-testid="knowledge-capture-agent-retry-execution"
         @click="$emit('retry')"
       >
         {{ t('aiAssistant.dialogs.agent.retry') }}
       </Button>
+      <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
+        t('common.cancel')
+      }}</Button>
     </div>
 
     <div
@@ -88,18 +121,20 @@
     </div>
 
     <div v-if="knowledgeCaptureRun.status === 'suspended' && reviewDraft" class="flex gap-2">
-      <Button data-testid="knowledge-capture-agent-confirm-run" @click="$emit('confirm')">
-        {{ t('aiAssistant.dialogs.automation.confirm') }}
+      <Button
+        data-testid="knowledge-capture-open-native-review"
+        :disabled="busy"
+        @click="$emit('open-native-review')"
+      >
+        {{ t('repository.capture.openReview') }}
       </Button>
       <Button
         variant="outline"
         data-testid="knowledge-capture-agent-cancel-run"
+        :disabled="busy"
         @click="$emit('cancel')"
       >
         {{ t('common.cancel') }}
-      </Button>
-      <Button variant="ghost" @click="$emit('edit-started')">
-        {{ t('common.edit') }}
       </Button>
     </div>
   </section>
@@ -120,13 +155,16 @@ const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
 const props = defineProps<{
   toolMode: WorkflowMode;
   knowledgeCaptureRun: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }> | null;
+  busy?: boolean;
+  clarificationAnswers?: string[];
+  canSubmitClarification?: boolean;
 }>();
 
 defineEmits<{
-  confirm: [];
   cancel: [];
   retry: [];
-  'edit-started': [];
+  'submit-clarification': [];
+  'open-native-review': [];
   'update-clarification-answer': [index: number, value: string];
 }>();
 

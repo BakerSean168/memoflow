@@ -269,10 +269,16 @@
         <AIKnowledgeCapturePanel
           :tool-mode="toolMode"
           :knowledge-capture-run="knowledgeCaptureRun"
-          @confirm="confirmKnowledgeCaptureRun"
+          :busy="knowledgeCaptureResuming"
+          :clarification-answers="knowledgeClarificationAnswers"
+          :can-submit-clarification="canSubmitKnowledgeClarification"
+          @submit-clarification="submitKnowledgeClarification"
+          @update-clarification-answer="
+            (index, value) => (knowledgeClarificationAnswers[index] = value)
+          "
           @cancel="cancelKnowledgeCaptureRun"
           @retry="retryKnowledgeCaptureExecution"
-          @edit-started="showKnowledgeDraftEditor = true"
+          @open-native-review="openKnowledgeNativeReview"
         />
         <div
           v-if="!hasWorkflowArtifact"
@@ -464,11 +470,14 @@ const {
 
 const {
   knowledgeCaptureRun,
-  showKnowledgeDraftEditor,
+  knowledgeCaptureResuming,
+  clarificationAnswers: knowledgeClarificationAnswers,
+  canSubmitKnowledgeClarification,
+  submitKnowledgeClarification,
   startKnowledgeCaptureRun,
   cancelKnowledgeCaptureRun,
-  confirmKnowledgeCaptureRun,
   retryKnowledgeCaptureExecution,
+  openKnowledgeNativeReview,
 } = knowledgeCaptureWorkflow;
 
 const { formatExecutionOutcome } = formatters;
