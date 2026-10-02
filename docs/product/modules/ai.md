@@ -65,7 +65,7 @@ approval retry / ambiguous-attempt recovery、cancel、clarification 与状态�
 Goal workflow 的 supporting Task/Knowledge overlay 仍按 run/revision 恢复；不保存 Goal/KR 表单。
 Task panel 的 confirm 委托同一个 native owner submit coordinator，保留 receipt/retry 语义。
 
-当前 `BusinessPanel.workflow` surface 在 native parity 完成前仍保留；Goal/Task/Knowledge 三条 native workflow vertical slice、clarification/recovery 与 dirty/busy/attention 迁移全部验证后，再评估删除。
+**2026-10-02 PVC-AI-8131:** `BusinessPanel.workflow` 经 native parity 后评估为继续保留，但职责已收缩为 non-owner workflow context/status。Goal/Task/Knowledge clarification、recovery/retry、Goal supporting overlays、revision/result diagnostics 与 shell dirty/busy/attention 仍没有等价宿主；owner business editing 则全部留在 GoalDialog、TaskPlanDialog、Repository Knowledge review。Governance 禁止 workflow context 引入 owner form 或直接 owner mutation。
 
 ## 4. Routine command tools（AI-6102）
 

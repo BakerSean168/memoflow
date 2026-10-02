@@ -109,11 +109,21 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain("intent: 'deeplink'");
   });
 
-  it('keeps workflow surface availability owned by the shell integration', () => {
+  it('keeps the retained workflow surface as non-owner context/status composition', () => {
     expect(source).toContain('shellStore?.setWorkflowAvailable(available, itemCount)');
     expect(source).toContain("requestContextPanel('automatic')");
     expect(source).toContain('shellStore.closeWorkflowSurface()');
     expect(source).toContain('SHELL_WORKFLOW_MOUNT_KEY');
+    expect(source).toContain('<AIContextPanel');
+    expect(source).toContain('<AIGoalWorkflowPanel');
+    expect(source).toContain('<AITaskWorkflowPanel');
+    expect(source).toContain('<AIKnowledgeCapturePanel');
+    expect(goalPanel).toContain("suspension?.type === 'recovery_required'");
+    expect(taskPanel).toContain("suspension?.type === 'clarification_required'");
+    expect(capturePanel).toContain("suspension?.type === 'clarification_required'");
+    expect(source).not.toContain('GoalDialog');
+    expect(source).not.toContain('TaskPlanDialog');
+    expect(source).not.toContain('KnowledgeCaptureReviewDialog');
   });
 
   it('projects the currently open goal, task, or registered knowledge note into composer context without a manual mode selector', () => {

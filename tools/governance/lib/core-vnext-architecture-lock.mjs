@@ -55,6 +55,17 @@ export const AI_RAW_SCHEDULER_ACCESS_PATTERN =
   /['"`]@memoflow\/scheduler(?:\/[^'"`]*)?['"`]|\b(ScheduledInvocation|ScheduleTask|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
 export const AI_RETIRED_GOAL_TASK_DRAFT_PATTERN =
   /\b(validateKeyResultsOutput|validateTasksOutput|valueType|folderId|estimatedHours|progressTrigger|PER_INSTANCE|ALL_INSTANCES_COMPLETED)\b/;
+
+const AI_WORKFLOW_CONTEXT_FILES = new Set([
+  'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.vue',
+  'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+]);
+export const AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN =
+  /\b(?:GoalDialog|TaskPlanDialog|KnowledgeCaptureReviewDialog|createConfirmedKnowledgeNote|createPlanSafe|createGoalSafe)\b/;
+
 export const TASK_LEGACY_CLASSIFICATION_PATTERN =
   /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
 export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
@@ -185,6 +196,15 @@ export function findCoreVnextArchitectureLockViolations(files) {
       /\b(?:AIGoalDraftEditor|AITaskDraftEditor|showGoalDraftEditor|showTaskDraftEditor|toggleGoalDraftEditor)\b|(?:show-goal-draft-editor|show-task-draft-editor|goal-agent-toggle-editor|goal-workflow-draft-editor|task-workflow-draft-editor|knowledge-capture-draft-editor)/g,
       'ai-owned-business-editor',
     );
+    if (AI_WORKFLOW_CONTEXT_FILES.has(relPath)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN,
+        'ai-workflow-context-owner-leakage',
+      );
+    }
     if (startsWithAny(relPath, FEATURE_ROOTS)) {
       pushPatternViolations(
         violations,
@@ -460,6 +480,41 @@ export function findCoreVnextArchitectureLockViolations(files) {
     }
   }
 
+  // PVC-AI-8131 retains workflow as a non-owner context/status surface until clarification,
+  // recovery, supporting overlays, attention deferral and diagnostics have another canonical host.
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
+    ["panelSurface === 'workflow'", '<slot name="workflow" />', 'workflowAttentionCount'],
+    'ai-workflow-context-surface-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
+    [
+      'requestWorkflowSurface',
+      "this.surfaceStatus !== 'clean'",
+      'this.workflowAttentionCount',
+      'closeWorkflowSurface',
+    ],
+    'ai-workflow-context-surface-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    [
+      '<AIContextPanel',
+      '<AIGoalWorkflowPanel',
+      '<AITaskWorkflowPanel',
+      '<AIKnowledgeCapturePanel',
+      'requestWorkflowSurface(intent)',
+    ],
+    'ai-workflow-context-surface-missing',
+  );
+
   // ADR-069 / GOAL-7205 positive locks: persistence must continue accepting Goal-only links,
   // and Task must own the bounded read seam consumed later by Goal Workspace.
   requireTokens(
@@ -544,6 +599,10 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
       'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
     'ai-owned-business-editor':
       'AI-owned Goal/Task editors and visibility controls are retired; use owner-native sessions (ADR-112 / PVC-AI-8121)',
+    'ai-workflow-context-owner-leakage':
+      'The retained workflow surface is context/status only; owner forms and direct owner mutations belong to native business surfaces (PVC-AI-8131)',
+    'ai-workflow-context-surface-missing':
+      'PVC-AI-8131 retains the workflow context surface until clarification/recovery/attention/diagnostics have canonical replacements',
     'ai-retired-goal-task-draft':
       'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification':

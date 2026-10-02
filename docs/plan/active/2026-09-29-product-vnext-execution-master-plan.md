@@ -1411,6 +1411,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** AI-8121.
 
+**Execution (2026-10-02): Accepted / retained / frozen.** Native business-editor parity is complete, but the `workflow` surface still uniquely hosts Goal/Task/Knowledge clarification, recovery/retry/result diagnostics, AI-8101 Goal supporting Task/Knowledge overlays, shell dirty/busy deferred-open attention, restart/restore availability and mobile workflow context. AI-8131 therefore retains `BusinessPanel.workflow` as a **non-owner context/status surface** rather than deleting it. Governance now forbids owner dialogs/direct owner mutation in the workflow context and positively locks the workflow slot/attention/context composition until canonical replacements exist. Acceptance: context matrix 6 files / 48 tests, workflow attention 2/2, architecture lock 23/23, uncached app-vue typecheck, full governance, lint/format/inventory/diff. Evidence: [AI-8131 workflow surface retention](../archive/2026-10-02-pvc-ai-8131-workflow-surface-retention.md).
+
 ---
 
 ## PVC-AI-8201 — Composer host/elevation cleanup

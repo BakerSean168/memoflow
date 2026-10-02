@@ -316,21 +316,26 @@ AIGoalDraftEditor、AITaskDraftEditor 与 AI-only Goal/Task form 已由 PVC-AI-8
 PanelSurface = home | business | workflow
 ```
 
-AI workflow 通过 Teleport 把独立 WorkflowPanel 挂到 workflow surface。
+AI workflow 通过 Teleport 把 context/status panel 挂到 workflow surface；业务编辑已经由 native owner surface 承担。
 
-在 Native Surface Orchestration 完成后，长期目标是：
+PVC-AI-8131 在 native parity 完成后重新审查了 retirement gate，结论是 **保留 workflow surface**。它不再是第二套业务 editor，而是当前唯一完整承载以下 workflow context 的宿主：
+
+- Goal / Task / Knowledge clarification；
+- recovery / retry / cancel / result 与 revision / warning diagnostics；
+- AI-8101 明确保留的 Goal supporting Task / Knowledge overlays；
+- shell dirty / busy 自动切换保护与 hidden-panel attention；
+- restart / restore 后重新声明 workflow availability；
+- mobile workflow context 入口。
+
+因此当前职责边界是：
 
 ```text
-AI planning/status     -> conversation
-product editing/review -> business owner tab
-workflow diagnostics  -> developer/details only
+AI planning / messages        -> conversation
+product editing / review      -> business owner native surface
+workflow context / diagnostics -> BusinessPanel.workflow
 ```
 
-因此 workflow surface 是 retirement candidate。
-
-删除条件：Goal create/review、Task create/review、Knowledge capture 已由 native owner surface 覆盖；clarification/recovery 不依赖独立 workflow panel；shell attention/dirty/busy 语义已迁移到 active native edit session；workflow diagnostics 有替代入口。
-
-在这些条件满足前不能直接删除。
+`workflow` surface 被锁定为 **non-owner context/status surface**：不得 import GoalDialog、TaskPlanDialog、KnowledgeCaptureReviewDialog，也不得直接调用 owner mutation/persistence。未来只有在 clarification/recovery/supporting overlays/attention/diagnostics 全部获得 canonical replacement 后，才可以重新提出 retirement。
 
 ## 8. 组件复用原则
 

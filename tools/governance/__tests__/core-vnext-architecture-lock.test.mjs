@@ -25,6 +25,33 @@ const canonicalNotificationFiles = [
   },
 ];
 
+const canonicalWorkflowContextFiles = [
+  {
+    relPath: 'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
+    content: `
+      const active = panelSurface === 'workflow';
+      const attention = workflowAttentionCount;
+      const slot = '<slot name="workflow" />';
+    `,
+  },
+  {
+    relPath: 'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
+    content: `
+      function requestWorkflowSurface() {
+        if (this.surfaceStatus !== 'clean') this.workflowAttentionCount = 1;
+      }
+      function closeWorkflowSurface() {}
+    `,
+  },
+  {
+    relPath: 'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    content: `
+      <AIContextPanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/><AIKnowledgeCapturePanel/></AIContextPanel>
+      requestWorkflowSurface(intent);
+    `,
+  },
+];
+
 const canonicalTaskGoalFiles = [
   {
     relPath: 'packages/database/src/schema/task-goal-binding-constraint.ts',
@@ -53,6 +80,7 @@ function scan(...files) {
   return findCoreVnextArchitectureLockViolations([
     ...canonicalNotificationFiles,
     ...canonicalTaskGoalFiles,
+    ...canonicalWorkflowContextFiles,
     ...files,
   ]);
 }
@@ -303,6 +331,37 @@ describe('HARD-7102 core vNext architecture lock', () => {
     });
     expect(message).toContain('packages/scheduler/src/api/routes.ts:42');
     expect(message).toContain('diagnostics-only');
+  });
+});
+
+describe('AI workflow context retention boundary', () => {
+  it.each(['GoalDialog', 'TaskPlanDialog', 'KnowledgeCaptureReviewDialog', 'createPlanSafe'])(
+    'rejects owner form or mutation symbol %s inside the retained workflow context',
+    (symbol) => {
+      const { violations } = scan({
+        relPath: 'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
+        content: symbol,
+      });
+      expect(violations.some(({ kind }) => kind === 'ai-workflow-context-owner-leakage')).toBe(
+        true,
+      );
+    },
+  );
+
+  it('requires the retained workflow slot, attention guard, and context composition', () => {
+    const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
+      file.relPath === 'packages/app-vue/src/layouts/shell/BusinessPanel.vue'
+        ? { ...file, content: 'workflowAttentionCount' }
+        : file,
+    );
+    const { violations } = findCoreVnextArchitectureLockViolations([
+      ...canonicalNotificationFiles,
+      ...canonicalTaskGoalFiles,
+      ...brokenWorkflowFiles,
+    ]);
+    expect(violations.some(({ kind }) => kind === 'ai-workflow-context-surface-missing')).toBe(
+      true,
+    );
   });
 });
 

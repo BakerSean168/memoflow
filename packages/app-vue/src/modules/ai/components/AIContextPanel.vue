@@ -1,5 +1,9 @@
 <script setup lang="ts">
-/** Canonical AI workflow workbench container. Runtime state is injected via slot. */
+/**
+ * Canonical non-owner workflow context/status container (PVC-AI-8131).
+ * Business editing lives in native owner surfaces; this slot is limited to
+ * clarification, recovery/retry, supporting overlays, status/results and diagnostics.
+ */
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { X } from '@lucide/vue';
