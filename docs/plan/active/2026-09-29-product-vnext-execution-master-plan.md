@@ -1439,6 +1439,8 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 
 **Acceptance:** 每个 reference 标记 `retire / keep engineering / shared / migrate first`。
 
+**Execution (2026-10-02): Accepted / frozen / non-destructive.** 全仓 Product Governance blast radius 已冻结为 **54 groups / 770 exact paths**：RETIRE 29/193、KEEP_ENGINEERING 4/375、SHARED 14/182、MIGRATE_FIRST 7/20。七个迁移前置组对应 B1–B6：engineering bundle consumer (B1)、rule metadata + published snapshot (B2)、bridge parity tests (B3)、reference policy (B4)、root governance gate bridge (B5)、live maintained docs (B6)。新增 read-only drift lock 会扫描真实 Git live files、阻止未分类 Product roots/imports/schema/table refs、binary concrete refs、escaping symlinks、重复 path ownership 和错误 generated/source 标记；root governance gate 仍 cacheable，inventory dependency 单独 non-cacheable。Acceptance：focused 18/18、governance-tools 21 files / 177 tests、1,346-file inventory、test-target/docs/lint/format/diff 全绿、独立 uncached full governance rerun 全绿。ADR-113 **仍为 Proposed**，AGENT/生产 runtime/DB/PowerSync/UI/route/IPC 未改，GOV-7903 仍无 destructive authorization。Evidence: [GOV-7901 retirement inventory](2026-10-02-pvc-gov-7901-governance-retirement-inventory.md).
+
 ---
 
 ## PVC-GOV-7902 — Decouple Engineering Governance inputs

@@ -51,7 +51,8 @@
         "governance-tools:test",
         "test-system-v2:test",
         "test-system-v2:test:governance",
-        "test-system-v2:ruleset"
+        "test-system-v2:ruleset",
+        "product-governance-retirement-inventory-check"
       ],
       "inputs": [
         "{workspaceRoot}/AGENT.md",
@@ -79,6 +80,9 @@
         "{workspaceRoot}/tools/governance/failure-contract-inventory-audit.mjs",
         "{workspaceRoot}/tools/governance/failure-contract-baseline.json",
         "{workspaceRoot}/tools/governance/target-baseline-manifest.json",
+        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory.json",
+        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory-audit.mjs",
+        "{workspaceRoot}/tools/governance/__tests__/product-governance-retirement-inventory.test.mjs",
         "{workspaceRoot}/tools/governance/target-baseline-audit.mjs",
         "{workspaceRoot}/tools/governance/governance-module-docs-audit.mjs",
         "{workspaceRoot}/tools/governance/platform-leakage-audit.mjs",
@@ -175,6 +179,18 @@
       "cache": false,
       "options": {
         "command": "node ./tools/test/hard-7101-failure-matrix.mjs --run"
+      }
+    },
+    "product-governance-retirement-inventory-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "inputs": [
+        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory.json",
+        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory-audit.mjs",
+        "{workspaceRoot}/tools/governance/__tests__/product-governance-retirement-inventory.test.mjs"
+      ],
+      "options": {
+        "command": "node ./tools/governance/product-governance-retirement-inventory-audit.mjs"
       }
     }
   }

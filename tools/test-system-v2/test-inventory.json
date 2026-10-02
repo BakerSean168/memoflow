@@ -11823,6 +11823,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/product-governance-retirement-inventory.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/public-surface-jsdoc.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12246,7 +12254,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -13157,6 +13165,6 @@
     "boundary-main": 8,
     "e2e": 63,
     "perf": 2,
-    "governance": 63
+    "governance": 64
   }
 }
