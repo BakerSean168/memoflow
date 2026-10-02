@@ -9,6 +9,25 @@ updated: 2026-07-05T00:15:00+08:00
 
 # 仓库治理
 
+## Repository-native Engineering Governance input
+
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
+
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+```
+
+ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
+active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+
 `docs/governance` 负责说明仓库为什么这样维护、哪些内容以文档表达、哪些内容以配置和脚本强制表达，以及冲突时谁是最终真值。
 
 ## 真值顺序
@@ -60,7 +79,7 @@ updated: 2026-07-05T00:15:00+08:00
 - 开发入口：[`../guides/development/README.md`](../guides/development/README.md)
 - 配置治理：[`./configuration-governance.md`](./configuration-governance.md)
 - 计划目录：[`../plan/README.md`](../plan/README.md)
-- governance 示例模块资料：[`../../packages/governance/README.md`](../../packages/governance/README.md)、[`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)、[`CHANGE_PLAYBOOK.md`](./CHANGE_PLAYBOOK.md)、[`DECISIONS.md`](./DECISIONS.md)
+- Product Governance compatibility/reference-policy资料（ADR-113 Proposed）：[`../../packages/governance/README.md`](../../packages/governance/README.md)、[`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)、[`CHANGE_PLAYBOOK.md`](./CHANGE_PLAYBOOK.md)、[`DECISIONS.md`](./DECISIONS.md)
 
 ## Dual Registry
 

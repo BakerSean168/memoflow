@@ -36,17 +36,28 @@ const EVIDENCE_ROOTS = [
   'reports/',
 ];
 const REQUIRED_CLASSIFICATIONS = {
-  'tools/governance/governance-rule-bundle-adapter.mjs': 'MIGRATE_FIRST',
-  'tools/governance/lib/governance-rule-engineering-adapter.mjs': 'MIGRATE_FIRST',
-  'tools/governance/lib/published-rule-bundle.mjs': 'MIGRATE_FIRST',
-  'tools/governance/engineering-rule-adapters.json': 'MIGRATE_FIRST',
-  'tools/governance/pinned-rule-bundles.json': 'MIGRATE_FIRST',
-  'tools/governance/published/governance-rule-bundle.v1.json': 'MIGRATE_FIRST',
-  'tools/governance/__fixtures__/governance-rule-bundle.v1.json': 'MIGRATE_FIRST',
-  'tools/governance/__tests__/governance-rule-bundle-cli.test.mjs': 'MIGRATE_FIRST',
-  'tools/governance/__tests__/governance-rule-bundle-hard-guards.test.mjs': 'MIGRATE_FIRST',
-  'tools/governance/__tests__/governance-rule-engineering-adapter.test.mjs': 'MIGRATE_FIRST',
-  'tools/governance/__tests__/published-rule-bundle.test.mjs': 'MIGRATE_FIRST',
+  'tools/governance/engineering-rules.json': 'KEEP_ENGINEERING',
+  'tools/governance/pinned-engineering-rules.json': 'KEEP_ENGINEERING',
+  'tools/governance/lib/engineering-rule-source.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/lib/engineering-rule-runner.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/engineering-rule-adapter.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/engineering-rule-source-audit.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/engineering-input-dependency-audit.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/__tests__/engineering-rule-source.test.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/__tests__/engineering-input-independence.test.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/__tests__/engineering-reference-policy-proposal.test.mjs': 'KEEP_ENGINEERING',
+
+  'tools/governance/governance-rule-bundle-adapter.mjs': 'SHARED',
+  'tools/governance/lib/governance-rule-engineering-adapter.mjs': 'KEEP_ENGINEERING',
+  'tools/governance/lib/published-rule-bundle.mjs': 'SHARED',
+  'tools/governance/engineering-rule-adapters.json': 'SHARED',
+  'tools/governance/pinned-rule-bundles.json': 'SHARED',
+  'tools/governance/published/governance-rule-bundle.v1.json': 'SHARED',
+  'tools/governance/__fixtures__/governance-rule-bundle.v1.json': 'SHARED',
+  'tools/governance/__tests__/governance-rule-bundle-cli.test.mjs': 'SHARED',
+  'tools/governance/__tests__/governance-rule-bundle-hard-guards.test.mjs': 'SHARED',
+  'tools/governance/__tests__/governance-rule-engineering-adapter.test.mjs': 'SHARED',
+  'tools/governance/__tests__/published-rule-bundle.test.mjs': 'SHARED',
   'AGENT.md': 'MIGRATE_FIRST',
   'tools/governance/__tests__/governance-reference-preservation.test.mjs': 'MIGRATE_FIRST',
   'project.json': 'MIGRATE_FIRST',
@@ -227,11 +238,19 @@ export function validateInventory(manifest) {
   for (const [id, blocker] of Object.entries(MIGRATION_BLOCKERS)) {
     const entry = groups.get(id);
     if (
-      entry?.classification !== 'MIGRATE_FIRST' ||
+      entry?.classification !==
+        ([
+          'engineering-bundle-consumer',
+          'engineering-rule-metadata',
+          'published-product-snapshot',
+          'bundle-bridge-tests',
+        ].includes(id)
+          ? 'SHARED'
+          : 'MIGRATE_FIRST') ||
       typeof entry.gov7902 !== 'string' ||
       !entry.gov7902.startsWith(`${blocker}:`)
     )
-      errors.push(`${id}: required MIGRATE_FIRST blocker ${blocker} missing`);
+      errors.push(`${id}: required migration classification/blocker ${blocker} missing`);
   }
   for (const [file, classification] of Object.entries(REQUIRED_CLASSIFICATIONS)) {
     if (ownership.get(file)?.classification !== classification)

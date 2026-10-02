@@ -31,22 +31,27 @@ describe('GOV-1904 engineering bridge hard guards', () => {
     );
   });
 
-  it('adds the pinned bundle bridge to governance-check without replacing standalone repository audits', () => {
+  it('selects native Engineering inputs in governance-check and preserves standalone repository audits', () => {
     const rootProject = JSON.parse(read('project.json'));
     const target = rootProject.targets['governance-check'];
     const command = target.options.command;
 
     expect(command).toContain('node ./tools/governance/package-internal-boundary-audit.mjs');
     expect(command).toContain(
-      `node ./tools/governance/governance-rule-bundle-adapter.mjs --bundle ${PUBLISHED_BUNDLE} --mode check`,
+      'node ./tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check',
     );
     expect(target.inputs).toEqual(
       expect.arrayContaining([
-        '{workspaceRoot}/tools/governance/governance-rule-bundle-adapter.mjs',
-        '{workspaceRoot}/tools/governance/engineering-rule-adapters.json',
-        '{workspaceRoot}/tools/governance/pinned-rule-bundles.json',
-        '{workspaceRoot}/tools/governance/published/**/*.json',
+        '{workspaceRoot}/tools/governance/engineering-rule-adapter.mjs',
+        '{workspaceRoot}/tools/governance/engineering-rules.json',
+        '{workspaceRoot}/tools/governance/pinned-engineering-rules.json',
+        '{workspaceRoot}/tools/governance/engineering-rule-source-audit.mjs',
+        '{workspaceRoot}/tools/governance/engineering-input-dependency-audit.mjs',
       ]),
+    );
+    expect(command).not.toContain('governance-rule-bundle-adapter.mjs');
+    expect(target.inputs).not.toEqual(
+      expect.arrayContaining(['{workspaceRoot}/tools/governance/pinned-rule-bundles.json']),
     );
     expect(
       existsSync(path.join(ROOT, 'tools/governance/package-internal-boundary-audit.mjs')),

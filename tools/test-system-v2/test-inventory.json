@@ -11751,6 +11751,30 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/engineering-input-independence.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/engineering-reference-policy-proposal.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/engineering-rule-source.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/failure-contract-inventory.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12254,7 +12278,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 24
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -13165,6 +13189,6 @@
     "boundary-main": 8,
     "e2e": 63,
     "perf": 2,
-    "governance": 64
+    "governance": 67
   }
 }

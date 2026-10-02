@@ -10,6 +10,30 @@ updated: 2026-07-06T00:00:00+08:00
 
 # Governance 决策记录
 
+## Repository-native Engineering Governance input
+
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
+
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+```
+
+ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
+active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+
+## Product Governance decision history (retained compatibility context)
+
+The numbered decisions below describe the existing Product reference module. They do not
+define the active Engineering input and are not superseded while ADR-113 is Proposed.
+
 ## 1. 这是“最佳实践示范模块”，不是“最少实现模块”
 
 - 目标不是只够用

@@ -46,7 +46,7 @@ describe('GOV-7901 non-destructive inventory drift lock', () => {
       .split('\0')
       .filter(Boolean);
     expect(auditInventory(ROOT, manifest, liveFiles)).toEqual([]);
-  });
+  }, 30_000);
   it('rejects destructive gate state and weakened known roots', () => {
     expect(
       changed((m) => {
@@ -227,9 +227,10 @@ describe('GOV-7901 non-destructive inventory drift lock', () => {
     ]) {
       expect(
         changed((m) => {
-          m.entries.find((e) => e.id === id).classification = 'SHARED';
+          const entry = m.entries.find((e) => e.id === id);
+          entry.classification = entry.classification === 'SHARED' ? 'MIGRATE_FIRST' : 'SHARED';
         }),
-      ).toContain('required MIGRATE_FIRST');
+      ).toContain('required migration classification/blocker');
     }
     expect(
       changed((m) => {

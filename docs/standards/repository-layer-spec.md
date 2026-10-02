@@ -8,6 +8,25 @@ tags: [standard, infrastructure, repository]
 **适用范围**: `packages/{domain}/src/server/infrastructure/adapters/`（旧模块在收敛期间可能暂时保留 `src/infrastructure-server/`）
 **读者**: 开发人员, AI 助手
 
+## Repository-native Engineering Governance input
+
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
+
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+```
+
+ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
+active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+
 ## 1. 核心职责
 
 仓储层是领域模型与持久化技术之间的适配器。它将领域对象的生命周期管理委托给数据库（Prisma / PowerSync），同时向应用层暴露与技术无关的接口。
@@ -15,9 +34,9 @@ tags: [standard, infrastructure, repository]
 ## 2. 架构位置
 
 ```text
-server/application  →  server/domain (IRuleRepository 接口)
+server/application  →  server/domain (IGoalRepository 接口)
                            ↑
-server/infrastructure (RulePrismaRepository 实现)
+server/infrastructure (GoalPrismaRepository 实现)
 ```
 
 - 接口定义在 `server/domain/repositories/`（领域层决定"需要什么"）
@@ -33,10 +52,16 @@ server/infrastructure (RulePrismaRepository 实现)
 
 **机制**: `save()` 作为模板方法，先调 `persist()`（子类实现），再自动 `publishDomainEvents()`。
 
-- 参考实现: [TaskTemplatePrismaRepository](../../../packages/task/src/infrastructure-server/adapters/prisma/task-template-prisma.repository.ts)
-- 参考实现: [GoalPrismaRepository](../../../packages/goal/src/infrastructure-server/adapters/prisma/goal-prisma.repository.ts)
+- 参考实现: [TaskTemplatePrismaRepository](../../../packages/task/src/server/infrastructure/adapters/prisma/task-template-prisma.repository.ts)
+- 参考实现: [GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
 
 ### 3.2 结构化异常 + 边界 Result（推荐）
+
+The Rule/RuleRevision snippets and Product links below are retained historical compatibility
+examples, not native Engineering inputs. Surviving owner evidence includes
+[GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
+and [Goal composition root](../../../packages/goal/src/server/infrastructure/goal.module.ts).
+The same domain/adapter boundaries apply to real owner implementations.
 
 仓储方法应返回普通的 `Promise<T>` / `Promise<T | null>` / `Promise<void>`。
 仓储内部可以 `try/catch`，但失败时应抛出**结构化异常**，而不是返回 `Result<T>`。
@@ -73,7 +98,7 @@ async execute(req: GetRuleReq): Promise<Result<GetRuleRes>> {
 ```
 
 - 参考实现: [RulePrismaRepository](../../../packages/governance/src/server/infrastructure/adapters/prisma/rule-prisma.repository.ts)
-- 参考实现: [createScheduleModule](../../../packages/schedule/src/infrastructure-server/schedule.module.ts)
+- 参考实现: [createScheduleModule](../../../packages/schedule/src/server/infrastructure/schedule.module.ts)
 - 共享工具: [resultify](../../../packages/utils/src/result/resultify.ts)
 
 ### 3.3 Mapper 静态类
@@ -84,9 +109,15 @@ async execute(req: GetRuleReq): Promise<Result<GetRuleRes>> {
 
 ```typescript
 export class RulePrismaMapper {
-  static toDomain(raw: PrismaRule): Rule { /* 反序列化 + 重建值对象 */ }
-  static toPersistence(rule: Rule): Omit<PrismaRule, 'createdAt' | 'updatedAt'> { /* 序列化 */ }
-  static toDomainMany(raws: PrismaRule[]): Rule[] { return raws.map(r => this.toDomain(r)); }
+  static toDomain(raw: PrismaRule): Rule {
+    /* 反序列化 + 重建值对象 */
+  }
+  static toPersistence(rule: Rule): Omit<PrismaRule, 'createdAt' | 'updatedAt'> {
+    /* 序列化 */
+  }
+  static toDomainMany(raws: PrismaRule[]): Rule[] {
+    return raws.map((r) => this.toDomain(r));
+  }
 }
 ```
 
@@ -119,7 +150,7 @@ protected async persist(goal: Goal): Promise<void> {
 }
 ```
 
-- 参考实现: [GoalPrismaRepository.persist()](../../../packages/goal/src/infrastructure-server/adapters/prisma/goal-prisma.repository.ts)
+- 参考实现: [GoalPrismaRepository.persist()](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
 
 ### 3.6 跨实体原子保存（saveWithXxx）
 
@@ -131,7 +162,7 @@ protected async persist(goal: Goal): Promise<void> {
 
 仓储接口暴露 `withTransaction(fn)` 方法，创建包装了事务客户端的新仓储实例。调用方自行决定是否需要事务。
 
-- 参考实现: [ScheduleTaskPrismaRepository.withTransaction()](../../../packages/schedule/src/infrastructure-server/adapters/prisma/schedule-task-prisma.repository.ts)
+- 参考实现: [ScheduleTaskPrismaRepository.withTransaction()](../../../packages/schedule/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.ts)
 
 ### 3.8 组合根（Composition Root）
 
@@ -141,7 +172,7 @@ protected async persist(goal: Goal): Promise<void> {
 
 ```typescript
 export interface GovernanceModuleDependencies {
-  readonly ruleRepository: IRuleRepository;
+  readonly ruleRepository: IGoalRepository;
   readonly revisionRepository: IRuleRevisionRepository;
   readonly runtimeAdapters?: GovernanceRuntimeAdaptersInput;
 }
@@ -164,13 +195,13 @@ export function createGovernanceModule(deps: GovernanceModuleDependencies): Gove
 
 ## 4. 命名规范
 
-| 元素 | 规范 | 示例 |
-|------|------|------|
-| 仓储接口 | `I{Name}Repository` | `IRuleRepository` |
-| 仓储实现 | `{Name}{Tech}Repository` | `RulePrismaRepository`, `PowerSyncRuleRepository` |
-| Mapper 类 | `{Name}{Tech}Mapper` | `RulePrismaMapper`, `PowerSyncRuleMapper` |
-| 文件名 | `kebab-case` | `rule-prisma.repository.ts` |
-| 接口文件 | `i-{name}.repository.ts` | `i-rule-repository.ts` |
+| 元素      | 规范                     | 示例                                              |
+| --------- | ------------------------ | ------------------------------------------------- |
+| 仓储接口  | `I{Name}Repository`      | `IGoalRepository`                                 |
+| 仓储实现  | `{Name}{Tech}Repository` | `RulePrismaRepository`, `PowerSyncRuleRepository` |
+| Mapper 类 | `{Name}{Tech}Mapper`     | `RulePrismaMapper`, `PowerSyncRuleMapper`         |
+| 文件名    | `kebab-case`             | `rule-prisma.repository.ts`                       |
+| 接口文件  | `i-{name}.repository.ts` | `i-rule-repository.ts`                            |
 
 ## 5. 注释规范
 

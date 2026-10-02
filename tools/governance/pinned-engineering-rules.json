@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "path": "tools/governance/engineering-rules.json",
+      "semanticHash": "sha256:8b5309fab404a4ec296740c9cb552c54ce7eed6efe55258c8a22379f4a0aac74"
+    }
+  ]
+}

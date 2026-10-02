@@ -10,7 +10,26 @@ updated: 2026-09-11T00:00:00+09:00
 
 # Governance 快速参考卡
 
-## 一页结构图
+## Repository-native Engineering Governance input
+
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
+
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+```
+
+ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
+active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+
+## Product Governance compatibility — 一页结构图
 
 | seam / 层             | 目录 / 入口                                       | 负责什么                                                                      |
 | --------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -38,7 +57,7 @@ Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 
 
 对应 anti-drift gate：`packages/governance/src/reference-module-invariants.surface.spec.ts` 与 `server/infrastructure/__tests__/governance-persistence-parity.spec.ts`。任何系统级 feature architecture 改造，应先确保这两类 reference gate 仍成立。
 
-## Published GovernanceRuleBundle
+## Legacy Published GovernanceRuleBundle (compatibility)
 
 - schema：`GovernanceRuleBundle` v1；
 - 内容：仅 Active Rule + revision/provenance + code/severity/tags/reference path + examples；
@@ -47,8 +66,8 @@ Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 
 - IPC：`governance:rule-bundle:export`；
 - client：`GovernanceClientPort.exportRuleBundle()`；
 - 生成过程严格只读；seed rule 没有历史 revision 时显式返回 `revisionCount: 0` / `latestRevision: null`；
-- CI/engineering governance 不读取 live Rule DB；当前固定消费 `tools/governance/published/governance-rule-bundle.v1.json`，semantic hash 由 `tools/governance/pinned-rule-bundles.json` 固定；
-- Rule → engineering check 必须在 `engineering-rule-adapters.json` 显式映射；severity 不自动等于 enforcement，未映射 Rule 只报告为 `unmapped (non-enforcing)`；
+- Legacy compatibility tests 不读取 live Rule DB；保留历史输入 `tools/governance/published/governance-rule-bundle.v1.json`，semantic hash 由 `tools/governance/pinned-rule-bundles.json` 固定；
+- Legacy Rule → engineering check 在 `engineering-rule-adapters.json` 显式映射；severity 不自动等于 enforcement，未映射 Rule 只报告为 `unmapped (non-enforcing)`；
 - `DDD-003` 当前只覆盖 `package-internal-boundary` 的 `partial` 子集；原始 `package-internal-boundary-audit.mjs` 仍可独立运行；
 - `--mode check` 用于 CI、`--mode report` 输出机器可读报告、`--mode autofix-proposal` 仅输出 review-required proposal，禁止直接修改产品源码。
 

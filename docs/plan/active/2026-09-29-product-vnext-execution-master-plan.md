@@ -1459,6 +1459,21 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 
 **Dependencies:** GOV-7901.
 
+**Execution (2026-10-02): Accepted / frozen / non-destructive.** B1/B2 native
+`engineering-rules.json` + independent semantic pin now own the active Engineering Governance
+input; the root governance gate no longer consumes the Product Governance published bundle,
+Product DB, or exporter. B3 preserves legacy/native parity for all five rules and all three CLI
+modes over real Goal owner fixtures while proving the active native import closure can run without
+Product Governance packages/contracts/schema/export/snapshot, network, or filesystem writes. B4
+real-owner vertical-slice policy remains proposal-only; AGENT Governance-first policy is unchanged.
+B5 root command/source audits are native and B6 retargets the six maintained governance docs while
+retaining clearly labelled Product compatibility/history. Current inventory is 55 groups / 781
+paths; B4/B5/B6 Product policy/presence/doc residuals stay MIGRATE_FIRST. Independent acceptance:
+focused 4 files / 85 tests, governance-tools 24 files / 244 tests, 1,349-file inventory, target/docs/
+source/dependency/inventory/diff checks, and uncached full `memoflow:governance-check` all pass.
+ADR-113 remains Proposed, `destructiveAllowed=false`, and GOV-7903 remains blocked. Evidence:
+[GOV-7902 input decoupling](../archive/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md).
+
 ---
 
 ## PVC-GOV-7903 — Destructive Product Governance retirement

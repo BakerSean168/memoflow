@@ -403,3 +403,24 @@ The accepted branch is ready for commit and batch fast-forward by ChatGPT Web. T
 inventory intentionally remains under `docs/plan/active/` because GOV-7902/GOV-7903 still consume
 it as the maintained blast-radius and B1–B6 decision baseline. ADR-113 remains Proposed; GOV-7903
 stays blocked and no destructive retirement is authorized.
+
+## Inventory evolution consumed by GOV-7902 — implementation review pending
+
+The accepted GOV-7901 historical baseline above remains **54 groups / 770 paths**; its
+acceptance evidence and baseline SHA are unchanged. GOV-7902 adds eleven KEEP_ENGINEERING
+native source/adapter/audit/test paths (including the extracted shared pure adapter) and
+one SHARED active plan path. B1/B2/B3 legacy consumers/metadata/snapshot/bridge tests become
+SHARED compatibility/parity evidence, retaining their B identifiers and source/generated
+markers. Current inventory: **55 groups / 781 paths** — RETIRE 29/193,
+KEEP_ENGINEERING 5/386, SHARED 18/193, MIGRATE_FIRST 3/9.
+
+The remaining MIGRATE_FIRST groups are B4 active Governance-first policy/presence tests,
+B5 root Product documentation/presence guards, and B6 retained reference-policy docs.
+Native root inputs and the six document migrations are implemented; removing these
+residual Product guards requires ADR acceptance. Exact classification locks evolve with
+ownership; reference/binary patterns, containment, live Git scanning, sourceOfTruth and
+destructiveAllowed=false are preserved. The full-repository test has a 30-second timeout
+matching its pre-existing Git timeout to support concurrent root-gate validation.
+
+GOV-7902 evidence: [native input decoupling](2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md).
+This inventory evolution neither reaccepts GOV-7901 nor authorizes GOV-7903.

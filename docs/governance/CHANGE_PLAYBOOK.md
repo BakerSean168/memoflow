@@ -10,6 +10,38 @@ updated: 2026-07-06T00:00:00+08:00
 
 # Governance 变更手册
 
+## Repository-native Engineering Governance input
+
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
+
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+```
+
+ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
+active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+
+## 更新 Engineering rule metadata
+
+Edit the native source, preserving sorted unique codes/tags and strict example shapes.
+Review semantic changes, then regenerate only the native pin:
+`node tools/governance/engineering-rule-source-audit.mjs --write`.
+Run native source/parity/isolation tests and `pnpm nx run memoflow:governance-check`.
+Legacy Product snapshot/pins stay as compatibility evidence and are not regenerated here.
+
+## Product Governance compatibility maintenance
+
+The following procedures describe the physically retained Product feature, not active
+Engineering rule input ownership. They remain subject to AGENT.md and the ADR-113 gate.
+
 ## 新增规则字段
 
 1. 更新 `packages/contracts/src/modules/governance/` 中对应 DTO / Zod schema / response schema
