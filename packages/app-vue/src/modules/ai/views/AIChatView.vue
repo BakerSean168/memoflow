@@ -160,7 +160,7 @@
         </div>
       </div>
 
-      <Teleport v-if="shellComposerMount" :to="shellComposerMount">
+      <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -184,29 +184,6 @@
           @remove-context-entity="removeContextEntity"
         />
       </Teleport>
-      <AIFooterComposer
-        v-else
-        ref="composerRef"
-        v-model="chatMessage"
-        :loading="chatLoading"
-        :can-send="canSendMessage"
-        :attachments="composerAttachments"
-        :context-entities="composerContextEntities"
-        :recent-goals="referenceGoalList"
-        :recent-tasks="referenceTaskList"
-        :recent-knowledge-notes="referenceKnowledgeNoteList"
-        :model-groups="modelGroups"
-        :selected-model-key="selectedModelKey"
-        :density="composerDensity"
-        @send="handleComposerSend"
-        @stop="stopGenerating"
-        @select-model="selectModel"
-        @open-settings="openAISettings"
-        @add-files="addComposerFiles"
-        @remove-attachment="removeComposerAttachment"
-        @toggle-context-entity="toggleExplicitContextEntity"
-        @remove-context-entity="removeContextEntity"
-      />
     </section>
 
     <Teleport :to="shellWorkflowMount ?? 'body'" :disabled="!shellWorkflowMount">

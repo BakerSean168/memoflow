@@ -1423,6 +1423,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** 可与 AI native slices 并行，但建议在结构稳定后合并。
 
+**Execution (2026-10-02): Accepted / frozen.** `AIChatView` 已从 Teleport + `v-else` 两份重复 `AIFooterComposer` 收敛为一个逻辑 composer mount path：同一 `Teleport` 在 shell composer host 存在时挂载到 host，不存在时通过 `disabled` 原地渲染，props/events/ref 只保留一个事实源。Composer 本身已使用 `semanticElevationClass('floating')`，本票未引入任何 bespoke rgba/shadow 或 product behavior 变化。Acceptance：focused App-Vue 3 files / 39 tests、uncached app-vue typecheck、targeted lint/format、1,345-file inventory、diff check、full governance 全绿。Evidence: [AI-8201 composer host/elevation cleanup](../archive/2026-10-02-pvc-ai-8201-composer-host-elevation.md).
+
 ---
 
 # 14. Parallel gated track — Product Governance retirement

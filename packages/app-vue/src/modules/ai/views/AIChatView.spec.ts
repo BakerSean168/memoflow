@@ -36,6 +36,7 @@ describe('AIChatView Mastra-native workbench', () => {
     resolve(__dirname, '../components/AIKnowledgeCapturePanel.vue'),
     'utf8',
   );
+  const composer = readFileSync(resolve(__dirname, '../components/AIFooterComposer.vue'), 'utf8');
 
   it('composes only canonical workflow projections in the right workbench', () => {
     expect(source).toContain('AIGoalWorkflowPanel');
@@ -139,6 +140,18 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('getActiveSurface: () =>');
     expect(source).toContain("shellStore.panelSurface !== 'business'");
     expect(source).not.toContain('ai-chat-tool-menu-trigger');
+  });
+
+  it('owns one composer mount path with shell teleport and local disabled fallback', () => {
+    expect(source.match(/<AIFooterComposer/g)).toHaveLength(1);
+    expect(source).toContain(
+      '<Teleport :to="shellComposerMount ?? \'body\'" :disabled="!shellComposerMount">',
+    );
+    expect(source).not.toContain('<Teleport v-if="shellComposerMount"');
+    expect(source).not.toMatch(/<AIFooterComposer[\s\S]*?v-else/);
+    expect(composer).toContain("semanticElevationClass('floating')");
+    expect(composer).not.toContain('rgba(');
+    expect(composer).not.toMatch(/shadow-\[[^\]]*rgba/);
   });
 
   it('preserves mobile conversation navigation without runtime-history rows', () => {
