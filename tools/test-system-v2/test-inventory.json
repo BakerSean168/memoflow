@@ -168,6 +168,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/task-plan-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -983,6 +993,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/stable-knowledge-note-ref-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/task-plan-mutation.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3791,6 +3809,14 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useShellRouterSync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/useTaskNativeSurface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -10291,6 +10317,16 @@
       ]
     },
     {
+      "path": "packages/task/src/application-client/task-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/client/task-client-browser-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11913,7 +11949,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 74
+      "fileCount": 75
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12032,7 +12068,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 84
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12291,14 +12327,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 74
+      "fileCount": 75
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 89
+      "fileCount": 90
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12333,7 +12369,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 272
+      "fileCount": 273
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12487,7 +12523,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 84
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12531,6 +12567,7 @@
       "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
+      "apps/api/src/modules/ai/task-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
       "apps/api/src/modules/powersync/crud-executor.routine-schedule.spec.ts",
@@ -13003,6 +13040,7 @@
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
+      "packages/task/src/application-client/task-client-service.spec.ts",
       "packages/task/src/client/task-client-browser-boundary.surface.spec.ts",
       "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
@@ -13088,7 +13126,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1157,
+    "unit": 1161,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

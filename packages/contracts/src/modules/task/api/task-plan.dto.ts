@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
+import { brandedId, ID_PREFIXES } from '../../../primitives';
 import type { IdentityId, GoalId, KeyResultId, TaskPlanId } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
@@ -20,7 +20,7 @@ export { TaskPlanScheduleSchema };
 // Public transport schema - NO identityId (injected from Context)
 export const CreateTaskPlanSchema = z
   .object({
-    id: brandedId<TaskPlanId>().optional(),
+    id: brandedId<TaskPlanId>(ID_PREFIXES.TaskPlanId).optional(),
     name: z.string().min(1, '标题不能为空'),
     description: z.string().optional().nullable(),
     schedule: TaskPlanScheduleSchema,

@@ -1,4 +1,13 @@
-import { computed, ref } from 'vue';
+import { TASK_SERVICE_KEY } from '../../../di/keys';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { useTaskNativeSurface } from '../../../layouts/shell/useTaskNativeSurface';
+import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
+import {
+  CreateTaskPlanSchema,
+  TaskGoalProgressConfigurationSchema,
+} from '@memoflow/contracts/task';
+import type { TaskNativeEditSession } from '../../task/composables/taskNativeEditSession';
+import { computed, onScopeDispose, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import {
@@ -14,6 +23,133 @@ import { getAIErrorMessage, getAIWorkflowFailureMessage } from './error';
 /** Thin presentation projection for the durable task.create Mastra Workflow. */
 export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
   const { t, locale } = useI18n();
+  const nativeSurface = useTaskNativeSurface();
+  const taskService = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
+  const labelCatalog = useLabelCatalog();
+  let nativeSession: TaskNativeEditSession | null = null;
+  let projectedRunId: string | null = null;
+  let projectedRevision: number | null = null;
+  let projectionEpoch = 0;
+  let nativeProjection: Promise<void> = Promise.resolve();
+  let pendingLabelNames: string[] = [];
+  type OwnerAttempt = { runId: string; revision: number; taskId: string };
+  let pendingOwnerAttempt: OwnerAttempt | null = null;
+  let submitted: OwnerAttempt | null = null;
+  const taskOwnerAttemptPending = ref(false);
+  const taskOwnerSubmitted = ref(false);
+
+  function retireNativeReview() {
+    ++projectionEpoch;
+    try {
+      nativeSession?.setEditingBlocked(false);
+      nativeSession?.requestCancel();
+    } catch {
+      /* Already retired by owner. */
+    }
+    nativeSession = null;
+    projectedRunId = null;
+    projectedRevision = null;
+    pendingOwnerAttempt = null;
+    submitted = null;
+    taskOwnerAttemptPending.value = false;
+    taskOwnerSubmitted.value = false;
+  }
+  onScopeDispose(retireNativeReview);
+  function liveSession(): TaskNativeEditSession {
+    if (!nativeSession || projectedRunId !== taskWorkflowRun.value?.runId)
+      throw new Error('Open native Task review before confirming');
+    nativeSession.readDraftState();
+    return nativeSession;
+  }
+  async function probeOwner(attempt: OwnerAttempt): Promise<boolean> {
+    const owner = await taskService.getPlan(attempt.taskId);
+    if (!owner.ok) {
+      if (owner.error.code === 'NOT_FOUND') return false;
+      throw owner.error;
+    }
+    if (String(owner.data.id) !== attempt.taskId)
+      throw new Error('Created Task does not match workflow owner identity');
+    return true;
+  }
+  function rememberSubmitted(attempt: OwnerAttempt) {
+    submitted = attempt;
+    pendingOwnerAttempt = null;
+    taskOwnerAttemptPending.value = false;
+    taskOwnerSubmitted.value = true;
+  }
+  async function projectNativeReview(run: Extract<AIWorkflowRunView, { kind: 'task.create' }>) {
+    const review = run.suspension;
+    if (review?.type !== 'task_draft_review') return;
+    if (nativeSession && projectedRunId === run.runId && projectedRevision === review.revision) {
+      try {
+        nativeSession.readDraftState();
+      } catch {
+        nativeSession = null;
+      }
+      if (nativeSession) {
+        await nativeSession.focus('title');
+        return;
+      }
+    }
+    const epoch = ++projectionEpoch;
+    const attempt = {
+      runId: run.runId,
+      revision: review.revision,
+      taskId: review.ownerCreate.taskId,
+    };
+    const exists = await probeOwner(attempt);
+    if (epoch !== projectionEpoch) return;
+    if (exists) {
+      rememberSubmitted(attempt);
+      return;
+    }
+    const labels = await labelCatalog.existingNames(review.draft.task.labels);
+    if (epoch !== projectionEpoch) return;
+    const session = await nativeSurface.openCreate();
+    if (epoch !== projectionEpoch) {
+      session.requestCancel();
+      return;
+    }
+    session.coordinateSubmit(confirmTaskAgentRun, cancelTaskAgentRun);
+    const task = review.draft.task;
+    session.patch({
+      title: task.title,
+      description: task.description ?? '',
+      importance: task.importance,
+      schedule: task.schedule,
+      reminderConfig: task.reminderConfig ?? null,
+      labelIds: labels.flatMap((item) => (item.label ? [item.label.id] : [])),
+      goalBinding: task.goalBinding
+        ? {
+            goalId: task.goalBinding.goalId,
+            keyResultId: task.goalBinding.keyResultId,
+            progressRule: TaskGoalProgressConfigurationSchema.parse(task.goalBinding).progressRule,
+          }
+        : null,
+    });
+    pendingLabelNames = labels.filter((item) => !item.label).map((item) => item.name);
+    nativeSession = session;
+    projectedRunId = run.runId;
+    projectedRevision = review.revision;
+  }
+  async function openTaskNativeReview() {
+    const run = taskWorkflowRun.value;
+    if (
+      !run ||
+      run.suspension?.type !== 'task_draft_review' ||
+      taskAgentResuming.value ||
+      submitted ||
+      pendingOwnerAttempt
+    )
+      return;
+    try {
+      nativeProjection = projectNativeReview(run);
+      await nativeProjection;
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+    }
+  }
+
   const taskWorkflowRun = ref<Extract<AIWorkflowRunView, { kind: 'task.create' }> | null>(null);
   const taskWorkflowStage = ref<TaskWorkflowStage>('collect');
   const clarificationAnswers = ref<string[]>([]);
@@ -32,8 +168,9 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     editableTask.value = TaskPlanTaskSchema.parse(draft.task);
   }
 
-  function projectRun(run: AIWorkflowRunView | null): void {
+  async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
     if (!run || run.kind !== 'task.create') {
+      retireNativeReview();
       taskWorkflowRun.value = null;
       taskWorkflowStage.value = 'collect';
       clarificationAnswers.value = [];
@@ -61,11 +198,15 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       clarificationAnswers.value = [];
     }
     options.scrollMessagesToBottom();
+    if (openNative && run.suspension?.type === 'task_draft_review') {
+      nativeProjection = projectNativeReview(run);
+      await nativeProjection;
+    }
   }
   async function syncTaskWorkflowRun(runId: string): Promise<void> {
     if (!runId) return;
     try {
-      projectRun(await options.workflowRuntime.get({ runId }));
+      await projectRun(await options.workflowRuntime.get({ runId }));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     }
@@ -132,8 +273,27 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
   }
 
   function buildEditedDraftContent(draft: TaskPlanDraft) {
+    const native = liveSession().readDraftState().draft;
     return TaskPlanDraftContentSchema.parse({
-      task: editableTask.value ?? draft.task,
+      task: {
+        ...draft.task,
+        title: native.title,
+        description: native.description || null,
+        importance: native.importance,
+        schedule: native.schedule,
+        reminderConfig: native.reminderConfig ?? null,
+        goalBinding: native.goalBinding ?? null,
+        labels: [
+          ...new Set([
+            ...(native.labelIds ?? []).map((id) => {
+              const label = labelCatalog.labels.value.find((item) => item.id === id);
+              if (!label) throw new Error('Selected Task label is unavailable');
+              return label.name;
+            }),
+            ...pendingLabelNames,
+          ]),
+        ],
+      },
       rationale: draft.rationale,
       warnings: [...draft.warnings],
     });
@@ -141,7 +301,10 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
 
   function canonicalDraftContent(draft: TaskPlanDraft) {
     const { revision: _revision, ...content } = draft;
-    return TaskPlanDraftContentSchema.parse(content);
+    return TaskPlanDraftContentSchema.parse({
+      ...content,
+      task: { ...content.task, description: content.task.description || null },
+    });
   }
 
   async function flushStructuredEdits(): Promise<Extract<
@@ -158,7 +321,9 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       runId: run.runId,
       command: { type: 'edit_structured', patch: edited },
     });
-    projectRun(next);
+    await projectRun(next, false);
+    if (next.kind === 'task.create' && next.suspension?.type === 'task_draft_review')
+      projectedRevision = next.suspension.revision;
     return next.kind === 'task.create' ? next : null;
   }
 
@@ -177,7 +342,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
         modelId: options.selectedModel.value.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
-      projectRun(run);
+      await projectRun(run);
       if (run.kind === 'task.create' && run.suspension?.type === 'task_draft_review')
         await options.maybeRenameCurrentConversation(run.suspension.draft.task.title);
     } catch (error) {
@@ -194,7 +359,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     taskAgentResuming.value = true;
     try {
       const next = await options.workflowRuntime.resume({ runId: run.runId, command });
-      projectRun(next);
+      await projectRun(next);
       if (next.kind === 'task.create' && next.status === 'completed' && next.result) {
         const createdTaskPlanId = Object.values(next.result.referenceMap)[0];
         if (createdTaskPlanId) await options.openCreatedTask?.(createdTaskPlanId);
@@ -206,40 +371,104 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     }
   }
   async function confirmTaskAgentRun(): Promise<void> {
-    const current = taskWorkflowRun.value;
-    if (!current || !taskAgentWaitingForApproval.value || taskAgentResuming.value) return;
+    let run = taskWorkflowRun.value;
+    if (!run || !taskAgentWaitingForApproval.value || taskAgentResuming.value) return;
     taskAgentResuming.value = true;
     try {
-      const run = await flushStructuredEdits();
-      if (!run || run.status !== 'suspended' || run.suspension?.type !== 'task_draft_review')
+      if (pendingOwnerAttempt && (await probeOwner(pendingOwnerAttempt)))
+        rememberSubmitted(pendingOwnerAttempt);
+      if (!submitted) {
+        await nativeProjection;
+        const session = liveSession();
+        session.setEditingBlocked(true);
+        if (!pendingOwnerAttempt) run = await flushStructuredEdits();
+        if (!run || run.suspension?.type !== 'task_draft_review') return;
+        const review = run.suspension;
+        const attempt = {
+          runId: run.runId,
+          revision: review.revision,
+          taskId: review.ownerCreate.taskId,
+        };
+        const expectedDraft = session.readDraftState().draft;
+        let saved;
+        try {
+          // requestSubmit synchronously takes the native owner's busy lock.
+          session.setEditingBlocked(false);
+          saved = await session.requestSubmit({
+            createId: CreateTaskPlanSchema.shape.id.unwrap().parse(attempt.taskId),
+            pendingLabelNames: [...pendingLabelNames],
+            expectedDraft,
+            onCreateAttempt: () => {
+              pendingOwnerAttempt = attempt;
+              taskOwnerAttemptPending.value = true;
+              session.setEditingBlocked(true);
+            },
+          });
+        } catch (error) {
+          if (!pendingOwnerAttempt || !(await probeOwner(pendingOwnerAttempt))) throw error;
+          rememberSubmitted(pendingOwnerAttempt);
+        }
+        if (saved && String(saved.id) === attempt.taskId) rememberSubmitted(attempt);
+        else if (!submitted) {
+          if (!pendingOwnerAttempt || !(await probeOwner(pendingOwnerAttempt))) return;
+          rememberSubmitted(pendingOwnerAttempt);
+        }
+      }
+      if (
+        !run ||
+        run.suspension?.type !== 'task_draft_review' ||
+        submitted?.runId !== run.runId ||
+        submitted.revision !== run.suspension.revision
+      )
         return;
       const next = await options.workflowRuntime.resume({
         runId: run.runId,
         command: { type: 'approve' },
       });
-      projectRun(next);
+      await projectRun(next, false);
       if (next.kind === 'task.create' && next.status === 'completed' && next.result) {
-        const createdTaskPlanId = Object.values(next.result.referenceMap)[0];
-        if (createdTaskPlanId) await options.openCreatedTask?.(createdTaskPlanId);
+        const id = Object.values(next.result.referenceMap)[0];
+        if (id) await options.openCreatedTask?.(id);
       }
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     } finally {
       taskAgentResuming.value = false;
+      try {
+        nativeSession?.setEditingBlocked(Boolean(pendingOwnerAttempt || submitted));
+      } catch {
+        /* Owner closed after persistence. */
+      }
     }
   }
   const submitTaskClarification = () =>
     resume({ type: 'answer', answers: clarificationAnswers.value.map((answer) => answer.trim()) });
   const retryTaskAgentExecution = () => resume({ type: 'retry' });
-  const reviseTaskAgentRun = (patch: Record<string, unknown>) =>
-    resume({ type: 'edit_structured', patch });
+  async function reviseTaskAgentRun() {
+    if (taskAgentResuming.value || submitted || pendingOwnerAttempt) return;
+    taskAgentResuming.value = true;
+    try {
+      liveSession().setEditingBlocked(true);
+      await flushStructuredEdits();
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+    } finally {
+      taskAgentResuming.value = false;
+      try {
+        nativeSession?.setEditingBlocked(false);
+      } catch {
+        /* Closed. */
+      }
+    }
+  }
   async function cancelTaskAgentRun(): Promise<void> {
     const run = taskWorkflowRun.value;
-    if (!run || taskAgentResuming.value) return;
+    if (!run || taskAgentResuming.value || pendingOwnerAttempt || submitted) return;
+    retireNativeReview();
     if (run.status === 'suspended') return resume({ type: 'cancel' });
     taskAgentResuming.value = true;
     try {
-      projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
+      await projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     } finally {
@@ -251,9 +480,26 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     linkedGoalId.value = goalId?.trim() || null;
   }
   function updateTaskDraft(task: TaskPlanTask): void {
-    editableTask.value = TaskPlanTaskSchema.parse(task);
+    if (taskAgentResuming.value || pendingOwnerAttempt || submitted) return;
+    const parsed = TaskPlanTaskSchema.parse(task);
+    liveSession().patch({
+      title: parsed.title,
+      description: parsed.description ?? '',
+      schedule: parsed.schedule,
+      importance: parsed.importance,
+      reminderConfig: parsed.reminderConfig,
+      goalBinding: parsed.goalBinding
+        ? {
+            goalId: parsed.goalBinding.goalId,
+            keyResultId: parsed.goalBinding.keyResultId,
+            progressRule: TaskGoalProgressConfigurationSchema.parse(parsed.goalBinding)
+              .progressRule,
+          }
+        : null,
+    });
   }
   function resetTaskWorkflowLocalState() {
+    retireNativeReview();
     taskWorkflowRun.value = null;
     taskWorkflowStage.value = 'collect';
     clarificationAnswers.value = [];
@@ -265,6 +511,9 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
   }
   return {
     taskWorkflowRun,
+    taskOwnerAttemptPending,
+    taskOwnerSubmitted,
+    openTaskNativeReview,
     taskWorkflowStage,
     clarificationAnswers,
     linkedGoalId,

@@ -1356,6 +1356,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** TASK-3901, AI-8001.
 
+**Execution (2026-10-02): Accepted / frozen.** Normal `task.create` review now uses the native full TaskPlanDialog owner session; Quick Task remains separate and untouched. Native Task validation/label resolution/persistence runs before Mastra approve, with revision-bound deterministic `ITaskPlanId_*` identity, canonical owner-truth probing, retry/restore guards and completed-task deep-linking. Independent review repaired the Task transport seam that had dropped caller-supplied IDs and the missing production deep-link wiring before acceptance. Final evidence: App-Vue 8 files / 79 tests, AI 3 / 22, contracts 2 / 15, Task owner/client/transport 3 / 57, API + Desktop adapters 10 tests, uncached serial typechecks for contracts/task/ai/app-vue, full governance, targeted ESLint/Prettier, 1,342-file inventory and diff checks. Isolated current-worktree E2E passed full owner-first create/approve/deep-link, refresh restore, and cancel-without-create. Evidence: [AI-8111 Task native workflow plan](../archive/2026-10-02-pvc-ai-8111-task-native-workflow.md).
+
 ---
 
 ## PVC-AI-8112 — Knowledge native AI capture workflow

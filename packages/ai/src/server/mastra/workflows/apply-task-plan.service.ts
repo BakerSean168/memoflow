@@ -130,6 +130,45 @@ export class ApplyTaskPlanService {
       return receipt({ workflowRunId, revision: draft.revision, referenceMap, failures: [] });
     }
 
+    try {
+      const owner = await this.mutations.readTaskPlan(expectedTaskId, context);
+      if (owner.ok) {
+        if (owner.data.taskId !== expectedTaskId) {
+          return receipt({
+            workflowRunId,
+            revision: draft.revision,
+            referenceMap,
+            failures: [
+              {
+                operation: 'task_plan',
+                draftRef,
+                code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
+                message: 'Task owner returned an unexpected deterministic entity ID',
+                retryable: false,
+              },
+            ],
+          });
+        }
+        referenceMap[draftRef] = expectedTaskId;
+        return receipt({ workflowRunId, revision: draft.revision, referenceMap, failures: [] });
+      }
+      if (owner.error.code !== 'NOT_FOUND') {
+        return receipt({
+          workflowRunId,
+          revision: draft.revision,
+          referenceMap,
+          failures: [failure(draftRef, owner.error)],
+        });
+      }
+    } catch (cause) {
+      return receipt({
+        workflowRunId,
+        revision: draft.revision,
+        referenceMap,
+        failures: [throwToFailure(draftRef, cause)],
+      });
+    }
+
     let labels;
     try {
       labels = await this.mutations.resolveLabels(draft.task.labels, context);

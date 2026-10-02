@@ -97,6 +97,7 @@ export class TaskPlanController {
     // Assemble internal input with identityId from Context
     const createInput: CreateTaskPlanInput = {
       identityId: IdentityId.of(ctx.identityId),
+      id: input.id,
       name: input.name,
       description: input.description,
       schedule: input.schedule,

@@ -93,6 +93,12 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(capturePanel).toContain('data-testid="knowledge-capture-agent-confirm-run"');
   });
 
+  it('wires completed Task workflow results to the canonical Task detail route', () => {
+    expect(viewComposable).toContain('openCreatedTask,');
+    expect(viewComposable).toContain('async function openCreatedTask(taskId: string)');
+    expect(viewComposable).toContain('await router.push(`/tasks/${taskId}`)');
+  });
+
   it('preserves durable goal HITL and completed-only deep-link behavior', () => {
     expect(goalPanel).toContain("suspension?.type === 'goal_draft_review'");
     expect(goalPanel).toContain("suspension?.type === 'recovery_required'");
@@ -154,5 +160,28 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(overlay).toBeGreaterThan(projection);
     expect(opening).toBeGreaterThan(overlay);
     expect(viewComposable).toContain('error instanceof AIWorkflowRestoreError &&');
+  });
+  it('persists authoritative Task pointer before recoverable native opening and wires native actions', () => {
+    const projection = viewComposable.indexOf('await taskWorkflow.projectRun(run, false)');
+    const persistence = viewComposable.indexOf(
+      'persistence.persistWorkflowState(conversationId)',
+      projection,
+    );
+    const opening = viewComposable.indexOf(
+      "if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview()",
+      projection,
+    );
+    expect(projection).toBeGreaterThan(0);
+    expect(persistence).toBeGreaterThan(projection);
+    expect(opening).toBeGreaterThan(persistence);
+    expect(source).toContain('@open-native-review="openTaskNativeReview"');
+    expect(taskPanel).not.toContain('AITaskDraftEditor');
+  });
+  it('guards Task conversation departure during owner/revision work and uses canonical dirty leave checks', () => {
+    expect(viewComposable).toContain(
+      'taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value',
+    );
+    expect(viewComposable).toContain('return canLeaveBusinessSurface(t)');
+    expect(viewComposable.match(/if \(!canLeaveTaskReview\(\)\) return/g)).toHaveLength(3);
   });
 });

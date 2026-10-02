@@ -154,6 +154,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     conversationShellSource: { loadShell: vi.fn(async () => null) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
+      readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
       resolveLabels: vi.fn(async (names: readonly string[]) =>
         ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
       ),

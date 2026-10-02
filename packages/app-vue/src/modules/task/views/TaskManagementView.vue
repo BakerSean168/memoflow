@@ -119,7 +119,9 @@
               :key="group.key"
               :data-testid="`task-occurrence-group-${group.key}`"
             >
-              <div class="flex items-center gap-2 border-b border-[hsl(var(--border-subtle))] px-1 pb-2">
+              <div
+                class="flex items-center gap-2 border-b border-[hsl(var(--border-subtle))] px-1 pb-2"
+              >
                 <h2 class="text-xs font-medium text-muted-foreground">
                   {{ group.label }}
                 </h2>
@@ -157,7 +159,9 @@
             </p>
           </div>
 
-          <div class="mt-4 flex items-center justify-between gap-3 border-t border-[hsl(var(--border-subtle))] pt-3">
+          <div
+            class="mt-4 flex items-center justify-between gap-3 border-t border-[hsl(var(--border-subtle))] pt-3"
+          >
             <p class="text-xs text-muted-foreground">
               {{ t('task.management.futureInSchedule') }}
             </p>
@@ -190,8 +194,12 @@
       @uncomplete="updateInspectedOccurrence(uncompleteOccurrence($event))"
       @missed="updateInspectedOccurrence(markOccurrenceMissed($event))"
       @skip="updateInspectedOccurrence(skipOccurrence($event))"
-      @checklist-change="(id, definitionId, completed, version) =>
-        updateInspectedOccurrence(setOccurrenceChecklistItem(id, definitionId, completed, version))"
+      @checklist-change="
+        (id, definitionId, completed, version) =>
+          updateInspectedOccurrence(
+            setOccurrenceChecklistItem(id, definitionId, completed, version),
+          )
+      "
     />
 
     <QuickTaskDialog
@@ -207,7 +215,11 @@
       :template="null"
       :saving="isSaving"
       :initial-goal-binding="createInitialGoalBinding"
+      :submit-owner="handleSubmit"
       @save="handleSubmit"
+      @dirty-change="fullCreateDirty = $event"
+      @busy-change="fullCreateBusy = $event"
+      @session-change="handleSessionChange"
       @cancel="closeDialog"
     />
     <TaskCompletionMeasurementDialog
@@ -218,9 +230,9 @@
 </template>
 
 <script setup lang="ts">
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { buildTaskPlanCreateRequest } from '../utils/task-plan-create-request';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onActivated, onDeactivated, onBeforeUnmount, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -235,8 +247,6 @@ import {
   RefreshCw,
 } from '@lucide/vue';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
 import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';
@@ -244,21 +254,20 @@ import TaskPlanRow from '../components/TaskPlanRow.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
-import type {
-  TaskPlanStateFilter,
-  TaskPlanViewModel,
-  TaskSurface,
-} from '../components/types';
+import type { TaskPlanStateFilter, TaskPlanViewModel, TaskSurface } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
+import { useTaskNativeSurfaceRegistration } from '../../../layouts/shell/useTaskNativeSurface';
+import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+import type {
+  TaskNativeEditSession,
+  TaskNativeSubmitContext,
+} from '../composables/taskNativeEditSession';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
-import {
-  mapTaskPlanDtoToViewModel,
-  toTaskPlanSchedulePayload,
-} from '../utils/task-plan-presentation';
+import { mapTaskPlanDtoToViewModel } from '../utils/task-plan-presentation';
 import {
   isTaskOccurrenceOnTodaySurface,
   isTaskOccurrenceOverdue,
@@ -268,7 +277,10 @@ import {
 import { endOfDayMs, isTodayMs, startOfDayMs } from '../../../shared/utils/product-time';
 import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
 import { unwrap } from '@memoflow/contracts/result';
-import { taskPlanQueryKeys, type TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
+import {
+  taskPlanQueryKeys,
+  type TaskPlanListQueryInput,
+} from '../../../platform/server-state/query-keys';
 import { TASK_TEMPLATE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
@@ -276,6 +288,28 @@ import { useStrictInject } from '../../../shared/utils/useStrictInject';
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const nativeSurface = useTaskNativeSurfaceRegistration();
+let unregisterSession: (() => void) | null = null;
+let surfaceActive = true;
+function handleSessionChange(session: TaskNativeEditSession | null) {
+  unregisterSession?.();
+  unregisterSession =
+    session && surfaceActive ? (nativeSurface?.register(route.fullPath, session) ?? null) : null;
+}
+onActivated(() => {
+  surfaceActive = true;
+});
+onDeactivated(() => {
+  surfaceActive = false;
+  handleSessionChange(null);
+});
+onBeforeUnmount(() => {
+  surfaceActive = false;
+  handleSessionChange(null);
+});
+const fullCreateDirty = ref(false);
+const fullCreateBusy = ref(false);
+
 const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
 
 const resolveIdentityScope = useServerStateIdentityScope();
@@ -326,7 +360,9 @@ const planStateFilters: Record<TaskPlanStateFilter, TaskPlanListQueryInput> = {
 };
 watch(
   [planStateFilter, labelFilterIds, queryGoalId, queryKeyResultId],
-  () => { planPage.value = 1; },
+  () => {
+    planPage.value = 1;
+  },
   { deep: true, flush: 'sync' },
 );
 const taskListParams = computed(() => ({
@@ -343,8 +379,16 @@ const {
   isLoading: templatesLoading,
   isError: templatesError,
   refetch: refetchTemplates,
-} = useTaskPlanListQuery({ params: taskListParams, enabled: () => activeSurface.value === 'plans' });
+} = useTaskPlanListQuery({
+  params: taskListParams,
+  enabled: () => activeSurface.value === 'plans',
+});
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
+usePanelSurfaceStatus(
+  computed(() =>
+    fullCreateBusy.value || isSaving.value ? 'busy' : fullCreateDirty.value ? 'dirty' : 'clean',
+  ),
+);
 const occurrenceOperations = useTaskOccurrences();
 const { fetchInstancesByDateRange: fetchOccurrencesByDateRange } = occurrenceOperations;
 const actionCoordinator = useTaskOccurrenceActionCoordinator({
@@ -416,17 +460,15 @@ const availableLabels = computed(() => {
   );
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 });
-const isLoading = computed(
-  () =>
-    activeSurface.value === 'plans'
-      ? templatesLoading.value
-      : instancesLoading.value || todayDetailsLoading.value,
+const isLoading = computed(() =>
+  activeSurface.value === 'plans'
+    ? templatesLoading.value
+    : instancesLoading.value || todayDetailsLoading.value,
 );
-const loadError = computed(
-  () =>
-    activeSurface.value === 'plans'
-      ? templatesError.value
-      : Boolean(instancesError.value) || todayDetailsError.value,
+const loadError = computed(() =>
+  activeSurface.value === 'plans'
+    ? templatesError.value
+    : Boolean(instancesError.value) || todayDetailsError.value,
 );
 
 function templateMatchesFilters(templateId: string): boolean {
@@ -596,6 +638,11 @@ function clearGoalScope() {
 function closeDialog() {
   showDialog.value = false;
   createInitialGoalBinding.value = null;
+  if (route.query.dialog === 'task-plan') {
+    const query = { ...route.query };
+    delete query.dialog;
+    void router.replace({ query, hash: route.hash });
+  }
 }
 
 function closeQuickTaskDialog() {
@@ -613,31 +660,15 @@ async function handleQuickSubmit({ title }: { title: string }) {
   await loadTodayOccurrences(true);
 }
 
-function goalBinding(vm: TaskPlanViewModel) {
-  if (!vm.goalBinding?.goalId) return null;
-  return {
-    goalId: vm.goalBinding.goalId as GoalId,
-    keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
-    progressRule: vm.goalBinding.keyResultId ? (TaskGoalProgressConfigurationSchema.parse(vm.goalBinding).progressRule) : null,
-  };
-}
-
-async function handleSubmit(vm: TaskPlanViewModel) {
-  const common = {
-    name: vm.title,
-    description: vm.description ?? null,
-    schedule: toTaskPlanSchedulePayload(vm),
-    reminderConfig: (vm.reminderConfig as never) ?? null,
-    importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
-    labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
-    goalBinding: goalBinding(vm),
-    checklist: vm.checklist,
-  };
+async function handleSubmit(vm: TaskPlanViewModel, context?: TaskNativeSubmitContext) {
+  const common = buildTaskPlanCreateRequest(vm, context?.createId);
+  context?.onCreateAttempt();
   const saved = await createPlanSafe(common);
   if (saved) {
     closeDialog();
     await reloadSurface();
   }
+  return saved?.plan.toDTO() ?? null;
 }
 async function abandon(id: string) {
   if (await abandonPlanSafe(id)) await refetchTemplates();
@@ -682,6 +713,7 @@ watch(
   () => route.query.dialog,
   (dialog) => {
     showQuickTaskDialog.value = dialog === 'quick-task';
+    showDialog.value = dialog === 'task-plan';
   },
   { immediate: true },
 );

@@ -1,3 +1,4 @@
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -227,6 +228,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     buildConversationTranscript: chatSession.buildConversationTranscript,
     scrollMessagesToBottom: chatSession.scrollMessagesToBottom,
     maybeRenameCurrentConversation,
+    openCreatedTask,
   });
 
   const knowledgeCaptureWorkflow = useAIKnowledgeCapture({
@@ -280,7 +282,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           break;
         case 'task.create':
           toolMode.value = 'task-create';
-          taskWorkflow.projectRun(run);
+          await taskWorkflow.projectRun(run, false);
           break;
         case 'knowledge.capture':
           toolMode.value = 'knowledge-capture';
@@ -291,6 +293,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       // Rebase or discard any stale overlay against the runtime revision.
       persistence.persistWorkflowState(conversationId);
       if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview();
+      if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview();
     } catch (error) {
       // Runtime failure is an explicit empty/blocked restore. The reset above
       // ensures no stale local run or draft remains visible as authority.
@@ -441,7 +444,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       !knowledgeCaptureWorkflow.knowledgeCaptureLoading.value,
   );
 
+  function canLeaveTaskReview(): boolean {
+    if (toolMode.value !== 'task-create') return true;
+    if (taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value) {
+      toast.info(t('shell.panel.busyTransitionHint'));
+      return false;
+    }
+    return canLeaveBusinessSurface(t);
+  }
+
   async function selectConversation(item: ConversationSummary) {
+    if (!canLeaveTaskReview()) return;
     persistence.suspendWorkflowPersistence.value = true;
     try {
       await chatSession.selectConversation(
@@ -460,11 +473,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   async function openRecentGoal(goalId: string) {
     if (goalId) await router.push(`/goals/${goalId}`);
   }
+  async function openCreatedTask(taskId: string) {
+    if (taskId) await router.push(`/tasks/${taskId}`);
+  }
   async function openRecentKnowledgeNote(resourceId: string) {
     await requestOpenKnowledgeNote(resourceId);
   }
 
   function startNewConversation(mode: WorkflowMode | string = 'chat') {
+    if (!canLeaveTaskReview()) return;
     const normalizedMode = normalizeWorkflowMode(mode);
     chatSession.startNewConversation(normalizedMode);
     resetWorkflowArtifacts();
@@ -473,6 +490,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   }
 
   function exitToolMode() {
+    if (!canLeaveTaskReview()) return;
     resetWorkflowArtifacts();
     toolMode.value = 'chat';
     if (!chatSession.chatConversationId.value && !chatSession.chatTimeline.value.length) {

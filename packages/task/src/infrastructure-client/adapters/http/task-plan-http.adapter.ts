@@ -32,7 +32,10 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
 
   constructor(private readonly httpClient: IResultHttpClient) {}
 
-  async getWorkspace(planId: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+  async getWorkspace(
+    planId: string,
+    request?: GetTaskWorkspaceReq,
+  ): Promise<Result<TaskPlanWorkspace>> {
     return this.httpClient.get(`/tasks/${planId}/workspace`, { params: request });
   }
 
@@ -48,7 +51,7 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
     return this.httpClient.get(this.baseUrl, { params });
   }
 
-  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>> {
+  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO | null>> {
     return this.httpClient.get(`${this.baseUrl}/${id}`);
   }
 

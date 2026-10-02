@@ -253,11 +253,18 @@
           :task-workflow-run="taskWorkflowRun"
           :editable-task="editableTask"
           :show-task-draft-editor="showTaskDraftEditor"
+          :busy="taskAgentResuming"
+          :owner-attempt-pending="taskOwnerAttemptPending"
+          :owner-submitted="taskOwnerSubmitted"
+          :clarification-answers="taskClarificationAnswers"
+          :can-submit-clarification="canSubmitTaskClarification"
+          @submit-clarification="submitTaskClarification"
+          @update-clarification-answer="(index, value) => (taskClarificationAnswers[index] = value)"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
           @update-task="updateStandaloneTaskDraft"
-          @edit-started="showTaskDraftEditor = true"
+          @open-native-review="openTaskNativeReview"
         />
         <AIKnowledgeCapturePanel
           :tool-mode="toolMode"
@@ -437,7 +444,14 @@ const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
 
 const {
   taskWorkflowRun,
+  taskAgentResuming,
   showTaskDraftEditor,
+  taskOwnerAttemptPending,
+  taskOwnerSubmitted,
+  clarificationAnswers: taskClarificationAnswers,
+  canSubmitTaskClarification,
+  submitTaskClarification,
+  openTaskNativeReview,
   editableTask,
   linkedGoalId,
   setLinkedGoalId,

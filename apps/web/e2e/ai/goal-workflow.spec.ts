@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
-import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema, TaskPlanDraftContentSchema } from '@memoflow/contracts/ai';
 import type {
   AIWorkflowRunView,
   GoalPlanDraft,
   GoalPlanExecutionFailure,
 } from '@memoflow/contracts/ai';
+import { CreateTaskPlanSchema, type CreateTaskPlanReq } from '@memoflow/contracts/task';
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
@@ -381,58 +382,65 @@ test.describe('AI Goal Workflow', () => {
       workflowEntry: createPendingTaskApprovalWorkflowEntry(),
       seedConversation: true,
     });
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Restored Mastra task workflow/i);
-    await expect(page.getByTestId('task-agent-confirm-run')).toBeVisible();
-
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Restored Mastra task workflow',
+    );
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.locator('#quick-task-form')).toHaveCount(0);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('ai-chat-view')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
-    await expect(workflowPanel).toContainText(/Restored Mastra task workflow/i);
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Restored Mastra task workflow',
+    );
+    expect(telemetry.ownerTaskCreateCount).toBe(0);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
-  test('[P0] completes task.create through the canonical Mastra Workflow panel', async ({
+  test('[P0] completes task.create through native full TaskPlanDialog before Mastra approve', async ({
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
-
     await sendComposerMessage(page, 'Create a weekly task to review the Mastra-only AI migration.');
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Review the Mastra migration/i);
-    await expect(page.getByTestId('task-agent-confirm-run')).toBeVisible();
-    await page.getByTestId('task-agent-confirm-run').click();
-
-    const result = page.getByTestId('task-workflow-result');
-    await expect(result).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(result).toContainText(/task-plan-e2e-mastra-1/i);
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Review the Mastra migration',
+    );
+    await page.getByTestId('task-recurrence-chip').click();
+    await expect(page.getByTestId('task-recurrence-popover')).toBeVisible();
+    await expect(page.locator('#task-recurrence-frequency')).toContainText(/week/i);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.locator('#quick-task-form')).toHaveCount(0);
+    // A manual native edit must be saved to Mastra before its fresh identity is submitted.
+    await page.getByTestId('task-plan-title-input').fill('Review the Mastra migration today');
+    await page.getByTestId('task-dialog-save-button').click();
+    await expect(dialog).not.toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect.poll(() => telemetry.taskWorkflowApproveCount).toBe(1);
+    expect(telemetry.ownerTaskCreateCount).toBe(1);
+    expect(telemetry.lastOwnerTaskCreateBody?.name).toBe('Review the Mastra migration today');
+    expect(telemetry.taskConfirmationEvents).toEqual(['owner_create', 'approve']);
+    const canonicalId = telemetry.lastOwnerTaskCreateBody?.id;
+    expect(canonicalId).toBeTruthy();
+    await expect(page).toHaveURL(new RegExp(`/tasks/${canonicalId}$`));
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
     expect(telemetry.taskWorkflowStartCount).toBe(1);
-    expect(telemetry.taskWorkflowApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
-  test('[P0] cancels task.create at approval without invoking a legacy runtime', async ({
+  test('[P0] cancels task.create at approval and closes native review without creating Task', async ({
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
-
     await sendComposerMessage(page, 'Draft a task but do not create it until I approve.');
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(page.getByTestId('task-agent-cancel-run')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await page.getByTestId('task-agent-cancel-run').click();
-    await expect(workflowPanel).toContainText(/cancelled/i, {
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    expect(telemetry.taskWorkflowCancelCount).toBe(1);
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect.poll(() => telemetry.taskWorkflowCancelCount).toBe(1);
+    expect(telemetry.ownerTaskCreateCount).toBe(0);
     expect(telemetry.taskWorkflowApproveCount).toBe(0);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
@@ -553,6 +561,9 @@ type GoalWorkflowMockOptions = {
 };
 
 type GoalWorkflowMockTelemetry = {
+  ownerTaskCreateCount: number;
+  lastOwnerTaskCreateBody: CreateTaskPlanReq | null;
+  taskConfirmationEvents: ('owner_create' | 'approve')[];
   ownerGoalCreateCount: number;
   lastOwnerGoalCreateBody: CreateGoalReq | null;
   goalConfirmationEvents: ('owner_create' | 'approve')[];
@@ -666,6 +677,20 @@ function createKnowledgeCaptureDraft(
   };
 }
 
+function taskOwnerIdentity(run: TaskWorkflowMockRun): string {
+  const bytes = createHash('sha256')
+    .update(
+      `memoflow:task.create:v2:${run.runId}:${run.draft.revision}:${run.draft.task.draftRef}:task_plan_create`,
+      'utf8',
+    )
+    .digest()
+    .subarray(0, 16);
+  bytes[6] = (bytes[6]! & 0x0f) | 0x80;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const hex = bytes.toString('hex');
+  return `ITaskPlanId_${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
 function createTaskReviewRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView {
   return {
     runId: mockRun.runId,
@@ -674,6 +699,10 @@ function createTaskReviewRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView {
     status: 'suspended',
     suspension: {
       type: 'task_draft_review',
+      ownerCreate: {
+        taskId: CreateTaskPlanSchema.shape.id.unwrap().parse(taskOwnerIdentity(mockRun)),
+        draftRef: mockRun.draft.task.draftRef,
+      },
       draft: mockRun.draft,
       warnings: mockRun.draft.warnings,
       revision: mockRun.draft.revision,
@@ -693,7 +722,7 @@ function createTaskCompletedRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      referenceMap: { [mockRun.draft.task.draftRef]: 'task-plan-e2e-mastra-1' },
+      referenceMap: { [mockRun.draft.task.draftRef]: taskOwnerIdentity(mockRun) },
       failures: [],
       retryable: false,
     },
@@ -1039,6 +1068,9 @@ async function installGoalWorkflowMocks(
   let conversationName = 'Goal Workflow Session';
   let generateGoalStep = options.seedConversation ? 1 : 0;
   const telemetry: GoalWorkflowMockTelemetry = {
+    ownerTaskCreateCount: 0,
+    lastOwnerTaskCreateBody: null,
+    taskConfirmationEvents: [],
     ownerGoalCreateCount: 0,
     lastOwnerGoalCreateBody: null,
     goalConfirmationEvents: [],
@@ -1057,6 +1089,22 @@ async function installGoalWorkflowMocks(
     knowledgeCaptureCancelCount: 0,
     legacyEndpointCallCount: 0,
   };
+  // Pass-through Task telemetry exercises the real owner API and test database.
+  await page.route(
+    (url) => url.pathname === '/api/v1/task-plans',
+    async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.fallback();
+        return;
+      }
+      telemetry.ownerTaskCreateCount += 1;
+      telemetry.lastOwnerTaskCreateBody = CreateTaskPlanSchema.parse(
+        route.request().postDataJSON(),
+      );
+      telemetry.taskConfirmationEvents.push('owner_create');
+      await route.continue();
+    },
+  );
   // Observe only native owner create; Goal reads/status/updates remain real API calls.
   await page.route(
     (url) => url.pathname === '/api/v1/goals',
@@ -1428,7 +1476,7 @@ async function installGoalWorkflowMocks(
       expect(request.input?.idea?.trim().length).toBeGreaterThan(0);
       telemetry.taskWorkflowStartCount += 1;
       const mockRun: TaskWorkflowMockRun = {
-        runId: `workflow-e2e-task-${telemetry.taskWorkflowStartCount}`,
+        runId: `workflow-e2e-task-${telemetry.taskWorkflowStartCount}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         conversationId: request.conversationId ?? conversationId,
         createdAt: Date.now(),
         draft: createTaskWorkflowDraft(),
@@ -1518,11 +1566,18 @@ async function installGoalWorkflowMocks(
         return;
       }
       if (commandType === 'approve') {
+        expect(telemetry.ownerTaskCreateCount).toBe(1);
+        expect(telemetry.lastOwnerTaskCreateBody?.id).toBe(taskOwnerIdentity(taskRun));
+        telemetry.taskConfirmationEvents.push('approve');
         telemetry.taskWorkflowApproveCount += 1;
         await fulfillJson(route, createTaskCompletedRun(taskRun));
         return;
       }
       if (commandType === 'edit_structured') {
+        const edited = TaskPlanDraftContentSchema.parse(
+          (route.request().postDataJSON() as { command: { patch: unknown } }).command.patch,
+        );
+        taskRun.draft = { ...edited, revision: taskRun.draft.revision + 1 };
         await fulfillJson(route, createTaskReviewRun(taskRun));
         return;
       }

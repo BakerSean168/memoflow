@@ -25,7 +25,10 @@ import type {
 export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
-  async getWorkspace(planId: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+  async getWorkspace(
+    planId: string,
+    request?: GetTaskWorkspaceReq,
+  ): Promise<Result<TaskPlanWorkspace>> {
     return this.ipcClient.invoke(TaskWorkspaceChannels.GET, { planId, ...request });
   }
 
@@ -39,7 +42,7 @@ export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
     return this.ipcClient.invoke(TaskChannels.PLAN_LIST, params);
   }
 
-  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>> {
+  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO | null>> {
     return this.ipcClient.invoke(TaskChannels.PLAN_GET, { id });
   }
 

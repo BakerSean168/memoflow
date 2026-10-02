@@ -2,6 +2,7 @@ import { defineComponent, h, ref, type Ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  AIWorkflowRunViewSchema,
   GoalPlanDraftSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
@@ -340,5 +341,43 @@ describe('useAIWorkflowPersistence', () => {
       PersistedWorkflowState
     >;
     expect(stored['conversation-1']).toEqual({ activeRunId: nextRun.runId });
+  });
+  it('persists a Task review pointer without introducing an AI business draft overlay', () => {
+    const { state, persistence } = setup();
+    state.toolMode.value = 'task-create';
+    state.taskWorkflowRun.value = AIWorkflowRunViewSchema.parse({
+      runId: 'task-run',
+      conversationId: 'conversation-1',
+      kind: 'task.create',
+      status: 'suspended',
+      createdAt: 1,
+      updatedAt: 1,
+      suspension: {
+        type: 'task_draft_review',
+        revision: 1,
+        ownerCreate: {
+          taskId: 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001',
+          draftRef: 'task:native',
+        },
+        warnings: [],
+        draft: {
+          revision: 1,
+          task: {
+            draftRef: 'task:native',
+            title: 'Native',
+            schedule: { kind: 'OneTime', date: '2026-10-02', timing: { kind: 'AllDay' } },
+          },
+        },
+      },
+    });
+    persistence.persistWorkflowState('conversation-1');
+    expect(JSON.parse(localStorage.getItem(AI_WORKFLOW_STORAGE_KEY) ?? '{}')).toEqual({
+      'conversation-1': { activeRunId: 'task-run' },
+    });
+    expect(persistence.restoreWorkflowState('conversation-1')).toEqual({ activeRunId: 'task-run' });
+    expect(state.taskWorkflowRun.value).toBeNull();
+    expect(JSON.parse(localStorage.getItem(AI_WORKFLOW_STORAGE_KEY) ?? '{}')).toEqual({
+      'conversation-1': { activeRunId: 'task-run' },
+    });
   });
 });

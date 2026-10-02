@@ -1,3 +1,4 @@
+import { CreateTaskPlanSchema } from '../../task';
 import { z } from 'zod';
 import {
   GoalCreateClientInputSchema,
@@ -303,6 +304,12 @@ export const AIWorkflowSuspensionSchema = z
     }),
     z.object({
       type: z.literal('task_draft_review'),
+      ownerCreate: z
+        .object({
+          taskId: CreateTaskPlanSchema.shape.id.unwrap(),
+          draftRef: TaskPlanDraftSchema.shape.task.shape.draftRef,
+        })
+        .strict(),
       draft: TaskPlanDraftSchema,
       warnings: z.array(z.string()).default([]),
       revision: z.number().int().positive(),
@@ -315,6 +322,16 @@ export const AIWorkflowSuspensionSchema = z
     }),
   ])
   .superRefine((suspension, ctx) => {
+    if (
+      suspension.type === 'task_draft_review' &&
+      (suspension.revision !== suspension.draft.revision ||
+        suspension.ownerCreate.draftRef !== suspension.draft.task.draftRef)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Task owner identity hints must match the current review revision and draftRef',
+      });
+    }
     if (suspension.type !== 'goal_draft_review') return;
     const refs = suspension.draft.keyResults.map((item) => item.draftRef);
     const ids = suspension.ownerCreate.keyResultIds;

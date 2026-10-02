@@ -22,6 +22,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
+import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
@@ -97,6 +98,7 @@ provide(DialogDraftScopeKey, activeTabId);
 
 const sync = useShellRouterSync();
 provideGoalNativeSurface();
+provideTaskNativeSurface();
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).

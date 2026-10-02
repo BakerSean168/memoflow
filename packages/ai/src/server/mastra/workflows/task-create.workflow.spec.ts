@@ -5,11 +5,16 @@ import { join } from 'node:path';
 import { Mastra } from '@mastra/core/mastra';
 import { RequestContext } from '@mastra/core/request-context';
 import { LibSQLStore } from '@mastra/libsql';
-import { TaskPlanDraftContentSchema, type TaskPlanningDecision } from '@memoflow/contracts/ai';
+import {
+  AIWorkflowSuspensionSchema,
+  TaskPlanDraftContentSchema,
+  type TaskPlanningDecision,
+} from '@memoflow/contracts/ai';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TaskPlannerPort, TaskPlannerRequest } from '../agents/task-planner.worker';
+import { taskWorkflowEntityId } from './deterministic-entity-id';
 import { ApplyTaskPlanService } from './apply-task-plan.service';
 import {
   TASK_CREATE_LIFECYCLE_STEP_ID,
@@ -79,10 +84,12 @@ function mastraRequestContext(requestId: string): RequestContext {
 }
 
 function mutationPort(): TaskPlanMutationPort & {
+  readTaskPlan: ReturnType<typeof vi.fn>;
   resolveLabels: ReturnType<typeof vi.fn>;
   createTaskPlan: ReturnType<typeof vi.fn>;
 } {
   return {
+    readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
     ),
@@ -398,5 +405,125 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
     expect(again.status).toBe('success');
     expect(again.referenceMap['task:weekly-report']).toBe(first.referenceMap['task:weekly-report']);
     expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Task owner-first apply replay', () => {
+  it('recognizes existing deterministic owner truth before labels and never creates again', async () => {
+    const port = mutationPort();
+    port.readTaskPlan.mockImplementation(async (id) => ok({ taskId: id }));
+    port.resolveLabels.mockRejectedValue(new Error('labels offline'));
+    const receipt = await new ApplyTaskPlanService(port).apply({
+      workflowRunId: 'owner-first',
+      draft: { ...draftContent, revision: 1 },
+      context: executionContext('replay'),
+    });
+    expect(receipt.status).toBe('success');
+    expect(port.resolveLabels).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
+    expect(receipt.referenceMap[draftContent.task.draftRef]).toBe(
+      port.readTaskPlan.mock.calls[0][0],
+    );
+  });
+  it.each(['NETWORK_ERROR', 'SERVICE_UNAVAILABLE'])(
+    'fails closed on unknown owner %s',
+    async (code) => {
+      const port = mutationPort();
+      port.readTaskPlan.mockResolvedValue(error(code, 'unknown'));
+      const receipt = await new ApplyTaskPlanService(port).apply({
+        workflowRunId: 'owner-first',
+        draft: { ...draftContent, revision: 1 },
+        context: executionContext('replay'),
+      });
+      expect(receipt.status).toBe('failed');
+      expect(receipt.retryable).toBe(true);
+      expect(port.resolveLabels).not.toHaveBeenCalled();
+      expect(port.createTaskPlan).not.toHaveBeenCalled();
+    },
+  );
+  it('rejects mismatched owner identities', async () => {
+    const port = mutationPort();
+    port.readTaskPlan.mockResolvedValue(ok({ taskId: 'wrong' }));
+    const receipt = await new ApplyTaskPlanService(port).apply({
+      workflowRunId: 'owner-first',
+      draft: { ...draftContent, revision: 1 },
+      context: executionContext('replay'),
+    });
+    expect(receipt.failures[0].code).toBe('AI_WORKFLOW_MUTATION_ID_MISMATCH');
+    expect(receipt.retryable).toBe(false);
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
+  });
+  it('leaves thrown owner reads retryable without create', async () => {
+    const port = mutationPort();
+    port.readTaskPlan.mockRejectedValue(new Error('offline'));
+    const receipt = await new ApplyTaskPlanService(port).apply({
+      workflowRunId: 'owner-first',
+      draft: { ...draftContent, revision: 1 },
+      context: executionContext('replay'),
+    });
+    expect(receipt.status).toBe('failed');
+    expect(receipt.retryable).toBe(true);
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
+  });
+});
+
+describe('Task review current revision identities', () => {
+  it('persists stable revision IDs across restart and regenerates only for structured revision', async () => {
+    const { buildWorkflow } = await harness({
+      plan: vi.fn(async () => ({
+        status: 'draft_ready' as const,
+        reason: 'ready',
+        candidateDraft: draftContent,
+      })),
+    });
+    const runId = 'task-identity-revision';
+    const firstRun = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const first = AIWorkflowSuspensionSchema.parse(
+      stepSuspendPayload(
+        await firstRun.start({
+          inputData: workflowInput,
+          initialState: initialTaskCreateWorkflowState(workflowInput),
+          requestContext: mastraRequestContext('start'),
+        }),
+      ),
+    );
+    if (first.type !== 'task_draft_review') throw new Error('Expected Task review');
+    expect(first.ownerCreate).toEqual({
+      taskId: taskWorkflowEntityId({
+        workflowRunId: runId,
+        revision: 1,
+        draftRef: draftContent.task.draftRef,
+      }),
+      draftRef: draftContent.task.draftRef,
+    });
+    const restored = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const revised = AIWorkflowSuspensionSchema.parse(
+      stepSuspendPayload(
+        await restored.resume({
+          step: TASK_CREATE_LIFECYCLE_STEP_ID,
+          resumeData: {
+            type: 'edit_structured',
+            patch: { ...draftContent, task: { ...draftContent.task, title: 'Edited' } },
+          },
+          requestContext: mastraRequestContext('edit'),
+        }),
+      ),
+    );
+    if (revised.type !== 'task_draft_review') throw new Error('Expected Task review');
+    expect(revised.revision).toBe(2);
+    expect(revised.ownerCreate.taskId).not.toBe(first.ownerCreate.taskId);
+    expect(revised.ownerCreate.taskId).toBe(
+      taskWorkflowEntityId({
+        workflowRunId: runId,
+        revision: 2,
+        draftRef: draftContent.task.draftRef,
+      }),
+    );
   });
 });
