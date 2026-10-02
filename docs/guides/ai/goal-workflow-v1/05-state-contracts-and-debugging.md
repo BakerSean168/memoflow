@@ -11,6 +11,8 @@ updated: 2026-04-19T00:00:00
 
 # DTO、状态与调试
 
+> **2026-10-02 current status (PVC-AI-8121):** Goal/Task AI-owned editors and their visibility flags are retired. Normal editing uses GoalDialog, full TaskPlanDialog and Repository KnowledgeCaptureReviewDialog. Mastra retains draft/revision/receipt/recovery authority; Goal supporting Task/Knowledge overlays remain. The older flow examples below describe historical behavior. See [current AI module](../../../product/modules/ai.md).
+
 这篇笔记把当前 v1 最容易遗漏的“契约层”和“排障层”集中到一起。
 
 ## 1. 聊天 goal draft 的请求契约
@@ -21,14 +23,14 @@ updated: 2026-04-19T00:00:00
 
 当前请求字段：
 
-| 字段 | 含义 |
-| --- | --- |
-| `idea` | 对话 transcript 或其他描述，至少 10 个字符 |
-| `category` | 可选分类偏好 |
-| `timeframe` | 可选时间范围偏好 |
-| `includeKeyResults` | 是否要求一并生成 key results |
-| `providerId` | 可选 provider 指定 |
-| `model` | 可选 model override |
+| 字段                | 含义                                       |
+| ------------------- | ------------------------------------------ |
+| `idea`              | 对话 transcript 或其他描述，至少 10 个字符 |
+| `category`          | 可选分类偏好                               |
+| `timeframe`         | 可选时间范围偏好                           |
+| `includeKeyResults` | 是否要求一并生成 key results               |
+| `providerId`        | 可选 provider 指定                         |
+| `model`             | 可选 model override                        |
 
 ## 2. 聊天 goal draft 的响应契约
 
@@ -111,12 +113,12 @@ updated: 2026-04-19T00:00:00
 
 当前涉及的本地 key：
 
-| key | 用途 |
-| --- | --- |
-| `ai:last-conversation-id` | 记住最后活跃会话 |
+| key                            | 用途                                         |
+| ------------------------------ | -------------------------------------------- |
+| `ai:last-conversation-id`      | 记住最后活跃会话                             |
 | `ai:conversation-workflow-map` | 按 conversation 保存 goal/note workflow 状态 |
-| `ai:last-model-key` | 全局最后一次模型选择 |
-| `ai:conversation-model-map` | 按 conversation 保存模型选择 |
+| `ai:last-model-key`            | 全局最后一次模型选择                         |
+| `ai:conversation-model-map`    | 按 conversation 保存模型选择                 |
 
 ## 6. 当前 workflow snapshot 里保存什么
 
@@ -171,7 +173,7 @@ executor 对每个 action 独立 `try/catch`，失败不会自动回滚之前成
 
 - 聊天 workflow：[../../../packages/app-vue/src/modules/ai/views/AIChatView.vue](../../../packages/app-vue/src/modules/ai/views/AIChatView.vue)
 - automation UI：[../../../packages/app-vue/src/modules/ai/components/AIWorkspaceToolbox.vue](../../../packages/app-vue/src/modules/ai/components/AIWorkspaceToolbox.vue)
-- goal draft editor：[../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue](../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue)
+- goal draft editor：[GoalDialog (native replacement)](../../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue)
 
 适合排查：
 

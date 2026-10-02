@@ -141,8 +141,6 @@ export default {
       submitGoalClarification: '提交补充信息',
       regenerateGoalDraft: '重新生成',
       createGoalDirectly: '直接创建目标',
-      editGoalBeforeCreate: '编辑后创建',
-      hideGoalEditor: '收起编辑',
       createKnowledgeNote: '创建知识笔记',
       openCreatedNote: '打开笔记',
       startAnotherNote: '新建笔记对话',

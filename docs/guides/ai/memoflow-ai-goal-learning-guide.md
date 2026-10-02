@@ -12,6 +12,8 @@ updated: 2026-04-29T14:40:00
 
 # 基于本项目的 AI 创建 Goal 学习指南
 
+> **2026-10-02 current status (PVC-AI-8121):** Goal/Task AI-owned editors and their visibility flags are retired. Normal editing uses GoalDialog, full TaskPlanDialog and Repository KnowledgeCaptureReviewDialog. Mastra retains draft/revision/receipt/recovery authority; Goal supporting Task/Knowledge overlays remain. The older flow examples below describe historical behavior. See [current AI module](../../product/modules/ai.md).
+
 这篇文档不是泛泛地讲“怎么学 AI Agent”，而是把当前仓库当作主训练项目，围绕 `AI 辅助创建 Goal` 这条链路，明确：
 
 - 当前已经做到什么

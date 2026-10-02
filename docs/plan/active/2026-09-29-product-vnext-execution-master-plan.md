@@ -1397,6 +1397,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** AI-8101, AI-8111, AI-8112.
 
+**Execution (2026-10-02): Accepted / frozen.** The duplicate AI-owned Goal/Task business editors and their visibility/toggle state are retired after native parity. Goal/Task/Knowledge normal workflows now review through their native owner surfaces; Goal's intentionally retained Task/Knowledge supporting overlays remain workflow-owned and submission-locked. Durable clarification/recovery/retry/results and internal workflow diagnostics remain, while BusinessPanel's workflow surface is intentionally preserved for AI-8131. Independent acceptance: App-Vue 11 files / 109 tests, architecture lock 18/18, uncached app-vue typecheck, full governance, lint/format/inventory/diff checks. Evidence: [AI-8121 retirement](../archive/2026-10-02-pvc-ai-8121-retire-ai-owned-editors.md).
+
 ---
 
 ## PVC-AI-8131 — Evaluate BusinessPanel workflow-surface retirement

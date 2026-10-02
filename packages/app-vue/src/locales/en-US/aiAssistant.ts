@@ -157,8 +157,6 @@ export default {
       submitGoalClarification: 'Continue With Answers',
       regenerateGoalDraft: 'Regenerate',
       createGoalDirectly: 'Create Goal',
-      editGoalBeforeCreate: 'Edit Before Create',
-      hideGoalEditor: 'Hide Editor',
       createKnowledgeNote: 'Create Knowledge Note',
       openCreatedNote: 'Open Note',
       startAnotherNote: 'New Note Chat',

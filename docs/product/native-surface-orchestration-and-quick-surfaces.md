@@ -220,9 +220,11 @@ Schedule 不复制其它 owner 的 mutation semantics。
 
 ### 6.1 当前问题
 
-当前 AI UI 有 AIGoalDraftEditor、AITaskDraftEditor、AIGoalWorkflowPanel、AITaskWorkflowPanel、AIKnowledgeCapturePanel，以及 editableGoal/editableKeyResults/editableTasks/editableKnowledge。
+2026-10-02 PVC-AI-8121 已删除 AIGoalDraftEditor / AITaskDraftEditor 和 editor visibility state。
+正常 Goal/Task/Knowledge review 使用 owner-native sessions；workflow panels 保留状态、clarification、
+recovery、result 和 native reopen。Goal supporting Task/Knowledge overlay 仍是 AI-8101 接受的跟进能力。
 
-这形成了第二套 Goal / Task / Knowledge 产品 UI。每次 owner 表单、字段、交互语义变化，都需要同步 AI-only editor，容易长期漂移。
+此前的第二套业务 editor 会随 owner 表单变化而漂移，现已由 native owner surface 替代。
 
 ### 6.2 Target
 
@@ -302,7 +304,7 @@ Owner UI
 
 ### 6.5 AI-owned product editor 目标退休
 
-长期 retirement candidate：AIGoalDraftEditor、AITaskDraftEditor、AI-only Goal/Task form vocabulary，以及 WorkflowPanel 中可由 native surface 承担的编辑职责。
+AIGoalDraftEditor、AITaskDraftEditor 与 AI-only Goal/Task form 已由 PVC-AI-8121 退休；BusinessPanel workflow surface 的后续评估属于 AI-8131。
 
 保留 conversation、planning、clarification、workflow checkpoint、approval/recovery、execution record、diagnostic details 和 owner mutation/read ports。
 

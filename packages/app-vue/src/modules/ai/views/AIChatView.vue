@@ -139,8 +139,8 @@
             :goal-clarification="goalClarification"
             :automated-goal-id="automatedGoalId"
             :goal-agent-resuming="goalAgentResuming"
-            :show-goal-draft-editor="showGoalDraftEditor"
             :goal-owner-submitted="goalOwnerSubmitted"
+            :goal-owner-attempt-pending="goalOwnerAttemptPending"
             :can-resume-goal-agent-clarification="canResumeGoalAgentClarification"
             :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
             :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
@@ -154,7 +154,6 @@
             :cancel-goal-agent-run="cancelGoalAgentRun"
             :continue-goal-agent-execution="continueGoalAgentExecution"
             :retry-goal-agent-execution="retryGoalAgentExecution"
-            :toggle-goal-draft-editor="toggleGoalDraftEditor"
             :open-automated-goal="openAutomatedGoal"
             :exit-tool-mode="exitToolMode"
           />
@@ -228,7 +227,6 @@
           :editable-key-results="editableKeyResults"
           :editable-tasks="editableTasks"
           :editable-knowledge="editableKnowledge"
-          :show-goal-draft-editor="showGoalDraftEditor"
           :goal-owner-submitted="goalOwnerSubmitted"
           :supporting-editing-blocked="
             goalAgentResuming || creatingGoal || goalOwnerSubmitted || goalOwnerAttemptPending
@@ -236,12 +234,7 @@
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
           @update:clarification-answers="handleClarificationAnswersUpdate"
-          @confirm="handleCreateGoalFromDraft"
           @open-native-review="openGoalNativeReview"
-          @add-key-result="addKeyResultDraft"
-          @remove-key-result="removeKeyResultDraft"
-          @update-goal="handleUpdateGoalDraft"
-          @update-key-result="updateKeyResultDraft"
           @remove-task="removeTaskDraft"
           @update-task="updateTaskDraft"
           @remove-knowledge="removeKnowledgeDraft"
@@ -251,8 +244,6 @@
         <AITaskWorkflowPanel
           :tool-mode="toolMode"
           :task-workflow-run="taskWorkflowRun"
-          :editable-task="editableTask"
-          :show-task-draft-editor="showTaskDraftEditor"
           :busy="taskAgentResuming"
           :owner-attempt-pending="taskOwnerAttemptPending"
           :owner-submitted="taskOwnerSubmitted"
@@ -263,7 +254,6 @@
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
-          @update-task="updateStandaloneTaskDraft"
           @open-native-review="openTaskNativeReview"
         />
         <AIKnowledgeCapturePanel
@@ -409,7 +399,6 @@ const {
   goalClarification,
   goalWorkflowRun,
   clarificationAnswers,
-  showGoalDraftEditor,
   goalOwnerSubmitted,
   goalOwnerAttemptPending,
   goalAgentResuming,
@@ -432,17 +421,11 @@ const {
   continueGoalAgentExecution,
   retryGoalAgentExecution,
   openAutomatedGoal,
-  handleCreateGoalFromDraft,
   openGoalNativeReview,
-  addKeyResultDraft,
-  removeKeyResultDraft,
-  updateKeyResultDraft,
-  handleUpdateGoalDraft,
   removeTaskDraft,
   updateTaskDraft,
   removeKnowledgeDraft,
   updateKnowledgeDraft,
-  toggleGoalDraftEditor,
 } = goalWorkflow;
 
 const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
@@ -451,20 +434,17 @@ const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
 const {
   taskWorkflowRun,
   taskAgentResuming,
-  showTaskDraftEditor,
   taskOwnerAttemptPending,
   taskOwnerSubmitted,
   clarificationAnswers: taskClarificationAnswers,
   canSubmitTaskClarification,
   submitTaskClarification,
   openTaskNativeReview,
-  editableTask,
   linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
   cancelTaskAgentRun,
   confirmTaskAgentRun,
-  updateTaskDraft: updateStandaloneTaskDraft,
   retryTaskAgentExecution,
 } = taskWorkflow;
 

@@ -5,7 +5,7 @@ tags:
   - ai
 description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-29T13:35:00+08:00
+updated: 2026-10-02T00:00:00+00:00
 ---
 
 # AI 模块说明
@@ -14,7 +14,7 @@ updated: 2026-09-29T13:35:00+08:00
 
 > **AI vNext closure (2026-09-18)：** ADR-096～099 已在 AI-9612 exact-head review 中落地并验收。本文件描述实现状态：Mastra 是 Assistant/Workflow/transcript authority；Conversation 只保存产品 shell；ProviderDefinition/Connection/SecretVault 与 capability evidence 分离；AIContextAssembler、stable KnowledgeDocumentId、owner-domain drafts/tools 与 AIExecutionRecord 已接入当前路径。
 >
-> **2026-09-29 Product vNext target：** AI 不再长期维护 AIGoalDraftEditor / AITaskDraftEditor 等第二套业务编辑 UI。目标是 ADR-112 的 Owner Native Surface Orchestration：Mastra 保留 durable internal draft/revision/retry 语义，右侧 BusinessPanel 则打开并操控 Goal/Task/Knowledge 原生 edit session。
+> **2026-10-02 Product vNext implementation：** PVC-AI-8121 已退休 AI-owned Goal/Task editors。ADR-112 Owner Native Surface Orchestration 通过 Goal/Task/Knowledge 原生 edit session 承担正常业务编辑；Mastra 保留 durable internal draft/revision/retry 语义。
 
 ## 1. 功能定位
 
@@ -40,7 +40,7 @@ MastraAIRuntime
 - `knowledge.capture`：结构化知识草稿，经确认后由 Repository owner port 持久化；
 - workflow apply 使用稳定 entity/request identity，重试不会重复创建业务对象或 Label。
 
-### 3.1 Native Surface Orchestration target
+### 3.1 Native Surface Orchestration
 
 内部 workflow draft 与用户看到的编辑 UI 分离：
 
@@ -58,12 +58,12 @@ AI 对业务 UI 使用 typed semantic action，而不是 DOM selector/click/type
 
 `draftRef / workflowRunId / revision / referenceMap` 等 internal identity 可以继续服务 restart/retry/recovery，但不再作为 normal user review UI 的字段。
 
-长期 retirement candidate：
-
-- `AIGoalDraftEditor`；
-- `AITaskDraftEditor`；
-- AI-only Goal/Task form vocabulary；
-- 独立 WorkflowPanel 中由 owner-native surface 能承担的编辑职责。
+**2026-10-02 PVC-AI-8121:** `AIGoalDraftEditor` / `AITaskDraftEditor` 及其 visibility state 已删除。
+Goal/KR 使用 GoalDialog，完整 Task 使用 TaskPlanDialog，Knowledge 使用 Repository
+KnowledgeCaptureReviewDialog。Goal native Save 负责确认编排；shell 只保留 owner submit 后的
+approval retry / ambiguous-attempt recovery、cancel、clarification 与状态。
+Goal workflow 的 supporting Task/Knowledge overlay 仍按 run/revision 恢复；不保存 Goal/KR 表单。
+Task panel 的 confirm 委托同一个 native owner submit coordinator，保留 receipt/retry 语义。
 
 当前 `BusinessPanel.workflow` surface 在 native parity 完成前仍保留；Goal/Task/Knowledge 三条 native workflow vertical slice、clarification/recovery 与 dirty/busy/attention 迁移全部验证后，再评估删除。
 

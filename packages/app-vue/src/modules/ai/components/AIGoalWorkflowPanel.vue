@@ -116,12 +116,13 @@
           v-if="!goalOwnerSubmitted"
           variant="outline"
           size="sm"
+          data-testid="goal-open-native-review"
           @click="$emit('open-native-review')"
         >
           {{ t('aiAssistant.chatPage.workflow.openGoalNativeReview') }}
         </Button>
       </div>
-      <template v-if="goalReviewDraft && showGoalDraftEditor && !goalOwnerSubmitted">
+      <template v-if="goalReviewDraft && !goalOwnerSubmitted">
         <div
           class="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4"
           data-testid="goal-workflow-supporting-drafts-editor"
@@ -268,10 +269,6 @@
                 </template>
                 <template v-else>
                   <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
-                  <p class="break-all font-mono text-xs text-muted-foreground">
-                    {{ item.knowledgeDocument.knowledgeSpaceId }} /
-                    {{ item.knowledgeDocument.documentId }}
-                  </p>
                 </template>
               </div>
             </div>
@@ -480,7 +477,6 @@ const props = defineProps<{
   editableKeyResults: EditableKeyResult[];
   editableTasks: EditableGoalTask[];
   editableKnowledge: EditableGoalKnowledge[];
-  showGoalDraftEditor: boolean;
   goalOwnerSubmitted?: boolean;
   supportingEditingBlocked?: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
@@ -489,12 +485,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:clarificationAnswers': [answers: string[]];
-  confirm: [];
   'open-native-review': [];
-  'add-key-result': [];
-  'remove-key-result': [index: number];
-  'update-goal': [payload: EditableGoal];
-  'update-key-result': [payload: { index: number; value: EditableKeyResult }];
   'remove-task': [index: number];
   'update-task': [payload: { index: number; value: EditableGoalTask }];
   'remove-knowledge': [index: number];

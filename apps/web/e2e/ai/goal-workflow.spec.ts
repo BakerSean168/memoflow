@@ -323,14 +323,15 @@ test.describe('AI Goal Workflow', () => {
     const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
     expect(ownerGoalId).toBeTruthy();
     await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
     await expect(
       page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
     ).toContainText(draft.keyResults[0].title);
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
-    // Task and Knowledge details render inside the optional draft editor; the review card
-    // stays a compact projection of Goal/KR/rationale.
+    // Goal/KR editing stays native; supporting Task/Knowledge overlays remain in the workflow.
     await expect(workflowPanel).toContainText(
       /Create the approved goal draft with a measurable key result/i,
     );
@@ -596,7 +597,8 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(workflowPanel).toContainText(/suspended/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
+    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
+    await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 

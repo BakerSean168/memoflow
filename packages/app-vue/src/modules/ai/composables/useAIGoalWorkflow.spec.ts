@@ -46,7 +46,9 @@ function session() {
     setEditingBlocked: vi.fn((blocked) => {
       native.blocked = blocked;
     }),
-    patch: vi.fn((changes) => Object.assign(native.state!, JSON.parse(JSON.stringify(changes)))),
+    patch: vi.fn((changes) => {
+      if (!native.blocked) Object.assign(native.state!, JSON.parse(JSON.stringify(changes)));
+    }),
     addChild: vi.fn((child) => native.state!.keyResults.push(child)),
     removeChild: vi.fn((index) => native.state!.keyResults.splice(index, 1)),
     focus: vi.fn(),
@@ -691,7 +693,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       await vm.confirmGoalAgentRun();
       expect(vm.goalOwnerAttemptPending).toBe(true);
       expect(native.blocked).toBe(true);
-      vm.handleUpdateGoalDraft({ ...vm.editableGoal, name: 'Second Goal attempt' });
+      session().patch({ name: 'Second Goal attempt' });
       await vm.reviseGoalAgentRun();
       await vm.confirmGoalAgentRun();
       expect(runtime.resume).not.toHaveBeenCalled();
@@ -731,7 +733,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     await vm.confirmGoalAgentRun();
     expect(vm.goalOwnerAttemptPending).toBe(true);
     expect(native.blocked).toBe(true);
-    vm.handleUpdateGoalDraft({ ...vm.editableGoal, name: 'Forbidden new revision' });
+    session().patch({ name: 'Forbidden new revision' });
     await vm.reviseGoalAgentRun();
     expect(native.state!.name).toBe('Deep work');
     expect(runtime.resume).not.toHaveBeenCalled();
@@ -933,7 +935,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     await vm.confirmGoalAgentRun();
     expect(vm.goalOwnerSubmitted).toBe(true);
     expect(vm.goalOwnerAttemptPending).toBe(false);
-    vm.handleUpdateGoalDraft({ ...vm.editableGoal, name: 'Unapproved edit' });
+    session().patch({ name: 'Unapproved edit' });
     await vm.reviseGoalAgentRun();
     await vm.confirmGoalAgentRun();
     expect(native.requestSubmit).toHaveBeenCalledOnce();
@@ -960,7 +962,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(native.readGoal).toHaveBeenCalledOnce();
     expect(vm.goalOwnerAttemptPending).toBe(false);
     expect(native.blocked).toBe(false);
-    vm.handleUpdateGoalDraft({ ...vm.editableGoal, name: 'Corrected native value' });
+    session().patch({ name: 'Corrected native value' });
     expect(native.state!.name).toBe('Corrected native value');
   });
 

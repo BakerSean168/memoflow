@@ -140,11 +140,7 @@
 import { computed } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
-import type {
-  AIWorkflowExecutionFailure,
-  AIWorkflowRunView,
-  TaskPlanTask,
-} from '@memoflow/contracts/ai';
+import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { WorkflowMode } from '../composables/types';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
@@ -155,8 +151,6 @@ const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
 const props = defineProps<{
   toolMode: WorkflowMode;
   taskWorkflowRun: Extract<AIWorkflowRunView, { kind: 'task.create' }> | null;
-  editableTask: TaskPlanTask | null;
-  showTaskDraftEditor: boolean;
   busy?: boolean;
   ownerAttemptPending?: boolean;
   ownerSubmitted?: boolean;
@@ -169,7 +163,6 @@ defineEmits<{
   cancel: [];
   retry: [];
   'open-native-review': [];
-  'update-task': [task: TaskPlanTask];
   'update-clarification-answer': [index: number, value: string];
 }>();
 const reviewDraft = computed(() =>

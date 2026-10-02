@@ -95,7 +95,7 @@ updated: 2026-04-19T00:00:00
 ### 主要代码入口
 
 - [`../../../packages/app-vue/src/modules/ai/views/AIChatView.vue`](../../../packages/app-vue/src/modules/ai/views/AIChatView.vue)
-- [`../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue`](../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue)
+- `AIGoalDraftEditor.vue` (retired by PVC-AI-8121; [native replacement](../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue))
 
 ### 验收标准
 

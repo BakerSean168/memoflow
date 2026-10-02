@@ -99,6 +99,21 @@
       "forbiddenPaths": [
         "packages/notification/src/server/domain/aggregates/notification-template.ts"
       ]
+    },
+    {
+      "id": "ai-owned-business-editors",
+      "status": "active",
+      "decision": "ADR-112 / PVC-AI-8121",
+      "forbiddenPaths": [
+        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AITaskDraftEditor.vue"
+      ],
+      "requiredPaths": [
+        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+        "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+        "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.vue"
+      ]
     }
   ]
 }

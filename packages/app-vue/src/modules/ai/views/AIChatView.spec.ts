@@ -186,4 +186,20 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(viewComposable).toContain('return canLeaveBusinessSurface(t)');
     expect(viewComposable.match(/if \(!canLeaveTaskReview\(\)\) return/g)).toHaveLength(3);
   });
+  it('routes all normal reviews to native owners without retired editor wiring', () => {
+    for (const symbol of [
+      'AIGoalDraftEditor',
+      'AITaskDraftEditor',
+      'showGoalDraftEditor',
+      'showTaskDraftEditor',
+      'toggleGoalDraftEditor',
+    ]) {
+      expect(source).not.toContain(symbol);
+      expect(viewComposable).not.toContain(symbol);
+      expect(actionBar).not.toContain(symbol);
+    }
+    expect(source).toContain('@open-native-review="openGoalNativeReview"');
+    expect(source).toContain('@open-native-review="openTaskNativeReview"');
+    expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
+  });
 });

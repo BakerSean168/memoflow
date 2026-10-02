@@ -305,3 +305,38 @@ describe('HARD-7102 core vNext architecture lock', () => {
     expect(message).toContain('diagnostics-only');
   });
 });
+
+describe('AI-owned business editor retirement', () => {
+  it.each([
+    'AIGoalDraftEditor',
+    'AITaskDraftEditor',
+    'showGoalDraftEditor',
+    'showTaskDraftEditor',
+    'toggleGoalDraftEditor',
+    'show-goal-draft-editor',
+    'show-task-draft-editor',
+    'goal-agent-toggle-editor',
+    'goal-workflow-draft-editor',
+    'task-workflow-draft-editor',
+    'knowledge-capture-draft-editor',
+  ])('rejects %s in production imports, exports or wiring', (symbol) => {
+    const result = findCoreVnextArchitectureLockViolations([
+      { relPath: 'packages/app-vue/src/modules/ai/components/index.ts', content: symbol },
+    ]);
+    expect(result.violations.some(({ kind }) => kind === 'ai-owned-business-editor')).toBe(true);
+  });
+  it('allows native and supporting state and historical test assertions', () => {
+    const result = findCoreVnextArchitectureLockViolations([
+      {
+        relPath: 'packages/app-vue/src/modules/ai/composables/current.ts',
+        content:
+          'GoalDialog; TaskPlanDialog; KnowledgeCaptureReviewDialog; editableTasks; editableKnowledge; editorOverlay;',
+      },
+      {
+        relPath: 'packages/app-vue/src/modules/ai/components/retirement.spec.ts',
+        content: 'AIGoalDraftEditor; showGoalDraftEditor;',
+      },
+    ]);
+    expect(result.violations.filter(({ kind }) => kind === 'ai-owned-business-editor')).toEqual([]);
+  });
+});

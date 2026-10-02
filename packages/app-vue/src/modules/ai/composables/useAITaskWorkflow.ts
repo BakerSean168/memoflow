@@ -154,7 +154,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
   const taskWorkflowStage = ref<TaskWorkflowStage>('collect');
   const clarificationAnswers = ref<string[]>([]);
   const linkedGoalId = ref<string | null>(null);
-  const showTaskDraftEditor = ref(false);
   const editableTask = ref<TaskPlanTask | null>(null);
   const taskAgentLoading = ref(false);
   const taskAgentResuming = ref(false);
@@ -175,7 +174,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       taskWorkflowStage.value = 'collect';
       clarificationAnswers.value = [];
       editableTask.value = null;
-      showTaskDraftEditor.value = false;
       return;
     }
     taskWorkflowRun.value = run;
@@ -192,7 +190,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       taskWorkflowStage.value = 'result';
       clarificationAnswers.value = [];
-      showTaskDraftEditor.value = false;
     } else {
       taskWorkflowStage.value = 'plan';
       clarificationAnswers.value = [];
@@ -504,7 +501,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     taskWorkflowStage.value = 'collect';
     clarificationAnswers.value = [];
     linkedGoalId.value = null;
-    showTaskDraftEditor.value = false;
     editableTask.value = null;
     taskAgentLoading.value = false;
     taskAgentResuming.value = false;
@@ -517,7 +513,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     taskWorkflowStage,
     clarificationAnswers,
     linkedGoalId,
-    showTaskDraftEditor,
     editableTask,
     taskAgentLoading,
     taskAgentResuming,

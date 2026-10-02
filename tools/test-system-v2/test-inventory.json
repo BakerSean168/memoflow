@@ -3922,14 +3922,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3963,6 +3955,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/components/AIWorkflowActionBar.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"

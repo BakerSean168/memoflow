@@ -257,11 +257,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     taskWorkflowRun: taskWorkflow.taskWorkflowRun,
     knowledgeCaptureRun: knowledgeCaptureWorkflow.knowledgeCaptureRun,
     clarificationAnswers: goalWorkflow.clarificationAnswers,
-    editableGoal: goalWorkflow.editableGoal,
-    editableKeyResults: goalWorkflow.editableKeyResults,
     editableTasks: goalWorkflow.editableTasks,
     editableKnowledge: goalWorkflow.editableKnowledge,
-    showGoalDraftEditor: goalWorkflow.showGoalDraftEditor,
     resetWorkflowArtifacts,
   });
 

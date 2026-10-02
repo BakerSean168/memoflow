@@ -1,8 +1,6 @@
 import { ref, watch, type Ref } from 'vue';
 import { GoalPlanDraftContentSchema, type AIWorkflowRunView } from '@memoflow/contracts/ai';
 import {
-  type EditableGoal,
-  type EditableKeyResult,
   type EditableGoalKnowledge,
   type EditableGoalTask,
   type GoalWorkflowStage,
@@ -113,12 +111,8 @@ export interface UseAIWorkflowPersistenceOptions {
   taskWorkflowRun: Ref<AIWorkflowRunView | null>;
   knowledgeCaptureRun: Ref<AIWorkflowRunView | null>;
   clarificationAnswers: Ref<string[]>;
-  editableGoal: Ref<EditableGoal>;
-  editableKeyResults: Ref<EditableKeyResult[]>;
   editableTasks: Ref<EditableGoalTask[]>;
   editableKnowledge: Ref<EditableGoalKnowledge[]>;
-  /** Ephemeral editor visibility; deliberately not persisted. */
-  showGoalDraftEditor: Ref<boolean>;
   resetWorkflowArtifacts: () => void;
 }
 
@@ -282,7 +276,6 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
     const draft = parsed.data;
     options.editableTasks.value = cloneSerializable(draft.tasks);
     options.editableKnowledge.value = cloneSerializable(draft.knowledge);
-    options.showGoalDraftEditor.value = true;
     return true;
   }
 
@@ -297,8 +290,6 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
           runKey(options.taskWorkflowRun.value),
           runKey(options.knowledgeCaptureRun.value),
           JSON.stringify(options.clarificationAnswers.value),
-          JSON.stringify(options.editableGoal.value),
-          JSON.stringify(options.editableKeyResults.value),
           JSON.stringify(options.editableTasks.value),
           JSON.stringify(options.editableKnowledge.value),
         ].join('|'),

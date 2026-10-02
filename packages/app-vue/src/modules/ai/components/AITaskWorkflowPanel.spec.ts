@@ -41,21 +41,6 @@ describe('AITaskWorkflowPanel', () => {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
-        showTaskDraftEditor: true,
-        editableTask: {
-          draftRef: 'task:ship-it',
-          title: 'Ship it',
-          description: '',
-          importance: 'Moderate',
-          schedule: {
-            kind: 'OneTime',
-            date: '2026-09-18',
-            timing: { kind: 'At', time: '09:00' },
-          },
-          reminderConfig: null,
-          goalBinding: null,
-          labels: [],
-        },
         taskWorkflowRun: {
           runId: 'run-1',
           conversationId: 'conv-1',
@@ -106,8 +91,6 @@ describe('AITaskWorkflowPanel', () => {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
-        showTaskDraftEditor: false,
-        editableTask: null,
         taskWorkflowRun: {
           runId: 'run-recovery',
           conversationId: 'conv-1',
@@ -142,8 +125,6 @@ describe('AITaskWorkflowPanel', () => {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
-        showTaskDraftEditor: false,
-        editableTask: null,
         taskWorkflowRun: AIWorkflowRunViewSchema.parse({
           runId: 'r',
           conversationId: 'c',
@@ -173,8 +154,6 @@ describe('AITaskWorkflowPanel', () => {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
-        showTaskDraftEditor: false,
-        editableTask: null,
         taskWorkflowRun: AIWorkflowRunViewSchema.parse({
           runId: 'r',
           conversationId: 'c',

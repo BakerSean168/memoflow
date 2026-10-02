@@ -199,7 +199,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const goalWorkflowStage = ref<GoalWorkflowStage>('collect');
   const goalClarification = ref<GoalClarificationView | null>(null);
   const clarificationAnswers = ref<string[]>([]);
-  const showGoalDraftEditor = ref(false);
   const creatingGoal = ref(false);
   const automationLoading = ref(false);
   const automationExecuting = ref(false);
@@ -260,7 +259,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         rationale: null,
       };
       clarificationAnswers.value = suspension.questions.map(() => '');
-      showGoalDraftEditor.value = false;
     } else if (run.status === 'suspended' && suspension?.type === 'goal_draft_review') {
       goalWorkflowStage.value = 'confirm';
       goalClarification.value = null;
@@ -285,7 +283,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       goalWorkflowStage.value = 'result';
       goalClarification.value = null;
       clarificationAnswers.value = [];
-      showGoalDraftEditor.value = false;
     } else {
       goalWorkflowStage.value = 'plan';
       goalClarification.value = null;
@@ -756,52 +753,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     await router.push(`/goals/${automatedGoalId.value}`);
   }
 
-  async function handleCreateGoalFromDraft(): Promise<void> {
-    await confirmGoalAgentRun();
-  }
-
-  function addKeyResultDraft(): void {
-    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
-    liveSession().addChild({
-      title: '',
-      description: null,
-      calculationMethod: 'Sum',
-      initialValue: 0,
-      currentValue: 0,
-      targetValue: 1,
-      target: null,
-      unit: '',
-      weight: 3,
-    });
-  }
-  function removeKeyResultDraft(index: number): void {
-    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
-    liveSession().removeChild(index);
-  }
-  function updateKeyResultDraft(payload: { index: number; value: EditableKeyResult }): void {
-    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
-    const item = payload.value;
-    liveSession().patch({
-      keyResult: {
-        index: payload.index,
-        changes: {
-          title: item.title,
-          description: item.description,
-          calculationMethod: item.aggregationMethod,
-          initialValue: item.initialValue,
-          currentValue: item.currentValue,
-          targetValue: item.targetValue,
-          target: item.target,
-          unit: item.unit,
-          weight: item.weight,
-        },
-      },
-    });
-  }
-  function handleUpdateGoalDraft(payload: EditableGoal): void {
-    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
-    liveSession().patch(payload);
-  }
   function removeTaskDraft(index: number): void {
     if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
     editableTasks.value.splice(index, 1);
@@ -834,9 +785,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     });
     editableKnowledge.value[payload.index] = parsed.knowledge[payload.index]!;
   }
-  function toggleGoalDraftEditor(): void {
-    showGoalDraftEditor.value = !showGoalDraftEditor.value;
-  }
 
   function resetGoalArtifacts(): void {
     retireNativeReview();
@@ -844,7 +792,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalWorkflowStage.value = 'collect';
     goalClarification.value = null;
     clarificationAnswers.value = [];
-    showGoalDraftEditor.value = false;
     editableTasks.value = [];
     editableKnowledge.value = [];
   }
@@ -856,7 +803,6 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalClarification,
     goalWorkflowRun,
     clarificationAnswers,
-    showGoalDraftEditor,
     creatingGoal,
     automationLoading,
     automationExecuting,
@@ -892,16 +838,10 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     retryGoalAgentExecution,
     syncGoalWorkflowRun,
     openAutomatedGoal,
-    handleCreateGoalFromDraft,
-    addKeyResultDraft,
-    removeKeyResultDraft,
-    updateKeyResultDraft,
-    handleUpdateGoalDraft,
     removeTaskDraft,
     updateTaskDraft,
     removeKnowledgeDraft,
     updateKnowledgeDraft,
-    toggleGoalDraftEditor,
   };
 }
 

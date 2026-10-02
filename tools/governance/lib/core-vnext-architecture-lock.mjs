@@ -91,7 +91,6 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
   'packages/app-vue/src/modules/ai/composables/types.ts',
   'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
-  'packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue',
   'packages/powersync-schema/src/index.ts',
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
@@ -122,7 +121,6 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
   'packages/app-vue/src/modules/ai/composables/types.ts',
   'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
-  'packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue',
   'packages/database/src/generated/prisma/schema.prisma',
 ]);
 const KR_CLIENT_SURFACE_ROOTS = [
@@ -180,6 +178,13 @@ export function findCoreVnextArchitectureLockViolations(files) {
   const fileMap = new Map(production.map(({ relPath, content }) => [relPath, content]));
 
   for (const { relPath, content } of production) {
+    pushPatternViolations(
+      violations,
+      relPath,
+      content,
+      /\b(?:AIGoalDraftEditor|AITaskDraftEditor|showGoalDraftEditor|showTaskDraftEditor|toggleGoalDraftEditor)\b|(?:show-goal-draft-editor|show-task-draft-editor|goal-agent-toggle-editor|goal-workflow-draft-editor|task-workflow-draft-editor|knowledge-capture-draft-editor)/g,
+      'ai-owned-business-editor',
+    );
     if (startsWithAny(relPath, FEATURE_ROOTS)) {
       pushPatternViolations(
         violations,
@@ -537,6 +542,8 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
       'UI must not mutate ScheduledInvocation/ScheduleTask worker state directly',
     'ai-raw-scheduler-access':
       'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
+    'ai-owned-business-editor':
+      'AI-owned Goal/Task editors and visibility controls are retired; use owner-native sessions (ADR-112 / PVC-AI-8121)',
     'ai-retired-goal-task-draft':
       'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification':

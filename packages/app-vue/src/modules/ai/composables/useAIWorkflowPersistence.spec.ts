@@ -80,7 +80,6 @@ type TestState = {
   editableKeyResults: Ref<EditableKeyResult[]>;
   editableTasks: Ref<EditableGoalTask[]>;
   editableKnowledge: Ref<EditableGoalKnowledge[]>;
-  showGoalDraftEditor: Ref<boolean>;
 };
 
 function setup() {
@@ -95,7 +94,6 @@ function setup() {
     editableKeyResults: ref<EditableKeyResult[]>([]),
     editableTasks: ref<EditableGoalTask[]>([]),
     editableKnowledge: ref<EditableGoalKnowledge[]>([]),
-    showGoalDraftEditor: ref(false),
   };
   let persistence!: ReturnType<typeof useAIWorkflowPersistence>;
   mount(
@@ -114,7 +112,6 @@ function setup() {
             state.editableKeyResults.value = [];
             state.editableTasks.value = [];
             state.editableKnowledge.value = [];
-            state.showGoalDraftEditor.value = false;
           },
         });
         return () => h('div');
@@ -220,7 +217,8 @@ describe('useAIWorkflowPersistence', () => {
     expect(state.editableKnowledge.value[0].title).toBe('Local');
     expect(JSON.stringify(stored)).not.toContain('editableGoal');
     expect(JSON.stringify(stored)).not.toContain('editableKeyResults');
-    expect(state.showGoalDraftEditor.value).toBe(true);
+    expect(JSON.stringify(stored)).not.toContain('showGoalDraftEditor');
+    expect(JSON.stringify(stored)).not.toContain('showTaskDraftEditor');
   });
 
   it('restores suspended HITL answers only as a matching local editor overlay', () => {
