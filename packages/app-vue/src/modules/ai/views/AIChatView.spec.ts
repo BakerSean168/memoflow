@@ -101,6 +101,13 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain("intent: 'deeplink'");
   });
 
+  it('keeps workflow intent visible without turning the conversation canvas into a dashboard', () => {
+    expect(source).toContain('data-testid="ai-active-intent"');
+    expect(source).toContain("toolMode !== 'chat'");
+    expect(source).toContain('currentToolLabel');
+    expect(source).toContain('max-w-[52rem]');
+  });
+
   it('keeps workflow surface availability owned by the shell integration', () => {
     expect(source).toContain('shellStore?.setWorkflowAvailable(available, itemCount)');
     expect(source).toContain("requestContextPanel('automatic')");
