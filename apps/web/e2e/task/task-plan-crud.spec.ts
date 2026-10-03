@@ -466,10 +466,7 @@ function taskOccurrenceByTitle(page: Page, title: string): Locator {
     .first();
 }
 
-async function selectTaskSurface(
-  page: Page,
-  surface: 'today' | 'upcoming' | 'plans',
-): Promise<void> {
+async function selectTaskSurface(page: Page, surface: 'today' | 'plans'): Promise<void> {
   await page.getByTestId('task-surface-trigger').click();
   await page.getByTestId(`task-surface-${surface}`).click();
 }
