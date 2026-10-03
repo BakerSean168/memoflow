@@ -21,10 +21,6 @@
       "types": "./dist/modules/goal/index.d.ts",
       "import": "./dist/modules/goal/index.js"
     },
-    "./governance": {
-      "types": "./dist/modules/governance/index.d.ts",
-      "import": "./dist/modules/governance/index.js"
-    },
     "./reliable-messaging": {
       "types": "./dist/modules/reliable-messaging/index.d.ts",
       "import": "./dist/modules/reliable-messaging/index.js"

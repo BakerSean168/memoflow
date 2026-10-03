@@ -6,11 +6,11 @@
  *
  * Targeted audit over the Phase 6 public surfaces (§3.6), not a repo-wide
  * allowlist: the shared module contract, the API observability public seam, the
- * app-local PowerSync factories, the 11 feature `api/module.ts`
+ * app-local PowerSync factories, the 10 active feature `api/module.ts`
  * public exports, and the new governance detector helpers.
  *
  * 针对阶段 6 公共表面的定向审计（§3.6），而非全仓 allowlist：共享模块契约、
- * API observability 公共 seam、app-local PowerSync 工厂、11 个
+ * API observability 公共 seam、app-local PowerSync 工厂、10 个
  * feature `api/module.ts` 公共导出，以及新增的 governance detector helpers。
  *
  * Every exported interface/type/class/function/const requires a JSDoc block
@@ -31,7 +31,6 @@ import { parseSource, walk } from './lib/architecture-surface.mjs';
 const ROOT = process.env.PUBLIC_SURFACE_JSDOC_ROOT ?? path.join(import.meta.dirname, '..', '..');
 
 const FEATURE_MODULES = [
-  'governance',
   'goal',
   'task',
   'account',

@@ -55,7 +55,7 @@ The plan deliberately avoids premature “one universal entity component” abst
 
 # 1. Target outcome
 
-A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification, Settings/Account and AI. Product Governance is no longer treated as a normal future-facing user module while ADR-113 evaluates retirement.
+A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification, Settings/Account and AI. Product Governance has been retired by ADR-113 and is no longer a product module.
 
 Observable outcomes:
 
@@ -1082,13 +1082,13 @@ Account remains a Settings capability surface; `/account -> /settings?tab=accoun
 
 ADR-112 changes the AI convergence target: AI does not maintain a parallel Goal/Task/Knowledge product editor. It orchestrates owner-native business surfaces through typed semantic actions.
 
-ADR-113 separately evaluates retiring Product Governance Runtime while preserving Engineering Governance.
+ADR-113 retires Product Governance Runtime while preserving repository-native Engineering Governance.
 
 ### PVC-GOV-7901 — Product Governance retirement decision / inventory
 
-**Status:** proposal track; ADR-113 not yet finally accepted.
+**Status:** GOV-7901 inventory accepted / frozen; GOV-7903 retirement complete (2026-10-03).
 
-Do not modernize Governance UI while retirement is unresolved.
+Do not reintroduce Product Governance UI/runtime surfaces; `Governance` now denotes Engineering Governance only.
 
 Inventory and classify:
 
@@ -1097,7 +1097,11 @@ Inventory and classify:
 - current rule-bundle adapter inputs that depend on Product Governance;
 - AGENT/reference-module policy dependencies.
 
-If ADR-113 is accepted, create a destructive retirement batch only after Engineering Governance has repository-native inputs. If rejected, then reopen Governance UI convergence as a separate bounded project.
+GOV-7902 established repository-native Engineering Governance inputs. GOV-7903 has completed physical removal and permanent negative locks against reintroduction.
+
+### PVC-GOV-7903 — Destructive retirement closure
+
+**Status (2026-10-03): Complete / implemented / validated.** Product package/contracts/UI/Prisma/PowerSync/transport/DI, the legacy bundle bridge, and remaining Docker/env/workspace/test slots are removed. Engineering Governance remains repository-native. Evidence: all 12 affected typechecks and dependency builds, three host builds, ten package test targets, 57 focused App-Vue tests, 199 Engineering Governance tests, full uncached governance, inventory/lockfile/sync/lint/diff checks and zero live runtime/config references pass. Full suites retain four unrelated Shell/Task failures and one Goal index failure; local prod-like runtime smoke was not performed because this worktree lacks its encryption key. See [exact commands, baseline failures and historical-reference limits](../archive/2026-10-03-pvc-gov-7903-retirement-closure.md).
 
 ### PVC-AI-8001 — Owner Native Edit Session + Surface Orchestrator foundation
 
@@ -1321,8 +1325,8 @@ bounded module visual convergence batches
         ↓
 Phase 9 product-wide grammar + visual regression closure
 
-Parallel:
-GOV-7901 / ADR-113 retirement decision
+Completed parallel closure:
+GOV-7903 Product Governance destructive retirement (2026-10-03)
 ```
 
 The broad module audits are now discovery-complete. Do not reopen them as generic discovery unless implementation uncovers contradictory evidence. Implementation migrations should be grouped by root cause and owner contract; shared primitives are promoted only after multiple converged surfaces prove the same grammar.
@@ -1340,7 +1344,7 @@ Execution-level ticket breakdown: [Product vNext Execution Master Plan](./2026-0
 5. After lifecycle truth is stable, implement Task Home/Quick Surface/action coordinator and the Goal Record foundation required by Task→KR measurement.
 6. Migrate Schedule day/event inspect toward Dialog + owner Quick Surface composition only after the Task Quick/action contract is available.
 7. Define Owner Native Edit Session / Surface Orchestrator and prove it with Goal before migrating Task/Knowledge AI workflows.
-8. Do not invest in Governance UI modernization while ADR-113 retirement is unresolved; inventory/decouple Engineering Governance first.
+8. Keep Product Governance retired; Engineering Governance remains repository-native and product-neutral.
 9. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
 10. Make deterministic visual regression part of closure, not an informal screenshot exercise.
 
@@ -1353,7 +1357,7 @@ Execution-level ticket breakdown: [Product vNext Execution Master Plan](./2026-0
 - [Remaining Modules Full Surface / UI Audit](../../analysis/2026-09-29-product-vnext-remaining-modules-full-surface-audit.md)
 - [Native Surface Orchestration + Quick Surface vNext](../../product/native-surface-orchestration-and-quick-surfaces.md)
 - [ADR-112 Owner Native Surface Orchestration](../../architecture/adr/ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md)
-- [ADR-113 Product Governance retirement proposal](../../architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md)
+- [ADR-113 Product Governance retirement decision](../../architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md)
 - [Workspace UI contract](../../product/workspace-ui.md)
 - [Task vNext](../../product/task-vnext-plan-occurrence-workspace.md)
 - [Routine Coach vNext](../../product/routine-coach-vnext.md)

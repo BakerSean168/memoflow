@@ -10,8 +10,8 @@ Accepted
 
 ## Context
 
-The monorepo has **12** audited business feature packages (account, ai, authentication,
-data-portability, goal, governance, notification, reminder, repository, schedule, setting, task)
+The monorepo has **11** active business feature families in this shape (account, ai, authentication,
+data-portability, goal, notification, reminder, repository, schedule, setting, task)
 that share a common internal structure. The former `editor` feature package was retired under
 ADR-034 (Obsidian Vault / GitHub knowledge repository); portable `editor_*` tables remain only
 for re-importable business backups, not as a live feature package. This ADR documents the shape
@@ -117,7 +117,7 @@ the package transport modules:
 - `apps/api/src/runtime` and `apps/desktop/src/main/runtime` select the concrete
   adapters (Prisma / PowerSync), build repositories and runtime adapters, assemble
   the transport-neutral feature instance, and turn it into an already-bound module
-  handle (reference: `compose-governance.ts` in both lanes).
+  handle (real-owner examples include Goal, Task, Account and Notification composers).
 - Package `api` / `electron` modules are transport + lifecycle adapters only:
   `register()` wires routes/IPC handlers and starts the pre-assembled instance,
   `destroy()` disposes it. They never read `context.db` and never construct
@@ -126,11 +126,10 @@ the package transport modules:
   package root so hosts can select adapters without importing concrete adapter
   classes; concrete `*PrismaRepository` / `*PowerSyncRepository` classes stay
   internal to the package.
-- RefArch Phase 6 governance-first rollout: module handles extend the shared
-  `ServerModuleHandle<TContext>` and registration contexts reuse the canonical
-  transport-only `ServerTransportModuleContext` (no `db`). The `context.db`
-  fallback is retired — the governance pilot proves the contract first, then
-  sibling modules converge onto host-bound instances before `register()`.
+- RefArch Phase 6 established shared `ServerModuleHandle<TContext>` and the canonical
+  transport-only `ServerTransportModuleContext` (no `db`). The `context.db` fallback
+  is retired; future changes validate the contract on a real-owner vertical slice before
+  broader rollout.
 
 ### Client Creation Language
 
@@ -141,7 +140,7 @@ export function createXxxServiceFromHttpClient(httpClient: IResultHttpClient): X
 ```
 
 This pattern remains the target for business feature packages. During the
-rollout period, governance scripts maintain an explicit legacy baseline for
+rollout period, repository governance scripts maintain an explicit legacy baseline for
 packages not yet migrated to the canonical `server/*` layout.
 
 ### Read-Model Exception

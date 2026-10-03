@@ -101,20 +101,6 @@ node tools/governance/engineering-rule-adapter.mjs --source tools/governance/eng
 node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
 ```
 
-ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
-active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
+ADR-113 is accepted and Product Governance Runtime is retired. The active rule runner operates only on real repository owners; there is no Product Governance package exclusion or compatibility input. The dependency audit traverses static module imports/re-exports with the TypeScript AST; subject-scanner violation strings are not input dependencies. The adapter closure itself uses Node built-ins only. TypeScript is tooling for the audit, not a runtime input dependency.
 
-The native rule runner excludes `packages/governance` from its audit subjects because that
-Product reference feature is queued for retirement. The standalone package boundary audit
-keeps its existing global behavior, including Governance. It remains a separate root gate.
-The dependency audit traverses static module imports/re-exports with the TypeScript AST;
-subject-scanner violation strings are not input dependencies. The adapter closure itself
-uses Node built-ins only. TypeScript is tooling for the audit, not a runtime input dependency.
-
-## Legacy Product bundle compatibility/parity evidence
-
-The GOV-1904 Product export bridge, `published/governance-rule-bundle.v1.json`,
-`pinned-rule-bundles.json`, `engineering-rule-adapters.json` and Product fixtures remain
-physically present for compatibility and legacy/native parity tests until GOV-7903 review.
-They are not active root engineering inputs. Product provenance/schema validation stays
-covered by legacy hard guards; historical GOV-1903/GOV-1904 ownership is preserved.
+Retired Product Governance paths are protected by the repository retirement manifest rather than by keeping legacy bundle/runtime artifacts physically present.

@@ -1431,7 +1431,7 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 # 14. Parallel gated track — Product Governance retirement
 
-ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除。
+ADR-113 已于 2026-10-03 采纳；GOV-7901 inventory 与 GOV-7902 Engineering-input decoupling 已满足 destructive retirement 前置条件，GOV-7903 已完成物理退休与 closure 验证。
 
 ## PVC-GOV-7901 — Governance retirement inventory
 
@@ -1441,7 +1441,7 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 
 **Acceptance:** 每个 reference 标记 `retire / keep engineering / shared / migrate first`。
 
-**Execution (2026-10-02): Accepted / frozen / non-destructive.** 全仓 Product Governance blast radius 已冻结为 **54 groups / 770 exact paths**：RETIRE 29/193、KEEP_ENGINEERING 4/375、SHARED 14/182、MIGRATE_FIRST 7/20。七个迁移前置组对应 B1–B6：engineering bundle consumer (B1)、rule metadata + published snapshot (B2)、bridge parity tests (B3)、reference policy (B4)、root governance gate bridge (B5)、live maintained docs (B6)。新增 read-only drift lock 会扫描真实 Git live files、阻止未分类 Product roots/imports/schema/table refs、binary concrete refs、escaping symlinks、重复 path ownership 和错误 generated/source 标记；root governance gate 仍 cacheable，inventory dependency 单独 non-cacheable。Acceptance：focused 18/18、governance-tools 21 files / 177 tests、1,346-file inventory、test-target/docs/lint/format/diff 全绿、独立 uncached full governance rerun 全绿。ADR-113 **仍为 Proposed**，AGENT/生产 runtime/DB/PowerSync/UI/route/IPC 未改，GOV-7903 仍无 destructive authorization。Evidence: [GOV-7901 retirement inventory](2026-10-02-pvc-gov-7901-governance-retirement-inventory.md).
+**Execution (2026-10-02): Accepted / frozen / non-destructive.** 全仓 Product Governance blast radius 已冻结为 **54 groups / 770 exact paths**：RETIRE 29/193、KEEP_ENGINEERING 4/375、SHARED 14/182、MIGRATE_FIRST 7/20。七个迁移前置组对应 B1–B6：engineering bundle consumer (B1)、rule metadata + published snapshot (B2)、bridge parity tests (B3)、reference policy (B4)、root governance gate bridge (B5)、live maintained docs (B6)。新增 read-only drift lock 会扫描真实 Git live files、阻止未分类 Product roots/imports/schema/table refs、binary concrete refs、escaping symlinks、重复 path ownership 和错误 generated/source 标记；root governance gate 仍 cacheable，inventory dependency 单独 non-cacheable。Acceptance：focused 18/18、governance-tools 21 files / 177 tests、1,346-file inventory、test-target/docs/lint/format/diff 全绿、独立 uncached full governance rerun 全绿。该阶段保留为 retirement 前的 frozen baseline；2026-10-03 ADR-113 已采纳，inventory 转入 archive。Evidence: [GOV-7901 retirement inventory](../archive/2026-10-02-pvc-gov-7901-governance-retirement-inventory.md).
 
 ---
 
@@ -1464,29 +1464,22 @@ ADR-113 尚未最终确认，因此只做非破坏性准备，不能直接删除
 **Execution (2026-10-02): Accepted / frozen / non-destructive.** B1/B2 native
 `engineering-rules.json` + independent semantic pin now own the active Engineering Governance
 input; the root governance gate no longer consumes the Product Governance published bundle,
-Product DB, or exporter. B3 preserves legacy/native parity for all five rules and all three CLI
-modes over real Goal owner fixtures while proving the active native import closure can run without
-Product Governance packages/contracts/schema/export/snapshot, network, or filesystem writes. B4
-real-owner vertical-slice policy remains proposal-only; AGENT Governance-first policy is unchanged.
-B5 root command/source audits are native and B6 retargets the six maintained governance docs while
-retaining clearly labelled Product compatibility/history. Current inventory is 55 groups / 781
-paths; B4/B5/B6 Product policy/presence/doc residuals stay MIGRATE_FIRST. Independent acceptance:
-focused 4 files / 85 tests, governance-tools 24 files / 244 tests, 1,349-file inventory, target/docs/
-source/dependency/inventory/diff checks, and uncached full `memoflow:governance-check` all pass.
-ADR-113 remains Proposed, `destructiveAllowed=false`, and GOV-7903 remains blocked. Evidence:
+Product DB, or exporter. B3 proved native parity for all five rules and all three CLI modes over real Goal owner fixtures while showing the active native import closure can run without Product Governance packages/contracts/schema/export/snapshot, network, or filesystem writes. On 2026-10-03 ADR-113 was accepted: B4 real-owner vertical-slice policy became canonical, B5 native root command/source audits remain active, and B6 live governance docs now describe Engineering Governance only. GOV-7903 has removed the legacy Product compatibility bridge. Evidence:
 [GOV-7902 input decoupling](../archive/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md).
 
 ---
 
 ## PVC-GOV-7903 — Destructive Product Governance retirement
 
-**Gate:** 只有 ADR-113 最终采纳后执行。
+**Gate:** ✅ ADR-113 已采纳（2026-10-03），destructive retirement 已授权。
 
 **Scope:** 删除 Product Governance contracts/package/UI/DB/transport/routes/composition/reference-only tests，保留 engineering governance。
 
 **Verification:** full typecheck/test/build/governance checks + repo grep zero runtime refs。
 
-**Dependencies:** ADR-113 accepted, GOV-7902.
+**Dependencies:** ✅ ADR-113 accepted；✅ GOV-7902 complete。
+
+**Execution (2026-10-03): Complete / implemented / validated.** Product Governance package/contracts/UI、route/DI/composition、Prisma/PowerSync、legacy Product bundle bridge 已物理退休；Docker/env、Nx/Vitest/test registries、ESLint scopes、exports/aliases 与 tracked graph 已清理。Engineering Governance source/audits/docs/CI 和真实 owner vertical-slice policy 保留，负向锁覆盖 runtime/generated/config surfaces 并具有正确 Nx cache inputs。实际验证：12 项 uncached typecheck 与 30 个 dependency tasks、API/Desktop/Web builds、10 个 package test targets、5 个 changed App-Vue specs / 57 tests、Engineering Governance 18 files / 199 tests、1,300-file inventory、frozen offline lockfile、sync/lint/diff 与 full uncached governance 全部通过；live runtime/config grep 为零。完整 App-Vue 1,655/1,659、contracts 547/548，保留四个既有 Shell/Task failures 与一个既有 Goal index failure，不宣称全量测试绿色。Prod-like runtime smoke 因缺少本 worktree 的 encryption key 未执行；未重启共享 stack 或应用 destructive SQL。没有 retirement-attributable blocker。Exact commands / limits: [GOV-7903 closure evidence](../archive/2026-10-03-pvc-gov-7903-retirement-closure.md)。
 
 ---
 

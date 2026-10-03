@@ -2,7 +2,7 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 14 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: build-recurrence-rule-dual.surface.spec.ts, build-reminder-template-input-dual.surface.spec.ts, error-message-cli-dual.surface.spec.ts, error-message-dual.surface.spec.ts, escape-html-dual.surface.spec.ts, extract-error-message-dual.surface.spec.ts, parse-json-safe-dual.surface.spec.ts, parse-query-boolean-dual.surface.spec.ts, parse-query-value-dual.surface.spec.ts, parse-query-value-governance-dual.surface.spec.ts, presentation-preference-dual.surface.spec.ts, preview-text-dual.surface.spec.ts, read-nested-number-dual.surface.spec.ts, reminder-time-of-day-dual.surface.spec.ts
+ * Sources: build-recurrence-rule-dual.surface.spec.ts, build-reminder-template-input-dual.surface.spec.ts, error-message-cli-dual.surface.spec.ts, error-message-dual.surface.spec.ts, escape-html-dual.surface.spec.ts, extract-error-message-dual.surface.spec.ts, parse-json-safe-dual.surface.spec.ts, parse-query-boolean-dual.surface.spec.ts, parse-query-value-dual.surface.spec.ts, presentation-preference-dual.surface.spec.ts, preview-text-dual.surface.spec.ts, read-nested-number-dual.surface.spec.ts, reminder-time-of-day-dual.surface.spec.ts
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -451,7 +451,6 @@ import {
    * Residual 1021: parseBoolean dual retired for notification query filters.
    * Sole body in @memoflow/utils/shared/parse-query-value.
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
-   * Soft residual 1023: governance parseString/parseNumber dual retired (re-export this sole).
    * Soft residual: scheduler route parsers keep-boundary (different empty/boolean handling).
    * Soft residual 1073: scheduler route parsers keep-boundary surface (no force-merge).
    * Soft residual: goal parseBoolean sole (residual 985) is true/false-only keep-boundary vs this dual.
@@ -527,78 +526,6 @@ import {
       expect(parseBoolean('0')).toBe(false);
       expect(parseBoolean('yes')).toBeUndefined();
       expect(parseBoolean(['true'])).toBe(true);
-    });
-  });
-}
-
-// --- merged from parse-query-value-governance-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 1023: governance parseString/parseNumber dual retired onto residual 989 sole.
-   * governance-route-shared re-exports utils sole; parseStringArray remains package-local.
-   * Soft residual 1069: governance parseStringArray keep-boundary surface (no force-merge).
-   * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
-   * S4-2302B: Scheduler diagnostics query parsing is contract-owned; local route parser bodies are retired.
-   * Soft residual 1021: notification parseBoolean sole family.
-   * Does not flip §13.2 checkboxes.
-   */
-  describe('governance parseString/parseNumber dual retired (residual 1023)', () => {
-    const sharedDir = __dirname;
-    const sole = readFileSync(resolve(sharedDir, 'parse-query-value.ts'), 'utf8');
-    const govShared = readFileSync(
-      resolve(sharedDir, '../../../governance/src/api/routes/governance-route-shared.ts'),
-      'utf8',
-    );
-    const rules = readFileSync(
-      resolve(sharedDir, '../../../governance/src/api/routes/governance-rules.routes.ts'),
-      'utf8',
-    );
-    const revisions = readFileSync(
-      resolve(sharedDir, '../../../governance/src/api/routes/governance-rule-revisions.routes.ts'),
-      'utf8',
-    );
-    const schedule = readFileSync(
-      resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
-      'utf8',
-    );
-
-    it('owns residual 989 sole parseString/parseNumber bodies', () => {
-      expect(sole).toContain('Residual 989');
-      expect(sole).toMatch(/export function parseString\b/);
-      expect(sole).toMatch(/export function parseNumber\b/);
-      expect(sole).toContain('Array.isArray(value)');
-      expect(sole).toContain('Number.isFinite(parsed)');
-    });
-
-    it('governance-route-shared re-exports utils sole without local dual bodies', () => {
-      expect(govShared).toContain('Residual 1023');
-      expect(govShared).toContain(
-        "export { parseNumber, parseString } from '@memoflow/utils/shared'",
-      );
-      expect(govShared).not.toMatch(/export function parseString\b/);
-      expect(govShared).not.toMatch(/export function parseNumber\b/);
-      expect(govShared).toMatch(/export function parseStringArray\b/);
-    });
-
-    it('governance routes import shared re-export without local dual bodies', () => {
-      expect(rules).toContain("from './governance-route-shared'");
-      expect(rules).toContain('parseString');
-      expect(rules).toContain('parseNumber');
-      expect(rules).toContain('parseStringArray');
-      expect(rules).not.toMatch(/function parseString\b/);
-      expect(rules).not.toMatch(/function parseNumber\b/);
-      expect(revisions).toContain("from './governance-route-shared'");
-      expect(revisions).toContain('parseNumber');
-      expect(revisions).not.toMatch(/function parseNumber\b/);
-    });
-
-    it('scheduler uses contract-owned diagnostics parsing; sole still parses arrays and finite numbers', () => {
-      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
-      expect(schedule).not.toMatch(/function parseString\b/);
-      expect(schedule).not.toMatch(/function parseNumber\b/);
-      expect(parseString(['a', 'b'])).toBe('a');
-      expect(parseNumber('12')).toBe(12);
-      expect(parseNumber('nope')).toBeUndefined();
     });
   });
 }

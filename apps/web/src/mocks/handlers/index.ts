@@ -16,7 +16,6 @@ import { taskHandlers } from './task.handlers';
 import { scheduleHandlers } from './schedule.handlers';
 import { notificationHandlers } from './notification.handlers';
 import { repositoryHandlers } from './repository.handlers';
-import { governanceHandlers } from './governance.handlers';
 import { settingHandlers } from './setting.handlers';
 import { powersyncHandlers } from './powersync.handlers';
 
@@ -27,7 +26,6 @@ export const handlers = [
   ...scheduleHandlers,
   ...notificationHandlers,
   ...repositoryHandlers,
-  ...governanceHandlers,
   ...settingHandlers,
   ...powersyncHandlers,
 ];

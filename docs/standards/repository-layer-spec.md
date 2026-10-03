@@ -1,238 +1,181 @@
 ---
 tags: [standard, infrastructure, repository]
+updated: 2026-10-03T10:30:00+09:00
 ---
 
 # 仓储层开发规范
 
-**版本**: 1.0
-**适用范围**: `packages/{domain}/src/server/infrastructure/adapters/`（旧模块在收敛期间可能暂时保留 `src/infrastructure-server/`）
-**读者**: 开发人员, AI 助手
+**版本**: 1.1
 
-## Repository-native Engineering Governance input
+**适用范围**: `packages/{domain}/src/server/infrastructure/adapters/`
+**读者**: 开发人员、AI 助手
 
-Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
-`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
-contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
-read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
-`autofix-proposal` emits review-required guidance without applying changes.
+本规范由 repository-native Engineering Governance 维护。ADR-113 已退休 Product Governance Runtime；所有示例必须来自真实业务 owner。
+
+## Engineering Governance input
 
 ```bash
 node tools/governance/engineering-rule-source-audit.mjs --check
 node tools/governance/engineering-input-dependency-audit.mjs
 node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
-node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
-node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
+pnpm nx run memoflow:governance-check
 ```
-
-ADR-113 remains Proposed. AGENT.md Governance-first policy and Product presence guards remain
-active. The real-owner vertical slice policy is a proposal only; GOV-7903 remains blocked.
 
 ## 1. 核心职责
 
-仓储层是领域模型与持久化技术之间的适配器。它将领域对象的生命周期管理委托给数据库（Prisma / PowerSync），同时向应用层暴露与技术无关的接口。
-
-## 2. 架构位置
+仓储层是领域模型与持久化技术之间的 adapter。领域层定义所需 Port，Infrastructure 决定 Prisma / PowerSync 等具体实现。
 
 ```text
-server/application  →  server/domain (IGoalRepository 接口)
-                           ↑
-server/infrastructure (GoalPrismaRepository 实现)
+server/application -> server/domain (IGoalRepository)
+                           ^
+server/infrastructure/adapters (GoalPrismaRepository / GoalPowerSyncRepository)
 ```
 
-- 接口定义在 `server/domain/repositories/`（领域层决定"需要什么"）
-- 实现在 `server/infrastructure/adapters/`（基础设施层决定"怎么实现"）
+- Port 定义在 `server/domain/repositories/`；
+- concrete adapter 位于 `server/infrastructure/adapters/`；
+- application/domain 不能直接依赖 Prisma concrete types；
+- transport 不负责构造 repository。
 
----
+## 2. 已验证模式
 
-## 3. 优秀范式（已验证）
+### 2.1 AggregateRepositoryBase
 
-### 3.1 AggregateRepositoryBase — 模板方法
+需要领域事件发布语义的聚合仓储继承 `AggregateRepositoryBase<T>`，由 base class 统一处理 persist 后的 event publication。
 
-聚合根仓储应继承 `AggregateRepositoryBase<T>`（来自 `@memoflow/patterns`）。
+真实 owner：
 
-**机制**: `save()` 作为模板方法，先调 `persist()`（子类实现），再自动 `publishDomainEvents()`。
+- [GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
+- [TaskPlanPrismaRepository](../../../packages/task/src/server/infrastructure/adapters/prisma/task-plan-prisma.repository.ts)
 
-- 参考实现: [TaskTemplatePrismaRepository](../../../packages/task/src/server/infrastructure/adapters/prisma/task-template-prisma.repository.ts)
-- 参考实现: [GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
+### 2.2 结构化异常 + Result 边界
 
-### 3.2 结构化异常 + 边界 Result（推荐）
-
-The Rule/RuleRevision snippets and Product links below are retained historical compatibility
-examples, not native Engineering inputs. Surviving owner evidence includes
-[GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
-and [Goal composition root](../../../packages/goal/src/server/infrastructure/goal.module.ts).
-The same domain/adapter boundaries apply to real owner implementations.
-
-仓储方法应返回普通的 `Promise<T>` / `Promise<T | null>` / `Promise<void>`。
-仓储内部可以 `try/catch`，但失败时应抛出**结构化异常**，而不是返回 `Result<T>`。
-
-`Result<T>` 的统一边界应放在 module `api`、controller 或 use case 外层，由边界层负责把 throw 转成 `fail(...)`。
-
-**规范写法**（仓储层）:
+仓储接口返回领域值或抛出结构化 infrastructure/domain error；不要让 persistence adapter 自行发明 HTTP/IPC 失败语义。
 
 ```typescript
-async findById(id: RuleId): Promise<Rule | null> {
-  try {
-    const row = await this.prisma.rule.findUnique({ where: { id } });
-    return row ? RulePrismaMapper.toDomain(row) : null;
-  } catch (err) {
-    throw toResultErrorException(
-      mapInfraErrorToResultError(err, 'Failed to find rule by ID'),
-    );
-  }
+async findById(id: GoalId): Promise<Goal | null> {
+  const row = await this.prisma.goal.findUnique({ where: { id } });
+  return row ? this.toDomain(row) : null;
 }
 ```
 
-**规范写法**（应用边界）:
+`Result<T>` / public failure mapping 放在 application/transport boundary。
+
+参考：
+
+- [GoalPrismaRepository](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
+- [Goal module composition](../../../packages/goal/src/server/infrastructure/goal.module.ts)
+- [resultify](../../../packages/utils/src/result/resultify.ts)
+
+### 2.3 Mapper
+
+Prisma / PowerSync adapter 各自拥有 mapper；mapper 只转换 persistence representation 与 domain/read-model representation，不拥有业务流程。
+
+真实 owner：
+
+- [PrismaGoalMapper](../../../packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-mapper.ts)
+- [PowerSyncGoalMapper](../../../packages/goal/src/server/infrastructure/adapters/powersync/mappers/powersync-goal.mapper.ts)
+- [PrismaTaskPlanMapper](../../../packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-plan-mapper.ts)
+- [PowerSyncTaskPlanMapper](../../../packages/task/src/server/infrastructure/adapters/powersync/mappers/powersync-task-plan.mapper.ts)
+
+重复的 parse/normalization 逻辑只在语义相同后抽取；不要为了“统一”合并 persistence 语义不同的 mapper。
+
+### 2.4 多表原子写入
+
+需要同步 aggregate + children/outbox/related records 时，事务 owner 必须显式。
+
+真实 owner：
+
+- [Prisma Goal write transaction runner](../../../packages/goal/src/server/infrastructure/adapters/prisma/prisma-goal-write-transaction-runner.ts)
+- [Prisma Task write transaction runner](../../../packages/task/src/server/infrastructure/adapters/prisma/prisma-task-write-transaction-runner.ts)
+- [PowerSync Goal write transaction runner](../../../packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-write-transaction-runner.ts)
+- [PowerSync Task write transaction runner](../../../packages/task/src/server/infrastructure/adapters/powersync/powersync-task-write-transaction-runner.ts)
+
+不要把跨 repository 原子性隐藏在任意一个 repository 的私有约定里；由明确 transaction runner / unit-of-work owner 表达。
+
+### 2.5 Composition Root
+
+每个真实 feature 的 `server/infrastructure/<module>.module.ts` 负责组装 transport-neutral application port 和 runtime lifecycle。
 
 ```typescript
-async execute(req: GetRuleReq): Promise<Result<GetRuleRes>> {
-  return resultify(async () => {
-    const rule = await this.ruleRepository.findById(req.id);
-    if (!rule) {
-      throw toResultErrorException({ code: 'NOT_FOUND', message: 'Rule not found' }, 404);
-    }
-    return rule.toClientDTO();
-  }, 'Failed to get rule');
+export interface GoalModuleDependencies {
+  readonly goalRepository: IGoalRepository;
+  readonly goalRecordRepository: IGoalRecordRepository;
+  readonly goalWriteTransactionRunner: GoalWriteTransactionRunner;
+  readonly goalDeletionTransactionRunner: GoalDeletionTransactionRunner;
+  readonly taskBindingReadPort: GoalDependencyReadPort;
+  readonly userTimeContextPort: UserTimeContextPort;
+}
+
+export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstance {
+  // assemble use cases + api + start/dispose
 }
 ```
 
-- 参考实现: [RulePrismaRepository](../../../packages/governance/src/server/infrastructure/adapters/prisma/rule-prisma.repository.ts)
-- 参考实现: [createScheduleModule](../../../packages/schedule/src/server/infrastructure/schedule.module.ts)
-- 共享工具: [resultify](../../../packages/utils/src/result/resultify.ts)
+参考：
 
-### 3.3 Mapper 静态类
+- [Goal module](../../../packages/goal/src/server/infrastructure/goal.module.ts)
+- [Task module](../../../packages/task/src/server/infrastructure/task.module.ts)
 
-每个持久化技术（Prisma / PowerSync）为每个实体/聚合根提供一个静态 Mapper 类，方法：`toDomain(raw)` / `toPersistence(entity)` / `toDomainMany(rows[])`。
+Host 的 API/Desktop runtime composer 选择 Prisma/PowerSync concrete adapter；package transport module 只负责 transport + lifecycle registration。
 
-**规范写法**:
+### 2.6 PowerSync parity
 
-```typescript
-export class RulePrismaMapper {
-  static toDomain(raw: PrismaRule): Rule {
-    /* 反序列化 + 重建值对象 */
-  }
-  static toPersistence(rule: Rule): Omit<PrismaRule, 'createdAt' | 'updatedAt'> {
-    /* 序列化 */
-  }
-  static toDomainMany(raws: PrismaRule[]): Rule[] {
-    return raws.map((r) => this.toDomain(r));
-  }
-}
-```
+需要 Web/Prisma 与 Desktop/PowerSync parity 的业务能力，应通过共享 contract + owner-specific characterization tests 验证语义等价，而不是要求两端实现逐行相同。
 
-- 参考实现: [RulePrismaMapper](../../../packages/governance/src/server/infrastructure/adapters/prisma/mappers/rule-prisma.mapper.ts)
-- 参考实现: [PowerSyncRuleMapper](../../../packages/governance/src/server/infrastructure/adapters/powersync/mappers/powersync-rule.mapper.ts)
+参考：
 
-### 3.4 Mapper 共享工具
+- [Goal PowerSync repository](../../../packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts)
+- [Task Plan PowerSync repository](../../../packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.ts)
 
-防御性解析（JSON、Date、SQL 转义）应集中在 `adapters/mapper-helpers.ts`，Prisma 和 PowerSync 的映射器复用同一套工具。
+## 3. 命名规范
 
-- 参考实现: [mapper-helpers.ts](../../../packages/governance/src/server/infrastructure/adapters/mapper-helpers.ts)
+| 元素 | 规范 | 示例 |
+| --- | --- | --- |
+| 仓储接口 | `I{Name}Repository` | `IGoalRepository` |
+| Prisma 实现 | `{Name}PrismaRepository` | `GoalPrismaRepository` |
+| PowerSync 实现 | `{Name}PowerSyncRepository` | `GoalPowerSyncRepository` |
+| Prisma Mapper | `Prisma{Name}Mapper` | `PrismaGoalMapper` |
+| PowerSync Mapper | `PowerSync{Name}Mapper` | `PowerSyncGoalMapper` |
+| 文件名 | kebab-case | `goal-prisma.repository.ts` |
 
-### 3.5 多表聚合同步（事务内 delete-removed + upsert）
+以当前 owner package 的既有命名为准；不要只为形式统一做无收益 rename。
 
-子实体应包裹在 `$transaction` 中，同步策略：删除已移除的子实体 + upsert 当前子实体。
+## 4. 边界约束
 
-**规范写法**（参考 Goal）:
+- `server/domain` 与 `server/application` 禁止依赖 `@memoflow/database` / `@prisma/client` concrete implementation；
+- concrete persistence imports 只进入 infrastructure、host runtime composer 或 tests；
+- package public surface 暴露必要 Port / factory，不暴露 concrete adapter class；
+- 不恢复 `domain-server`、`application-server`、`infrastructure-server` 等旧分裂目录；
+- cross-feature persistence 必须通过明确 owner Port/read model/transaction contract，而不是直接跨 package 访问对方表。
 
-```typescript
-protected async persist(goal: Goal): Promise<void> {
-  await this.prisma.$transaction(async (tx) => {
-    await tx.goal.upsert({...});
-    // 1. 删除已移除的子实体
-    await tx.keyResult.deleteMany({ where: { goalId: id, id: { notIn: currentIds } } });
-    // 2. Upsert 当前子实体
-    for (const kr of dto.keyResults) {
-      await tx.keyResult.upsert({...});
-    }
-  });
-}
-```
-
-- 参考实现: [GoalPrismaRepository.persist()](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts)
-
-### 3.6 跨实体原子保存（saveWithXxx）
-
-当一个操作需要同时持久化多个实体时，提供 `saveWithXxx()` 方法，在单个 `$transaction` 中完成。
-
-- 参考实现: [RulePrismaRepository.saveWithRevision()](../../../packages/governance/src/server/infrastructure/adapters/prisma/rule-prisma.repository.ts)
-
-### 3.7 事务控制封装（withTransaction）
-
-仓储接口暴露 `withTransaction(fn)` 方法，创建包装了事务客户端的新仓储实例。调用方自行决定是否需要事务。
-
-- 参考实现: [ScheduleTaskPrismaRepository.withTransaction()](../../../packages/schedule/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.ts)
-
-### 3.8 组合根（Composition Root）
-
-每个模块的 `server/infrastructure/` 提供 `create<Module>Module(dependencies)` 工厂函数作为组合根。依赖通过构造函数注入，不使用 Service Locator / DI 容器。
-
-**规范结构**:
-
-```typescript
-export interface GovernanceModuleDependencies {
-  readonly ruleRepository: IGoalRepository;
-  readonly revisionRepository: IRuleRevisionRepository;
-  readonly runtimeAdapters?: GovernanceRuntimeAdaptersInput;
-}
-
-export function createGovernanceModule(deps: GovernanceModuleDependencies): GovernanceModuleInstance {
-  const api: GovernanceApplicationPort = { /* 委托给 useCases */ };
-  return { api, start(), dispose() };
-}
-```
-
-- 参考实现: [governance.module.ts](../../../packages/governance/src/server/infrastructure/governance.module.ts)
-
-### 3.9 PowerSync 适配器 — SQL 提取复用
-
-在 PowerSync 实现中，共享的 SQL 逻辑应提取为私有方法，避免 `save()` 和 `saveWithXxx()` 之间的重复。
-
-- 参考实现: [PowerSyncRuleRepository._upsertRule()](../../../packages/governance/src/server/infrastructure/adapters/powersync/rule-powersync.repository.ts)
-
----
-
-## 4. 命名规范
-
-| 元素      | 规范                     | 示例                                              |
-| --------- | ------------------------ | ------------------------------------------------- |
-| 仓储接口  | `I{Name}Repository`      | `IGoalRepository`                                 |
-| 仓储实现  | `{Name}{Tech}Repository` | `RulePrismaRepository`, `PowerSyncRuleRepository` |
-| Mapper 类 | `{Name}{Tech}Mapper`     | `RulePrismaMapper`, `PowerSyncRuleMapper`         |
-| 文件名    | `kebab-case`             | `rule-prisma.repository.ts`                       |
-| 接口文件  | `i-{name}.repository.ts` | `i-rule-repository.ts`                            |
-
-## 5. 注释规范
-
-- 所有文件使用**中英双语 JSDoc**（English first, 中文 second）
-- 公开方法必须有 `@param` / `@returns` 标注
-- 具体实现类标记 `@internal`（消费方应使用接口）
-- 遗留代码标记 `@deprecated` 并指向替代方案
-
-## 6. 文件夹结构
+## 5. 文件结构
 
 ```text
 server/infrastructure/
   adapters/
-    mapper-helpers.ts           ← 共享解析工具
     prisma/
-      index.ts                  ← barrel export
       <entity>-prisma.repository.ts
       mappers/
-        index.ts
-        <entity>-prisma.mapper.ts
     powersync/
-      index.ts
       <entity>-powersync.repository.ts
       mappers/
-        index.ts
-        <entity>-powersync.mapper.ts
   runtime/
-    module-runtime.ts           ← runtime adapter seam
-    <module>-event-log.runtime.ts
-  <module>.module.ts            ← 规范化组合根
-  prisma.ts                     ← Prisma 便捷组合根（可选）
-  powersync.ts                  ← PowerSync 便捷组合根（可选）
-  index.ts                      ← barrel export
+  <module>.module.ts
+  prisma.ts
+  powersync.ts
+  index.ts
 ```
+
+真实模块允许因领域复杂度增加 transaction runners、outbox adapters、read ports 等，但 owner 与依赖方向必须明确。
+
+## 6. 验证
+
+Repository architecture 变化至少运行：
+
+```bash
+node tools/governance/package-internal-boundary-audit.mjs
+node tools/governance/server-feature-shape-audit.mjs
+pnpm nx run memoflow:governance-check
+```
+
+并补对应 owner package 的 typecheck / test；如果同时修改 Prisma / PowerSync，则两条 runtime lane 都要验证。

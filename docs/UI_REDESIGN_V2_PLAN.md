@@ -1,5 +1,7 @@
 # UI 重构 V2 方案：AI 优先的 ChatGPT 桌面式壳（Desktop-first）
 
+> **2026-10-03 GOV-7903 / ADR-113:** Product Governance package、Rule/RuleRevision、UI 与 `/governance/**` 已退休；本文相关内容仅为历史设计记录，不再作为实施输入，也不得并入 Knowledge。当前 Governance 仅指 repository-native Engineering Governance。
+
 > 状态：实施方案。**取代** `UI_PAGE_REDESIGN_PLAN.md`（下称 V1）的壳/导航/响应式/实施顺序体系；V1 各页面章节的**内容级结论**（主/次操作、信息删减清单、拆分退役清单）仍然有效，由本文 §6 引用为面板内容设计输入。
 > **2026-09-18 Dashboard retirement:** HOME-1805 is implemented. The standalone Dashboard package, route, redirect, DTO/config, and persistence surfaces are deleted. Any remaining Dashboard wording in this historical design plan is context only; current Home and AI behavior uses owner read models and must not recreate `/dashboard`.
 > 2026-07-14 修订：Electron 实机诊断后的 Settings 独立场景、Schedule 统一分栏入口、动态面板、Global Composer 与胶囊预览方案，见 [`docs/plan/active/2026-07-14-ui-shell-diagnostic-followup.md`](plan/active/2026-07-14-ui-shell-diagnostic-followup.md)。冲突部分以该修订为准。

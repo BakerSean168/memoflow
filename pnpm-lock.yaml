@@ -338,9 +338,6 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
-      '@memoflow/governance':
-        specifier: workspace:*
-        version: link:../../packages/governance
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
@@ -537,9 +534,6 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
-      '@memoflow/governance':
-        specifier: workspace:*
-        version: link:../../packages/governance
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../../packages/ipc-client
@@ -978,9 +972,6 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
-      '@memoflow/governance':
-        specifier: workspace:*
-        version: link:../../packages/governance
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
@@ -1279,9 +1270,6 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../goal
-      '@memoflow/governance':
-        specifier: workspace:*
-        version: link:../governance
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1589,40 +1577,6 @@ importers:
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
-      '@types/express':
-        specifier: ^5.0.0
-        version: 5.0.6
-
-  packages/governance:
-    dependencies:
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@memoflow/database':
-        specifier: workspace:*
-        version: link:../database
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
-      '@memoflow/patterns':
-        specifier: workspace:*
-        version: link:../patterns
-      '@memoflow/utils':
-        specifier: workspace:*
-        version: link:../utils
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1(supports-color@10.2.2)
-      tslib:
-        specifier: ^2.3.0
-        version: 2.8.1
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
-    devDependencies:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6

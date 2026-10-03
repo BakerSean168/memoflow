@@ -88,7 +88,7 @@ import { describe, expect, it } from 'vitest';
   /**
    * Phase 2 freezes `packages/contracts/src/shared/execution-context.ts` as the
    * only `ExecutionContext` body. `context.ts` keeps a deprecated alias only;
-   * governance's private copy is retired in the adapter rollout. The context
+   * the legacy feature-private copy is retired in the adapter rollout. The context
    * stays metadata-only — no Prisma/repository/business-aggregate fields.
    */
   const here = dirname(fileURLToPath(import.meta.url));

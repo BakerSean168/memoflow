@@ -92,9 +92,9 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
   it('routes pilot tables to the dispatcher and keeps non-pilot modules on the legacy path', () => {
     initElectronFeatures({} as never);
 
-    emitDbChanged(['notifications', 'task_plans', 'rules', 'goals']);
+    emitDbChanged(['notifications', 'task_plans', 'goals']);
 
-    expect(dispatchedIntents()).toHaveLength(3);
+    expect(dispatchedIntents()).toHaveLength(2);
     expect(dispatchedIntents()[0]).toEqual({
       target: 'notification',
       identityScope: 'profile-1',
@@ -102,12 +102,6 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     });
     expect(dispatchedIntents()[1]).toEqual({
       target: 'task-plan',
-      identityScope: 'profile-1',
-      source: 'powersync',
-      projection: 'all',
-    });
-    expect(dispatchedIntents()[2]).toEqual({
-      target: 'governance',
       identityScope: 'profile-1',
       source: 'powersync',
       projection: 'all',

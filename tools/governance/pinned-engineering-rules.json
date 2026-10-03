@@ -3,7 +3,7 @@
   "sources": [
     {
       "path": "tools/governance/engineering-rules.json",
-      "semanticHash": "sha256:8b5309fab404a4ec296740c9cb552c54ce7eed6efe55258c8a22379f4a0aac74"
+      "semanticHash": "sha256:cf57cfa94746c57adc672d36019a68aa96a611366f9d011a20bf5b486edaceca"
     }
   ]
 }

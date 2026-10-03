@@ -13,9 +13,6 @@ export type RuntimeLane = 'web' | 'desktop';
 /** Notification stale time: 30s. 通知 staleTime：30 秒。 */
 export const NOTIFICATION_STALE_TIME_MS = 30_000;
 
-/** Governance stale time: 30s. 治理规则 staleTime：30 秒。 */
-export const GOVERNANCE_STALE_TIME_MS = 30_000;
-
 /** Task template stale time: 60s. 任务模板 staleTime：60 秒。 */
 export const TASK_TEMPLATE_STALE_TIME_MS = 60_000;
 
@@ -37,7 +34,7 @@ export const SERVER_STATE_GC_TIME_MS = 10 * 60_000;
 export interface ServerStateRuntimePolicy {
   lane: RuntimeLane;
   /** Per-module stale times (ms). 各模块 staleTime（毫秒）。 */
-  staleTime: { notification: number; taskPlan: number; governance: number };
+  staleTime: { notification: number; taskPlan: number };
   /** Query cache GC time (ms). 查询缓存 gcTime（毫秒）。 */
   gcTime: number;
   /**
@@ -65,7 +62,6 @@ export function createServerStateRuntimePolicy(lane: RuntimeLane): ServerStateRu
     staleTime: {
       notification: NOTIFICATION_STALE_TIME_MS,
       taskPlan: TASK_TEMPLATE_STALE_TIME_MS,
-      governance: GOVERNANCE_STALE_TIME_MS,
     },
     gcTime: SERVER_STATE_GC_TIME_MS,
     queryNetworkMode: lane === 'web' ? 'online' : 'always',

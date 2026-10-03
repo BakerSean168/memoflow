@@ -14,7 +14,6 @@
 
 import type { QueryKey } from '@tanstack/vue-query';
 import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
-import type { RuleSeverity, RuleStatus } from '@memoflow/contracts/governance';
 
 // ─── Notification ─────────────────────────────────────────────────────────────
 
@@ -201,69 +200,9 @@ export const routineUpcomingQueryKeys = {
     [...routineUpcomingQueryKeys.identity(identityScope), 'range', start, end, limit] as const,
 };
 
-// ─── Governance ───────────────────────────────────────────────────────────────
-
-/**
- * Canonical, transport-safe Governance rule list query used inside the cache key.
- * 进入 cache key 的规范化治理规则列表查询（仅 transport 接受的 primitive 字段）。
- *
- * Field order is frozen: `page/pageSize/status/severity/tags/search`.
- * 字段顺序冻结为：`page/pageSize/status/severity/tags/search`。
- */
-export interface CanonicalGovernanceListQuery {
-  page: number;
-  pageSize: number;
-  status?: RuleStatus;
-  severity?: RuleSeverity;
-  tags?: string[];
-  search?: string;
-}
-
-/** Input accepted by the Governance canonicalizer (may omit defaults/undefined). */
-export type GovernanceListQueryInput = Partial<CanonicalGovernanceListQuery>;
-
-/**
- * Materialize a Governance rule list query into its canonical, key-safe form.
- * 把治理规则列表查询规范化为键安全形态：补齐分页默认值、删除 undefined、规范化 tags 数组。
- */
-export function canonicalizeGovernanceListQuery(
-  query?: GovernanceListQueryInput,
-): CanonicalGovernanceListQuery {
-  const { page, pageSize, status, severity, tags, search } = query ?? {};
-  const normalizedTags = normalizeStringArray(tags);
-  return {
-    page: page ?? 1,
-    pageSize: pageSize ?? 20,
-    ...(status !== undefined ? { status } : {}),
-    ...(severity !== undefined ? { severity } : {}),
-    ...(normalizedTags !== undefined ? { tags: normalizedTags } : {}),
-    ...(search !== undefined && search.length > 0 ? { search } : {}),
-  };
-}
-
-/**
- * Frozen Governance query key factories.
- * 冻结的 Governance 查询键工厂。
- */
-export const governanceQueryKeys = {
-  all: ['server-state', 'governance'] as const,
-  identity: (identityScope: string) => [...governanceQueryKeys.all, identityScope] as const,
-  lists: (identityScope: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'list'] as const,
-  list: (identityScope: string, query: CanonicalGovernanceListQuery) =>
-    [...governanceQueryKeys.lists(identityScope), query] as const,
-  details: (identityScope: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'detail'] as const,
-  detail: (identityScope: string, id: string) =>
-    [...governanceQueryKeys.details(identityScope), id] as const,
-  revisions: (identityScope: string, ruleId: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'revision', ruleId] as const,
-};
-
 /** Type alias so the frozen key shape stays importable for dispatcher typing. */
 export type NotificationQueryKeys = typeof notificationQueryKeys;
 export type TaskPlanQueryKeys = typeof taskPlanQueryKeys;
-export type GovernanceQueryKeys = typeof governanceQueryKeys;
 
 /** Type guard for identity-scoped server-state keys owned by this renderer. */
 export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boolean {
@@ -279,7 +218,6 @@ export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boole
       'goal-home',
       'recent-knowledge',
       'routine-upcoming',
-      'governance',
     ].includes(String(key[1]))
   );
 }

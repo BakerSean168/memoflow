@@ -771,38 +771,6 @@ const task_goal_outbox = new Table({
 });
 
 // ──────────────────────────────────────────────
-// Governance
-// ──────────────────────────────────────────────
-
-const rules = new Table({
-  code: column.text,
-  title: column.text,
-  description: column.text,
-  severity: column.text,
-  status: column.text,
-  deprecation_reason: column.text,
-  replacement_rule_id: column.text,
-  live_reference_location: column.text,
-  tags: column.text, // JSON
-  good_examples: column.text, // JSON
-  bad_examples: column.text, // JSON
-  author_id: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const rule_revisions = new Table({
-  rule_id: column.text, // FK
-  revision_number: column.integer,
-  author_id: column.text,
-  changed_fields: column.text, // JSON
-  previous_values: column.text, // JSON
-  new_values: column.text, // JSON
-  change_type: column.text,
-  created_at: column.text,
-});
-
-// ──────────────────────────────────────────────
 // Schema Export
 // ──────────────────────────────────────────────
 
@@ -859,9 +827,6 @@ export const PowerSyncAppSchema = new Schema({
   ai_provider_secrets,
   ai_knowledge_index_entries_local,
   task_goal_outbox,
-  // Governance
-  rules,
-  rule_revisions,
 });
 
 export type PowerSyncDatabase = InstanceType<typeof Schema>;

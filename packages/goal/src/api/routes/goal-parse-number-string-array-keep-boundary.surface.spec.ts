@@ -11,7 +11,6 @@ import { describe, expect, it } from 'vitest';
  *   utils persistence parseStringArray is JSON-string only (different domain).
  * Soft residual 985: goal parseBoolean true/false-only sole remains separate.
  * Soft residual: schedule route parsers keep-boundary remains in utils surface.
- * Soft residual 1069: governance parseStringArray keep-boundary (empty→undefined + trim).
  * Does not flip §13.2 checkboxes.
  */
 describe('goal parseNumber/parseStringArray keep-boundary (residual 1067)', () => {

@@ -78,7 +78,6 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
       '.register(interventionWindowElectronModule)',
       '.register(focusWindowElectronModule)',
       '.register(aiComposed.module)',
-      '.register(governanceElectronModule)',
       '.register(repositoryElectronModule)',
     ];
     let cursor = 0;

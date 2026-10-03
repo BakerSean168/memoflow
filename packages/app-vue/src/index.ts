@@ -8,7 +8,6 @@ export {
   NOTIFICATION_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   ROUTINE_SERVICE_KEY,
-  RULE_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
   SETTING_SERVICE_KEY,
   AI_CLIENT_KEY,
@@ -51,7 +50,6 @@ export { useGoalStore } from './modules/goal';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from './modules/schedule';
 export { useNotificationStore } from './modules/notification';
-export { useGovernanceStore } from './modules/governance';
 export { usePresentationPreferenceStore } from './modules/setting';
 
 // ── Startup hooks ──

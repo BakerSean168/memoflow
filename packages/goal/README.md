@@ -1,6 +1,6 @@
 # @memoflow/goal
 
-目标模块 — OKR 目标与关键结果管理。Goal 与 Governance 一样使用 host-composer 装配模式：模块只暴露 transport-neutral 的深模块工厂与 ingredient factory，宿主运行时选择持久化 adapter 并组装 instance。
+目标模块 — OKR 目标与关键结果管理。Goal 使用 host-composer 装配模式：模块只暴露 transport-neutral 的深模块工厂与 ingredient factory，宿主运行时选择持久化 adapter 并组装 instance。
 
 ## 公开 seam
 

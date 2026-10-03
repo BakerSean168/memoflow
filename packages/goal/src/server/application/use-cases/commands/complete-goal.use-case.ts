@@ -2,7 +2,7 @@
  * Complete Goal Use Case
  *
  * 完成目标的应用服务
- * 遵循 governance 模块 Result<T> 规范
+ * 遵循共享 Result<T> contract
  */
 
 import { GoalPolicy, GoalVersionConflictError, type IGoalRepository } from '../../../domain';

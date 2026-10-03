@@ -59,9 +59,9 @@ describe('logger bootstrap preflight (RefArch Phase 6)', () => {
       },
     });
 
-    const featureLogger = createLogger('GovernanceApiModule');
-    expect(featureLogger).toMatchObject({ provider: 'fake', context: 'GovernanceApiModule' });
-    expect(createdContexts).toContain('GovernanceApiModule');
+    const featureLogger = createLogger('GoalApiModule');
+    expect(featureLogger).toMatchObject({ provider: 'fake', context: 'GoalApiModule' });
+    expect(createdContexts).toContain('GoalApiModule');
   });
 
   it('is idempotent for identical repeated initialization', () => {

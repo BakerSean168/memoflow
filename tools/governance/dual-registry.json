@@ -1,25 +1,25 @@
 {
   "version": 1,
-  "generated": "2026-09-18",
+  "generated": "2026-10-03",
   "baseline": {
     "dual_surface": 237,
     "keep_boundary": 66,
     "note": "elegance plan E0 baseline"
   },
   "post_e3b": {
-    "dual_surface_files": 68,
-    "drop_from_baseline": 169,
-    "drop_pct": 71.3,
-    "registry_suites": 117
+    "dual_surface_files": 64,
+    "drop_from_baseline": 173,
+    "drop_pct": 73,
+    "registry_suites": 111
   },
   "counts": {
-    "total": 117,
+    "total": 111,
     "by_class": {
-      "keep_boundary": 48,
-      "retired": 69
+      "keep_boundary": 47,
+      "retired": 64
     },
-    "dual_surface_files": 68,
-    "keep_boundary_files": 48
+    "dual_surface_files": 64,
+    "keep_boundary_files": 47
   },
   "entries": [
     {
@@ -628,28 +628,6 @@
       "suite_describes": 2
     },
     {
-      "id": "r651",
-      "path": "packages/contracts/src/modules/governance/aggregates/rule-server-dual.surface.spec.ts",
-      "package": "packages/contracts",
-      "class": "retired",
-      "sole": "index.ts",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": "651",
-      "suite_describes": 1
-    },
-    {
-      "id": "r731",
-      "path": "packages/contracts/src/modules/governance/api/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
-      "class": "retired",
-      "sole": "../value-objects/code-snippet.ts",
-      "blast": "surface lock (retired); suite describes=3",
-      "next": "none",
-      "residual": "731",
-      "suite_describes": 3
-    },
-    {
       "id": "r863",
       "path": "packages/contracts/src/modules/notification/aggregates/notification-client-dto-dual.surface.spec.ts",
       "package": "packages/contracts",
@@ -1021,50 +999,6 @@
       "blast": "surface lock (keep_boundary)",
       "next": "none",
       "residual": "1177",
-      "suite_describes": 1
-    },
-    {
-      "id": "r1069",
-      "path": "packages/governance/src/api/routes/governance-parse-string-array-keep-boundary.surface.spec.ts",
-      "package": "packages/governance",
-      "class": "keep_boundary",
-      "sole": "governance-route-shared.ts",
-      "blast": "surface lock (keep_boundary)",
-      "next": "none",
-      "residual": "1069",
-      "suite_describes": 1
-    },
-    {
-      "id": "r681",
-      "path": "packages/governance/src/api/routes/governance-response-schema-name-dual.surface.spec.ts",
-      "package": "packages/governance",
-      "class": "retired",
-      "sole": "governance-route-shared.ts",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": "681",
-      "suite_describes": 1
-    },
-    {
-      "id": "r272",
-      "path": "packages/governance/src/client/governance-ipc-transport-dual.surface.spec.ts",
-      "package": "packages/governance",
-      "class": "retired",
-      "sole": "index.ts",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": "272",
-      "suite_describes": 1
-    },
-    {
-      "id": "h8aedcd3ce1",
-      "path": "packages/governance/src/dual-registry-path.surface.spec.ts",
-      "package": "packages/governance",
-      "class": "retired",
-      "sole": "../../..",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": null,
       "suite_describes": 1
     },
     {

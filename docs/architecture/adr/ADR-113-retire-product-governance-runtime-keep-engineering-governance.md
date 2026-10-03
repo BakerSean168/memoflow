@@ -1,15 +1,16 @@
 ---
 tags: [adr, governance, retirement, engineering-governance, simplification]
-description: 提议退休虚构 Product Governance Runtime，仅保留真正可执行的 repository engineering governance
+description: 退休虚构 Product Governance Runtime，仅保留 repository-native Engineering Governance
 created: 2026-09-29T13:30:00+08:00
-updated: 2026-09-29T13:30:00+08:00
+updated: 2026-10-03T10:30:00+09:00
 ---
 
 # ADR-113: Retire Product Governance Runtime, Keep Engineering Governance
 
-**状态：** 提议（待最终确认）
+**状态：** 已采纳并实施（GOV-7903）
 **日期：** 2026-09-29
-**若采纳则取代：** ADR-110
+**采纳/实施：** 2026-10-03
+**取代：** ADR-110
 **关联：** ADR-031、ADR-048、ADR-109、ADR-110、ADR-111
 
 ## Context
@@ -60,11 +61,11 @@ failure-contract audits
 
 这些 deterministic repository-versioned checks 与 Product Governance DB/CRUD 并不要求绑定。
 
-## Proposal
+## Decision
 
 ### 1. 退休 Product Governance Runtime
 
-若本 ADR 被采纳，进入 retirement queue：
+本 ADR 采纳后，以下 Product Governance surface 进入 destructive retirement：
 
 - `packages/governance`；
 - `packages/contracts/src/modules/governance`；
@@ -101,7 +102,7 @@ Product Rule DB
  -> check/report
 ```
 
-若退休 Product Governance，则改为：
+Product Governance 退休后，Engineering Governance 使用：
 
 ```text
 docs/standards and/or repository engineering-rules registry
@@ -119,7 +120,7 @@ tools/governance/engineering-rules.json
 
 ### 4. Reference-module policy 改为真实 vertical slice 验证
 
-如果采纳本 ADR，必须同步修改 `AGENT.md` 当前“Governance 先行铁律”。
+同步修改 `AGENT.md`，删除“Governance 先行铁律”，改用真实 owner vertical slice 验证。
 
 新规则：
 
@@ -178,27 +179,31 @@ Governance 目前进入：
 
 ADR-110 不应被改写成“从未存在”，而应在本 ADR 最终采纳后标记 superseded，以保留决策历史。
 
-## Retirement gate
+## Implementation / retirement gate
 
-在真正删除前必须完成：
+本决策按三阶段执行：
 
-1. inventory 所有 Governance runtime/build/schema/DI references；
-2. classify 为 Product Governance-only / Engineering Governance-keep / shared；
-3. 给 Engineering Governance 建立不依赖 Product Governance 的输入；
-4. 修改 AGENT reference-module policy；
-5. 删除路由/DI/composition；
-6. 删除 contracts/package/database models；
-7. regenerate database/runtime generated assets；
-8. 删除仅服务 Product Governance 的 tests/config；
-9. 跑完整 governance-check、typecheck、unit、build、HTTP/IPC composition tests；
-10. 搜索仓库确保无运行时 Product Governance reference。
+1. **GOV-7901 — inventory**：枚举并分类 Product-only、shared、Engineering-keep surface；
+2. **GOV-7902 — decouple**：Engineering Governance 切换到 repository-native `engineering-rules.json` + deterministic adapters，不再以 Product Rule DB / bundle 为运行输入；
+3. **GOV-7903 — destructive retirement**：删除 Product Governance contracts/package/UI/transport/composition/Prisma/PowerSync/runtime compatibility surface，并保留负向 retirement lock。
 
-## Until accepted
+GOV-7903 的完成条件固定为：
 
-本 ADR 当前是提议，不改变现有运行时事实。
+- Product Governance route / DI / composition / package exports 为零；
+- `Rule` / `RuleRevision` 产品持久化模型与 PowerSync projection 被移除，并提供 destructive drop migration；
+- legacy Product rule-bundle bridge 被删除；
+- Engineering Governance 的 repository-native source、audits、standards docs 与 CI gate 保留；
+- `AGENT.md` 使用真实 owner vertical-slice policy；
+- database/runtime generated assets 已重新生成；
+- governance-check、受 retirement 影响的 typecheck/tests/build 与 repository grep 全部通过；完整测试集结果必须记录，并单独列出与本票无关的既有失败，不把部分通过写成全量通过。
 
-在最终确认前：
+## GOV-7903 closure evidence
 
-- ADR-110 仍描述当前 reference-module contract；
-- 不执行 destructive retirement；
-- 但暂停新的 Governance UI modernization 投资，避免在可能退休的 surface 上继续扩张。
+2026-10-03 已完成物理退休、generated/workspace slots 清理、真实 owner policy 与负向锁。12 项 typecheck、30 个 dependency tasks、三个 host build、10 个 package test targets、57 个 focused App-Vue tests、199 个 Engineering Governance tests 和 full uncached governance 均通过。完整 App-Vue / contracts 保留五个与本票无关的既有失败；没有 retirement-attributable blocker。Prod-like runtime smoke / live SQL 未执行。详见 [GOV-7903 closure evidence](../../plan/archive/2026-10-03-pvc-gov-7903-retirement-closure.md)。
+
+## Consequences
+
+- `Governance` 不再是 MemoFlow Product bounded context，也不再出现在产品导航、HTTP/IPC、DI、数据库或同步协议中。
+- `governance` 作为工程术语继续存在于 `tools/governance`、`docs/governance`、`docs/standards` 与 CI gates 中。
+- 架构演进不再创建或扩展虚构 reference feature；改为先在最小真实 owner vertical slice 上验证，再在第二个真实 owner 上复验，最后才提升共享抽象。
+- ADR-110 保留为历史记录，但其“永久 executable reference module”决策已被本 ADR 取代。

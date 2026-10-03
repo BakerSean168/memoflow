@@ -41,8 +41,6 @@ updated: 2026-09-19T00:00:00+00:00
 - [认证模块文件索引](./module-index/authentication-files.md)：认证模块相关页面、接口、领域代码、数据结构和测试入口。
 - [设置模块说明](./modules/setting.md)：设置模块当前功能、用户路径、业务规则和风险点。
 - [设置模块文件索引](./module-index/setting-files.md)：设置模块相关页面、接口、领域代码、数据结构和测试入口。
-- [治理模块说明](./modules/governance.md)：治理模块当前功能、用户路径、业务规则和风险点。
-- [治理模块文件索引](./module-index/governance-files.md)：治理模块相关页面、接口、领域代码、数据结构和测试入口。
 
 ## 使用方式
 

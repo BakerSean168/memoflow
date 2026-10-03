@@ -87,7 +87,6 @@ const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
   ['/tasks', 'task'],
   ['/routines', 'routine'],
   ['/repository', 'note'],
-  ['/governance', 'note'],
   ['/notifications', 'notification'],
   ['/sse-monitor', 'notification'],
   ['/schedule', 'schedule'],

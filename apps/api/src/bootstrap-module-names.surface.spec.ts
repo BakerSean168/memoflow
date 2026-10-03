@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 /**
  * Elegance E5b: API bootstrap docs must not invent dead Legacy* module names.
  * Production registration lives in server.ts via the runtime composers
- * (composeGovernance / composeAccount and peers).
+ * (composeAccount / composeGoal and peers).
  */
 describe('api bootstrap module names (elegance E5b)', () => {
   const dir = __dirname;

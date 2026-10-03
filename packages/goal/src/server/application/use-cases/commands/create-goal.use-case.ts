@@ -2,7 +2,7 @@
  * Create Goal Use Case
  *
  * 创建新目标的应用服务
- * 遵循 governance 模块 Result<T> 规范
+ * 遵循共享 Result<T> contract
  */
 
 import type { IGoalRepository, IGoalRecordRepository } from '../../../domain';

@@ -125,12 +125,6 @@
         "command": "pnpm nx run database:prisma-studio"
       }
     },
-    "prisma:seed": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm nx run governance:seed"
-      }
-    },
     "db:push": {
       "executor": "nx:run-commands",
       "options": {

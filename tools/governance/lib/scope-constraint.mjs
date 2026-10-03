@@ -32,7 +32,6 @@ const REQUIRED_SCOPE_PREFIXES = [
   'scope:ai',
   'scope:authentication',
   'scope:goal',
-  'scope:governance',
   'scope:notification',
   'scope:reminder',
   'scope:repository',

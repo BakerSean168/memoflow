@@ -34,7 +34,6 @@ import type {
   IAssistantRuntimeService,
   IRuntimeUsageService,
   IWorkflowRuntimeService,
-  IRuleService,
   DesktopUpdateService,
   ModuleCapsule,
 } from './types';
@@ -70,7 +69,6 @@ export const AI_ASSISTANT_RUNTIME_KEY: InjectionKey<IAssistantRuntimeService> =
 export const AI_RUNTIME_USAGE_KEY: InjectionKey<IRuntimeUsageService> = Symbol('AIRuntimeUsage');
 export const AI_WORKFLOW_RUNTIME_KEY: InjectionKey<IWorkflowRuntimeService> =
   Symbol('AIWorkflowRuntime');
-export const RULE_SERVICE_KEY: InjectionKey<IRuleService> = Symbol('RuleService');
 // ── UI / Navigation Keys ──
 /**
  * V2 shell: ordered list of module capsules rendered in WindowHeader.

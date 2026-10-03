@@ -40,10 +40,6 @@ const featureScopeConstraints = [
     ],
   },
   {
-    sourceTag: 'scope:governance',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:governance'],
-  },
-  {
     sourceTag: 'scope:notification',
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:notification'],
   },
@@ -156,7 +152,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -177,7 +172,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -199,7 +193,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -229,7 +222,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -259,7 +251,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -289,7 +280,6 @@ const moduleBoundaryDepConstraints = [
       'scope:ai',
       'scope:authentication',
       'scope:goal',
-      'scope:governance',
       'scope:notification',
       'scope:reminder',
       'scope:repository',
@@ -592,17 +582,6 @@ export default tseslint.config(
     {
       files: ['apps/api/src/**/*.ts'],
       ignores: ['**/__tests__/**', '**/test/**'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-        ],
-      },
-    },
-    {
-      files: ['packages/governance/src/**/*.ts'],
-      ignores: ['**/__tests__/**', '**/test/**', '**/*.spec.ts', '**/*.test.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-unused-vars': [

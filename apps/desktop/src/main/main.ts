@@ -56,7 +56,6 @@ import { createGoalWorkspaceElectronModule } from './modules/goal/goal-workspace
 import { createTaskWorkspaceElectronModule } from './modules/task/task-workspace.electron-module';
 import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
-import { composeGovernance } from './runtime/compose-governance';
 import { composeGoal } from './runtime/compose-goal';
 import { composeTask } from './runtime/compose-task';
 import { composeAccount } from './runtime/compose-account';
@@ -654,8 +653,6 @@ async function registerBusinessModules(
     knowledgeRepositoryAutoSyncScheduler,
   });
 
-  const governanceElectronModule = composeGovernance({ db });
-
   // Schedule runtime controller wiring: the SAME composed controller is handed
   // to both lifecycle owners (WindowManager drives delayed start/stop on window
   // transitions; the profile manager stops it on deactivation before teardown).
@@ -686,7 +683,6 @@ async function registerBusinessModules(
     .register(interventionWindowElectronModule)
     .register(focusWindowElectronModule)
     .register(aiComposed.module)
-    .register(governanceElectronModule)
     .register(repositoryElectronModule);
 
   const initTime = performance.now() - startTime;

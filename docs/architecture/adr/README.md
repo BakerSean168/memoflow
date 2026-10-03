@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-11T00:02:00+08:00
+updated: 2026-10-03T10:30:00+09:00
 ---
 
 # ADR 索引
@@ -126,10 +126,10 @@ updated: 2026-09-11T00:02:00+08:00
 | [ADR-107](./ADR-107-legacy-editor-persistence-retirement.md) | Legacy Editor Persistence Retirement | 已采纳并实施（EDITOR-1701/1702） | 2026-09-09 |
 | [ADR-108](./ADR-108-dashboard-retirement-and-home-composition.md) | Dashboard Retirement 与 Home Composition | 已采纳（已实施） | 2026-09-09 |
 | [ADR-109](./ADR-109-product-governance-to-knowledge-standards.md) | Product Governance → Knowledge Standards | 已被 ADR-110 取代 | 2026-09-09 |
-| [ADR-110](./ADR-110-governance-permanent-executable-reference-module.md) | Governance 永久可执行参考模块与开发规范工作台 | 已采纳；由 ADR-113 重新评估中 | 2026-09-09 |
+| [ADR-110](./ADR-110-governance-permanent-executable-reference-module.md) | Governance 永久可执行参考模块与开发规范工作台 | 已被 ADR-113 取代 | 2026-09-09 |
 | [ADR-111](./ADR-111-zero-legacy-data-destructive-cutover-policy.md) | Zero-Legacy-Data Destructive Cutover Policy | 已采纳（立即生效） | 2026-09-09 |
 | [ADR-112](./ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md) | Owner Native Surface Orchestration + Quick Surface Reuse | 已采纳（target-design，待实施） | 2026-09-29 |
-| [ADR-113](./ADR-113-retire-product-governance-runtime-keep-engineering-governance.md) | Retire Product Governance Runtime, Keep Engineering Governance | 提议（待最终确认） | 2026-09-29 |
+| [ADR-113](./ADR-113-retire-product-governance-runtime-keep-engineering-governance.md) | Retire Product Governance Runtime, Keep Engineering Governance | 已采纳并实施（GOV-7903） | 2026-09-29 |
 | [ADR-114](./ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) | Desktop Update Domain、Runtime Boundary 与 Installation Ownership | 已采纳并实施（Windows / Linux；macOS 延后） | 2026-09-30 |
 
 ## 维护规则

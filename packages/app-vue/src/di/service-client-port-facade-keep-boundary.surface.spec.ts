@@ -32,7 +32,6 @@ describe('DI I*Service ClientPort facade keep-boundary (residual 927)', () => {
     ['ISettingService', 'SettingClientPort'],
     ['IDataPortabilityService', 'DataPortabilityClientPort'],
     ['IAIClient', 'AIClientPort'],
-    ['IRuleService', 'GovernanceClientPort'],
   ];
 
   it('owns each I*Service as type alias of the package ClientPort (no interface dual body)', () => {
@@ -65,7 +64,7 @@ describe('DI I*Service ClientPort facade keep-boundary (residual 927)', () => {
     // IAIClient is intentionally named Client; the remaining service facades stay I*Service aliases.
     const serviceAliasCount = (types.match(/^export type I\w+Service = \w+ClientPort;/gm) ?? [])
       .length;
-    expect(serviceAliasCount).toBe(13);
+    expect(serviceAliasCount).toBe(12);
     expect(types).toContain('export type IAIClient = AIClientPort;');
   });
 });

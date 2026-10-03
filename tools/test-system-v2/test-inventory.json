@@ -418,26 +418,6 @@
       ]
     },
     {
-      "path": "apps/api/src/runtime/compose-governance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "apps/api/src/runtime/compose-governance.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/runtime/compose-notification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2263,14 +2243,6 @@
     },
     {
       "path": "apps/web/src/mocks/handlers/goal.handlers.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/web/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/src/mocks/handlers/governance.handlers.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/web/vitest.config.ts"
@@ -4350,72 +4322,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/governance/composables/useGovernanceQueries.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/governance-authority.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/governance-development-smoke.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/governance-development-surface.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/governance-surface-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/governance-types-export.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/stores/governanceStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/governance/views/RuleEditorView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6161,38 +6067,6 @@
     },
     {
       "path": "packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/governance/aggregates/rule-server-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/governance/api/__tests__/rule-crud.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/governance/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/governance/api/governance-rule-bundle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -7970,306 +7844,6 @@
       ],
       "measurementCollectors": [
         "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/module-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance-parse-string-array-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance-response-schema-name-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance-transport-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance-validation-binding.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance-void-success-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/api/routes/governance.routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/client/governance-ipc-transport-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/client/governance-rule-bundle-client.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/dual-registry-path.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/electron/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/reference-module-invariants.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/commands/__tests__/create-rule.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/commands/__tests__/delete-rule.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/commands/__tests__/update-rule.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/export-governance-rule-bundle.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule-revisions.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/list-rules.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/search-rules.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/aggregates/__tests__/rule-reference-module-characterization.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/aggregates/__tests__/rule.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/entities/__tests__/rule-revision.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/value-objects/__tests__/governance-enums.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/value-objects/__tests__/governance-rich-value-objects.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/domain/value-objects/__tests__/rule-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/infrastructure/__tests__/governance-composition-root.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/infrastructure/__tests__/governance-persistence-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/infrastructure/__tests__/governance-repositories.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/governance/src/server/infrastructure/adapters/prisma/__tests__/governance-rule-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/governance/vitest.config.ts"
       ]
     },
     {
@@ -11767,7 +11341,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "tools/governance/__tests__/engineering-reference-policy-proposal.test.mjs",
+      "path": "tools/governance/__tests__/engineering-reference-policy.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
@@ -11799,38 +11373,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "tools/governance/__tests__/governance-reference-preservation.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "tools/governance/__tests__/governance-rule-bundle-cli.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "tools/governance/__tests__/governance-rule-bundle-hard-guards.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "tools/governance/__tests__/governance-rule-engineering-adapter.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "tools/governance/__tests__/local-docker-product-validation.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11855,23 +11397,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "tools/governance/__tests__/product-governance-retirement-inventory.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "tools/governance/__tests__/public-surface-jsdoc.test.mjs",
-      "primarySuite": "governance",
-      "collectors": [
-        "tools/governance/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "tools/governance/__tests__/published-rule-bundle.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
@@ -12021,7 +11547,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12042,7 +11568,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 7
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12078,13 +11604,6 @@
       "suite": "coverage",
       "runner": "vitest",
       "fileCount": 34
-    },
-    {
-      "id": "packages/governance/vitest.config.ts",
-      "type": "measurement",
-      "suite": "coverage",
-      "runner": "vitest",
-      "fileCount": 30
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -12301,7 +11820,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 18
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -12406,7 +11925,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -12427,7 +11946,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 18
+      "fileCount": 17
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12448,7 +11967,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 275
+      "fileCount": 267
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12469,7 +11988,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 95
+      "fileCount": 91
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12498,13 +12017,6 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 100
-    },
-    {
-      "id": "packages/governance/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 30
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12671,8 +12183,6 @@
       "apps/api/src/runtime/compose-data-portability.surface.spec.ts",
       "apps/api/src/runtime/compose-goal.spec.ts",
       "apps/api/src/runtime/compose-goal.surface.spec.ts",
-      "apps/api/src/runtime/compose-governance.spec.ts",
-      "apps/api/src/runtime/compose-governance.surface.spec.ts",
       "apps/api/src/runtime/compose-notification.spec.ts",
       "apps/api/src/runtime/compose-notification.surface.spec.ts",
       "apps/api/src/runtime/compose-repository.spec.ts",
@@ -12830,7 +12340,6 @@
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
       "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
-      "packages/app-vue/src/modules/governance/stores/governanceStore.spec.ts",
       "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
       "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
       "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
@@ -12952,36 +12461,6 @@
       "packages/goal/src/server/transport/__tests__/goal-transport-mapper.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-parity.spec.ts",
       "packages/goal/src/shared/goal-record-preview.spec.ts",
-      "packages/governance/src/api/module-lifecycle.spec.ts",
-      "packages/governance/src/api/routes/governance-parse-string-array-keep-boundary.surface.spec.ts",
-      "packages/governance/src/api/routes/governance-response-schema-name-dual.surface.spec.ts",
-      "packages/governance/src/api/routes/governance-transport-parity.spec.ts",
-      "packages/governance/src/api/routes/governance-validation-binding.surface.spec.ts",
-      "packages/governance/src/api/routes/governance-void-success-envelope.surface.spec.ts",
-      "packages/governance/src/api/routes/governance.routes.spec.ts",
-      "packages/governance/src/client/governance-ipc-transport-dual.surface.spec.ts",
-      "packages/governance/src/client/governance-rule-bundle-client.spec.ts",
-      "packages/governance/src/dual-registry-path.surface.spec.ts",
-      "packages/governance/src/electron/index.spec.ts",
-      "packages/governance/src/reference-module-invariants.surface.spec.ts",
-      "packages/governance/src/server/application/use-cases/commands/__tests__/create-rule.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/commands/__tests__/delete-rule.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/commands/__tests__/update-rule.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/queries/__tests__/export-governance-rule-bundle.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule-revisions.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/queries/__tests__/list-rules.use-case.test.ts",
-      "packages/governance/src/server/application/use-cases/queries/__tests__/search-rules.use-case.test.ts",
-      "packages/governance/src/server/domain/aggregates/__tests__/rule-reference-module-characterization.spec.ts",
-      "packages/governance/src/server/domain/aggregates/__tests__/rule.test.ts",
-      "packages/governance/src/server/domain/entities/__tests__/rule-revision.test.ts",
-      "packages/governance/src/server/domain/value-objects/__tests__/governance-enums.spec.ts",
-      "packages/governance/src/server/domain/value-objects/__tests__/governance-rich-value-objects.spec.ts",
-      "packages/governance/src/server/domain/value-objects/__tests__/rule-id.spec.ts",
-      "packages/governance/src/server/infrastructure/__tests__/governance-composition-root.surface.spec.ts",
-      "packages/governance/src/server/infrastructure/__tests__/governance-persistence-parity.spec.ts",
-      "packages/governance/src/server/infrastructure/__tests__/governance-repositories.surface.spec.ts",
-      "packages/governance/src/server/infrastructure/adapters/prisma/__tests__/governance-rule-ownership.surface.spec.ts",
       "packages/notification/src/api/__tests__/notification-lane-bootstrap.spec.ts",
       "packages/notification/src/api/module-lifecycle.spec.ts",
       "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
@@ -13205,13 +12684,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1164,
+    "unit": 1119,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
     "e2e": 64,
     "perf": 2,
-    "governance": 68
+    "governance": 62
   }
 }

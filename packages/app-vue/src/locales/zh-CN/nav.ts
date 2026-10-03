@@ -8,7 +8,6 @@ export default {
   "reminders": "提醒",
   "notifications": "通知",
   "repositories": "笔记",
-  "governance": "规范",
   "settings": "设置",
   "accountCenter": "个人中心",
   "logout": "退出登录",

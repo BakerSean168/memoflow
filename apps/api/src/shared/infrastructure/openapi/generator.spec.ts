@@ -1,10 +1,9 @@
 /**
  * OpenAPI generator check (Phase 4 Step 6).
  *
- * Registers the Goal/Task/Notification/Governance mutation routes through the
+ * Registers the Goal/Task/Notification mutation routes through the
  * PRODUCTION composition-root seams (`createGoalApiModule`,
- * `createTaskApiModule`, `createNotificationApiModule`,
- * `createGovernanceApiModule`) into a fresh zod-to-openapi registry, then
+ * `createTaskApiModule`, `createNotificationApiModule`) into a fresh zod-to-openapi registry, then
  * generates an OpenAPI document. Every ledger HTTP mutation is asserted to
  * have a path, a request schema (params/query/body) and a response envelope /
  * data schema. This proves the schema objects referenced by OpenAPI and the
@@ -13,8 +12,7 @@
  * Notification read-all.
  *
  * OpenAPI 生成检查（Phase 4 Step 6）：通过生产组合根 seam
- * （`createGoalApiModule` / `createTaskApiModule` / `createNotificationApiModule`
- * / `createGovernanceApiModule`）把 Goal/Task/Notification/Governance 的
+ * （`createGoalApiModule` / `createTaskApiModule` / `createNotificationApiModule`）把 Goal/Task/Notification 的
  * mutation 路由注册进全新 registry，再生成 OpenAPI 文档。每个 ledger HTTP
  * mutation 都断言有 path、request schema（params/query/body）与 response
  * envelope/data schema。这证明 OpenAPI 引用的 schema 与 runtime validation
@@ -28,7 +26,6 @@ import type { OpenApiRegistryLike } from '@memoflow/utils/result';
 import { createGoalApiModule } from '@memoflow/goal/api';
 import { createTaskApiModule } from '@memoflow/task/api';
 import { createNotificationApiModule } from '@memoflow/notification/api';
-import { createGovernanceApiModule } from '@memoflow/governance/api';
 
 /**
  * Captures every `registerPath` raw route definition (with the exact Zod
@@ -77,7 +74,6 @@ async function registerAll(registry: CapturingRegistry) {
   await createGoalApiModule({ instance: fakeInstance() }).register(createContext(registry));
   await createTaskApiModule({ instance: fakeInstance() }).register(createContext(registry));
   await createNotificationApiModule({ instance: fakeInstance() }).register(createContext(registry));
-  await createGovernanceApiModule({ instance: fakeInstance() }).register(createContext(registry));
 }
 
 type SchemaLike = { safeParse(data: unknown): { success: boolean } };
@@ -111,7 +107,7 @@ function getResponseSchema(def: RouteDef, status: number): SchemaLike | undefine
 }
 
 interface LedgerRow {
-  readonly module: 'goal' | 'task' | 'notification' | 'governance';
+  readonly module: 'goal' | 'task' | 'notification';
   readonly method: string;
   /** OpenAPI path (RouteRegistrar basePath + path). */
   readonly path: string;
@@ -454,17 +450,7 @@ const NOTIFICATION_LEDGER: LedgerRow[] = [
   },
 ];
 
-const GOVERNANCE_LEDGER: LedgerRow[] = [
-  {
-    module: 'governance',
-    method: 'post',
-    path: '/api/v1/governance/rules',
-    status: 201,
-    hasBody: true,
-  },
-];
-
-const ALL_LEDGER = [...GOAL_LEDGER, ...TASK_LEDGER, ...NOTIFICATION_LEDGER, ...GOVERNANCE_LEDGER];
+const ALL_LEDGER = [...GOAL_LEDGER, ...TASK_LEDGER, ...NOTIFICATION_LEDGER];
 
 describe('OpenAPI generator ledger coverage (Phase 4)', () => {
   it('registers a path for every ledger mutation', async () => {

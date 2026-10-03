@@ -261,7 +261,6 @@ export function createSharedConfig(options: SharedConfigOptions) {
     'data-portability',
     'editor',
     'goal',
-    'governance',
     'http-client',
     'label',
     'notification',

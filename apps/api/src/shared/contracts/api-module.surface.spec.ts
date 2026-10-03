@@ -23,7 +23,6 @@ import { describe, expect, it } from 'vitest';
 const REPO_ROOT = resolve(__dirname, '../../../../..');
 
 const FEATURE_API_MODULES = [
-  'governance',
   'goal',
   'task',
   'account',

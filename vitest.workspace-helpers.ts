@@ -20,7 +20,6 @@ export const domainResolveAtAlias = {
       'task',
       'setting',
       'goal',
-      'governance',
       'reminder',
       'ai',
       'cloud-auth',

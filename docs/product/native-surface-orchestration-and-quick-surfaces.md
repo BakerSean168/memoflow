@@ -359,9 +359,7 @@ workflow context / diagnostics -> BusinessPanel.workflow
 
 ## 9. Governance 方向
 
-本轮讨论发现 Product Governance Runtime 的“虚构 reference module / 活文档”价值已经明显下降。
-
-当前 Product Governance 维护 Rule/RuleRevision domain、contracts、Prisma/PowerSync、HTTP/IPC、Web/Desktop client、Vue list/detail/editor/history、bundle export 和大量 reference-module tests。
+ADR-113 已确认此前 Product Governance Runtime 的“虚构 reference module / 活文档”不再值得作为产品 bounded context 维护。原有 Rule/RuleRevision、contracts、Prisma/PowerSync、HTTP/IPC、Web/Desktop client、Vue surfaces 与 bundle export 已由 GOV-7903 完成 destructive retirement。
 
 真正持续有价值的 repository governance 是：
 
@@ -382,7 +380,7 @@ Retire Product Governance Runtime
 Keep Engineering Governance
 ```
 
-详细 retirement proposal 由 ADR-113 单独定义。在最终接受 ADR-113 前，不继续投资 Governance UI modernization。
+详细 retirement decision 由 ADR-113 定义。当前禁止重新引入 Product Governance UI/runtime；Engineering Governance 继续由 repository-native rules/audits/CI 负责。
 
 ## 10. Protected contracts
 
@@ -390,7 +388,7 @@ Native Surface 重构必须保护 owner domain ownership、owner command/read po
 
 ## 11. 非目标
 
-本方案不意味着 AI 获得 DOM/浏览器级任意点击权限，不允许 AI 直接修改 Pinia/组件任意 state，不删除 Mastra durable workflow，不把所有模块压成同一种页面，不创建 universal quick row，不删除 Calendar 或 TaskPlan detail route，也不会在迁移完成前立即删除 workflow surface 或整个 Governance package。
+本方案不意味着 AI 获得 DOM/浏览器级任意点击权限，不允许 AI 直接修改 Pinia/组件任意 state，不删除 Mastra durable workflow，不把所有模块压成同一种页面，不创建 universal quick row，不删除 Calendar 或 TaskPlan detail route，也不会为了统一 UI 而删除仍有真实业务 owner 的 workflow surface。Product Governance package 已由 ADR-113 单独退休。
 
 ## 12. 实施顺序
 
@@ -418,8 +416,8 @@ Phase E
 retire AI-owned Goal/Task editors
 then evaluate workflow surface retirement
 
-Parallel decision track
-ADR-113 Product Governance Runtime retirement
+Parallel closure track
+GOV-7903 Product Governance destructive retirement
 
 Final
 shared grammar + visual regression closure

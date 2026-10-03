@@ -2,7 +2,7 @@
 // Public Surface Audit
 //
 // Ensures that apps and packages consume only approved public seams.
-// Legacy governance layer seams are explicitly forbidden.
+// Retired Product Governance package/contract imports are explicitly forbidden.
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -12,7 +12,7 @@ const APPS_DIR = path.join(ROOT, 'apps');
 const PACKAGES_DIR = path.join(ROOT, 'packages');
 
 const INTERNAL_LAYER_REGEX = /(?:from\s+['"]|import\s*\(\s*['"])@memoflow\/([^/'"]+)\/(domain-server|application-server|infrastructure-server|controllers|server\/(?:domain|application|transport|infrastructure))['"]/g;
-const GOVERNANCE_LEGACY_REGEX = /(?:from\s+['"]|import\s*\(\s*['"])@memoflow\/governance\/(domain-shared|domain-server|domain-client|application-client|infrastructure-client|electron-entry|mocks)['"]/g;
+const RETIRED_PRODUCT_GOVERNANCE_REGEX = /(?:from\s+['"]|import\s*\(\s*['"])(@memoflow\/governance(?:\/[^'"]+)?|@memoflow\/contracts\/governance)['"]/g;
 
 function getSourceFiles(dir, extensions = ['.ts', '.tsx', '.vue']) {
   const results = [];
@@ -66,10 +66,9 @@ function auditFile(filePath, violations) {
     }
   }
 
-  GOVERNANCE_LEGACY_REGEX.lastIndex = 0;
-  while ((match = GOVERNANCE_LEGACY_REGEX.exec(content)) !== null) {
-    const seam = match[1];
-    violations.push(`${relPath}: imports legacy governance seam @memoflow/governance/${seam} (use @memoflow/governance, /api, /client, /electron, or @memoflow/contracts/...)`);
+  RETIRED_PRODUCT_GOVERNANCE_REGEX.lastIndex = 0;
+  while ((match = RETIRED_PRODUCT_GOVERNANCE_REGEX.exec(content)) !== null) {
+    violations.push(`${relPath}: imports retired Product Governance surface ${match[1]} (ADR-113)`);
   }
 }
 

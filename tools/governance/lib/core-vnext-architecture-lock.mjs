@@ -349,7 +349,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     // ADR-054: Task classification is single-track Shared Label. These locks
     // intentionally target only Task-owned product/contract files so Reminder,
-    // Governance and Scheduler metadata may keep their unrelated tag/color semantics.
+    // Scheduler metadata may keep its unrelated tag/color semantics.
     if (
       relPath.startsWith('packages/task/src/') ||
       relPath.startsWith('packages/app-vue/src/modules/task/') ||

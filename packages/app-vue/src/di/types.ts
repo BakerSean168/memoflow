@@ -19,7 +19,6 @@ import type {
   WorkflowRuntimeClient,
 } from '@memoflow/ai/client';
 import type { CloudAuthClientPort } from '@memoflow/contracts';
-import type { GovernanceClientPort } from '@memoflow/governance/client';
 import type { GoalClientPort } from '@memoflow/goal/client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import type { NotificationClientPort } from '@memoflow/notification/client';
@@ -57,7 +56,6 @@ export type IAssistantRuntimeService = AssistantRuntimeClient;
 export type IRuntimeUsageService = RuntimeUsageClient;
 /** Mastra-native durable Workflow seam for goal/task/knowledge product workflows. */
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
-export type IRuleService = GovernanceClientPort;
 
 /**
  * Host-neutral Desktop Update capability exposed to shared Vue UI.

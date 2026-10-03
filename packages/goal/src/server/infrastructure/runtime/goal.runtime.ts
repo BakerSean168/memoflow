@@ -29,10 +29,10 @@ const logger = createLogger('GoalRuntime');
  *
  * Current behavior is logging-only (same as the old initialization.ts).
  * Future event handlers (e.g. task-completion → goal-progress) can be added
- * here following the governance pattern with eventBus.on/off.
+ * here using the shared eventBus.on/off lifecycle pattern.
  *
  * 当前行为仅做日志记录（与旧 initialization.ts 相同）。
- * 未来的事件处理器（如任务完成 → 目标进度）可以按照 governance 模式
+ * 未来的事件处理器（如任务完成 → 目标进度）可以按照同一 runtime lifecycle 模式
  * 在这里使用 eventBus.on/off 添加。
  */
 export function createGoalRuntimeContribution(): GoalModuleRuntimeContribution {

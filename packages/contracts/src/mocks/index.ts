@@ -12,8 +12,6 @@
  *   createMockTaskPlan,
  *   createMockAccount,
  *   createMockNotification,
- *   createMockRule,
- *   createMockRuleRevision,
  * } from '@memoflow/contracts/mocks';
  * ```
  */
@@ -22,4 +20,3 @@ export * from './goal.mock';
 export * from './task.mock';
 export * from './account.mock';
 export * from './notification.mock';
-export * from './governance.mock';

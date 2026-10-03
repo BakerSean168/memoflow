@@ -9,9 +9,9 @@
  * 外层应用负责选择具体适配器并传入这里。
  * 组合根只做一次组装，然后向 HTTP / IPC 等传输层暴露稳定门面。
  *
- * AI uses the governance module as its reference pattern: one composition root
+ * AI follows the real-owner composition pattern: one composition root
  * per module, constructor injection only, no hidden service locator.
- * AI 模块以 governance 模块为参考模式：每个模块一个组合根，
+ * AI 模块遵循真实业务 owner 组合模式：每个模块一个组合根，
  * 仅使用构造器注入，不使用隐藏的服务定位器。
  *
  * AI-VNEXT-07: Mastra is the ONLY runtime. The legacy Python AIService,
@@ -27,7 +27,6 @@
  * 旧 AgentRun / AssistantFacade / checkpoint 应用方法以 SERVICE_UNAVAILABLE
  * fail closed——绝不回退到第二个 runtime。
  *
- * @see {@link createGovernanceModule} in @memoflow/governance for the canonical example.
  */
 
 import { ok, error } from '@memoflow/contracts/result';

@@ -51,9 +51,6 @@
       "@memoflow/task/client": [
         "../task/dist/client/index.d.ts"
       ],
-      "@memoflow/governance/client": [
-        "../governance/dist/client/index.d.ts"
-      ],
       "@memoflow/repository/client": [
         "../repository/dist/client/index.d.ts"
       ]

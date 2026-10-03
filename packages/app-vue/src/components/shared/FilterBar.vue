@@ -8,7 +8,7 @@
  *   #search   搜索框（右对齐）
  *   #trailing 行尾附加控件（如视图切换）
  *
- * task / governance / notification 等列表页共用。
+ * task / goal / notification 等列表页共用。
  */
 </script>
 

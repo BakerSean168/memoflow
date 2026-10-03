@@ -6,8 +6,7 @@ const ENGINEERING_RUNNERS = new Map([
     'package-internal-boundary',
     {
       checkScript: 'tools/governance/package-internal-boundary-audit.mjs',
-      // Product reference presence is an ADR gate, not an engineering input or audit subject.
-      run: (root) => runPackageInternalBoundaryAudit(root, { excludedPackages: ['governance'] }),
+      run: (root) => runPackageInternalBoundaryAudit(root),
     },
   ],
 ]);

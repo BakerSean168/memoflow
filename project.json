@@ -1,7 +1,10 @@
 {
   "name": "memoflow",
   "$schema": "node_modules/nx/schemas/project-schema.json",
-  "tags": ["scope:meta", "type:meta"],
+  "tags": [
+    "scope:meta",
+    "type:meta"
+  ],
   "targets": {
     "docs-check": {
       "executor": "nx:run-commands",
@@ -51,8 +54,7 @@
         "governance-tools:test",
         "test-system-v2:test",
         "test-system-v2:test:governance",
-        "test-system-v2:ruleset",
-        "product-governance-retirement-inventory-check"
+        "test-system-v2:ruleset"
       ],
       "inputs": [
         "{workspaceRoot}/AGENT.md",
@@ -80,11 +82,7 @@
         "{workspaceRoot}/tools/governance/failure-contract-inventory-audit.mjs",
         "{workspaceRoot}/tools/governance/failure-contract-baseline.json",
         "{workspaceRoot}/tools/governance/target-baseline-manifest.json",
-        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory.json",
-        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory-audit.mjs",
-        "{workspaceRoot}/tools/governance/__tests__/product-governance-retirement-inventory.test.mjs",
         "{workspaceRoot}/tools/governance/target-baseline-audit.mjs",
-        "{workspaceRoot}/tools/governance/governance-module-docs-audit.mjs",
         "{workspaceRoot}/tools/governance/platform-leakage-audit.mjs",
         "{workspaceRoot}/tools/governance/singleton-audit.mjs",
         "{workspaceRoot}/tools/governance/desktop-runtime-locator-audit.mjs",
@@ -137,7 +135,7 @@
         "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
       ],
       "options": {
-        "command": "node ./tools/docs/check-docs-config.mjs && node ./tools/test/hard-7101-failure-matrix.mjs --check && node ./tools/governance/product-identity-audit.mjs && node ./tools/governance/target-baseline-audit.mjs && node ./tools/governance/file-naming-audit.mjs && node ./tools/governance/github-action-pinning-audit.mjs && node ./tools/governance/failure-contract-inventory-audit.mjs && node ./tools/governance/governance-module-docs-audit.mjs && node ./tools/governance/platform-leakage-audit.mjs && node ./tools/governance/singleton-audit.mjs && node ./tools/governance/desktop-runtime-locator-audit.mjs && node ./tools/governance/vitest-no-tests-audit.mjs && node ./tools/governance/server-feature-shape-audit.mjs && node ./tools/governance/package-internal-boundary-audit.mjs && node ./tools/governance/engineering-rule-source-audit.mjs --check && node ./tools/governance/engineering-input-dependency-audit.mjs && node ./tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check && node ./tools/governance/package-export-audit.mjs && node ./tools/governance/public-surface-audit.mjs && node ./tools/governance/raw-event-bus-audit.mjs && node ./tools/governance/mitt-rpc-forbidden-audit.mjs && node ./tools/governance/schedule-notification-separation-audit.mjs && node ./tools/governance/core-vnext-architecture-lock-audit.mjs && node ./tools/governance/vnext-retirement-audit.mjs && node ./tools/governance/cross-domain-ownership-audit.mjs && node ./tools/governance/unflushed-events-audit.mjs && node ./tools/governance/scope-constraint-audit.mjs && node ./tools/governance/reka-ui-primitive-audit.mjs && node ./tools/governance/accessible-interaction-audit.mjs && node ./tools/governance/product-time-surface-audit.mjs && node ./tools/governance/shared-relation-ownership-audit.mjs && node ./tools/governance/goal-workspace-read-model-audit.mjs && node ./tools/governance/label-registry-ownership-audit.mjs && node ./tools/governance/label-primitive-audit.mjs && node ./tools/governance/date-fns-import-audit.mjs && node ./tools/governance/architecture-surface-audit.mjs && node ./tools/governance/public-surface-jsdoc-audit.mjs && node ./tools/governance/api-runtime-dependency-audit.mjs"
+        "command": "node ./tools/docs/check-docs-config.mjs && node ./tools/test/hard-7101-failure-matrix.mjs --check && node ./tools/governance/product-identity-audit.mjs && node ./tools/governance/target-baseline-audit.mjs && node ./tools/governance/file-naming-audit.mjs && node ./tools/governance/github-action-pinning-audit.mjs && node ./tools/governance/failure-contract-inventory-audit.mjs && node ./tools/governance/platform-leakage-audit.mjs && node ./tools/governance/singleton-audit.mjs && node ./tools/governance/desktop-runtime-locator-audit.mjs && node ./tools/governance/vitest-no-tests-audit.mjs && node ./tools/governance/server-feature-shape-audit.mjs && node ./tools/governance/package-internal-boundary-audit.mjs && node ./tools/governance/engineering-rule-source-audit.mjs --check && node ./tools/governance/engineering-input-dependency-audit.mjs && node ./tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check && node ./tools/governance/package-export-audit.mjs && node ./tools/governance/public-surface-audit.mjs && node ./tools/governance/raw-event-bus-audit.mjs && node ./tools/governance/mitt-rpc-forbidden-audit.mjs && node ./tools/governance/schedule-notification-separation-audit.mjs && node ./tools/governance/core-vnext-architecture-lock-audit.mjs && node ./tools/governance/vnext-retirement-audit.mjs && node ./tools/governance/cross-domain-ownership-audit.mjs && node ./tools/governance/unflushed-events-audit.mjs && node ./tools/governance/scope-constraint-audit.mjs && node ./tools/governance/reka-ui-primitive-audit.mjs && node ./tools/governance/accessible-interaction-audit.mjs && node ./tools/governance/product-time-surface-audit.mjs && node ./tools/governance/shared-relation-ownership-audit.mjs && node ./tools/governance/goal-workspace-read-model-audit.mjs && node ./tools/governance/label-registry-ownership-audit.mjs && node ./tools/governance/label-primitive-audit.mjs && node ./tools/governance/date-fns-import-audit.mjs && node ./tools/governance/architecture-surface-audit.mjs && node ./tools/governance/public-surface-jsdoc-audit.mjs && node ./tools/governance/api-runtime-dependency-audit.mjs"
       }
     },
     "test:governance": {
@@ -180,18 +178,6 @@
       "cache": false,
       "options": {
         "command": "node ./tools/test/hard-7101-failure-matrix.mjs --run"
-      }
-    },
-    "product-governance-retirement-inventory-check": {
-      "executor": "nx:run-commands",
-      "cache": false,
-      "inputs": [
-        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory.json",
-        "{workspaceRoot}/tools/governance/product-governance-retirement-inventory-audit.mjs",
-        "{workspaceRoot}/tools/governance/__tests__/product-governance-retirement-inventory.test.mjs"
-      ],
-      "options": {
-        "command": "node ./tools/governance/product-governance-retirement-inventory-audit.mjs"
       }
     }
   }

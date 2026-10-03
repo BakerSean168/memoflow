@@ -21,10 +21,6 @@ describe('Product date presentation boundary', () => {
     resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
-  const rule = readFileSync(
-    resolve(dir, '../../modules/governance/components/RuleCard.vue'),
-    'utf8',
-  );
 
   it('keeps semantic empty labels distinct', () => {
     expect(resolveEmptyLabel('notSet')).toBe(DEFAULT_EMPTY_LITERALS.notSet);
@@ -60,7 +56,4 @@ describe('Product date presentation boundary', () => {
     expect(taskDetail).not.toContain('toLocaleDateString');
   });
 
-  it('keeps governance date surfaces on Product Time helpers', () => {
-    expect(rule).toContain('formatProductMonthDay');
-  });
 });

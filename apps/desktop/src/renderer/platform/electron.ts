@@ -102,12 +102,7 @@ const MODULE_INVALIDATORS: Record<string, () => void> = {
  * PowerSync pilot tables that must be routed through the server-state dispatcher.
  * 必须走 server-state dispatcher 的 PowerSync pilot 表。
  */
-const PILOT_TABLES = new Set([
-  'notifications',
-  'task_plans',
-  'rules',
-  'rule_revisions',
-]);
+const PILOT_TABLES = new Set(['notifications', 'task_plans']);
 
 /**
  * Listens for `db:changed` events from the main process (PowerSync onChange).

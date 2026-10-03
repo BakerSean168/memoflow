@@ -37,7 +37,6 @@ export default defineConfig({
       './packages/ai/vitest.config.ts',
       './packages/cloud-auth/vitest.config.ts',
       './packages/goal/vitest.config.ts',
-      './packages/governance/vitest.config.ts',
       './packages/notification/vitest.config.ts',
       './packages/reminder/vitest.config.ts',
       './packages/repository/vitest.config.ts',

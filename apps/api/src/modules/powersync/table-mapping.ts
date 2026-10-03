@@ -11,7 +11,6 @@
  * Used to automatically inject the authenticated user's identity on write operations.
  *
  * NOTE: `accounts` is NOT included — its `id` IS the identity, not a foreign key.
- * Tables like `rules` and `rule_revisions` do not have `identityId`.
  */
 export const IDENTITY_ID_TABLES = new Set([
   'user_preference_records',
@@ -68,8 +67,6 @@ const TABLE_TO_MODEL: Record<string, string> = {
   ai_conversations: 'aiConversation',
   ai_execution_records: 'aiExecutionRecord',
   task_goal_outbox: 'taskGoalOutbox',
-  rules: 'rule',
-  rule_revisions: 'ruleRevision',
 };
 
 export interface CrudDelegate {

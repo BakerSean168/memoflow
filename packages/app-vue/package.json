@@ -70,10 +70,6 @@
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
     },
-    "./modules/governance": {
-      "types": "./dist/modules/governance/index.d.ts",
-      "import": "./dist/modules/governance/index.js"
-    },
     "./modules/ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -96,7 +92,6 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal": "workspace:*",
-    "@memoflow/governance": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",

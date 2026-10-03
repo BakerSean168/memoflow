@@ -6,7 +6,7 @@ import { SUPPORTED_REPOSITORY_CHANNELS } from '../preload/allowed-channels';
 
 /**
  * Residual 256: desktop shared/types ipc-channels dual re-export barrel is gone.
- * Callers import channels from @memoflow/contracts/electron (and governance).
+ * Callers import channels from @memoflow/contracts/electron.
  */
 describe('desktop shared ipc-channels dual single-track surface', () => {
   const desktopSrc = resolve(__dirname, '..');
@@ -50,7 +50,6 @@ describe('desktop shared ipc-channels dual single-track surface', () => {
     const preloadSrc = readFileSync(preload, 'utf8');
     const viewSrc = readFileSync(notificationView, 'utf8');
     expect(preloadSrc).toContain("from '@memoflow/contracts/electron'");
-    expect(preloadSrc).toContain("from '@memoflow/contracts/governance'");
     expect(preloadSrc).not.toContain('shared/types/ipc-channels');
     expect(viewSrc).toContain("from '@memoflow/contracts/electron'");
     expect(viewSrc).not.toContain('shared/types/ipc-channels');

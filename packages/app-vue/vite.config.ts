@@ -61,7 +61,6 @@ export default defineConfig({
         'modules/notification/index': path.resolve(__dirname, 'src/modules/notification/index.ts'),
         'modules/repository/index': path.resolve(__dirname, 'src/modules/repository/index.ts'),
         'modules/setting/index': path.resolve(__dirname, 'src/modules/setting/index.ts'),
-        'modules/governance/index': path.resolve(__dirname, 'src/modules/governance/index.ts'),
         'modules/ai/index': path.resolve(__dirname, 'src/modules/ai/index.ts'),
       },
       formats: ['es'],

@@ -159,5 +159,5 @@ export * from './components/custom/form';
 export * from './components/custom/linear';
 
 // NOTE: All business components (account, authentication, task, schedule,
-// reminder, repository, notification, governance, setting, application)
+// reminder, repository, notification, setting, application)
 // have been migrated to @memoflow/app-vue.

@@ -26,7 +26,7 @@
  * controller/route 已删除。剩余 surface 为 provider config、conversations、
  * open chat (Mastra 托管)、knowledge 与 analytics。
  *
- * Registration and lifecycle follow the governance reference pattern:
+ * Registration and lifecycle follow the shared feature-module pattern:
  * 1. Controllers wired to their proven application capability port.
  * 2. `instance.start()` once, then mount route groups; a partial route set is
  *    rolled back on any mount failure.
