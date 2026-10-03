@@ -2,8 +2,8 @@
 
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { defineComponent, h } from 'vue';
-import { describe, expect, it } from 'vitest';
+import { defineComponent, h, nextTick } from 'vue';
+import { describe, expect, it, vi } from 'vitest';
 import BusinessPanel from './BusinessPanel.vue';
 import { resolveBusinessTabDensity } from './business-tab-layout';
 import type { BusinessTab } from './useAppShellStore';
@@ -130,14 +130,46 @@ describe('BusinessPanel surfaces', () => {
     expect(activeTab.attributes('tabindex')).toBe('0');
   });
 
+  it.each(['home', 'workflow'] as const)(
+    'uses only the first business tab as the tab stop on %s with a remembered non-first tab',
+    async (panelSurface) => {
+      const secondTab: BusinessTab = {
+        id: 'tab-task-2',
+        module: 'task',
+        route: '/tasks',
+        title: 'Tasks',
+        lastActiveAt: 2,
+      };
+      const wrapper = mountPanel(panelSurface);
+      await wrapper.setProps({ tabs: [...tabs, secondTab], activeTabId: secondTab.id });
+
+      expect(wrapper.findAll('[role="tab"][tabindex="0"]')).toHaveLength(1);
+      expect(wrapper.get('[role="tab"][tabindex="0"]').attributes('data-business-tab-id')).toBe(
+        tabs[0].id,
+      );
+      expect(wrapper.findAll('[role="tab"][aria-selected="true"]')).toHaveLength(0);
+
+      await wrapper.setProps({ panelSurface: 'business' });
+
+      expect(wrapper.findAll('[role="tab"][tabindex="0"]')).toHaveLength(1);
+      expect(wrapper.get('[role="tab"][tabindex="0"]').attributes('data-business-tab-id')).toBe(
+        secondTab.id,
+      );
+      expect(wrapper.findAll('[role="tab"][aria-selected="true"]')).toHaveLength(1);
+      expect(
+        wrapper.get('[role="tab"][aria-selected="true"]').attributes('data-business-tab-id'),
+      ).toBe(secondTab.id);
+    },
+  );
+
   it('uses overlay close controls and consistent chrome hit targets', () => {
     const wrapper = mountPanel('business');
 
     expect(wrapper.get('[data-testid="business-panel-tab-close"]').classes()).toEqual(
-      expect.arrayContaining(['absolute', 'h-5', 'w-5']),
+      expect.arrayContaining(['absolute', 'h-8', 'w-8']),
     );
     expect(wrapper.get('[data-testid="business-panel-focus-toggle"]').classes()).toEqual(
-      expect.arrayContaining(['h-7', 'w-7']),
+      expect.arrayContaining(['h-8', 'w-8']),
     );
   });
 
@@ -198,6 +230,68 @@ describe('BusinessPanel surfaces', () => {
       const root = wrapper.get(`[data-surface-scroll-root="${name}"]`);
       expect(root.classes()).toContain('overflow-hidden');
       expect(root.findAll('[data-scroll-host]')).toHaveLength(1);
+    }
+  });
+});
+
+describe('BusinessPanel narrow keyboard contract', () => {
+  it('keeps eight tabs and workflow named and keyboard reachable at a measured 520px', async () => {
+    let resize: ResizeObserverCallback | undefined;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const manyTabs = Array.from({ length: 8 }, (_, index) => ({
+      ...tabs[0],
+      id: `tab-${index}`,
+      title: `Goal ${index}`,
+    }));
+    const wrapper = mount(BusinessPanel, {
+      attachTo: document.body,
+      props: {
+        tabs: manyTabs,
+        activeTabId: 'tab-0',
+        layout: 'split',
+        panelSurface: 'home',
+        workflowAvailable: true,
+      },
+      global: { plugins: [i18n] },
+    });
+    try {
+      resize?.([{ contentRect: { width: 520 } } as ResizeObserverEntry], {} as ResizeObserver);
+      await nextTick();
+      expect(wrapper.attributes('data-tab-density')).toBe('icon');
+      const tabButtons = wrapper.findAll('[role="tab"]');
+      expect(tabButtons.filter((tab) => tab.attributes('tabindex') === '0')).toHaveLength(1);
+      for (const [index, tab] of tabButtons.entries()) {
+        expect(tab.attributes('aria-label')).toBe(`Goal ${index}`);
+        expect(tab.element.tagName).toBe('BUTTON');
+      }
+      expect(wrapper.get('[data-testid="business-panel-workflow"]').attributes('aria-label')).toBe(
+        'Workflow',
+      );
+      await tabButtons[0].trigger('keydown', { key: 'End' });
+      expect(wrapper.emitted('activate-tab')).toEqual([['tab-7']]);
+      expect(document.activeElement).toBe(tabButtons[7].element);
+      await tabButtons[7].trigger('keydown', { key: 'ArrowRight' });
+      expect(document.activeElement).toBe(tabButtons[0].element);
+      await wrapper.setProps({ panelSurface: 'workflow' });
+      const closeWorkflow = wrapper.get('[aria-label="Close workflow"]');
+      expect(closeWorkflow.classes()).not.toContain('hidden');
+      await closeWorkflow.trigger('click');
+      expect(wrapper.emitted('close-workflow')).toHaveLength(1);
+      for (const root of wrapper.findAll('[data-surface-scroll-root]')) {
+        expect(root.classes()).toContain('overflow-hidden');
+      }
+    } finally {
+      wrapper.unmount();
+      vi.unstubAllGlobals();
     }
   });
 });

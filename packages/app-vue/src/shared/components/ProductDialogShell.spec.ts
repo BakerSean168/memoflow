@@ -1,4 +1,4 @@
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, nextTick } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { Dialog as AppDialog, DialogContent } from '@memoflow/ui-vue-shadcn';
@@ -231,4 +231,33 @@ describe('ProductDialogShell', () => {
     expect(event.defaultPrevented).toBe(true);
     wrapper.unmount();
   });
+});
+
+it('returns focus after Escape for owner-controlled dialogs without a DialogTrigger', async () => {
+  const Host = defineComponent({
+    components: { AppDialog, ProductDialogShell },
+    setup: () => ({ open: ref(false) }),
+    template: `<button data-testid="owner-open" @click="open = true">Create</button>
+      <AppDialog v-model:open="open">
+        <ProductDialogShell :open="open" test-id="owner-dialog" initial-focus-selector="input">
+          <template #title>Owner form</template><input />
+        </ProductDialogShell>
+      </AppDialog>`,
+  });
+  const wrapper = mount(Host, { attachTo: document.body });
+  const opener = wrapper.get<HTMLButtonElement>('[data-testid="owner-open"]');
+  for (let attempt = 0; attempt < 2; attempt++) {
+    opener.element.focus();
+    await opener.trigger('click');
+    await flushPromises();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const input = document.querySelector<HTMLInputElement>('[data-testid="owner-dialog"] input')!;
+    expect(document.activeElement).toBe(input);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+    await nextTick();
+    expect(document.querySelector('[data-testid="owner-dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(opener.element);
+  }
+  wrapper.unmount();
 });

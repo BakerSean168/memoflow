@@ -16,6 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
   Switch as RekaSwitch,
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
   Tabs,
   TabsContent,
   TabsList,
@@ -171,6 +175,7 @@ describe('Reka primitive contracts', () => {
     await nextTick();
 
     expect(document.body.textContent).not.toContain('Popover content');
+    expect(document.activeElement).toBe(trigger.element);
     wrapper.unmount();
   });
 
@@ -187,4 +192,24 @@ describe('Reka primitive contracts', () => {
     expect(wrapper.text()).not.toContain('First panel');
     wrapper.unmount();
   });
+});
+
+it('names the Sheet close control, preserves its target and dismisses the controlled root', async () => {
+  const Host = defineComponent({
+    components: { Sheet, SheetContent, SheetTitle, SheetDescription },
+    setup: () => ({ open: ref(true) }),
+    template: `<Sheet v-model:open="open"><SheetContent close-label="Dismiss catalog">
+      <SheetTitle>Catalog</SheetTitle><SheetDescription>Choose a document</SheetDescription>
+    </SheetContent></Sheet>`,
+  });
+  const wrapper = mount(Host, { attachTo: document.body });
+  await nextTick();
+  const close = document.querySelector<HTMLButtonElement>('[aria-label="Dismiss catalog"]')!;
+  expect(close.tagName).toBe('BUTTON');
+  expect(close.classList.contains('h-8')).toBe(true);
+  expect(close.classList.contains('w-8')).toBe(true);
+  close.click();
+  await nextTick();
+  expect(wrapper.vm.open).toBe(false);
+  wrapper.unmount();
 });

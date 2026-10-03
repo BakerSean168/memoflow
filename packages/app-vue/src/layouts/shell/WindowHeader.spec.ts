@@ -58,6 +58,15 @@ describe('WindowHeader desktop drag contract', () => {
       'no-drag',
     );
     expect(wrapper.get('[data-testid="shell-primary-capsules"]').classes()).toContain('no-drag');
+    for (const button of wrapper.findAll('button[aria-label]')) {
+      expect(button.element.tagName).toBe('BUTTON');
+      expect(button.attributes('aria-label')).toBeTruthy();
+      expect(button.classes()).toContain('h-8');
+      expect(button.classes()).toEqual(
+        expect.arrayContaining([expect.stringMatching(/^(w-8|min-w-8)$/)]),
+      );
+    }
+    wrapper.unmount();
   });
 });
 

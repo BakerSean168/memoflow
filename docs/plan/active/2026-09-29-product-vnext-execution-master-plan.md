@@ -1504,6 +1504,8 @@ Product DB, or exporter. B3 proved native parity for all five rules and all thre
 
 ## PVC-UI-9002 — Keyboard/focus/a11y/container closure
 
+**Execution (2026-10-03): Accepted / frozen after delegated implementation and independent review.** Owner-controlled Dialog focus return, Capsule Escape focus return, Popover/Sheet reduced motion, localized Sheet close accessible names, shell 32px actions/36px tabs, narrow accessible names/single roving tab stop, and Task native form submit-to-owner coordination are closed. Independent acceptance re-ran focused App-Vue **11 files / 112 tests**, UI primitives **2 / 10**, App-Vue/UI typechecks, inventory/target/sync checks, the complete compare-only Chromium matrix **29/29**, and full uncached governance; all passed. Six reviewed PNG baselines encode the intentional target-size changes. Electron OS host and screen-reader sessions remain explicit non-claims. See [scope, exact commands and limitations](../archive/2026-10-03-pvc-ui-9002-keyboard-focus-a11y-container-closure.md).
+
 **Checks:**
 
 - keyboard submit/cancel;

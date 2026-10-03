@@ -12,13 +12,7 @@ export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
 
 export type TaskSurface = 'today' | 'plans';
 export type TaskPlanStateFilter =
-  | 'all'
-  | 'active'
-  | 'paused'
-  | 'succeeded'
-  | 'failed'
-  | 'abandoned'
-  | 'archived';
+  'all' | 'active' | 'paused' | 'succeeded' | 'failed' | 'abandoned' | 'archived';
 
 export interface EditableTaskUI {
   title: string;
@@ -130,6 +124,7 @@ export interface TaskPlanFormEmits {
   'update:modelValue': [value: TaskPlanViewModel];
   'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
+  submit: [];
 }
 
 // ── 任务库列表过滤 / 视图模式（UI_PAGE_REDESIGN_PLAN §6）──

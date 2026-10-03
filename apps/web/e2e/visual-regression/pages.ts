@@ -311,6 +311,16 @@ if (shell) {
   const store = useAppShellStore(pinia);
   store.setSidebarCollapsed(true);
   store.setPanelWidth(surface === 'shell-split' ? 720 : 520);
+  if (params.get('tabs') === '8') {
+    for (let index = 0; index < 8; index++) {
+      store.openTab({
+        module: 'task',
+        route: `/tasks?context=${index}`,
+        title: `Task ${index}`,
+        intent: 'deeplink',
+      });
+    }
+  }
   if (surface === 'shell-focus') store.setLayout('focus', 'user');
 }
 app.mount('#app');

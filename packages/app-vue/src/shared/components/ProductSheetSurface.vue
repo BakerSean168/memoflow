@@ -2,6 +2,7 @@
   <SheetContent
     :side="side"
     :hide-close="hideClose"
+    :close-label="t('common.close')"
     :class="
       cn(
         'flex h-full min-h-0 flex-col overflow-hidden bg-[hsl(var(--surface-overlay))] p-0',
@@ -21,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { computed, type HTMLAttributes } from 'vue';
 import {
   cn,
@@ -49,6 +51,8 @@ const props = withDefaults(
     contentClass: undefined,
   },
 );
+
+const { t } = useI18n();
 
 const widthClass = computed(
   () =>

@@ -53,6 +53,7 @@
   </DefineFooter>
   <Sheet v-if="isNarrow" :open="open" @update:open="emit('update:open', $event)">
     <SheetContent
+      :close-label="t('common.close')"
       side="right"
       class="flex h-full w-full max-w-sm flex-col gap-0 overflow-hidden p-0"
       data-testid="planner-day-sheet"

@@ -1,6 +1,6 @@
 /** @vitest-environment happy-dom */
 
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { Target } from '@lucide/vue';
 import { h, nextTick } from 'vue';
@@ -108,9 +108,7 @@ describe('ModuleCapsule', () => {
     await nextTick();
     expect(preview.attributes('aria-expanded')).toBe('true');
 
-    const content = document.querySelector<HTMLElement>(
-      '[data-capsule-preview-content="goal"]',
-    );
+    const content = document.querySelector<HTMLElement>('[data-capsule-preview-content="goal"]');
     const input = document.querySelector<HTMLInputElement>('[data-testid="preview-input"]');
     expect(content).not.toBeNull();
     expect(input).not.toBeNull();
@@ -153,4 +151,26 @@ describe('ModuleCapsule', () => {
 
     wrapper.unmount();
   });
+});
+
+it('returns keyboard Escape focus to the named preview action without reopening it', async () => {
+  const wrapper = mount(ModuleCapsule, {
+    attachTo: document.body,
+    props: { id: 'goal', label: 'Goals', route: '/goals', icon: Target },
+    slots: { default: '<button data-testid="capsule-inner">Preview action</button>' },
+    global: { plugins: [i18n] },
+  });
+  const preview = wrapper.get('[data-testid="capsule-preview-goal"]');
+  expect(wrapper.get('[data-testid="capsule-nav-goal"]').attributes('aria-label')).toBe('Goals');
+  expect(preview.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+  preview.element.focus();
+  await preview.trigger('click', { detail: 0 });
+  await flushPromises();
+  const inner = document.querySelector<HTMLButtonElement>('[data-testid="capsule-inner"]')!;
+  expect(document.activeElement).toBe(inner);
+  inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flushPromises();
+  expect(preview.attributes('aria-expanded')).toBe('false');
+  expect(document.activeElement).toBe(preview.element);
+  wrapper.unmount();
 });

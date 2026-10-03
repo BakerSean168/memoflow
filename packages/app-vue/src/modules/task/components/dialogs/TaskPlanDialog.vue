@@ -46,6 +46,7 @@
         @update:model-value="handleTemplateUpdate"
         @update:validation="handleValidationUpdate"
         @close="handleCancel"
+        @submit="handleSave"
       />
 
       <template #footer>

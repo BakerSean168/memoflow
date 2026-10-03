@@ -10909,6 +10909,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ui-vue-shadcn/src/lib/motion.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ui-vue-shadcn/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/utils/src/domain/__tests__/cross-platform-event-bus.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12135,7 +12143,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/utils/vitest.config.ts",
@@ -12684,7 +12692,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1119,
+    "unit": 1120,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

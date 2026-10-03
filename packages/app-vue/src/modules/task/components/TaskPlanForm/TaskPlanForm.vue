@@ -19,7 +19,7 @@
       ref="formRef"
       :inert="props.readonly"
       class="task-plan-form flex min-h-0 flex-1 flex-col gap-6"
-      @submit.prevent
+      @submit.prevent="!props.readonly && emit('submit')"
     >
       <section
         class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"

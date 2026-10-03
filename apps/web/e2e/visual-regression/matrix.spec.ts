@@ -84,3 +84,69 @@ for (const entry of matrix) {
     expect(externalRequests).toEqual([]);
   });
 }
+
+test('UI-9002 narrow shell target, keyboard and scroll ownership', async ({ page }) => {
+  const entry = matrix.find((entry) => entry.surface === 'shell.narrow')!;
+  await openVisualCase(page, { ...entry, query: `${entry.query}&tabs=8` });
+  await expect(page.getByTestId('business-panel')).toBeVisible();
+  await waitForVisualLayout(page);
+  const panel = page.getByTestId('business-panel');
+  expect((await panel.boundingBox())!.width).toBeCloseTo(520, 0);
+  await expect(panel.getByRole('tab')).toHaveCount(8);
+  await expect(panel).toHaveAttribute('data-tab-density', 'icon');
+  const tab = panel.getByRole('tab').first();
+  await expect(tab).toHaveAccessibleName(/.+/);
+  await tab.focus();
+  await page.keyboard.press('Home');
+  await expect(tab).toBeFocused();
+  const controls = panel.locator(
+    '[data-testid="business-panel-home"], [data-testid="business-panel-focus-toggle"], [data-testid="business-panel-tab-close"]',
+  );
+  for (const control of await controls.all()) {
+    if (!(await control.isVisible())) continue;
+    await expect(control).toHaveAccessibleName(/.+/);
+    const box = (await control.boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(32);
+    expect(box.height).toBeGreaterThanOrEqual(32);
+  }
+  expect((await tab.boundingBox())!.height).toBeGreaterThanOrEqual(36);
+  const geometry = await panel.evaluate((element) => ({
+    overflows: element.scrollWidth > element.clientWidth,
+    roots: [...element.querySelectorAll('[data-surface-scroll-root]')].map(
+      (root) => getComputedStyle(root).overflowY,
+    ),
+  }));
+  expect(geometry.overflows).toBe(false);
+  await expect(panel.locator('[data-surface-scroll-root=business] [data-scroll-host]')).toHaveCount(
+    1,
+  );
+  expect(geometry.roots).toEqual(['hidden', 'hidden', 'hidden']);
+  expect(
+    await panel
+      .getByTestId('business-panel-tab-strip')
+      .evaluate((element) => getComputedStyle(element).overflowX),
+  ).not.toBe('auto');
+});
+
+test('UI-9002 capsule keyboard focus and computed reduced motion', async ({ page }) => {
+  const entry = matrix.find((entry) => entry.surface === 'shell.split')!;
+  await openVisualCase(page, entry);
+  const preview = page.getByTestId('capsule-preview-schedule');
+  await expect(preview).toBeVisible();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await preview.focus();
+  await page.keyboard.press('Enter');
+  const content = page.locator('[data-capsule-preview-content="schedule"]');
+  await expect(content).toBeVisible();
+  await expect(content).toHaveAttribute('role', 'dialog');
+  expect(await content.evaluate((element) => getComputedStyle(element).animationName)).not.toBe(
+    'none',
+  );
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(await content.evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
+  await expect(content.getByRole('button').first()).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(content).toBeHidden();
+  await expect(preview).toBeFocused();
+  await expect(preview).toHaveAttribute('aria-expanded', 'false');
+});

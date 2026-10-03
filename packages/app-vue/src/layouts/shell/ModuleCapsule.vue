@@ -27,6 +27,7 @@ const { t } = useI18n();
 
 type CapsuleOpenMode = 'closed' | 'hover' | 'pinned';
 
+const previewButton = ref<HTMLButtonElement | null>(null);
 const openMode = ref<CapsuleOpenMode>('closed');
 const open = computed(() => openMode.value !== 'closed');
 const previewWidthClass = computed(() => {
@@ -117,6 +118,12 @@ function handleOpenChange(value: boolean): void {
   if (!value) dismissPreview();
 }
 
+function handleEscape(): void {
+  const restoreFocus = previewHasFocus();
+  dismissPreview();
+  if (restoreFocus) void nextTick(() => previewButton.value?.focus({ preventScroll: true }));
+}
+
 function dismissPreview(): void {
   clearOpenTimer();
   clearCloseTimer();
@@ -142,9 +149,10 @@ onBeforeUnmount(() => {
     >
       <button
         type="button"
-        class="module-capsule-main flex h-7 items-center gap-1.5 px-2.5 text-[12px] font-medium leading-none text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        class="module-capsule-main flex h-8 min-w-8 items-center gap-1.5 px-2.5 text-[12px] font-medium leading-none text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :data-testid="`capsule-nav-${id}`"
         :title="label"
+        :aria-label="label"
         @click="enterModule"
       >
         <component :is="icon" class="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden="true" />
@@ -161,8 +169,9 @@ onBeforeUnmount(() => {
 
       <PopoverAnchor as-child>
         <button
+          ref="previewButton"
           type="button"
-          class="flex h-7 w-6 items-center justify-center border-l border-[hsl(var(--border-subtle))] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 shrink-0 items-center justify-center border-l border-[hsl(var(--border-subtle))] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :data-testid="`capsule-preview-${id}`"
           :aria-label="t('shell.previewModule', { name: label })"
           :aria-expanded="open"
@@ -188,7 +197,7 @@ onBeforeUnmount(() => {
       @focusout="scheduleClose"
       @open-auto-focus.prevent
       @close-auto-focus.prevent
-      @escape-key-down="dismissPreview"
+      @escape-key-down="handleEscape"
       @pointer-down-outside="dismissPreview"
     >
       <slot :close-preview="dismissPreview" />
@@ -205,7 +214,7 @@ onBeforeUnmount(() => {
 
 @container window-header (max-width: 900px) {
   .module-capsule-main {
-    width: 1.9rem;
+    width: 2rem;
     justify-content: center;
     padding-inline: 0;
   }

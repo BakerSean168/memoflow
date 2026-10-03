@@ -180,6 +180,7 @@ onBeforeUnmount(() => {
       @update:open="shellStore.setSettingsNavigationOpen($event)"
     >
       <SheetContent
+        :close-label="t('common.close')"
         side="left"
         class="w-[min(20rem,88vw)] border-r border-sidebar-border bg-sidebar p-0"
         data-testid="settings-navigation-drawer"

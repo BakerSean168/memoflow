@@ -11,6 +11,7 @@
     :data-testid="testId"
     :data-product-dialog-recipe="recipe"
     @open-auto-focus="handleOpenAutoFocus"
+    @close-auto-focus="handleCloseAutoFocus"
     @interact-outside="handleInteractOutside"
   >
     <DialogHeader
@@ -122,11 +123,23 @@ const heightClass = computed(
     })[resolvedHeightMode.value],
 );
 
+let returnFocus: HTMLElement | null = null;
+
 function handleOpenAutoFocus(event: Event): void {
+  returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   if (!props.initialFocusSelector) return;
 
   event.preventDefault();
   scheduleInitialFocus();
+}
+
+function handleCloseAutoFocus(event: Event): void {
+  // Route-controlled owner dialogs have no DialogTrigger registered with Reka.
+  if (!event.defaultPrevented && returnFocus?.isConnected && returnFocus !== document.body) {
+    event.preventDefault();
+    returnFocus.focus({ preventScroll: true });
+  }
+  returnFocus = null;
 }
 
 function handleInteractOutside(event: Event): void {
@@ -141,6 +154,7 @@ function scheduleInitialFocus(): void {
 
   void nextTick(() => {
     requestAnimationFrame(() => {
+      if (!props.open) return;
       const dialog = document.querySelector<HTMLElement>(`[data-testid="${props.testId}"]`);
       dialog?.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
     });

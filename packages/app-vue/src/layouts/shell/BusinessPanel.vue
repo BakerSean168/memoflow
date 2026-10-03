@@ -32,10 +32,7 @@ import {
 import type { Component } from 'vue';
 import type { BusinessTab, PanelSurface, ShellLayout, ShellModule } from './useAppShellStore';
 import { providePanelWidth } from './usePanelWidth';
-import {
-  resolveBusinessTabDensity,
-  type BusinessTabDensity,
-} from './business-tab-layout';
+import { resolveBusinessTabDensity, type BusinessTabDensity } from './business-tab-layout';
 
 const props = defineProps<{
   tabs: BusinessTab[];
@@ -116,7 +113,7 @@ function tabWidthClass(tab: BusinessTab): string {
   }
   return isActiveTab(tab)
     ? 'min-w-[4.5rem] flex-[1.6_1_4.5rem] max-w-[6.5rem]'
-    : 'min-w-8 flex-[0_1_2.25rem] max-w-10';
+    : 'min-w-9 flex-[0_1_2.25rem] max-w-10';
 }
 
 function focusTab(tabId: string): void {
@@ -133,7 +130,8 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
   let nextIndex = index;
   if (event.key === 'ArrowRight') nextIndex = (index + 1) % props.tabs.length;
-  else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + props.tabs.length) % props.tabs.length;
+  else if (event.key === 'ArrowLeft')
+    nextIndex = (index - 1 + props.tabs.length) % props.tabs.length;
   else if (event.key === 'Home') nextIndex = 0;
   else if (event.key === 'End') nextIndex = props.tabs.length - 1;
   else if (event.key === 'Delete') {
@@ -167,7 +165,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
     >
       <button
         type="button"
-        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[background-color,color,box-shadow] duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[background-color,color,box-shadow] duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :class="
           panelSurface === 'home'
             ? 'bg-[hsl(var(--surface-raised))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle))]'
@@ -192,7 +190,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           <div
             v-for="tab in tabs"
             :key="tab.id"
-            class="business-workbench-tab group relative flex h-8 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[flex-basis,max-width,background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none"
+            class="business-workbench-tab group relative flex h-9 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[flex-basis,max-width,background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none"
             :class="[
               tabWidthClass(tab),
               isActiveTab(tab)
@@ -206,24 +204,22 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
               role="tab"
               class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
               :class="[
-                showTabLabel(tab) ? 'pr-7' : 'justify-center px-0',
+                showTabLabel(tab) ? 'pr-9' : 'justify-center px-0',
                 tabDensity === 'comfortable' ? 'font-medium' : 'font-normal',
               ]"
               :data-business-tab-id="tab.id"
               :aria-selected="isActiveTab(tab)"
-              :tabindex="isActiveTab(tab) ? 0 : -1"
+              :tabindex="
+                (panelSurface === 'business' ? isActiveTab(tab) : tab.id === tabs[0]?.id) ? 0 : -1
+              "
               :title="tab.title"
+              :aria-label="tab.title"
               @click="emit('activate-tab', tab.id)"
               @keydown="handleTabKeydown($event, tab.id)"
             >
               <component
                 :is="moduleIcons[tab.module]"
                 class="h-3.5 w-3.5 shrink-0 transition-opacity duration-150"
-                :class="
-                  tabDensity === 'icon' && !isActiveTab(tab)
-                    ? 'group-hover:opacity-0 group-focus-within:opacity-0'
-                    : ''
-                "
                 aria-hidden="true"
               />
               <span v-if="showTabLabel(tab)" class="min-w-0 flex-1 truncate leading-none">
@@ -233,11 +229,9 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
             <button
               type="button"
-              class="absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+              class="absolute top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
               :class="[
-                tabDensity === 'icon' && !isActiveTab(tab)
-                  ? 'right-1/2 translate-x-1/2'
-                  : 'right-1',
+                tabDensity === 'icon' && !isActiveTab(tab) ? 'hidden' : 'right-1',
                 isActiveTab(tab)
                   ? 'opacity-60 hover:opacity-100'
                   : 'opacity-0 group-hover:opacity-70 group-focus-within:opacity-100 hover:!opacity-100',
@@ -254,28 +248,36 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
         <div
           v-if="workflowAvailable"
-          class="business-workbench-tab group relative flex h-8 shrink-0 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[background-color,color,box-shadow] duration-150"
+          class="business-workbench-tab group relative flex h-9 shrink-0 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[background-color,color,box-shadow] duration-150"
           :class="[
             panelSurface === 'workflow'
               ? 'business-workbench-tab--active text-foreground'
               : 'business-workbench-tab--inactive text-[hsl(var(--foreground-muted))]',
-            tabDensity === 'comfortable' ? 'max-w-36' : tabDensity === 'compact' ? 'max-w-24' : 'w-8',
+            tabDensity === 'comfortable'
+              ? 'max-w-36'
+              : tabDensity === 'compact'
+                ? 'max-w-24'
+                : panelSurface === 'workflow'
+                  ? 'w-[4.5rem]'
+                  : 'w-9',
           ]"
         >
           <button
             type="button"
             class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
-            :class="tabDensity === 'icon' ? 'justify-center px-0' : 'pr-7'"
+            :class="
+              tabDensity === 'icon' && panelSurface !== 'workflow' ? 'justify-center px-0' : 'pr-9'
+            "
             data-testid="business-panel-workflow"
             :aria-current="panelSurface === 'workflow' ? 'page' : undefined"
             :title="t('shell.panel.workflow')"
+            :aria-label="t('shell.panel.workflow')"
             @click="emit('show-workflow')"
           >
-            <Workflow
-              class="h-3.5 w-3.5 shrink-0 transition-opacity duration-150"
-              :class="tabDensity === 'icon' ? 'group-hover:opacity-0' : ''"
-            />
-            <span v-if="tabDensity !== 'icon'" class="truncate">{{ t('shell.panel.workflow') }}</span>
+            <Workflow class="h-3.5 w-3.5 shrink-0 transition-opacity duration-150" />
+            <span v-if="tabDensity !== 'icon'" class="truncate">{{
+              t('shell.panel.workflow')
+            }}</span>
             <span
               v-if="(workflowAttentionCount ?? 0) > 0 && tabDensity !== 'icon'"
               class="rounded-full bg-primary/15 px-1.5 text-[9px] font-semibold text-primary"
@@ -285,8 +287,8 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           </button>
           <button
             type="button"
-            class="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground group-hover:opacity-70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
-            :class="tabDensity === 'icon' ? 'right-1/2 translate-x-1/2' : ''"
+            class="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground group-hover:opacity-70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+            :class="tabDensity === 'icon' && panelSurface !== 'workflow' ? 'hidden' : ''"
             :aria-label="t('shell.panel.closeWorkflow')"
             @click.stop="emit('close-workflow')"
           >
@@ -300,7 +302,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
         <button
           type="button"
           data-testid="business-panel-focus-toggle"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[background-color,color] duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[background-color,color] duration-150 hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="isFocused ? t('shell.panel.exitFocus') : t('shell.panel.enterFocus')"
           :aria-label="isFocused ? t('shell.panel.exitFocus') : t('shell.panel.enterFocus')"
           @click="emit('toggle-focus')"
@@ -336,7 +338,6 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
         <slot name="workflow" />
       </div>
     </div>
-
   </section>
 </template>
 

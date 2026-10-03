@@ -167,6 +167,28 @@ describe('Task full-create native session', () => {
       submitOwner.mock.invocationCallOrder[0],
     );
   });
+  it('routes native form submit through the owner coordinator and Escape through cancel', async () => {
+    const { session, submitOwner } = render();
+    session.patch({ title: 'Keyboard task' });
+    await flushPromises();
+    const submit = vi.fn(async () => {});
+    const cancel = vi.fn(async () => {});
+    session.coordinateSubmit(submit, cancel);
+    const form = document.querySelector<HTMLFormElement>('.task-plan-form')!;
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+    expect(submit).toHaveBeenCalledOnce();
+    expect(submitOwner).not.toHaveBeenCalled();
+    document
+      .querySelector('[role="dialog"]')!
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+    expect(cancel).toHaveBeenCalledOnce();
+    session.setEditingBlocked(true);
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await flushPromises();
+    expect(submit).toHaveBeenCalledOnce();
+  });
   it('leaves normal owner Save uncoordinated', async () => {
     const { session, submitOwner } = render();
     session.patch({ title: 'Manual' });

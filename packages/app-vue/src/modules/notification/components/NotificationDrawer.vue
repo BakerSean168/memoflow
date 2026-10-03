@@ -1,6 +1,10 @@
 <template>
   <Sheet :open="modelValue" @update:open="$emit('update:modelValue', $event)">
-    <SheetContent side="right" class="w-[400px] @2xl/panel:w-[540px]">
+    <SheetContent
+      side="right"
+      :close-label="t('common.close')"
+      class="w-[400px] @2xl/panel:w-[540px]"
+    >
       <SheetHeader class="flex flex-row items-center justify-between space-y-0 pb-4">
         <SheetTitle>{{ t('notification.drawer.title') }}</SheetTitle>
         <div class="flex items-center gap-2">

@@ -11,3 +11,7 @@ export const dialogOverlayMotionClass =
 
 export const dialogContentMotionClass =
   'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-[0.98] data-[state=closed]:zoom-out-[0.98] duration-150 motion-reduce:data-[state=open]:animate-none motion-reduce:data-[state=closed]:animate-none';
+
+/** Shared opt-out for directional Popover and Sheet animations. */
+export const reducedMotionClass =
+  'motion-reduce:transition-none motion-reduce:data-[state=open]:animate-none motion-reduce:data-[state=closed]:animate-none';

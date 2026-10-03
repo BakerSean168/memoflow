@@ -456,6 +456,35 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
     },
   );
 
+  it.each(['day', 'event'])(
+    'localizes the narrow %s sheet close accessible name',
+    async (surface) => {
+      mocks.narrow = true;
+      const global = {
+        plugins: [
+          createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages }),
+        ],
+      };
+      const wrapper =
+        surface === 'day'
+          ? mount(PlannerDayDialog, {
+              attachTo: document.body,
+              props: { open: true, date: new Date(projection.start), events: [projection] },
+              global,
+            })
+          : mount(PlannerEventDialog, {
+              attachTo: document.body,
+              props: { open: true, event: projection },
+              global,
+            });
+      await flushPromises();
+
+      expect(document.querySelector('button[aria-label="关闭"]')).not.toBeNull();
+      expect(document.querySelector('button[aria-label="Close"]')).toBeNull();
+      wrapper.unmount();
+    },
+  );
+
   it.each([false, true])('shares day/event bodies and actions in narrow=%s', async (narrow) => {
     mocks.narrow = narrow;
     const wrapper = await mountView();

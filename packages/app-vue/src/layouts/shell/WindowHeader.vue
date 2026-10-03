@@ -100,7 +100,7 @@ const utilityCapsules = computed(() =>
     <div class="flex shrink-0 items-center gap-1.5">
       <button
         type="button"
-        class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :title="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         :aria-label="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         data-testid="shell-sidebar-toggle"
@@ -112,7 +112,7 @@ const utilityCapsules = computed(() =>
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.back')"
           :aria-label="t('shell.back')"
           @click="emit('go-back')"
@@ -121,7 +121,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.forward')"
           :aria-label="t('shell.forward')"
           @click="emit('go-forward')"
@@ -163,9 +163,10 @@ const utilityCapsules = computed(() =>
       class="window-header__drag-surface flex min-w-0 flex-1 items-center justify-center"
       data-testid="settings-window-header-title"
     >
-      <span class="truncate rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] px-2.5 py-1 text-[12px] font-medium text-foreground">{{
-        t('setting.title')
-      }}</span>
+      <span
+        class="truncate rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] px-2.5 py-1 text-[12px] font-medium text-foreground"
+        >{{ t('setting.title') }}</span
+      >
     </div>
 
     <!-- 右：轻量状态动作、日程/通知入口、面板与桌面窗控。 -->
@@ -201,7 +202,7 @@ const utilityCapsules = computed(() =>
       <button
         v-if="props.mode !== 'settings'"
         type="button"
-        class="relative flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+        class="relative flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         data-testid="shell-right-panel-toggle"
         :title="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
         :aria-label="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
@@ -222,7 +223,7 @@ const utilityCapsules = computed(() =>
       <div v-if="isDesktop && !isMac" class="flex items-center gap-1">
         <button
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isMinimizable"
           :title="t('shell.window.minimize')"
           :aria-label="t('shell.window.minimize')"
@@ -232,7 +233,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isMaximizable"
           :title="t('shell.window.maximize')"
           :aria-label="t('shell.window.maximize')"
@@ -243,7 +244,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-destructive/85 hover:text-destructive-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-destructive/85 hover:text-destructive-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isClosable"
           :title="t('shell.window.close')"
           :aria-label="t('shell.window.close')"
