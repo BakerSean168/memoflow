@@ -51,7 +51,8 @@ test.describe('Routine authenticated product journey', () => {
     await page.getByTestId('routine-name-input').fill(routineName);
     await page.getByTestId('routine-trigger-type').click();
     await page.getByTestId('routine-trigger-option-WallClock').click();
-    await page.getByTestId('routine-local-time').fill('09:15');
+    await page.getByTestId('routine-local-time-hour').fill('09');
+    await page.getByTestId('routine-local-time-minute').fill('15');
     await page.getByTestId('routine-profile-picker').click();
     await page.getByTestId(`routine-profile-membership-${profileId}`).click();
     await page.keyboard.press('Escape');
@@ -80,7 +81,8 @@ test.describe('Routine authenticated product journey', () => {
     await createdCard.locator('button').first().click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(updatedRoutineName);
-    await page.getByTestId('routine-local-time').fill('10:30');
+    await page.getByTestId('routine-local-time-hour').fill('10');
+    await page.getByTestId('routine-local-time-minute').fill('30');
     await page.getByTestId('routine-profile-picker').click();
     await expect(page.getByTestId(`routine-profile-membership-${profileId}`)).toHaveAttribute(
       'aria-checked',

@@ -1,7 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ok } from '@memoflow/contracts/result';
 import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
@@ -14,8 +16,6 @@ import {
   TASK_TEST_TIME_CONTEXT,
   TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../testing';
-import {
-} from '../../../domain/value-objects';
 import { createTaskPrismaModule } from '../../prisma';
 import {
   cleanTaskTables,
@@ -245,8 +245,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     const prisma = await getPrisma();
 
     // Seed the Goal + KeyResult rows required by the goal-binding FK.
-    const goalId = `goal-${Date.now()}`;
-    const keyResultId = `kr-${Date.now()}`;
+    const goalId = `IGoalId_${randomUUID()}`;
+    const keyResultId = `IKeyResultId_${randomUUID()}`;
     await prisma.goal.create({
       data: {
         id: goalId,
@@ -271,6 +271,11 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     });
     const module = createTaskPrismaModule(prisma, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      goalReadPort: {
+        getKeyResultMeasurementContext: vi
+          .fn()
+          .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+      },
     });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
@@ -364,8 +369,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       const prisma = await getPrisma();
 
       // Seed the Goal + KeyResult rows required by the goal-binding FK.
-      const goalId = `goal-${Date.now()}`;
-      const keyResultId = `kr-${Date.now()}`;
+      const goalId = `IGoalId_${randomUUID()}`;
+      const keyResultId = `IKeyResultId_${randomUUID()}`;
       await prisma.goal.create({
         data: {
           id: goalId,
@@ -390,6 +395,11 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       });
       const module = createTaskPrismaModule(prisma, {
         userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+        goalReadPort: {
+          getKeyResultMeasurementContext: vi
+            .fn()
+            .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+        },
       });
       const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 

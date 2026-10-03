@@ -602,6 +602,11 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
+    // Native Goal review is modal owner UI; close it before acting on workflow context controls.
+    const nativeReview = page.getByTestId('goal-dialog');
+    await expect(nativeReview).toBeVisible();
+    await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
+    await expect(nativeReview).toBeHidden();
     await page.getByTestId('goal-agent-cancel-run').click();
 
     await expect(workflowPanel).toContainText(/cancelled/i, {

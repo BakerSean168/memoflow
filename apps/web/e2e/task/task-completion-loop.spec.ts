@@ -106,6 +106,10 @@ test.describe('Task completion closed loop', () => {
     await page.goto('/');
 
     await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.getByTestId('business-panel-home').click();
+    await expect(page.getByTestId('today-overview-panel')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
     const todoWidget = page.getByTestId('daily-todo-widget');
     const taskItem = todoWidget
       .locator('[data-task-occurrence-id]')
@@ -117,7 +121,10 @@ test.describe('Task completion closed loop', () => {
     await expect(todoWidget).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(taskItem).toHaveAttribute('data-task-status', 'Pending');
     await expect(todoWidget.getByTestId('task-quick-count')).toHaveText('0/1');
-    await expect(todoWidget.getByTestId('task-quick-progress')).toHaveAttribute('data-progress', '0');
+    await expect(todoWidget.getByTestId('task-quick-progress')).toHaveAttribute(
+      'data-progress',
+      '0',
+    );
     await expect(goalItem.getByTestId('goal-progress-value')).toHaveText('0%');
 
     const occurrenceId = await taskItem.getAttribute('data-task-occurrence-id');
@@ -155,8 +162,7 @@ test.describe('Task completion closed loop', () => {
           return {
             activeGoalCount: homeSummary.activeCount,
             linkedGoalProgress:
-              homeSummary.goals.find((item) => item.id === goalReceipt.goalId)?.progress ??
-              null,
+              homeSummary.goals.find((item) => item.id === goalReceipt.goalId)?.progress ?? null,
           };
         },
         { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },

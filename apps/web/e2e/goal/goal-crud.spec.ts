@@ -206,9 +206,13 @@ test.describe('Goal vNext product surface', () => {
 
     await expect(dialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     const keyResultSection = page.getByTestId('goal-workspace-key-results');
-    await expect(keyResultSection).toContainText(keyResultTitle);
-    await expect(keyResultSection).toContainText('100 → 80 → 40');
-    await expect(keyResultSection).toContainText('tickets');
+    await expect(
+      keyResultSection.getByRole('textbox', { name: /^(Key Result title|关键结果标题)$/ }).first(),
+    ).toHaveValue(keyResultTitle);
+    const trajectory = keyResultSection.getByTestId('kr-trajectory-summary').first();
+    await expect(trajectory).toContainText('100 tickets');
+    await expect(trajectory).toContainText('80 tickets');
+    await expect(trajectory).toContainText('40 tickets');
   });
 
   test('[P1] opens goal detail from the progress-row title', async ({ page }) => {

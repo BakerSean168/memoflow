@@ -44,8 +44,16 @@ export function createAppVueSourceAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${appVueRoot}/router/index.ts`,
     },
     {
-      find: /^@memoflow\/app-vue\/modules\/(.+)$/,
+      find: /^@memoflow\/app-vue\/modules\/([^/]+)$/,
       replacement: `${appVueRoot}/modules/$1/index.ts`,
+    },
+    {
+      find: /^@memoflow\/app-vue\/modules\/(.+)$/,
+      replacement: `${appVueRoot}/modules/$1`,
+    },
+    {
+      find: /^@memoflow\/app-vue\/(.+)$/,
+      replacement: `${appVueRoot}/$1`,
     },
     {
       find: /^@memoflow\/app-vue$/,

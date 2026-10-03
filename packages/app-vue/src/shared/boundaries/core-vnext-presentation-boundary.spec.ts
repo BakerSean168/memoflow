@@ -22,10 +22,12 @@ describe('Core vNext presentation boundaries', () => {
     }
   });
 
-  it('uses Missed facts and never resurrects persisted Expired in Task capsule', () => {
-    const source = read('layouts/shell/previews/TaskCapsulePreview.vue');
-    expect(source).toContain("'Missed'");
-    expect(source).not.toContain("'Expired'");
+  it('uses Missed facts and never resurrects persisted Expired in the canonical Task quick surface', () => {
+    const capsule = read('layouts/shell/previews/TaskCapsulePreview.vue');
+    const quickSurface = read('modules/task/components/TaskQuickSurface.vue');
+    expect(capsule).toContain('<TaskQuickSurface');
+    expect(quickSurface).toContain("'Missed'");
+    expect(`${capsule}\n${quickSurface}`).not.toContain("'Expired'");
   });
 
   it('keeps a stable canonical create-task action anchor', () => {

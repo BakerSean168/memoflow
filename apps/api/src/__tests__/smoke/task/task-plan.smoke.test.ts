@@ -166,7 +166,7 @@ describe('Task Plan API Smoke Tests', () => {
 
     it('should return plans from repository', async () => {
       const plan = makeFakePlan();
-      vi.mocked(ctx.templateRepo.findByIdentityId).mockResolvedValue([plan]);
+      vi.mocked(ctx.templateRepo.findPage).mockResolvedValue({ plans: [plan], total: 1 });
 
       const res = await request(ctx.app)
         .get('/api/v1/task-plans')
@@ -180,15 +180,17 @@ describe('Task Plan API Smoke Tests', () => {
     });
 
     it('should pass status filter to repository', async () => {
-      vi.mocked(ctx.templateRepo.findByStatus).mockResolvedValue([]);
+      vi.mocked(ctx.templateRepo.findPage).mockResolvedValue({ plans: [], total: 0 });
 
       const res = await request(ctx.app)
         .get('/api/v1/task-plans?status=Active')
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
-      // When status is provided, the use case calls findByStatus (not findByIdentityId)
-      expect(ctx.templateRepo.findByStatus).toHaveBeenCalled();
+      expect(ctx.templateRepo.findPage).toHaveBeenCalledWith(
+        TEST_IDENTITY_ID,
+        expect.objectContaining({ status: ['Active'], limit: 20, offset: 0 }),
+      );
     });
   });
 
@@ -225,10 +227,7 @@ describe('Task Plan API Smoke Tests', () => {
       expect(res.body.data).toBeDefined();
       expect(res.body.data.name).toBe('Smoke Test Task');
       expect(res.body.data.importance).toBe('Moderate');
-      expect(ctx.templateRepo.findByIdForIdentity).toHaveBeenCalledWith(
-        TEST_IDENTITY_ID,
-        plan.id,
-      );
+      expect(ctx.templateRepo.findByIdForIdentity).toHaveBeenCalledWith(TEST_IDENTITY_ID, plan.id);
     });
   });
 

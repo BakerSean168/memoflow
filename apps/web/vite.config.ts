@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 import {
+  createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -24,7 +25,10 @@ function createTailwindPlugins(useBundledDev: boolean): Plugin[] {
   if (!useBundledDev) return plugins;
 
   return plugins.map((plugin) => {
-    if (plugin.name !== '@tailwindcss/vite:generate:serve' || typeof plugin.hotUpdate !== 'function') {
+    if (
+      plugin.name !== '@tailwindcss/vite:generate:serve' ||
+      typeof plugin.hotUpdate !== 'function'
+    ) {
       return plugin;
     }
 
@@ -46,19 +50,6 @@ const webBundledDevWorkspaceEntries = [
 ] as const;
 
 const webDevWorkspaceEntries = [
-  // Keep narrow app-vue subpath aliases ahead of the package-root alias. A string
-  // root alias also matches `/...` suffixes, so without this entry
-  // `@memoflow/app-vue/di` would become `src/index.ts/di` and the auth bootstrap
-  // would either fail production build or pull the full app-vue barrel in dev.
-  ['@memoflow/app-vue/di', 'packages/app-vue/src/di/index.ts'],
-  ['@memoflow/app-vue/modules/authentication', 'packages/app-vue/src/modules/authentication/index.ts'],
-  ['@memoflow/app-vue/web-core', 'packages/app-vue/src/web-core.ts'],
-  ['@memoflow/app-vue/web-shell-core', 'packages/app-vue/src/web-shell-core.ts'],
-  ['@memoflow/app-vue/web-overlays', 'packages/app-vue/src/web-overlays.ts'],
-  ['@memoflow/app-vue/web-shell', 'packages/app-vue/src/web-shell.ts'],
-  ['@memoflow/app-vue/web-i18n', 'packages/app-vue/src/web-i18n.ts'],
-  ['@memoflow/app-vue/web-bootstrap', 'packages/app-vue/src/web-bootstrap.ts'],
-  ['@memoflow/app-vue', 'packages/app-vue/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
@@ -124,14 +115,14 @@ export default defineConfig(({ mode, command }) => {
 
   const sharedWorkspaceAliases = [
     ...createAssetsAliasEntries(workspaceRoot),
-    ...createWorkspaceSourceAliasEntries(workspaceRoot, [
-    ]),
+    ...createWorkspaceSourceAliasEntries(workspaceRoot, []),
     ...(isDev ? createUiVueSourceAliasEntries(workspaceRoot) : []),
   ];
 
   const envSpecificAliases = isDev ? createContractsAliasEntries(workspaceRoot) : [];
 
   const resolveAliases = [
+    ...createAppVueSourceAliasEntries(workspaceRoot),
     ...directWorkspaceAliases,
     ...bundledDevWorkspaceAliases,
     ...sharedWorkspaceAliases,
@@ -149,7 +140,12 @@ export default defineConfig(({ mode, command }) => {
   if (isDev && env.MEMOFLOW_WEB_URL) {
     try {
       const hostname = new URL(env.MEMOFLOW_WEB_URL).hostname;
-      if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '[::1]') {
+      if (
+        hostname &&
+        hostname !== 'localhost' &&
+        hostname !== '127.0.0.1' &&
+        hostname !== '[::1]'
+      ) {
         allowedDevHosts = [hostname];
       }
     } catch {
