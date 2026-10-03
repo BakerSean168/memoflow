@@ -21,6 +21,7 @@ const script = fontStep
 function runPreflight({
   family = 'Noto Sans CJK SC',
   englishFamily = 'WenQuanYi Zen Hei',
+  workflowScript = script,
   fail = '',
 } = {}) {
   assert.ok(script, 'font prerequisite must have an executable script');
@@ -56,12 +57,16 @@ function runPreflight({
             ;;
           '-f %{family} Inter:lang=en:charset=4e00')
             [[ "$FONT_TEST_FAIL" != 'match-en' ]] || return 1
+            printf '%s' 'WenQuanYi Zen Hei,文泉驛正黑,文泉驛正黑'
+            ;;
+          '-f %{family[0]} Inter:lang=en:charset=4e00')
+            [[ "$FONT_TEST_FAIL" != 'match-en' ]] || return 1
             printf '%s' "$FONT_TEST_ENGLISH_FAMILY"
             ;;
           *) return 2 ;;
         esac
       }
-      ${script}
+      ${workflowScript}
     `,
   });
 }
@@ -93,12 +98,32 @@ test('font preflight provisions both pinned packages before checking both CJK fa
     'fc-cache -f',
     'dpkg-query -W -f=${Package} ${Version}\\n fonts-noto-cjk fonts-wqy-zenhei',
     'fc-match -f %{family} Inter:lang=zh-cn',
-    'fc-match -f %{family} Inter:lang=en:charset=4e00',
+    'fc-match -f %{family[0]} Inter:lang=en:charset=4e00',
   ]);
   assert.match(result.stdout, /fonts-noto-cjk 1:20230817\+repack1-3/u);
   assert.match(result.stdout, /fonts-wqy-zenhei 0\.9\.45-8/u);
   assert.match(result.stdout, /Inter:lang=zh-cn -> Noto Sans CJK SC/u);
   assert.match(result.stdout, /Inter:lang=en:charset=4e00 -> WenQuanYi Zen Hei/u);
+});
+
+test('font preflight selects the first English family and rejects the full alias list', () => {
+  const result = runPreflight();
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /fc-match -f %\{family\[0\]\} Inter:lang=en:charset=4e00/u);
+  assert.doesNotMatch(result.stdout, /文泉驛正黑/u);
+
+  const withoutFirstFamily = runPreflight({
+    workflowScript: script.replace('%{family[0]}', '%{family}'),
+  });
+  assert.equal(withoutFirstFamily.status, 1, withoutFirstFamily.stderr);
+  assert.match(
+    withoutFirstFamily.stdout,
+    /Inter:lang=en:charset=4e00 -> WenQuanYi Zen Hei,文泉驛正黑,文泉驛正黑/u,
+  );
+  assert.match(
+    withoutFirstFamily.stdout,
+    /::error::Visual baselines require the WenQuanYi Zen Hei/u,
+  );
 });
 
 test('font preflight fails closed on missing glyph coverage or either wrong fallback', () => {
