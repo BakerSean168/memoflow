@@ -7,6 +7,8 @@ import type { NotificationClientDTO } from '@memoflow/contracts/notification';
 import enNotification from '../../../locales/en-US/notification';
 import InAppNotification from './InAppNotification.vue';
 import NotificationItem from './NotificationItem.vue';
+import { semanticToneSurfaceClass } from '../../../shared/constants/semantic-tone';
+import { resolveNotificationSemanticTone } from '../presentation/notification-presentation';
 
 vi.mock('../../../components/shared', async () => {
   const { defineComponent, h } = await import('vue');
@@ -74,6 +76,31 @@ describe('notification semantic controls', () => {
     expect(action.element.tagName).toBe('BUTTON');
     expect(action.attributes('type')).toBe('button');
     expect(action.attributes('aria-label')).toBe('Build finished');
+  });
+
+  it('maps notification categories and fallback types onto shared semantic tones', () => {
+    expect(resolveNotificationSemanticTone('task', 'Info')).toBe('success');
+    expect(resolveNotificationSemanticTone('goal', 'Info')).toBe('warning');
+    expect(resolveNotificationSemanticTone('reminder', 'Info')).toBe('primary');
+    expect(resolveNotificationSemanticTone('schedule', 'Info')).toBe('info');
+    expect(resolveNotificationSemanticTone('general', 'Error')).toBe('destructive');
+    expect(resolveNotificationSemanticTone('system', 'Error')).toBe('info');
+    expect(resolveNotificationSemanticTone('account', 'Error')).toBe('primary');
+    expect(resolveNotificationSemanticTone('general', 'Success')).toBe('success');
+    expect(resolveNotificationSemanticTone('general', 'Warning')).toBe('warning');
+    expect(resolveNotificationSemanticTone('general', 'Info')).toBe('info');
+    expect(resolveNotificationSemanticTone('general', 'Reminder')).toBe('primary');
+    expect(resolveNotificationSemanticTone('general', 'Unknown')).toBe('muted');
+
+    expect(semanticToneSurfaceClass('primary')).toBe('bg-primary/10 text-primary');
+    expect(semanticToneSurfaceClass('info')).toBe('bg-info/10 text-info');
+
+    const reminder = mountItem({ category: 'Reminder', type: 'Info' });
+    const schedule = mountItem({ category: 'Schedule', type: 'Info' });
+    expect(reminder.html()).toContain('bg-primary/10 text-primary');
+    expect(schedule.html()).toContain('bg-info/10 text-info');
+    expect(reminder.html()).not.toContain('purple-');
+    expect(schedule.html()).not.toContain('cyan-');
   });
 
   it('renders a known Task workflow without exposing contract or delivery internals', () => {
@@ -181,6 +208,39 @@ describe('notification semantic controls', () => {
     expect(wrapper.text()).not.toContain('Open related item');
   });
 
+  it.each([
+    ['LOW', 'border-l-muted-foreground/45'],
+    ['NORMAL', 'border-l-info/70'],
+    ['HIGH', 'border-l-warning/70'],
+    ['URGENT', 'border-l-destructive/70'],
+    ['UNKNOWN', 'border-l-info/70'],
+  ])(
+    'maps toast priority %s without changing click or close behavior',
+    async (priority, border) => {
+      const notification = {
+        id: 'toast-1',
+        title: 'Reminder',
+        message: 'Due',
+        type: 'REMINDER',
+        priority,
+      };
+      const wrapper = mount(InAppNotification, {
+        props: { notifications: [notification] },
+        global: { plugins: [i18n], stubs: { Teleport: true, TransitionGroup: false } },
+      });
+      const toast = wrapper.get('button').element.parentElement!;
+      expect(toast.classList.contains(border)).toBe(true);
+      expect(toast.classList.contains('animate-pulse-shadow')).toBe(priority === 'URGENT');
+
+      const buttons = wrapper.findAll('button');
+      await buttons[0].trigger('click');
+      await buttons[1].trigger('click');
+      expect(wrapper.emitted('notification-click')).toEqual([[notification]]);
+      expect(wrapper.emitted('close')).toEqual([['toast-1']]);
+      wrapper.unmount();
+    },
+  );
+
   it('keeps toast content and close as separate named buttons', () => {
     const wrapper = mount(InAppNotification, {
       props: {
@@ -204,5 +264,7 @@ describe('notification semantic controls', () => {
     expect(buttons).toHaveLength(2);
     expect(buttons[0].attributes('aria-label')).toBe('Reminder due');
     expect(buttons[1].attributes('aria-label')).toBe('Close');
+    expect(wrapper.html()).toContain('border-l-info/70');
+    expect(wrapper.html()).not.toMatch(/border-l-(blue|orange|red|gray)-\d+/);
   });
 });

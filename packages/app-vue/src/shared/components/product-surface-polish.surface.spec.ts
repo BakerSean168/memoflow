@@ -10,7 +10,7 @@ describe('MemoFlow product surface polish', () => {
     const goal = read('modules/goal/views/GoalDetailView.vue');
     expect(goal).toContain('<ModuleHeader data-testid="goal-detail-toolbar">');
     expect(goal).toContain('data-testid="goal-detail-identity"');
-    expect(goal).toContain('class="space-y-4 border-b border-border/70 pb-5"');
+    expect(goal).toContain('class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"');
     expect(goal).toContain('<GoalStatusPicker');
     expect(goal.match(/<GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
     expect(goal).toContain('<GoalReminderMenuItems');
@@ -68,6 +68,24 @@ describe('MemoFlow product surface polish', () => {
     expect(reminder).not.toContain('TimeProgressPercentage');
   });
 
+  it('keeps Goal review and KR inspect on the product dialog shell', () => {
+    const reviewCreate = read('modules/goal/components/dialogs/GoalReviewCreateDialog.vue');
+    const reviewDetail = read('modules/goal/components/dialogs/GoalReviewInspectDialog.vue');
+    const keyResultDetail = read('modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue');
+
+    for (const source of [reviewCreate, reviewDetail]) {
+      expect(source).toContain('<ProductDialogShell');
+      expect(source).not.toContain('min-h-14 items-center gap-2 border-b');
+      expect(source).not.toContain('rounded-lg border bg-card');
+    }
+
+    expect(reviewCreate).toContain('<GoalReviewSnapshot');
+    expect(reviewDetail).toContain('<GoalReviewSnapshot');
+    expect(read('modules/goal/components/GoalReviewSnapshot.vue')).toContain('surface-raised');
+    expect(keyResultDetail).toContain('<ProductDialogShell');
+    expect(keyResultDetail).toContain('<GoalKeyResultTrajectoryPlot');
+  });
+
   it('keeps standalone Key Result create/edit on the same trajectory editor as the Goal form', () => {
     const goalDialog = read('modules/goal/components/dialogs/GoalDialog.vue');
     const keyResultDialog = read('modules/goal/components/dialogs/KeyResultDialog.vue');
@@ -93,7 +111,8 @@ describe('MemoFlow product surface polish', () => {
     expect(card).toContain('<Sigma');
     expect(card).toContain('<Plus v-if="!unit"');
     expect(card).toContain('weightOpen.value = false');
-    expect(trajectory).toContain('class="relative mt-4 h-[14.5rem] border-t border-border/45"');
+    expect(trajectory).toContain('class="relative border-t border-border/45"');
+    expect(trajectory).toContain("'mt-4 h-[14.5rem]'");
     expect(trajectory).not.toContain('rounded-xl bg-background/35');
     expect(trajectory).not.toContain('stroke-dasharray="1.2 2.4"');
     expect(trajectory).toContain(":data-target-state=\"hasTarget ? 'set' : 'unset'\"");
@@ -105,7 +124,7 @@ describe('MemoFlow product surface polish', () => {
     const task = read('modules/task/views/TaskDetailView.vue');
     expect(task).toContain('data-testid="task-detail-metadata"');
     expect(task).toContain('data-testid="task-properties-row"');
-    expect(task).toContain('data-testid="task-properties-more"');
+    expect(task).toContain('test-id="task-properties-more"');
     expect(task).toContain('<DropdownMenuSub');
     expect(task).toContain('<DropdownMenuCheckboxItem');
     expect(task).toContain('<TaskReminderMenuItems');
@@ -127,6 +146,24 @@ describe('MemoFlow product surface polish', () => {
     expect(task).not.toContain('@3xl/panel:grid-cols-4');
   });
 
+  it('keeps high-frequency editors on semantic surfaces instead of nested default cards', () => {
+    const krCard = read('modules/goal/components/GoalKeyResultCardEditor.vue');
+    const krDrafts = read('modules/goal/components/GoalKeyResultDraftEditor.vue');
+    const checklist = read('modules/task/components/TaskPlanForm/sections/ChecklistSection.vue');
+    const reminder = read('modules/task/components/TaskPlanForm/sections/ReminderSection.vue');
+    const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
+
+    for (const source of [krCard, krDrafts, checklist, reminder, schedule]) {
+      expect(source).toContain('surface-raised');
+      expect(source).not.toContain('border bg-card');
+    }
+
+    expect(krDrafts).not.toContain('border border-border/70 bg-background/20');
+    expect(checklist).not.toContain('border border-border/70 bg-background/20');
+    expect(schedule).not.toContain('border border-border/60 bg-muted/[0.08]');
+    expect(schedule).not.toContain('border border-border/60 bg-background/55');
+  });
+
   it('keeps inbox rows compact without the old high-chroma unread chrome', () => {
     const item = read('modules/notification/components/NotificationItem.vue');
     expect(item).toContain('data-density="compact"');
@@ -135,10 +172,12 @@ describe('MemoFlow product surface polish', () => {
   });
 
   it('keeps Schedule day and event details on compact row surfaces', () => {
-    const day = read('modules/schedule/components/DayDetailSheet.vue');
-    const detail = read('modules/schedule/components/EventDetailSheet.vue');
-    expect(day).toContain('data-testid="schedule-day-event-list"');
-    expect(day).toContain('class="divide-y border-y border-border/70"');
+    const day = read('modules/schedule/components/PlannerDayDialog.vue');
+    const detail = read('modules/schedule/components/PlannerEventDialog.vue');
+    expect(day).toContain('data-testid="planner-day-event-list"');
+    expect(day).toContain(
+      'class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"',
+    );
     expect(detail).toContain('data-testid="event-detail-properties"');
   });
 
@@ -163,5 +202,27 @@ describe('MemoFlow product surface polish', () => {
     expect(goal).not.toContain('type="date"');
     expect(task).not.toContain('type="date"');
     expect(schedule).not.toContain('type="date"');
+  });
+
+  it('keeps legal surface-header families explicit at their owner boundaries', () => {
+    expect(read('modules/task/components/TaskPageToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="collection"',
+    );
+    expect(read('modules/goal/components/GoalPageToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="collection"',
+    );
+    expect(read('modules/schedule/views/ScheduleCalendarView.vue')).toContain(
+      '<ProductSurfaceHeader family="calendar"',
+    );
+    expect(read('modules/repository/components/DocumentWorkspaceToolbar.vue')).toContain(
+      '<ProductSurfaceHeader family="document"',
+    );
+    expect(read('modules/setting/views/UserSettingsView.vue')).toContain('family="settings"');
+    expect(read('modules/notification/views/SSEMonitorPage.vue')).toContain(
+      '<ModuleHeader family="diagnostic">',
+    );
+    expect(read('modules/task/views/TaskDetailView.vue')).toContain(
+      '<ModuleHeader data-testid="task-detail-toolbar">',
+    );
   });
 });

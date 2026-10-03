@@ -1,3 +1,4 @@
+import { AIWorkflowSuspensionSchema } from './ai-runtime.dto';
 import { describe, expect, it } from 'vitest';
 import {
   GoalCreateClientInputSchema,
@@ -214,5 +215,40 @@ describe('GOAL-7208 goal.create Workflow V2 contracts', () => {
     expect(receipt.failures[0]?.draftRef).toBe('task:daily-n1-study');
     expect(receipt).not.toHaveProperty('taskIds');
     expect(receipt).not.toHaveProperty('reminderIds');
+  });
+});
+
+describe('Goal native review identity contract', () => {
+  it('requires identity metadata for exactly the suspension revision and KR draftRefs', () => {
+    const value = {
+      type: 'goal_draft_review',
+      revision: 1,
+      draft: { ...draft, revision: 1 },
+      warnings: [],
+      ownerCreate: {
+        goalId: 'GoalId_current',
+        keyResultIds: { 'kr:mock-exams': 'IKeyResultId_current' },
+      },
+    };
+    expect(AIWorkflowSuspensionSchema.safeParse(value).success).toBe(true);
+    expect(AIWorkflowSuspensionSchema.safeParse({ ...value, revision: 2 }).success).toBe(false);
+    expect(AIWorkflowSuspensionSchema.safeParse({ ...value, ownerCreate: undefined }).success).toBe(
+      false,
+    );
+    expect(
+      AIWorkflowSuspensionSchema.safeParse({
+        ...value,
+        ownerCreate: { ...value.ownerCreate, keyResultIds: {} },
+      }).success,
+    ).toBe(false);
+    expect(
+      AIWorkflowSuspensionSchema.safeParse({
+        ...value,
+        ownerCreate: {
+          ...value.ownerCreate,
+          keyResultIds: { ...value.ownerCreate.keyResultIds, 'kr:stale': 'IKeyResultId_stale' },
+        },
+      }).success,
+    ).toBe(false);
   });
 });

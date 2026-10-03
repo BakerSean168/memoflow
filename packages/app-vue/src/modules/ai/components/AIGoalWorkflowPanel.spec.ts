@@ -2,8 +2,8 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
-import AIGoalDraftEditor from './AIGoalDraftEditor.vue';
 import AIGoalWorkflowPanel from './AIGoalWorkflowPanel.vue';
+import { Input, Select } from '@memoflow/ui-vue-shadcn';
 
 type PanelProps = InstanceType<typeof AIGoalWorkflowPanel>['$props'];
 type GoalWorkflowRun = Extract<AIWorkflowRunView, { kind: 'goal.create' }>;
@@ -188,6 +188,10 @@ function reviewRun(): GoalWorkflowRun {
     status: 'suspended',
     suspension: {
       type: 'goal_draft_review',
+      ownerCreate: {
+        goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+        keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+      },
       draft,
       warnings: draft.warnings,
       revision: draft.revision,
@@ -224,7 +228,6 @@ function createPanelProps(overrides: Partial<PanelProps> = {}): PanelProps {
     })),
     editableTasks: structuredClone(draft.tasks),
     editableKnowledge: structuredClone(draft.knowledge),
-    showGoalDraftEditor: false,
     knowledgeAnswer: null,
     formatExecutionOutcome: (status: string) => status,
     ...overrides,
@@ -252,23 +255,29 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
   });
 
   it('renders canonical Task schedule and both Knowledge create/linkExisting review entries', () => {
-    const wrapper = mountPanel({ showGoalDraftEditor: true });
-    const editor = wrapper.findComponent(AIGoalDraftEditor);
+    const wrapper = mountPanel({});
 
-    expect(wrapper.find('[data-testid="goal-workflow-draft-editor"]').exists()).toBe(true);
-    expect(editor.exists()).toBe(true);
-    expect(editor.props('showConfirmAction')).toBe(false);
+    expect(wrapper.find('[data-testid="goal-workflow-draft-editor"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="goal-native-review-hint"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="goal-workflow-supporting-drafts-editor"]').exists()).toBe(
       true,
     );
     expect(wrapper.find('[data-testid="goal-workflow-task-editor"]').exists()).toBe(true);
     expect(wrapper.findAll('[data-testid="goal-workflow-knowledge-editor"]')).toHaveLength(2);
-    expect(wrapper.text()).toContain('task:regression-gate');
+    expect(wrapper.text()).not.toContain('task:regression-gate');
     expect(wrapper.text()).toContain('Daily ×1');
-    expect(wrapper.text()).toContain('note:goal-brief');
+    expect(wrapper.text()).not.toContain('note:goal-brief');
     expect(wrapper.text()).toContain('notes/adr-099.md');
-    expect(wrapper.text()).toContain('note:existing-architecture');
-    expect(wrapper.text()).toContain('kdoc_550e8400-e29b-41d4-a716-446655440011');
+    expect(wrapper.text()).not.toContain('note:existing-architecture');
+    expect(wrapper.text()).not.toContain('kdoc_550e8400-e29b-41d4-a716-446655440011');
+  });
+
+  it('opens native Goal review without Goal/KR business inputs', async () => {
+    const wrapper = mountPanel();
+    await wrapper.get('[data-testid="goal-open-native-review"]').trigger('click');
+    expect(wrapper.emitted('open-native-review')).toHaveLength(1);
+    expect(wrapper.find('[data-testid="goal-workflow-draft-editor"]').exists()).toBe(false);
+    expect(wrapper.find('form').exists()).toBe(false);
   });
 
   it('renders recovery directly from the durable Workflow suspension', () => {
@@ -331,7 +340,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     const wrapper = mountPanel({ goalWorkflowRun: run });
 
     expect(wrapper.find('[data-testid="goal-workflow-result"]').exists()).toBe(true);
-    expect(wrapper.text()).toContain('IGoalId_550e8400-e29b-41d4-a716-446655440000');
+    expect(wrapper.text()).not.toContain('IGoalId_550e8400-e29b-41d4-a716-446655440000');
     expect(wrapper.text()).toContain('success');
   });
 
@@ -366,5 +375,21 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="knowledge-answer-panel"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Grounded Note');
     expect(wrapper.find('[data-testid="goal-workflow-panel"]').exists()).toBe(false);
+  });
+  it('disables supporting controls and suppresses late input events during confirmation', async () => {
+    const wrapper = mountPanel({ supportingEditingBlocked: true });
+    const task = wrapper.find('[data-testid="goal-workflow-task-editor"]');
+    expect(task.find('button').attributes('disabled')).toBeDefined();
+    expect(task.find('input').attributes('disabled')).toBeDefined();
+    expect(task.find('textarea').attributes('disabled')).toBeDefined();
+    expect(task.findComponent(Select).props('disabled')).toBe(true);
+    task.findComponent(Input).vm.$emit('update:modelValue', 'Late task edit');
+    const note = wrapper.find('[data-testid="goal-workflow-knowledge-editor"]');
+    expect(note.find('button').attributes('disabled')).toBeDefined();
+    expect(note.find('input').attributes('disabled')).toBeDefined();
+    note.findComponent(Input).vm.$emit('update:modelValue', 'Late note edit');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted('update-task')).toBeUndefined();
+    expect(wrapper.emitted('update-knowledge')).toBeUndefined();
   });
 });

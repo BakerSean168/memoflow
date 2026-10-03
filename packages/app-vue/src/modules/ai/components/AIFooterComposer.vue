@@ -1,6 +1,6 @@
 <template>
   <footer
-    class="global-composer-footer bg-transparent"
+    class="global-composer-footer bg-gradient-to-t from-background via-background/96 to-transparent"
     :class="footerPaddingClass"
     data-testid="ai-footer-composer"
   >
@@ -8,8 +8,9 @@
       <slot name="action-rail" />
 
       <div
-        class="relative rounded-[18px] border border-border/60 bg-card/95 shadow-[0_18px_46px_-30px_rgba(0,0,0,0.8)] transition-[border-color,box-shadow] duration-150 focus-within:border-border focus-within:shadow-[0_20px_52px_-30px_rgba(0,0,0,0.9)]"
+        class="relative rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))]"
         :class="[
+          semanticElevationClass('floating'),
           density === 'comfortable' ? 'px-3 pb-2.5 pt-3' : 'px-2 pb-2 pt-2.5',
           dragging ? 'border-primary/60 bg-muted/20' : '',
         ]"
@@ -37,7 +38,8 @@
           <span
             v-for="attachment in attachments"
             :key="attachment.id"
-            class="group inline-flex h-8 max-w-[15rem] items-center gap-1.5 rounded-lg bg-muted/60 pl-1.5 pr-1 text-xs text-foreground"
+            class="group inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-1.5 pr-1 text-[11px] text-foreground"
+            :class="semanticElevationClass('inset')"
             data-testid="ai-composer-attachment-chip"
           >
             <img
@@ -63,7 +65,8 @@
           <span
             v-for="entity in contextEntities"
             :key="`${entity.entityType}:${entity.id}`"
-            class="inline-flex h-8 max-w-[15rem] items-center gap-1.5 rounded-lg bg-muted/60 pl-2 pr-1 text-xs text-foreground"
+            class="inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-2 pr-1 text-[11px] text-foreground"
+            :class="semanticElevationClass('inset')"
             data-testid="ai-composer-entity-chip"
             :title="
               entity.origin === 'surface'
@@ -94,7 +97,8 @@
 
         <div
           v-if="mentionSuggestions.length"
-          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-border/70 bg-popover p-1 shadow-xl"
+          class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
+          :class="semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
         >
           <div class="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -127,7 +131,7 @@
           ref="composerTextarea"
           :value="modelValue"
           rows="1"
-          class="block min-h-[34px] w-full resize-none border-0 bg-transparent px-1.5 py-1 text-sm leading-6 text-foreground shadow-none outline-none placeholder:text-muted-foreground/70 focus-visible:ring-0 disabled:cursor-wait"
+          class="block min-h-[32px] w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0 disabled:cursor-wait"
           :style="{ maxHeight: `${textareaMaxPx}px` }"
           :disabled="loading"
           :placeholder="t('aiAssistant.dialogs.chat.messagePlaceholder')"
@@ -142,14 +146,14 @@
           @compositionend="handleCompositionEnd"
         />
 
-        <div class="mt-2 flex items-center gap-2">
+        <div class="mt-1.5 flex items-center gap-1.5">
           <div class="flex min-w-0 flex-1 items-center gap-1">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <Button
                   variant="ghost"
                   size="icon"
-                  class="h-8 w-8 shrink-0 rounded-lg p-0 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                  class="h-7 w-7 shrink-0 rounded-md p-0 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
                   data-testid="ai-chat-add-context"
                   :title="t('aiAssistant.chatPage.attachments.addContext')"
                   :aria-label="t('aiAssistant.chatPage.attachments.addContext')"
@@ -264,7 +268,7 @@
               @update:model-value="$emit('select-model', String($event))"
             >
               <SelectTrigger
-                class="h-8 w-auto min-w-[8rem] max-w-[13rem] rounded-lg border-0 bg-transparent px-2 text-xs text-muted-foreground shadow-none hover:bg-muted/70 hover:text-foreground focus:ring-0 focus:ring-offset-0"
+                class="h-7 w-auto min-w-[7rem] max-w-[12rem] rounded-md border-0 bg-transparent px-2 text-[11px] text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
                 :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
               >
                 <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
@@ -282,7 +286,7 @@
           <Button
             v-else
             variant="ghost"
-            class="h-8 shrink-0 rounded-lg px-2 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+            class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             data-testid="ai-chat-empty-models"
             :title="t('aiAssistant.chatPage.emptyModelsHint')"
             @click="$emit('open-settings')"
@@ -297,7 +301,7 @@
             v-if="loading"
             variant="outline"
             size="icon"
-            class="h-8 w-8 shrink-0 rounded-full p-0"
+            class="h-8 w-8 shrink-0 rounded-lg p-0 shadow-none"
             data-testid="ai-chat-stop-generating"
             :title="t('aiAssistant.dialogs.chat.stopGenerating')"
             :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
@@ -308,7 +312,7 @@
           <Button
             v-else
             size="icon"
-            class="h-8 w-8 shrink-0 rounded-full p-0"
+            class="h-8 w-8 shrink-0 rounded-lg p-0 shadow-none"
             :disabled="!canSubmit"
             data-testid="ai-chat-send-message"
             :title="t('aiAssistant.dialogs.chat.sendMessage')"
@@ -364,6 +368,7 @@ import type {
   ComposerAttachment,
   ComposerContextEntity,
 } from '../composables/types';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import {
   COMPOSER_TEXTAREA_MAX_PX,
   type ComposerDensity,
@@ -468,9 +473,9 @@ const canSubmit = computed(
 );
 
 const footerPaddingClass = computed(() => {
-  if (props.density === 'comfortable') return 'px-4 pb-4 pt-2 sm:px-6';
-  if (props.density === 'compact') return 'px-3 pb-3 pt-1.5';
-  return 'px-2 pb-2 pt-1';
+  if (props.density === 'comfortable') return 'px-4 pb-3 pt-5 sm:px-6';
+  if (props.density === 'compact') return 'px-3 pb-2.5 pt-4';
+  return 'px-2 pb-2 pt-3';
 });
 
 const maxWidthClass = computed(() =>

@@ -5,7 +5,7 @@
  * Extracted from TaskPlan aggregate to reduce aggregate size.
  */
 
-import type { GoalContributionRule } from '@memoflow/contracts/task';
+import type { TaskGoalProgressRule, GoalContributionRule } from '@memoflow/contracts/task';
 import { TaskGoalBindingTrigger, TaskRecurrenceEndKind } from '@memoflow/contracts/task';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskGoalBinding, type TaskPlanSchedule } from '../value-objects';
@@ -31,15 +31,16 @@ export function bindToGoal(
   ctx: GoalOperationContext,
   goalId: string,
   keyResultId: string | null = null,
-  contribution: GoalContributionRule | null = null,
+  rule: TaskGoalProgressRule | GoalContributionRule | null = null,
 ): void {
+  const progressRule = rule && ('mode' in rule ? rule : { mode: 'Fixed' as const, ...rule });
   if (!goalId) {
     throw new InvalidGoalBindingError('Goal ID is required');
   }
   if (keyResultId === '') {
     throw new InvalidGoalBindingError('Key Result ID cannot be empty');
   }
-  if (contribution && !keyResultId) {
+  if (progressRule && !keyResultId) {
     throw new InvalidGoalBindingError('Automatic Goal contribution requires a Key Result');
   }
   if (ctx.props.status === TaskPlanStatus.Closed || ctx.props.deletedAt !== null) {
@@ -51,7 +52,7 @@ export function bindToGoal(
     throw new InvalidGoalBindingError('Template is already bound to a goal');
   }
   if (
-    contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
+    progressRule?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
     !isFiniteTaskPlan(ctx.props.schedule)
   ) {
     throw new InvalidGoalBindingError('Whole-plan goal progress requires a finite task plan');
@@ -60,10 +61,10 @@ export function bindToGoal(
   ctx.props.goalBinding = TaskGoalBinding.create({
     goalId: goalId as TaskGoalBinding['goalId'],
     keyResultId: keyResultId as TaskGoalBinding['keyResultId'],
-    contribution,
+    progressRule,
   });
   ctx.props.updatedAt = Date.now();
-  ctx.addHistory('goal_bound', { goalId, keyResultId, contribution });
+  ctx.addHistory('goal_bound', { goalId, keyResultId, progressRule });
 }
 
 /** Unbinds from the current goal. */

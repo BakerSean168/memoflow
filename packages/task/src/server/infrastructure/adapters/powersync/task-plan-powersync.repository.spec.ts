@@ -1,3 +1,4 @@
+import Database from 'better-sqlite3';
 import { describe, expect, it, vi } from 'vitest';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type { IEventBus } from '@memoflow/patterns';
@@ -6,6 +7,7 @@ import {
   type PowerSyncTaskPlanRow,
 } from './mappers/powersync-task-plan.mapper';
 import { PowerSyncTaskPlanRepository } from './task-plan-powersync.repository';
+import type { TaskPlanPageQuery } from '../../../domain/repositories/i-task-plan-repository';
 import { TaskLabelOwnershipError } from '../../../domain/repositories/i-task-plan-repository';
 
 const identityId = 'identity-1';
@@ -33,6 +35,8 @@ function createBoundRow(): PowerSyncTaskPlanRow {
     reminder_config: null,
     goal_id: goalId,
     key_result_id: keyResultId,
+    goal_progress_mode: null,
+    goal_suggested_value: null,
     goal_record_value: 3,
     goal_progress_trigger: 'EachCompletion',
     checklist: null,
@@ -77,6 +81,39 @@ describe('PowerSync task plan goal binding', () => {
       goalRecordValue: 3,
       goalProgressTrigger: 'EachCompletion',
     });
+  });
+
+  it.each([0, -3, null])('persists Prompt suggestion %s without a Fixed value', async (suggestedValue) => {
+    const row = { ...createBoundRow(), goal_progress_mode: 'Prompt', goal_record_value: null, goal_suggested_value: suggestedValue };
+    const plan = PowerSyncTaskPlanMapper.toDomain(row);
+    expect(plan.goalBinding?.progressRule).toEqual({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue });
+    expect(plan.goalBinding?.contribution).toBeNull();
+    const db = createDatabase();
+    await new PowerSyncTaskPlanRepository(db, eventBus).save(plan);
+    const [sql, parameters] = db.execute.mock.calls[0];
+    expect(boundColumnParameters(sql, parameters!)).toMatchObject({ goal_progress_mode: 'Prompt', goal_suggested_value: suggestedValue, goal_record_value: null, goal_progress_trigger: 'EachCompletion' });
+  });
+  it.each([0, -2, null])('round-trips Prompt suggestion %s through real SQLite writes and reads', async (suggestedValue) => {
+    const sqlite = new Database(':memory:');
+    try {
+      const row = { ...createBoundRow(), goal_progress_mode: 'Prompt', goal_record_value: null, goal_suggested_value: suggestedValue };
+      sqlite.exec(`CREATE TABLE task_plans (${Object.keys(row).map((column) => `${column} ${['goal_record_value', 'goal_suggested_value', 'version'].includes(column) ? 'REAL' : 'TEXT'}`).join(',')})`);
+      const db = createDatabase({
+        execute: async (sql, parameters) => ({ rowsAffected: sqlite.prepare(sql).run(...(parameters ?? [])).changes }),
+        getOptional: async <T>(sql: string, parameters?: unknown[]) => (sqlite.prepare(sql).get(...(parameters ?? [])) as T) ?? null,
+      });
+      const repository = new PowerSyncTaskPlanRepository(db, eventBus);
+      const plan = PowerSyncTaskPlanMapper.toDomain(row);
+      await repository.save(plan);
+      const restored = await repository.findByIdForIdentity(identityId, String(plan.id));
+      expect(restored?.goalBinding?.progressRule).toEqual({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue });
+      expect(restored?.goalBinding?.contribution).toBeNull();
+    } finally { sqlite.close(); }
+  });
+
+  it('writes explicit Fixed mode after legacy decoding', () => {
+    const persistence = PowerSyncTaskPlanMapper.toPersistence(PowerSyncTaskPlanMapper.toDomain({ ...createBoundRow(), goal_record_value: -2 }));
+    expect(persistence).toMatchObject({ goalProgressMode: 'Fixed', goalRecordValue: -2, goalSuggestedValue: null });
   });
 
   it('queries the relational goal and key result columns directly', async () => {
@@ -215,4 +252,82 @@ describe('PowerSync task plan goal binding', () => {
     ).rejects.toBeInstanceOf(TaskLabelOwnershipError);
     expect(db.execute).not.toHaveBeenCalled();
   });
+});
+
+it('pages real SQLite rows after owner, Goal/KR, status and label AND filtering', async () => {
+  const sqlite = new Database(':memory:');
+  try {
+    const row = createBoundRow();
+    const columns = Object.keys(row);
+    sqlite.exec(`CREATE TABLE task_plans (${columns.map((column) => `${column} ${['goal_record_value', 'goal_suggested_value', 'version'].includes(column) ? 'REAL' : 'TEXT'}`).join(',')});
+      CREATE TABLE task_labels (identity_id TEXT, task_plan_id TEXT, label_id TEXT);
+      CREATE TABLE labels (id TEXT, identity_id TEXT, name TEXT);`);
+    const insert = sqlite.prepare(
+      `INSERT INTO task_plans VALUES (${columns.map(() => '?').join(',')})`,
+    );
+    for (const id of ['a', 'b', 'c', 'other-owner', 'other-kr', 'deleted', 'one-label', 'paused', 'archived-open', 'succeeded', 'succeeded-archived', 'failed', 'abandoned']) {
+      const seeded = {
+        ...row,
+        id,
+        identity_id: id === 'other-owner' ? 'foreign' : identityId,
+        key_result_id: id === 'other-kr' ? 'foreign-kr' : keyResultId,
+        deleted_at: id === 'deleted' ? '2026-09-29' : null,
+        status: ['succeeded', 'succeeded-archived', 'failed', 'abandoned'].includes(id)
+          ? 'Closed' : id === 'paused' ? 'Paused' : 'Active',
+        outcome: id.startsWith('succeeded') ? 'Succeeded' : id === 'failed' ? 'Failed' : id === 'abandoned' ? 'Abandoned' : 'Open',
+        archived_at: id.includes('archived') ? '2026-09-29' : null,
+      };
+      insert.run(...Object.values(seeded));
+      for (const label of id === 'one-label' ? ['x'] : ['x', 'y']) {
+        sqlite
+          .prepare('INSERT INTO task_labels VALUES (?, ?, ?)')
+          .run(seeded.identity_id, id, label);
+      }
+    }
+    const db = createDatabase({
+      get: async <T>(sql: string, parameters?: unknown[]) =>
+        sqlite.prepare(sql).get(...(parameters ?? [])) as T,
+      getAll: async <T>(sql: string, parameters?: unknown[]) =>
+        sqlite.prepare(sql).all(...(parameters ?? [])) as T[],
+    });
+    const repo = new PowerSyncTaskPlanRepository(db, eventBus);
+    const scope: Omit<TaskPlanPageQuery, 'offset'> = {
+      goalId,
+      keyResultId,
+      status: ['Active'],
+      outcome: ['Open'],
+      archiveState: 'active',
+      labelIdsAll: ['x', 'y', 'x'],
+      limit: 2,
+    };
+    const first = await repo.findPage(identityId, { ...scope, offset: 0 });
+    const second = await repo.findPage(identityId, { ...scope, offset: 2 });
+    const empty = await repo.findPage(identityId, { ...scope, offset: 4 });
+    expect(first.plans.map((plan) => String(plan.id))).toEqual(['a', 'b']);
+    expect(second.plans.map((plan) => String(plan.id))).toEqual(['c']);
+    expect(empty.plans).toEqual([]);
+    expect([first.total, second.total, empty.total]).toEqual([3, 3, 3]);
+
+    const cases: Array<[Partial<TaskPlanPageQuery>, string[]]> = [
+      [{ status: ['Paused'], outcome: ['Open'], archiveState: 'active' }, ['paused']],
+      [{ outcome: ['Succeeded'] }, ['succeeded', 'succeeded-archived']],
+      [{ outcome: ['Failed'] }, ['failed']],
+      [{ outcome: ['Abandoned'] }, ['abandoned']],
+      [{ outcome: ['Failed', 'Abandoned'] }, ['abandoned', 'failed']],
+      [{ archiveState: 'archived' }, ['archived-open', 'succeeded-archived']],
+      [{}, ['a', 'abandoned', 'archived-open', 'b', 'c', 'failed', 'paused', 'succeeded', 'succeeded-archived']],
+      [{ outcome: [], archiveState: 'all' }, ['a', 'abandoned', 'archived-open', 'b', 'c', 'failed', 'paused', 'succeeded', 'succeeded-archived']],
+    ];
+    for (const [filter, expected] of cases) {
+      for (let offset = 0; offset <= expected.length; offset++) {
+        const page = await repo.findPage(identityId, {
+          goalId, keyResultId, labelIdsAll: ['x', 'y'], ...filter, limit: 1, offset,
+        });
+        expect(page.total).toBe(expected.length);
+        expect(page.plans.map((plan) => String(plan.id))).toEqual(expected.slice(offset, offset + 1));
+      }
+    }
+  } finally {
+    sqlite.close();
+  }
 });

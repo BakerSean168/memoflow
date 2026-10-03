@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import AIMessagePanel from './AIMessagePanel.vue';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 
 const i18n = createI18n({
   legacy: false,
@@ -95,6 +96,25 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.text()).toContain('hello');
   });
 
+  it('uses raised user messages and inset assistant avatars', () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          { id: 'user-1', role: 'user', content: 'Hello' },
+          { id: 'assistant-1', role: 'assistant', content: 'Hi' },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+    const messages = wrapper.findAll('article');
+    expect(messages[0].get('div').classes()).toContain(semanticElevationClass('raised'));
+    expect(messages[1].get('[aria-hidden="true"]').classes()).toContain(
+      semanticElevationClass('inset'),
+    );
+    wrapper.unmount();
+  });
+
   it('renders attachment-only user turns without synthetic placeholder text', () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
@@ -174,7 +194,9 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
 
     expect(wrapper.get('[data-testid="ai-message-markdown"] h2').text()).toBe('Result');
     expect(wrapper.findAll('[data-testid="ai-message-markdown"] li')).toHaveLength(2);
-    await wrapper.get('[data-testid="ai-message-copy"]').trigger('click');
+    const copy = wrapper.get('[data-testid="ai-message-copy"]');
+    expect(copy.classes()).toContain('h-8');
+    await copy.trigger('click');
     expect(writeText).toHaveBeenCalledWith('## Result\n\n- one\n- two');
   });
 

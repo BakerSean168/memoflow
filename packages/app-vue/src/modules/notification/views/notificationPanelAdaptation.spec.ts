@@ -11,13 +11,19 @@ const notificationSource = readFileSync(
 describe('Notification single-page architecture', () => {
   it('owns one inbox toolbar without panel-tier structure branches', () => {
     expect(notificationSource).toContain('data-testid="notification-page-toolbar"');
-    // Notification owns one compact Linear-style toolbar without panel-tier branching.
-    expect(notificationSource).toContain('<header');
-    expect(notificationSource.match(/<header/g)?.length).toBe(1);
+    // Notification shares the same product header primitive as Goal / Task.
+    expect(notificationSource).toContain(
+      '<ModuleHeader family="collection" data-testid="notification-page-toolbar">',
+    );
+    expect(notificationSource).not.toContain('<header');
     expect(notificationSource).not.toContain('FilterBar');
     expect(notificationSource).not.toContain('usePanelWidth');
     expect(notificationSource).not.toContain('isNarrow');
     expect(notificationSource).toContain('data-testid="mark-all-read-button"');
-    expect(notificationSource).toContain(':aria-selected="selectedFilter === tab.value"');
+    expect(notificationSource).toContain('data-testid="notifications-list"');
+    expect(notificationSource).toContain('<ResponsiveSegmentedFilter');
+    expect(notificationSource).toContain('expanded-option-test-id-prefix="notification-filter"');
+    expect(notificationSource).toContain('collapse-mode="none"');
+    expect(notificationSource).toContain('option-role="tab"');
   });
 });

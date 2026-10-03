@@ -13,7 +13,6 @@ describe('split workspace responsive contract', () => {
 
   it('uses AI-container breakpoints for narrow workflow grids', () => {
     for (const path of [
-      '../../modules/ai/components/AIGoalDraftEditor.vue',
       '../../modules/ai/components/AIGoalWorkflowPanel.vue',
       '../../modules/ai/components/AIMessagePanel.vue',
     ]) {

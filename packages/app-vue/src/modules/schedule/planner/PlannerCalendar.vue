@@ -52,7 +52,10 @@ import timeGridPlugin from '@fullcalendar/vue3/timegrid';
 import classicThemePlugin from '@fullcalendar/vue3/themes/classic';
 import zhCnLocale from '@fullcalendar/vue3/locales/zh-cn';
 import type { CalendarApi, CalendarOptions, EventApi, EventInput } from '@fullcalendar/vue3';
-import type { CalendarEventProjection, PlannerConflictProjection } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/contracts/schedule';
 import { plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
 import { Loader2, TriangleAlert } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
@@ -63,6 +66,10 @@ import {
   type PlannerMutationOutcome,
   type PlannerOwnerCommandRouter,
 } from './index';
+import {
+  plannerProjectionSourcePresentation,
+  plannerProjectionToneClass,
+} from './planner-presentation';
 
 export type PlannerCalendarView = 'day' | 'week' | 'month';
 
@@ -104,6 +111,7 @@ const emit = defineEmits<{
 
 const calendarRef = ref<{ getApi(): CalendarApi } | null>(null);
 const lastVisibleRangeKey = ref<string | null>(null);
+const reportedMutations = new WeakSet<() => void>();
 
 const fullCalendarView: Record<PlannerCalendarView, string> = {
   day: 'timeGridDay',
@@ -130,10 +138,10 @@ function projectionToEvent(projection: CalendarEventProjection): EventInput {
     // FullCalendar v7 uses singular className for event UI refiners.
     className: [
       'planner-source',
-      `planner-source-${projection.sourceType}`,
+      plannerProjectionSourcePresentation[projection.sourceType].sourceClass,
       projection.allDay ? 'planner-event-all-day' : 'planner-event-timed',
       `planner-occupancy-${projection.occupancy}`,
-      `planner-tone-${projection.displayMetadata.tone ?? 'default'}`,
+      plannerProjectionToneClass(projection, hasDerivedConflict(projection)),
       hasDerivedConflict(projection) ? 'planner-event-conflict' : '',
     ]
       .filter(Boolean)
@@ -158,6 +166,8 @@ async function applyMutation(
     | Parameters<NonNullable<CalendarOptions['eventDrop']>>[0]
     | Parameters<NonNullable<CalendarOptions['eventResize']>>[0],
 ): Promise<void> {
+  if (reportedMutations.has(info.revert)) return;
+  reportedMutations.add(info.revert);
   const outcome = await applyFullCalendarPlannerMutation(
     kind,
     info,
@@ -255,6 +265,9 @@ const calendarOptions = computed<CalendarOptions>(() => {
     eventDidMount(info) {
       const projection = projectionOf(info.event);
       if (!projection) return;
+      const source = plannerProjectionSourcePresentation[projection.sourceType];
+      info.el.style.setProperty('--planner-source-hsl', source.calendarColor);
+      info.el.style.setProperty('--planner-source-foreground-hsl', source.calendarForeground);
       info.el.setAttribute('role', 'button');
       info.el.setAttribute('tabindex', '0');
       info.el.setAttribute('aria-label', projection.title);
@@ -327,8 +340,7 @@ function showDate(view: PlannerCalendarView, date: Date | number): void {
 defineExpose({ previous, next, today, goToDate, showDate });
 
 function eventToneClass(projection: CalendarEventProjection): string {
-  if (hasDerivedConflict(projection)) return 'planner-tone-warning';
-  return `planner-tone-${projection.displayMetadata.tone ?? 'default'}`;
+  return plannerProjectionToneClass(projection, hasDerivedConflict(projection));
 }
 </script>
 
@@ -481,9 +493,10 @@ function eventToneClass(projection: CalendarEventProjection): string {
   background: hsl(var(--destructive) / 0.72) !important;
 }
 
-.planner-calendar :deep(.planner-source) {
-  --planner-event-hsl: var(--primary);
-  --planner-event-foreground-hsl: var(--primary-foreground);
+/* FullCalendar portals Month overflow events outside the calendar ancestor. */
+:global(.planner-source) {
+  --planner-event-hsl: var(--planner-source-hsl);
+  --planner-event-foreground-hsl: var(--planner-source-foreground-hsl);
   margin: 1px 2px;
   overflow: hidden;
   border: 1px solid hsl(var(--planner-event-hsl) / 0.48) !important;
@@ -504,28 +517,28 @@ function eventToneClass(projection: CalendarEventProjection): string {
     transform 120ms ease;
 }
 
-.planner-calendar :deep(.planner-source:hover) {
+:global(.planner-source:hover) {
   filter: saturate(1.06) brightness(1.06);
   box-shadow:
     0 2px 6px hsl(0 0% 0% / 0.2),
     inset 0 1px 0 hsl(0 0% 100% / 0.14);
 }
 
-.planner-calendar :deep(.planner-source:focus-visible) {
+:global(.planner-source:focus-visible) {
   outline: none;
   box-shadow:
     0 0 0 2px hsl(var(--background)),
     0 0 0 4px hsl(var(--planner-event-hsl) / 0.72);
 }
 
-.planner-calendar :deep(.planner-event) {
+:global(.planner-event) {
   padding: 0.3rem 0.42rem 0.25rem 0.48rem;
   color: inherit;
   font-size: 0.75rem;
   line-height: 1.18;
 }
 
-.planner-calendar :deep(.planner-event-title) {
+:global(.planner-event-title) {
   display: -webkit-box;
   min-width: 0;
   overflow: hidden;
@@ -538,7 +551,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
   -webkit-line-clamp: 2;
 }
 
-.planner-calendar :deep(.planner-event-conflict-icon) {
+:global(.planner-event-conflict-icon) {
   width: 0.75rem;
   height: 0.75rem;
   margin-top: 0.0625rem;
@@ -552,27 +565,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
   box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.05);
 }
 
-.planner-calendar :deep(.planner-source-schedule) {
-  --planner-event-hsl: var(--primary);
-  --planner-event-foreground-hsl: var(--primary-foreground);
-}
-
-.planner-calendar :deep(.planner-source-task) {
-  --planner-event-hsl: var(--info);
-  --planner-event-foreground-hsl: var(--info-foreground);
-}
-
-.planner-calendar :deep(.planner-source-goal) {
-  --planner-event-hsl: var(--warning);
-  --planner-event-foreground-hsl: var(--warning-foreground);
-}
-
-.planner-calendar :deep(.planner-source-routine) {
-  --planner-event-hsl: var(--success);
-  --planner-event-foreground-hsl: var(--success-foreground);
-}
-
-.planner-calendar :deep(.planner-event-all-day) {
+:global(.planner-event-all-day) {
   min-height: 1.5rem;
   border-color: hsl(var(--planner-event-hsl) / 0.3) !important;
   color: hsl(var(--planner-event-hsl)) !important;
@@ -580,7 +573,7 @@ function eventToneClass(projection: CalendarEventProjection): string {
   box-shadow: inset 2px 0 0 hsl(var(--planner-event-hsl) / 0.72);
 }
 
-.planner-calendar :deep(.planner-occupancy-marker) {
+:global(.planner-occupancy-marker) {
   border-style: dashed !important;
   border-color: hsl(var(--planner-event-hsl) / 0.66) !important;
   color: hsl(var(--planner-event-hsl)) !important;
@@ -588,19 +581,19 @@ function eventToneClass(projection: CalendarEventProjection): string {
   box-shadow: none;
 }
 
-.planner-calendar :deep(.planner-tone-muted) {
+:global(.planner-tone-muted) {
   --planner-event-hsl: var(--muted-foreground);
   --planner-event-foreground-hsl: var(--foreground);
   opacity: 0.72;
 }
 
-.planner-calendar :deep(.planner-tone-success) {
+:global(.planner-tone-success) {
   --planner-event-hsl: var(--success);
   --planner-event-foreground-hsl: var(--success-foreground);
 }
 
-.planner-calendar :deep(.planner-event-conflict),
-.planner-calendar :deep(.planner-tone-warning) {
+:global(.planner-event-conflict),
+:global(.planner-tone-warning) {
   --planner-event-hsl: var(--warning);
   --planner-event-foreground-hsl: var(--warning-foreground);
 }

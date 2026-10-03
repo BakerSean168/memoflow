@@ -52,6 +52,35 @@ const groups = [
 ];
 
 describe('ConversationSidebar search', () => {
+  it('returns keyboard focus to search after Escape and preserves conversation navigation', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups, activeConversationId: 'b' },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const toggle = wrapper.get('[data-testid="conversation-search-toggle"]');
+      expect(toggle.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+      await toggle.trigger('click');
+      const input = wrapper.get('[data-testid="conversation-search-input"]');
+      expect(document.activeElement).toBe(input.element);
+      await input.setValue('TRAINING');
+      const conversation = wrapper
+        .findAll('nav button')
+        .find((button) => button.text() === 'Training plan');
+      await conversation!.trigger('click');
+      expect(wrapper.emitted('select-conversation')).toEqual([['b']]);
+      await input.trigger('keydown', { key: 'Escape' });
+      expect(wrapper.find('[data-testid="conversation-search-input"]').exists()).toBe(false);
+      expect(toggle.attributes('aria-pressed')).toBe('false');
+      expect(document.activeElement).toBe(toggle.element);
+      expect(wrapper.text()).toContain('Infrastructure migration');
+      expect(wrapper.emitted('new-conversation')).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('filters existing conversations locally instead of starting a new conversation', async () => {
     const wrapper = mount(ConversationSidebar, {
       props: { groups, activeConversationId: null },
@@ -78,7 +107,9 @@ describe('ConversationSidebar search', () => {
       'No matching conversations',
     );
 
-    await wrapper.get('[data-testid="conversation-search-clear"]').trigger('click');
+    const clear = wrapper.get('[data-testid="conversation-search-clear"]');
+    expect(clear.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+    await clear.trigger('click');
     expect(wrapper.text()).toContain('Personal systems architecture');
     expect(wrapper.text()).toContain('Infrastructure migration');
   });

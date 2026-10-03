@@ -66,21 +66,29 @@ watch(
 </script>
 
 <template>
-  <Card class="border-border/50" data-testid="routine-upcoming-widget">
-    <CardHeader class="flex flex-row items-center justify-between px-4 pb-2 pt-4">
-      <CardTitle class="flex items-center gap-2 text-sm font-medium text-foreground">
-        <Repeat2 class="h-4 w-4 text-muted-foreground" />
+  <Card
+    class="rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
+    data-testid="routine-upcoming-widget"
+  >
+    <CardHeader class="flex flex-row items-center justify-between px-3.5 pb-2 pt-3.5">
+      <CardTitle class="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+        <Repeat2 class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))]" />
         {{ t('routine.home.title') }}
       </CardTitle>
       <div class="flex items-center gap-2">
         <span class="font-mono text-[11px] text-muted-foreground">{{ occurrences.length }}</span>
-        <Button variant="ghost" size="sm" class="h-7 text-xs" @click="$emit('view-all')">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-6 rounded-md px-1.5 text-[11px] text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+          @click="$emit('view-all')"
+        >
           {{ t('routine.home.viewAll') }}
           <ArrowRight class="ml-1 h-3 w-3" />
         </Button>
       </div>
     </CardHeader>
-    <CardContent class="px-4 pb-4">
+    <CardContent class="px-3.5 pb-3.5">
       <div v-if="loading" class="space-y-3">
         <div v-for="i in 3" :key="i" class="flex items-center gap-2">
           <Skeleton class="h-8 w-12 rounded" />
@@ -92,7 +100,7 @@ watch(
         <div
           v-for="occurrence in visible"
           :key="occurrence.occurrenceKey"
-          class="flex items-center gap-2.5 rounded-md px-1 py-1.5"
+          class="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors hover:bg-[hsl(var(--hover))]"
           data-testid="routine-upcoming-item"
         >
           <span class="w-12 shrink-0 font-mono text-xs font-medium text-foreground">

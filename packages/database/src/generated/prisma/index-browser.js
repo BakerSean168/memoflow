@@ -337,6 +337,7 @@ exports.Prisma.GoalRecordScalarFieldEnum = {
   keyResultId: 'keyResultId',
   value: 'value',
   note: 'note',
+  authorship: 'authorship',
   sourceType: 'sourceType',
   sourceId: 'sourceId',
   recordedAt: 'recordedAt',
@@ -369,36 +370,6 @@ exports.Prisma.KeyResultWeightSnapshotScalarFieldEnum = {
   trigger: 'trigger',
   reason: 'reason',
   operatorId: 'operatorId',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.RuleScalarFieldEnum = {
-  id: 'id',
-  code: 'code',
-  title: 'title',
-  description: 'description',
-  severity: 'severity',
-  status: 'status',
-  deprecationReason: 'deprecationReason',
-  replacementRuleId: 'replacementRuleId',
-  liveReferenceLocation: 'liveReferenceLocation',
-  tags: 'tags',
-  goodExamples: 'goodExamples',
-  badExamples: 'badExamples',
-  authorId: 'authorId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.RuleRevisionScalarFieldEnum = {
-  id: 'id',
-  ruleId: 'ruleId',
-  revisionNumber: 'revisionNumber',
-  authorId: 'authorId',
-  changedFields: 'changedFields',
-  previousValues: 'previousValues',
-  newValues: 'newValues',
-  changeType: 'changeType',
   createdAt: 'createdAt'
 };
 
@@ -1105,6 +1076,8 @@ exports.Prisma.TaskPlanScalarFieldEnum = {
   reminderConfig: 'reminderConfig',
   goalId: 'goalId',
   keyResultId: 'keyResultId',
+  goalProgressMode: 'goalProgressMode',
+  goalSuggestedValue: 'goalSuggestedValue',
   goalRecordValue: 'goalRecordValue',
   goalProgressTrigger: 'goalProgressTrigger',
   checklist: 'checklist',
@@ -1231,8 +1204,6 @@ exports.Prisma.ModelName = {
   GoalRecord: 'GoalRecord',
   GoalReview: 'GoalReview',
   KeyResultWeightSnapshot: 'KeyResultWeightSnapshot',
-  Rule: 'Rule',
-  RuleRevision: 'RuleRevision',
   Habit: 'Habit',
   HabitOccurrence: 'HabitOccurrence',
   HabitCheckIn: 'HabitCheckIn',

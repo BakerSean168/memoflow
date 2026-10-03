@@ -208,7 +208,7 @@ export function formatProductRelative(
   return sessionTime.format.relative(value);
 }
 
-/** Month short + day (governance cards, compact lists). */
+/** Month short + day for compact product lists. */
 export function formatProductMonthDay(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,

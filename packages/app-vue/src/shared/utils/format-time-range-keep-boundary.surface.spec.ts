@@ -20,11 +20,11 @@ describe('schedule time-range presentation boundary', () => {
     'utf8',
   );
   const dayDetail = readFileSync(
-    resolve(dir, '../../modules/schedule/components/DayDetailSheet.vue'),
+    resolve(dir, '../../modules/schedule/components/PlannerDayDialog.vue'),
     'utf8',
   );
-  const panel = readFileSync(
-    resolve(dir, '../../modules/schedule/components/TaskEventActionPanel.vue'),
+  const eventDetail = readFileSync(
+    resolve(dir, '../../modules/schedule/components/PlannerEventDialog.vue'),
     'utf8',
   );
   const plannerPresentation = readFileSync(
@@ -55,7 +55,7 @@ describe('schedule time-range presentation boundary', () => {
     expect(plannerPresentation).not.toContain('CalendarEventItem');
     expect(plannerPresentation).not.toContain('Intl.DateTimeFormat');
 
-    for (const consumer of [dayDetail, panel]) {
+    for (const consumer of [dayDetail, eventDetail]) {
       expect(consumer).toContain('planner-presentation');
       expect(consumer).toContain('formatPlannerProjectionTimeRange');
       expect(consumer).not.toContain('CalendarEventItem');

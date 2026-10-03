@@ -1,12 +1,6 @@
 import { ref, watch, type Ref } from 'vue';
+import { GoalPlanDraftContentSchema, type AIWorkflowRunView } from '@memoflow/contracts/ai';
 import {
-  GoalPlanDraftContentSchema,
-  type AIWorkflowRunView,
-  type GoalPlanDraft,
-} from '@memoflow/contracts/ai';
-import {
-  type EditableGoal,
-  type EditableKeyResult,
   type EditableGoalKnowledge,
   type EditableGoalTask,
   type GoalWorkflowStage,
@@ -67,36 +61,13 @@ function parseEditorOverlay(value: unknown): PersistedWorkflowEditorOverlay | un
   }
 
   if (value.phase !== 'draft-review') return undefined;
-  const editableGoal = value.editableGoal;
-  if (
-    !isRecord(editableGoal) ||
-    typeof editableGoal.name !== 'string' ||
-    typeof editableGoal.summary !== 'string' ||
-    typeof editableGoal.status !== 'string' ||
-    (editableGoal.start !== null && !isRecord(editableGoal.start)) ||
-    (editableGoal.target !== null && !isRecord(editableGoal.target)) ||
-    !isObjectArray(value.editableKeyResults) ||
-    !isObjectArray(value.editableTasks) ||
-    !isObjectArray(value.editableKnowledge)
-  ) {
+  if (!isObjectArray(value.editableTasks) || !isObjectArray(value.editableKnowledge))
     return undefined;
-  }
-
   return {
     kind: 'goal.create',
     phase: 'draft-review',
     runId: value.runId,
     revision: value.revision,
-    editableGoal: {
-      name: editableGoal.name,
-      summary: editableGoal.summary,
-      status: editableGoal.status as EditableGoal['status'],
-      start: editableGoal.start as EditableGoal['start'],
-      target: editableGoal.target as EditableGoal['target'],
-    },
-    // The complete overlay is validated against the authoritative draft before
-    // it is applied. These casts only preserve the JSON object shape here.
-    editableKeyResults: value.editableKeyResults as EditableKeyResult[],
     editableTasks: value.editableTasks as EditableGoalTask[],
     editableKnowledge: value.editableKnowledge as EditableGoalKnowledge[],
   };
@@ -129,31 +100,6 @@ function runKey(run: AIWorkflowRunView | null): string {
   ].join(':');
 }
 
-function editableGoalFromDraft(draft: GoalPlanDraft): EditableGoal {
-  return {
-    name: draft.goal.name,
-    summary: draft.goal.summary ?? '',
-    status: draft.goal.status,
-    start: draft.goal.start ?? null,
-    target: draft.goal.target ?? null,
-  };
-}
-
-function editableKeyResultsFromDraft(draft: GoalPlanDraft): EditableKeyResult[] {
-  return draft.keyResults.map((item) => ({
-    draftRef: item.draftRef,
-    title: item.title,
-    description: item.description ?? '',
-    aggregationMethod: item.aggregationMethod,
-    initialValue: item.initialValue,
-    currentValue: item.currentValue,
-    targetValue: item.targetValue,
-    target: item.target ?? null,
-    unit: item.unit ?? '',
-    weight: item.weight,
-  }));
-}
-
 function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
@@ -165,12 +111,8 @@ export interface UseAIWorkflowPersistenceOptions {
   taskWorkflowRun: Ref<AIWorkflowRunView | null>;
   knowledgeCaptureRun: Ref<AIWorkflowRunView | null>;
   clarificationAnswers: Ref<string[]>;
-  editableGoal: Ref<EditableGoal>;
-  editableKeyResults: Ref<EditableKeyResult[]>;
   editableTasks: Ref<EditableGoalTask[]>;
   editableKnowledge: Ref<EditableGoalKnowledge[]>;
-  /** Ephemeral editor visibility; deliberately not persisted. */
-  showGoalDraftEditor: Ref<boolean>;
   resetWorkflowArtifacts: () => void;
 }
 
@@ -240,14 +182,10 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
 
     if (run.suspension.type !== 'goal_draft_review') return undefined;
     const canonical = {
-      editableGoal: editableGoalFromDraft(run.suspension.draft),
-      editableKeyResults: editableKeyResultsFromDraft(run.suspension.draft),
       editableTasks: run.suspension.draft.tasks,
       editableKnowledge: run.suspension.draft.knowledge,
     };
     const current = {
-      editableGoal: options.editableGoal.value,
-      editableKeyResults: options.editableKeyResults.value,
       editableTasks: options.editableTasks.value,
       editableKnowledge: options.editableKnowledge.value,
     };
@@ -258,8 +196,6 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
       phase: 'draft-review',
       runId: run.runId,
       revision: run.suspension.draft.revision,
-      editableGoal: cloneSerializable(options.editableGoal.value),
-      editableKeyResults: cloneSerializable(options.editableKeyResults.value),
       editableTasks: cloneSerializable(options.editableTasks.value),
       editableKnowledge: cloneSerializable(options.editableKnowledge.value),
     };
@@ -328,17 +264,8 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
     if (overlay.revision !== run.suspension.draft.revision) return false;
 
     const parsed = GoalPlanDraftContentSchema.safeParse({
-      goal: {
-        ...run.suspension.draft.goal,
-        ...overlay.editableGoal,
-        summary: overlay.editableGoal.summary.trim() || null,
-      },
-      keyResults: overlay.editableKeyResults.map((item) => ({
-        ...item,
-        description: item.description.trim() || null,
-        target: item.target ?? null,
-        unit: item.unit.trim() || null,
-      })),
+      goal: run.suspension.draft.goal,
+      keyResults: run.suspension.draft.keyResults,
       tasks: overlay.editableTasks,
       knowledge: overlay.editableKnowledge,
       rationale: run.suspension.draft.rationale,
@@ -347,17 +274,8 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
     if (!parsed.success) return false;
 
     const draft = parsed.data;
-    options.editableGoal.value = editableGoalFromDraft({
-      ...draft,
-      revision: run.suspension.draft.revision,
-    });
-    options.editableKeyResults.value = editableKeyResultsFromDraft({
-      ...draft,
-      revision: run.suspension.draft.revision,
-    });
     options.editableTasks.value = cloneSerializable(draft.tasks);
     options.editableKnowledge.value = cloneSerializable(draft.knowledge);
-    options.showGoalDraftEditor.value = true;
     return true;
   }
 
@@ -372,8 +290,6 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
           runKey(options.taskWorkflowRun.value),
           runKey(options.knowledgeCaptureRun.value),
           JSON.stringify(options.clarificationAnswers.value),
-          JSON.stringify(options.editableGoal.value),
-          JSON.stringify(options.editableKeyResults.value),
           JSON.stringify(options.editableTasks.value),
           JSON.stringify(options.editableKnowledge.value),
         ].join('|'),

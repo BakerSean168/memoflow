@@ -1,3 +1,4 @@
+import type { TaskGoalMeasurementReadPort } from '../application/ports';
 /**
  * Task Prisma Composition Helpers
  *
@@ -31,6 +32,7 @@ import type { TaskWriteTransactionRunner } from '../application/use-cases/comman
 
 export interface CreateTaskPrismaModuleOptions {
   readonly userTimeContextPort: UserTimeContextPort;
+    readonly goalReadPort?: TaskGoalMeasurementReadPort;
   readonly runtimeContributions?:
     | TaskModuleRuntimeContribution
     | readonly TaskModuleRuntimeContribution[];
@@ -84,6 +86,7 @@ export function createTaskPrismaModule(
     taskOccurrenceRepository,
     taskWriteTransactionRunner,
     userTimeContextPort: options.userTimeContextPort,
+    goalReadPort: options.goalReadPort,
     runtimeContributions: options.runtimeContributions,
   });
 }

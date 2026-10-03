@@ -18,6 +18,42 @@ export const SIDEBAR_COLLAPSE_THRESHOLD = 96;
 /** Below this effective viewport, release the sidebar budget without changing user preference. */
 export const SIDEBAR_AUTO_COLLAPSE_VIEWPORT = 960;
 
+/**
+ * Hybrid workspace chrome. The sidebar stays flush with the shell while the
+ * shared Chat + Business content well is inset from the shell edge.
+ * Geometry reserves the exact horizontal margins consumed by CSS.
+ */
+export const WORKSPACE_COMPACT_BREAKPOINT = 768;
+export const WORKSPACE_DESKTOP_BREAKPOINT = 1200;
+export const WORKSPACE_DESKTOP_INSET = 6;
+export const WORKSPACE_DESKTOP_GAP = 6;
+export const WORKSPACE_MID_INSET = 4;
+export const WORKSPACE_MID_GAP = 4;
+
+export interface WorkspaceChromeMetrics {
+  inset: number;
+  gap: number;
+}
+
+export function resolveWorkspaceChromeMetrics(viewportWidth: number): WorkspaceChromeMetrics {
+  const width = Math.max(0, Math.floor(viewportWidth));
+  if (width < WORKSPACE_COMPACT_BREAKPOINT) return { inset: 0, gap: 0 };
+  if (width < WORKSPACE_DESKTOP_BREAKPOINT) {
+    return { inset: WORKSPACE_MID_INSET, gap: WORKSPACE_MID_GAP };
+  }
+  return { inset: WORKSPACE_DESKTOP_INSET, gap: WORKSPACE_DESKTOP_GAP };
+}
+
+/**
+ * The content well always consumes a left margin and a right inset.
+ * When the sidebar is visible that left margin is the sidebar-to-well gap;
+ * when it is collapsed the same value becomes the shell's left inset.
+ */
+export function workspaceChromeBudget(viewportWidth: number): number {
+  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  return inset + gap;
+}
+
 /** Global Composer 宿主几何（§8.4）。 */
 export const COMPOSER_MAX = 740;
 export const COMPOSER_SIDE_GAP = 28;
@@ -69,7 +105,8 @@ export function shouldAutoCollapseSidebar(viewportWidth: number): boolean {
 export function computePanelGeometry(input: PanelGeometryInput): PanelGeometry {
   const viewportWidth = Math.max(0, Math.floor(input.viewportWidth));
   const sidebarOccupiedWidth = Math.max(0, Math.floor(input.sidebarOccupiedWidth));
-  const workspaceWidth = Math.max(0, viewportWidth - sidebarOccupiedWidth);
+  const chromeBudget = workspaceChromeBudget(viewportWidth);
+  const workspaceWidth = Math.max(0, viewportWidth - sidebarOccupiedWidth - chromeBudget);
   // There is no product maximum. The upper bound is only the current legal
   // split range after reserving the AI minimum; this changes with the window.
   const panelMax = Math.max(0, workspaceWidth - AI_HARD_MIN);
@@ -101,14 +138,17 @@ export function computePanelGeometry(input: PanelGeometryInput): PanelGeometry {
 }
 
 /** 拖拽过程中按指针位置计算面板宽度（面板贴右边缘）。 */
-export function panelWidthFromPointer(
-  clientX: number,
-  viewportWidth: number,
-  sidebarOccupiedWidth: number,
-): number {
-  void sidebarOccupiedWidth;
-  const raw = Math.max(0, Math.round(viewportWidth - clientX));
+export function panelWidthFromPointer(clientX: number, viewportWidth: number): number {
+  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Business content ends at the content well's right inset.
+  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX));
   return raw;
+}
+
+export function sidebarWidthFromPointer(clientX: number, viewportWidth: number): number {
+  const { gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Sidebar resizer is centered inside the sidebar-to-content-well gap.
+  return Math.max(0, Math.round(clientX - gap / 2));
 }
 
 export function shouldCollapsePanelWidth(width: number): boolean {

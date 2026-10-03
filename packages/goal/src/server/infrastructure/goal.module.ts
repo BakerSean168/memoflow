@@ -9,9 +9,9 @@
  * 外层应用负责选择具体适配器并传入这里。
  * 组合根只做一次组装，然后向 HTTP / IPC 等传输层暴露稳定门面。
  *
- * Goal uses the governance module as reference pattern: one composition root per
+ * Goal is a real-owner feature package: one composition root per
  * module, constructor injection only, no hidden service locator.
- * 目标模块以 governance 模块为参考模式：每个模块只有一个组合根，
+ * Goal 作为真实业务 owner：每个模块只有一个组合根，
  * 只使用构造函数注入，不使用隐藏的服务定位器。
  */
 
@@ -51,6 +51,7 @@ import {
 import type { GoalSystemView } from '@memoflow/contracts/goal';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalReviewContextBuilder } from '../application';
+import { ReviewWindowResolver } from '../application/services/review-window-resolver';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalApplicationPort } from '../application';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
@@ -74,7 +75,7 @@ const logger = createLogger('GoalModule');
 // Dependencies — everything the goal server runtime needs from the outside.
 // 依赖 — 目标模块服务端运行时向外部索取的全部依赖。
 //
-// Refactor rule (same as governance):
+// Refactor rule:
 // - only put ports or runtime contributions here
 // - never put transport objects (Express req/res, ipcMain, Router) here
 // - never hide these dependencies behind a singleton container
@@ -228,6 +229,7 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
   } = deps;
 
   const goalPolicy = new GoalPolicy();
+  const reviewWindowResolver = new ReviewWindowResolver();
 
   const habitRepository: IHabitRepository | undefined = deps.habitRepository;
   const userTimeContextPort = deps.userTimeContextPort;
@@ -297,12 +299,16 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
       goalPolicy,
       new GoalReviewContextBuilder(goalRecordRepository),
       userTimeContextPort,
+      undefined,
+      reviewWindowResolver,
     ),
     listReviews: new ListGoalReviewsUseCase(goalRepository),
     getReviewContext: new GetGoalReviewContextUseCase(
       goalRepository,
       new GoalReviewContextBuilder(goalRecordRepository),
       userTimeContextPort,
+      undefined,
+      reviewWindowResolver,
     ),
     updateReview: new UpdateGoalReviewUseCase(goalRepository, goalPolicy),
     deleteReview: new DeleteGoalReviewUseCase(goalRepository, goalPolicy),
@@ -372,7 +378,7 @@ export function normalizeGoalRuntimeContributions(
 // Canonical composition root.
 // 规范化的目标模块主组合根。
 //
-// Reading order (same as governance):
+// Reading order:
 // 1. define `Dependencies`
 // 2. define transport-neutral `ApplicationPort`
 // 3. assemble use cases once
@@ -404,6 +410,8 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
   const api: GoalApplicationPort = {
     // Goal CRUD / 目标增删改查
     createGoal: (input, cx) => useCases.createGoal.execute(input, cx),
+    getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
+      useCases.getGoal.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
     getGoal: (id, identityId, includeChildren) =>
       useCases.getGoal.execute(id, identityId, includeChildren),
     listGoals: (input) => useCases.listGoals.execute(input),

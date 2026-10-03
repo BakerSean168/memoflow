@@ -176,10 +176,15 @@ const validBindGoal = {
 const malformedBindGoal = {
   goalId: GOAL_ID,
   keyResultId: KR_ID,
-  contribution: { value: -1, trigger: TaskGoalBindingTrigger.EachCompletion },
+  contribution: { value: 0, trigger: TaskGoalBindingTrigger.EachCompletion },
 };
 
-const validComplete = { duration: 30, rating: 5 };
+const validComplete = {
+  duration: 30,
+  rating: 5,
+  note: 'Task note',
+  goalMeasurement: { value: 0, note: 'Goal note' },
+};
 const malformedComplete = { rating: 99 };
 
 const validSkip = { reason: 'Too tired' };

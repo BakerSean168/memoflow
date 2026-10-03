@@ -185,6 +185,8 @@ function goalRequest(
   return {
     id: expected.goal as NonNullable<CreateGoalReq['id']>,
     name: draft.goal.name,
+    ...(draft.goal.description == null ? {} : { description: draft.goal.description }),
+    ...(draft.goal.reminderConfig == null ? {} : { reminderConfig: draft.goal.reminderConfig }),
     ...(draft.goal.summary == null ? {} : { summary: draft.goal.summary }),
     ...(draft.goal.start == null ? {} : { start: draft.goal.start }),
     ...(draft.goal.target == null ? {} : { target: draft.goal.target }),
@@ -262,12 +264,49 @@ export class ApplyGoalPlanService {
 
     const expectedGoalId = expected.goal!;
     const expectedKeyResultIds = draft.keyResults.map((item) => expected[item.draftRef]!);
-    const goalAlreadyCreated =
+    let goalAlreadyCreated =
       state.referenceMap.goal === expectedGoalId &&
       state.goalVersion !== undefined &&
       draft.keyResults.every(
         (item) => state.referenceMap[item.draftRef] === expected[item.draftRef],
       );
+
+    if (!goalAlreadyCreated) {
+      try {
+        const owner = await this.mutations.readGoal(expectedGoalId, context);
+        if (owner.ok) {
+          const ids = new Set(owner.data.keyResultIds);
+          if (
+            owner.data.goalId !== expectedGoalId ||
+            ids.size !== expectedKeyResultIds.length ||
+            owner.data.keyResultIds.length !== expectedKeyResultIds.length ||
+            !expectedKeyResultIds.every((id) => ids.has(id))
+          ) {
+            failures.push(mismatchFailure('goal_create', 'goal', 'Goal/Key Result'));
+            return receipt({
+              workflowRunId,
+              revision: draft.revision,
+              ...state,
+              failures,
+              forceStatus: 'failed',
+            });
+          }
+          state.referenceMap.goal = expectedGoalId;
+          state.goalVersion = owner.data.goalVersion;
+          if (owner.data.goalStatus === 'Planned' || owner.data.goalStatus === 'InProgress')
+            state.appliedGoalStatus = owner.data.goalStatus;
+          for (const item of draft.keyResults)
+            state.referenceMap[item.draftRef] = expected[item.draftRef]!;
+          goalAlreadyCreated = true;
+        } else if (owner.error.code !== 'NOT_FOUND') {
+          failures.push(failure('goal_create', 'goal', owner.error));
+          return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
+        }
+      } catch (cause) {
+        failures.push(throwToFailure('goal_create', 'goal', cause));
+        return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
+      }
+    }
 
     if (!goalAlreadyCreated) {
       let labels;
@@ -313,6 +352,9 @@ export class ApplyGoalPlanService {
         }
         state.referenceMap.goal = expectedGoalId;
         state.goalVersion = result.data.goalVersion;
+        if (result.data.goalStatus === 'InProgress' || result.data.goalStatus === 'Planned') {
+          state.appliedGoalStatus = result.data.goalStatus;
+        }
         for (const keyResult of draft.keyResults) {
           state.referenceMap[keyResult.draftRef] = expected[keyResult.draftRef]!;
         }

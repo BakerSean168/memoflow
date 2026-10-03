@@ -16,8 +16,8 @@ updated: 2026-09-14T00:00:00+08:00
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/app-vue/src/modules/account/router/index.ts`](../../../packages/app-vue/src/modules/account/router/index.ts) | Vue 账户模块路由，定义账户中心入口 |
-| [`packages/app-vue/src/modules/account/components/AccountProfileSection.vue`](../../../packages/app-vue/src/modules/account/components/AccountProfileSection.vue) | 账户中心页面 |
+| [`packages/app-vue/src/modules/account/router/index.ts`](../../../packages/app-vue/src/modules/account/router/index.ts) | Vue 账户中心兼容路由，重定向到 Settings account 分组 |
+| [`packages/app-vue/src/modules/account/components/AccountProfileSection.vue`](../../../packages/app-vue/src/modules/account/components/AccountProfileSection.vue) | Settings account 分组内的 canonical 资料编辑/登出 section |
 
 ## 前端状态、组合函数与组件
 
@@ -25,8 +25,6 @@ updated: 2026-09-14T00:00:00+08:00
 | --- | --- |
 | [`packages/app-vue/src/modules/account/stores/account-store.ts`](../../../packages/app-vue/src/modules/account/stores/account-store.ts) | 账户 Pinia store |
 | [`packages/app-vue/src/modules/account/composables/useAccount.ts`](../../../packages/app-vue/src/modules/account/composables/useAccount.ts) | 账户操作组合函数 |
-| [`packages/app-vue/src/modules/account/components/ProfileCard.vue`](../../../packages/app-vue/src/modules/account/components/ProfileCard.vue) | 资料卡片组件 |
-| [`packages/app-vue/src/modules/account/components/ProfileForm.vue`](../../../packages/app-vue/src/modules/account/components/ProfileForm.vue) | 资料编辑表单 |
 
 ## 移动端入口
 

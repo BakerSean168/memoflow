@@ -22,6 +22,7 @@ export default {
     "viewInDayView": "在日视图中查看"
   },
   "eventDetail": {
+    "refreshFailed": "无法刷新最新日程，请刷新规划器后重试。",
     "subtitle": "时间规划详情",
     "time": "时间",
     "allDay": "全天",
@@ -37,7 +38,8 @@ export default {
       "routineWallClock": "例程实例"
     },
     "conflictHint": "该时段存在规划冲突",
-    "readOnlyHint": "日历负责时间投影；编辑仍由对应的目标、任务、例程或日程对象负责。"
+    "readOnlyHint": "日历负责时间投影；编辑仍由对应的目标、任务或例程对象负责。",
+    "entryUnavailable": "该日程已发生变化或不再可用，请刷新规划视图后重试。"
   },
   "planning": {
     "title": "日程",
@@ -56,7 +58,11 @@ export default {
     "taskResumed": "调度任务已恢复",
     "taskDeleted": "调度任务已删除",
     "scheduleCreated": "日程已创建",
-    "scheduleCreatedRefreshFailed": "日程已创建，但规划视图刷新失败。请刷新页面以重新加载最新状态。"
+    "scheduleCreatedRefreshFailed": "日程已创建，但规划视图刷新失败。请刷新页面以重新加载最新状态。",
+    "scheduleUpdated": "日程已更新",
+    "scheduleUpdatedRefreshFailed": "日程已更新，但规划视图刷新失败。请刷新页面以重新加载最新状态。",
+    "scheduleDeleted": "日程已删除",
+    "scheduleDeletedRefreshFailed": "日程已删除，但规划视图刷新失败。请刷新页面以重新加载最新状态。"
   },
   "plannerMutation": {
     "taskTargetDayConflict": "目标日期已经存在同一任务计划的任务实例，已恢复到原位置。",
@@ -70,6 +76,8 @@ export default {
   },
   "confirm": {
     "deleteTask": "确认删除调度「{name}」？",
+    "deleteCalendarEntryTitle": "删除「{name}」？",
+    "deleteCalendarEntryDescription": "该日程将从日历中移除，此操作无法撤销。",
     "endBeforeStart": "结束时间必须晚于开始时间"
   },
   "weekViewPage": {
@@ -307,6 +315,7 @@ export default {
     "health": "健康状态"
   },
   "error": {
+    "deleteCalendarEntryFailed": "删除日程失败",
     "loadTasksFailed": "加载调度任务失败",
     "updateCalendarEntryFailed": "更新日程失败",
     "createTaskFailed": "创建调度任务失败",

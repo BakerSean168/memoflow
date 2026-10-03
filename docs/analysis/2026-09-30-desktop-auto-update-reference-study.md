@@ -15,7 +15,7 @@ updated: 2026-09-30T12:45:00+08:00
 
 > 本文是 MemoFlow Desktop 自动更新设计的外部参考研究。它记录“外部项目事实 → 可复用模式 → MemoFlow 适配结论”，不把任何单一项目的实现直接复制为本项目架构。
 >
-> 对应正式决策见 [ADR-112](../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md)，实施拆解见 [Desktop Auto-Update Implementation Plan](../plan/active/2026-09-30-desktop-auto-update-implementation.md)。
+> 对应正式决策见 [ADR-114](../architecture/adr/ADR-114-desktop-update-domain-runtime-and-installation-ownership.md)，实施拆解见 [Desktop Auto-Update Implementation Plan](../plan/active/2026-09-30-desktop-auto-update-implementation.md)。
 
 ## 1. 研究目标
 
@@ -1117,4 +1117,4 @@ manual/background/check/download/install/channel 分离。
 
 GitHub Releases 可以继续作为 artifact mirror 和人类 release 页面，但不应长期成为 client 业务语义的唯一边界。
 
-这五点共同构成 [ADR-112](../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md) 的依据。
+这五点共同构成 [ADR-114](../architecture/adr/ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) 的依据。

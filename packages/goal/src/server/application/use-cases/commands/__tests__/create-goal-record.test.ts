@@ -1,9 +1,13 @@
+import { GoalTaskProgressHandler } from '../../../event-handlers/task-goal-progress.handler';
+import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
+import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { Goal, GoalRecord } from '../../../../domain';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import type { IGoalRecordRepository } from '../../../../domain/repositories/i-goal-record-repository';
+import { RemoveTaskGoalContributionUseCase } from '../remove-task-goal-contribution.use-case';
 import { CreateGoalRecordUseCase } from '../create-goal-record.use-case';
 import type { GoalWriteTransactionRunner } from '../goal-write-support';
 import { createInlineGoalWriteTransactionRunner } from '../goal-write-support';
@@ -109,6 +113,8 @@ describe('CreateGoalRecordUseCase', () => {
       expect(result.data.recordChanges?.upserted[0]).toMatchObject({
         value: 1,
         valueAfter: 42,
+        authorship: 'Manual',
+        source: null,
       });
     }
   });
@@ -148,6 +154,49 @@ describe('CreateGoalRecordUseCase', () => {
     }
   });
 
+  it.each<[{ method: KeyResultCalculationMethod; expected: number }]>([
+    [{ method: 'Sum', expected: 12 }],
+    [{ method: 'Average', expected: -1 }],
+    [{ method: 'Max', expected: 2 }],
+    [{ method: 'Min', expected: -5 }],
+    [{ method: 'Last', expected: -5 }],
+  ])('recalculates $method with zero and negative manual facts', async ({ method, expected }) => {
+    const goal = createTestGoal();
+    const keyResult = goal.createAndAddKeyResult({
+      title: 'Measurement',
+      aggregationMethod: method,
+      initialValue: 0,
+      currentValue: 15,
+      targetValue: 50,
+      weight: 1,
+      unit: 'points',
+    });
+    const history = [2, 0].map((value) =>
+      GoalRecord.create({
+        keyResultId: keyResult.id,
+        identityId: goal.identityId,
+        value,
+      }),
+    );
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue(history);
+    const result = await useCase.execute(
+      goal.id,
+      keyResult.id,
+      { value: -5, expectedVersion: goal.version },
+      'identity-1',
+    );
+    expect(result).toBeOk();
+    expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(expected);
+    if (result.ok) {
+      expect(result.data.readModel.keyResults[0].progress.currentValue).toBe(expected);
+      expect(result.data.recordChanges?.upserted[0]).toMatchObject({
+        value: -5,
+        valueAfter: expected,
+      });
+    }
+  });
+
   it('rejects automatic Task contributions to non-Sum key results', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
@@ -166,6 +215,7 @@ describe('CreateGoalRecordUseCase', () => {
       keyResult.id,
       {
         value: 1,
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
       },
       'identity-1',
@@ -176,7 +226,7 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goalRepository.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('applies the same task-occurrence contribution only once', async () => {
+  it.each(['TaskAutomatic', 'TaskUserMeasurement'] as const)('applies the same %s occurrence source only once', async (authorship) => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
@@ -197,6 +247,7 @@ describe('CreateGoalRecordUseCase', () => {
     const params = {
       value: 2,
       note: 'Task completed',
+      authorship,
       source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
     };
     const first = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');
@@ -240,4 +291,159 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(4);
     expect(goalRepository.save).not.toHaveBeenCalled();
   });
+  it.each(
+    ['Sum', 'Average', 'Max', 'Min', 'Last'].flatMap((aggregationMethod) =>
+      [0, -2].map((value) => ({
+        aggregationMethod: aggregationMethod as KeyResultCalculationMethod,
+        value,
+      })),
+    ),
+  )(
+    'creates TaskUserMeasurement $value for $aggregationMethod',
+    async ({ aggregationMethod, value }) => {
+      const goal = createTestGoal();
+      const kr = goal.createAndAddKeyResult({
+        title: 'Measurement',
+        aggregationMethod,
+        initialValue: 0,
+        currentValue: 10,
+        targetValue: 100,
+        weight: 1,
+        unit: 'points',
+      });
+      vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+      const result = await useCase.execute(
+        goal.id,
+        kr.id,
+        {
+          value,
+          authorship: 'TaskUserMeasurement',
+          source: { type: 'TASK_INSTANCE', id: 'occurrence-1' },
+        },
+        'identity-1',
+      );
+      expect(result).toBeOk();
+      expect(goalRecordRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ authorship: 'TaskUserMeasurement' }),
+      );
+      if (result.ok)
+        expect(result.data.recordChanges?.upserted[0]).toMatchObject({
+          authorship: 'TaskUserMeasurement',
+          source: { type: 'TASK_INSTANCE', id: 'occurrence-1' },
+        });
+    },
+  );
+
+  it.each([
+    { authorship: 'Manual', source: { type: 'TASK_INSTANCE', id: 'task' } },
+    { authorship: 'TaskAutomatic' },
+    { authorship: 'TaskUserMeasurement', source: { type: 'TASK_TEMPLATE', id: 'plan' } },
+    { authorship: 'TaskUserMeasurement', source: { type: 'TASK_INSTANCE', id: ' ' } },
+  ])('rejects invalid internal provenance $authorship / $source', async (provenance) => {
+    const goal = createTestGoal();
+    const kr = goal.createAndAddKeyResult({ title: 'Measurement', aggregationMethod: 'Sum',
+      initialValue: 0, currentValue: 0, targetValue: 100, weight: 1, unit: 'points' });
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    const result = await useCase.execute(goal.id, kr.id, { value: 2, ...provenance } as never, 'identity-1');
+    expect(result).toBeErrorWithCode('VALIDATION_ERROR');
+    expect(goalRecordRepository.save).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -2])(
+    'replays Prompt fact %s through the durable Goal handler only once',
+    async (value) => {
+      const goal = createTestGoal();
+      const kr = goal.createAndAddKeyResult({
+        title: 'Last measurement',
+        aggregationMethod: 'Last',
+        initialValue: 0,
+        currentValue: 10,
+        targetValue: 100,
+        weight: 1,
+        unit: 'points',
+      });
+      let savedRecord: GoalRecord | null = null;
+      vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+      vi.mocked(goalRecordRepository.findBySource).mockImplementation(async () => savedRecord);
+      vi.mocked(goalRecordRepository.save).mockImplementation(async (record) => {
+        savedRecord = record;
+      });
+      const handler = new GoalTaskProgressHandler(useCase, { execute: vi.fn() });
+      const event: TaskGoalProgressOutboxEventV2 = {
+        eventId: 'prompt-replay',
+        schemaVersion: 2,
+        eventType: 'task.goal-progress-requested',
+        action: 'apply',
+        recordingMode: 'PromptedUserMeasurement',
+        identityId: 'identity-1' as never,
+        taskOccurrenceId: 'occurrence-1' as never,
+        taskPlanId: 'plan-1' as never,
+        goalId: goal.id,
+        keyResultId: kr.id,
+        source: { type: 'TaskOccurrence', id: 'occurrence-1' },
+        value,
+        note: 'User measurement',
+        taskTitle: 'Measure',
+        occurredAt: 1000,
+      };
+      await handler.handle(event);
+      await handler.handle(event);
+      expect(goalRecordRepository.save).toHaveBeenCalledTimes(1);
+      expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledTimes(1);
+      expect(goalRecordRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          authorship: 'TaskUserMeasurement',
+          note: 'User measurement',
+          value,
+          sourceType: 'TASK_INSTANCE',
+          sourceId: 'occurrence-1',
+        }),
+      );
+      expect(goal.getKeyResult(kr.id)?.progress.currentValue).toBe(value);
+    },
+  );
+  it('reverts a Prompt measurement and creates one replacement on re-complete/retry', async () => {
+    const goal = createTestGoal();
+    const kr = goal.createAndAddKeyResult({ title: 'Actual measurement', aggregationMethod: 'Last',
+      initialValue: 0, currentValue: 10, targetValue: 100, weight: 1, unit: 'points' });
+    let active: GoalRecord | null = null;
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRepository.findByKeyResultIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRecordRepository.findBySource).mockImplementation(async () => active);
+    vi.mocked(goalRecordRepository.findByKeyResultId).mockImplementation(async () => active ? [active] : []);
+    vi.mocked(goalRecordRepository.save).mockImplementation(async record => { active = record; });
+    vi.mocked(goalRecordRepository.delete).mockImplementation(async () => { active = null; });
+    const remove = new RemoveTaskGoalContributionUseCase(goalRepository, goalRecordRepository,
+      createInlineGoalWriteTransactionRunner({ goalRepository, goalRecordRepository }, new InMemoryGoalReliableOperationAdapter()));
+    const handler = new GoalTaskProgressHandler(useCase, remove);
+    const apply: TaskGoalProgressOutboxEventV2 = { eventId: 'prompt-first', schemaVersion: 2,
+      eventType: 'task.goal-progress-requested', action: 'apply', recordingMode: 'PromptedUserMeasurement',
+      identityId: 'identity-1' as never, taskOccurrenceId: 'occurrence-1' as never, taskPlanId: 'plan-1' as never,
+      goalId: goal.id, keyResultId: kr.id, source: { type: 'TaskOccurrence', id: 'occurrence-1' },
+      value: -2, note: 'first', taskTitle: 'Measure', occurredAt: 1000 };
+    await handler.handle(apply);
+    await handler.handle(apply);
+    const firstId = goalRecordRepository.save.mock.calls[0][0].id;
+    expect(kr.progress.currentValue).toBe(-2);
+    const revert: TaskGoalProgressOutboxEventV2 = { eventId: 'prompt-revert', schemaVersion: 2,
+      eventType: 'task.goal-progress-requested', action: 'revert', identityId: 'identity-1' as never,
+      taskOccurrenceId: 'occurrence-1' as never, taskPlanId: 'plan-1' as never,
+      sources: [{ type: 'TaskOccurrence', id: 'occurrence-1' }], occurredAt: 2000 };
+    await handler.handle(revert);
+    await handler.handle(revert);
+    expect(kr.progress.currentValue).toBe(10);
+    expect(goalRecordRepository.delete).toHaveBeenCalledExactlyOnceWith('identity-1', String(firstId));
+    const replacement = { ...apply, eventId: 'prompt-replacement', value: 0, note: 'replacement', occurredAt: 3000 };
+    await handler.handle(replacement);
+    await handler.handle(replacement);
+    expect(goalRecordRepository.save).toHaveBeenCalledTimes(2);
+    const saved = goalRecordRepository.save.mock.calls[1][0];
+    expect(saved.id).not.toBe(firstId);
+    expect(saved.authorship).toBe('TaskUserMeasurement');
+    expect(saved.sourceId).toBe('occurrence-1');
+    expect(saved.value).toBe(0);
+    expect(saved.note).toBe('replacement');
+    expect(kr.progress.currentValue).toBe(0);
+  });
+
 });

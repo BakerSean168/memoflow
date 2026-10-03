@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  canonicalizeGovernanceListQuery,
   canonicalizeNotificationListQuery,
   canonicalizeTaskPlanListQuery,
-  governanceQueryKeys,
   notificationQueryKeys,
   taskPlanQueryKeys,
 } from './query-keys';
@@ -152,6 +150,7 @@ describe('canonicalizeTaskPlanListQuery', () => {
   it('keeps scalar filters and puts arrays into the frozen field order', () => {
     const canonical = canonicalizeTaskPlanListQuery({
       goalId: 'g-1',
+      keyResultId: 'kr-1',
       status: ['Active'],
       page: 2,
       labelIdsAll: ['x'],
@@ -162,81 +161,48 @@ describe('canonicalizeTaskPlanListQuery', () => {
       'limit',
       'status',
       'goalId',
+      'keyResultId',
       'labelIdsAll',
     ]);
+  });
+
+  it('canonicalizes outcomes without mutating input and treats all archives as unfiltered', () => {
+    const outcome: Array<'Succeeded' | 'Failed'> = ['Succeeded', 'Failed', 'Succeeded'];
+    const a = canonicalizeTaskPlanListQuery({ outcome, archiveState: 'all' });
+    const b = canonicalizeTaskPlanListQuery({ outcome: ['Failed', 'Succeeded'] });
+    expect(a).toEqual(b);
+    expect(a.outcome).toEqual(['Failed', 'Succeeded']);
+    expect(outcome).toEqual(['Succeeded', 'Failed', 'Succeeded']);
+    expect(canonicalizeTaskPlanListQuery({ outcome: [], archiveState: 'all' }))
+      .toEqual(canonicalizeTaskPlanListQuery());
+  });
+
+  it('isolates every outcome and archive filter within identity-scoped list keys', () => {
+    const queries = [
+      canonicalizeTaskPlanListQuery(),
+      ...(['Open', 'Succeeded', 'Failed', 'Abandoned'] as const)
+        .map((outcome) => canonicalizeTaskPlanListQuery({ outcome: [outcome] })),
+      ...(['active', 'archived'] as const)
+        .map((archiveState) => canonicalizeTaskPlanListQuery({ archiveState })),
+    ];
+    const keys = queries.flatMap((query) => ['owner-a', 'owner-b'].map((owner) =>
+      JSON.stringify(taskPlanQueryKeys.list(owner, query)),
+    ));
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('keeps Goal/KR scope in the canonical list identity', () => {
+    const goalOnly = canonicalizeTaskPlanListQuery({ goalId: 'g-1' });
+    const scoped = canonicalizeTaskPlanListQuery({ goalId: 'g-1', keyResultId: 'kr-1' });
+    expect(scoped.keyResultId).toBe('kr-1');
+    expect(taskPlanQueryKeys.list('id-1', goalOnly)).not.toEqual(
+      taskPlanQueryKeys.list('id-1', scoped),
+    );
   });
 
   it('produces equal keys for semantically equal requests regardless of array order', () => {
     const a = canonicalizeTaskPlanListQuery({ status: ['Active', 'Paused'] });
     const b = canonicalizeTaskPlanListQuery({ status: ['Paused', 'Active'] });
     expect(a).toEqual(b);
-  });
-});
-
-describe('governanceQueryKeys (governance pilot key scheme)', () => {
-  it('builds the frozen key hierarchy', () => {
-    expect(governanceQueryKeys.all).toEqual(['server-state', 'governance']);
-    expect(governanceQueryKeys.identity('id-1')).toEqual(['server-state', 'governance', 'id-1']);
-    expect(governanceQueryKeys.lists('id-1')).toEqual([
-      'server-state',
-      'governance',
-      'id-1',
-      'list',
-    ]);
-    expect(governanceQueryKeys.list('id-1', { page: 1, pageSize: 20 })).toEqual([
-      'server-state',
-      'governance',
-      'id-1',
-      'list',
-      { page: 1, pageSize: 20 },
-    ]);
-    expect(governanceQueryKeys.details('id-1')).toEqual([
-      'server-state',
-      'governance',
-      'id-1',
-      'detail',
-    ]);
-    expect(governanceQueryKeys.detail('id-1', 'RuleId_x')).toEqual([
-      'server-state',
-      'governance',
-      'id-1',
-      'detail',
-      'RuleId_x',
-    ]);
-    expect(governanceQueryKeys.revisions('id-1', 'RuleId_x')).toEqual([
-      'server-state',
-      'governance',
-      'id-1',
-      'revision',
-      'RuleId_x',
-    ]);
-  });
-});
-
-describe('canonicalizeGovernanceListQuery', () => {
-  it('materializes pagination defaults and drops empty optional fields', () => {
-    expect(canonicalizeGovernanceListQuery()).toEqual({ page: 1, pageSize: 20 });
-    expect(canonicalizeGovernanceListQuery({ page: 2, pageSize: 50 })).toEqual({
-      page: 2,
-      pageSize: 50,
-    });
-  });
-
-  it('normalizes tags arrays and keeps scalar filters in frozen order', () => {
-    const canonical = canonicalizeGovernanceListQuery({
-      page: 1,
-      pageSize: 20,
-      status: 'Active',
-      severity: 'Mandatory',
-      tags: ['b', 'a', 'b'],
-    });
-    expect(Object.keys(canonical)).toEqual(['page', 'pageSize', 'status', 'severity', 'tags']);
-    expect(canonical.tags).toEqual(['a', 'b']);
-  });
-
-  it('drops empty search and empty tags arrays', () => {
-    const canonical = canonicalizeGovernanceListQuery({ search: '', tags: [] });
-    expect(canonical).not.toHaveProperty('search');
-    expect(canonical).not.toHaveProperty('tags');
   });
 });

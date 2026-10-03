@@ -1,8 +1,8 @@
 /**
- * Explicit Governance Rule -> repository engineering audit adapter (GOV-1904).
+ * Pure rule -> repository engineering audit adapter (legacy and native inputs).
  *
  * Only registry-declared, read-only audit scripts may be invoked. Unmapped
- * product rules remain visible but non-enforcing. Autofix is proposal-only.
+ * rules remain visible but non-enforcing. Autofix is proposal-only.
  */
 
 const CHECK_SCRIPT_RE = /^tools\/governance\/[a-z0-9][a-z0-9-]*-audit\.mjs$/;
@@ -48,29 +48,43 @@ export function validateEngineeringAdapterRegistry(registry) {
 }
 
 export async function runMappedEngineeringChecks({ bundle, registry, executeCheck }) {
+  return runEngineeringChecks({
+    source: {
+      ...bundle,
+      rules: bundle.rules.map((rule) => ({
+        code: rule.engineering.ruleKey,
+        severity: rule.engineering.severity,
+      })),
+    },
+    registry,
+    executeCheck,
+  });
+}
+
+export async function runEngineeringChecks({ source: bundle, registry, executeCheck }) {
   const validated = validateEngineeringAdapterRegistry(registry);
   const adapterByRule = new Map(validated.adapters.map((adapter) => [adapter.ruleKey, adapter]));
   const resultByAdapter = new Map();
 
   for (const adapter of validated.adapters) {
-    if (!bundle.rules.some((rule) => rule.engineering.ruleKey === adapter.ruleKey)) continue;
+    if (!bundle.rules.some((rule) => rule.code === adapter.ruleKey)) continue;
     resultByAdapter.set(adapter.adapterId, await executeCheck(adapter));
   }
 
   const rules = bundle.rules.map((rule) => {
-    const adapter = adapterByRule.get(rule.engineering.ruleKey);
+    const adapter = adapterByRule.get(rule.code);
     if (!adapter) {
       return {
-        ruleKey: rule.engineering.ruleKey,
-        severity: rule.engineering.severity,
+        ruleKey: rule.code,
+        severity: rule.severity,
         mapping: 'unmapped',
         enforcement: 'none',
         check: null,
       };
     }
     return {
-      ruleKey: rule.engineering.ruleKey,
-      severity: rule.engineering.severity,
+      ruleKey: rule.code,
+      severity: rule.severity,
       mapping: 'mapped',
       enforcement: adapter.coverage,
       adapterId: adapter.adapterId,

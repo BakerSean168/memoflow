@@ -5,7 +5,7 @@ tags:
   - goal
 description: 目标模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T10:14:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # 目标模块文件索引
@@ -20,9 +20,6 @@ updated: 2026-09-12T10:14:00+08:00
 | [`packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue`](../../../packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue) | 目标模块布局 |
 | [`packages/app-vue/src/modules/goal/views/GoalListView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalListView.vue) | 目标列表页 |
 | [`packages/app-vue/src/modules/goal/views/GoalDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalDetailView.vue) | 目标详情页 |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue) | 目标复盘创建页 |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue) | 目标复盘详情页 |
-| [`packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue) | 关键结果详情页 |
 
 ## 前端状态、组合函数与组件
 
@@ -36,6 +33,8 @@ updated: 2026-09-12T10:14:00+08:00
 | [`packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue`](../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue) | 目标创建或编辑弹窗 |
 | [`packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue`](../../../packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue) | 关键结果创建或编辑弹窗 |
 | [`packages/app-vue/src/modules/goal/components/GoalProgressRow.vue`](../../../packages/app-vue/src/modules/goal/components/GoalProgressRow.vue) | vNext 目标进度行 |
+| [`packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue`](../../../packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue) | 当前 Sum-biased Record 输入；target measurement-aware Record Composer |
+| [`packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.vue`](../../../packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.vue) | KR trajectory editor；仅复用视觉语法，不直接充当 Record Preview |
 
 ## 移动端入口
 
@@ -73,6 +72,10 @@ updated: 2026-09-12T10:14:00+08:00
 | [`packages/goal/src/server/application/use-cases/commands/create-goal.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/create-goal.use-case.ts) | 创建目标用例 |
 | [`packages/goal/src/server/application/use-cases/commands/add-goal-key-result.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/add-goal-key-result.use-case.ts) | 添加关键结果用例 |
 | [`packages/goal/src/server/application/use-cases/commands/add-goal-review.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/add-goal-review.use-case.ts) | 添加目标复盘用例 |
+| [`packages/goal/src/server/application/use-cases/commands/create-goal-record.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/create-goal-record.use-case.ts) | GoalRecord authoritative apply；当前 Task source 只接受 Sum automatic contribution |
+| [`packages/goal/src/server/application/use-cases/commands/update-goal-record.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/update-goal-record.use-case.ts) | 当前 source-correlated record 全部禁止手工编辑；target 区分 provenance 后允许 TaskUserMeasurement correction |
+| [`packages/goal/src/server/application/use-cases/commands/remove-task-goal-contribution.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/remove-task-goal-contribution.use-case.ts) | source-correlated Task record revert |
+| [`packages/goal/src/server/domain/services/key-result-progress-calculator.ts`](../../../packages/goal/src/server/domain/services/key-result-progress-calculator.ts) | KR Measurement V3 单一 aggregation/progress 算法 authority；Record Preview 必须复用 |
 | [`packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts`](../../../packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts) | 获取目标聚合查询 |
 | [`packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts) | Prisma 目标仓储 |
 | [`packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts) | PowerSync 目标仓储 |
@@ -86,7 +89,8 @@ updated: 2026-09-12T10:14:00+08:00
 | [`packages/contracts/src/modules/goal/api/goal-crud.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-crud.dto.ts) | 目标 CRUD DTO |
 | [`packages/contracts/src/modules/goal/api/key-result.dto.ts`](../../../packages/contracts/src/modules/goal/api/key-result.dto.ts) | 关键结果 DTO |
 | [`packages/contracts/src/modules/goal/api/goal-review.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-review.dto.ts) | 目标复盘 DTO |
-| [`packages/contracts/src/modules/goal/api/goal-record.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-record.dto.ts) | 目标记录 DTO |
+| [`packages/contracts/src/modules/goal/api/goal-record.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-record.dto.ts) | GoalRecord DTO；value 是 signed finite delta/sample，不应被 UI 全局限制为 positive |
+| [`packages/contracts/src/modules/goal/entities/goal-record-server.ts`](../../../packages/contracts/src/modules/goal/entities/goal-record-server.ts) | GoalRecord source correlation；target 增加/映射 provenance/authorship distinction |
 | [`packages/contracts/src/modules/goal/api/response-schemas.ts`](../../../packages/contracts/src/modules/goal/api/response-schemas.ts) | API response schemas |
 | [`packages/contracts/src/modules/goal/value-objects/goal-timeframe.ts`](../../../packages/contracts/src/modules/goal/value-objects/goal-timeframe.ts) | Goal Target Timeframe 的 Day/Month/Quarter/Half-year/Year contract、边界与精度展示 helper |
 | [`packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts`](../../../packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts) | 目标模块 RPC map |

@@ -1,4 +1,4 @@
-import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
+import type { KnowledgeCaptureSource, KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
@@ -11,6 +11,8 @@ export interface CreateKnowledgeNotePersistenceInput {
    * 共享同一个 requestId/traceId。
    */
   context: ExecutionContext;
+  /** Owner-selected source for standalone knowledge.capture. Other approved flows may omit it. */
+  source?: KnowledgeCaptureSource;
   /** Explicit GitHub knowledge-repository connection for multi-repository users. */
   connectionId?: string;
   knowledgeDocumentId: KnowledgeDocumentId;

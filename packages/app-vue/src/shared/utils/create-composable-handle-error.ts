@@ -4,7 +4,7 @@
  * Residual 973: schedule / notification / reminder / setting (default console.error report).
  * Residual 975: task instances / templates / dependencies (toast.error report via `report`).
  * Residual 1055: authentication useSession + account useAccount (toast.error report via `report`).
- * Residual 1057: governance useGovernance (default console.error report; setGovernanceError dual retired).
+ * Error handling is centralized here so feature composables do not grow local reporting shims.
  * Local handleError duals retired in these clusters.
  * Soft residual: usePassword / account checkAvailability toast-only (no setError) keep-boundary.
  * Soft residual 1075: password/checkAvailability toast-only keep-boundary surface (no force-merge).

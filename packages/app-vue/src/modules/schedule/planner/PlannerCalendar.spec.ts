@@ -1,10 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import FullCalendar from '@fullcalendar/vue3';
+import type { EventDropInfo } from '@fullcalendar/vue3';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { asInstant } from '@memoflow/time';
-import type { CalendarEventProjection, PlannerConflictProjection } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/contracts/schedule';
 import PlannerCalendar from './PlannerCalendar.vue';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
 
@@ -56,12 +61,18 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
     expect(wrapper.find('[data-testid="schedule-fullcalendar"]').exists()).toBe(true);
     const eventRoot = wrapper.get('[data-testid="schedule-event-schedule-calendar-entry-1"]');
+    expect(eventRoot.classes()).toContain('planner-source-schedule');
+    expect((eventRoot.element as HTMLElement).style.getPropertyValue('--planner-source-hsl')).toBe(
+      'var(--primary)',
+    );
     expect(eventRoot.classes()).toContain('planner-event-timed');
     expect(eventRoot.classes()).toContain('planner-occupancy-blocking');
     expect(wrapper.text()).toContain('Deep work');
     const eventContent = wrapper.get(
       '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
     );
+    await eventRoot.trigger('click');
+    expect(wrapper.emitted('event-click')).toEqual([[scheduleProjection]]);
     expect(eventContent.text()).toBe('Deep work');
     expect(eventContent.text()).not.toContain('10:00');
     expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(
@@ -178,11 +189,19 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
     );
     expect(content.classes()).toContain('planner-tone-warning');
+    const root = wrapper.get('[data-testid="schedule-event-schedule-calendar-entry-1"]');
+    expect(root.classes()).toContain('planner-tone-warning');
+    expect(root.classes()).toContain('planner-source-schedule');
+    expect((root.element as HTMLElement).style.getPropertyValue('--planner-source-hsl')).toBe(
+      'var(--primary)',
+    );
 
     await wrapper.setProps({ conflicts: [] });
     await vi.waitFor(() =>
       expect(wrapper.find('.planner-event-conflict-icon').exists()).toBe(false),
     );
+    expect(root.classes()).toContain('planner-tone-default');
+    expect(root.classes()).not.toContain('planner-tone-warning');
     wrapper.unmount();
   });
 
@@ -202,6 +221,37 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       'true',
     );
     expect(wrapper.find('[data-testid="schedule-calendar-loading"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+  it('reports one outcome for a replayed FullCalendar gesture, then accepts a distinct gesture', async () => {
+    const route = vi.fn().mockResolvedValue({
+      status: 'conflict',
+      code: 'CONFLICT',
+      reason: 'generic',
+      message: 'conflict',
+      ownerType: 'schedule.calendar-entry',
+    });
+    const wrapper = mount(PlannerCalendar, {
+      props: { projections: [scheduleProjection], ownerCommands: { route }, view: 'week' },
+    });
+    const options = wrapper.getComponent(FullCalendar).props('options');
+    const info = {
+      event: {
+        start: new Date(Number(scheduleProjection.start) + 60_000),
+        end: new Date(Number(scheduleProjection.end) + 60_000),
+        allDay: false,
+        extendedProps: { projection: scheduleProjection },
+      },
+      revert: vi.fn(),
+    } as unknown as EventDropInfo;
+    options.eventDrop?.(info);
+    options.eventDrop?.({ ...info });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(1));
+    expect(route).toHaveBeenCalledOnce();
+    expect(info.revert).toHaveBeenCalledOnce();
+    options.eventDrop?.({ ...info, revert: vi.fn() });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(2));
+    expect(route).toHaveBeenCalledTimes(2);
     wrapper.unmount();
   });
 });

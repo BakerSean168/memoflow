@@ -124,10 +124,14 @@ export class TaskOccurrencePrismaRepository
     return rows.map((row) => this.mapToEntity(row));
   }
 
-  /** Returns open candidates; overdue is derived with Product Time in the application/domain layer. */
-  async findOverdueOccurrences(identityId: string): Promise<TaskOccurrence[]> {
+  async findOpenBeforeDate(identityId: string, beforeDate: Ymd): Promise<TaskOccurrence[]> {
     const rows = await this.db.taskOccurrence.findMany({
-      where: { identityId, status: { in: ['Pending', 'InProgress'] }, deletedAt: null },
+      where: {
+        identityId,
+        scheduleDate: { lt: beforeDate },
+        status: { in: ['Pending', 'InProgress'] },
+        deletedAt: null,
+      },
       orderBy: { scheduleDate: 'asc' },
     });
     return rows.map((row) => this.mapToEntity(row));

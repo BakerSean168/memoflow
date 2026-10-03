@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
-    <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card class="border-0 bg-transparent shadow-none">
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 px-0 pb-2 pt-0">
         <CardTitle class="text-base">{{ t('goal.weightTrend.title') }}</CardTitle>
         <div class="flex items-center gap-0.5">
           <Button
@@ -16,7 +16,7 @@
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent class="px-0 pb-0">
         <!-- 加载状态 -->
         <div v-if="isLoading" class="flex items-center justify-center py-12">
           <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
@@ -38,7 +38,10 @@
         />
 
         <!-- 图例说明 -->
-        <div v-if="hasTrendData" class="mt-4 rounded-md bg-muted/30 p-3 flex flex-wrap gap-2">
+        <div
+          v-if="hasTrendData"
+          class="mt-4 flex flex-wrap gap-2 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]"
+        >
           <Badge
             v-for="kr in trendData?.keyResults"
             :key="kr.id"

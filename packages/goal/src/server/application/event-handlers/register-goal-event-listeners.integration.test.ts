@@ -78,6 +78,7 @@ describe('GoalTaskProgressHandler V2 integration', () => {
       schemaVersion: 2,
       eventType: 'task.goal-progress-requested',
       action: 'apply',
+      recordingMode: 'FixedAutomatic',
       identityId: identityId as never,
       taskOccurrenceId: 'ti-int-1' as never,
       taskPlanId: 'tt-int-1' as never,

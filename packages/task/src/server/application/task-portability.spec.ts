@@ -7,7 +7,7 @@ import {
   type PortableReferencePort,
   type PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
-import { TaskPortablePayloadV3Schema } from '@memoflow/contracts/task';
+import { TaskPortablePayloadV3Schema, TaskPortableGoalLinkV3Schema } from '@memoflow/contracts/task';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
 import type { TaskCanonicalRestoreService } from './services/task-canonical-restore.service';
@@ -243,7 +243,7 @@ function portablePayload() {
 }
 
 describe('TaskPortableCapability', () => {
-  it('exports only portable refs and user-owned Task facts', async () => {
+  it.each([null, { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 0 }, { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: -2 }])('exports portable refs and canonical progress configuration %j', async (progressRule) => {
     const references = new FakeReferences();
     references.seedExport('labels', 'LabelId_host', 'labels:1');
     references.seedExport('goals', 'GoalId_host', 'goals:1');
@@ -269,7 +269,7 @@ describe('TaskPortableCapability', () => {
         goalBinding: {
           goalId: 'GoalId_host',
           keyResultId: 'KeyResultId_host',
-          contribution: { value: 1, trigger: 'EachCompletion' },
+          ...(progressRule ? { progressRule, contribution: null } : { contribution: { value: 1, trigger: 'EachCompletion' } }),
         },
         checklist: [{ id: 'check-host', title: 'Proof', order: 0 }],
         createdAt: 1,
@@ -320,7 +320,7 @@ describe('TaskPortableCapability', () => {
 
     expect(payload.plans[0]).toMatchObject({
       title: 'Portable Task',
-      goalLink: { goalRef: 'goals:1', keyResultRef: 'goals:2' },
+      goalLink: { goalRef: 'goals:1', keyResultRef: 'goals:2', progressRule: progressRule ?? { mode: 'Fixed', value: 1, trigger: 'EachCompletion' } },
       labelRefs: ['labels:1'],
     });
     expect(payload.occurrences[0]).toMatchObject({ status: 'Completed' });
@@ -328,6 +328,23 @@ describe('TaskPortableCapability', () => {
     expect(JSON.stringify(payload)).not.toContain('IdentityId_host');
     expect(JSON.stringify(payload)).not.toContain('ITaskPlanId_host');
     expect(JSON.stringify(payload)).not.toContain('check-host');
+  });
+
+  it.each([0, -2, null])('imports Prompt suggestion %s through the canonical restore seam', async (suggestedValue) => {
+    const references = new FakeReferences();
+    references.seedImport('goals:1', 'GoalId_target');
+    references.seedImport('goals:2', 'KeyResultId_target');
+    references.seedImport('labels:1', 'LabelId_target');
+    const payload = portablePayload();
+    payload.plans[0]!.goalLink = { goalRef: ref('goals:1'), keyResultRef: ref('goals:2'), progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue }, contribution: null };
+    const { capability, restore } = makeCapability();
+    await capability.apply(payload, makeContext(references));
+    expect(restore).toHaveBeenCalledWith(expect.objectContaining({ plans: expect.arrayContaining([expect.objectContaining({ goalBinding: expect.objectContaining({ progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue }, contribution: null }) })]) }));
+  });
+  it('normalizes legacy portable contribution and rejects conflicting progress', () => {
+    const legacy = { goalRef: 'goals:1', keyResultRef: 'goals:2', contribution: { value: -2, trigger: 'EachCompletion' } };
+    expect(TaskPortableGoalLinkV3Schema.parse(legacy).progressRule).toEqual({ mode: 'Fixed', value: -2, trigger: 'EachCompletion' });
+    expect(TaskPortableGoalLinkV3Schema.safeParse({ ...legacy, progressRule: { mode: 'Prompt', trigger: 'EachCompletion' } }).success).toBe(false);
   });
 
   it('accepts Goal-only links but rejects contribution without a KR', () => {

@@ -168,7 +168,21 @@ describe('TaskOccurrenceController', () => {
         endDate: 2000,
       });
 
-      expect(useCases.getByDateRange).toHaveBeenCalledWith(TEST_IDENTITY_ID, 1000, 2000);
+      expect(useCases.getByDateRange).toHaveBeenCalledWith(TEST_IDENTITY_ID, 1000, 2000, undefined);
+    });
+
+    it('passes the Today attention flag through to the range use case', async () => {
+      (useCases.getByDateRange as ReturnType<typeof vi.fn>).mockResolvedValue(
+        ok({ data: [], total: 0 }),
+      );
+
+      await controller.getOccurrencesByDateRange(TEST_IDENTITY_ID, {
+        startDate: 1000,
+        endDate: 2000,
+        includeOverdueOpen: true,
+      });
+
+      expect(useCases.getByDateRange).toHaveBeenCalledWith(TEST_IDENTITY_ID, 1000, 2000, true);
     });
 
     it('should forward use case failure', async () => {

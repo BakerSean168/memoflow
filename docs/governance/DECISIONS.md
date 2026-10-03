@@ -1,77 +1,38 @@
 ---
 tags:
   - governance
+  - engineering-governance
   - decisions
-  - ddd
-description: Governance 模块决策记录 - 只记录稳定且重要的设计选择
+description: Engineering Governance 当前稳定决策
 created: 2026-03-14T00:00:00
-updated: 2026-07-06T00:00:00+08:00
+updated: 2026-10-03T10:30:00+09:00
 ---
 
-# Governance 决策记录
+# Engineering Governance 决策
 
-## 1. 这是“最佳实践示范模块”，不是“最少实现模块”
+## 1. Governance 是工程能力，不是产品 bounded context
 
-- 目标不是只够用
-- 目标是让后来者直接照着抄也不会走偏
+ADR-113 已退休 Product Governance Runtime。当前 `Governance` 指 repository audits、standards、CI gates 与 engineering rule metadata。
 
-## 2. Props vs State 双命名约定保留
+## 2. Repository-native input 是唯一活动输入
 
-- Value Object / factory params 使用 `Props`
-- Aggregate / Entity 内部持久状态使用 `State`
-- 原因：与 `ValueObject` 基类 API 以及可变生命周期语义都更一致
+`tools/governance/engineering-rules.json` + `pinned-engineering-rules.json` 是结构化规则输入。Engineering Governance 不读取 Product DB、Rule/RuleRevision、Product exporter 或 published Product snapshot。
 
-## 3. 公共契约必须集中到 `@memoflow/contracts/governance`
+## 3. 真实 owner 优先于 reference module
 
-- governance 包内不再保留第二份公共 contracts
-- transport port 如果只是模块内部技术 seam，不进入 contracts 包
-- IPC channel 与 RPC payload 也属于 governance protocol，不再挂在通用 `contracts/electron` 下
+架构模式先在真实业务 owner 上验证。至少两个真实 owner 证明稳定重复后才抽取共享 abstraction。禁止为了架构试点创建虚构业务复杂度。
 
-## 4. 根入口只暴露服务端组合根
+## 4. 文档解释，audit 强制
 
-- `@memoflow/governance` 只负责 server composition root
-- `api`、`client`、`electron` 各自使用语义化子路径
-- 不再对外暴露 layer-named seam
-- 不再从根入口暴露 `createGovernancePowerSyncModule` 这类技术命名工厂
+- standards / ADR 说明为什么与规则语义；
+- deterministic audit 负责可执行约束；
+- CI 负责持续执行；
+- negative retirement lock 防止已删除 surface 回流。
 
-补充（参考 plan §3.5：公开 seam 与导出约束）：
+## 5. 自动修复必须 reviewable
 
-- `createGovernancePrismaRepositories` / `createGovernancePowerSyncRepositories` / `createGovernanceEventLogRuntime` 是宿主装配所需的 **abstract ingredient factory**，不是 concrete adapter surface，也不是 layer-named seam；它们由 apps 的 runtime composer 调用，用来选择 adapter 并组装 instance。
-- 具体 `*Repository` class（`RulePrismaRepository`、`PowerSyncRuleRepository` 等）仍不通过根入口导出。
-- 宿主装配在 apps 完成（`apps/api/src/runtime/compose-governance.ts`、`apps/desktop/src/main/runtime/compose-governance.ts`）；`api` / `electron` module 只做 transport + lifecycle。
+默认只允许 `autofix-proposal` 生成建议。除非单独决策明确允许，Engineering Governance 不直接写产品源码。
 
-## 5. 前端不再消费 governance 包内 `domain-client`
+## 6. 历史决策保留但不再是当前指引
 
-- governance 负责返回 DTO
-- app-vue 本地派生展示模型
-- UI helper 不再伪装成领域模型
-
-原因：
-
-- UI 展示逻辑属于 app 层，不属于治理运行时包
-- 这样能减少模块特例和双轨认知负担
-- 也让 governance 更适合作为其他模块的严格参照
-
-## 6. Branded ID 必须贯穿 contracts / runtime / validation
-
-- 类型层：branded types
-- 运行时：`createIdType<T>()`
-- 校验层：`brandedId<T>()`
-- 三层不一致会导致 schema 接受不了系统自己生成的 ID
-
-## 7. 路由必须按资源 / feature 拆分
-
-- governance 要展示 ADR-021，而不是继续单大文件
-- route 也是架构实践的一部分，不是附属品
-
-## 8. 顶层交付 seam 与服务端内部层次必须分开
-
-- 顶层交付 seam：`api` / `client` / `electron`
-- 服务端内部层次：`server/domain` / `server/application` / `server/transport` / `server/infrastructure`
-- `server/transport` 只负责 controller 与 transport 翻译
-- 模块运行时副作用属于 `server/infrastructure/runtime`
-
-## 9. 轻量 docs 作为主入口，包内长文档作为深度资料
-
-- `docs/governance/*` 负责导航、速查、变更手册、决策
-- `packages/governance/*.md` 保留深度背景与实现细节
+ADR-109/110 与旧归档计划保留 Product Governance reference-module 的历史背景；当前决策以 ADR-113、当前代码和 tests 为准。

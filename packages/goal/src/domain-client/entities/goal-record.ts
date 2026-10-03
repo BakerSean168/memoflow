@@ -21,6 +21,9 @@ export interface GoalRecordState {
   value: number;
   valueAfter: number;
   comment: string | null;
+  authorship: GoalRecordClientDTO['authorship'];
+  source: GoalRecordClientDTO['source'];
+  recordedAt: Instant;
   createdAt: Instant;
   updatedAt: Instant;
 }
@@ -56,6 +59,12 @@ export class GoalRecord extends Entity<GoalRecordId> {
     return this._props.comment;
   }
 
+  get authorship(): GoalRecordClientDTO['authorship'] { return this._props.authorship; }
+
+  get source(): GoalRecordClientDTO['source'] { return this._props.source; }
+
+  get recordedAt(): Instant { return this._props.recordedAt; }
+
   get createdAt(): Instant {
     const v = this._props.createdAt;
     return v as Instant;
@@ -80,6 +89,9 @@ export class GoalRecord extends Entity<GoalRecordId> {
       value: this._props.value,
       valueAfter: this._props.valueAfter,
       comment: this._props.comment,
+      authorship: this.authorship,
+      source: this.source,
+      recordedAt: this.recordedAt,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
     };

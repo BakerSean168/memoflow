@@ -1,29 +1,27 @@
 <template>
-  <div class="flex h-full min-h-0 flex-col bg-sidebar" data-testid="knowledge-note-catalog">
-    <div class="border-b border-border/70 px-3 py-2.5" data-testid="knowledge-catalog-repository">
-      <div class="flex min-w-0 items-center gap-2">
-        <BookOpen class="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span class="min-w-0 truncate text-sm font-semibold">{{ repositoryName }}</span>
-        <Badge variant="secondary" class="shrink-0 px-1.5 text-[10px]">
-          {{ noteCountLabel }}
-        </Badge>
-
-        <div class="ml-auto flex shrink-0 items-center gap-0.5">
-          <Badge
-            v-if="providerNeedsAttention"
-            variant="outline"
-            class="mr-1 max-w-32 truncate px-1.5 text-[10px]"
-            data-testid="knowledge-projection-provider-warning"
-          >
-            {{ providerWarningLabel }}
-          </Badge>
-          <Loader2
-            v-if="syncing"
-            class="mr-1 h-3.5 w-3.5 animate-spin text-muted-foreground"
-            :title="t('repository.projection.syncing')"
-            data-testid="knowledge-projection-syncing-badge"
-          />
-
+  <div
+    class="flex h-full min-h-0 flex-col bg-[hsl(var(--surface)/0.5)]"
+    data-testid="knowledge-note-catalog"
+  >
+    <div
+      class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5"
+      data-testid="knowledge-catalog-repository"
+    >
+      <DocumentSourceStatus
+        :title="repositoryName"
+        :subtitle="sourceSubtitle"
+        :count-label="noteCountLabel"
+        :status-label="providerNeedsAttention ? providerWarningLabel : undefined"
+        :status-tone="providerNeedsAttention ? 'warning' : 'default'"
+        status-test-id="knowledge-projection-provider-warning"
+        :syncing="syncing"
+        :syncing-label="t('repository.projection.syncing')"
+        syncing-test-id="knowledge-projection-syncing-badge"
+      >
+        <template #icon>
+          <BookOpen class="h-4 w-4" />
+        </template>
+        <template #actions>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button
@@ -57,7 +55,10 @@
                 >
                   <span class="truncate font-mono">{{ directory }}</span>
                 </div>
-                <p v-if="hiddenNoteCount > 0 && !includeHidden" class="pt-1 text-[10px] text-muted-foreground">
+                <p
+                  v-if="hiddenNoteCount > 0 && !includeHidden"
+                  class="pt-1 text-[10px] text-muted-foreground"
+                >
                   {{ t('repository.projection.hiddenNoteCount', { count: hiddenNoteCount }) }}
                 </p>
               </div>
@@ -87,94 +88,63 @@
           >
             <X class="h-3.5 w-3.5" />
           </Button>
-        </div>
-      </div>
+        </template>
+      </DocumentSourceStatus>
 
-      <div class="mt-1 flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
-        <span class="min-w-0 truncate">{{ repositoryDisplayName }}</span>
-        <span aria-hidden="true">·</span>
-        <span class="shrink-0">{{ defaultBranch }}</span>
-      </div>
-
-      <select
+      <Select
         v-if="connections.length > 1"
-        :value="selectedConnectionId"
-        class="mt-2 h-7 w-full rounded-md border border-border/70 bg-background/60 px-2 text-xs"
-        :aria-label="t('repository.projection.connectionLabel')"
-        data-testid="knowledge-projection-connection-select"
-        @change="handleConnectionChange"
+        :model-value="selectedConnectionId"
+        @update:model-value="handleConnectionChange"
       >
-        <option v-for="connection in connections" :key="connection.id" :value="connection.id">
-          {{ connectionDisplayName(connection) }}
-        </option>
-      </select>
+        <SelectTrigger
+          class="mt-2 h-7 w-full bg-[hsl(var(--surface-raised)/0.5)] text-xs shadow-none"
+          :aria-label="t('repository.projection.connectionLabel')"
+          data-testid="knowledge-projection-connection-select"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="connection in connections" :key="connection.id" :value="connection.id">
+            {{ connectionDisplayName(connection) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
 
     <div class="px-2.5 pb-2 pt-2.5">
-      <div class="relative w-full">
-        <Search
-          class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          type="text"
-          autocomplete="off"
-          :model-value="searchQuery"
-          class="h-8 rounded-md border-border/70 bg-background/60 pl-8 pr-8 text-sm shadow-none"
-          :placeholder="t('repository.projection.searchPlaceholder')"
-          data-testid="knowledge-projection-search"
-          @update:model-value="emit('update:searchQuery', String($event ?? ''))"
-          @keyup.enter="emit('search')"
-          @keyup.esc="emit('clear-search')"
-        />
-        <button
-          v-if="searchQuery"
-          type="button"
-          class="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          :aria-label="t('common.clear')"
-          data-testid="knowledge-projection-search-clear"
-          @click="emit('clear-search')"
-        >
-          <X class="h-3.5 w-3.5" />
-        </button>
-      </div>
+      <DocumentCatalogSearch
+        :model-value="searchQuery"
+        :placeholder="t('repository.projection.searchPlaceholder')"
+        :clear-label="t('common.clear')"
+        test-id="knowledge-projection-search"
+        @update:model-value="emit('update:searchQuery', $event)"
+        @submit="emit('search')"
+        @clear="emit('clear-search')"
+      />
     </div>
 
     <div class="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
       <template v-if="searchMode">
         <div class="space-y-0.5">
-          <button
+          <DocumentCatalogRow
             v-for="note in notes"
             :key="note.id"
-            type="button"
-            class="group block w-full rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/55"
-            :class="
-              selectedNoteId === note.id
-                ? 'bg-accent/75 text-accent-foreground'
-                : 'text-foreground'
-            "
+            :selected="selectedNoteId === note.id"
             :data-testid="`knowledge-projection-note-${note.id}`"
-            @click="emit('select', note.id)"
+            @activate="emit('select', note.id)"
           >
-            <span class="block truncate text-sm font-medium leading-5">{{ note.title }}</span>
-            <span class="mt-0.5 block truncate text-[11px] leading-4 text-muted-foreground">
-              {{ note.relativePath }}
-            </span>
-          </button>
+            {{ note.title }}
+            <template #meta>{{ note.relativePath }}</template>
+          </DocumentCatalogRow>
         </div>
 
-        <div
+        <DocumentWorkspaceState
           v-if="!loading && notes.length === 0"
-          class="grid h-32 place-items-center px-4 text-center text-sm text-muted-foreground"
-        >
-          {{ t('repository.projection.noSearchResults') }}
-        </div>
+          kind="empty"
+          :title="t('repository.projection.noSearchResults')"
+        />
 
-        <div
-          v-if="loading && notes.length === 0"
-          class="grid h-32 place-items-center text-muted-foreground"
-        >
-          <Loader2 class="h-4 w-4 animate-spin" />
-        </div>
+        <DocumentWorkspaceState v-if="loading && notes.length === 0" kind="loading" />
 
         <div v-if="notes.length > 0" class="px-2 py-3 text-center">
           <p class="text-[11px] text-muted-foreground">{{ loadedCountLabel }}</p>
@@ -198,12 +168,16 @@
           <Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
 
-        <div v-else-if="treeRows.length" class="space-y-0.5 py-0.5" data-testid="knowledge-file-tree">
+        <div
+          v-else-if="treeRows.length"
+          class="space-y-0.5 py-0.5"
+          data-testid="knowledge-file-tree"
+        >
           <template v-for="row in treeRows" :key="row.node.relativePath">
             <button
               v-if="row.node.kind === 'directory'"
               type="button"
-              class="flex h-7 w-full items-center gap-1 rounded-md pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent/55 hover:text-foreground"
+              class="flex h-7 w-full items-center gap-1 rounded-md pr-2 text-left text-sm text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover)/0.6)] hover:text-foreground"
               :style="{ paddingLeft: `${6 + row.depth * 16}px` }"
               :data-testid="`knowledge-tree-directory-${row.node.relativePath}`"
               @click="emit('toggle-directory', row.node.relativePath)"
@@ -223,38 +197,34 @@
               </span>
             </button>
 
-            <button
+            <DocumentCatalogRow
               v-else
-              type="button"
-              class="flex h-7 w-full items-center gap-1.5 rounded-md pr-2 text-left text-sm transition-colors hover:bg-accent/55"
-              :class="
-                selectedNoteId === row.node.projectionId
-                  ? 'bg-accent/75 text-accent-foreground'
-                  : 'text-foreground/90'
-              "
+              class="h-7 py-0 pr-2"
+              :selected="selectedNoteId === row.node.projectionId"
               :style="{ paddingLeft: `${9 + row.depth * 16}px` }"
               :data-testid="`knowledge-tree-note-${row.node.projectionId}`"
-              @click="emit('select', row.node.projectionId)"
+              @activate="emit('select', row.node.projectionId)"
             >
-              <FileText class="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
-              <span class="min-w-0 flex-1 truncate">{{ row.node.title }}</span>
-            </button>
+              <template #icon>
+                <FileText class="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" />
+              </template>
+              {{ row.node.title }}
+            </DocumentCatalogRow>
           </template>
         </div>
 
-        <div
+        <DocumentWorkspaceState
+          v-else-if="!treeLoading && syncing"
+          kind="loading"
+          :title="t('repository.projection.syncing')"
+          :description="t('repository.projection.syncingDescription')"
+          data-testid="knowledge-projection-syncing-empty"
+        />
+        <DocumentWorkspaceState
           v-else-if="!treeLoading"
-          class="grid h-32 place-items-center px-4 text-center text-sm text-muted-foreground"
-        >
-          <div v-if="syncing" data-testid="knowledge-projection-syncing-empty">
-            <Loader2 class="mx-auto mb-2 h-4 w-4 animate-spin" />
-            <p class="font-medium text-foreground">{{ t('repository.projection.syncing') }}</p>
-            <p class="mt-1 text-xs leading-5">{{ t('repository.projection.syncingDescription') }}</p>
-          </div>
-          <template v-else>
-            {{ t('repository.projection.noNotes') }}
-          </template>
-        </div>
+          kind="empty"
+          :title="t('repository.projection.noNotes')"
+        />
       </template>
     </div>
   </div>
@@ -270,11 +240,9 @@ import {
   FileText,
   Loader2,
   RefreshCw,
-  Search,
   X,
 } from '@lucide/vue';
 import {
-  Badge,
   Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -282,7 +250,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   KnowledgeNoteProjectionSummaryDTO,
@@ -290,6 +262,10 @@ import type {
   KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
 import { useI18n } from 'vue-i18n';
+import DocumentCatalogRow from './DocumentCatalogRow.vue';
+import DocumentCatalogSearch from './DocumentCatalogSearch.vue';
+import DocumentSourceStatus from './DocumentSourceStatus.vue';
+import DocumentWorkspaceState from './DocumentWorkspaceState.vue';
 
 const props = defineProps<{
   notes: KnowledgeNoteProjectionSummaryDTO[];
@@ -335,6 +311,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const searchMode = computed(() => props.searchQuery.trim().length > 0);
+const sourceSubtitle = computed(() => `${props.repositoryDisplayName} · ${props.defaultBranch}`);
 
 const treeRows = computed(() => {
   const expanded = new Set(props.expandedDirectories);
@@ -357,9 +334,8 @@ function connectionDisplayName(connection: KnowledgeRemoteBindingClientDTO): str
   return connection.observation?.repositoryFullName ?? connection.repositoryFullNameSnapshot;
 }
 
-function handleConnectionChange(event: Event): void {
-  const select = event.currentTarget as HTMLSelectElement | null;
-  if (!select?.value) return;
-  emit('connection-change', select.value);
+function handleConnectionChange(value: unknown): void {
+  if (typeof value !== 'string' || !value || value === props.selectedConnectionId) return;
+  emit('connection-change', value);
 }
 </script>

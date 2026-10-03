@@ -55,7 +55,7 @@ function detection(
 }
 
 /**
- * Fail-closed installation owner detector (ADR-112 / DU-1102).
+ * Fail-closed installation owner detector (ADR-114 / DU-1102).
  *
  * Platform alone is insufficient. Store/package-manager/portable provenance
  * takes precedence over OS defaults, and unsigned/unknown direct macOS builds

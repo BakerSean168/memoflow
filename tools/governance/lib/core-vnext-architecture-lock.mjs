@@ -55,6 +55,17 @@ export const AI_RAW_SCHEDULER_ACCESS_PATTERN =
   /['"`]@memoflow\/scheduler(?:\/[^'"`]*)?['"`]|\b(ScheduledInvocation|ScheduleTask|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
 export const AI_RETIRED_GOAL_TASK_DRAFT_PATTERN =
   /\b(validateKeyResultsOutput|validateTasksOutput|valueType|folderId|estimatedHours|progressTrigger|PER_INSTANCE|ALL_INSTANCES_COMPLETED)\b/;
+
+const AI_WORKFLOW_CONTEXT_FILES = new Set([
+  'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.vue',
+  'packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.vue',
+  'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+]);
+export const AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN =
+  /\b(?:GoalDialog|TaskPlanDialog|KnowledgeCaptureReviewDialog|createConfirmedKnowledgeNote|createPlanSafe|createGoalSafe)\b/;
+
 export const TASK_LEGACY_CLASSIFICATION_PATTERN =
   /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
 export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
@@ -91,7 +102,6 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
   'packages/app-vue/src/modules/ai/composables/types.ts',
   'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
-  'packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue',
   'packages/powersync-schema/src/index.ts',
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
@@ -122,7 +132,6 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.ts',
   'packages/app-vue/src/modules/ai/composables/types.ts',
   'packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
-  'packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue',
   'packages/database/src/generated/prisma/schema.prisma',
 ]);
 const KR_CLIENT_SURFACE_ROOTS = [
@@ -180,6 +189,22 @@ export function findCoreVnextArchitectureLockViolations(files) {
   const fileMap = new Map(production.map(({ relPath, content }) => [relPath, content]));
 
   for (const { relPath, content } of production) {
+    pushPatternViolations(
+      violations,
+      relPath,
+      content,
+      /\b(?:AIGoalDraftEditor|AITaskDraftEditor|showGoalDraftEditor|showTaskDraftEditor|toggleGoalDraftEditor)\b|(?:show-goal-draft-editor|show-task-draft-editor|goal-agent-toggle-editor|goal-workflow-draft-editor|task-workflow-draft-editor|knowledge-capture-draft-editor)/g,
+      'ai-owned-business-editor',
+    );
+    if (AI_WORKFLOW_CONTEXT_FILES.has(relPath)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN,
+        'ai-workflow-context-owner-leakage',
+      );
+    }
     if (startsWithAny(relPath, FEATURE_ROOTS)) {
       pushPatternViolations(
         violations,
@@ -324,7 +349,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     // ADR-054: Task classification is single-track Shared Label. These locks
     // intentionally target only Task-owned product/contract files so Reminder,
-    // Governance and Scheduler metadata may keep their unrelated tag/color semantics.
+    // Scheduler metadata may keep its unrelated tag/color semantics.
     if (
       relPath.startsWith('packages/task/src/') ||
       relPath.startsWith('packages/app-vue/src/modules/task/') ||
@@ -455,6 +480,41 @@ export function findCoreVnextArchitectureLockViolations(files) {
     }
   }
 
+  // PVC-AI-8131 retains workflow as a non-owner context/status surface until clarification,
+  // recovery, supporting overlays, attention deferral and diagnostics have another canonical host.
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
+    ["panelSurface === 'workflow'", '<slot name="workflow" />', 'workflowAttentionCount'],
+    'ai-workflow-context-surface-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
+    [
+      'requestWorkflowSurface',
+      "this.surfaceStatus !== 'clean'",
+      'this.workflowAttentionCount',
+      'closeWorkflowSurface',
+    ],
+    'ai-workflow-context-surface-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    [
+      '<AIContextPanel',
+      '<AIGoalWorkflowPanel',
+      '<AITaskWorkflowPanel',
+      '<AIKnowledgeCapturePanel',
+      'requestWorkflowSurface(intent)',
+    ],
+    'ai-workflow-context-surface-missing',
+  );
+
   // ADR-069 / GOAL-7205 positive locks: persistence must continue accepting Goal-only links,
   // and Task must own the bounded read seam consumed later by Goal Workspace.
   requireTokens(
@@ -462,11 +522,14 @@ export function findCoreVnextArchitectureLockViolations(files) {
     fileMap,
     'packages/database/src/schema/task-goal-binding-constraint.ts',
     [
-      'memoflow.task-goal-binding/v3',
-      'goal_id IS NOT NULL AND key_result_id IS NULL',
+      'memoflow.task-goal-binding/v4',
+      'key_result_id IS NULL OR goal_id IS NOT NULL',
       'goal_record_value IS NULL AND goal_progress_trigger IS NULL',
+      "goal_progress_mode = 'Prompt' AND goal_record_value IS NULL",
+      'goal_record_value <> 0',
+      ') IS TRUE)',
     ],
-    'task-goal-binding-v3-missing',
+    'task-goal-binding-v4-missing',
   );
   requireTokens(
     violations,
@@ -534,6 +597,12 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
       'UI must not mutate ScheduledInvocation/ScheduleTask worker state directly',
     'ai-raw-scheduler-access':
       'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
+    'ai-owned-business-editor':
+      'AI-owned Goal/Task editors and visibility controls are retired; use owner-native sessions (ADR-112 / PVC-AI-8121)',
+    'ai-workflow-context-owner-leakage':
+      'The retained workflow surface is context/status only; owner forms and direct owner mutations belong to native business surfaces (PVC-AI-8131)',
+    'ai-workflow-context-surface-missing':
+      'PVC-AI-8131 retains the workflow context surface until clarification/recovery/attention/diagnostics have canonical replacements',
     'ai-retired-goal-task-draft':
       'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification':
@@ -548,8 +617,8 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
       'Task Key Result reads must include the owning Goal; ownerless findByKeyResultId queries are forbidden',
     'task-goal-null-kr-stringify':
       'Goal-only Task links must preserve keyResultId=null; stringifying a nullable KR id is forbidden',
-    'task-goal-binding-v3-missing':
-      'Task persistence must retain the v3 Goal-only / Goal+KR binding constraint',
+    'task-goal-binding-v4-missing':
+      'Task persistence must retain the v4 Goal-only / Goal+KR Fixed/Prompt binding constraint',
     'task-goal-context-read-port-missing':
       'Task must expose the ADR-069 owner-controlled Goal/KR context read port',
   };

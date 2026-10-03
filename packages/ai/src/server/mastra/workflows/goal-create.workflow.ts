@@ -1,3 +1,4 @@
+import { goalWorkflowEntityId } from './deterministic-entity-id';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {
@@ -160,6 +161,25 @@ export function createGoalCreateWorkflow(input: {
           draft,
           warnings: draft.warnings,
           revision: draft.revision,
+          ownerCreate: {
+            goalId: goalWorkflowEntityId({
+              workflowRunId: runId,
+              revision: draft.revision,
+              kind: 'goal',
+              draftRef: 'goal',
+            }),
+            keyResultIds: Object.fromEntries(
+              draft.keyResults.map((item) => [
+                item.draftRef,
+                goalWorkflowEntityId({
+                  workflowRunId: runId,
+                  revision: draft.revision,
+                  kind: 'key_result',
+                  draftRef: item.draftRef,
+                }),
+              ]),
+            ),
+          },
         });
       };
 

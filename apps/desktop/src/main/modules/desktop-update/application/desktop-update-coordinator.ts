@@ -108,7 +108,7 @@ function unrefTimer(timer: ReturnType<typeof setTimeout> | ReturnType<typeof set
 }
 
 /**
- * Shell-owned application coordinator for Desktop Update (ADR-112 / DU-1105).
+ * Shell-owned application coordinator for Desktop Update (ADR-114 / DU-1105).
  *
  * This class owns scheduling, single-flight, product policy, and the canonical
  * renderer snapshot. It has no Electron or electron-updater dependency.

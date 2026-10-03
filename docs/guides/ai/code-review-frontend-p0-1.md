@@ -1,12 +1,14 @@
 # 说明：本文档保留为工程实现参考，不是当前 canonical plan。历史统一方案见 `docs/plan/archive/2026-04-29-ai-goal-agent-workflow-unification.md`；当前真值以代码、配置和仍留在 `docs/plan/active` 的计划为准。
 
+> **PVC-AI-8121 retirement:** 本文代码片段是迁移前的历史审查记录。AI-owned Goal/Task editors、visibility flags 与 toggle 已退役；当前使用 GoalDialog、完整 TaskPlanDialog 与 Repository native review。支持性 Task/Knowledge overlays、澄清与恢复保留。以 [当前 AI 模块](../../product/modules/ai.md) 为准。
+
 # P0-1 代码审查 - Vue 前端层
 
 详细的前端代码审查、架构分析和改动建议。
 
 ---
 
-## 当前前端架构
+## 历史前端架构
 
 ### AIChatView.vue 核心状态管理
 
@@ -67,9 +69,10 @@ applyGoalDraft(draft)
 ### 状态持久化机制
 
 **存储位置**：localStorage  
-**存储键**：`ai:conversation-workflow-map`  
+**存储键**：`ai:conversation-workflow-map`
 
 **结构**：
+
 ```typescript
 {
   [conversationId]: PersistedWorkflowEntry {
@@ -84,6 +87,7 @@ applyGoalDraft(draft)
 ```
 
 **时机**：
+
 - 创建会话后
 - 生成 draft 后
 - 编辑 draft 后
@@ -105,15 +109,22 @@ const goalClarificationAnswers = ref<string[]>([]);
 const goalClarificationLoading = ref(false);
 
 // 澄清流程阶段
-type GoalWorkflowStage = 'input' | 'clarifying' | 'clarification-required' | 'draft-generating' | 'draft-ready' | 'creating';
+type GoalWorkflowStage =
+  | 'input'
+  | 'clarifying'
+  | 'clarification-required'
+  | 'draft-generating'
+  | 'draft-ready'
+  | 'creating';
 const goalWorkflowStage = ref<GoalWorkflowStage>('input');
 ```
 
 **在 PersistedWorkflowEntry 中新增**：
+
 ```typescript
 type PersistedWorkflowEntry = {
   // ... 现有字段
-  
+
   // 新增字段
   goalClarificationQuestions?: Array<{ question: string; context?: string }>;
   goalClarificationAnswers?: string[];
@@ -126,6 +137,7 @@ type PersistedWorkflowEntry = {
 ### 改动 2：改进 generateGoalDraftFromConversation
 
 当前实现很简单：
+
 ```typescript
 async function generateGoalDraftFromConversation() {
   // 1. 调用 service.generateGoal()
@@ -135,10 +147,9 @@ async function generateGoalDraftFromConversation() {
 ```
 
 新的实现（两阶段）：
+
 ```typescript
-async function generateGoalDraftFromConversation(
-  skipClarification: boolean = false
-) {
+async function generateGoalDraftFromConversation(skipClarification: boolean = false) {
   if (!selectedModel.value || !hasWorkflowUserMessages.value) {
     return;
   }
@@ -184,8 +195,8 @@ async function generateGoalDraftFromConversation(
       providerId: selectedModel.value.providerId,
       model: selectedModel.value.modelId,
       enableClarification: false,
-      clarificationAnswers: goalClarificationAnswers.value.length 
-        ? goalClarificationAnswers.value 
+      clarificationAnswers: goalClarificationAnswers.value.length
+        ? goalClarificationAnswers.value
         : undefined,
     })) as GoalDraft;
 
@@ -222,8 +233,10 @@ async function submitGoalClarifications(answers: string[]) {
 
 ```vue
 <!-- Clarification Questions Section -->
-<section v-if="toolMode === 'goal' && goalWorkflowStage === 'clarification-required'" 
-         class="rounded-3xl border bg-card p-5">
+<section
+  v-if="toolMode === 'goal' && goalWorkflowStage === 'clarification-required'"
+  class="rounded-3xl border bg-card p-5"
+>
   <div class="flex flex-col gap-4">
     <div class="space-y-2">
       <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -280,8 +293,10 @@ async function submitGoalClarifications(answers: string[]) {
 </section>
 
 <!-- Existing Goal Draft Section (updated condition) -->
-<section v-if="toolMode === 'goal' && goalDraft && goalWorkflowStage !== 'clarification-required'" 
-         class="rounded-3xl border bg-card p-5">
+<section
+  v-if="toolMode === 'goal' && goalDraft && goalWorkflowStage !== 'clarification-required'"
+  class="rounded-3xl border bg-card p-5"
+>
   <!-- ... 保持不变 ... -->
 </section>
 ```
@@ -358,11 +373,11 @@ function snapshotWorkflowEntry(): PersistedWorkflowEntry | null {
   return {
     mode: toolMode.value,
     goalDraft: goalDraft.value,
-    editableGoal: { /* ... */ },
-    editableKeyResults: [ /* ... */ ],
+    editableGoal: {/* ... */},
+    editableKeyResults: [/* ... */],
     noteSummary: createStoredNoteSummary(noteSummary.value),
     showGoalDraftEditor: showGoalDraftEditor.value,
-    
+
     // 新增
     goalClarificationQuestions: goalClarificationQuestions.value,
     goalClarificationAnswers: goalClarificationAnswers.value,
@@ -381,11 +396,11 @@ function restoreWorkflowState(conversationId: string) {
 
   toolMode.value = entry.mode;
   goalDraft.value = entry.goalDraft;
-  editableGoal.value = { /* ... */ };
-  editableKeyResults.value = [ /* ... */ ];
+  editableGoal.value = {/* ... */};
+  editableKeyResults.value = [/* ... */];
   noteSummary.value = entry.noteSummary ? createStoredNoteSummary(entry.noteSummary) : null;
   showGoalDraftEditor.value = Boolean(entry.showGoalDraftEditor);
-  
+
   // 新增
   goalClarificationQuestions.value = entry.goalClarificationQuestions ?? [];
   goalClarificationAnswers.value = entry.goalClarificationAnswers ?? [];
@@ -398,22 +413,26 @@ function restoreWorkflowState(conversationId: string) {
 ## 关键设计观察
 
 ### 1. 当前 Goal Draft 流程已经优化完善
+
 - 消息流式追加
 - 工作流状态与会话关联
 - 本地状态持久化完整
 - 编辑器与预览分离
 
 ### 2. 澄清流程需要的改动相对轻量
+
 - 只需在状态中新增 3-4 个 ref
 - 核心 UI 改动是新增一个"澄清问题卡片"
 - 兼容现有的持久化机制
 
 ### 3. 状态恢复机制是关键
+
 - 当前已经支持会话级工作流恢复
 - 澄清状态可以自然地扩展进现有机制
 - 用户刷新页面时能恢复到"澄清问题"步骤（如果还未提交）
 
 ### 4. 两阶段 LLM 调用的前端协调
+
 - 第一次调用是澄清检查（可选，`enableClarification=true`）
 - 第二次调用是 draft 生成（带澄清答案）
 - 前端需要清楚地管理这两个阶段的状态转换
@@ -423,11 +442,13 @@ function restoreWorkflowState(conversationId: string) {
 ## 与其他组件的关系
 
 ### 与 AIGoalDraftEditor.vue 的关系
+
 - 澄清问题 UI 是 **独立的卡片**，不在 editor 内
 - editor 的用途是修改 draft 细节（名字、KR 等）
 - 澄清问题是 draft 之前的前置步骤
 
 ### 与 API Client Service 的关系
+
 - 需要扩展 `AIClientService.generateGoal()` 的签名
   - 新增 `enableClarification?: boolean`
   - 新增 `clarificationAnswers?: string[]`
@@ -438,6 +459,7 @@ function restoreWorkflowState(conversationId: string) {
 ## 本地化字符串需求
 
 新增以下 i18n key：
+
 ```
 aiAssistant.chatPage.workflow.clarificationRequired
 aiAssistant.chatPage.workflow.clarifyYourGoal
@@ -453,11 +475,13 @@ aiAssistant.dialogs.generateGoal.clarifying
 ## 测试要点
 
 ### 单元测试（组件逻辑）
+
 - `generateGoalDraftFromConversation()` 处理澄清响应
 - `submitGoalClarifications()` 正确传递答案
 - 状态转换逻辑正确
 
 ### E2E 测试（工作流）
+
 1. 输入模糊 idea → 系统返回澄清问题
 2. 填写答案 → 系统继续生成 draft
 3. 刷新页面 → 澄清问题恢复显示

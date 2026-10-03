@@ -12,6 +12,7 @@ import {
   SERVER_STATE_RUNTIME_KEY,
   type ServerStateRuntime,
 } from '../../../platform/server-state';
+import { SCHEDULE_CALENDAR_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { useSchedule } from './useSchedule';
 
 const i18n = createI18n({
@@ -74,6 +75,51 @@ describe('useScheduleCalendar shared owner cache', () => {
     vi.clearAllMocks();
   });
 
+  it('shares pending owner reads across windows and expires at the owner policy boundary', async () => {
+    const now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    const runtime = createTestServerStateRuntime();
+    const pinia = createTestPinia();
+    let release!: () => void;
+    const service = {
+      getSchedulesByAccount: vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = () => resolve(ok([scheduleEntry()]));
+            }),
+        )
+        .mockResolvedValue(ok([scheduleEntry()])),
+    };
+    const first = mountSchedule(runtime, pinia, service);
+    const second = mountSchedule(runtime, pinia, service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    try {
+      const reads = [
+        first.api.fetchCalendarEntries(start, end),
+        second.api.fetchCalendarEntries(end, end + 86_400_000),
+      ];
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(1);
+      release();
+      const [today, tomorrow] = await Promise.all(reads);
+      expect(today).toHaveLength(1);
+      expect(tomorrow).toEqual([]);
+      clock.mockReturnValue(now + SCHEDULE_CALENDAR_STALE_TIME_MS - 1);
+      await second.api.fetchCalendarEntries(start, end);
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(now + SCHEDULE_CALENDAR_STALE_TIME_MS);
+      await second.api.fetchCalendarEntries(start, end);
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(2);
+    } finally {
+      first.wrapper.unmount();
+      second.wrapper.unmount();
+      runtime.dispose();
+      clock.mockRestore();
+    }
+  });
+
   it('reuses the fresh account schedule read after the consumer is unmounted and remounted', async () => {
     const runtime = createTestServerStateRuntime();
     const pinia = createTestPinia();
@@ -94,6 +140,48 @@ describe('useScheduleCalendar shared owner cache', () => {
     expect(second.api.calendarEntries.value).toHaveLength(1);
 
     second.wrapper.unmount();
+    runtime.dispose();
+  });
+  it('returns the update Result and delete boolean while patching owner facts and cache', async () => {
+    const runtime = createTestServerStateRuntime();
+    const updated = { ...scheduleEntry(), title: 'Updated', version: 2 };
+    const service = {
+      getSchedulesByAccount: vi.fn().mockResolvedValue(ok([scheduleEntry()])),
+      updateSchedule: vi.fn().mockResolvedValue(ok(updated)),
+      deleteSchedule: vi.fn().mockResolvedValue(ok(undefined)),
+    };
+    const { wrapper, api } = mountSchedule(runtime, createTestPinia(), service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchCalendarEntries(start, end);
+    expect(
+      await api.updateCalendarEntry('schedule-1', { name: 'Updated', expectedVersion: 1 }),
+    ).toEqual(ok(updated));
+    expect(api.calendarEntries.value[0]?.version).toBe(2);
+    expect(await api.deleteCalendarEntry('schedule-1', 2)).toBe(true);
+    expect(service.deleteSchedule).toHaveBeenCalledWith('schedule-1', 2);
+    await api.fetchCalendarEntries(start, end);
+    expect(api.calendarEntries.value).toEqual([]);
+    expect(service.getSchedulesByAccount).toHaveBeenCalledOnce();
+    wrapper.unmount();
+    runtime.dispose();
+  });
+  it('forces a canonical read after a stale conflict even while cached facts are fresh', async () => {
+    const runtime = createTestServerStateRuntime();
+    const service = {
+      getSchedulesByAccount: vi
+        .fn()
+        .mockResolvedValueOnce(ok([scheduleEntry()]))
+        .mockResolvedValueOnce(ok([{ ...scheduleEntry(), version: 2 }])),
+    };
+    const { wrapper, api } = mountSchedule(runtime, createTestPinia(), service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    await api.fetchCalendarEntries(start, end);
+    await api.fetchCalendarEntries(start, end, { force: true });
+    expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(2);
+    expect(api.calendarEntries.value[0]?.version).toBe(2);
+    wrapper.unmount();
     runtime.dispose();
   });
 });

@@ -13,141 +13,144 @@
       <Button variant="ghost" size="sm" @click="loadConnections">{{ t('common.retry') }}</Button>
     </div>
 
-    <div
-      v-if="loadingConnections"
-      class="grid min-h-0 flex-1 place-items-center text-sm text-muted-foreground"
-      aria-busy="true"
-    >
-      <Loader2 class="h-5 w-5 animate-spin" />
-    </div>
+    <DocumentWorkspaceState v-if="loadingConnections" class="min-h-0 flex-1" kind="loading" />
 
     <div
       v-else-if="connections.length === 0"
-      class="grid min-h-0 flex-1 place-items-center overflow-auto px-6 py-10"
+      class="grid min-h-0 flex-1 place-items-center overflow-auto"
       data-testid="knowledge-projection-empty"
     >
-      <div class="max-w-md text-center">
-        <CloudOff class="mx-auto h-10 w-10 text-muted-foreground" />
-        <h1 class="mt-4 text-xl font-semibold">{{ t('repository.projection.connectTitle') }}</h1>
-        <p class="mt-2 text-sm leading-6 text-muted-foreground">
-          {{ t('repository.projection.connectDescription') }}
-        </p>
-        <Button
-          class="mt-5"
-          data-testid="knowledge-projection-connect"
-          @click="openRepositorySettings"
-        >
-          <Link2 class="mr-2 h-4 w-4" />
-          {{ t('repository.projection.connectAction') }}
-        </Button>
-      </div>
+      <DocumentWorkspaceState
+        kind="empty"
+        :title="t('repository.projection.connectTitle')"
+        :description="t('repository.projection.connectDescription')"
+      >
+        <template #icon>
+          <div
+            class="grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]"
+          >
+            <CloudOff class="h-5 w-5 text-[hsl(var(--foreground-muted))]" />
+          </div>
+        </template>
+        <template #actions>
+          <Button data-testid="knowledge-projection-connect" @click="openRepositorySettings">
+            <Link2 class="mr-2 h-4 w-4" />
+            {{ t('repository.projection.connectAction') }}
+          </Button>
+        </template>
+      </DocumentWorkspaceState>
     </div>
 
     <template v-else>
-      <header
-        class="flex h-11 min-w-0 shrink-0 items-center gap-2 border-b border-border/70 px-2.5"
-        data-testid="knowledge-projection-document-toolbar"
-      >
-        <Button
-          variant="ghost"
-          size="icon"
-          class="h-8 w-8 shrink-0"
-          :aria-label="
-            isNarrow || !catalogVisible
-              ? t('repository.projection.openCatalog')
-              : t('repository.projection.hideCatalog')
-          "
-          :title="
-            isNarrow || !catalogVisible
-              ? t('repository.projection.openCatalog')
-              : t('repository.projection.hideCatalog')
-          "
-          data-testid="knowledge-projection-toggle-catalog"
-          @click="toggleCatalog"
-        >
-          <PanelLeftOpen v-if="isNarrow || !catalogVisible" class="h-4 w-4" />
-          <PanelLeftClose v-else class="h-4 w-4" />
-        </Button>
-
-        <div class="flex min-w-0 flex-1 items-center gap-2">
-          <template v-if="selectedNote">
-            <h1 class="min-w-0 max-w-[46%] truncate text-sm font-semibold tracking-tight">
-              {{ selectedNote.title }}
-            </h1>
-            <span class="min-w-0 truncate text-[11px] text-muted-foreground">
-              {{ selectedNote.relativePath }}
-            </span>
-            <span class="shrink-0 text-[11px] text-muted-foreground" aria-hidden="true">·</span>
-            <span class="shrink-0 text-[11px] text-muted-foreground">
-              {{ formatUpdatedAt(selectedNote.updatedAt) }}
-            </span>
-          </template>
-          <span v-else class="truncate text-sm font-medium text-muted-foreground">
-            {{ t('repository.projection.catalogTitle') }}
-          </span>
-          <Loader2
-            v-if="loadingDetail"
-            class="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground"
-          />
-        </div>
-
-        <template v-if="selectedNote">
+      <DocumentWorkspaceToolbar data-testid="knowledge-projection-document-toolbar">
+        <template #leading>
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8 shrink-0"
-            :class="contextOpen ? 'bg-accent text-accent-foreground' : ''"
-            :aria-label="t('repository.projection.contextTitle')"
-            :title="t('repository.projection.contextTitle')"
-            data-testid="knowledge-projection-context-toggle"
-            @click="contextOpen = !contextOpen"
+            class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+            :aria-label="
+              isNarrow || !catalogVisible
+                ? t('repository.projection.openCatalog')
+                : t('repository.projection.hideCatalog')
+            "
+            :title="
+              isNarrow || !catalogVisible
+                ? t('repository.projection.openCatalog')
+                : t('repository.projection.hideCatalog')
+            "
+            data-testid="knowledge-projection-toggle-catalog"
+            @click="toggleCatalog"
           >
-            <PanelRight class="h-4 w-4" />
+            <PanelLeftOpen v-if="isNarrow || !catalogVisible" class="h-4 w-4" />
+            <PanelLeftClose v-else class="h-4 w-4" />
           </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button
-                variant="ghost"
-                size="icon"
-                class="h-8 w-8 shrink-0"
-                :aria-label="t('common.more')"
-                data-testid="knowledge-projection-more"
-              >
-                <Ellipsis class="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" class="w-52">
-              <DropdownMenuItem @click="copyNotePath">
-                <Copy class="mr-2 h-3.5 w-3.5" />
-                {{
-                  pathCopied
-                    ? t('repository.projection.pathCopied')
-                    : t('repository.projection.copyPath')
-                }}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                v-if="selectedNote.knowledgeDocumentId === null"
-                data-testid="knowledge-projection-adopt"
-                @click="openAdoptionDialog"
-              >
-                <Link2 class="mr-2 h-3.5 w-3.5" />
-                {{ t('repository.projection.stableReferenceAction') }}
-              </DropdownMenuItem>
-              <DropdownMenuItem v-else disabled data-testid="knowledge-projection-document-id">
-                <Check class="mr-2 h-3.5 w-3.5" />
-                {{ t('repository.projection.stableReferenceReady') }}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </template>
-      </header>
+
+        <template v-if="selectedNote">
+          <h1 class="min-w-0 max-w-[46%] truncate text-[13px] font-semibold tracking-[-0.01em]">
+            {{ selectedNote.title }}
+          </h1>
+          <span class="min-w-0 truncate text-[11px] text-[hsl(var(--foreground-subtle))]">
+            {{ selectedNote.relativePath }}
+          </span>
+          <span class="shrink-0 text-[11px] text-[hsl(var(--foreground-subtle))]" aria-hidden="true"
+            >·</span
+          >
+          <span class="shrink-0 text-[11px] text-[hsl(var(--foreground-subtle))]">
+            {{ formatUpdatedAt(selectedNote.updatedAt) }}
+          </span>
+        </template>
+        <span v-else class="truncate text-sm font-medium text-muted-foreground">
+          {{ t('repository.projection.catalogTitle') }}
+        </span>
+        <Loader2
+          v-if="loadingDetail"
+          class="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground"
+        />
+
+        <template #actions>
+          <template v-if="selectedNote">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+              :class="
+                contextOpen
+                  ? 'bg-[hsl(var(--selected))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]'
+                  : ''
+              "
+              :aria-label="t('repository.projection.contextTitle')"
+              :title="t('repository.projection.contextTitle')"
+              data-testid="knowledge-projection-context-toggle"
+              @click="contextOpen = !contextOpen"
+            >
+              <PanelRight class="h-4 w-4" />
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+                  :aria-label="t('common.more')"
+                  data-testid="knowledge-projection-more"
+                >
+                  <Ellipsis class="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" class="w-52">
+                <DropdownMenuItem @click="copyNotePath">
+                  <Copy class="mr-2 h-3.5 w-3.5" />
+                  {{
+                    pathCopied
+                      ? t('repository.projection.pathCopied')
+                      : t('repository.projection.copyPath')
+                  }}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  v-if="selectedNote.knowledgeDocumentId === null"
+                  data-testid="knowledge-projection-adopt"
+                  @click="openAdoptionDialog"
+                >
+                  <Link2 class="mr-2 h-3.5 w-3.5" />
+                  {{ t('repository.projection.stableReferenceAction') }}
+                </DropdownMenuItem>
+                <DropdownMenuItem v-else disabled data-testid="knowledge-projection-document-id">
+                  <Check class="mr-2 h-3.5 w-3.5" />
+                  {{ t('repository.projection.stableReferenceReady') }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </template>
+        </template>
+      </DocumentWorkspaceToolbar>
 
       <div class="flex min-h-0 flex-1 overflow-hidden">
         <aside
           v-if="catalogVisible && !isNarrow"
-          class="w-[min(20rem,32%)] shrink-0 border-r"
+          class="w-[min(20rem,32%)] shrink-0 border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)]"
           data-testid="knowledge-projection-catalog-inline"
         >
           <KnowledgeNoteCatalog
@@ -209,20 +212,22 @@
             </div>
           </div>
 
-          <div v-else class="grid h-full min-h-48 place-items-center px-6 text-center">
-            <div>
-              <BookOpen class="mx-auto h-8 w-8 text-muted-foreground" />
-              <p class="mt-3 text-sm font-medium">{{ t('repository.projection.selectNote') }}</p>
-              <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('repository.projection.selectNoteDescription') }}
-              </p>
-            </div>
-          </div>
+          <DocumentWorkspaceState
+            v-else
+            class="h-full"
+            kind="empty"
+            :title="t('repository.projection.selectNote')"
+            :description="t('repository.projection.selectNoteDescription')"
+          >
+            <template #icon>
+              <BookOpen class="h-8 w-8 text-muted-foreground" />
+            </template>
+          </DocumentWorkspaceState>
         </main>
 
         <aside
           v-if="contextOpen && selectedNote && !isNarrow"
-          class="w-72 shrink-0 border-l"
+          class="w-72 shrink-0 border-l border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.36)]"
           data-testid="knowledge-projection-context-inline"
         >
           <KnowledgeNoteContextPanel
@@ -234,10 +239,12 @@
       </div>
 
       <Sheet :open="catalogOpen && isNarrow" @update:open="catalogOpen = $event">
-        <SheetContent hide-close side="left" class="w-[min(88vw,22rem)] p-0">
-          <SheetHeader class="sr-only">
-            <SheetTitle>{{ t('repository.projection.catalogTitle') }}</SheetTitle>
-          </SheetHeader>
+        <ProductSheetSurface
+          side="left"
+          width="sm"
+          :title="t('repository.projection.catalogTitle')"
+          test-id="knowledge-projection-catalog-sheet"
+        >
           <KnowledgeNoteCatalog
             v-model:search-query="searchQuery"
             :notes="notes"
@@ -278,21 +285,23 @@
             @toggle-directory="toggleDirectory"
             @toggle-hidden="toggleHiddenDirectories"
           />
-        </SheetContent>
+        </ProductSheetSurface>
       </Sheet>
 
       <Sheet :open="contextOpen && isNarrow" @update:open="contextOpen = $event">
-        <SheetContent hide-close side="right" class="w-[min(92vw,24rem)] p-0">
-          <SheetHeader class="sr-only">
-            <SheetTitle>{{ t('repository.projection.contextTitle') }}</SheetTitle>
-          </SheetHeader>
+        <ProductSheetSurface
+          side="right"
+          width="md"
+          :title="t('repository.projection.contextTitle')"
+          test-id="knowledge-projection-context-sheet"
+        >
           <KnowledgeNoteContextPanel
             v-if="selectedNote"
             :note="selectedNote"
             @select="handleContextSelect"
             @close="contextOpen = false"
           />
-        </SheetContent>
+        </ProductSheetSurface>
       </Sheet>
     </template>
 
@@ -306,11 +315,15 @@
         <template #description>{{ t('repository.projection.adoptDescription') }}</template>
 
         <div v-if="adoptionProposal" class="space-y-3 text-sm">
-          <div class="rounded-md border bg-muted/20 p-3">
+          <div
+            class="rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+          >
             <p class="text-xs text-muted-foreground">{{ t('repository.projection.notePath') }}</p>
             <p class="mt-1 font-mono text-xs">{{ adoptionProposal.relativePath }}</p>
           </div>
-          <div class="rounded-md border bg-muted/20 p-3">
+          <div
+            class="rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+          >
             <p class="text-xs text-muted-foreground">{{ t('repository.projection.adoptPatch') }}</p>
             <p class="mt-1 font-mono text-xs" data-testid="knowledge-projection-adopt-document-id">
               memoflow_id: {{ adoptionProposal.knowledgeDocumentId }}
@@ -345,6 +358,13 @@
         </template>
       </ProductDialogShell>
     </Dialog>
+
+    <KnowledgeCaptureReviewDialog
+      :open="knowledgeCaptureDialogOpen"
+      :source-options="knowledgeCaptureSourceOptions"
+      :default-source-key="knowledgeCaptureDefaultSourceKey"
+      @update:open="handleKnowledgeCaptureOpenChange"
+    />
   </div>
 </template>
 
@@ -374,9 +394,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
 } from '@memoflow/ui-vue-shadcn';
 import {
   AdoptKnowledgeDocumentSchema,
@@ -391,12 +408,19 @@ import {
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
-import { ProductDialogShell } from '../../../shared/components';
+import { ProductDialogShell, ProductSheetSurface } from '../../../shared/components';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';
+import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue';
 import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
 import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeNoteContextPanel from '../components/KnowledgeNoteContextPanel.vue';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
+import {
+  knowledgeCaptureSourceKey,
+  type KnowledgeCaptureSourceOption,
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -463,6 +487,29 @@ const selectedConnection = computed(
 const projectionSyncing = computed(() => {
   const state = selectedConnection.value?.projectionCheckpoint?.state;
   return state === 'Lagging' || state === 'Rebuilding';
+});
+const knowledgeCaptureDialogOpen = computed(() => route.query.dialog === 'knowledge-capture');
+const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>(() =>
+  connections.value
+    .filter(
+      (connection) =>
+        connection.disconnectedAt === null && connection.observation?.eligibility.state === 'Ready',
+    )
+    .map((connection) => {
+      const source = { kind: 'repository' as const, connectionId: String(connection.id) };
+      return {
+        key: knowledgeCaptureSourceKey(source),
+        label: repositoryDisplayName(connection),
+        source,
+      };
+    }),
+);
+const knowledgeCaptureDefaultSourceKey = computed(() => {
+  const option = knowledgeCaptureSourceOptions.value.find(
+    (item) =>
+      item.source.kind === 'repository' && item.source.connectionId === selectedConnectionId.value,
+  );
+  return option?.key;
 });
 const repositoryShortName = computed(() => {
   const fullName = selectedConnection.value ? repositoryDisplayName(selectedConnection.value) : '';
@@ -555,21 +602,39 @@ async function applyNoteQuerySelection(): Promise<void> {
   detailAbortController = abortController;
   const sequence = ++detailLoadSequence;
   loadingDetail.value = true;
+  const stableReference = KnowledgeDocumentIdSchema.safeParse(requested).success;
   const result = await service.resolveKnowledgeNoteReference(
-    { connectionId, reference: requested },
+    { ...(stableReference ? {} : { connectionId }), reference: requested },
     { signal: abortController.signal },
   );
-  if (sequence !== detailLoadSequence) return;
+  if (sequence !== detailLoadSequence || selectedConnectionId.value !== connectionId) return;
   if (detailAbortController === abortController) detailAbortController = null;
   loadingDetail.value = false;
-  if (!result.ok || result.data.connectionId !== connectionId) {
+  if (
+    !result.ok ||
+    (!stableReference && result.data.connectionId !== connectionId) ||
+    (result.ok &&
+      !connections.value.some(
+        (item) => item.id === result.data.connectionId && item.disconnectedAt === null,
+      ))
+  ) {
     if (!result.ok && result.error.code !== 'NOT_FOUND') errorMessage.value = result.error.message;
     return;
   }
 
+  const sourceChanged = result.data.connectionId !== connectionId;
+  if (sourceChanged) {
+    selectedConnectionId.value = result.data.connectionId;
+    notes.value = [];
+    totalNotes.value = 0;
+    repositoryTotalNotes.value = 0;
+    nextCursor.value = null;
+    resetTree();
+  }
   selectedNoteId.value = result.data.id;
   selectedNote.value = result.data;
   setCachedDetail(result.data);
+  if (sourceChanged) await loadTreeDirectory('', true);
   if (!searchQuery.value.trim()) await revealTreePath(result.data.relativePath);
 }
 
@@ -617,6 +682,13 @@ function formatUpdatedAt(timestamp: number): string {
     month: 'short',
     day: 'numeric',
   }).format(new Date(timestamp));
+}
+
+async function handleKnowledgeCaptureOpenChange(open: boolean): Promise<void> {
+  if (open) return;
+  const query = { ...route.query };
+  delete query.dialog;
+  await router.replace({ name: 'repository', query });
 }
 
 function clearSearchTimer(): void {

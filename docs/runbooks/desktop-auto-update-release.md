@@ -21,7 +21,7 @@ Use this runbook to prepare, verify, publish, recover, and contain a MemoFlow De
 
 macOS DU-1501..1504 remain **DEFERRED by user**. Default release policy is `unsigned-pilot`; these packages are not production updater readiness evidence. This runbook does not activate macOS signing, upgrade the updater (DU-1703 remains optional), deploy server containers, add telemetry, or implement feed hosting.
 
-Repository code/workflows are authoritative. [ADR-112](../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md) supplies the ownership design; its historical context is not current runtime status. See the [implementation plan](../plan/active/2026-09-30-desktop-auto-update-implementation.md) for proof history and the [Delivery Platform V3 runbook](./delivery-platform-v3-rollout.md) for server deployment and optional future macOS signing operations.
+Repository code/workflows are authoritative. [ADR-114](../architecture/adr/ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) supplies the ownership design; its historical context is not current runtime status. See the [implementation plan](../plan/active/2026-09-30-desktop-auto-update-implementation.md) for proof history and the [Delivery Platform V3 runbook](./delivery-platform-v3-rollout.md) for server deployment and optional future macOS signing operations.
 
 ## 2. Current topology and authority map
 

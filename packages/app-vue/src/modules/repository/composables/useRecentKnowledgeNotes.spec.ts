@@ -25,6 +25,7 @@ import {
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
 } from '../../../platform/server-state';
+import { RECENT_KNOWLEDGE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { useRecentKnowledgeNotes } from './useRecentKnowledgeNotes';
 
 let runtime: ReturnType<typeof createTestServerStateRuntime>;
@@ -39,6 +40,46 @@ describe('useRecentKnowledgeNotes', () => {
 
   afterEach(() => {
     runtime.dispose();
+  });
+
+  it('shares pending lightweight lists and expires at the existing owner stale window', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
+    let release!: () => void;
+    const list = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(ok({ notes: [], total: 0, nextCursor: null }));
+          }),
+      )
+      .mockResolvedValue(ok({ notes: [], total: 0, nextCursor: null }));
+    const body = vi.fn();
+    const tree = vi.fn();
+    provideMap.set(REPOSITORY_SERVICE_KEY, {
+      listKnowledgeNoteProjections: list,
+      getKnowledgeNoteProjection: body,
+      listKnowledgeNoteTree: tree,
+    });
+    try {
+      const first = useRecentKnowledgeNotes();
+      const second = useRecentKnowledgeNotes();
+      const reads = [first.ensure(40), second.ensure(40)];
+      expect(list).toHaveBeenCalledTimes(1);
+      expect(list).toHaveBeenCalledWith({ limit: 40, sort: 'recent' });
+      release();
+      await Promise.all(reads);
+      clock.mockReturnValue(1_800_000_000_000 + RECENT_KNOWLEDGE_STALE_TIME_MS - 1);
+      await second.ensure(40);
+      expect(list).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(1_800_000_000_000 + RECENT_KNOWLEDGE_STALE_TIME_MS);
+      await second.ensure(40);
+      expect(list).toHaveBeenCalledTimes(2);
+      expect(body).not.toHaveBeenCalled();
+      expect(tree).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it('loads globally recent GitHub note projections on web', async () => {

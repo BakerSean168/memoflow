@@ -120,15 +120,6 @@ export type AiProviderConnectionId = AiProviderConfigId;
 /** Opaque reference into the host-owned provider SecretVault. */
 export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
 
-/** 治理规则 ID */
-export type RuleId = string & { readonly __brand: 'RuleId' };
-
-/** 规则修订记录 ID */
-export type RuleRevisionId = string & { readonly __brand: 'RuleRevisionId' };
-
-/** 代码片段 ID */
-export type CodeSnippetId = string & { readonly __brand: 'CodeSnippetId' };
-
 // ==========================================
 // ID Prefix Constants
 // 运行时前缀常量，与 createIdType() 调用保持同步
@@ -184,9 +175,6 @@ export const ID_PREFIXES = {
   AiConversationId: 'IAiConversationId',
   AiProviderConfigId: 'IAiProviderConfigId',
 
-  // === Governance ===
-  RuleId: 'RuleId',
-  RuleRevisionId: 'RuleRevisionId',
 } as const;
 
 export type IdPrefixKey = keyof typeof ID_PREFIXES;

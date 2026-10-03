@@ -1,20 +1,64 @@
 import { DOMWrapper, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
+import { Diff, Ruler } from '@lucide/vue';
+import { Dialog, Input } from '@memoflow/ui-vue-shadcn';
+import { createMockGoalRecord } from '@memoflow/contracts/mocks';
+import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../../locales/en-US';
 import GoalRecordDialog from './GoalRecordDialog.vue';
 
 const goalActions = vi.hoisted(() => ({
   createGoalRecord: vi.fn(),
+  updateGoalRecord: vi.fn(),
+  contextRead: vi.fn(),
+  method: 'Sum' as KeyResultCalculationMethod,
+  context: true,
+  records: [] as {
+    goalId: string;
+    keyResultId: string;
+    value: number;
+    recordedAt: number;
+    createdAt: number;
+  }[],
 }));
 
 vi.mock('../../composables/useGoal', () => {
   return {
     useGoal: () => ({
       createGoalRecord: goalActions.createGoalRecord,
+      updateGoalRecord: goalActions.updateGoalRecord,
+      getGoalRecordPreviewContext: vi.fn(async () => {
+        goalActions.contextRead();
+        return goalActions.context
+          ? {
+              keyResultId: 'kr-1',
+              trackingBaseValue: 40,
+              initialValue: 0,
+              currentValue: 80,
+              targetValue: 100,
+              aggregationMethod: goalActions.method,
+              unit: '°C / day',
+              aggregationSnapshot: goalActions.records.length
+                ? { count: 1, sum: 80, max: 80, min: 80, last: 80 }
+                : { count: 0, sum: 0, max: null, min: null, last: null },
+            }
+          : null;
+      }),
       getKeyResultById: (id: string) =>
-        id === 'kr-1' ? { id: 'kr-1', progress: { unit: 'tasks' } } : undefined,
+        id === 'kr-1'
+          ? {
+              id: 'kr-1',
+              progress: {
+                initialValue: 0,
+                currentValue: 80,
+                targetValue: 100,
+                unit: '°C / day',
+                aggregationMethod: goalActions.method,
+              },
+            }
+          : undefined,
     }),
   };
 });
@@ -40,6 +84,7 @@ async function openDialog() {
 describe('GoalRecordDialog submission lifecycle', () => {
   afterEach(() => {
     goalActions.createGoalRecord.mockReset();
+    goalActions.method = 'Sum';
     document.body.innerHTML = '';
   });
 
@@ -61,6 +106,10 @@ describe('GoalRecordDialog submission lifecycle', () => {
     ).trigger('click');
     await nextTick();
 
+    wrapper.findComponent(Dialog).vm.$emit('update:open', false);
+    await nextTick();
+    await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+    expect(goalActions.createGoalRecord).toHaveBeenCalledOnce();
     expect(document.querySelector('#change-amount')).not.toBeNull();
     expect(
       document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled,
@@ -104,6 +153,216 @@ describe('GoalRecordDialog submission lifecycle', () => {
     expect(quickValue?.type).toBe('button');
     await new DOMWrapper(quickValue!).trigger('click');
     expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('5');
+    wrapper.unmount();
+  });
+});
+
+describe.each(Object.values(KeyResultCalculationMethod))(
+  'GoalRecordDialog %s measurement',
+  (method) => {
+    afterEach(() => {
+      goalActions.createGoalRecord.mockReset();
+      goalActions.method = 'Sum';
+      document.body.innerHTML = '';
+    });
+
+    it.each([-5, 0, 10001.125])(
+      'submits the exact finite value %s with the KR unit',
+      async (value) => {
+        goalActions.method = method;
+        goalActions.createGoalRecord.mockResolvedValue({ id: 'record-1' });
+        const wrapper = await openDialog();
+        expect(document.querySelector('label[for="change-amount"]')?.textContent).toBe(
+          method === 'Sum' ? 'Change this time' : 'Recorded value',
+        );
+        expect(wrapper.findComponent(method === 'Sum' ? Diff : Ruler).exists()).toBe(true);
+        expect(document.body.textContent).toContain('°C / day');
+        const chips = [
+          ...document.querySelectorAll<HTMLButtonElement>('[data-testid^="quick-goal-record-"]'),
+        ];
+        expect(chips.map((chip) => chip.textContent?.trim())).toEqual(
+          method === 'Sum' ? ['-10', '-5', '-1', '+1', '+5', '+10'] : [],
+        );
+        expect(chips.every((chip) => chip.tagName === 'BUTTON' && chip.type === 'button')).toBe(
+          true,
+        );
+        const amount = new DOMWrapper(document.querySelector<HTMLInputElement>('#change-amount')!);
+        expect(amount.attributes('min')).toBeUndefined();
+        expect(amount.attributes('step')).toBe('any');
+        await amount.setValue(String(value));
+        await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+        await nextTick();
+        expect(goalActions.createGoalRecord).toHaveBeenCalledWith('goal-1', 'kr-1', {
+          value,
+          note: '',
+        });
+        wrapper.unmount();
+      },
+    );
+
+    it.each([NaN, Infinity, -Infinity])(
+      'rejects non-finite numeric model value %s',
+      async (value) => {
+        goalActions.method = method;
+        const wrapper = await openDialog();
+        wrapper.findComponent(Input).vm.$emit('update:modelValue', value);
+        await nextTick();
+        await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+        expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+        expect(
+          document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled,
+        ).toBe(true);
+        wrapper.unmount();
+      },
+    );
+
+    it.each(['', 'NaN', 'Infinity', '-Infinity', '1e309', 'abc'])(
+      'rejects invalid input %s',
+      async (value) => {
+        goalActions.method = method;
+        const wrapper = await openDialog();
+        await new DOMWrapper(document.querySelector<HTMLInputElement>('#change-amount')!).setValue(
+          value,
+        );
+        expect(
+          document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled,
+        ).toBe(true);
+        await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+        expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+        wrapper.unmount();
+      },
+    );
+  },
+);
+
+describe('GoalRecordDialog live preview and keyboard', () => {
+  afterEach(() => {
+    goalActions.createGoalRecord.mockReset();
+    goalActions.method = 'Sum';
+    goalActions.context = true;
+    goalActions.records = [];
+    document.body.innerHTML = '';
+  });
+
+  it('updates preview with input and quick chips and retains it after failure', async () => {
+    goalActions.createGoalRecord.mockRejectedValue(new Error('offline'));
+    goalActions.contextRead.mockClear();
+    const wrapper = await openDialog();
+    const amount = new DOMWrapper(document.querySelector('#change-amount')!);
+    await amount.setValue('5');
+    expect(document.querySelector('[data-testid="goal-record-preview"]')?.textContent).toContain(
+      '45',
+    );
+    await new DOMWrapper(document.querySelector('[data-testid="quick-goal-record--5"]')!).trigger(
+      'click',
+    );
+    expect(document.querySelector('[data-testid="goal-record-preview"]')?.textContent).toContain(
+      '35',
+    );
+    await amount.trigger('keydown', { key: 'Enter' });
+    await nextTick();
+    await nextTick();
+    expect(goalActions.createGoalRecord).toHaveBeenCalledOnce();
+    expect(goalActions.contextRead).toHaveBeenCalledOnce();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('-5');
+    expect(document.querySelector('[data-testid="goal-record-preview"]')?.textContent).toContain(
+      '35',
+    );
+    expect(document.querySelector('[role="alert"]')).not.toBeNull();
+    wrapper.unmount();
+  });
+
+  it.each(['Max', 'Min', 'Average'] as const)(
+    'explains unchanged %s samples from the authoritative context',
+    async (method) => {
+      goalActions.method = method;
+      goalActions.records = [
+        { goalId: 'goal-1', keyResultId: 'kr-1', value: 80, recordedAt: 1, createdAt: 1 },
+        { goalId: 'other', keyResultId: 'kr-1', value: -999, recordedAt: 1, createdAt: 1 },
+        { goalId: 'goal-1', keyResultId: 'other', value: 999, recordedAt: 1, createdAt: 1 },
+      ];
+      const wrapper = await openDialog();
+      await new DOMWrapper(document.querySelector('#change-amount')!).setValue(
+        method === 'Max' ? '70' : method === 'Min' ? '90' : '80',
+      );
+      expect(
+        document.querySelector('[data-testid="goal-record-unchanged"]')?.textContent,
+      ).toContain(
+        method === 'Average' ? 'record will still be saved' : 'sample will still be recorded',
+      );
+      wrapper.unmount();
+    },
+  );
+
+  it('shows unavailable copy without aggregation context', async () => {
+    goalActions.context = false;
+    const wrapper = await openDialog();
+    await new DOMWrapper(document.querySelector('#change-amount')!).setValue('5');
+    expect(document.querySelector('[data-testid="goal-record-preview"]')?.textContent).toContain(
+      'Preview unavailable',
+    );
+    wrapper.unmount();
+  });
+
+  it('does not submit on multiline Enter, invalid Enter, Escape or cancel', async () => {
+    const wrapper = await openDialog();
+    const amount = new DOMWrapper(document.querySelector('#change-amount')!);
+    await amount.trigger('keydown', { key: 'Enter' });
+    await amount.setValue('5');
+    await new DOMWrapper(document.querySelector('#record-note')!).trigger('keydown', {
+      key: 'Enter',
+    });
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    await amount.trigger('keydown', { key: 'Escape' });
+    expect(document.querySelector('#change-amount')).toBeNull();
+    wrapper.vm.openDialog('goal-1', 'kr-1');
+    await nextTick();
+    await new DOMWrapper(document.querySelector('#change-amount')!).setValue('5');
+    const cancel = [...document.querySelectorAll('button')].find(
+      (button) => button.textContent?.trim() === 'Cancel',
+    );
+    await new DOMWrapper(cancel!).trigger('click');
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+});
+
+describe('Goal record correction', () => {
+  afterEach(() => { goalActions.updateGoalRecord.mockReset(); goalActions.createGoalRecord.mockReset(); document.body.innerHTML = ''; });
+  it.each(['Manual', 'TaskUserMeasurement'] as const)('corrects %s via Goal update only and retains a failed draft', async authorship => {
+    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
+    const record = createMockGoalRecord({ id: 'record-1' as never, value: 3, comment: 'original', authorship,
+      source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'occurrence-1' } });
+    const provenance = { source: record.source, authorship: record.authorship };
+    wrapper.vm.openDialog('goal-1', 'kr-1', record);
+    await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('3');
+    await new DOMWrapper(document.querySelector('#change-amount')!).setValue('-2');
+    await new DOMWrapper(document.querySelector('#record-note')!).setValue('corrected');
+    goalActions.updateGoalRecord.mockResolvedValueOnce(null);
+    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
+    await nextTick(); await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('-2');
+    expect(wrapper.emitted('saved')).toBeUndefined();
+    goalActions.updateGoalRecord.mockResolvedValueOnce({ ...record, value: -2, comment: 'corrected' });
+    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
+    await nextTick(); await nextTick();
+    expect(goalActions.updateGoalRecord).toHaveBeenLastCalledWith('goal-1', 'kr-1', 'record-1', { value: -2, note: 'corrected' });
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    expect(wrapper.emitted('saved')).toEqual([[]]);
+    expect({ source: record.source, authorship: record.authorship }).toEqual(provenance);
+    wrapper.unmount();
+  });
+  it('renders TaskAutomatic read-only and offers no delete', async () => {
+    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
+    wrapper.vm.openDialog('goal-1', 'kr-1', createMockGoalRecord({ authorship: 'TaskAutomatic', source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } }));
+    await nextTick();
+    expect(document.querySelector<HTMLInputElement>('#change-amount')?.disabled).toBe(true);
+    expect(document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled).toBe(true);
+    await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
+    expect(goalActions.updateGoalRecord).not.toHaveBeenCalled();
+    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+    expect(document.body.textContent).not.toContain('Delete');
     wrapper.unmount();
   });
 });

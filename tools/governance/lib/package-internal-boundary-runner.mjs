@@ -95,12 +95,13 @@ function walk(root, dir, rule, violations, counter) {
   }
 }
 
-export function runPackageInternalBoundaryAudit(root) {
+export function runPackageInternalBoundaryAudit(root, { excludedPackages = [] } = {}) {
   const packagesDir = join(root, 'packages');
   const violations = [];
   const counter = { count: 0 };
   for (const entry of readdirSync(packagesDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || exceptions.has(entry.name)) continue;
+    if (!entry.isDirectory() || exceptions.has(entry.name) || excludedPackages.includes(entry.name))
+      continue;
     const srcDir = join(packagesDir, entry.name, 'src');
     if (!existsSync(join(srcDir, 'server'))) continue;
     for (const rule of rules) {

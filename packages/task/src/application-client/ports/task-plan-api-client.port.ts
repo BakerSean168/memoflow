@@ -32,7 +32,7 @@ export interface ITaskPlanApiClient {
   getTaskPlans(
     params?: TaskPlanListParams,
   ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>>;
-  getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>>;
+  getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO | null>>;
   updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
   deleteTaskPlan(id: string): Promise<Result<void>>;
   activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;

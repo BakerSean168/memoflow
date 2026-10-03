@@ -17,7 +17,7 @@
  * const result = await httpClient.post<Rule>('/rules', data);
  *
  * // IPC (Desktop)
- * const result = await ipcClient.invoke<Rule>('governance:rule:create', data);
+ * const result = await ipcClient.invoke<TaskPlan>('task:plan:create', data);
  *
  * // 消费方式完全一致
  * if (result.ok) {

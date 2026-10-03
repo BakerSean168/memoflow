@@ -179,7 +179,7 @@ const FailedDesktopUpdateStateSchema = z.object({
 });
 
 /**
- * Canonical renderer-safe Desktop Update state (ADR-112).
+ * Canonical renderer-safe Desktop Update state (ADR-114).
  *
  * The discriminant owns field validity: renderer code must not reconstruct
  * update state from independent booleans or third-party updater events.

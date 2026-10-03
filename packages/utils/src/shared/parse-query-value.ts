@@ -1,7 +1,7 @@
 /**
  * Residual 989: sole Express query value parsers for notification + reminder routes.
  * Residual 1021: parseBoolean elevated for notification query filters (true/false/1/0).
- * Residual 1023: governance routes re-export parseString/parseNumber from this sole.
+ * Shared query adapters consume parseString/parseNumber from this sole implementation.
  * parseString prefers first array entry / stringifies scalars; parseNumber uses it.
  * Soft residual: schedule route parsers remain keep-boundary (empty-string / boolean shapes differ).
  * Soft residual 1073: schedule route parsers keep-boundary surface (no force-merge).

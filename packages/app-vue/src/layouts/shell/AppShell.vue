@@ -22,6 +22,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
+import { provideTaskNativeSurface } from './useTaskNativeSurface';
+import { provideGoalNativeSurface } from './useGoalNativeSurface';
+import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
@@ -56,6 +59,9 @@ import {
   computePanelGeometry,
   panelWidthFromPointer,
   resolveComposerDensity,
+  resolveWorkspaceChromeMetrics,
+  sidebarWidthFromPointer,
+  workspaceChromeBudget,
   shouldCollapsePanelWidth,
   shouldCollapseSidebarWidth,
   shouldAutoCollapseSidebar,
@@ -92,6 +98,9 @@ const {
 provide(DialogDraftScopeKey, activeTabId);
 
 const sync = useShellRouterSync();
+provideGoalNativeSurface();
+provideTaskNativeSurface();
+provideKnowledgeNativeSurface();
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).
@@ -139,6 +148,13 @@ const shellState = computed<'chat' | 'split' | 'focus'>(() => {
 });
 
 const effectiveViewportWidth = ref(typeof window === 'undefined' ? 1280 : window.innerWidth);
+const workspaceChromeStyle = computed(() => {
+  const { inset, gap } = resolveWorkspaceChromeMetrics(effectiveViewportWidth.value);
+  return {
+    '--workspace-edge-inset': `${inset}px`,
+    '--workspace-sidebar-gap': `${gap}px`,
+  };
+});
 /** 用户 Toggle 是持久化偏好；极窄视口只临时释放侧栏预算。 */
 const showSidebar = computed(
   () => !sidebarCollapsed.value && !shouldAutoCollapseSidebar(effectiveViewportWidth.value),
@@ -150,7 +166,8 @@ const effectiveSidebarWidth = computed(() => {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved);
+  const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
+  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved - chrome);
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
@@ -351,7 +368,8 @@ function maxSidebarWidth(): number {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (shellState.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved);
+  const chrome = workspaceChromeBudget(window.innerWidth);
+  return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved - chrome);
 }
 
 function startSidebarResize(e: MouseEvent) {
@@ -378,12 +396,13 @@ function startSidebarResize(e: MouseEvent) {
     }
   };
   const move = (ev: MouseEvent) => {
-    if (shouldCollapseSidebarWidth(ev.clientX)) {
+    const width = sidebarWidthFromPointer(ev.clientX, window.innerWidth);
+    if (shouldCollapseSidebarWidth(width)) {
       cleanup();
       store.setSidebarCollapsed(true);
       return;
     }
-    store.setSidebarWidth(ev.clientX, maxSidebarWidth());
+    store.setSidebarWidth(width, maxSidebarWidth());
   };
   const up = () => {
     cleanup();
@@ -515,7 +534,7 @@ function startPanelResize(e: PointerEvent) {
   };
 
   const move = (ev: PointerEvent) => {
-    const width = panelWidthFromPointer(ev.clientX, window.innerWidth, occupiedSidebarWidth());
+    const width = panelWidthFromPointer(ev.clientX, window.innerWidth);
     if (shouldCollapsePanelWidth(width)) {
       cleanup(ev.pointerId, false);
       void sync.closePanel();
@@ -829,33 +848,61 @@ function panelCacheKey(
       <router-view name="settings" />
     </StandaloneSettingsLayout>
 
-    <!-- 主工作区（STATE A/B/C）：DOM 常驻，设置场景时隐藏而非卸载。 -->
-    <div v-show="!isSettingsScene" class="relative flex min-h-0 flex-1 overflow-hidden">
+    <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
+         Sidebar 属于 Shell；Chat + Business 共享一个圆角 content well，
+         圆角只表达主工作台层级，内部面板用 divider 分区。 -->
+    <div
+      v-show="!isSettingsScene"
+      class="workspace-stage relative flex min-h-0 flex-1 overflow-hidden"
+      :style="workspaceChromeStyle"
+      data-testid="shell-workspace-stage"
+    >
       <!-- 会话侧栏只响应自己的 Toggle，和右栏/Focus 独立。 -->
       <Transition name="shell-sidebar">
-        <ConversationSidebar
+        <div
           v-if="showSidebar"
-          class="shrink-0"
+          class="relative shrink-0"
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
-          :groups="conversationGroups"
-          :active-conversation-id="activeConversationId"
-          :user-name="userName"
-          :identity-kind="shellIdentityKind"
-          :cloud-connected="isAuthenticated"
-          :loading="Boolean(aiRef?.conversationListLoading)"
-          :is-desktop="isDesktop"
-          :width="effectiveSidebarWidth"
-          @new-conversation="handleNewConversation"
-          @select-conversation="handleSelectConversation"
-          @delete-conversation="handleDeleteConversation"
-          @open-settings="openSettings"
-          @open-account="openAccount"
-          @open-cloud-connection="openCloudConnection"
-          @logout="() => void handleLogout()"
-          @start-resize="startSidebarResize"
-          @resize-by="resizeSidebarBy"
-        />
+          data-testid="shell-sidebar-pane-host"
+        >
+          <div
+            class="workspace-sidebar-shell h-full w-full overflow-hidden"
+            data-testid="shell-sidebar-pane"
+          >
+            <ConversationSidebar
+              class="h-full w-full"
+              :groups="conversationGroups"
+              :active-conversation-id="activeConversationId"
+              :user-name="userName"
+              :identity-kind="shellIdentityKind"
+              :cloud-connected="isAuthenticated"
+              :loading="Boolean(aiRef?.conversationListLoading)"
+              :is-desktop="isDesktop"
+              @new-conversation="handleNewConversation"
+              @select-conversation="handleSelectConversation"
+              @delete-conversation="handleDeleteConversation"
+              @open-settings="openSettings"
+              @open-account="openAccount"
+              @open-cloud-connection="openCloudConnection"
+              @logout="() => void handleLogout()"
+            />
+          </div>
+
+          <div
+            role="separator"
+            tabindex="0"
+            aria-orientation="vertical"
+            :aria-label="t('shell.conversation.resize')"
+            :aria-valuemin="SIDEBAR_HARD_MIN"
+            :aria-valuenow="Math.round(effectiveSidebarWidth)"
+            class="workspace-resizer workspace-resizer--right"
+            data-testid="conversation-sidebar-resizer"
+            @mousedown="startSidebarResize"
+            @keydown.left.prevent="resizeSidebarBy(-24)"
+            @keydown.right.prevent="resizeSidebarBy(24)"
+          />
+        </div>
       </Transition>
 
       <!-- 中央区：AI 常驻层 + 业务面板 + GlobalComposer 宿主。
@@ -863,7 +910,7 @@ function panelCacheKey(
       <div
         ref="workspaceMainRef"
         data-testid="shell-workspace-main"
-        class="relative flex min-h-0 min-w-0 flex-1 overflow-hidden"
+        class="workspace-content-well relative flex min-h-0 min-w-0 flex-1 overflow-hidden"
         :class="shellState === 'focus' ? 'flex-col' : 'flex-row'"
       >
         <!-- AI 工作区（A/B 满列；C 隐藏列但实例保活，Composer 改浮动宿主） -->
@@ -871,7 +918,7 @@ function panelCacheKey(
           v-show="shellState !== 'focus'"
           ref="aiColumnRef"
           data-testid="shell-ai-column"
-          class="order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          class="workspace-primary-surface order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
         >
           <AIChatView ref="aiRef" class="min-h-0 w-full flex-1" hide-conversation-sidebar />
           <GlobalComposer
@@ -884,12 +931,14 @@ function panelCacheKey(
 
         <!-- 右侧面板 DOM 常驻；Toggle 只显隐，Tab、草稿和工作流上下文继续保活。 -->
         <div
+          class="workspace-business-host relative"
+          data-testid="shell-business-pane-host"
           :aria-hidden="showPanel ? undefined : 'true'"
           :class="
             shellState === 'focus'
-              ? 'order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'
+              ? 'order-1 flex min-h-0 min-w-0 flex-1 flex-col'
               : [
-                  'order-2 flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden transition-[width,opacity] duration-200 ease-out motion-reduce:transition-none md:flex',
+                  'order-2 flex h-full min-h-0 min-w-0 shrink-0 flex-col transition-[width,opacity] duration-200 ease-out motion-reduce:transition-none md:flex',
                   showPanel ? 'opacity-100' : 'pointer-events-none invisible w-0 opacity-0',
                   isPanelResizing ? 'transition-none' : '',
                 ]
@@ -901,50 +950,69 @@ function panelCacheKey(
             ...(shellState === 'focus' ? { paddingBottom: focusComposerPad + 'px' } : {}),
           }"
         >
-          <BusinessPanel
-            :tabs="tabs"
-            :active-tab-id="activeTabId"
-            :layout="layout"
-            :panel-surface="panelSurface"
-            :workflow-available="workflowAvailable"
-            :workflow-attention-count="workflowAttentionCount"
-            @activate-tab="(id: string) => void sync.activateTab(id)"
-            @close-tab="(id: string) => void sync.closeTab(id)"
-            @show-home="() => void sync.goHome()"
-            @show-workflow="store.requestWorkflowSurface('explicit')"
-            @close-workflow="store.closeWorkflowSurface()"
-            @toggle-focus="handleToggleWorkspaceFocus"
-            @start-resize="startPanelResize"
-            @reset-width="resetPanelWidth"
-            @resize-by="resizePanelBy"
+          <div
+            class="workspace-business-surface h-full min-h-0 w-full overflow-hidden"
+            data-testid="shell-business-pane"
           >
-            <template #home>
-              <TodayOverviewPanel
-                :active="showPanel && panelSurface === 'home'"
-                @open-route="openPanelRoute"
-              />
-            </template>
+            <BusinessPanel
+              :tabs="tabs"
+              :active-tab-id="activeTabId"
+              :layout="layout"
+              :panel-surface="panelSurface"
+              :workflow-available="workflowAvailable"
+              :workflow-attention-count="workflowAttentionCount"
+              @activate-tab="(id: string) => void sync.activateTab(id)"
+              @close-tab="(id: string) => void sync.closeTab(id)"
+              @show-home="() => void sync.goHome()"
+              @show-workflow="store.requestWorkflowSurface('explicit')"
+              @close-workflow="store.closeWorkflowSurface()"
+              @toggle-focus="handleToggleWorkspaceFocus"
+            >
+              <template #home>
+                <TodayOverviewPanel
+                  :active="showPanel && panelSurface === 'home'"
+                  @open-route="openPanelRoute"
+                />
+              </template>
 
-            <PanelErrorBoundary :reset-key="activeTabId">
-              <router-view v-slot="{ Component }">
-                <KeepAlive :max="MAX_BUSINESS_TABS">
-                  <component
-                    :is="Component"
-                    v-if="Component"
-                    :key="panelCacheKey($route.fullPath, $route.matched)"
-                  />
-                </KeepAlive>
-              </router-view>
-            </PanelErrorBoundary>
+              <PanelErrorBoundary :reset-key="activeTabId">
+                <router-view v-slot="{ Component }">
+                  <KeepAlive :max="MAX_BUSINESS_TABS">
+                    <component
+                      :is="Component"
+                      v-if="Component"
+                      :key="panelCacheKey($route.fullPath, $route.matched)"
+                    />
+                  </KeepAlive>
+                </router-view>
+              </PanelErrorBoundary>
 
-            <template #workflow>
-              <div
-                ref="shellWorkflowMount"
-                class="h-full min-h-0"
-                data-testid="shell-workflow-surface"
-              />
-            </template>
-          </BusinessPanel>
+              <template #workflow>
+                <div
+                  ref="shellWorkflowMount"
+                  class="h-full min-h-0"
+                  data-testid="shell-workflow-surface"
+                />
+              </template>
+            </BusinessPanel>
+          </div>
+
+          <div
+            v-if="shellState === 'split' && showPanel"
+            data-testid="business-panel-resizer"
+            role="separator"
+            tabindex="0"
+            aria-orientation="vertical"
+            :aria-label="t('shell.panel.resize')"
+            :aria-valuemin="BUSINESS_HARD_MIN"
+            :aria-valuenow="Math.round(effectivePanelWidth())"
+            class="workspace-resizer workspace-resizer--left"
+            :title="t('shell.panel.resize')"
+            @pointerdown="startPanelResize"
+            @dblclick.stop="resetPanelWidth"
+            @keydown.left.prevent="resizePanelBy(24)"
+            @keydown.right.prevent="resizePanelBy(-24)"
+          />
         </div>
 
         <!-- STATE C：相对业务工作区宿主居中的浮动 Composer（§8.4） -->
@@ -965,6 +1033,122 @@ function panelCacheKey(
 </template>
 
 <style scoped>
+.workspace-stage {
+  --workspace-well-radius: var(--radius-workspace);
+  background: hsl(var(--workspace-shell));
+}
+
+.workspace-sidebar-shell {
+  --background: var(--workspace-navigation);
+  background: hsl(var(--workspace-navigation));
+  box-shadow: inset -1px 0 0 hsl(var(--border-subtle) / 0.7);
+}
+
+.workspace-content-well {
+  --background: var(--workspace-primary);
+  margin: 4px var(--workspace-edge-inset) 6px var(--workspace-sidebar-gap);
+  border-radius: var(--workspace-well-radius);
+  background: hsl(var(--workspace-primary));
+  box-shadow:
+    0 0 0 1px hsl(var(--border-strong) / 0.58),
+    0 6px 22px -18px hsl(var(--workspace-shadow) / 0.72),
+    inset 0 1px 0 hsl(var(--foreground) / 0.025);
+}
+
+.workspace-primary-surface {
+  --background: var(--workspace-primary);
+  background: hsl(var(--workspace-primary));
+}
+
+.workspace-business-host {
+  position: relative;
+}
+
+.workspace-content-well.flex-row .workspace-business-host:not([aria-hidden='true']) {
+  box-shadow: -1px 0 0 hsl(var(--border-subtle));
+}
+
+.workspace-business-surface {
+  --background: var(--workspace-business);
+  background: hsl(var(--workspace-business));
+}
+
+.workspace-resizer {
+  position: absolute;
+  top: 0;
+  z-index: 40;
+  height: 100%;
+  width: 12px;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+  outline: none;
+}
+
+.workspace-resizer::after {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 50%;
+  width: 1px;
+  border-radius: 999px;
+  background: hsl(var(--border-strong) / 0.46);
+  content: '';
+  opacity: 0.62;
+  transform: translateX(-50%);
+  transition:
+    width 120ms ease-out,
+    opacity 120ms ease-out,
+    background-color 120ms ease-out;
+}
+
+.workspace-resizer:hover,
+.workspace-resizer:focus-visible {
+  background: hsl(var(--primary) / 0.045);
+}
+
+.workspace-resizer:hover::after,
+.workspace-resizer:focus-visible::after {
+  width: 2px;
+  background: hsl(var(--primary) / 0.92);
+  opacity: 1;
+}
+
+.workspace-resizer--right {
+  right: calc((var(--workspace-sidebar-gap) / -2) - 6px);
+}
+
+.workspace-resizer--left {
+  left: -6px;
+}
+
+@media (max-width: 1199px) {
+  .workspace-stage {
+    --workspace-well-radius: var(--radius-surface);
+  }
+
+  .workspace-content-well {
+    margin-top: 3px;
+    margin-bottom: 4px;
+  }
+}
+
+@media (max-width: 767px) {
+  .workspace-stage {
+    --workspace-well-radius: 0px;
+  }
+
+  .workspace-content-well {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .workspace-sidebar-shell {
+    box-shadow: none;
+  }
+}
+
 .shell-sidebar-enter-active,
 .shell-sidebar-leave-active {
   overflow: hidden;

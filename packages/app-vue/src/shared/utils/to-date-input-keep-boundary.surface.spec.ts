@@ -4,10 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 describe('date input product-time boundary', () => {
   const dir = __dirname;
-  const vueAi = readFileSync(
-    resolve(dir, '../../modules/ai/components/AIGoalDraftEditor.vue'),
-    'utf8',
-  );
   const goalDialog = readFileSync(
     resolve(dir, '../../modules/goal/components/dialogs/GoalDialog.vue'),
     'utf8',
@@ -23,9 +19,8 @@ describe('date input product-time boundary', () => {
 
   it('keeps Goal start and target as precision-preserving GoalTimeframe values', () => {
     expect(goalDialog.match(/GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
-    expect(vueAi.match(/GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
 
-    for (const source of [vueAi, goalDialog]) {
+    for (const source of [goalDialog]) {
       expect(source).not.toContain('toProductYmdInputValue');
       expect(source).not.toContain('fromProductYmdInputValue');
       expect(source).not.toContain('type="date"');

@@ -182,7 +182,7 @@ async function walk(directory) {
  * platform receipt / canonical Desktop release manifest.
  *
  * The macOS arch-specific manifest names intentionally describe the current
- * release baseline. ADR-112 / DU-1502 will replace that workaround with
+ * release baseline. ADR-114 / DU-1502 will replace that workaround with
  * per-architecture feed paths that each expose canonical latest-mac.yml.
  */
 export async function verifyDesktopUpdateMetadataClosure({

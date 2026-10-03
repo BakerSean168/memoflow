@@ -3,12 +3,19 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, CalendarDays } from '@lucide/vue';
 import {
+  calendarEventSourceLabel,
   formatCapsuleTime,
   toLocalDateKey,
   type CalendarEventItem,
   type ScheduleCapsuleSnapshot,
   useCalendarView,
 } from '../../../modules/schedule/composables/useCalendarView';
+import {
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
 
 const emit = defineEmits<{
   'view-all': [];
@@ -77,33 +84,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex max-h-[30rem] min-h-0 flex-col"
+  <CapsulePreviewShell
+    max-height="30rem"
     data-testid="schedule-capsule-preview"
     data-capsule-workspace="schedule"
   >
-    <div class="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
-      <div>
-        <p class="text-xs font-semibold text-foreground">{{ t('nav.schedule') }}</p>
-        <p class="mt-0.5 text-[10px] text-muted-foreground">{{ t('shell.schedule.today') }}</p>
-      </div>
-      <CalendarDays class="h-4 w-4 text-muted-foreground/70" />
-    </div>
+    <CapsulePreviewHeader :title="t('nav.schedule')" :subtitle="t('shell.schedule.today')">
+      <template #actions>
+        <CalendarDays class="h-4 w-4 text-muted-foreground/70" />
+      </template>
+    </CapsulePreviewHeader>
 
-    <div v-if="isLoading" class="space-y-1.5 py-3" data-testid="schedule-capsule-loading">
+    <CapsulePreviewState v-if="isLoading" kind="loading" data-testid="schedule-capsule-loading">
       <div class="h-14 animate-pulse rounded-lg bg-muted/70" />
       <div class="h-10 animate-pulse rounded-lg bg-muted/50" />
       <div class="h-10 animate-pulse rounded-lg bg-muted/50" />
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="!primaryEvent"
-      class="flex flex-col items-center justify-center py-7 text-center"
+      kind="empty"
       data-testid="schedule-capsule-empty"
     >
-      <CalendarDays class="mb-2 h-6 w-6 text-muted-foreground/45" />
+      <CalendarDays class="h-6 w-6 text-muted-foreground/45" />
       <p class="text-[11px] text-muted-foreground">{{ t('shell.schedule.empty') }}</p>
-    </div>
+    </CapsulePreviewState>
 
     <template v-else>
       <div class="py-2" data-testid="schedule-capsule-summary">
@@ -122,8 +127,10 @@ onMounted(() => {
               {{ primaryTime }}
             </span>
           </span>
-          <span class="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
-            <span>{{ t(`schedule.source.${primaryEvent.source}`) }}</span>
+          <span
+            class="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground"
+          >
+            <span>{{ calendarEventSourceLabel(primaryEvent.source, t) }}</span>
             <span v-if="snapshot.kind === 'upcoming' && snapshot.minutesUntilStart != null">
               {{ t('shell.schedule.startsIn', { minutes: snapshot.minutesUntilStart }) }}
             </span>
@@ -155,7 +162,7 @@ onMounted(() => {
               {{ event.title }}
             </span>
             <span class="shrink-0 text-[9px] text-muted-foreground/70">
-              {{ t(`schedule.source.${event.source}`) }}
+              {{ calendarEventSourceLabel(event.source, t) }}
             </span>
           </button>
         </div>
@@ -170,7 +177,7 @@ onMounted(() => {
       </div>
     </template>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <CapsulePreviewFooter>
       <button
         type="button"
         class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -180,6 +187,6 @@ onMounted(() => {
         {{ t('shell.openSchedule') }}
         <ArrowRight class="h-3.5 w-3.5" />
       </button>
-    </div>
-  </div>
+    </CapsulePreviewFooter>
+  </CapsulePreviewShell>
 </template>

@@ -9,6 +9,10 @@ function getColumnType(tableName: keyof typeof PowerSyncAppSchema.props, columnN
 }
 
 describe('PowerSyncAppSchema', () => {
+  it('syncs GoalRecord authorship separately from correlation and recordedAt', () => {
+    for (const name of ['authorship', 'source_type', 'source_id', 'recorded_at'])
+      expect(getColumnType('goal_records', name)).toBe('TEXT');
+  });
   it('keeps the key sync tables in the exported schema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
     expect(PowerSyncAppSchema.props).toHaveProperty('task_plans');
@@ -74,6 +78,8 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('task_plans', 'goal_id')).toBe('TEXT');
     expect(getColumnType('task_plans', 'key_result_id')).toBe('TEXT');
     expect(getColumnType('task_plans', 'goal_record_value')).toBe('REAL');
+    expect(getColumnType('task_plans', 'goal_progress_mode')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'goal_suggested_value')).toBe('REAL');
     expect(getColumnType('task_plans', 'goal_progress_trigger')).toBe('TEXT');
     expect(getColumnType('task_plans', 'goal_binding')).toBeUndefined();
     expect(getColumnType('task_plans', 'schedule')).toBe('TEXT');

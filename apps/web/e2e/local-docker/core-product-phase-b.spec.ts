@@ -186,7 +186,10 @@ test.describe('Local Docker core product Phase B', () => {
     await showTodayOverview(page);
     const recurringTodo = todayTodo(page, recurringPlanName);
     await expect(recurringTodo).toHaveAttribute('data-task-status', 'Pending');
-    await recurringTodo.locator('button[title]').click();
+    const occurrenceId = await recurringTodo.getAttribute('data-task-occurrence-id');
+    expect(occurrenceId).toBeTruthy();
+    const completeButton = recurringTodo.getByTestId(`task-compact-complete-${occurrenceId}`);
+    await completeButton.click();
     await expect(recurringTodo).toHaveAttribute('data-task-status', 'Completed');
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
     await showPlansSurface(page);
@@ -198,7 +201,7 @@ test.describe('Local Docker core product Phase B', () => {
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);
-    await todayTodo(page, recurringPlanName).locator('button[title]').click();
+    await completeButton.click();
     await expect(todayTodo(page, recurringPlanName)).toHaveAttribute('data-task-status', 'Pending');
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
     await showPlansSurface(page);
@@ -218,7 +221,8 @@ function taskCard(page: Page, title: string): Locator {
 
 function todayTodo(page: Page, title: string): Locator {
   return page
-    .getByTestId('daily-todo-item')
+    .getByTestId('daily-todo-widget')
+    .locator('[data-task-occurrence-id]')
     .filter({ has: page.getByText(title, { exact: true }) });
 }
 

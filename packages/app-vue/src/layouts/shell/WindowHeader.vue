@@ -91,16 +91,16 @@ const utilityCapsules = computed(() =>
 
 <template>
   <header
-    class="window-header flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-3 text-xs"
+    class="window-header flex h-11 shrink-0 items-center justify-between gap-1.5 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.94)] px-2 text-xs shadow-[0_1px_0_hsl(var(--border)/0.05)] backdrop-blur-sm"
     :class="[isDesktop ? 'window-header--drag' : '', isMac ? 'pl-20' : '']"
     data-testid="window-header"
     :data-header-mode="props.mode ?? 'workspace'"
   >
     <!-- 左：所有场景共享侧栏 + history 控件；Settings 只替换中间内容。 -->
-    <div class="flex shrink-0 items-center gap-2">
+    <div class="flex shrink-0 items-center gap-1.5">
       <button
         type="button"
-        class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :title="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         :aria-label="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         data-testid="shell-sidebar-toggle"
@@ -112,7 +112,7 @@ const utilityCapsules = computed(() =>
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.back')"
           :aria-label="t('shell.back')"
           @click="emit('go-back')"
@@ -121,7 +121,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.forward')"
           :aria-label="t('shell.forward')"
           @click="emit('go-forward')"
@@ -138,7 +138,7 @@ const utilityCapsules = computed(() =>
     >
       <nav
         v-if="primaryCapsules.length"
-        class="no-drag flex min-w-0 items-center gap-1 overflow-x-auto py-1"
+        class="no-drag flex min-w-0 items-center gap-1 overflow-hidden py-1"
         :aria-label="t('shell.moduleNav')"
         data-testid="shell-primary-capsules"
       >
@@ -163,13 +163,14 @@ const utilityCapsules = computed(() =>
       class="window-header__drag-surface flex min-w-0 flex-1 items-center justify-center"
       data-testid="settings-window-header-title"
     >
-      <span class="truncate rounded-md bg-muted/50 px-3 py-1 text-xs font-medium text-foreground">{{
-        t('setting.title')
-      }}</span>
+      <span
+        class="truncate rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] px-2.5 py-1 text-[12px] font-medium text-foreground"
+        >{{ t('setting.title') }}</span
+      >
     </div>
 
     <!-- 右：轻量状态动作、日程/通知入口、面板与桌面窗控。 -->
-    <div class="flex shrink-0 items-center gap-3">
+    <div class="flex shrink-0 items-center gap-2">
       <div
         v-if="$slots['status-actions']"
         class="no-drag flex items-center"
@@ -179,7 +180,7 @@ const utilityCapsules = computed(() =>
       </div>
       <nav
         v-if="props.mode !== 'settings' && utilityCapsules.length"
-        class="no-drag flex max-w-[35vw] items-center gap-1 overflow-x-auto"
+        class="no-drag flex max-w-[35vw] items-center gap-1 overflow-hidden"
         :aria-label="t('shell.moduleNav')"
         data-testid="shell-utility-capsules"
       >
@@ -201,7 +202,7 @@ const utilityCapsules = computed(() =>
       <button
         v-if="props.mode !== 'settings'"
         type="button"
-        class="relative rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="relative flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         data-testid="shell-right-panel-toggle"
         :title="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
         :aria-label="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
@@ -222,7 +223,7 @@ const utilityCapsules = computed(() =>
       <div v-if="isDesktop && !isMac" class="flex items-center gap-1">
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isMinimizable"
           :title="t('shell.window.minimize')"
           :aria-label="t('shell.window.minimize')"
@@ -232,7 +233,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isMaximizable"
           :title="t('shell.window.maximize')"
           :aria-label="t('shell.window.maximize')"
@@ -243,7 +244,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground"
+          class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-destructive/85 hover:text-destructive-foreground disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :disabled="windowControls && !windowControls.isClosable"
           :title="t('shell.window.close')"
           :aria-label="t('shell.window.close')"
@@ -257,6 +258,11 @@ const utilityCapsules = computed(() =>
 </template>
 
 <style scoped>
+.window-header {
+  container-type: inline-size;
+  container-name: window-header;
+}
+
 .window-header--drag {
   -webkit-app-region: drag;
   user-select: none;

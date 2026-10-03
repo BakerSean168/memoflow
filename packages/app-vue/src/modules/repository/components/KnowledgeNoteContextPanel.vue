@@ -27,7 +27,7 @@
             v-for="item in outline"
             :key="item.level + ':' + item.label"
             type="button"
-            class="block w-full truncate rounded-md py-1.5 text-left text-xs text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+            class="block w-full truncate rounded-md py-1.5 text-left text-xs text-muted-foreground hover:bg-[hsl(var(--hover)/0.65)] hover:text-foreground"
             :class="item.level >= 3 ? 'pl-4 pr-2' : 'px-2'"
             @click="scrollToHeading(item.label)"
           >

@@ -3,7 +3,7 @@
  * Package-Internal Boundary Audit
  *
  * CLI wrapper around the shared read-only runner used by both repository
- * governance and the pinned GovernanceRuleBundle engineering adapter.
+ * Engineering Governance and its repository-native rule adapter.
  */
 import path from 'node:path';
 import { runPackageInternalBoundaryAudit } from './lib/package-internal-boundary-runner.mjs';

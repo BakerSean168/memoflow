@@ -10,6 +10,12 @@ import { useI18n } from 'vue-i18n';
 import { ArrowRight, FileText, Link2, Search } from '@lucide/vue';
 import { Input } from '@memoflow/ui-vue-shadcn';
 import { useRecentKnowledgeNotes } from '../../../modules/repository/composables/useRecentKnowledgeNotes';
+import {
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
 
 const LOAD_LIMIT = 40;
 const DISPLAY_LIMIT = 8;
@@ -64,26 +70,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex max-h-[30rem] min-h-0 flex-col"
+  <CapsulePreviewShell
+    max-height="30rem"
     data-testid="note-capsule-preview"
     data-capsule-workspace="note"
   >
-    <div class="shrink-0 border-b border-border/50 pb-2">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold text-foreground">{{ t('nav.capsule.note') }}</p>
-          <p class="mt-0.5 text-[10px] text-muted-foreground">
-            {{ t('shell.noteWorkspace.recent') }}
-          </p>
-        </div>
+    <CapsulePreviewHeader
+      :title="t('nav.capsule.note')"
+      :subtitle="t('shell.noteWorkspace.recent')"
+    >
+      <template #actions>
         <span
           class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
           data-testid="note-capsule-count"
         >
           {{ totalCount }}
         </span>
-      </div>
+      </template>
 
       <div class="relative mt-2">
         <Search
@@ -96,32 +99,31 @@ onMounted(() => {
           data-testid="note-capsule-search"
         />
       </div>
-    </div>
+    </CapsulePreviewHeader>
 
-    <div
+    <CapsulePreviewState
       v-if="isLoading && recentNotes.notes.value.length === 0"
-      class="space-y-1.5 py-3"
+      kind="loading"
       data-testid="note-capsule-loading"
     >
       <div v-for="i in 4" :key="i" class="h-10 animate-pulse rounded-lg bg-muted/70" />
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="emailVerificationRequired"
-      class="space-y-1 py-4 text-center"
+      kind="info"
       data-testid="note-capsule-email-verification"
-      role="status"
     >
-      <p class="text-[11px] font-medium text-amber-950 dark:text-amber-100">
+      <p class="text-[11px] font-medium text-foreground">
         {{ verificationDegradeMessage ?? t('common.emailVerificationRequired') }}
       </p>
       <p class="text-[10px] text-muted-foreground">
         {{ t('common.emailVerificationRequiredHint') }}
       </p>
-    </div>
+    </CapsulePreviewState>
 
-    <div v-else-if="localError" class="space-y-2 py-4 text-center" data-testid="note-capsule-error">
-      <p class="text-[11px] text-muted-foreground">{{ localError }}</p>
+    <CapsulePreviewState v-else-if="localError" kind="error" data-testid="note-capsule-error">
+      <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ localError }}</p>
       <button
         type="button"
         class="text-[11px] font-medium text-primary"
@@ -130,18 +132,18 @@ onMounted(() => {
       >
         {{ t('common.retry') }}
       </button>
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="filtered.length === 0"
-      class="flex flex-col items-center justify-center py-7 text-center"
+      kind="empty"
       data-testid="note-capsule-empty"
     >
-      <FileText class="mb-2 h-6 w-6 text-muted-foreground/45" />
+      <FileText class="h-6 w-6 text-muted-foreground/45" />
       <p class="text-[11px] text-muted-foreground">
         {{ query.trim() ? t('shell.noteWorkspace.noMatches') : t('shell.preview.noteEmpty') }}
       </p>
-    </div>
+    </CapsulePreviewState>
 
     <ul
       v-else
@@ -175,7 +177,7 @@ onMounted(() => {
       </li>
     </ul>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <CapsulePreviewFooter>
       <button
         type="button"
         class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -185,6 +187,6 @@ onMounted(() => {
         {{ t('shell.noteWorkspace.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
       </button>
-    </div>
-  </div>
+    </CapsulePreviewFooter>
+  </CapsulePreviewShell>
 </template>

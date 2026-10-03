@@ -10,6 +10,7 @@ describe('Task occurrence filters', () => {
     for (const selector of [
       'task-surface-trigger',
       'task-status-filter',
+      'task-plan-state-filter',
       'task-label-filter',
       'task-compact-view-options',
       'task-occurrence-sort',

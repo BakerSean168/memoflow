@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex min-h-0 overflow-hidden bg-background"
+    class="flex min-h-0 overflow-hidden bg-transparent"
     :class="composerOnly ? 'h-auto' : 'h-full'"
     data-testid="ai-chat-view"
   >
@@ -64,11 +64,11 @@
     <section class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden">
       <header
         v-show="!composerOnly"
-        class="flex h-12 shrink-0 items-center border-b border-border/45 bg-background px-4 @md/ai:px-6"
+        class="flex h-11 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
       >
         <div class="flex w-full items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-sm font-semibold tracking-[-0.01em] text-foreground">
+            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
               {{ currentConversationLabel }}
             </h1>
             <span
@@ -148,7 +148,8 @@
             :goal-clarification="goalClarification"
             :automated-goal-id="automatedGoalId"
             :goal-agent-resuming="goalAgentResuming"
-            :show-goal-draft-editor="showGoalDraftEditor"
+            :goal-owner-submitted="goalOwnerSubmitted"
+            :goal-owner-attempt-pending="goalOwnerAttemptPending"
             :can-resume-goal-agent-clarification="canResumeGoalAgentClarification"
             :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
             :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
@@ -162,14 +163,13 @@
             :cancel-goal-agent-run="cancelGoalAgentRun"
             :continue-goal-agent-execution="continueGoalAgentExecution"
             :retry-goal-agent-execution="retryGoalAgentExecution"
-            :toggle-goal-draft-editor="toggleGoalDraftEditor"
             :open-automated-goal="openAutomatedGoal"
             :exit-tool-mode="exitToolMode"
           />
         </div>
       </div>
 
-      <Teleport v-if="shellComposerMount" :to="shellComposerMount">
+      <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -193,29 +193,6 @@
           @remove-context-entity="removeContextEntity"
         />
       </Teleport>
-      <AIFooterComposer
-        v-else
-        ref="composerRef"
-        v-model="chatMessage"
-        :loading="chatLoading"
-        :can-send="canSendMessage"
-        :attachments="composerAttachments"
-        :context-entities="composerContextEntities"
-        :recent-goals="referenceGoalList"
-        :recent-tasks="referenceTaskList"
-        :recent-knowledge-notes="referenceKnowledgeNoteList"
-        :model-groups="modelGroups"
-        :selected-model-key="selectedModelKey"
-        :density="composerDensity"
-        @send="handleComposerSend"
-        @stop="stopGenerating"
-        @select-model="selectModel"
-        @open-settings="openAISettings"
-        @add-files="addComposerFiles"
-        @remove-attachment="removeComposerAttachment"
-        @toggle-context-entity="toggleExplicitContextEntity"
-        @remove-context-entity="removeContextEntity"
-      />
     </section>
 
     <Teleport :to="shellWorkflowMount ?? 'body'" :disabled="!shellWorkflowMount">
@@ -236,15 +213,14 @@
           :editable-key-results="editableKeyResults"
           :editable-tasks="editableTasks"
           :editable-knowledge="editableKnowledge"
-          :show-goal-draft-editor="showGoalDraftEditor"
+          :goal-owner-submitted="goalOwnerSubmitted"
+          :supporting-editing-blocked="
+            goalAgentResuming || creatingGoal || goalOwnerSubmitted || goalOwnerAttemptPending
+          "
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
           @update:clarification-answers="handleClarificationAnswersUpdate"
-          @confirm="handleCreateGoalFromDraft"
-          @add-key-result="addKeyResultDraft"
-          @remove-key-result="removeKeyResultDraft"
-          @update-goal="handleUpdateGoalDraft"
-          @update-key-result="updateKeyResultDraft"
+          @open-native-review="openGoalNativeReview"
           @remove-task="removeTaskDraft"
           @update-task="updateTaskDraft"
           @remove-knowledge="removeKnowledgeDraft"
@@ -254,21 +230,31 @@
         <AITaskWorkflowPanel
           :tool-mode="toolMode"
           :task-workflow-run="taskWorkflowRun"
-          :editable-task="editableTask"
-          :show-task-draft-editor="showTaskDraftEditor"
+          :busy="taskAgentResuming"
+          :owner-attempt-pending="taskOwnerAttemptPending"
+          :owner-submitted="taskOwnerSubmitted"
+          :clarification-answers="taskClarificationAnswers"
+          :can-submit-clarification="canSubmitTaskClarification"
+          @submit-clarification="submitTaskClarification"
+          @update-clarification-answer="(index, value) => (taskClarificationAnswers[index] = value)"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
-          @update-task="updateStandaloneTaskDraft"
-          @edit-started="showTaskDraftEditor = true"
+          @open-native-review="openTaskNativeReview"
         />
         <AIKnowledgeCapturePanel
           :tool-mode="toolMode"
           :knowledge-capture-run="knowledgeCaptureRun"
-          @confirm="confirmKnowledgeCaptureRun"
+          :busy="knowledgeCaptureResuming"
+          :clarification-answers="knowledgeClarificationAnswers"
+          :can-submit-clarification="canSubmitKnowledgeClarification"
+          @submit-clarification="submitKnowledgeClarification"
+          @update-clarification-answer="
+            (index, value) => (knowledgeClarificationAnswers[index] = value)
+          "
           @cancel="cancelKnowledgeCaptureRun"
           @retry="retryKnowledgeCaptureExecution"
-          @edit-started="showKnowledgeDraftEditor = true"
+          @open-native-review="openKnowledgeNativeReview"
         />
         <div
           v-if="!hasWorkflowArtifact"
@@ -399,8 +385,10 @@ const {
   goalClarification,
   goalWorkflowRun,
   clarificationAnswers,
-  showGoalDraftEditor,
+  goalOwnerSubmitted,
+  goalOwnerAttemptPending,
   goalAgentResuming,
+  creatingGoal,
   editableGoal,
   editableKeyResults,
   editableTasks,
@@ -419,16 +407,11 @@ const {
   continueGoalAgentExecution,
   retryGoalAgentExecution,
   openAutomatedGoal,
-  handleCreateGoalFromDraft,
-  addKeyResultDraft,
-  removeKeyResultDraft,
-  updateKeyResultDraft,
-  handleUpdateGoalDraft,
+  openGoalNativeReview,
   removeTaskDraft,
   updateTaskDraft,
   removeKnowledgeDraft,
   updateKnowledgeDraft,
-  toggleGoalDraftEditor,
 } = goalWorkflow;
 
 const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
@@ -436,24 +419,31 @@ const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
 
 const {
   taskWorkflowRun,
-  showTaskDraftEditor,
-  editableTask,
+  taskAgentResuming,
+  taskOwnerAttemptPending,
+  taskOwnerSubmitted,
+  clarificationAnswers: taskClarificationAnswers,
+  canSubmitTaskClarification,
+  submitTaskClarification,
+  openTaskNativeReview,
   linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
   cancelTaskAgentRun,
   confirmTaskAgentRun,
-  updateTaskDraft: updateStandaloneTaskDraft,
   retryTaskAgentExecution,
 } = taskWorkflow;
 
 const {
   knowledgeCaptureRun,
-  showKnowledgeDraftEditor,
+  knowledgeCaptureResuming,
+  clarificationAnswers: knowledgeClarificationAnswers,
+  canSubmitKnowledgeClarification,
+  submitKnowledgeClarification,
   startKnowledgeCaptureRun,
   cancelKnowledgeCaptureRun,
-  confirmKnowledgeCaptureRun,
   retryKnowledgeCaptureExecution,
+  openKnowledgeNativeReview,
 } = knowledgeCaptureWorkflow;
 
 const { formatExecutionOutcome } = formatters;

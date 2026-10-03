@@ -6,6 +6,9 @@ import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import {
   formatPlannerProjectionTimeRange,
   plannerProjectionDateKey,
+  plannerProjectionSourceLabel,
+  plannerProjectionSourcePresentation,
+  plannerProjectionToneClass,
 } from './planner-presentation';
 
 function timedProjection(start: number, end: number | null): CalendarEventProjection {
@@ -27,6 +30,59 @@ function timedProjection(start: number, end: number | null): CalendarEventProjec
 
 describe('planner projection presentation', () => {
   afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
+
+  it('owns one source label and visual identity for every Planner owner', () => {
+    expect(plannerProjectionSourcePresentation).toEqual({
+      schedule: expect.objectContaining({
+        labelI18nKey: 'schedule.source.schedule',
+        sourceClass: 'planner-source-schedule',
+        dotClass: 'bg-primary',
+        badgeClass: 'bg-primary/10 text-primary',
+        calendarColor: 'var(--primary)',
+        calendarForeground: 'var(--primary-foreground)',
+      }),
+      task: expect.objectContaining({
+        labelI18nKey: 'schedule.source.task',
+        sourceClass: 'planner-source-task',
+        dotClass: 'bg-info',
+        badgeClass: 'bg-info/15 text-info',
+        calendarColor: 'var(--info)',
+        calendarForeground: 'var(--info-foreground)',
+      }),
+      goal: expect.objectContaining({
+        labelI18nKey: 'schedule.source.goal',
+        sourceClass: 'planner-source-goal',
+        dotClass: 'bg-warning',
+        badgeClass: 'bg-warning/15 text-warning',
+        calendarColor: 'var(--warning)',
+        calendarForeground: 'var(--warning-foreground)',
+      }),
+      routine: expect.objectContaining({
+        labelI18nKey: 'schedule.source.routine',
+        sourceClass: 'planner-source-routine',
+        dotClass: 'bg-success',
+        badgeClass: 'bg-success/15 text-success',
+        calendarColor: 'var(--success)',
+        calendarForeground: 'var(--success-foreground)',
+      }),
+    });
+
+    expect(plannerProjectionSourceLabel('goal', (key) => `translated:${key}`)).toBe(
+      'translated:schedule.source.goal',
+    );
+  });
+
+  it('derives event tone from projection metadata and conflict state', () => {
+    const event = timedProjection(Date.parse('2026-03-08T13:05:00.000Z'), null);
+    expect(plannerProjectionToneClass(event)).toBe('planner-tone-default');
+    expect(
+      plannerProjectionToneClass({
+        ...event,
+        displayMetadata: { ...event.displayMetadata, tone: 'success' },
+      }),
+    ).toBe('planner-tone-success');
+    expect(plannerProjectionToneClass(event, true)).toBe('planner-tone-warning');
+  });
 
   it('formats timed projections in the session timezone', () => {
     const profile = createDefaultUserPreferenceProfile();

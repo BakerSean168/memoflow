@@ -13,10 +13,9 @@ import type { TaskPlanMutationResult } from './goal-plan-mutation.port';
  * are never performed directly by the Mastra agent/workflow.
  */
 export interface TaskPlanMutationPort {
-  resolveLabels(
-    names: readonly string[],
-    context: ExecutionContext,
-  ): Promise<Result<string[]>>;
+  /** Canonical identity-scoped owner truth, before replay resolves labels. */
+  readTaskPlan(id: string, context: ExecutionContext): Promise<Result<TaskPlanMutationResult>>;
+  resolveLabels(names: readonly string[], context: ExecutionContext): Promise<Result<string[]>>;
   createTaskPlan(
     request: CreateTaskPlanReq,
     context: ExecutionContext,

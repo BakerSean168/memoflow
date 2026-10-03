@@ -60,7 +60,6 @@ const AUDITED_PACKAGES = new Set([
   'ai',
   'data-portability',
   'goal',
-  'governance',
   'notification',
   'reminder',
   'repository',

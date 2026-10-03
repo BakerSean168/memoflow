@@ -11,7 +11,6 @@ import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal/client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
-import { createGovernanceIpcClient } from '@memoflow/governance/client';
 import { createTaskIpcClient } from '@memoflow/task/client';
 import { createScheduleIpcClient } from '@memoflow/schedule/client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
@@ -41,7 +40,6 @@ import {
   AI_ASSISTANT_RUNTIME_KEY,
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
-  RULE_SERVICE_KEY,
   DATA_PORTABILITY_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
@@ -111,8 +109,6 @@ export function installDesktopAppServices(app: App): void {
   app.provide(AI_ASSISTANT_RUNTIME_KEY, createAssistantRuntimeIpcClient(resultIpcClient));
   app.provide(AI_RUNTIME_USAGE_KEY, createRuntimeUsageIpcClient(resultIpcClient));
   app.provide(AI_WORKFLOW_RUNTIME_KEY, createWorkflowRuntimeIpcClient(resultIpcClient));
-
-  app.provide(RULE_SERVICE_KEY, createGovernanceIpcClient(resultIpcClient));
 
   app.provide(DATA_PORTABILITY_SERVICE_KEY, createDataPortabilityIpcClient(resultIpcClient));
 

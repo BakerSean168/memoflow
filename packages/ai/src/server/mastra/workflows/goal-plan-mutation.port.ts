@@ -3,7 +3,7 @@ import type {
   GoalPlanDraftRef,
   GoalPlanExecutionReceipt,
 } from '@memoflow/contracts/ai';
-import type { CreateGoalReq } from '@memoflow/contracts/goal';
+import type { GoalStatus, CreateGoalReq } from '@memoflow/contracts/goal';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import type { Result } from '@memoflow/contracts/result';
@@ -13,6 +13,7 @@ import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 export type GoalMutationResult = {
   goalId: string;
   goalVersion: number;
+  goalStatus?: GoalStatus;
   keyResultIds: string[];
 };
 
@@ -40,6 +41,7 @@ export interface GoalPlanKnowledgeCreateMutationRequest {
  * no owner repository or cross-module transaction leaks into the AI package.
  */
 export interface GoalPlanMutationPort {
+  readGoal(goalId: string, context: ExecutionContext): Promise<Result<GoalMutationResult>>;
   resolveLabels(names: readonly string[], context: ExecutionContext): Promise<Result<string[]>>;
   createGoal(
     request: CreateGoalReq,

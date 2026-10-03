@@ -1,6 +1,8 @@
 import { DOMWrapper, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locales/en-US';
 import CreateScheduleDialog from './CreateScheduleDialog.vue';
@@ -29,11 +31,14 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     // Freeze the clock at mid-day UTC so nowDateStr()/nowTimeStr()/
     // oneHourLaterTimeStr() can never straddle a date/TZ boundary, keeping
     // startTimestamp < endTimestamp deterministic regardless of when CI runs.
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({ ...profile, regional: { ...profile.regional, timeZone: 'UTC' } });
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-08-14T12:00:00Z'));
   });
 
   afterEach(() => {
+    setProductTimePreferences(createDefaultUserPreferenceProfile());
     vi.useRealTimers();
     document.body.innerHTML = '';
   });
@@ -194,6 +199,132 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     await nextTick();
 
     expect(onSubmit).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+    wrapper.unmount();
+  }, 20_000);
+  it.each(['Timed', 'AllDay'] as const)(
+    'seeds %s edit facts and saves the same range',
+    async (kind) => {
+      const range =
+        kind === 'Timed'
+          ? {
+              kind,
+              start: Date.parse('2026-08-14T09:30:00Z'),
+              end: Date.parse('2026-08-14T11:00:00Z'),
+            }
+          : { kind, start: '2026-08-14', end: null };
+      const onSubmit = vi.fn().mockResolvedValue(true);
+      const wrapper = mount(CreateScheduleDialog, {
+        props: {
+          modelValue: true,
+          schedule: {
+            title: 'Existing entry',
+            description: 'Seeded note',
+            location: 'Desk',
+            attendees: ['Ada'],
+            range,
+          } as unknown as import('@memoflow/contracts/schedule').CalendarEntryClientDTO,
+          onSubmit,
+        },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      await nextTick();
+      expect(
+        document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')?.value,
+      ).toBe('Existing entry');
+      await new DOMWrapper(
+        document.querySelector<HTMLButtonElement>('[data-testid="schedule-save-button"]')!,
+      ).trigger('click');
+      await nextTick();
+      await nextTick();
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Existing entry',
+          description: 'Seeded note',
+          location: 'Desk',
+          attendees: ['Ada'],
+          range,
+        }),
+      );
+      wrapper.unmount();
+    },
+    20_000,
+  );
+  it.each([false, true])(
+    'submits the canonical selected range once under synchronous form races, allDay=%s',
+    async (allDay) => {
+      let finish!: (value: boolean) => void;
+      const onSubmit = vi.fn(
+        () =>
+          new Promise<boolean>((resolve) => {
+            finish = resolve;
+          }),
+      );
+      const wrapper = mount(CreateScheduleDialog, {
+        props: {
+          modelValue: true,
+          initialRange: {
+            start: Date.parse('2026-08-14T09:30:00Z'),
+            end: Date.parse(allDay ? '2026-08-16T00:00:00Z' : '2026-08-14T10:30:00Z'),
+            allDay,
+          },
+          onSubmit,
+        },
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      await nextTick();
+      await new DOMWrapper(
+        document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+      ).setValue('Selected range');
+      const form = document.querySelector<HTMLFormElement>('#schedule-form')!;
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      expect(onSubmit).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          range: allDay
+            ? { kind: 'AllDay', start: '2026-08-14', end: '2026-08-15' }
+            : {
+                kind: 'Timed',
+                start: Date.parse('2026-08-14T09:30:00Z'),
+                end: Date.parse('2026-08-14T10:30:00Z'),
+              },
+        }),
+      );
+      finish(true);
+      await nextTick();
+      await wrapper.setProps({ modelValue: false });
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      expect(onSubmit).toHaveBeenCalledOnce();
+      wrapper.unmount();
+    },
+    20_000,
+  );
+
+  it('retains the selected draft after an exception and allows a distinct retry', async () => {
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce(true);
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    await new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    ).setValue('Retry draft');
+    const form = new DOMWrapper(document.querySelector<HTMLFormElement>('#schedule-form')!);
+    await form.trigger('submit');
+    await nextTick();
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(document.querySelector('[role="alert"]')).not.toBeNull();
+    await form.trigger('submit');
+    await nextTick();
+    expect(onSubmit).toHaveBeenCalledTimes(2);
+    expect(onSubmit.mock.calls[0]).toEqual(onSubmit.mock.calls[1]);
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
     wrapper.unmount();
   }, 20_000);

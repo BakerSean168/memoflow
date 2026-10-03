@@ -6,16 +6,16 @@
     menu-width="w-40"
     more-button-test-id="goal-row-more-actions"
     :more-button-label="t('goal.list.moreActions')"
-    more-button-class="!border-transparent !bg-transparent !shadow-none !backdrop-blur-none hover:!bg-muted/70"
+    more-button-class="!border-transparent !bg-transparent !shadow-none !backdrop-blur-none hover:!bg-[hsl(var(--hover))]"
   >
     <article
-      class="border-b border-border/70 last:border-b-0"
+      class="border-b border-[hsl(var(--border-subtle))] last:border-b-0"
       data-testid="goal-progress-row"
       :data-goal-id="goal.id"
     >
       <button
         type="button"
-        class="w-full text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+        class="w-full text-left transition-colors hover:bg-[hsl(var(--hover)/0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
         @click="emit('view')"
       >
         <div
@@ -51,7 +51,7 @@
               >
                 <span
                   v-if="label.color"
-                  class="h-1.5 w-1.5 rounded-full border border-border/70"
+                  class="h-1.5 w-1.5 rounded-full border border-[hsl(var(--border-subtle))]"
                   :style="{ backgroundColor: label.color }"
                   aria-hidden="true"
                 />

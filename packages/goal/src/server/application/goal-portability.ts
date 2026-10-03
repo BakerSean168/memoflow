@@ -239,11 +239,7 @@ function assertExistingGoalMatchesPortableDefinition(
     const normalizedContext = {
       ...currentContext,
       keyResults: currentContext.keyResults.map((keyResult) => ({
-        keyResultRef: deterministicKeyResultId(
-          existing.identityId,
-          batchId,
-          String(keyResult.keyResultId),
-        ),
+        keyResultRef: String(keyResult.keyResultId),
         title: keyResult.title,
         unit: keyResult.unit,
         startPercentage: keyResult.startPercentage,
@@ -253,7 +249,7 @@ function assertExistingGoalMatchesPortableDefinition(
       })),
     };
     const portableKeyResults = portableContext.keyResults.map((keyResult) => ({
-      keyResultRef: keyResult.keyResultRef,
+      keyResultRef: deterministicKeyResultId(existing.identityId, batchId, keyResult.keyResultRef),
       title: keyResult.title,
       unit: keyResult.unit,
       startPercentage: keyResult.startPercentage,
@@ -263,6 +259,17 @@ function assertExistingGoalMatchesPortableDefinition(
     }));
     const comparablePortableContext = {
       ...portableContext,
+      signals: portableContext.signals.map((signal) =>
+        signal.kind === 'key-result-movement'
+          ? {
+              ...signal,
+              evidence: signal.evidence.map(({ keyResultRef, ...item }) => ({
+                ...item,
+                keyResultId: deterministicKeyResultId(existing.identityId, batchId, keyResultRef),
+              })),
+            }
+          : signal,
+      ),
       keyResults: portableKeyResults,
     };
     if (
@@ -439,11 +446,25 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
             reviewedAt: Number(review.reviewedAt),
             systemContext: {
               ...review.systemContext,
-              keyResults: review.systemContext.keyResults.map((keyResult) => ({
+              signals: review.systemContext.signals.map((signal) =>
+                signal.kind === 'key-result-movement'
+                  ? {
+                      ...signal,
+                      evidence: signal.evidence.map(({ keyResultId, ...item }) => ({
+                        ...item,
+                        keyResultRef: context.references.resolveExportReference(
+                          'goals',
+                          String(keyResultId),
+                        ),
+                      })),
+                    }
+                  : signal,
+              ),
+              keyResults: review.systemContext.keyResults.map(({ keyResultId, ...keyResult }) => ({
                 ...keyResult,
                 keyResultRef: context.references.resolveExportReference(
                   'goals',
-                  String(keyResult.keyResultId),
+                  String(keyResultId),
                 ),
               })),
             },
@@ -572,6 +593,21 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           updatedAt: review.reviewedAt,
           systemContext: {
             ...review.systemContext,
+            signals: review.systemContext.signals.map((signal) =>
+              signal.kind === 'key-result-movement'
+                ? {
+                    ...signal,
+                    evidence: signal.evidence.map(({ keyResultRef, ...item }) => ({
+                      ...item,
+                      keyResultId: deterministicKeyResultId(
+                        context.identityId,
+                        batchId,
+                        keyResultRef,
+                      ),
+                    })),
+                  }
+                : signal,
+            ),
             keyResults: review.systemContext.keyResults.map((keyResult) => ({
               ...keyResult,
               keyResultId: deterministicKeyResultId(

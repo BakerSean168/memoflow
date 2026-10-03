@@ -14,6 +14,12 @@ import {
   type GoalHomeProgressItem,
 } from '@memoflow/contracts/goal';
 import { useGoalHomeSummary } from '../../../modules/goal/composables/useGoalHomeSummary';
+import {
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
 
 const DISPLAY_LIMIT = 5;
 
@@ -23,8 +29,14 @@ defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-const { goals: goalProgress, activeCount, isLoading, error, ensure, refresh } =
-  useGoalHomeSummary();
+const {
+  goals: goalProgress,
+  activeCount,
+  isLoading,
+  error,
+  ensure,
+  refresh,
+} = useGoalHomeSummary();
 
 const localError = ref<string | null>(null);
 
@@ -63,36 +75,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex max-h-[30rem] min-h-0 flex-col"
+  <CapsulePreviewShell
+    max-height="30rem"
     data-testid="goal-capsule-preview"
     data-capsule-workspace="goal"
   >
-    <div class="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
-      <div>
-        <p class="text-xs font-semibold text-foreground">{{ t('nav.capsule.goal') }}</p>
-        <p class="mt-0.5 text-[10px] text-muted-foreground">
-          {{ t('shell.goalWorkspace.attention') }}
-        </p>
-      </div>
-      <span
-        class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground"
-        data-testid="goal-capsule-count"
-      >
-        {{ activeCount }}
-      </span>
-    </div>
+    <CapsulePreviewHeader
+      :title="t('nav.capsule.goal')"
+      :subtitle="t('shell.goalWorkspace.attention')"
+    >
+      <template #actions>
+        <span
+          class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground"
+          data-testid="goal-capsule-count"
+        >
+          {{ activeCount }}
+        </span>
+      </template>
+    </CapsulePreviewHeader>
 
-    <div
+    <CapsulePreviewState
       v-if="isLoading && items.length === 0"
-      class="space-y-1.5 py-3"
+      kind="loading"
       data-testid="goal-capsule-loading"
     >
       <div v-for="i in 4" :key="i" class="h-12 animate-pulse rounded-lg bg-muted/70" />
-    </div>
+    </CapsulePreviewState>
 
-    <div v-else-if="localError" class="space-y-2 py-4 text-center" data-testid="goal-capsule-error">
-      <p class="text-[11px] text-muted-foreground">{{ localError }}</p>
+    <CapsulePreviewState v-else-if="localError" kind="error" data-testid="goal-capsule-error">
+      <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ localError }}</p>
       <button
         type="button"
         class="text-[11px] font-medium text-primary"
@@ -101,16 +112,16 @@ onMounted(() => {
       >
         {{ t('common.retry') }}
       </button>
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="items.length === 0"
-      class="flex flex-col items-center justify-center py-7 text-center"
+      kind="empty"
       data-testid="goal-capsule-empty"
     >
-      <Target class="mb-2 h-6 w-6 text-muted-foreground/45" />
+      <Target class="h-6 w-6 text-muted-foreground/45" />
       <p class="text-[11px] text-muted-foreground">{{ t('shell.preview.goalEmpty') }}</p>
-    </div>
+    </CapsulePreviewState>
 
     <ul
       v-else
@@ -152,7 +163,7 @@ onMounted(() => {
       </li>
     </ul>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <CapsulePreviewFooter>
       <button
         type="button"
         class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -162,6 +173,6 @@ onMounted(() => {
         {{ t('shell.goalWorkspace.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
       </button>
-    </div>
-  </div>
+    </CapsulePreviewFooter>
+  </CapsulePreviewShell>
 </template>

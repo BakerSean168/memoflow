@@ -15,6 +15,13 @@ export class TaskPlanMutationAdapter implements TaskPlanMutationPort {
     private readonly labels: LabelService,
   ) {}
 
+  async readTaskPlan(id: string, context: Parameters<TaskPlanMutationPort['readTaskPlan']>[1]) {
+    const result = await this.task.getTaskPlan(id, context.identityId);
+    if (!result.ok) return result;
+    if (!result.data) return error('NOT_FOUND', 'Task plan not found');
+    return ok({ taskId: String(result.data.id) });
+  }
+
   async resolveLabels(
     names: readonly string[],
     context: Parameters<TaskPlanMutationPort['resolveLabels']>[1],

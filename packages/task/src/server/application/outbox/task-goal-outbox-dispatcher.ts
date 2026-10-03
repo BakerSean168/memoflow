@@ -1,5 +1,7 @@
 import {
   TaskGoalSettlementSourceType,
+  TaskGoalRecordingMode,
+  TaskGoalMeasurementSchema,
   type TaskGoalProgressOutboxEventV2,
   type TaskGoalSettlementSource,
 } from '@memoflow/contracts/task';
@@ -74,10 +76,28 @@ function decodeTaskGoalProgressEvent(
     for (const field of ['goalId', 'keyResultId', 'taskTitle'] as const) {
       requireNonEmptyString(value[field], `Task -> Goal ${field}`);
     }
-    if (!Number.isFinite(value.value) || Number(value.value) <= 0) {
+    // Persisted V2 events predate explicit recording mode.
+    const recordingMode =
+      value.recordingMode === undefined
+        ? TaskGoalRecordingMode.FixedAutomatic
+        : value.recordingMode;
+    if (!Object.values(TaskGoalRecordingMode).includes(recordingMode as never)) {
+      throw new Error('Task -> Goal recording mode is invalid');
+    }
+    if (
+      !Number.isFinite(value.value) ||
+      (recordingMode === TaskGoalRecordingMode.FixedAutomatic && value.value === 0)
+    ) {
       throw new Error('Task -> Goal apply payload contains an invalid contribution value');
     }
     requireSettlementSource(value.source);
+    if (recordingMode === TaskGoalRecordingMode.PromptedUserMeasurement) {
+      if (value.source.type !== TaskGoalSettlementSourceType.TaskOccurrence) {
+        throw new Error('Prompted measurement requires TaskOccurrence source');
+      }
+      TaskGoalMeasurementSchema.parse({ value: value.value, note: value.note });
+    }
+    value.recordingMode = recordingMode;
     return value as unknown as TaskGoalProgressOutboxEventV2;
   }
 

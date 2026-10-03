@@ -1,6 +1,6 @@
 <template>
   <section
-    class="overflow-hidden rounded-xl border border-border/70 bg-background/20"
+    class="overflow-hidden rounded-xl bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]"
     data-testid="task-checklist-editor"
   >
     <div class="flex min-h-11 items-center justify-between gap-3 px-3">
@@ -27,14 +27,14 @@
 
     <div
       v-if="modelValue.checklist.length"
-      class="border-t border-border/60"
+      class="border-t border-[hsl(var(--border-subtle))]"
       data-testid="task-checklist-definition-list"
     >
       <div
         v-for="(item, index) in modelValue.checklist"
         :key="item.id"
-        class="flex min-h-11 items-center gap-2 px-3 py-2 transition-colors hover:bg-muted/25"
-        :class="index > 0 ? 'border-t border-border/50' : ''"
+        class="flex min-h-11 items-center gap-2 px-3 py-2 transition-colors hover:bg-[hsl(var(--hover)/0.5)]"
+        :class="index > 0 ? 'border-t border-[hsl(var(--border-subtle))]' : ''"
       >
         <button
           type="button"
@@ -49,7 +49,7 @@
           type="button"
           variant="ghost"
           size="icon-xs"
-          class="text-muted-foreground/70 hover:bg-muted/60 hover:text-foreground"
+          class="text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('task.checklist.remove')"
           :disabled="disabled || editorOpen"
           @click="removeItem(item.id)"
@@ -61,7 +61,7 @@
 
     <div
       v-if="modelValue.checklist.length && !editorOpen"
-      class="flex justify-end border-t border-border/60 px-2 py-1.5"
+      class="flex justify-end border-t border-[hsl(var(--border-subtle))] px-2 py-1.5"
     >
       <Button
         type="button"
@@ -81,7 +81,10 @@
     <Transition name="checklist-editor-reveal" @after-enter="ensureEditorFullyVisible">
       <div v-if="editorOpen" class="grid grid-rows-[1fr]" data-testid="task-checklist-item-form">
         <div class="min-h-0 overflow-hidden">
-          <div ref="editorPanelRef" class="space-y-4 border-t border-border/60 p-4">
+          <div
+            ref="editorPanelRef"
+            class="space-y-4 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.28)] p-4"
+          >
             <Label for="task-checklist-item-title" class="sr-only">
               {{ t('task.checklist.placeholder') }}
             </Label>

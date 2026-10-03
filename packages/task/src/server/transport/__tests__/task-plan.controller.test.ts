@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ok, fail, isOk } from '@memoflow/contracts/result';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { CreateTaskPlanSchema, type TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { TaskPlanController, type TaskPlanUseCases } from '../task-plan.controller';
 
 // ---------------------------------------------------------------------------
@@ -86,6 +86,24 @@ describe('TaskPlanController', () => {
       expect(args.name).toBe('My Task');
       expect(args.schedule.kind).toBe('OneTime');
       expect(args.importance).toBe('Moderate');
+    });
+
+    it('forwards a caller-supplied canonical plan ID to the create use case', async () => {
+      (useCases.createPlan as ReturnType<typeof vi.fn>).mockResolvedValue(
+        ok({ plan: FAKE_TEMPLATE_DTO, occurrenceCount: 0, todayOccurrenceCreated: false }),
+      );
+      const id = CreateTaskPlanSchema.shape.id
+        .unwrap()
+        .parse('ITaskPlanId_550e8400-e29b-41d4-a716-446655440010');
+
+      await controller.createPlan({ ...VALID_CREATE_INPUT, id }, ctx);
+
+      expect(useCases.createPlan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identityId: TEST_IDENTITY_ID,
+          id,
+        }),
+      );
     });
 
     it('forwards checklist definitions to the create use case', async () => {
@@ -243,17 +261,25 @@ describe('TaskPlanController', () => {
 
       await controller.listPlans(
         {
+          page: 3,
+          limit: 25,
           goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002' as any,
           keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003' as any,
           labelIdsAll: ['label-1', 'label-2'],
+          outcome: ['Succeeded', 'Failed'],
+          archiveState: 'all',
         },
         ctx,
       );
 
       const args = (useCases.listPlans as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(args.page).toBe(3);
+      expect(args.limit).toBe(25);
       expect(args.goalId).toBe('GoalId_550e8400-e29b-41d4-a716-446655440002');
       expect(args.keyResultId).toBe('KeyResultId_550e8400-e29b-41d4-a716-446655440003');
       expect(args.labelIdsAll).toEqual(['label-1', 'label-2']);
+      expect(args.outcome).toEqual(['Succeeded', 'Failed']);
+      expect(args.archiveState).toBe('all');
     });
 
     it('should return plans and total', async () => {

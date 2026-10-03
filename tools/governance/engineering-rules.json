@@ -1,0 +1,169 @@
+{
+  "kind": "memoflow.engineering-rules",
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "code": "DDD-001",
+      "title": "Entity Props Pattern",
+      "description": "Entities MUST encapsulate constructor arguments inside a dedicated Props object to keep signatures stable and explicit.",
+      "severity": "Mandatory",
+      "tags": [
+        "architecture",
+        "consistency",
+        "ddd",
+        "entity"
+      ],
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "interface GoalProps {\n  name: string;\n  description?: string;\n}\n\nclass Goal {\n  private constructor(private readonly props: GoalProps) {}\n}\n",
+          "caption": "Entity constructor receives a single props object."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class Goal {\n  constructor(\n    private readonly name: string,\n    private readonly description: string,\n    private readonly status: string,\n    private readonly targetDate: string,\n  ) {}\n}\n",
+          "caption": "Long positional constructor arguments are fragile and error-prone."
+        }
+      ],
+      "referencePath": "packages/goal/src/server/domain/aggregates/goal.ts"
+    },
+    {
+      "code": "DDD-002",
+      "title": "No Logic in DTOs",
+      "description": "DTOs MUST remain pure data contracts. Validation and business rules belong to Value Objects, Entities, and Use Cases.",
+      "severity": "Mandatory",
+      "tags": [
+        "contracts",
+        "ddd",
+        "dto",
+        "separation-of-concerns"
+      ],
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "export interface CreateGoalReq {\n  name: string;\n  description?: string;\n}\n",
+          "caption": "DTO remains a pure shape declaration."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "export class CreateGoalReq {\n  constructor(public name: string) {}\n\n  normalizeName(): string {\n    return this.name.trim();\n  }\n}\n",
+          "caption": "Behavior in DTOs creates hidden domain logic in the wrong layer."
+        }
+      ],
+      "referencePath": "packages/task/src/server/domain/aggregates/task-plan.ts"
+    },
+    {
+      "code": "DDD-003",
+      "title": "Layer Isolation",
+      "description": "Domain and application layers MUST not directly depend on infrastructure details such as Prisma clients or HTTP adapters.",
+      "severity": "Mandatory",
+      "tags": [
+        "ddd",
+        "dependency-inversion",
+        "infrastructure",
+        "layering"
+      ],
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "export interface IGoalRepository {\n  findById(id: string): Promise<Goal | null>;\n}\n\nclass GetGoalUseCase {\n  constructor(private readonly repo: IGoalRepository) {}\n}\n",
+          "caption": "Use case depends on abstraction, not infrastructure."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "import { prisma } from '@memoflow/database';\n\nclass GetGoalUseCase {\n  async execute(id: string) {\n    return prisma.goal.findUnique({ where: { id } });\n  }\n}\n",
+          "caption": "Application layer is tightly coupled to persistence implementation."
+        }
+      ],
+      "referencePath": "packages/goal/src/server/domain/repositories/i-goal-repository.ts"
+    },
+    {
+      "code": "DDD-004",
+      "title": "Value Object Collections",
+      "description": "Collections in aggregates MUST use Value Objects for normalization and invariants instead of passing primitive strings directly.",
+      "severity": "Recommended",
+      "tags": [
+        "collection",
+        "ddd",
+        "invariants",
+        "value-object"
+      ],
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "class TaskPlan {\n  private checklist = new Set<ChecklistItemDefinition>();\n\n  addChecklistItem(input: ChecklistItemInput) {\n    this.checklist.add(ChecklistItemDefinition.create(input));\n  }\n}\n",
+          "caption": "RuleTag enforces normalization for every collection entry."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class TaskPlan {\n  private checklist: string[] = [];\n\n  addChecklistItem(raw: string) {\n    this.checklist.push(raw);\n  }\n}\n",
+          "caption": "Primitive collection bypasses normalization and duplicate checks."
+        }
+      ],
+      "referencePath": "packages/task/src/server/domain/value-objects/checklist-item-definition.ts"
+    },
+    {
+      "code": "DDD-005",
+      "title": "Factory Method Pattern",
+      "description": "Aggregates MUST expose static factory methods and hide constructors to guarantee invariant validation at creation time.",
+      "severity": "Recommended",
+      "tags": [
+        "aggregate",
+        "ddd",
+        "factory-method",
+        "invariants"
+      ],
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "class GoalReview {\n  private constructor(private readonly props: GoalReviewProps) {}\n\n  static create(props: GoalReviewProps): GoalReview {\n    return new GoalReview(props);\n  }\n}\n",
+          "caption": "Factory method centralizes creation and validation flow."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class GoalReview {\n  constructor(public readonly props: GoalReviewProps) {}\n}\n",
+          "caption": "Public constructor allows bypassing validation and lifecycle controls."
+        }
+      ],
+      "referencePath": "packages/goal/src/server/domain/entities/goal-review.ts"
+    }
+  ],
+  "adapters": [
+    {
+      "ruleKey": "DDD-003",
+      "adapterId": "package-internal-boundary",
+      "coverage": "partial",
+      "checkScript": "tools/governance/package-internal-boundary-audit.mjs",
+      "description": "Enforces the persistence/import-isolation subset of DDD-003. It does not claim complete Layer Isolation coverage.",
+      "proposal": {
+        "kind": "review-required",
+        "summary": "Move infrastructure access behind an application/domain port instead of importing persistence from domain/application code.",
+        "suggestedActions": [
+          "Introduce or extend a narrow repository/application port at the owning boundary.",
+          "Move Prisma or other infrastructure-specific access into server/infrastructure or the host composer.",
+          "Update callers to depend on the port and re-run package-internal-boundary-audit.mjs."
+        ]
+      }
+    }
+  ]
+}

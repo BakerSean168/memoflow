@@ -25,22 +25,45 @@
       </h2>
       <p v-if="reviewDraft" class="text-sm text-muted-foreground">
         {{ reviewDraft.task.schedule.kind }}
-        <span v-if="reviewDraft.task.goalBinding">
-          · {{ reviewDraft.task.goalBinding.goalId }}
-          <span v-if="reviewDraft.task.goalBinding.keyResultId">
-            → {{ reviewDraft.task.goalBinding.keyResultId }}
-          </span>
-        </span>
       </p>
       <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {{ reviewDraft.rationale }}
       </p>
     </div>
-    <AITaskDraftEditor
-      v-if="reviewDraft && showTaskDraftEditor && editableTask"
-      :task="editableTask"
-      @update-task="$emit('update-task', $event)"
-    />
+    <div
+      v-if="taskWorkflowRun.suspension?.type === 'clarification_required'"
+      class="space-y-3"
+      data-testid="task-workflow-clarification"
+    >
+      <label
+        v-for="(question, index) in taskWorkflowRun.suspension.questions"
+        :key="index"
+        class="block space-y-2 text-sm"
+      >
+        <span>{{ question }}</span>
+        <textarea
+          :value="clarificationAnswers?.[index] ?? ''"
+          :disabled="busy"
+          class="w-full rounded-md border bg-background p-2"
+          @input="
+            $emit(
+              'update-clarification-answer',
+              index,
+              ($event.target as HTMLTextAreaElement).value,
+            )
+          "
+        />
+      </label>
+      <Button
+        :disabled="busy || !canSubmitClarification"
+        data-testid="task-submit-clarification"
+        @click="$emit('submit-clarification')"
+        >{{ t('aiAssistant.dialogs.automation.confirm') }}</Button
+      >
+      <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
+        t('common.cancel')
+      }}</Button>
+    </div>
     <div v-if="reviewDraft?.warnings.length" class="space-y-2">
       <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         {{ t('aiAssistant.dialogs.agent.warnings') }}
@@ -75,6 +98,7 @@
       <Button
         v-if="taskWorkflowRun.suspension.retryable"
         variant="outline"
+        :disabled="busy"
         data-testid="task-agent-retry-execution"
         @click="$emit('retry')"
         >{{ t('aiAssistant.dialogs.agent.retry') }}</Button
@@ -87,18 +111,27 @@
     >
       <p class="text-sm text-muted-foreground">{{ taskWorkflowRun.result.status }}</p>
       <p class="text-sm text-muted-foreground">
-        {{ Object.values(taskWorkflowRun.result.referenceMap)[0] || '—' }} ·
         {{ Object.keys(taskWorkflowRun.result.referenceMap).length }} task
       </p>
     </div>
     <div v-if="taskWorkflowRun.status === 'suspended' && reviewDraft" class="flex gap-2">
-      <Button data-testid="task-agent-confirm-run" @click="$emit('confirm')">{{
+      <Button :disabled="busy" data-testid="task-agent-confirm-run" @click="$emit('confirm')">{{
         t('aiAssistant.dialogs.automation.confirm')
       }}</Button>
-      <Button variant="outline" data-testid="task-agent-cancel-run" @click="$emit('cancel')">{{
-        t('common.cancel')
-      }}</Button>
-      <Button variant="ghost" @click="$emit('edit-started')">{{ t('common.edit') }}</Button>
+      <Button
+        :disabled="busy || ownerAttemptPending || ownerSubmitted"
+        variant="outline"
+        data-testid="task-agent-cancel-run"
+        @click="$emit('cancel')"
+        >{{ t('common.cancel') }}</Button
+      >
+      <Button
+        :disabled="busy || ownerAttemptPending || ownerSubmitted"
+        variant="ghost"
+        data-testid="task-open-native-review"
+        @click="$emit('open-native-review')"
+        >{{ t('common.edit') }}</Button
+      >
     </div>
   </section>
 </template>
@@ -107,14 +140,9 @@
 import { computed } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
-import type {
-  AIWorkflowExecutionFailure,
-  AIWorkflowRunView,
-  TaskPlanTask,
-} from '@memoflow/contracts/ai';
+import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { WorkflowMode } from '../composables/types';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
-import AITaskDraftEditor from './AITaskDraftEditor.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
 
 const { t } = useI18n();
@@ -123,15 +151,18 @@ const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
 const props = defineProps<{
   toolMode: WorkflowMode;
   taskWorkflowRun: Extract<AIWorkflowRunView, { kind: 'task.create' }> | null;
-  editableTask: TaskPlanTask | null;
-  showTaskDraftEditor: boolean;
+  busy?: boolean;
+  ownerAttemptPending?: boolean;
+  ownerSubmitted?: boolean;
+  clarificationAnswers?: string[];
+  canSubmitClarification?: boolean;
 }>();
 defineEmits<{
   confirm: [];
+  'submit-clarification': [];
   cancel: [];
   retry: [];
-  'edit-started': [];
-  'update-task': [task: TaskPlanTask];
+  'open-native-review': [];
   'update-clarification-answer': [index: number, value: string];
 }>();
 const reviewDraft = computed(() =>

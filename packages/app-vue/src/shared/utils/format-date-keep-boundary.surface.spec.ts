@@ -21,10 +21,6 @@ describe('Product date presentation boundary', () => {
     resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
-  const rule = readFileSync(
-    resolve(dir, '../../modules/governance/components/RuleCard.vue'),
-    'utf8',
-  );
 
   it('keeps semantic empty labels distinct', () => {
     expect(resolveEmptyLabel('notSet')).toBe(DEFAULT_EMPTY_LITERALS.notSet);
@@ -36,7 +32,11 @@ describe('Product date presentation boundary', () => {
   it('renders semantic Goal timeframes without collapsing them into calendar dates', () => {
     expect(goalDetail).toContain('goalTimeframeLabel');
     expect(goalRow).toContain('goalTimeframeLabel');
-    expect(goalDetail).not.toContain('formatProductYmd');
+    // Current is a calendar-native Product Today marker, not a GoalTimeframe.
+    expect(goalDetail).toContain('formatProductYmd(getProductTodayYmd())');
+    expect(goalDetail.replace('formatProductYmd(getProductTodayYmd())', '')).not.toMatch(
+      /\bformatProductYmd\s*\(/,
+    );
     expect(goalRow).not.toContain('formatProductYmd');
     for (const source of [goalDetail, goalRow]) {
       expect(source).not.toMatch(/function formatDate\b/);
@@ -56,7 +56,4 @@ describe('Product date presentation boundary', () => {
     expect(taskDetail).not.toContain('toLocaleDateString');
   });
 
-  it('keeps governance date surfaces on Product Time helpers', () => {
-    expect(rule).toContain('formatProductMonthDay');
-  });
 });

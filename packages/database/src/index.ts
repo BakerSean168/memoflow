@@ -13,7 +13,7 @@
  * import type { PrismaClient } from '@memoflow/database';
  *
  * // 使用 Model 类型
- * import type { Rule, RuleRevision } from '@memoflow/database';
+ * import type { Goal, TaskPlan } from '@memoflow/database';
  * ```
  */
 

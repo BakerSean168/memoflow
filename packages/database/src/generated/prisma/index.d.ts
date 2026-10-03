@@ -101,16 +101,6 @@ export type GoalReview = $Result.DefaultSelection<Prisma.$GoalReviewPayload>
  */
 export type KeyResultWeightSnapshot = $Result.DefaultSelection<Prisma.$KeyResultWeightSnapshotPayload>
 /**
- * Model Rule
- *
- */
-export type Rule = $Result.DefaultSelection<Prisma.$RulePayload>
-/**
- * Model RuleRevision
- *
- */
-export type RuleRevision = $Result.DefaultSelection<Prisma.$RuleRevisionPayload>
-/**
  * Model Habit
  *
  */
@@ -708,26 +698,6 @@ export class PrismaClient<
     * ```
     */
   get keyResultWeightSnapshot(): Prisma.KeyResultWeightSnapshotDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.rule`: Exposes CRUD operations for the **Rule** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Rules
-    * const rules = await prisma.rule.findMany()
-    * ```
-    */
-  get rule(): Prisma.RuleDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.ruleRevision`: Exposes CRUD operations for the **RuleRevision** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more RuleRevisions
-    * const ruleRevisions = await prisma.ruleRevision.findMany()
-    * ```
-    */
-  get ruleRevision(): Prisma.RuleRevisionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.habit`: Exposes CRUD operations for the **Habit** model.
@@ -1752,8 +1722,6 @@ export namespace Prisma {
     GoalRecord: 'GoalRecord',
     GoalReview: 'GoalReview',
     KeyResultWeightSnapshot: 'KeyResultWeightSnapshot',
-    Rule: 'Rule',
-    RuleRevision: 'RuleRevision',
     Habit: 'Habit',
     HabitOccurrence: 'HabitOccurrence',
     HabitCheckIn: 'HabitCheckIn',
@@ -1825,7 +1793,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3084,154 +3052,6 @@ export namespace Prisma {
           count: {
             args: Prisma.KeyResultWeightSnapshotCountArgs<ExtArgs>
             result: $Utils.Optional<KeyResultWeightSnapshotCountAggregateOutputType> | number
-          }
-        }
-      }
-      Rule: {
-        payload: Prisma.$RulePayload<ExtArgs>
-        fields: Prisma.RuleFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.RuleFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.RuleFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          findFirst: {
-            args: Prisma.RuleFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.RuleFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          findMany: {
-            args: Prisma.RuleFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>[]
-          }
-          create: {
-            args: Prisma.RuleCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          createMany: {
-            args: Prisma.RuleCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.RuleCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>[]
-          }
-          delete: {
-            args: Prisma.RuleDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          update: {
-            args: Prisma.RuleUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          deleteMany: {
-            args: Prisma.RuleDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.RuleUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.RuleUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>[]
-          }
-          upsert: {
-            args: Prisma.RuleUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RulePayload>
-          }
-          aggregate: {
-            args: Prisma.RuleAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateRule>
-          }
-          groupBy: {
-            args: Prisma.RuleGroupByArgs<ExtArgs>
-            result: $Utils.Optional<RuleGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.RuleCountArgs<ExtArgs>
-            result: $Utils.Optional<RuleCountAggregateOutputType> | number
-          }
-        }
-      }
-      RuleRevision: {
-        payload: Prisma.$RuleRevisionPayload<ExtArgs>
-        fields: Prisma.RuleRevisionFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.RuleRevisionFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.RuleRevisionFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          findFirst: {
-            args: Prisma.RuleRevisionFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.RuleRevisionFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          findMany: {
-            args: Prisma.RuleRevisionFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>[]
-          }
-          create: {
-            args: Prisma.RuleRevisionCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          createMany: {
-            args: Prisma.RuleRevisionCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.RuleRevisionCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>[]
-          }
-          delete: {
-            args: Prisma.RuleRevisionDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          update: {
-            args: Prisma.RuleRevisionUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          deleteMany: {
-            args: Prisma.RuleRevisionDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.RuleRevisionUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.RuleRevisionUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>[]
-          }
-          upsert: {
-            args: Prisma.RuleRevisionUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RuleRevisionPayload>
-          }
-          aggregate: {
-            args: Prisma.RuleRevisionAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateRuleRevision>
-          }
-          groupBy: {
-            args: Prisma.RuleRevisionGroupByArgs<ExtArgs>
-            result: $Utils.Optional<RuleRevisionGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.RuleRevisionCountArgs<ExtArgs>
-            result: $Utils.Optional<RuleRevisionCountAggregateOutputType> | number
           }
         }
       }
@@ -7519,8 +7339,6 @@ export namespace Prisma {
     goalRecord?: GoalRecordOmit
     goalReview?: GoalReviewOmit
     keyResultWeightSnapshot?: KeyResultWeightSnapshotOmit
-    rule?: RuleOmit
-    ruleRevision?: RuleRevisionOmit
     habit?: HabitOmit
     habitOccurrence?: HabitOccurrenceOmit
     habitCheckIn?: HabitCheckInOmit
@@ -8151,37 +7969,6 @@ export namespace Prisma {
    */
   export type KeyResultCountOutputTypeCountKeyResultWeightSnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KeyResultWeightSnapshotWhereInput
-  }
-
-
-  /**
-   * Count Type RuleCountOutputType
-   */
-
-  export type RuleCountOutputType = {
-    revisions: number
-  }
-
-  export type RuleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    revisions?: boolean | RuleCountOutputTypeCountRevisionsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * RuleCountOutputType without action
-   */
-  export type RuleCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleCountOutputType
-     */
-    select?: RuleCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * RuleCountOutputType without action
-   */
-  export type RuleCountOutputTypeCountRevisionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RuleRevisionWhereInput
   }
 
 
@@ -26391,6 +26178,7 @@ export namespace Prisma {
     keyResultId: string | null
     value: number | null
     note: string | null
+    authorship: string | null
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date | null
@@ -26404,6 +26192,7 @@ export namespace Prisma {
     keyResultId: string | null
     value: number | null
     note: string | null
+    authorship: string | null
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date | null
@@ -26417,6 +26206,7 @@ export namespace Prisma {
     keyResultId: number
     value: number
     note: number
+    authorship: number
     sourceType: number
     sourceId: number
     recordedAt: number
@@ -26440,6 +26230,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26453,6 +26244,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26466,6 +26258,7 @@ export namespace Prisma {
     keyResultId?: true
     value?: true
     note?: true
+    authorship?: true
     sourceType?: true
     sourceId?: true
     recordedAt?: true
@@ -26566,6 +26359,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note: string | null
+    authorship: string
     sourceType: string | null
     sourceId: string | null
     recordedAt: Date
@@ -26598,6 +26392,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26612,6 +26407,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26626,6 +26422,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26640,6 +26437,7 @@ export namespace Prisma {
     keyResultId?: boolean
     value?: boolean
     note?: boolean
+    authorship?: boolean
     sourceType?: boolean
     sourceId?: boolean
     recordedAt?: boolean
@@ -26647,7 +26445,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GoalRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "keyResultId" | "value" | "note" | "sourceType" | "sourceId" | "recordedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["goalRecord"]>
+  export type GoalRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "keyResultId" | "value" | "note" | "authorship" | "sourceType" | "sourceId" | "recordedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["goalRecord"]>
   export type GoalRecordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     keyResult?: boolean | KeyResultDefaultArgs<ExtArgs>
   }
@@ -26669,6 +26467,7 @@ export namespace Prisma {
       keyResultId: string
       value: number
       note: string | null
+      authorship: string
       sourceType: string | null
       sourceId: string | null
       recordedAt: Date
@@ -27103,6 +26902,7 @@ export namespace Prisma {
     readonly keyResultId: FieldRef<"GoalRecord", 'String'>
     readonly value: FieldRef<"GoalRecord", 'Float'>
     readonly note: FieldRef<"GoalRecord", 'String'>
+    readonly authorship: FieldRef<"GoalRecord", 'String'>
     readonly sourceType: FieldRef<"GoalRecord", 'String'>
     readonly sourceId: FieldRef<"GoalRecord", 'String'>
     readonly recordedAt: FieldRef<"GoalRecord", 'DateTime'>
@@ -29856,2360 +29656,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KeyResultWeightSnapshotInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model Rule
-   */
-
-  export type AggregateRule = {
-    _count: RuleCountAggregateOutputType | null
-    _min: RuleMinAggregateOutputType | null
-    _max: RuleMaxAggregateOutputType | null
-  }
-
-  export type RuleMinAggregateOutputType = {
-    id: string | null
-    code: string | null
-    title: string | null
-    description: string | null
-    severity: string | null
-    status: string | null
-    deprecationReason: string | null
-    replacementRuleId: string | null
-    liveReferenceLocation: string | null
-    tags: string | null
-    goodExamples: string | null
-    badExamples: string | null
-    authorId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RuleMaxAggregateOutputType = {
-    id: string | null
-    code: string | null
-    title: string | null
-    description: string | null
-    severity: string | null
-    status: string | null
-    deprecationReason: string | null
-    replacementRuleId: string | null
-    liveReferenceLocation: string | null
-    tags: string | null
-    goodExamples: string | null
-    badExamples: string | null
-    authorId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RuleCountAggregateOutputType = {
-    id: number
-    code: number
-    title: number
-    description: number
-    severity: number
-    status: number
-    deprecationReason: number
-    replacementRuleId: number
-    liveReferenceLocation: number
-    tags: number
-    goodExamples: number
-    badExamples: number
-    authorId: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type RuleMinAggregateInputType = {
-    id?: true
-    code?: true
-    title?: true
-    description?: true
-    severity?: true
-    status?: true
-    deprecationReason?: true
-    replacementRuleId?: true
-    liveReferenceLocation?: true
-    tags?: true
-    goodExamples?: true
-    badExamples?: true
-    authorId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RuleMaxAggregateInputType = {
-    id?: true
-    code?: true
-    title?: true
-    description?: true
-    severity?: true
-    status?: true
-    deprecationReason?: true
-    replacementRuleId?: true
-    liveReferenceLocation?: true
-    tags?: true
-    goodExamples?: true
-    badExamples?: true
-    authorId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RuleCountAggregateInputType = {
-    id?: true
-    code?: true
-    title?: true
-    description?: true
-    severity?: true
-    status?: true
-    deprecationReason?: true
-    replacementRuleId?: true
-    liveReferenceLocation?: true
-    tags?: true
-    goodExamples?: true
-    badExamples?: true
-    authorId?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type RuleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Rule to aggregate.
-     */
-    where?: RuleWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of Rules to fetch.
-     */
-    orderBy?: RuleOrderByWithRelationInput | RuleOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: RuleWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` Rules from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` Rules.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned Rules
-    **/
-    _count?: true | RuleCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: RuleMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: RuleMaxAggregateInputType
-  }
-
-  export type GetRuleAggregateType<T extends RuleAggregateArgs> = {
-        [P in keyof T & keyof AggregateRule]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateRule[P]>
-      : GetScalarType<T[P], AggregateRule[P]>
-  }
-
-
-
-
-  export type RuleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RuleWhereInput
-    orderBy?: RuleOrderByWithAggregationInput | RuleOrderByWithAggregationInput[]
-    by: RuleScalarFieldEnum[] | RuleScalarFieldEnum
-    having?: RuleScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: RuleCountAggregateInputType | true
-    _min?: RuleMinAggregateInputType
-    _max?: RuleMaxAggregateInputType
-  }
-
-  export type RuleGroupByOutputType = {
-    id: string
-    code: string
-    title: string
-    description: string
-    severity: string
-    status: string
-    deprecationReason: string | null
-    replacementRuleId: string | null
-    liveReferenceLocation: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt: Date
-    updatedAt: Date
-    _count: RuleCountAggregateOutputType | null
-    _min: RuleMinAggregateOutputType | null
-    _max: RuleMaxAggregateOutputType | null
-  }
-
-  type GetRuleGroupByPayload<T extends RuleGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<RuleGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof RuleGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], RuleGroupByOutputType[P]>
-            : GetScalarType<T[P], RuleGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type RuleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    code?: boolean
-    title?: boolean
-    description?: boolean
-    severity?: boolean
-    status?: boolean
-    deprecationReason?: boolean
-    replacementRuleId?: boolean
-    liveReferenceLocation?: boolean
-    tags?: boolean
-    goodExamples?: boolean
-    badExamples?: boolean
-    authorId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    revisions?: boolean | Rule$revisionsArgs<ExtArgs>
-    _count?: boolean | RuleCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["rule"]>
-
-  export type RuleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    code?: boolean
-    title?: boolean
-    description?: boolean
-    severity?: boolean
-    status?: boolean
-    deprecationReason?: boolean
-    replacementRuleId?: boolean
-    liveReferenceLocation?: boolean
-    tags?: boolean
-    goodExamples?: boolean
-    badExamples?: boolean
-    authorId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["rule"]>
-
-  export type RuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    code?: boolean
-    title?: boolean
-    description?: boolean
-    severity?: boolean
-    status?: boolean
-    deprecationReason?: boolean
-    replacementRuleId?: boolean
-    liveReferenceLocation?: boolean
-    tags?: boolean
-    goodExamples?: boolean
-    badExamples?: boolean
-    authorId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["rule"]>
-
-  export type RuleSelectScalar = {
-    id?: boolean
-    code?: boolean
-    title?: boolean
-    description?: boolean
-    severity?: boolean
-    status?: boolean
-    deprecationReason?: boolean
-    replacementRuleId?: boolean
-    liveReferenceLocation?: boolean
-    tags?: boolean
-    goodExamples?: boolean
-    badExamples?: boolean
-    authorId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type RuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "title" | "description" | "severity" | "status" | "deprecationReason" | "replacementRuleId" | "liveReferenceLocation" | "tags" | "goodExamples" | "badExamples" | "authorId" | "createdAt" | "updatedAt", ExtArgs["result"]["rule"]>
-  export type RuleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    revisions?: boolean | Rule$revisionsArgs<ExtArgs>
-    _count?: boolean | RuleCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type RuleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type RuleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-
-  export type $RulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Rule"
-    objects: {
-      revisions: Prisma.$RuleRevisionPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      code: string
-      title: string
-      description: string
-      severity: string
-      status: string
-      deprecationReason: string | null
-      replacementRuleId: string | null
-      liveReferenceLocation: string | null
-      tags: string
-      goodExamples: string
-      badExamples: string
-      authorId: string
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["rule"]>
-    composites: {}
-  }
-
-  type RuleGetPayload<S extends boolean | null | undefined | RuleDefaultArgs> = $Result.GetResult<Prisma.$RulePayload, S>
-
-  type RuleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<RuleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: RuleCountAggregateInputType | true
-    }
-
-  export interface RuleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Rule'], meta: { name: 'Rule' } }
-    /**
-     * Find zero or one Rule that matches the filter.
-     * @param {RuleFindUniqueArgs} args - Arguments to find a Rule
-     * @example
-     * // Get one Rule
-     * const rule = await prisma.rule.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends RuleFindUniqueArgs>(args: SelectSubset<T, RuleFindUniqueArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Rule that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {RuleFindUniqueOrThrowArgs} args - Arguments to find a Rule
-     * @example
-     * // Get one Rule
-     * const rule = await prisma.rule.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends RuleFindUniqueOrThrowArgs>(args: SelectSubset<T, RuleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Rule that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleFindFirstArgs} args - Arguments to find a Rule
-     * @example
-     * // Get one Rule
-     * const rule = await prisma.rule.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends RuleFindFirstArgs>(args?: SelectSubset<T, RuleFindFirstArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Rule that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleFindFirstOrThrowArgs} args - Arguments to find a Rule
-     * @example
-     * // Get one Rule
-     * const rule = await prisma.rule.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends RuleFindFirstOrThrowArgs>(args?: SelectSubset<T, RuleFindFirstOrThrowArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Rules that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Rules
-     * const rules = await prisma.rule.findMany()
-     *
-     * // Get first 10 Rules
-     * const rules = await prisma.rule.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const ruleWithIdOnly = await prisma.rule.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends RuleFindManyArgs>(args?: SelectSubset<T, RuleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Rule.
-     * @param {RuleCreateArgs} args - Arguments to create a Rule.
-     * @example
-     * // Create one Rule
-     * const Rule = await prisma.rule.create({
-     *   data: {
-     *     // ... data to create a Rule
-     *   }
-     * })
-     *
-     */
-    create<T extends RuleCreateArgs>(args: SelectSubset<T, RuleCreateArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Rules.
-     * @param {RuleCreateManyArgs} args - Arguments to create many Rules.
-     * @example
-     * // Create many Rules
-     * const rule = await prisma.rule.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends RuleCreateManyArgs>(args?: SelectSubset<T, RuleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Rules and returns the data saved in the database.
-     * @param {RuleCreateManyAndReturnArgs} args - Arguments to create many Rules.
-     * @example
-     * // Create many Rules
-     * const rule = await prisma.rule.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many Rules and only return the `id`
-     * const ruleWithIdOnly = await prisma.rule.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends RuleCreateManyAndReturnArgs>(args?: SelectSubset<T, RuleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Rule.
-     * @param {RuleDeleteArgs} args - Arguments to delete one Rule.
-     * @example
-     * // Delete one Rule
-     * const Rule = await prisma.rule.delete({
-     *   where: {
-     *     // ... filter to delete one Rule
-     *   }
-     * })
-     *
-     */
-    delete<T extends RuleDeleteArgs>(args: SelectSubset<T, RuleDeleteArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Rule.
-     * @param {RuleUpdateArgs} args - Arguments to update one Rule.
-     * @example
-     * // Update one Rule
-     * const rule = await prisma.rule.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends RuleUpdateArgs>(args: SelectSubset<T, RuleUpdateArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Rules.
-     * @param {RuleDeleteManyArgs} args - Arguments to filter Rules to delete.
-     * @example
-     * // Delete a few Rules
-     * const { count } = await prisma.rule.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends RuleDeleteManyArgs>(args?: SelectSubset<T, RuleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Rules.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Rules
-     * const rule = await prisma.rule.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends RuleUpdateManyArgs>(args: SelectSubset<T, RuleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Rules and returns the data updated in the database.
-     * @param {RuleUpdateManyAndReturnArgs} args - Arguments to update many Rules.
-     * @example
-     * // Update many Rules
-     * const rule = await prisma.rule.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more Rules and only return the `id`
-     * const ruleWithIdOnly = await prisma.rule.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends RuleUpdateManyAndReturnArgs>(args: SelectSubset<T, RuleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Rule.
-     * @param {RuleUpsertArgs} args - Arguments to update or create a Rule.
-     * @example
-     * // Update or create a Rule
-     * const rule = await prisma.rule.upsert({
-     *   create: {
-     *     // ... data to create a Rule
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Rule we want to update
-     *   }
-     * })
-     */
-    upsert<T extends RuleUpsertArgs>(args: SelectSubset<T, RuleUpsertArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Rules.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleCountArgs} args - Arguments to filter Rules to count.
-     * @example
-     * // Count the number of Rules
-     * const count = await prisma.rule.count({
-     *   where: {
-     *     // ... the filter for the Rules we want to count
-     *   }
-     * })
-    **/
-    count<T extends RuleCountArgs>(
-      args?: Subset<T, RuleCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], RuleCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Rule.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends RuleAggregateArgs>(args: Subset<T, RuleAggregateArgs>): Prisma.PrismaPromise<GetRuleAggregateType<T>>
-
-    /**
-     * Group by Rule.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends RuleGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: RuleGroupByArgs['orderBy'] }
-        : { orderBy?: RuleGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, RuleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRuleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Rule model
-   */
-  readonly fields: RuleFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Rule.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__RuleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    revisions<T extends Rule$revisionsArgs<ExtArgs> = {}>(args?: Subset<T, Rule$revisionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Rule model
-   */
-  interface RuleFieldRefs {
-    readonly id: FieldRef<"Rule", 'String'>
-    readonly code: FieldRef<"Rule", 'String'>
-    readonly title: FieldRef<"Rule", 'String'>
-    readonly description: FieldRef<"Rule", 'String'>
-    readonly severity: FieldRef<"Rule", 'String'>
-    readonly status: FieldRef<"Rule", 'String'>
-    readonly deprecationReason: FieldRef<"Rule", 'String'>
-    readonly replacementRuleId: FieldRef<"Rule", 'String'>
-    readonly liveReferenceLocation: FieldRef<"Rule", 'String'>
-    readonly tags: FieldRef<"Rule", 'String'>
-    readonly goodExamples: FieldRef<"Rule", 'String'>
-    readonly badExamples: FieldRef<"Rule", 'String'>
-    readonly authorId: FieldRef<"Rule", 'String'>
-    readonly createdAt: FieldRef<"Rule", 'DateTime'>
-    readonly updatedAt: FieldRef<"Rule", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * Rule findUnique
-   */
-  export type RuleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter, which Rule to fetch.
-     */
-    where: RuleWhereUniqueInput
-  }
-
-  /**
-   * Rule findUniqueOrThrow
-   */
-  export type RuleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter, which Rule to fetch.
-     */
-    where: RuleWhereUniqueInput
-  }
-
-  /**
-   * Rule findFirst
-   */
-  export type RuleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter, which Rule to fetch.
-     */
-    where?: RuleWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of Rules to fetch.
-     */
-    orderBy?: RuleOrderByWithRelationInput | RuleOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for Rules.
-     */
-    cursor?: RuleWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` Rules from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` Rules.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of Rules.
-     */
-    distinct?: RuleScalarFieldEnum | RuleScalarFieldEnum[]
-  }
-
-  /**
-   * Rule findFirstOrThrow
-   */
-  export type RuleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter, which Rule to fetch.
-     */
-    where?: RuleWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of Rules to fetch.
-     */
-    orderBy?: RuleOrderByWithRelationInput | RuleOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for Rules.
-     */
-    cursor?: RuleWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` Rules from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` Rules.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of Rules.
-     */
-    distinct?: RuleScalarFieldEnum | RuleScalarFieldEnum[]
-  }
-
-  /**
-   * Rule findMany
-   */
-  export type RuleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter, which Rules to fetch.
-     */
-    where?: RuleWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of Rules to fetch.
-     */
-    orderBy?: RuleOrderByWithRelationInput | RuleOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing Rules.
-     */
-    cursor?: RuleWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` Rules from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` Rules.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of Rules.
-     */
-    distinct?: RuleScalarFieldEnum | RuleScalarFieldEnum[]
-  }
-
-  /**
-   * Rule create
-   */
-  export type RuleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * The data needed to create a Rule.
-     */
-    data: XOR<RuleCreateInput, RuleUncheckedCreateInput>
-  }
-
-  /**
-   * Rule createMany
-   */
-  export type RuleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Rules.
-     */
-    data: RuleCreateManyInput | RuleCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Rule createManyAndReturn
-   */
-  export type RuleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * The data used to create many Rules.
-     */
-    data: RuleCreateManyInput | RuleCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Rule update
-   */
-  export type RuleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * The data needed to update a Rule.
-     */
-    data: XOR<RuleUpdateInput, RuleUncheckedUpdateInput>
-    /**
-     * Choose, which Rule to update.
-     */
-    where: RuleWhereUniqueInput
-  }
-
-  /**
-   * Rule updateMany
-   */
-  export type RuleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Rules.
-     */
-    data: XOR<RuleUpdateManyMutationInput, RuleUncheckedUpdateManyInput>
-    /**
-     * Filter which Rules to update
-     */
-    where?: RuleWhereInput
-    /**
-     * Limit how many Rules to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Rule updateManyAndReturn
-   */
-  export type RuleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * The data used to update Rules.
-     */
-    data: XOR<RuleUpdateManyMutationInput, RuleUncheckedUpdateManyInput>
-    /**
-     * Filter which Rules to update
-     */
-    where?: RuleWhereInput
-    /**
-     * Limit how many Rules to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Rule upsert
-   */
-  export type RuleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * The filter to search for the Rule to update in case it exists.
-     */
-    where: RuleWhereUniqueInput
-    /**
-     * In case the Rule found by the `where` argument doesn't exist, create a new Rule with this data.
-     */
-    create: XOR<RuleCreateInput, RuleUncheckedCreateInput>
-    /**
-     * In case the Rule was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<RuleUpdateInput, RuleUncheckedUpdateInput>
-  }
-
-  /**
-   * Rule delete
-   */
-  export type RuleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-    /**
-     * Filter which Rule to delete.
-     */
-    where: RuleWhereUniqueInput
-  }
-
-  /**
-   * Rule deleteMany
-   */
-  export type RuleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Rules to delete
-     */
-    where?: RuleWhereInput
-    /**
-     * Limit how many Rules to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Rule.revisions
-   */
-  export type Rule$revisionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    where?: RuleRevisionWhereInput
-    orderBy?: RuleRevisionOrderByWithRelationInput | RuleRevisionOrderByWithRelationInput[]
-    cursor?: RuleRevisionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: RuleRevisionScalarFieldEnum | RuleRevisionScalarFieldEnum[]
-  }
-
-  /**
-   * Rule without action
-   */
-  export type RuleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Rule
-     */
-    select?: RuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Rule
-     */
-    omit?: RuleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model RuleRevision
-   */
-
-  export type AggregateRuleRevision = {
-    _count: RuleRevisionCountAggregateOutputType | null
-    _avg: RuleRevisionAvgAggregateOutputType | null
-    _sum: RuleRevisionSumAggregateOutputType | null
-    _min: RuleRevisionMinAggregateOutputType | null
-    _max: RuleRevisionMaxAggregateOutputType | null
-  }
-
-  export type RuleRevisionAvgAggregateOutputType = {
-    revisionNumber: number | null
-  }
-
-  export type RuleRevisionSumAggregateOutputType = {
-    revisionNumber: number | null
-  }
-
-  export type RuleRevisionMinAggregateOutputType = {
-    id: string | null
-    ruleId: string | null
-    revisionNumber: number | null
-    authorId: string | null
-    changedFields: string | null
-    previousValues: string | null
-    newValues: string | null
-    changeType: string | null
-    createdAt: Date | null
-  }
-
-  export type RuleRevisionMaxAggregateOutputType = {
-    id: string | null
-    ruleId: string | null
-    revisionNumber: number | null
-    authorId: string | null
-    changedFields: string | null
-    previousValues: string | null
-    newValues: string | null
-    changeType: string | null
-    createdAt: Date | null
-  }
-
-  export type RuleRevisionCountAggregateOutputType = {
-    id: number
-    ruleId: number
-    revisionNumber: number
-    authorId: number
-    changedFields: number
-    previousValues: number
-    newValues: number
-    changeType: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type RuleRevisionAvgAggregateInputType = {
-    revisionNumber?: true
-  }
-
-  export type RuleRevisionSumAggregateInputType = {
-    revisionNumber?: true
-  }
-
-  export type RuleRevisionMinAggregateInputType = {
-    id?: true
-    ruleId?: true
-    revisionNumber?: true
-    authorId?: true
-    changedFields?: true
-    previousValues?: true
-    newValues?: true
-    changeType?: true
-    createdAt?: true
-  }
-
-  export type RuleRevisionMaxAggregateInputType = {
-    id?: true
-    ruleId?: true
-    revisionNumber?: true
-    authorId?: true
-    changedFields?: true
-    previousValues?: true
-    newValues?: true
-    changeType?: true
-    createdAt?: true
-  }
-
-  export type RuleRevisionCountAggregateInputType = {
-    id?: true
-    ruleId?: true
-    revisionNumber?: true
-    authorId?: true
-    changedFields?: true
-    previousValues?: true
-    newValues?: true
-    changeType?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type RuleRevisionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which RuleRevision to aggregate.
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of RuleRevisions to fetch.
-     */
-    orderBy?: RuleRevisionOrderByWithRelationInput | RuleRevisionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: RuleRevisionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` RuleRevisions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` RuleRevisions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned RuleRevisions
-    **/
-    _count?: true | RuleRevisionCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: RuleRevisionAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: RuleRevisionSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: RuleRevisionMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: RuleRevisionMaxAggregateInputType
-  }
-
-  export type GetRuleRevisionAggregateType<T extends RuleRevisionAggregateArgs> = {
-        [P in keyof T & keyof AggregateRuleRevision]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateRuleRevision[P]>
-      : GetScalarType<T[P], AggregateRuleRevision[P]>
-  }
-
-
-
-
-  export type RuleRevisionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RuleRevisionWhereInput
-    orderBy?: RuleRevisionOrderByWithAggregationInput | RuleRevisionOrderByWithAggregationInput[]
-    by: RuleRevisionScalarFieldEnum[] | RuleRevisionScalarFieldEnum
-    having?: RuleRevisionScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: RuleRevisionCountAggregateInputType | true
-    _avg?: RuleRevisionAvgAggregateInputType
-    _sum?: RuleRevisionSumAggregateInputType
-    _min?: RuleRevisionMinAggregateInputType
-    _max?: RuleRevisionMaxAggregateInputType
-  }
-
-  export type RuleRevisionGroupByOutputType = {
-    id: string
-    ruleId: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues: string | null
-    newValues: string | null
-    changeType: string
-    createdAt: Date
-    _count: RuleRevisionCountAggregateOutputType | null
-    _avg: RuleRevisionAvgAggregateOutputType | null
-    _sum: RuleRevisionSumAggregateOutputType | null
-    _min: RuleRevisionMinAggregateOutputType | null
-    _max: RuleRevisionMaxAggregateOutputType | null
-  }
-
-  type GetRuleRevisionGroupByPayload<T extends RuleRevisionGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<RuleRevisionGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof RuleRevisionGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], RuleRevisionGroupByOutputType[P]>
-            : GetScalarType<T[P], RuleRevisionGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type RuleRevisionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    ruleId?: boolean
-    revisionNumber?: boolean
-    authorId?: boolean
-    changedFields?: boolean
-    previousValues?: boolean
-    newValues?: boolean
-    changeType?: boolean
-    createdAt?: boolean
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["ruleRevision"]>
-
-  export type RuleRevisionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    ruleId?: boolean
-    revisionNumber?: boolean
-    authorId?: boolean
-    changedFields?: boolean
-    previousValues?: boolean
-    newValues?: boolean
-    changeType?: boolean
-    createdAt?: boolean
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["ruleRevision"]>
-
-  export type RuleRevisionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    ruleId?: boolean
-    revisionNumber?: boolean
-    authorId?: boolean
-    changedFields?: boolean
-    previousValues?: boolean
-    newValues?: boolean
-    changeType?: boolean
-    createdAt?: boolean
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["ruleRevision"]>
-
-  export type RuleRevisionSelectScalar = {
-    id?: boolean
-    ruleId?: boolean
-    revisionNumber?: boolean
-    authorId?: boolean
-    changedFields?: boolean
-    previousValues?: boolean
-    newValues?: boolean
-    changeType?: boolean
-    createdAt?: boolean
-  }
-
-  export type RuleRevisionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ruleId" | "revisionNumber" | "authorId" | "changedFields" | "previousValues" | "newValues" | "changeType" | "createdAt", ExtArgs["result"]["ruleRevision"]>
-  export type RuleRevisionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }
-  export type RuleRevisionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }
-  export type RuleRevisionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rule?: boolean | RuleDefaultArgs<ExtArgs>
-  }
-
-  export type $RuleRevisionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "RuleRevision"
-    objects: {
-      rule: Prisma.$RulePayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      ruleId: string
-      revisionNumber: number
-      authorId: string
-      changedFields: string
-      previousValues: string | null
-      newValues: string | null
-      changeType: string
-      createdAt: Date
-    }, ExtArgs["result"]["ruleRevision"]>
-    composites: {}
-  }
-
-  type RuleRevisionGetPayload<S extends boolean | null | undefined | RuleRevisionDefaultArgs> = $Result.GetResult<Prisma.$RuleRevisionPayload, S>
-
-  type RuleRevisionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<RuleRevisionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: RuleRevisionCountAggregateInputType | true
-    }
-
-  export interface RuleRevisionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RuleRevision'], meta: { name: 'RuleRevision' } }
-    /**
-     * Find zero or one RuleRevision that matches the filter.
-     * @param {RuleRevisionFindUniqueArgs} args - Arguments to find a RuleRevision
-     * @example
-     * // Get one RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends RuleRevisionFindUniqueArgs>(args: SelectSubset<T, RuleRevisionFindUniqueArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one RuleRevision that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {RuleRevisionFindUniqueOrThrowArgs} args - Arguments to find a RuleRevision
-     * @example
-     * // Get one RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends RuleRevisionFindUniqueOrThrowArgs>(args: SelectSubset<T, RuleRevisionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first RuleRevision that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionFindFirstArgs} args - Arguments to find a RuleRevision
-     * @example
-     * // Get one RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends RuleRevisionFindFirstArgs>(args?: SelectSubset<T, RuleRevisionFindFirstArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first RuleRevision that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionFindFirstOrThrowArgs} args - Arguments to find a RuleRevision
-     * @example
-     * // Get one RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends RuleRevisionFindFirstOrThrowArgs>(args?: SelectSubset<T, RuleRevisionFindFirstOrThrowArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more RuleRevisions that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all RuleRevisions
-     * const ruleRevisions = await prisma.ruleRevision.findMany()
-     *
-     * // Get first 10 RuleRevisions
-     * const ruleRevisions = await prisma.ruleRevision.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const ruleRevisionWithIdOnly = await prisma.ruleRevision.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends RuleRevisionFindManyArgs>(args?: SelectSubset<T, RuleRevisionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a RuleRevision.
-     * @param {RuleRevisionCreateArgs} args - Arguments to create a RuleRevision.
-     * @example
-     * // Create one RuleRevision
-     * const RuleRevision = await prisma.ruleRevision.create({
-     *   data: {
-     *     // ... data to create a RuleRevision
-     *   }
-     * })
-     *
-     */
-    create<T extends RuleRevisionCreateArgs>(args: SelectSubset<T, RuleRevisionCreateArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many RuleRevisions.
-     * @param {RuleRevisionCreateManyArgs} args - Arguments to create many RuleRevisions.
-     * @example
-     * // Create many RuleRevisions
-     * const ruleRevision = await prisma.ruleRevision.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends RuleRevisionCreateManyArgs>(args?: SelectSubset<T, RuleRevisionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many RuleRevisions and returns the data saved in the database.
-     * @param {RuleRevisionCreateManyAndReturnArgs} args - Arguments to create many RuleRevisions.
-     * @example
-     * // Create many RuleRevisions
-     * const ruleRevision = await prisma.ruleRevision.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many RuleRevisions and only return the `id`
-     * const ruleRevisionWithIdOnly = await prisma.ruleRevision.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends RuleRevisionCreateManyAndReturnArgs>(args?: SelectSubset<T, RuleRevisionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a RuleRevision.
-     * @param {RuleRevisionDeleteArgs} args - Arguments to delete one RuleRevision.
-     * @example
-     * // Delete one RuleRevision
-     * const RuleRevision = await prisma.ruleRevision.delete({
-     *   where: {
-     *     // ... filter to delete one RuleRevision
-     *   }
-     * })
-     *
-     */
-    delete<T extends RuleRevisionDeleteArgs>(args: SelectSubset<T, RuleRevisionDeleteArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one RuleRevision.
-     * @param {RuleRevisionUpdateArgs} args - Arguments to update one RuleRevision.
-     * @example
-     * // Update one RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends RuleRevisionUpdateArgs>(args: SelectSubset<T, RuleRevisionUpdateArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more RuleRevisions.
-     * @param {RuleRevisionDeleteManyArgs} args - Arguments to filter RuleRevisions to delete.
-     * @example
-     * // Delete a few RuleRevisions
-     * const { count } = await prisma.ruleRevision.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends RuleRevisionDeleteManyArgs>(args?: SelectSubset<T, RuleRevisionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more RuleRevisions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many RuleRevisions
-     * const ruleRevision = await prisma.ruleRevision.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends RuleRevisionUpdateManyArgs>(args: SelectSubset<T, RuleRevisionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more RuleRevisions and returns the data updated in the database.
-     * @param {RuleRevisionUpdateManyAndReturnArgs} args - Arguments to update many RuleRevisions.
-     * @example
-     * // Update many RuleRevisions
-     * const ruleRevision = await prisma.ruleRevision.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more RuleRevisions and only return the `id`
-     * const ruleRevisionWithIdOnly = await prisma.ruleRevision.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends RuleRevisionUpdateManyAndReturnArgs>(args: SelectSubset<T, RuleRevisionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one RuleRevision.
-     * @param {RuleRevisionUpsertArgs} args - Arguments to update or create a RuleRevision.
-     * @example
-     * // Update or create a RuleRevision
-     * const ruleRevision = await prisma.ruleRevision.upsert({
-     *   create: {
-     *     // ... data to create a RuleRevision
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the RuleRevision we want to update
-     *   }
-     * })
-     */
-    upsert<T extends RuleRevisionUpsertArgs>(args: SelectSubset<T, RuleRevisionUpsertArgs<ExtArgs>>): Prisma__RuleRevisionClient<$Result.GetResult<Prisma.$RuleRevisionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of RuleRevisions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionCountArgs} args - Arguments to filter RuleRevisions to count.
-     * @example
-     * // Count the number of RuleRevisions
-     * const count = await prisma.ruleRevision.count({
-     *   where: {
-     *     // ... the filter for the RuleRevisions we want to count
-     *   }
-     * })
-    **/
-    count<T extends RuleRevisionCountArgs>(
-      args?: Subset<T, RuleRevisionCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], RuleRevisionCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a RuleRevision.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends RuleRevisionAggregateArgs>(args: Subset<T, RuleRevisionAggregateArgs>): Prisma.PrismaPromise<GetRuleRevisionAggregateType<T>>
-
-    /**
-     * Group by RuleRevision.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RuleRevisionGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends RuleRevisionGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: RuleRevisionGroupByArgs['orderBy'] }
-        : { orderBy?: RuleRevisionGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, RuleRevisionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRuleRevisionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the RuleRevision model
-   */
-  readonly fields: RuleRevisionFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for RuleRevision.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__RuleRevisionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    rule<T extends RuleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RuleDefaultArgs<ExtArgs>>): Prisma__RuleClient<$Result.GetResult<Prisma.$RulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the RuleRevision model
-   */
-  interface RuleRevisionFieldRefs {
-    readonly id: FieldRef<"RuleRevision", 'String'>
-    readonly ruleId: FieldRef<"RuleRevision", 'String'>
-    readonly revisionNumber: FieldRef<"RuleRevision", 'Int'>
-    readonly authorId: FieldRef<"RuleRevision", 'String'>
-    readonly changedFields: FieldRef<"RuleRevision", 'String'>
-    readonly previousValues: FieldRef<"RuleRevision", 'String'>
-    readonly newValues: FieldRef<"RuleRevision", 'String'>
-    readonly changeType: FieldRef<"RuleRevision", 'String'>
-    readonly createdAt: FieldRef<"RuleRevision", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * RuleRevision findUnique
-   */
-  export type RuleRevisionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter, which RuleRevision to fetch.
-     */
-    where: RuleRevisionWhereUniqueInput
-  }
-
-  /**
-   * RuleRevision findUniqueOrThrow
-   */
-  export type RuleRevisionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter, which RuleRevision to fetch.
-     */
-    where: RuleRevisionWhereUniqueInput
-  }
-
-  /**
-   * RuleRevision findFirst
-   */
-  export type RuleRevisionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter, which RuleRevision to fetch.
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of RuleRevisions to fetch.
-     */
-    orderBy?: RuleRevisionOrderByWithRelationInput | RuleRevisionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for RuleRevisions.
-     */
-    cursor?: RuleRevisionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` RuleRevisions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` RuleRevisions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of RuleRevisions.
-     */
-    distinct?: RuleRevisionScalarFieldEnum | RuleRevisionScalarFieldEnum[]
-  }
-
-  /**
-   * RuleRevision findFirstOrThrow
-   */
-  export type RuleRevisionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter, which RuleRevision to fetch.
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of RuleRevisions to fetch.
-     */
-    orderBy?: RuleRevisionOrderByWithRelationInput | RuleRevisionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for RuleRevisions.
-     */
-    cursor?: RuleRevisionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` RuleRevisions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` RuleRevisions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of RuleRevisions.
-     */
-    distinct?: RuleRevisionScalarFieldEnum | RuleRevisionScalarFieldEnum[]
-  }
-
-  /**
-   * RuleRevision findMany
-   */
-  export type RuleRevisionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter, which RuleRevisions to fetch.
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of RuleRevisions to fetch.
-     */
-    orderBy?: RuleRevisionOrderByWithRelationInput | RuleRevisionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing RuleRevisions.
-     */
-    cursor?: RuleRevisionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` RuleRevisions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` RuleRevisions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of RuleRevisions.
-     */
-    distinct?: RuleRevisionScalarFieldEnum | RuleRevisionScalarFieldEnum[]
-  }
-
-  /**
-   * RuleRevision create
-   */
-  export type RuleRevisionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * The data needed to create a RuleRevision.
-     */
-    data: XOR<RuleRevisionCreateInput, RuleRevisionUncheckedCreateInput>
-  }
-
-  /**
-   * RuleRevision createMany
-   */
-  export type RuleRevisionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many RuleRevisions.
-     */
-    data: RuleRevisionCreateManyInput | RuleRevisionCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * RuleRevision createManyAndReturn
-   */
-  export type RuleRevisionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * The data used to create many RuleRevisions.
-     */
-    data: RuleRevisionCreateManyInput | RuleRevisionCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * RuleRevision update
-   */
-  export type RuleRevisionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * The data needed to update a RuleRevision.
-     */
-    data: XOR<RuleRevisionUpdateInput, RuleRevisionUncheckedUpdateInput>
-    /**
-     * Choose, which RuleRevision to update.
-     */
-    where: RuleRevisionWhereUniqueInput
-  }
-
-  /**
-   * RuleRevision updateMany
-   */
-  export type RuleRevisionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update RuleRevisions.
-     */
-    data: XOR<RuleRevisionUpdateManyMutationInput, RuleRevisionUncheckedUpdateManyInput>
-    /**
-     * Filter which RuleRevisions to update
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * Limit how many RuleRevisions to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * RuleRevision updateManyAndReturn
-   */
-  export type RuleRevisionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * The data used to update RuleRevisions.
-     */
-    data: XOR<RuleRevisionUpdateManyMutationInput, RuleRevisionUncheckedUpdateManyInput>
-    /**
-     * Filter which RuleRevisions to update
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * Limit how many RuleRevisions to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * RuleRevision upsert
-   */
-  export type RuleRevisionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * The filter to search for the RuleRevision to update in case it exists.
-     */
-    where: RuleRevisionWhereUniqueInput
-    /**
-     * In case the RuleRevision found by the `where` argument doesn't exist, create a new RuleRevision with this data.
-     */
-    create: XOR<RuleRevisionCreateInput, RuleRevisionUncheckedCreateInput>
-    /**
-     * In case the RuleRevision was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<RuleRevisionUpdateInput, RuleRevisionUncheckedUpdateInput>
-  }
-
-  /**
-   * RuleRevision delete
-   */
-  export type RuleRevisionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
-    /**
-     * Filter which RuleRevision to delete.
-     */
-    where: RuleRevisionWhereUniqueInput
-  }
-
-  /**
-   * RuleRevision deleteMany
-   */
-  export type RuleRevisionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which RuleRevisions to delete
-     */
-    where?: RuleRevisionWhereInput
-    /**
-     * Limit how many RuleRevisions to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * RuleRevision without action
-   */
-  export type RuleRevisionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RuleRevision
-     */
-    select?: RuleRevisionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RuleRevision
-     */
-    omit?: RuleRevisionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RuleRevisionInclude<ExtArgs> | null
   }
 
 
@@ -90252,11 +87698,13 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgAggregateOutputType = {
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     version: number | null
   }
 
   export type TaskPlanSumAggregateOutputType = {
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     version: number | null
   }
@@ -90276,6 +87724,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90300,6 +87750,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90325,6 +87777,8 @@ export namespace Prisma {
     reminderConfig: number
     goalId: number
     keyResultId: number
+    goalProgressMode: number
+    goalSuggestedValue: number
     goalRecordValue: number
     goalProgressTrigger: number
     checklist: number
@@ -90337,11 +87791,13 @@ export namespace Prisma {
 
 
   export type TaskPlanAvgAggregateInputType = {
+    goalSuggestedValue?: true
     goalRecordValue?: true
     version?: true
   }
 
   export type TaskPlanSumAggregateInputType = {
+    goalSuggestedValue?: true
     goalRecordValue?: true
     version?: true
   }
@@ -90361,6 +87817,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90385,6 +87843,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90410,6 +87870,8 @@ export namespace Prisma {
     reminderConfig?: true
     goalId?: true
     keyResultId?: true
+    goalProgressMode?: true
+    goalSuggestedValue?: true
     goalRecordValue?: true
     goalProgressTrigger?: true
     checklist?: true
@@ -90522,6 +87984,8 @@ export namespace Prisma {
     reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
+    goalProgressMode: string | null
+    goalSuggestedValue: number | null
     goalRecordValue: number | null
     goalProgressTrigger: string | null
     checklist: string | null
@@ -90566,6 +88030,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90597,6 +88063,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90624,6 +88092,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90651,6 +88121,8 @@ export namespace Prisma {
     reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
+    goalProgressMode?: boolean
+    goalSuggestedValue?: boolean
     goalRecordValue?: boolean
     goalProgressTrigger?: boolean
     checklist?: boolean
@@ -90660,7 +88132,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "schedule" | "reminderConfig" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
+  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "schedule" | "reminderConfig" | "goalId" | "keyResultId" | "goalProgressMode" | "goalSuggestedValue" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
   export type TaskPlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskPlan$keyResultArgs<ExtArgs>
@@ -90718,6 +88190,8 @@ export namespace Prisma {
       reminderConfig: string | null
       goalId: string | null
       keyResultId: string | null
+      goalProgressMode: string | null
+      goalSuggestedValue: number | null
       goalRecordValue: number | null
       goalProgressTrigger: string | null
       /**
@@ -91171,6 +88645,8 @@ export namespace Prisma {
     readonly reminderConfig: FieldRef<"TaskPlan", 'String'>
     readonly goalId: FieldRef<"TaskPlan", 'String'>
     readonly keyResultId: FieldRef<"TaskPlan", 'String'>
+    readonly goalProgressMode: FieldRef<"TaskPlan", 'String'>
+    readonly goalSuggestedValue: FieldRef<"TaskPlan", 'Float'>
     readonly goalRecordValue: FieldRef<"TaskPlan", 'Float'>
     readonly goalProgressTrigger: FieldRef<"TaskPlan", 'String'>
     readonly checklist: FieldRef<"TaskPlan", 'String'>
@@ -97788,6 +95264,7 @@ export namespace Prisma {
     keyResultId: 'keyResultId',
     value: 'value',
     note: 'note',
+    authorship: 'authorship',
     sourceType: 'sourceType',
     sourceId: 'sourceId',
     recordedAt: 'recordedAt',
@@ -97830,42 +95307,6 @@ export namespace Prisma {
   };
 
   export type KeyResultWeightSnapshotScalarFieldEnum = (typeof KeyResultWeightSnapshotScalarFieldEnum)[keyof typeof KeyResultWeightSnapshotScalarFieldEnum]
-
-
-  export const RuleScalarFieldEnum: {
-    id: 'id',
-    code: 'code',
-    title: 'title',
-    description: 'description',
-    severity: 'severity',
-    status: 'status',
-    deprecationReason: 'deprecationReason',
-    replacementRuleId: 'replacementRuleId',
-    liveReferenceLocation: 'liveReferenceLocation',
-    tags: 'tags',
-    goodExamples: 'goodExamples',
-    badExamples: 'badExamples',
-    authorId: 'authorId',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type RuleScalarFieldEnum = (typeof RuleScalarFieldEnum)[keyof typeof RuleScalarFieldEnum]
-
-
-  export const RuleRevisionScalarFieldEnum: {
-    id: 'id',
-    ruleId: 'ruleId',
-    revisionNumber: 'revisionNumber',
-    authorId: 'authorId',
-    changedFields: 'changedFields',
-    previousValues: 'previousValues',
-    newValues: 'newValues',
-    changeType: 'changeType',
-    createdAt: 'createdAt'
-  };
-
-  export type RuleRevisionScalarFieldEnum = (typeof RuleRevisionScalarFieldEnum)[keyof typeof RuleRevisionScalarFieldEnum]
 
 
   export const HabitScalarFieldEnum: {
@@ -98721,6 +96162,8 @@ export namespace Prisma {
     reminderConfig: 'reminderConfig',
     goalId: 'goalId',
     keyResultId: 'keyResultId',
+    goalProgressMode: 'goalProgressMode',
+    goalSuggestedValue: 'goalSuggestedValue',
     goalRecordValue: 'goalRecordValue',
     goalProgressTrigger: 'goalProgressTrigger',
     checklist: 'checklist',
@@ -100407,6 +97850,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -100421,6 +97865,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrderInput | SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrderInput | SortOrder
     sourceId?: SortOrderInput | SortOrder
     recordedAt?: SortOrder
@@ -100439,6 +97884,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -100453,6 +97899,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrderInput | SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrderInput | SortOrder
     sourceId?: SortOrderInput | SortOrder
     recordedAt?: SortOrder
@@ -100474,6 +97921,7 @@ export namespace Prisma {
     keyResultId?: StringWithAggregatesFilter<"GoalRecord"> | string
     value?: FloatWithAggregatesFilter<"GoalRecord"> | number
     note?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
+    authorship?: StringWithAggregatesFilter<"GoalRecord"> | string
     sourceType?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableWithAggregatesFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeWithAggregatesFilter<"GoalRecord"> | Date | string
@@ -100654,189 +98102,6 @@ export namespace Prisma {
     reason?: StringNullableWithAggregatesFilter<"KeyResultWeightSnapshot"> | string | null
     operatorId?: StringWithAggregatesFilter<"KeyResultWeightSnapshot"> | string
     createdAt?: DateTimeWithAggregatesFilter<"KeyResultWeightSnapshot"> | Date | string
-  }
-
-  export type RuleWhereInput = {
-    AND?: RuleWhereInput | RuleWhereInput[]
-    OR?: RuleWhereInput[]
-    NOT?: RuleWhereInput | RuleWhereInput[]
-    id?: StringFilter<"Rule"> | string
-    code?: StringFilter<"Rule"> | string
-    title?: StringFilter<"Rule"> | string
-    description?: StringFilter<"Rule"> | string
-    severity?: StringFilter<"Rule"> | string
-    status?: StringFilter<"Rule"> | string
-    deprecationReason?: StringNullableFilter<"Rule"> | string | null
-    replacementRuleId?: StringNullableFilter<"Rule"> | string | null
-    liveReferenceLocation?: StringNullableFilter<"Rule"> | string | null
-    tags?: StringFilter<"Rule"> | string
-    goodExamples?: StringFilter<"Rule"> | string
-    badExamples?: StringFilter<"Rule"> | string
-    authorId?: StringFilter<"Rule"> | string
-    createdAt?: DateTimeFilter<"Rule"> | Date | string
-    updatedAt?: DateTimeFilter<"Rule"> | Date | string
-    revisions?: RuleRevisionListRelationFilter
-  }
-
-  export type RuleOrderByWithRelationInput = {
-    id?: SortOrder
-    code?: SortOrder
-    title?: SortOrder
-    description?: SortOrder
-    severity?: SortOrder
-    status?: SortOrder
-    deprecationReason?: SortOrderInput | SortOrder
-    replacementRuleId?: SortOrderInput | SortOrder
-    liveReferenceLocation?: SortOrderInput | SortOrder
-    tags?: SortOrder
-    goodExamples?: SortOrder
-    badExamples?: SortOrder
-    authorId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    revisions?: RuleRevisionOrderByRelationAggregateInput
-  }
-
-  export type RuleWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    code?: string
-    AND?: RuleWhereInput | RuleWhereInput[]
-    OR?: RuleWhereInput[]
-    NOT?: RuleWhereInput | RuleWhereInput[]
-    title?: StringFilter<"Rule"> | string
-    description?: StringFilter<"Rule"> | string
-    severity?: StringFilter<"Rule"> | string
-    status?: StringFilter<"Rule"> | string
-    deprecationReason?: StringNullableFilter<"Rule"> | string | null
-    replacementRuleId?: StringNullableFilter<"Rule"> | string | null
-    liveReferenceLocation?: StringNullableFilter<"Rule"> | string | null
-    tags?: StringFilter<"Rule"> | string
-    goodExamples?: StringFilter<"Rule"> | string
-    badExamples?: StringFilter<"Rule"> | string
-    authorId?: StringFilter<"Rule"> | string
-    createdAt?: DateTimeFilter<"Rule"> | Date | string
-    updatedAt?: DateTimeFilter<"Rule"> | Date | string
-    revisions?: RuleRevisionListRelationFilter
-  }, "id" | "code">
-
-  export type RuleOrderByWithAggregationInput = {
-    id?: SortOrder
-    code?: SortOrder
-    title?: SortOrder
-    description?: SortOrder
-    severity?: SortOrder
-    status?: SortOrder
-    deprecationReason?: SortOrderInput | SortOrder
-    replacementRuleId?: SortOrderInput | SortOrder
-    liveReferenceLocation?: SortOrderInput | SortOrder
-    tags?: SortOrder
-    goodExamples?: SortOrder
-    badExamples?: SortOrder
-    authorId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: RuleCountOrderByAggregateInput
-    _max?: RuleMaxOrderByAggregateInput
-    _min?: RuleMinOrderByAggregateInput
-  }
-
-  export type RuleScalarWhereWithAggregatesInput = {
-    AND?: RuleScalarWhereWithAggregatesInput | RuleScalarWhereWithAggregatesInput[]
-    OR?: RuleScalarWhereWithAggregatesInput[]
-    NOT?: RuleScalarWhereWithAggregatesInput | RuleScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Rule"> | string
-    code?: StringWithAggregatesFilter<"Rule"> | string
-    title?: StringWithAggregatesFilter<"Rule"> | string
-    description?: StringWithAggregatesFilter<"Rule"> | string
-    severity?: StringWithAggregatesFilter<"Rule"> | string
-    status?: StringWithAggregatesFilter<"Rule"> | string
-    deprecationReason?: StringNullableWithAggregatesFilter<"Rule"> | string | null
-    replacementRuleId?: StringNullableWithAggregatesFilter<"Rule"> | string | null
-    liveReferenceLocation?: StringNullableWithAggregatesFilter<"Rule"> | string | null
-    tags?: StringWithAggregatesFilter<"Rule"> | string
-    goodExamples?: StringWithAggregatesFilter<"Rule"> | string
-    badExamples?: StringWithAggregatesFilter<"Rule"> | string
-    authorId?: StringWithAggregatesFilter<"Rule"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Rule"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Rule"> | Date | string
-  }
-
-  export type RuleRevisionWhereInput = {
-    AND?: RuleRevisionWhereInput | RuleRevisionWhereInput[]
-    OR?: RuleRevisionWhereInput[]
-    NOT?: RuleRevisionWhereInput | RuleRevisionWhereInput[]
-    id?: StringFilter<"RuleRevision"> | string
-    ruleId?: StringFilter<"RuleRevision"> | string
-    revisionNumber?: IntFilter<"RuleRevision"> | number
-    authorId?: StringFilter<"RuleRevision"> | string
-    changedFields?: StringFilter<"RuleRevision"> | string
-    previousValues?: StringNullableFilter<"RuleRevision"> | string | null
-    newValues?: StringNullableFilter<"RuleRevision"> | string | null
-    changeType?: StringFilter<"RuleRevision"> | string
-    createdAt?: DateTimeFilter<"RuleRevision"> | Date | string
-    rule?: XOR<RuleScalarRelationFilter, RuleWhereInput>
-  }
-
-  export type RuleRevisionOrderByWithRelationInput = {
-    id?: SortOrder
-    ruleId?: SortOrder
-    revisionNumber?: SortOrder
-    authorId?: SortOrder
-    changedFields?: SortOrder
-    previousValues?: SortOrderInput | SortOrder
-    newValues?: SortOrderInput | SortOrder
-    changeType?: SortOrder
-    createdAt?: SortOrder
-    rule?: RuleOrderByWithRelationInput
-  }
-
-  export type RuleRevisionWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    ruleId_revisionNumber?: RuleRevisionRuleIdRevisionNumberCompoundUniqueInput
-    AND?: RuleRevisionWhereInput | RuleRevisionWhereInput[]
-    OR?: RuleRevisionWhereInput[]
-    NOT?: RuleRevisionWhereInput | RuleRevisionWhereInput[]
-    ruleId?: StringFilter<"RuleRevision"> | string
-    revisionNumber?: IntFilter<"RuleRevision"> | number
-    authorId?: StringFilter<"RuleRevision"> | string
-    changedFields?: StringFilter<"RuleRevision"> | string
-    previousValues?: StringNullableFilter<"RuleRevision"> | string | null
-    newValues?: StringNullableFilter<"RuleRevision"> | string | null
-    changeType?: StringFilter<"RuleRevision"> | string
-    createdAt?: DateTimeFilter<"RuleRevision"> | Date | string
-    rule?: XOR<RuleScalarRelationFilter, RuleWhereInput>
-  }, "id" | "ruleId_revisionNumber">
-
-  export type RuleRevisionOrderByWithAggregationInput = {
-    id?: SortOrder
-    ruleId?: SortOrder
-    revisionNumber?: SortOrder
-    authorId?: SortOrder
-    changedFields?: SortOrder
-    previousValues?: SortOrderInput | SortOrder
-    newValues?: SortOrderInput | SortOrder
-    changeType?: SortOrder
-    createdAt?: SortOrder
-    _count?: RuleRevisionCountOrderByAggregateInput
-    _avg?: RuleRevisionAvgOrderByAggregateInput
-    _max?: RuleRevisionMaxOrderByAggregateInput
-    _min?: RuleRevisionMinOrderByAggregateInput
-    _sum?: RuleRevisionSumOrderByAggregateInput
-  }
-
-  export type RuleRevisionScalarWhereWithAggregatesInput = {
-    AND?: RuleRevisionScalarWhereWithAggregatesInput | RuleRevisionScalarWhereWithAggregatesInput[]
-    OR?: RuleRevisionScalarWhereWithAggregatesInput[]
-    NOT?: RuleRevisionScalarWhereWithAggregatesInput | RuleRevisionScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"RuleRevision"> | string
-    ruleId?: StringWithAggregatesFilter<"RuleRevision"> | string
-    revisionNumber?: IntWithAggregatesFilter<"RuleRevision"> | number
-    authorId?: StringWithAggregatesFilter<"RuleRevision"> | string
-    changedFields?: StringWithAggregatesFilter<"RuleRevision"> | string
-    previousValues?: StringNullableWithAggregatesFilter<"RuleRevision"> | string | null
-    newValues?: StringNullableWithAggregatesFilter<"RuleRevision"> | string | null
-    changeType?: StringWithAggregatesFilter<"RuleRevision"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"RuleRevision"> | Date | string
   }
 
   export type HabitWhereInput = {
@@ -105213,6 +102478,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -105243,6 +102510,8 @@ export namespace Prisma {
     reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
+    goalProgressMode?: SortOrderInput | SortOrder
+    goalSuggestedValue?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
     goalProgressTrigger?: SortOrderInput | SortOrder
     checklist?: SortOrderInput | SortOrder
@@ -105277,6 +102546,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -105307,6 +102578,8 @@ export namespace Prisma {
     reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
+    goalProgressMode?: SortOrderInput | SortOrder
+    goalSuggestedValue?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
     goalProgressTrigger?: SortOrderInput | SortOrder
     checklist?: SortOrderInput | SortOrder
@@ -105340,6 +102613,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     goalId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableWithAggregatesFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableWithAggregatesFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     checklist?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
@@ -107440,6 +104715,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107454,6 +104730,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107465,6 +104742,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107479,6 +104757,7 @@ export namespace Prisma {
     keyResultId?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107492,6 +104771,7 @@ export namespace Prisma {
     keyResultId: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -107503,6 +104783,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107516,6 +104797,7 @@ export namespace Prisma {
     keyResultId?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107707,219 +104989,6 @@ export namespace Prisma {
     trigger?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     operatorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleCreateInput = {
-    id?: string
-    code: string
-    title: string
-    description: string
-    severity?: string
-    status?: string
-    deprecationReason?: string | null
-    replacementRuleId?: string | null
-    liveReferenceLocation?: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    revisions?: RuleRevisionCreateNestedManyWithoutRuleInput
-  }
-
-  export type RuleUncheckedCreateInput = {
-    id?: string
-    code: string
-    title: string
-    description: string
-    severity?: string
-    status?: string
-    deprecationReason?: string | null
-    replacementRuleId?: string | null
-    liveReferenceLocation?: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    revisions?: RuleRevisionUncheckedCreateNestedManyWithoutRuleInput
-  }
-
-  export type RuleUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    revisions?: RuleRevisionUpdateManyWithoutRuleNestedInput
-  }
-
-  export type RuleUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    revisions?: RuleRevisionUncheckedUpdateManyWithoutRuleNestedInput
-  }
-
-  export type RuleCreateManyInput = {
-    id?: string
-    code: string
-    title: string
-    description: string
-    severity?: string
-    status?: string
-    deprecationReason?: string | null
-    replacementRuleId?: string | null
-    liveReferenceLocation?: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type RuleUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionCreateInput = {
-    id?: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-    rule: RuleCreateNestedOneWithoutRevisionsInput
-  }
-
-  export type RuleRevisionUncheckedCreateInput = {
-    id?: string
-    ruleId: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-  }
-
-  export type RuleRevisionUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    rule?: RuleUpdateOneRequiredWithoutRevisionsNestedInput
-  }
-
-  export type RuleRevisionUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    ruleId?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionCreateManyInput = {
-    id?: string
-    ruleId: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-  }
-
-  export type RuleRevisionUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    ruleId?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -112798,6 +109867,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112828,6 +109899,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112853,6 +109926,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112883,6 +109958,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112911,6 +109988,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -112933,6 +110012,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112958,6 +110039,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114975,6 +112058,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -114992,6 +112076,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -115005,6 +112090,7 @@ export namespace Prisma {
     keyResultId?: SortOrder
     value?: SortOrder
     note?: SortOrder
+    authorship?: SortOrder
     sourceType?: SortOrder
     sourceId?: SortOrder
     recordedAt?: SortOrder
@@ -115110,124 +112196,6 @@ export namespace Prisma {
     oldWeight?: SortOrder
     newWeight?: SortOrder
     weightDelta?: SortOrder
-  }
-
-  export type RuleRevisionListRelationFilter = {
-    every?: RuleRevisionWhereInput
-    some?: RuleRevisionWhereInput
-    none?: RuleRevisionWhereInput
-  }
-
-  export type RuleRevisionOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type RuleCountOrderByAggregateInput = {
-    id?: SortOrder
-    code?: SortOrder
-    title?: SortOrder
-    description?: SortOrder
-    severity?: SortOrder
-    status?: SortOrder
-    deprecationReason?: SortOrder
-    replacementRuleId?: SortOrder
-    liveReferenceLocation?: SortOrder
-    tags?: SortOrder
-    goodExamples?: SortOrder
-    badExamples?: SortOrder
-    authorId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RuleMaxOrderByAggregateInput = {
-    id?: SortOrder
-    code?: SortOrder
-    title?: SortOrder
-    description?: SortOrder
-    severity?: SortOrder
-    status?: SortOrder
-    deprecationReason?: SortOrder
-    replacementRuleId?: SortOrder
-    liveReferenceLocation?: SortOrder
-    tags?: SortOrder
-    goodExamples?: SortOrder
-    badExamples?: SortOrder
-    authorId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RuleMinOrderByAggregateInput = {
-    id?: SortOrder
-    code?: SortOrder
-    title?: SortOrder
-    description?: SortOrder
-    severity?: SortOrder
-    status?: SortOrder
-    deprecationReason?: SortOrder
-    replacementRuleId?: SortOrder
-    liveReferenceLocation?: SortOrder
-    tags?: SortOrder
-    goodExamples?: SortOrder
-    badExamples?: SortOrder
-    authorId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RuleScalarRelationFilter = {
-    is?: RuleWhereInput
-    isNot?: RuleWhereInput
-  }
-
-  export type RuleRevisionRuleIdRevisionNumberCompoundUniqueInput = {
-    ruleId: string
-    revisionNumber: number
-  }
-
-  export type RuleRevisionCountOrderByAggregateInput = {
-    id?: SortOrder
-    ruleId?: SortOrder
-    revisionNumber?: SortOrder
-    authorId?: SortOrder
-    changedFields?: SortOrder
-    previousValues?: SortOrder
-    newValues?: SortOrder
-    changeType?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type RuleRevisionAvgOrderByAggregateInput = {
-    revisionNumber?: SortOrder
-  }
-
-  export type RuleRevisionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    ruleId?: SortOrder
-    revisionNumber?: SortOrder
-    authorId?: SortOrder
-    changedFields?: SortOrder
-    previousValues?: SortOrder
-    newValues?: SortOrder
-    changeType?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type RuleRevisionMinOrderByAggregateInput = {
-    id?: SortOrder
-    ruleId?: SortOrder
-    revisionNumber?: SortOrder
-    authorId?: SortOrder
-    changedFields?: SortOrder
-    previousValues?: SortOrder
-    newValues?: SortOrder
-    changeType?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type RuleRevisionSumOrderByAggregateInput = {
-    revisionNumber?: SortOrder
   }
 
   export type HabitOccurrenceListRelationFilter = {
@@ -117915,6 +114883,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117925,6 +114895,7 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgOrderByAggregateInput = {
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -117944,6 +114915,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117968,6 +114941,8 @@ export namespace Prisma {
     reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
+    goalProgressMode?: SortOrder
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     goalProgressTrigger?: SortOrder
     checklist?: SortOrder
@@ -117978,6 +114953,7 @@ export namespace Prisma {
   }
 
   export type TaskPlanSumOrderByAggregateInput = {
+    goalSuggestedValue?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -120527,62 +117503,6 @@ export namespace Prisma {
     upsert?: KeyResultUpsertWithoutKeyResultWeightSnapshotsInput
     connect?: KeyResultWhereUniqueInput
     update?: XOR<XOR<KeyResultUpdateToOneWithWhereWithoutKeyResultWeightSnapshotsInput, KeyResultUpdateWithoutKeyResultWeightSnapshotsInput>, KeyResultUncheckedUpdateWithoutKeyResultWeightSnapshotsInput>
-  }
-
-  export type RuleRevisionCreateNestedManyWithoutRuleInput = {
-    create?: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput> | RuleRevisionCreateWithoutRuleInput[] | RuleRevisionUncheckedCreateWithoutRuleInput[]
-    connectOrCreate?: RuleRevisionCreateOrConnectWithoutRuleInput | RuleRevisionCreateOrConnectWithoutRuleInput[]
-    createMany?: RuleRevisionCreateManyRuleInputEnvelope
-    connect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-  }
-
-  export type RuleRevisionUncheckedCreateNestedManyWithoutRuleInput = {
-    create?: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput> | RuleRevisionCreateWithoutRuleInput[] | RuleRevisionUncheckedCreateWithoutRuleInput[]
-    connectOrCreate?: RuleRevisionCreateOrConnectWithoutRuleInput | RuleRevisionCreateOrConnectWithoutRuleInput[]
-    createMany?: RuleRevisionCreateManyRuleInputEnvelope
-    connect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-  }
-
-  export type RuleRevisionUpdateManyWithoutRuleNestedInput = {
-    create?: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput> | RuleRevisionCreateWithoutRuleInput[] | RuleRevisionUncheckedCreateWithoutRuleInput[]
-    connectOrCreate?: RuleRevisionCreateOrConnectWithoutRuleInput | RuleRevisionCreateOrConnectWithoutRuleInput[]
-    upsert?: RuleRevisionUpsertWithWhereUniqueWithoutRuleInput | RuleRevisionUpsertWithWhereUniqueWithoutRuleInput[]
-    createMany?: RuleRevisionCreateManyRuleInputEnvelope
-    set?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    disconnect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    delete?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    connect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    update?: RuleRevisionUpdateWithWhereUniqueWithoutRuleInput | RuleRevisionUpdateWithWhereUniqueWithoutRuleInput[]
-    updateMany?: RuleRevisionUpdateManyWithWhereWithoutRuleInput | RuleRevisionUpdateManyWithWhereWithoutRuleInput[]
-    deleteMany?: RuleRevisionScalarWhereInput | RuleRevisionScalarWhereInput[]
-  }
-
-  export type RuleRevisionUncheckedUpdateManyWithoutRuleNestedInput = {
-    create?: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput> | RuleRevisionCreateWithoutRuleInput[] | RuleRevisionUncheckedCreateWithoutRuleInput[]
-    connectOrCreate?: RuleRevisionCreateOrConnectWithoutRuleInput | RuleRevisionCreateOrConnectWithoutRuleInput[]
-    upsert?: RuleRevisionUpsertWithWhereUniqueWithoutRuleInput | RuleRevisionUpsertWithWhereUniqueWithoutRuleInput[]
-    createMany?: RuleRevisionCreateManyRuleInputEnvelope
-    set?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    disconnect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    delete?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    connect?: RuleRevisionWhereUniqueInput | RuleRevisionWhereUniqueInput[]
-    update?: RuleRevisionUpdateWithWhereUniqueWithoutRuleInput | RuleRevisionUpdateWithWhereUniqueWithoutRuleInput[]
-    updateMany?: RuleRevisionUpdateManyWithWhereWithoutRuleInput | RuleRevisionUpdateManyWithWhereWithoutRuleInput[]
-    deleteMany?: RuleRevisionScalarWhereInput | RuleRevisionScalarWhereInput[]
-  }
-
-  export type RuleCreateNestedOneWithoutRevisionsInput = {
-    create?: XOR<RuleCreateWithoutRevisionsInput, RuleUncheckedCreateWithoutRevisionsInput>
-    connectOrCreate?: RuleCreateOrConnectWithoutRevisionsInput
-    connect?: RuleWhereUniqueInput
-  }
-
-  export type RuleUpdateOneRequiredWithoutRevisionsNestedInput = {
-    create?: XOR<RuleCreateWithoutRevisionsInput, RuleUncheckedCreateWithoutRevisionsInput>
-    connectOrCreate?: RuleCreateOrConnectWithoutRevisionsInput
-    upsert?: RuleUpsertWithoutRevisionsInput
-    connect?: RuleWhereUniqueInput
-    update?: XOR<XOR<RuleUpdateToOneWithWhereWithoutRevisionsInput, RuleUpdateWithoutRevisionsInput>, RuleUncheckedUpdateWithoutRevisionsInput>
   }
 
   export type AccountCreateNestedOneWithoutHabitsInput = {
@@ -123746,6 +120666,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -123774,6 +120696,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -125265,6 +122189,8 @@ export namespace Prisma {
     reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
+    goalProgressMode?: StringNullableFilter<"TaskPlan"> | string | null
+    goalSuggestedValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
     goalProgressTrigger?: StringNullableFilter<"TaskPlan"> | string | null
     checklist?: StringNullableFilter<"TaskPlan"> | string | null
@@ -128220,6 +125146,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -128246,6 +125174,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -128272,6 +125202,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -128283,6 +125214,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -128435,6 +125367,7 @@ export namespace Prisma {
     keyResultId?: StringFilter<"GoalRecord"> | string
     value?: FloatFilter<"GoalRecord"> | number
     note?: StringNullableFilter<"GoalRecord"> | string | null
+    authorship?: StringFilter<"GoalRecord"> | string
     sourceType?: StringNullableFilter<"GoalRecord"> | string | null
     sourceId?: StringNullableFilter<"GoalRecord"> | string | null
     recordedAt?: DateTimeFilter<"GoalRecord"> | Date | string
@@ -128884,157 +125817,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     linkedTaskPlans?: TaskPlanUncheckedUpdateManyWithoutKeyResultNestedInput
     records?: GoalRecordUncheckedUpdateManyWithoutKeyResultNestedInput
-  }
-
-  export type RuleRevisionCreateWithoutRuleInput = {
-    id?: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-  }
-
-  export type RuleRevisionUncheckedCreateWithoutRuleInput = {
-    id?: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-  }
-
-  export type RuleRevisionCreateOrConnectWithoutRuleInput = {
-    where: RuleRevisionWhereUniqueInput
-    create: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput>
-  }
-
-  export type RuleRevisionCreateManyRuleInputEnvelope = {
-    data: RuleRevisionCreateManyRuleInput | RuleRevisionCreateManyRuleInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type RuleRevisionUpsertWithWhereUniqueWithoutRuleInput = {
-    where: RuleRevisionWhereUniqueInput
-    update: XOR<RuleRevisionUpdateWithoutRuleInput, RuleRevisionUncheckedUpdateWithoutRuleInput>
-    create: XOR<RuleRevisionCreateWithoutRuleInput, RuleRevisionUncheckedCreateWithoutRuleInput>
-  }
-
-  export type RuleRevisionUpdateWithWhereUniqueWithoutRuleInput = {
-    where: RuleRevisionWhereUniqueInput
-    data: XOR<RuleRevisionUpdateWithoutRuleInput, RuleRevisionUncheckedUpdateWithoutRuleInput>
-  }
-
-  export type RuleRevisionUpdateManyWithWhereWithoutRuleInput = {
-    where: RuleRevisionScalarWhereInput
-    data: XOR<RuleRevisionUpdateManyMutationInput, RuleRevisionUncheckedUpdateManyWithoutRuleInput>
-  }
-
-  export type RuleRevisionScalarWhereInput = {
-    AND?: RuleRevisionScalarWhereInput | RuleRevisionScalarWhereInput[]
-    OR?: RuleRevisionScalarWhereInput[]
-    NOT?: RuleRevisionScalarWhereInput | RuleRevisionScalarWhereInput[]
-    id?: StringFilter<"RuleRevision"> | string
-    ruleId?: StringFilter<"RuleRevision"> | string
-    revisionNumber?: IntFilter<"RuleRevision"> | number
-    authorId?: StringFilter<"RuleRevision"> | string
-    changedFields?: StringFilter<"RuleRevision"> | string
-    previousValues?: StringNullableFilter<"RuleRevision"> | string | null
-    newValues?: StringNullableFilter<"RuleRevision"> | string | null
-    changeType?: StringFilter<"RuleRevision"> | string
-    createdAt?: DateTimeFilter<"RuleRevision"> | Date | string
-  }
-
-  export type RuleCreateWithoutRevisionsInput = {
-    id?: string
-    code: string
-    title: string
-    description: string
-    severity?: string
-    status?: string
-    deprecationReason?: string | null
-    replacementRuleId?: string | null
-    liveReferenceLocation?: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type RuleUncheckedCreateWithoutRevisionsInput = {
-    id?: string
-    code: string
-    title: string
-    description: string
-    severity?: string
-    status?: string
-    deprecationReason?: string | null
-    replacementRuleId?: string | null
-    liveReferenceLocation?: string | null
-    tags: string
-    goodExamples: string
-    badExamples: string
-    authorId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type RuleCreateOrConnectWithoutRevisionsInput = {
-    where: RuleWhereUniqueInput
-    create: XOR<RuleCreateWithoutRevisionsInput, RuleUncheckedCreateWithoutRevisionsInput>
-  }
-
-  export type RuleUpsertWithoutRevisionsInput = {
-    update: XOR<RuleUpdateWithoutRevisionsInput, RuleUncheckedUpdateWithoutRevisionsInput>
-    create: XOR<RuleCreateWithoutRevisionsInput, RuleUncheckedCreateWithoutRevisionsInput>
-    where?: RuleWhereInput
-  }
-
-  export type RuleUpdateToOneWithWhereWithoutRevisionsInput = {
-    where?: RuleWhereInput
-    data: XOR<RuleUpdateWithoutRevisionsInput, RuleUncheckedUpdateWithoutRevisionsInput>
-  }
-
-  export type RuleUpdateWithoutRevisionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleUncheckedUpdateWithoutRevisionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
-    severity?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    deprecationReason?: NullableStringFieldUpdateOperationsInput | string | null
-    replacementRuleId?: NullableStringFieldUpdateOperationsInput | string | null
-    liveReferenceLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    goodExamples?: StringFieldUpdateOperationsInput | string
-    badExamples?: StringFieldUpdateOperationsInput | string
-    authorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AccountCreateWithoutHabitsInput = {
@@ -130326,6 +127108,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -130355,6 +127139,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -130523,6 +127309,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130552,6 +127340,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138508,6 +135298,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138537,6 +135329,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138678,6 +135472,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138707,6 +135503,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138826,6 +135624,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138855,6 +135655,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -138996,6 +135798,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139025,6 +135829,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139773,6 +136579,8 @@ export namespace Prisma {
     reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -140794,6 +137602,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140822,6 +137632,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140849,6 +137661,8 @@ export namespace Prisma {
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142119,6 +138933,8 @@ export namespace Prisma {
     importance?: string
     schedule: JsonNullValueInput | InputJsonValue
     reminderConfig?: string | null
+    goalProgressMode?: string | null
+    goalSuggestedValue?: number | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -142132,6 +138948,7 @@ export namespace Prisma {
     id: string
     value: number
     note?: string | null
+    authorship?: string
     sourceType?: string | null
     sourceId?: string | null
     recordedAt: Date | string
@@ -142164,6 +138981,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142190,6 +139009,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142215,6 +139036,8 @@ export namespace Prisma {
     importance?: StringFieldUpdateOperationsInput | string
     schedule?: JsonNullValueInput | InputJsonValue
     reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
+    goalProgressMode?: NullableStringFieldUpdateOperationsInput | string | null
+    goalSuggestedValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142228,6 +139051,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142239,6 +139063,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142250,6 +139075,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     value?: FloatFieldUpdateOperationsInput | number
     note?: NullableStringFieldUpdateOperationsInput | string | null
+    authorship?: StringFieldUpdateOperationsInput | string
     sourceType?: NullableStringFieldUpdateOperationsInput | string | null
     sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     recordedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -142291,50 +139117,6 @@ export namespace Prisma {
     trigger?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     operatorId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionCreateManyRuleInput = {
-    id?: string
-    revisionNumber: number
-    authorId: string
-    changedFields: string
-    previousValues?: string | null
-    newValues?: string | null
-    changeType: string
-    createdAt?: Date | string
-  }
-
-  export type RuleRevisionUpdateWithoutRuleInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionUncheckedUpdateWithoutRuleInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RuleRevisionUncheckedUpdateManyWithoutRuleInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    revisionNumber?: IntFieldUpdateOperationsInput | number
-    authorId?: StringFieldUpdateOperationsInput | string
-    changedFields?: StringFieldUpdateOperationsInput | string
-    previousValues?: NullableStringFieldUpdateOperationsInput | string | null
-    newValues?: NullableStringFieldUpdateOperationsInput | string | null
-    changeType?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

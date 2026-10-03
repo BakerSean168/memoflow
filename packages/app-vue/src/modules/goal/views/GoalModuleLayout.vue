@@ -19,10 +19,12 @@
       <router-view />
       <GoalDialog
         :open="dialogOpen"
+        @session-change="handleSessionChange"
         @update:open="handleDialogOpenUpdate"
         :mode="dialogMode"
         :goal="editingGoal"
         @dirty-change="goalDialogDirty = $event"
+        @busy-change="goalDialogBusy = $event"
         @created="handleSaved"
         @updated="handleSaved"
         @create-with-ai="openCreateWithAI"
@@ -33,7 +35,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import {
+  onActivated,
+  onDeactivated,
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { GoalClientDTO, GoalSystemView } from '@memoflow/contracts/goal';
@@ -43,6 +54,33 @@ import { useGoal } from '../composables/useGoal';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import { useRouteDialogState } from '../../../shared/composables/useRouteDialogState';
+
+import { useGoalNativeSurfaceRegistration } from '../../../layouts/shell/useGoalNativeSurface';
+import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
+
+const nativeSurface = useGoalNativeSurfaceRegistration();
+let unregisterSession: (() => void) | null = null;
+let currentSession: GoalNativeEditSession | null = null;
+let surfaceActive = true;
+function handleSessionChange(session: GoalNativeEditSession | null): void {
+  unregisterSession?.();
+  currentSession = session;
+  unregisterSession =
+    session && surfaceActive ? (nativeSurface?.register(route.fullPath, session) ?? null) : null;
+}
+onActivated(() => {
+  surfaceActive = true;
+  if (dialogIdentity() !== lastSynchronizedIdentity) void syncDialogFromRoute();
+  else if (currentSession) handleSessionChange(currentSession);
+});
+onDeactivated(() => {
+  surfaceActive = false;
+  handleSessionChange(null);
+});
+onUnmounted(() => {
+  surfaceActive = false;
+  handleSessionChange(null);
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -64,9 +102,10 @@ const dialogOpen = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
 const editingGoal = ref<GoalClientDTO | null>(null);
 const goalDialogDirty = ref(false);
+const goalDialogBusy = ref(false);
 const isListRoute = computed(() => route.name === 'goal-list');
 const panelSurfaceStatus = computed<'clean' | 'dirty' | 'busy'>(() => {
-  if (isSaving.value) return 'busy';
+  if (goalDialogBusy.value || isSaving.value) return 'busy';
   return goalDialogDirty.value ? 'dirty' : 'clean';
 });
 usePanelSurfaceStatus(panelSurfaceStatus);
@@ -87,17 +126,28 @@ function handleDialogOpenUpdate(open: boolean) {
   void routeDialog.close();
 }
 function openCreateWithAI() {
+  if (goalDialogBusy.value || isSaving.value) return;
   dialogOpen.value = false;
   goalDialogDirty.value = false;
   void router.push({ path: '/', query: { workflow: 'goal-create' } });
 }
 function openKnowledge(goalId: string) {
+  if (goalDialogBusy.value || isSaving.value) return;
   dialogOpen.value = false;
   goalDialogDirty.value = false;
   void router.push({ path: '/repository', query: { goalId } });
 }
 
+let loadRevision = 0;
+let lastSynchronizedIdentity: string | null = null;
+function dialogIdentity(): string {
+  return JSON.stringify([route.name, route.query.dialog, route.query.goalId]);
+}
 async function syncDialogFromRoute() {
+  if (!surfaceActive || dialogIdentity() === lastSynchronizedIdentity) return;
+  lastSynchronizedIdentity = dialogIdentity();
+  const revision = ++loadRevision;
+  handleSessionChange(null);
   if (route.name !== 'goal-list' || route.query.dialog !== 'goal') {
     dialogOpen.value = false;
     editingGoal.value = null;
@@ -112,8 +162,16 @@ async function syncDialogFromRoute() {
     return;
   }
 
+  dialogOpen.value = false;
   dialogMode.value = 'edit';
-  const aggregate = await getGoalAggregateView(goalId);
+  let aggregate;
+  try {
+    aggregate = await getGoalAggregateView(goalId);
+  } catch {
+    if (revision === loadRevision) await routeDialog.close();
+    return;
+  }
+  if (revision !== loadRevision) return;
   editingGoal.value = aggregate
     ? { ...aggregate.goal, keyResults: aggregate.keyResults, reviews: aggregate.reviews }
     : null;
@@ -133,13 +191,29 @@ function handleDatabaseTablesChanged(event: Event) {
 }
 
 watch(
+  [() => route.name, () => route.query.dialog, () => route.query.goalId],
+  async () => {
+    // KeepAlive lifecycle hooks are queued alongside post-render watchers.
+    await nextTick();
+    void syncDialogFromRoute();
+  },
+  { immediate: true, flush: 'post' },
+);
+// Filter/query changes do not reset the canonical draft; update its registration key.
+watch(
   () => route.fullPath,
-  () => void syncDialogFromRoute(),
-  { immediate: true },
+  async () => {
+    await nextTick();
+    if (surfaceActive && currentSession) handleSessionChange(currentSession);
+  },
+  { flush: 'post' },
 );
 onMounted(() => {
   window.addEventListener('db:tables-changed', handleDatabaseTablesChanged);
   void fetchGoals();
 });
-onUnmounted(() => window.removeEventListener('db:tables-changed', handleDatabaseTablesChanged));
+onUnmounted(() => {
+  loadRevision += 1;
+  window.removeEventListener('db:tables-changed', handleDatabaseTablesChanged);
+});
 </script>

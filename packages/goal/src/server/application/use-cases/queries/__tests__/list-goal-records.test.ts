@@ -12,6 +12,8 @@ function createRecordFixture(overrides?: Record<string, any>) {
     keyResultId: overrides?.keyResultId ?? 'kr-1',
     value,
     createdAt: overrides?.createdAt ?? new Date('2026-01-01T00:00:00.000Z'),
+    recordedAt:
+      overrides?.recordedAt ?? overrides?.createdAt ?? new Date('2026-01-01T00:00:00.000Z'),
     toClientDTO: vi.fn().mockReturnValue({ id, value }),
     ...overrides,
   } as any;
@@ -258,5 +260,155 @@ describe('ListGoalRecordsUseCase', () => {
     if (!result.ok) return;
     expect(recordA.toClientDTO).toHaveBeenCalledWith('goal-1', 10);
     expect(recordB.toClientDTO).toHaveBeenCalledWith('goal-1', 20);
+  });
+});
+
+describe('Goal-owned record preview context', () => {
+  it.each([
+    { aggregationMethod: 'Sum', earlierValueAfter: 15, laterValueAfter: 22 },
+    { aggregationMethod: 'Average', earlierValueAfter: 5, laterValueAfter: 6 },
+    { aggregationMethod: 'Last', earlierValueAfter: 5, laterValueAfter: 7 },
+  ] as const)(
+    'uses recordedAt rather than createdAt for $aggregationMethod snapshots and valueAfter',
+    async ({ aggregationMethod, earlierValueAfter, laterValueAfter }) => {
+      const earlier = createRecordFixture({
+        id: 'record-z',
+        value: 5,
+        recordedAt: 1,
+        createdAt: 20,
+      });
+      const later = createRecordFixture({
+        id: 'record-a',
+        value: 7,
+        recordedAt: 2,
+        createdAt: 10,
+      });
+      const progress = {
+        initialValue: 0,
+        currentValue: laterValueAfter,
+        targetValue: 100,
+        trackingBaseValue: 10,
+        aggregationMethod,
+        unit: null,
+      };
+      const goalRepo = createMockRepo<IGoalRepository>({
+        findByIdForIdentity: vi
+          .fn()
+          .mockResolvedValue(createGoalFixture({ keyResults: [{ id: 'kr-1', progress }] })),
+      });
+      const recordRepo = createMockRepo<IGoalRecordRepository>({
+        findByKeyResultId: vi.fn().mockResolvedValue([later, earlier]),
+      });
+      const result = await new ListGoalRecordsUseCase(recordRepo, goalRepo).execute({
+        identityId: 'identity-1',
+        goalId: 'goal-1',
+        keyResultId: 'kr-1',
+      });
+
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.data.previewContext?.aggregationSnapshot).toEqual({
+        count: 2,
+        sum: 12,
+        max: 7,
+        min: 5,
+        last: 7,
+      });
+      expect(result.data.data.map((record) => record.id)).toEqual(['record-a', 'record-z']);
+      expect(earlier.toClientDTO).toHaveBeenCalledWith('goal-1', earlierValueAfter);
+      expect(later.toClientDTO).toHaveBeenCalledWith('goal-1', laterValueAfter);
+    },
+  );
+
+  it.each(['Sum', 'Average', 'Max', 'Min', 'Last'] as const)(
+    'uses all identity-scoped records before pagination for %s with deterministic Last',
+    async (aggregationMethod) => {
+      const records = [
+        createRecordFixture({ id: 'c', value: 0, recordedAt: 2, createdAt: 1 }),
+        createRecordFixture({ id: 'a', value: -2, recordedAt: 1, createdAt: 3 }),
+        createRecordFixture({ id: 'b', value: 6, recordedAt: 2, createdAt: 2 }),
+        createRecordFixture({ id: 'foreign', value: 999, createdAt: 3, identityId: 'other' }),
+        createRecordFixture({ id: 'wrong-kr', keyResultId: 'other', value: 999, createdAt: 3 }),
+      ];
+      const progress = {
+        initialValue: 100,
+        currentValue: 80,
+        targetValue: 50,
+        trackingBaseValue: 40,
+        aggregationMethod,
+        unit: 'kg',
+      };
+      const goalRepo = createMockRepo<IGoalRepository>({
+        findByIdForIdentity: vi
+          .fn()
+          .mockResolvedValue(createGoalFixture({ keyResults: [{ id: 'kr-1', progress }] })),
+      });
+      const recordRepo = createMockRepo<IGoalRecordRepository>({
+        findByKeyResultId: vi.fn().mockResolvedValue(records),
+        findByGoalId: vi.fn().mockResolvedValue(records),
+      });
+      const useCase = new ListGoalRecordsUseCase(recordRepo, goalRepo);
+      for (const offset of [0, 1, 10]) {
+        const result = await useCase.execute({
+          identityId: 'identity-1',
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          limit: 1,
+          offset,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok) continue;
+        expect(result.data.data.length).toBeLessThanOrEqual(1);
+        expect(result.data.total).toBe(3);
+        expect(result.data.previewContext).toEqual({
+          ...progress,
+          keyResultId: 'kr-1',
+          aggregationSnapshot: { count: 3, sum: 4, max: 6, min: -2, last: 0 },
+        });
+      }
+      const goalWide = await useCase.execute({ identityId: 'identity-1', goalId: 'goal-1' });
+      if (aggregationMethod === 'Sum') {
+        expect(records[1].toClientDTO).toHaveBeenCalledWith('goal-1', 38);
+        expect(records[2].toClientDTO).toHaveBeenCalledWith('goal-1', 44);
+        expect(records[0].toClientDTO).toHaveBeenCalledWith('goal-1', 44);
+      }
+      if (goalWide.ok) expect(goalWide.data).not.toHaveProperty('previewContext');
+    },
+  );
+
+  it('returns empty snapshot and refuses a KR outside the owned goal', async () => {
+    const progress = {
+      initialValue: 0,
+      currentValue: 40,
+      targetValue: 100,
+      trackingBaseValue: 40,
+      aggregationMethod: 'Sum',
+      unit: null,
+    };
+    const goalRepo = createMockRepo<IGoalRepository>({
+      findByIdForIdentity: vi
+        .fn()
+        .mockResolvedValue(createGoalFixture({ keyResults: [{ id: 'kr-1', progress }] })),
+    });
+    const recordRepo = createMockRepo<IGoalRecordRepository>({
+      findByKeyResultId: vi.fn().mockResolvedValue([]),
+    });
+    const useCase = new ListGoalRecordsUseCase(recordRepo, goalRepo);
+    const result = await useCase.execute({
+      identityId: 'identity-1',
+      goalId: 'goal-1',
+      keyResultId: 'kr-1',
+    });
+    if (result.ok)
+      expect(result.data.previewContext?.aggregationSnapshot).toEqual({
+        count: 0,
+        sum: 0,
+        max: null,
+        min: null,
+        last: null,
+      });
+    expect(
+      await useCase.execute({ identityId: 'identity-1', goalId: 'goal-1', keyResultId: 'other' }),
+    ).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
   });
 });

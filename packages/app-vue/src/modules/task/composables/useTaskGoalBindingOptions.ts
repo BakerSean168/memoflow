@@ -1,3 +1,4 @@
+import { getKeyResultCalculationLabel, KEY_RESULT_CALCULATION_PRESENTATION } from '../../goal';
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Result } from '@memoflow/contracts/result';
@@ -41,7 +42,10 @@ function mapGoalOption(goal: GoalLike): GoalBindingOption {
   };
 }
 
-function mapKeyResultOption(dto: KeyResultClientDTO): KeyResultBindingOption {
+function mapKeyResultOption(
+  dto: KeyResultClientDTO,
+  t: (key: string) => string,
+): KeyResultBindingOption {
   const { initialValue, currentValue: current, targetValue: target } = dto.progress;
   const range = target - initialValue;
   const percentage =
@@ -55,6 +59,13 @@ function mapKeyResultOption(dto: KeyResultClientDTO): KeyResultBindingOption {
     id: String(dto.id),
     title: dto.title,
     weight: dto.weight,
+    calculationMethod: dto.progress.aggregationMethod,
+    methodLabel: getKeyResultCalculationLabel(dto.progress.aggregationMethod, t),
+    recordInputKind:
+      KEY_RESULT_CALCULATION_PRESENTATION[dto.progress.aggregationMethod].recordInputKind,
+    unit: dto.progress.unit,
+    currentValue: current,
+    targetValue: target,
     progress: {
       current,
       target,
@@ -174,7 +185,7 @@ export function useTaskGoalBindingOptions() {
 
       const aggregate = result.data as GetGoalAggregateRes;
       const goal = mapGoalOption(aggregate.goal);
-      const mapped = aggregate.keyResults.map(mapKeyResultOption);
+      const mapped = aggregate.keyResults.map((kr) => mapKeyResultOption(kr, t));
 
       goals.value = [...goals.value.filter((option) => option.id !== goalId), goal];
       keyResultsByGoal.value = {

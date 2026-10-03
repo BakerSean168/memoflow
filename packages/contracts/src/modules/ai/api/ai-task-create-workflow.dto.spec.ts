@@ -121,3 +121,36 @@ describe('TaskPlanTaskSchema owner-aligned contract', () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe('Task review owner identities', () => {
+  it('requires identity metadata matching revision and draftRef', async () => {
+    const { AIWorkflowSuspensionSchema } = await import('./ai-runtime.dto');
+    const review = {
+      type: 'task_draft_review',
+      revision: 2,
+      draft: { ...TaskPlanDraftSchema.parse({ task: baseTask, revision: 2 }) },
+      warnings: [],
+      ownerCreate: {
+        taskId: 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440002',
+        draftRef: baseTask.draftRef,
+      },
+    };
+    expect(AIWorkflowSuspensionSchema.safeParse(review).success).toBe(true);
+    expect(AIWorkflowSuspensionSchema.safeParse({ ...review, revision: 1 }).success).toBe(false);
+    expect(
+      AIWorkflowSuspensionSchema.safeParse({
+        ...review,
+        ownerCreate: { ...review.ownerCreate, draftRef: 'task:other' },
+      }).success,
+    ).toBe(false);
+    expect(
+      AIWorkflowSuspensionSchema.safeParse({ ...review, ownerCreate: undefined }).success,
+    ).toBe(false);
+    expect(
+      AIWorkflowSuspensionSchema.safeParse({
+        ...review,
+        ownerCreate: { ...review.ownerCreate, taskId: '' },
+      }).success,
+    ).toBe(false);
+  });
+});

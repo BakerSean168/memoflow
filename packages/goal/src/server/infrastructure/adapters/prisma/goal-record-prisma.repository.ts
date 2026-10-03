@@ -37,7 +37,8 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
       where.recordedAt = recordedAtFilter;
     }
 
-    const orderBy = { recordedAt: options?.orderBy ?? 'desc' };
+    const direction = options?.orderBy ?? 'desc';
+    const orderBy = [{ recordedAt: direction }, { id: direction }];
     const take = options?.limit;
 
     return { where, orderBy, take };
@@ -152,6 +153,7 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
         identityId: dto.identityId as string,
         value: dto.value,
         note: dto.note,
+        authorship: dto.authorship,
         sourceType: dto.sourceType,
         sourceId: dto.sourceId,
         recordedAt: new Date(dto.recordedAt),
@@ -161,6 +163,7 @@ export class GoalRecordPrismaRepository implements IGoalRecordRepository {
       update: {
         value: dto.value,
         note: dto.note,
+        authorship: dto.authorship,
         sourceType: dto.sourceType,
         sourceId: dto.sourceId,
         recordedAt: new Date(dto.recordedAt),

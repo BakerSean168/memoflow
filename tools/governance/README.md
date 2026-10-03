@@ -85,41 +85,22 @@ node -e "console.log('see docs/governance/dual-registry.md')"
 
 E3b tax cut may merge many `*-dual.surface.spec.ts` in one directory into `dual-registry.surface.spec.ts` (table/describe suite). Locks must be preserved.
 
-## Pinned GovernanceRuleBundle engineering bridge
+## Repository-native Engineering Governance input
 
-`GOV-1904` keeps product Governance truth and repository engineering enforcement separate:
-
-```text
-Rule + RuleRevision (product truth)
-→ explicit GovernanceRuleBundle export (GOV-1903)
-→ reviewed repository snapshot + semantic-hash pin
-→ explicit engineering adapter registry
-→ check / report / autofix-proposal
-```
-
-CI consumes only the committed snapshot at
-`published/governance-rule-bundle.v1.json`, pinned by `pinned-rule-bundles.json`; it never
-connects to a live Governance database or network endpoint. `engineering-rule-adapters.json`
-is an allowlist, not an executable command registry. A Rule's `Mandatory` severity does not
-make it a CI gate by itself. Unmapped rules stay visible as `unmapped (non-enforcing)`.
-The current `DDD-003` mapping reuses the package-internal boundary runner and is explicitly
-`partial` coverage rather than claiming full Layer Isolation enforcement.
+Engineering rules use `tools/governance/engineering-rules.json` and the semantic pin in
+`tools/governance/pinned-engineering-rules.json`. The native adapter needs no Product UUIDs,
+contracts, database, exporter or published Product snapshot. DDD-003 has explicit partial,
+read-only package-boundary coverage; DDD-001/002/004/005 remain visible and non-enforcing.
+`autofix-proposal` emits review-required guidance without applying changes.
 
 ```bash
-node tools/governance/governance-rule-bundle-adapter.mjs \
-  --bundle tools/governance/published/governance-rule-bundle.v1.json \
-  --mode check
-
-node tools/governance/governance-rule-bundle-adapter.mjs \
-  --bundle tools/governance/published/governance-rule-bundle.v1.json \
-  --mode report
-
-node tools/governance/governance-rule-bundle-adapter.mjs \
-  --bundle tools/governance/published/governance-rule-bundle.v1.json \
-  --mode autofix-proposal
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode check
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode report
+node tools/governance/engineering-rule-adapter.mjs --source tools/governance/engineering-rules.json --mode autofix-proposal
 ```
 
-`autofix-proposal` is proposal-only: it emits review-required guidance and never mutates
-product source. The standalone `package-internal-boundary-audit.mjs` remains a first-class,
-independently runnable repository gate; the bundle bridge composes with it rather than
-replacing it.
+ADR-113 is accepted and Product Governance Runtime is retired. The active rule runner operates only on real repository owners; there is no Product Governance package exclusion or compatibility input. The dependency audit traverses static module imports/re-exports with the TypeScript AST; subject-scanner violation strings are not input dependencies. The adapter closure itself uses Node built-ins only. TypeScript is tooling for the audit, not a runtime input dependency.
+
+Retired Product Governance paths are protected by the repository retirement manifest rather than by keeping legacy bundle/runtime artifacts physically present.

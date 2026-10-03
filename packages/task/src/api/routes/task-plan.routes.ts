@@ -41,7 +41,9 @@ interface PlatformMiddleware {
   requireRole?(roles: string[]): RequestHandler;
 }
 
-function parseTemplateFilters(query: Record<string, unknown> | undefined): ListTaskPlanFilters {
+function parseTemplateFilters(query: Record<string, unknown> | undefined) {
+  const page = getFirstQueryValue(query?.page);
+  const limit = getFirstQueryValue(query?.limit);
   const status = Array.isArray(query?.status)
     ? (query!.status as string[])
     : typeof query?.status === 'string'
@@ -61,7 +63,16 @@ function parseTemplateFilters(query: Record<string, unknown> | undefined): ListT
       ? [query!.labelIdsAll as string]
       : undefined;
 
-  return ListTaskPlanFiltersSchema.parse({ status, goalId, keyResultId, labelIdsAll });
+  return {
+    page,
+    limit,
+    status,
+    outcome: typeof query?.outcome === 'string' ? [query.outcome] : query?.outcome,
+    archiveState: query?.archiveState,
+    goalId,
+    keyResultId,
+    labelIdsAll,
+  };
 }
 
 function parseTemplateInstancesRange(query: Record<string, unknown> | undefined): {
@@ -114,7 +125,7 @@ export function registerTaskPlanRoutes(
   );
 
   // GET / — List plans
-  r.route(
+  r.routeWithValidation(
     {
       method: 'get',
       path: '/',
@@ -122,13 +133,16 @@ export function registerTaskPlanRoutes(
       request: {
         query: ListTaskPlanFiltersSchema,
       },
+      validation: {
+        schema: ListTaskPlanFiltersSchema,
+        projectInput: (req) => parseTemplateFilters(req.query as Record<string, unknown>),
+      },
       responses: {
         200: successResponse(TaskPlanListResponseSchema, '获取成功'),
       },
     },
     [auth],
-    (req, ctx) =>
-      controller.listPlans(parseTemplateFilters(req.query as Record<string, unknown>), ctx),
+    (data, ctx) => controller.listPlans(data, ctx),
   );
 
 

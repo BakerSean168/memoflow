@@ -11,6 +11,8 @@ updated: 2026-04-19T00:00:00
 
 # 聊天 Goal Draft 链路
 
+> **2026-10-02 current status (PVC-AI-8121):** Goal/Task AI-owned editors and their visibility flags are retired. Normal editing uses GoalDialog, full TaskPlanDialog and Repository KnowledgeCaptureReviewDialog. Mastra retains draft/revision/receipt/recovery authority; Goal supporting Task/Knowledge overlays remain. The older flow examples below describe historical behavior. See [current AI module](../../../product/modules/ai.md).
+
 这条链路是当前最显眼、用户最容易直接看到的 AI 创建 Goal 流程。
 
 它的实际形态不是“一键建目标”，而是：
@@ -22,7 +24,7 @@ updated: 2026-04-19T00:00:00
 核心文件：
 
 - [../../../packages/app-vue/src/modules/ai/views/AIChatView.vue](../../../packages/app-vue/src/modules/ai/views/AIChatView.vue)
-- [../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue](../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue)
+- [GoalDialog (native replacement)](../../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue)
 
 当前页面不是单纯聊天页，而是一个共享壳：
 
@@ -244,7 +246,7 @@ controller：
 ## 12. 这条链路里的关键文件
 
 - 聊天页：[../../../packages/app-vue/src/modules/ai/views/AIChatView.vue](../../../packages/app-vue/src/modules/ai/views/AIChatView.vue)
-- 草稿编辑器：[../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue](../../../packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue)
+- 草稿编辑器：[GoalDialog (native replacement)](../../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue)
 - AI 客户端门面：[../../../packages/ai/src/application-client/ai-client-service.ts](../../../packages/ai/src/application-client/ai-client-service.ts)
 - goal generation controller：[../../../packages/ai/src/api/controllers/ai-goal-generation.controller.ts](../../../packages/ai/src/api/controllers/ai-goal-generation.controller.ts)
 - goal generation service：[../../../packages/ai/src/application-server/use-cases/commands/goal-generation-application-service.ts](../../../packages/ai/src/application-server/use-cases/commands/goal-generation-application-service.ts)

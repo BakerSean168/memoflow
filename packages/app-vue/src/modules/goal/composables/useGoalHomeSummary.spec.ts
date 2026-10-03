@@ -11,6 +11,7 @@ import {
   SERVER_STATE_RUNTIME_KEY,
   type ServerStateRuntime,
 } from '../../../platform/server-state';
+import { GOAL_HOME_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { useGoalHomeSummary } from './useGoalHomeSummary';
 
 const i18n = createI18n({
@@ -45,9 +46,55 @@ async function mountComposable(
 }
 
 describe('useGoalHomeSummary', () => {
+  it('deduplicates pending consumers and expires at the owner stale-window boundary', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
+    const runtime = createTestServerStateRuntime();
+    let release!: () => void;
+    const getHomeSummary = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(ok({ activeCount: 0, goals: [] }));
+          }),
+      )
+      .mockResolvedValue(ok({ activeCount: 0, goals: [] }));
+    const first = await mountComposable(getHomeSummary, runtime);
+    const second = await mountComposable(getHomeSummary, runtime);
+    try {
+      const reads = [first.api.ensure(), second.api.ensure()];
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      release();
+      await Promise.all(reads);
+      clock.mockReturnValue(1_800_000_000_000 + GOAL_HOME_STALE_TIME_MS - 1);
+      await second.api.ensure();
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(1_800_000_000_000 + GOAL_HOME_STALE_TIME_MS);
+      await second.api.ensure();
+      expect(getHomeSummary).toHaveBeenCalledTimes(2);
+    } finally {
+      first.wrapper.unmount();
+      second.wrapper.unmount();
+      runtime.dispose();
+      clock.mockRestore();
+    }
+  });
+
   it('stores the Goal-owned summary without Dashboard state', async () => {
     const getHomeSummary = vi.fn().mockResolvedValue(
-      ok({ activeCount: 2, goals: [{ id: 'g1', name: 'Goal', progress: 30, status: 'Planned', target: null, keyResultCount: 1 }] }),
+      ok({
+        activeCount: 2,
+        goals: [
+          {
+            id: 'g1',
+            name: 'Goal',
+            progress: 30,
+            status: 'Planned',
+            target: null,
+            keyResultCount: 1,
+          },
+        ],
+      }),
     );
     const { wrapper, api } = await mountComposable(getHomeSummary);
     await api.refresh();
@@ -58,9 +105,9 @@ describe('useGoalHomeSummary', () => {
   });
 
   it('degrades to a local error on a failed owner read', async () => {
-    const getHomeSummary = vi.fn().mockResolvedValue(
-      fail({ code: 'INTERNAL_ERROR', message: 'owner unavailable' }),
-    );
+    const getHomeSummary = vi
+      .fn()
+      .mockResolvedValue(fail({ code: 'INTERNAL_ERROR', message: 'owner unavailable' }));
     const { wrapper, api } = await mountComposable(getHomeSummary);
     await api.refresh();
     expect(api.error.value).toBeTruthy();

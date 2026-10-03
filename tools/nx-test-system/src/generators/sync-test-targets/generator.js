@@ -13,7 +13,6 @@ const governedDomainProjects = new Set([
   'authentication',
   'domain-shared',
   'goal',
-  'governance',
   'notification',
   'reminder',
   'schedule',

@@ -3,12 +3,9 @@
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="schedule-calendar-view"
   >
-    <header
-      class="z-10 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border/60 bg-[hsl(var(--surface)/0.9)] px-2 py-2 shadow-[0_1px_0_hsl(var(--border)/0.18)] backdrop-blur-md @2xl/panel:px-4"
-      data-testid="schedule-page-toolbar"
-    >
+    <ProductSurfaceHeader family="calendar" data-testid="schedule-page-toolbar">
       <div
-        class="flex min-w-0 items-center gap-0.5 rounded-lg border border-border/40 bg-muted/25 p-0.5"
+        class="flex min-w-0 items-center gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.55)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
         role="tablist"
         :aria-label="t('schedule.route.calendar')"
         data-testid="schedule-view-tabs"
@@ -22,9 +19,9 @@
           :aria-selected="activeView === tab.value"
           :aria-label="tab.label"
           :class="[
-            'h-7 rounded-md px-2 text-muted-foreground hover:bg-[hsl(var(--hover)/0.7)] hover:text-foreground @xl/panel:px-3',
+            'h-7 rounded-md px-2 text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground @xl/panel:px-3',
             activeView === tab.value
-              ? 'bg-primary/12 font-semibold text-primary shadow-sm shadow-black/10'
+              ? 'bg-[hsl(var(--surface-overlay))] font-semibold text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.65)]'
               : '',
           ]"
           :data-testid="`schedule-view-tab-${tab.value}`"
@@ -42,7 +39,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
+          class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.previousPeriod')"
           data-testid="schedule-previous-period"
           @click="movePeriod(-1)"
@@ -50,7 +47,7 @@
           <ChevronLeft class="h-4 w-4" />
         </Button>
         <p
-          class="min-w-0 max-w-48 flex-1 truncate px-2 text-center text-sm font-semibold tracking-tight @3xl/panel:w-52 @3xl/panel:flex-none"
+          class="min-w-0 max-w-48 flex-1 truncate px-2 text-center text-[13px] font-semibold tracking-[-0.01em] @3xl/panel:w-52 @3xl/panel:flex-none"
           data-testid="schedule-period-label"
         >
           {{ currentPeriodTitle }}
@@ -58,7 +55,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
+          class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.nextPeriod')"
           data-testid="schedule-next-period"
           @click="movePeriod(1)"
@@ -68,7 +65,7 @@
         <Button
           variant="outline"
           size="sm"
-          class="h-8 shrink-0 border-border/40 bg-transparent px-2 font-medium text-primary hover:bg-primary/10 hover:text-primary"
+          class="h-7 shrink-0 border-transparent bg-transparent px-2 text-[12px] font-medium text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           data-testid="schedule-today"
           @click="goToToday"
         >
@@ -84,7 +81,7 @@
         data-testid="create-schedule-button"
         @click="openCreateDialog"
       />
-    </header>
+    </ProductSurfaceHeader>
 
     <div class="min-h-0 flex-1 overflow-hidden" data-testid="schedule-calendar-content">
       <PlannerCalendar
@@ -104,37 +101,42 @@
       />
     </div>
 
-    <DayDetailSheet
+    <PlannerDayDialog
       v-model:open="dayDetailOpen"
       :date="selectedDate"
       :events="selectedDayEvents"
       :conflicts="conflicts"
       @event-click="handleProjectionClick"
       @view-in-day="switchToDayView"
-      @complete-task="handleCompleteTask"
     />
 
-    <TaskEventActionPanel
-      v-model:open="taskPanelOpen"
-      :event="selectedTaskEvent"
-      @complete-task="handleCompleteTask"
-    />
-
-    <EventDetailSheet
+    <PlannerEventDialog
       v-model:open="eventDetailOpen"
       :event="selectedDetailEvent"
       :has-conflict="selectedDetailHasConflict"
-    />
+      @edit="handleEditCalendarEntry"
+      @delete="handleDeleteCalendarEntry"
+    >
+      <template #owner-content="{ event }">
+        <TaskOccurrenceQuickSurface
+          v-if="eventDetailOpen && event.sourceType === 'task'"
+          :key="event.ownerCommandTarget.ownerId"
+          :occurrence-id="event.ownerCommandTarget.ownerId"
+          @open-plan="openTaskPlan"
+        />
+      </template>
+    </PlannerEventDialog>
     <CreateScheduleDialog
       v-model="showCreateDialog"
+      :schedule="editingSchedule"
       :initial-range="pendingCreateRange"
-      :on-submit="handleCreateSchedule"
+      :on-submit="handleSaveSchedule"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import {
@@ -145,20 +147,26 @@ import {
   ChevronRight,
   Plus,
 } from '@lucide/vue';
-import { Button } from '@memoflow/ui-vue-shadcn';
+import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import CreateScheduleDialog from '../components/CreateScheduleDialog.vue';
-import DayDetailSheet from '../components/DayDetailSheet.vue';
-import TaskEventActionPanel from '../components/TaskEventActionPanel.vue';
-import EventDetailSheet from '../components/EventDetailSheet.vue';
+import PlannerDayDialog from '../components/PlannerDayDialog.vue';
+import TaskOccurrenceQuickSurface from '../../task/components/TaskOccurrenceQuickSurface.vue';
+import { useRouter } from 'vue-router';
+import PlannerEventDialog from '../components/PlannerEventDialog.vue';
 import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView';
 import { useSchedule } from '../composables/useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { ResponsivePrimaryAction } from '../../../shared/components';
+import { ProductSurfaceHeader, ResponsivePrimaryAction } from '../../../shared/components';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
-import type { CalendarEventProjection, CreateScheduleRequest } from '@memoflow/contracts/schedule';
+import type {
+  CalendarEntryClientDTO,
+  CalendarEventProjection,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '@memoflow/contracts/schedule';
 import PlannerCalendar, {
   type PlannerCalendarView,
   type PlannerVisibleRange,
@@ -172,6 +180,7 @@ import { plannerConflictSourceKeys } from '@memoflow/schedule/client';
 import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 const { t, locale } = useI18n();
+const router = useRouter();
 const { projections, conflicts, isLoading, fetchForRange, windowStart, windowEnd } =
   useCalendarView();
 const schedule = useSchedule();
@@ -190,14 +199,11 @@ const ownerCommands = createPlannerOwnerCommandRouter({
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
 const showCreateDialog = ref(false);
 const pendingCreateRange = ref<{ start: number; end: number; allDay: boolean } | null>(null);
+const editingSchedule = ref<CalendarEntryClientDTO | null>(null);
 const activeView = ref<PlannerCalendarView>('week');
 const currentPeriodTitle = ref('');
 const dayDetailOpen = ref(false);
 const selectedDate = ref<Date | null>(null);
-const taskPanelOpen = ref(false);
-const selectedTaskEvent = ref<Extract<CalendarEventProjection, { sourceType: 'task' }> | null>(
-  null,
-);
 const eventDetailOpen = ref(false);
 const selectedDetailEvent = ref<CalendarEventProjection | null>(null);
 
@@ -263,21 +269,14 @@ function goToToday(): void {
 }
 
 function handleProjectionClick(projection: CalendarEventProjection): void {
-  if (projection.sourceType === 'task') {
-    selectedTaskEvent.value = projection;
-    taskPanelOpen.value = true;
-    return;
-  }
-
+  dayDetailOpen.value = false;
   selectedDetailEvent.value = projection;
   eventDetailOpen.value = true;
 }
 
-async function handleCompleteTask(originalId: string): Promise<void> {
-  const result = await task.completeOccurrence(originalId);
-  if (result && windowStart.value && windowEnd.value) {
-    await fetchForRange(windowStart.value, windowEnd.value);
-  }
+function openTaskPlan(id: string): void {
+  eventDetailOpen.value = false;
+  void router.push({ name: 'task-detail', params: { id } });
 }
 
 function plannerConflictMessage(
@@ -294,12 +293,15 @@ function plannerConflictMessage(
   return t('schedule.plannerMutation.conflict');
 }
 
-async function refreshPlannerAfterConflict(): Promise<void> {
+async function refreshPlannerAfterConflict(
+  warningKey = 'schedule.plannerMutation.refreshFailed',
+): Promise<void> {
   if (!windowStart.value || !windowEnd.value) return;
   try {
-    await fetchForRange(windowStart.value, windowEnd.value);
+    await fetchForRange(windowStart.value, windowEnd.value, { force: true });
+    if (schedule.error.value || task.error.value) toast.warning(t(warningKey));
   } catch {
-    toast.warning(t('schedule.plannerMutation.refreshFailed'));
+    toast.warning(t(warningKey));
   }
 }
 
@@ -333,6 +335,7 @@ function handlePlannerMutation(outcome: PlannerMutationOutcome): void {
 }
 
 function handleDayClick(date: Date): void {
+  if (showCreateDialog.value) return;
   selectedDate.value = date;
   dayDetailOpen.value = true;
 }
@@ -345,30 +348,133 @@ function switchToDayView(date: Date | null): void {
 }
 
 function openCreateDialog(): void {
+  if (showCreateDialog.value) return;
+  editingSchedule.value = null;
   pendingCreateRange.value = null;
   showCreateDialog.value = true;
 }
 
 function handleSelectRange(range: { start: number; end: number; allDay: boolean }): void {
+  if (showCreateDialog.value) return;
+  dayDetailOpen.value = false;
+  editingSchedule.value = null;
   pendingCreateRange.value = range;
   showCreateDialog.value = true;
 }
 
-async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolean> {
-  const result = await schedule.createCalendarEntry(data);
-  if (result) {
-    if (windowStart.value && windowEnd.value) {
-      try {
-        await fetchForRange(windowStart.value, windowEnd.value);
-      } catch {
-        // The command already committed and the local Schedule store contains the returned DTO.
-        // A read-model refresh failure must never be reported as a failed create.
-        toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'));
-      }
-    }
+function resolveCalendarEntry(event: CalendarEventProjection): CalendarEntryClientDTO | null {
+  if (event.sourceType !== 'schedule') return null;
+  const entry = schedule.calendarEntries.value.find(
+    (entry) => String(entry.id) === event.ownerCommandTarget.ownerId,
+  );
+  if (!entry || entry.version !== event.revision) {
+    toast.error(t('schedule.eventDetail.entryUnavailable'));
+    void refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return null;
+  }
+  return entry;
+}
+
+function handleEditCalendarEntry(event: CalendarEventProjection): void {
+  const entry = resolveCalendarEntry(event);
+  if (!entry) return;
+
+  selectedDetailEvent.value = event;
+  eventDetailOpen.value = false;
+  editingSchedule.value = entry;
+  pendingCreateRange.value = null;
+  showCreateDialog.value = true;
+}
+
+async function handleDeleteCalendarEntry(event: CalendarEventProjection): Promise<void> {
+  const entry = resolveCalendarEntry(event);
+  if (!entry) return;
+
+  eventDetailOpen.value = false;
+  const confirmed = await useConfirm({
+    title: t('schedule.confirm.deleteCalendarEntryTitle', { name: entry.title }),
+    description: t('schedule.confirm.deleteCalendarEntryDescription'),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (!confirmed) {
+    eventDetailOpen.value = true;
+    return;
+  }
+
+  // Confirmation may remain open while owner facts change.
+  if (!resolveCalendarEntry(event)) {
+    eventDetailOpen.value = true;
+    return;
+  }
+  const deleted = await schedule.deleteCalendarEntry(String(entry.id), entry.version);
+  if (!deleted) {
+    eventDetailOpen.value = true;
+    toast.error(schedule.error.value ?? t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return;
+  }
+
+  eventDetailOpen.value = false;
+  selectedDetailEvent.value = null;
+  await refreshAfterScheduleWrite('schedule.toast.scheduleDeletedRefreshFailed');
+  toast.success(t('schedule.toast.scheduleDeleted'));
+}
+
+async function refreshAfterScheduleWrite(refreshFailureKey: string): Promise<void> {
+  if (!windowStart.value || !windowEnd.value) return;
+  try {
+    await fetchForRange(windowStart.value, windowEnd.value);
+    // Schedule owner reads report failures in the store rather than rejecting.
+    if (schedule.error.value) toast.warning(t(refreshFailureKey));
+  } catch {
+    toast.warning(t(refreshFailureKey));
+  }
+}
+
+async function handleSaveSchedule(data: CreateScheduleRequest): Promise<boolean> {
+  const editing = editingSchedule.value;
+  if (!editing) {
+    const result = await schedule.createCalendarEntry(data);
+    if (!result) return false;
+
+    await refreshAfterScheduleWrite('schedule.toast.scheduleCreatedRefreshFailed');
     toast.success(t('schedule.toast.scheduleCreated'));
     return true;
   }
-  return false;
+
+  const current = schedule.calendarEntries.value.find((entry) => entry.id === editing.id);
+  if (!current || current.version !== editing.version) {
+    toast.error(t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return false;
+  }
+
+  const update: UpdateScheduleRequest = {
+    name: data.name,
+    description: data.description ?? '',
+    range: data.range,
+    location: data.location ?? '',
+    attendees: data.attendees ?? [],
+    expectedVersion: editing.version,
+  };
+  const result = await schedule.updateCalendarEntry(String(editing.id), update);
+  if (!result.ok) {
+    toast.error(schedule.error.value ?? t('schedule.eventDetail.entryUnavailable'));
+    await refreshPlannerAfterConflict('schedule.eventDetail.refreshFailed');
+    return false;
+  }
+
+  await refreshAfterScheduleWrite('schedule.toast.scheduleUpdatedRefreshFailed');
+  selectedDetailEvent.value = null;
+  toast.success(t('schedule.toast.scheduleUpdated'));
+  return true;
 }
+
+watch(showCreateDialog, (open) => {
+  if (open) return;
+  editingSchedule.value = null;
+  pendingCreateRange.value = null;
+});
 </script>

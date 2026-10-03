@@ -166,12 +166,13 @@ export class PowerSyncTaskOccurrenceRepository
     );
   }
 
-  async findOverdueOccurrences(identityId: string): Promise<TaskOccurrence[]> {
+  async findOpenBeforeDate(identityId: string, beforeDate: Ymd): Promise<TaskOccurrence[]> {
     return this.query(
       `SELECT * FROM task_occurrences
-       WHERE identity_id = ? AND status IN ('Pending', 'InProgress') AND deleted_at IS NULL
+       WHERE identity_id = ? AND schedule_date < ?
+         AND status IN ('Pending', 'InProgress') AND deleted_at IS NULL
        ORDER BY schedule_date ASC`,
-      [identityId],
+      [identityId, beforeDate],
     );
   }
 

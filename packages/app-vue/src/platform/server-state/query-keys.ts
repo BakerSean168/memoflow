@@ -13,7 +13,7 @@
  */
 
 import type { QueryKey } from '@tanstack/vue-query';
-import type { RuleSeverity, RuleStatus } from '@memoflow/contracts/governance';
+import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
 
 // ─── Notification ─────────────────────────────────────────────────────────────
 
@@ -81,15 +81,18 @@ export const notificationQueryKeys = {
  * Canonical, transport-safe Task template list query used inside the cache key.
  * 进入 cache key 的规范化任务模板列表查询（仅 transport 接受的 primitive 字段）。
  *
- * Field order is frozen: `page/limit/status/goalId/labelIdsAll`.
- * 字段顺序冻结为：`page/limit/status/goalId/labelIdsAll`。
+ * Field order is frozen: `page/limit/status/goalId/keyResultId/labelIdsAll/outcome/archiveState`.
+ * 字段顺序冻结为：`page/limit/status/goalId/keyResultId/labelIdsAll/outcome/archiveState`。
  */
 export interface CanonicalTaskPlanListQuery {
   page: number;
   limit: number;
   status?: string[];
   goalId?: string;
+  keyResultId?: string;
   labelIdsAll?: string[];
+  outcome?: ListTaskPlanFilters['outcome'];
+  archiveState?: ListTaskPlanFilters['archiveState'];
 }
 
 /** Input accepted by the Task canonicalizer (may omit defaults/undefined). */
@@ -99,7 +102,7 @@ export type TaskPlanListQueryInput = Partial<CanonicalTaskPlanListQuery>;
  * Normalize a string array for the cache key (copy, dedupe, sort).
  * 规范化字符串数组用于 cache key（拷贝、去重、排序）。
  */
-function normalizeStringArray(value: string[] | undefined): string[] | undefined {
+function normalizeStringArray<T extends string>(value: T[] | undefined): T[] | undefined {
   if (value === undefined) return undefined;
   const unique = [...new Set(value)].sort();
   return unique.length > 0 ? unique : undefined;
@@ -112,15 +115,20 @@ function normalizeStringArray(value: string[] | undefined): string[] | undefined
 export function canonicalizeTaskPlanListQuery(
   query?: TaskPlanListQueryInput,
 ): CanonicalTaskPlanListQuery {
-  const { page, limit, status, goalId, labelIdsAll } = query ?? {};
+  const { page, limit, status, goalId, keyResultId, labelIdsAll, outcome, archiveState } =
+    query ?? {};
   const normalizedStatus = normalizeStringArray(status);
   const normalizedLabelIds = normalizeStringArray(labelIdsAll);
+  const normalizedOutcome = normalizeStringArray(outcome);
   return {
     page: page ?? 1,
     limit: limit ?? 20,
     ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
     ...(goalId !== undefined ? { goalId } : {}),
+    ...(keyResultId !== undefined ? { keyResultId } : {}),
     ...(normalizedLabelIds !== undefined ? { labelIdsAll: normalizedLabelIds } : {}),
+    ...(normalizedOutcome !== undefined ? { outcome: normalizedOutcome } : {}),
+    ...(archiveState && archiveState !== 'all' ? { archiveState } : {}),
   };
 }
 
@@ -131,8 +139,7 @@ export function canonicalizeTaskPlanListQuery(
 export const taskPlanQueryKeys = {
   all: ['server-state', 'task-plan'] as const,
   identity: (identityScope: string) => [...taskPlanQueryKeys.all, identityScope] as const,
-  lists: (identityScope: string) =>
-    [...taskPlanQueryKeys.identity(identityScope), 'list'] as const,
+  lists: (identityScope: string) => [...taskPlanQueryKeys.identity(identityScope), 'list'] as const,
   list: (identityScope: string, query: CanonicalTaskPlanListQuery) =>
     [...taskPlanQueryKeys.lists(identityScope), query] as const,
   details: (identityScope: string) =>
@@ -150,10 +157,12 @@ export const taskPlanQueryKeys = {
 export const taskOccurrenceQueryKeys = {
   all: ['server-state', 'task-occurrence'] as const,
   identity: (identityScope: string) => [...taskOccurrenceQueryKeys.all, identityScope] as const,
+  detail: (identityScope: string, id: string) =>
+    [...taskOccurrenceQueryKeys.identity(identityScope), 'detail', id] as const,
   ranges: (identityScope: string) =>
     [...taskOccurrenceQueryKeys.identity(identityScope), 'range'] as const,
-  range: (identityScope: string, start: number, end: number) =>
-    [...taskOccurrenceQueryKeys.ranges(identityScope), start, end] as const,
+  range: (identityScope: string, start: number, end: number, includeOverdueOpen = false) =>
+    [...taskOccurrenceQueryKeys.ranges(identityScope), start, end, { includeOverdueOpen }] as const,
 };
 
 export const scheduleCalendarQueryKeys = {
@@ -191,69 +200,9 @@ export const routineUpcomingQueryKeys = {
     [...routineUpcomingQueryKeys.identity(identityScope), 'range', start, end, limit] as const,
 };
 
-// ─── Governance ───────────────────────────────────────────────────────────────
-
-/**
- * Canonical, transport-safe Governance rule list query used inside the cache key.
- * 进入 cache key 的规范化治理规则列表查询（仅 transport 接受的 primitive 字段）。
- *
- * Field order is frozen: `page/pageSize/status/severity/tags/search`.
- * 字段顺序冻结为：`page/pageSize/status/severity/tags/search`。
- */
-export interface CanonicalGovernanceListQuery {
-  page: number;
-  pageSize: number;
-  status?: RuleStatus;
-  severity?: RuleSeverity;
-  tags?: string[];
-  search?: string;
-}
-
-/** Input accepted by the Governance canonicalizer (may omit defaults/undefined). */
-export type GovernanceListQueryInput = Partial<CanonicalGovernanceListQuery>;
-
-/**
- * Materialize a Governance rule list query into its canonical, key-safe form.
- * 把治理规则列表查询规范化为键安全形态：补齐分页默认值、删除 undefined、规范化 tags 数组。
- */
-export function canonicalizeGovernanceListQuery(
-  query?: GovernanceListQueryInput,
-): CanonicalGovernanceListQuery {
-  const { page, pageSize, status, severity, tags, search } = query ?? {};
-  const normalizedTags = normalizeStringArray(tags);
-  return {
-    page: page ?? 1,
-    pageSize: pageSize ?? 20,
-    ...(status !== undefined ? { status } : {}),
-    ...(severity !== undefined ? { severity } : {}),
-    ...(normalizedTags !== undefined ? { tags: normalizedTags } : {}),
-    ...(search !== undefined && search.length > 0 ? { search } : {}),
-  };
-}
-
-/**
- * Frozen Governance query key factories.
- * 冻结的 Governance 查询键工厂。
- */
-export const governanceQueryKeys = {
-  all: ['server-state', 'governance'] as const,
-  identity: (identityScope: string) => [...governanceQueryKeys.all, identityScope] as const,
-  lists: (identityScope: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'list'] as const,
-  list: (identityScope: string, query: CanonicalGovernanceListQuery) =>
-    [...governanceQueryKeys.lists(identityScope), query] as const,
-  details: (identityScope: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'detail'] as const,
-  detail: (identityScope: string, id: string) =>
-    [...governanceQueryKeys.details(identityScope), id] as const,
-  revisions: (identityScope: string, ruleId: string) =>
-    [...governanceQueryKeys.identity(identityScope), 'revision', ruleId] as const,
-};
-
 /** Type alias so the frozen key shape stays importable for dispatcher typing. */
 export type NotificationQueryKeys = typeof notificationQueryKeys;
 export type TaskPlanQueryKeys = typeof taskPlanQueryKeys;
-export type GovernanceQueryKeys = typeof governanceQueryKeys;
 
 /** Type guard for identity-scoped server-state keys owned by this renderer. */
 export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boolean {
@@ -269,7 +218,6 @@ export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boole
       'goal-home',
       'recent-knowledge',
       'routine-upcoming',
-      'governance',
     ].includes(String(key[1]))
   );
 }

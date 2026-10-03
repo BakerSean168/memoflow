@@ -1,5 +1,6 @@
 export default {
   "page": {
+    "redirecting": "正在跳转至登录…",
     "description": "登录云端账号以使用同步和在线能力",
     "languageSelector": "界面语言",
     "legalNoticePrefix": "继续即表示您同意",

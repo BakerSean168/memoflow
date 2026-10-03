@@ -19,7 +19,6 @@ import {
   NOTIFICATION_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   ROUTINE_SERVICE_KEY,
-  RULE_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
   SETTING_SERVICE_KEY,
   DATA_PORTABILITY_SERVICE_KEY,
@@ -45,11 +44,6 @@ const authService = createCloudAuthHttpClient(resultHttpClient, {
 const accountService = createLazyService(async () => {
   const { createAccountHttpClient } = await import('@memoflow/account/client');
   return createAccountHttpClient(resultHttpClient);
-});
-
-const ruleService = createLazyService(async () => {
-  const { createGovernanceHttpClient } = await import('@memoflow/governance/client');
-  return createGovernanceHttpClient(resultHttpClient);
 });
 
 const goalService = createLazyService(async () => {
@@ -129,7 +123,6 @@ const taskService = createLazyService(async () => {
 export function installAppServices(app: App): void {
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
-  app.provide(RULE_SERVICE_KEY, ruleService);
   app.provide(GOAL_SERVICE_KEY, goalService);
   app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, goalKnowledgeService);
   app.provide(LABEL_SERVICE_KEY, labelService);

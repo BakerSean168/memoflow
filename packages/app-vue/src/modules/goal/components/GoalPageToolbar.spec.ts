@@ -46,7 +46,15 @@ function mountToolbar() {
       labelOptions,
       selectedLabelIds: ['work'],
     },
-    global: { plugins: [i18n] },
+    global: {
+      plugins: [i18n],
+      stubs: {
+        ProductSurfaceHeader: {
+          name: 'ProductSurfaceHeader',
+          template: '<header><slot /></header>',
+        },
+      },
+    },
   });
 }
 
@@ -55,6 +63,7 @@ describe('GoalPageToolbar (GOAL-5101)', () => {
     const wrapper = mountToolbar();
 
     expect(wrapper.findAll('[data-testid="goal-page-toolbar"]')).toHaveLength(1);
+    expect(wrapper.findComponent({ name: 'ProductSurfaceHeader' }).exists()).toBe(true);
     expect(wrapper.findAll('[data-primary-action="create-goal"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-testid="create-goal-entry"]')).toHaveLength(1);
     expect(wrapper.findComponent(LabelFilterPopover).exists()).toBe(true);

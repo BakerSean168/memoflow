@@ -11,6 +11,9 @@ import type {
 } from '@memoflow/contracts/repository';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
+import { providePanelWidth } from '../../../layouts/shell/usePanelWidth';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
+import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
 import KnowledgeProjectionWorkspaceView from './KnowledgeProjectionWorkspaceView.vue';
 
 const routerMocks = vi.hoisted(() => ({
@@ -327,14 +330,26 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
   } as unknown as IRepositoryService;
 }
 
-function mountWorkspace(service: IRepositoryService) {
-  return mount(KnowledgeProjectionWorkspaceView, {
+function mountWorkspace(service: IRepositoryService, options: { narrow?: boolean } = {}) {
+  const component = options.narrow
+    ? defineComponent({
+        name: 'NarrowKnowledgeProjectionWorkspaceHost',
+        setup() {
+          const { width } = providePanelWidth();
+          width.value = 600;
+          return () => h(KnowledgeProjectionWorkspaceView);
+        },
+      })
+    : KnowledgeProjectionWorkspaceView;
+
+  return mount(component, {
     global: {
       plugins: [i18n],
       provide: {
         [REPOSITORY_SERVICE_KEY as symbol]: service,
       },
       stubs: {
+        KnowledgeCaptureReviewDialog: true,
         Badge: PassthroughStub,
         Button: ButtonStub,
         Dialog: DialogStub,
@@ -351,6 +366,7 @@ function mountWorkspace(service: IRepositoryService) {
         DropdownMenuSeparator: true,
         Input: InputStub,
         ProductDialogShell: ProductDialogShellStub,
+        ProductSheetSurface: PassthroughStub,
         BookOpen: true,
         Check: true,
         CloudOff: true,
@@ -394,6 +410,59 @@ describe('KnowledgeProjectionWorkspaceView', () => {
       path: '/settings',
       query: { tab: 'repository' },
     });
+  });
+
+  it('loads only the root until a visible branch is expanded, then reuses that branch without fetching bodies', async () => {
+    const service = createService({
+      listKnowledgeNoteTree: vi.fn(async (request?: { parent?: string }) =>
+        ok({
+          parent: request?.parent ?? '',
+          nodes: request?.parent
+            ? [treeNote({ relativePath: 'notes/architecture.md' })]
+            : [
+                {
+                  kind: 'directory' as const,
+                  name: 'notes',
+                  relativePath: 'notes',
+                  noteCount: 1,
+                  hasChildren: true as const,
+                },
+                {
+                  kind: 'directory' as const,
+                  name: 'other',
+                  relativePath: 'other',
+                  noteCount: 1000,
+                  hasChildren: true as const,
+                },
+              ],
+          metadata: null,
+        }),
+      ),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(1);
+    expect(service.listKnowledgeNoteTree).toHaveBeenLastCalledWith(
+      expect.objectContaining({ parent: '' }),
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    expect(service.listKnowledgeNoteProjections).not.toHaveBeenCalled();
+    expect(service.getKnowledgeNoteProjection).not.toHaveBeenCalled();
+    const catalog = wrapper.getComponent(KnowledgeNoteCatalog);
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(2);
+    expect(service.listKnowledgeNoteTree).toHaveBeenLastCalledWith(
+      expect.objectContaining({ parent: 'notes' }),
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(2);
+    expect(service.getKnowledgeNoteProjection).not.toHaveBeenCalled();
+    expect(service.listKnowledgeNoteProjections).not.toHaveBeenCalled();
   });
 
   it('loads the lightweight file tree, shows the real total, and fetches only selected note detail', async () => {
@@ -695,6 +764,26 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     }
   });
 
+  it('keeps narrow catalog and context interactions in Sheets while preserving selection behavior', async () => {
+    const wrapper = mountWorkspace(createService(), { narrow: true });
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="knowledge-note-catalog"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="knowledge-projection-toggle-catalog"]').trigger('click');
+    expect(wrapper.get('[data-testid="knowledge-note-catalog"]')).toBeDefined();
+
+    await wrapper.get('[data-testid="knowledge-tree-note-projection-1"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="knowledge-note-catalog"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="knowledge-projection-context-toggle"]').trigger('click');
+    expect(wrapper.get('[data-testid="knowledge-context-stub"]')).toBeDefined();
+
+    await wrapper.get('[data-testid="knowledge-context-close-stub"]').trigger('click');
+    expect(wrapper.find('[data-testid="knowledge-context-stub"]').exists()).toBe(false);
+  });
+
   it('keeps content primary and opens links/outline in a contextual side panel', async () => {
     const wrapper = mountWorkspace(createService());
     await flushPromises();
@@ -839,9 +928,9 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     );
     await flushPromises();
 
-    await wrapper
-      .get('[data-testid="knowledge-projection-connection-select"]')
-      .setValue(String(SECOND_BINDING_ID));
+    wrapper
+      .getComponent(KnowledgeNoteCatalog)
+      .vm.$emit('connection-change', String(SECOND_BINDING_ID));
     await flushPromises();
 
     expect(listKnowledgeNoteTree).toHaveBeenCalledWith(
@@ -920,5 +1009,90 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     expect(wrapper.get('[data-testid="knowledge-projection-document-id"]').text()).not.toContain(
       managedId,
     );
+  });
+  it('offers only Ready connected sources and defaults to the selected repository without a write action', async () => {
+    const ready = connection();
+    const blocked = {
+      ...ready,
+      id: 'binding-blocked' as never,
+      observation: {
+        ...ready.observation!,
+        eligibility: { state: 'Blocked' as const, reasons: [] },
+      },
+    };
+    const disconnected = { ...ready, id: 'binding-disconnected' as never, disconnectedAt: 1 };
+    const wrapper = mountWorkspace(
+      createService({
+        listKnowledgeRepositoryConnections: vi.fn(async () =>
+          ok({ connections: [ready, blocked, disconnected] }),
+        ) as never,
+      }),
+    );
+    await flushPromises();
+    const dialog = wrapper.getComponent(KnowledgeCaptureReviewDialog);
+    expect(dialog.props('sourceOptions')).toEqual([
+      expect.objectContaining({
+        key: `repository:${ready.id}`,
+        source: { kind: 'repository', connectionId: ready.id },
+      }),
+    ]);
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${ready.id}`);
+    expect(wrapper.find('[data-testid="repository-create-note"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+  it('tracks the owner-selected default with multiple ready repositories', async () => {
+    const first = connection();
+    const second = connection({
+      id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440999' as never,
+      repositoryFullNameSnapshot: 'owner/second',
+    });
+    const service = createService({
+      listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [first, second] })),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+    const dialog = wrapper.getComponent(KnowledgeCaptureReviewDialog);
+    expect(dialog.props('sourceOptions')).toHaveLength(2);
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${first.id}`);
+    wrapper.getComponent(KnowledgeNoteCatalog).vm.$emit('connection-change', second.id);
+    await flushPromises();
+    expect(dialog.props('defaultSourceKey')).toBe(`repository:${second.id}`);
+    expect(service.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it('resolves a completed stable document across repositories and selects its actual source', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440706';
+    routerMocks.route.query = { note: documentId };
+    const second = connection({
+      id: SECOND_BINDING_ID,
+      repositoryFullNameSnapshot: 'owner/second',
+    });
+    const resolveKnowledgeNoteReference = vi.fn(async () =>
+      ok(
+        projection({
+          connectionId: SECOND_BINDING_ID,
+          knowledgeDocumentId: documentId as never,
+          title: 'Created in selected source',
+        }),
+      ),
+    );
+    const wrapper = mountWorkspace(
+      createService({
+        listKnowledgeRepositoryConnections: vi.fn(async () =>
+          ok({ connections: [connection(), second] }),
+        ),
+        resolveKnowledgeNoteReference,
+      }),
+    );
+    await flushPromises();
+    expect(resolveKnowledgeNoteReference).toHaveBeenCalledWith(
+      { reference: documentId },
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    expect(wrapper.getComponent(KnowledgeNoteCatalog).props('selectedConnectionId')).toBe(
+      SECOND_BINDING_ID,
+    );
+    expect(wrapper.text()).toContain('Created in selected source');
+    wrapper.unmount();
   });
 });

@@ -2,6 +2,7 @@ import { defineComponent, h, ref, type Ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  AIWorkflowRunViewSchema,
   GoalPlanDraftSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
@@ -79,7 +80,6 @@ type TestState = {
   editableKeyResults: Ref<EditableKeyResult[]>;
   editableTasks: Ref<EditableGoalTask[]>;
   editableKnowledge: Ref<EditableGoalKnowledge[]>;
-  showGoalDraftEditor: Ref<boolean>;
 };
 
 function setup() {
@@ -94,7 +94,6 @@ function setup() {
     editableKeyResults: ref<EditableKeyResult[]>([]),
     editableTasks: ref<EditableGoalTask[]>([]),
     editableKnowledge: ref<EditableGoalKnowledge[]>([]),
-    showGoalDraftEditor: ref(false),
   };
   let persistence!: ReturnType<typeof useAIWorkflowPersistence>;
   mount(
@@ -113,7 +112,6 @@ function setup() {
             state.editableKeyResults.value = [];
             state.editableTasks.value = [];
             state.editableKnowledge.value = [];
-            state.showGoalDraftEditor.value = false;
           },
         });
         return () => h('div');
@@ -170,11 +168,30 @@ describe('useAIWorkflowPersistence', () => {
     const draft = makeDraft(3);
     const run = makeGoalRun({
       status: 'suspended',
-      suspension: { type: 'goal_draft_review', draft, warnings: [], revision: 3 },
+      suspension: {
+        type: 'goal_draft_review',
+        ownerCreate: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+        },
+        draft,
+        warnings: [],
+        revision: 3,
+      },
       updatedAt: 30,
     });
     projectDraft(state, run, draft);
     state.editableGoal.value.name = 'Unsaved local edit';
+    state.editableKnowledge.value = [
+      {
+        draftRef: 'note:local',
+        mode: 'create',
+        title: 'Local',
+        markdown: '# Local',
+        targetSubpath: 'local.md',
+        sourceRefs: [],
+      },
+    ];
 
     persistence.persistWorkflowState('conversation-1');
 
@@ -188,7 +205,7 @@ describe('useAIWorkflowPersistence', () => {
       phase: 'draft-review',
       runId: run.runId,
       revision: 3,
-      editableGoal: { name: 'Unsaved local edit' },
+      editableKnowledge: [{ title: 'Local' }],
     });
     expect(JSON.stringify(stored)).not.toContain('goalWorkflowRun');
 
@@ -196,8 +213,12 @@ describe('useAIWorkflowPersistence', () => {
     expect(restored?.editorOverlay).toBeDefined();
     expect(state.editableGoal.value.name).toBe('');
     expect(persistence.applyEditorOverlay(restored?.editorOverlay, run)).toBe(true);
-    expect(state.editableGoal.value.name).toBe('Unsaved local edit');
-    expect(state.showGoalDraftEditor.value).toBe(true);
+    expect(state.editableGoal.value.name).toBe('');
+    expect(state.editableKnowledge.value[0].title).toBe('Local');
+    expect(JSON.stringify(stored)).not.toContain('editableGoal');
+    expect(JSON.stringify(stored)).not.toContain('editableKeyResults');
+    expect(JSON.stringify(stored)).not.toContain('showGoalDraftEditor');
+    expect(JSON.stringify(stored)).not.toContain('showTaskDraftEditor');
   });
 
   it('restores suspended HITL answers only as a matching local editor overlay', () => {
@@ -229,7 +250,16 @@ describe('useAIWorkflowPersistence', () => {
     const oldDraft = makeDraft(2);
     const oldRun = makeGoalRun({
       status: 'suspended',
-      suspension: { type: 'goal_draft_review', draft: oldDraft, warnings: [], revision: 2 },
+      suspension: {
+        type: 'goal_draft_review',
+        ownerCreate: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+        },
+        draft: oldDraft,
+        warnings: [],
+        revision: 2,
+      },
       updatedAt: 20,
     });
     projectDraft(state, oldRun, oldDraft);
@@ -240,7 +270,16 @@ describe('useAIWorkflowPersistence', () => {
     const newDraft = makeDraft(3, 'New authoritative goal');
     const newRun = makeGoalRun({
       status: 'suspended',
-      suspension: { type: 'goal_draft_review', draft: newDraft, warnings: [], revision: 3 },
+      suspension: {
+        type: 'goal_draft_review',
+        ownerCreate: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+        },
+        draft: newDraft,
+        warnings: [],
+        revision: 3,
+      },
       updatedAt: 30,
     });
     expect(persistence.applyEditorOverlay(persisted?.editorOverlay, newRun)).toBe(false);
@@ -260,7 +299,16 @@ describe('useAIWorkflowPersistence', () => {
     const draft = makeDraft(1);
     const run = makeGoalRun({
       status: 'suspended',
-      suspension: { type: 'goal_draft_review', draft, warnings: [], revision: 1 },
+      suspension: {
+        type: 'goal_draft_review',
+        ownerCreate: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+        },
+        draft,
+        warnings: [],
+        revision: 1,
+      },
     });
     projectDraft(state, run, draft);
     state.editableGoal.value.name = 'Local edit';
@@ -269,7 +317,16 @@ describe('useAIWorkflowPersistence', () => {
     const nextDraft = makeDraft(2, 'Accepted runtime edit');
     const nextRun = makeGoalRun({
       status: 'suspended',
-      suspension: { type: 'goal_draft_review', draft: nextDraft, warnings: [], revision: 2 },
+      suspension: {
+        type: 'goal_draft_review',
+        ownerCreate: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultIds: { 'kr:focus-blocks': 'KeyResultId_550e8400-e29b-41d4-a716-446655440002' },
+        },
+        draft: nextDraft,
+        warnings: [],
+        revision: 2,
+      },
       updatedAt: 2,
     });
     // This models projectRun(next) after edit_structured/approve: editor refs
@@ -282,5 +339,43 @@ describe('useAIWorkflowPersistence', () => {
       PersistedWorkflowState
     >;
     expect(stored['conversation-1']).toEqual({ activeRunId: nextRun.runId });
+  });
+  it('persists a Task review pointer without introducing an AI business draft overlay', () => {
+    const { state, persistence } = setup();
+    state.toolMode.value = 'task-create';
+    state.taskWorkflowRun.value = AIWorkflowRunViewSchema.parse({
+      runId: 'task-run',
+      conversationId: 'conversation-1',
+      kind: 'task.create',
+      status: 'suspended',
+      createdAt: 1,
+      updatedAt: 1,
+      suspension: {
+        type: 'task_draft_review',
+        revision: 1,
+        ownerCreate: {
+          taskId: 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001',
+          draftRef: 'task:native',
+        },
+        warnings: [],
+        draft: {
+          revision: 1,
+          task: {
+            draftRef: 'task:native',
+            title: 'Native',
+            schedule: { kind: 'OneTime', date: '2026-10-02', timing: { kind: 'AllDay' } },
+          },
+        },
+      },
+    });
+    persistence.persistWorkflowState('conversation-1');
+    expect(JSON.parse(localStorage.getItem(AI_WORKFLOW_STORAGE_KEY) ?? '{}')).toEqual({
+      'conversation-1': { activeRunId: 'task-run' },
+    });
+    expect(persistence.restoreWorkflowState('conversation-1')).toEqual({ activeRunId: 'task-run' });
+    expect(state.taskWorkflowRun.value).toBeNull();
+    expect(JSON.parse(localStorage.getItem(AI_WORKFLOW_STORAGE_KEY) ?? '{}')).toEqual({
+      'conversation-1': { activeRunId: 'task-run' },
+    });
   });
 });

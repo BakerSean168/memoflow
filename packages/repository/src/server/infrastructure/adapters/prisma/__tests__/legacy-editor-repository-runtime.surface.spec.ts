@@ -158,10 +158,10 @@ describe('legacy editor/repository runtime surface', () => {
     );
     expect(coverageWorkflow).toContain('GOVERNED_COVERAGE_PROJECTS:');
     expect(coverageWorkflow).not.toMatch(/GOVERNED_COVERAGE_PROJECTS:\s*'[^']*\beditor\b[^']*'/);
-    expect(coverageWorkflow).toContain('domain-shared,goal,governance');
+    expect(coverageWorkflow).toContain('domain-shared,goal,notification');
   });
 
-  it('ADR-031 and server-feature-shape audit list 12 live packages without editor (residual 184)', () => {
+  it('ADR-031 and server-feature-shape audit exclude retired synthetic/editor packages (residual 184)', () => {
     const adr031 = readFileSync(
       resolve(repoRoot, 'docs/architecture/adr/ADR-031-server-feature-standard-shape.md'),
       'utf8',
@@ -170,9 +170,9 @@ describe('legacy editor/repository runtime surface', () => {
       resolve(repoRoot, 'tools/governance/server-feature-shape-audit.mjs'),
       'utf8',
     );
-    expect(adr031).toContain('**12** audited business feature packages');
+    expect(adr031).toContain('**11** active business feature families');
     expect(adr031).toMatch(/account, ai, authentication/);
-    expect(adr031).toMatch(/data-portability, goal, governance/);
+    expect(adr031).toMatch(/data-portability, goal, notification/);
     expect(adr031).toMatch(/repository, schedule, setting, task/);
     expect(adr031).not.toMatch(/data-portability, editor, goal/);
     expect(adr031).not.toMatch(/\b13 business feature packages\b/);
@@ -181,6 +181,7 @@ describe('legacy editor/repository runtime surface', () => {
     expect(shapeAudit).toContain("'account'");
     expect(shapeAudit).toContain("'task'");
     expect(shapeAudit).not.toContain("'editor'");
+    expect(shapeAudit).not.toContain("'governance'");
   });
 
   it('legacy Editor runtime and persistence stay deleted', () => {

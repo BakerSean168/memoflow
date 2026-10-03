@@ -20,6 +20,9 @@ export class DesktopKnowledgeNotePersistenceAdapter implements IKnowledgeNotePer
     if (!input.proposalId || !input.proposalRevision || !input.requestId) {
       throw new Error('A confirmed knowledge-note proposal is required for local Vault writes');
     }
+    if (input.source && input.source.kind !== 'local_vault') {
+      throw new Error('Desktop knowledge persistence requires a local Vault source');
+    }
 
     const result = await this.localVault.writeConfirmedNote({
       relativePath: input.path,

@@ -3,7 +3,7 @@
     <ProductDialogShell
       :open="modelValue"
       test-id="schedule-dialog"
-      size="md"
+      recipe="config"
       content-class="sm:max-w-[620px]"
       initial-focus-selector="[data-testid='schedule-title-input']"
     >
@@ -50,7 +50,7 @@
         </section>
 
         <section
-          class="rounded-xl border border-border/60 bg-muted/[0.08] p-3.5"
+          class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-3.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
           data-testid="schedule-time-panel"
         >
           <div class="flex items-center gap-3">
@@ -73,11 +73,7 @@
               for="all-day"
             >
               {{ t('schedule.calendar.allDay') }}
-              <Switch
-                id="all-day"
-                :model-value="formData.allDay"
-                @update:model-value="setAllDay"
-              />
+              <Switch id="all-day" :model-value="formData.allDay" @update:model-value="setAllDay" />
             </label>
           </div>
 
@@ -101,7 +97,9 @@
               />
             </div>
 
-            <ArrowRight class="hidden h-4 w-4 self-end text-muted-foreground/70 sm:block sm:mb-2.5" />
+            <ArrowRight
+              class="hidden h-4 w-4 self-end text-muted-foreground/70 sm:block sm:mb-2.5"
+            />
 
             <div class="space-y-1.5">
               <p class="text-[11px] font-medium text-muted-foreground">
@@ -126,7 +124,7 @@
           <div v-else class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_1fr]">
             <button
               type="button"
-              class="group min-w-0 rounded-lg border border-border/60 bg-background/55 px-3 py-2.5 text-left transition-colors hover:border-primary/35 hover:bg-primary/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-start-time-button"
               @click="startPickerOpen = true"
             >
@@ -142,7 +140,7 @@
 
             <button
               type="button"
-              class="group min-w-0 rounded-lg border border-border/60 bg-background/55 px-3 py-2.5 text-left transition-colors hover:border-primary/35 hover:bg-primary/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-end-time-button"
               @click="endPickerOpen = true"
             >
@@ -202,7 +200,7 @@
                   id="location"
                   v-model="formData.location"
                   :placeholder="t('schedule.createDialog.fieldLocationPlaceholder')"
-                  class="h-9 border-border/60 bg-muted/10 pl-9 shadow-none"
+                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] pl-9 shadow-none"
                   maxlength="200"
                 />
               </div>
@@ -232,7 +230,7 @@
                 <Input
                   v-model="newAttendee"
                   :placeholder="t('schedule.createDialog.fieldAttendeePlaceholder')"
-                  class="h-9 border-border/60 bg-muted/10 shadow-none"
+                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] shadow-none"
                   @keydown.enter.prevent="addAttendee"
                 />
                 <Button type="button" variant="outline" size="sm" class="h-9" @click="addAttendee">
@@ -245,12 +243,14 @@
 
           <div
             v-if="!formData.allDay"
-            class="flex items-center gap-3 rounded-lg border border-border/50 bg-background/30 px-3 py-2.5"
+            class="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.3)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
             data-testid="schedule-conflict-setting"
           >
             <ShieldCheck class="h-4 w-4 shrink-0 text-success" />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium">{{ t('schedule.createDialog.autoDetectConflicts') }}</p>
+              <p class="text-sm font-medium">
+                {{ t('schedule.createDialog.autoDetectConflicts') }}
+              </p>
               <p class="mt-0.5 text-xs text-muted-foreground">
                 {{ t('schedule.createDialog.autoDetectConflictsDescription') }}
               </p>
@@ -341,15 +341,7 @@ import {
   Users,
   X,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Dialog,
-  Input,
-  Label,
-  Switch,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Dialog, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-shadcn';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/contracts/schedule';
 import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitives';
 import {
@@ -359,10 +351,7 @@ import {
   ProductPropertyChip,
 } from '../../../shared/components';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
-import {
-  formatProductDateTime,
-  getProductTime,
-} from '../../../shared/utils/product-time';
+import { formatProductDateTime, getProductTime } from '../../../shared/utils/product-time';
 
 type ScheduleProperty = 'location' | 'attendees';
 
@@ -629,7 +618,7 @@ function removeAttendee(index: number): void {
 }
 
 async function handleSubmit(): Promise<void> {
-  if (busy.value) return;
+  if (!props.modelValue || busy.value) return;
   const time = getProductTime();
   const startDate = time.input.parseDateValue(formData.startDate);
   const endDate = time.input.parseDateValue(formData.endDate);

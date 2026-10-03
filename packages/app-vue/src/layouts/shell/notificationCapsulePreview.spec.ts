@@ -1,101 +1,123 @@
-import { describe, expect, it } from 'vitest';
-import { defineComponent, h, nextTick, ref } from 'vue';
-import { mount } from '@vue/test-utils';
+/** @vitest-environment happy-dom */
 
-/**
- * Probe for capsule preview wiring (V2 §6.5 / §10):
- * - notification + goal (and other modules) open dedicated previews, not generic placeholders
- * - view-all closes preview and enters module
- */
-function mountCapsulePreviewProbe() {
-  const previewOpenId = ref<string | null>(null);
-  const entered = ref<string | null>(null);
+import { flushPromises, mount } from '@vue/test-utils';
+import { VueQueryPlugin } from '@tanstack/vue-query';
+import { Bell } from '@lucide/vue';
+import { createPinia } from 'pinia';
+import { h } from 'vue';
+import { createI18n } from 'vue-i18n';
+import { expect, it, vi } from 'vitest';
+import { ok } from '@memoflow/contracts/result';
+import { NOTIFICATION_SERVICE_KEY } from '../../di/keys';
+import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
+import {
+  createServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+} from '../../platform/server-state';
+import ModuleCapsule from './ModuleCapsule.vue';
 
-  const Probe = defineComponent({
-    name: 'CapsulePreviewProbe',
-    setup() {
-      function toggle(id: string) {
-        previewOpenId.value = previewOpenId.value === id ? null : id;
-      }
-      function enter(id: string) {
-        previewOpenId.value = null;
-        entered.value = id;
-      }
-      return () =>
-        h('div', [
-          h(
-            'button',
-            {
-              'data-testid': 'capsule-nav-notification',
-              onClick: () => toggle('notification'),
+it('reuses the notification owner queries through hover, pin and keyboard reopen', async () => {
+  vi.useFakeTimers();
+  const runtime = createServerStateRuntime('web');
+  const result = ok({ notifications: [], total: 0, page: 1, pageSize: 10, hasMore: false });
+  let release!: () => void;
+  const findNotifications = vi.fn(
+    () => new Promise<typeof result>((resolve) => (release = () => resolve(result))),
+  );
+  const getUnreadCount = vi.fn().mockResolvedValue(ok({ count: 0 }));
+  const wrapper = mount(ModuleCapsule, {
+    attachTo: document.body,
+    props: { id: 'notification', label: 'Notifications', route: '/notifications', icon: Bell },
+    slots: {
+      default: () => h(NotificationCapsulePreview),
+    },
+    global: {
+      plugins: [
+        createPinia(),
+        [VueQueryPlugin, { queryClient: runtime.queryClient }],
+        createI18n({
+          legacy: false,
+          locale: 'en-US',
+          messages: {
+            'en-US': {
+              shell: { previewModule: 'Preview {name}' },
+              notification: {
+                empty: 'No notifications',
+                drawer: { title: 'Notification Center', viewAll: 'View all notifications' },
+              },
             },
-            'notification',
-          ),
-          h(
-            'button',
-            {
-              'data-testid': 'capsule-nav-goal',
-              onClick: () => toggle('goal'),
-            },
-            'goal',
-          ),
-          previewOpenId.value === 'notification'
-            ? h('div', { 'data-testid': 'capsule-preview-notification' }, [
-                h('div', { 'data-testid': 'notification-capsule-preview' }, 'recent'),
-                h(
-                  'button',
-                  {
-                    'data-testid': 'notification-capsule-view-all',
-                    onClick: () => enter('notification'),
-                  },
-                  'view all',
-                ),
-              ])
-            : null,
-          previewOpenId.value === 'goal'
-            ? h('div', { 'data-testid': 'capsule-preview-goal' }, [
-                h('div', { 'data-testid': 'goal-capsule-preview' }, 'goals'),
-                h(
-                  'button',
-                  {
-                    'data-testid': 'goal-capsule-view-all',
-                    onClick: () => enter('goal'),
-                  },
-                  'enter',
-                ),
-              ])
-            : null,
-          h('div', { 'data-testid': 'entered' }, entered.value ?? ''),
-        ]);
+          },
+        }),
+      ],
+      provide: {
+        [NOTIFICATION_SERVICE_KEY as symbol]: { findNotifications, getUnreadCount },
+        [SERVER_STATE_RUNTIME_KEY]: runtime,
+        [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
+      },
     },
   });
+  try {
+    const navigation = wrapper.get('[data-testid="capsule-nav-notification"]');
+    const preview = wrapper.get('[data-testid="capsule-preview-notification"]');
+    const ownerPreview = () =>
+      document.querySelector('[data-testid="notification-capsule-preview"]');
 
-  return mount(Probe);
-}
+    await navigation.trigger('click');
+    expect(wrapper.emitted('open')).toEqual([[{ id: 'notification', route: '/notifications' }]]);
+    expect(ownerPreview()).toBeNull();
+    expect(findNotifications).not.toHaveBeenCalled();
+    expect(getUnreadCount).not.toHaveBeenCalled();
 
-describe('Capsule preview wiring (V2 §6.5 / §10)', () => {
-  it('opens module-specific previews and enters via view-all', async () => {
-    const wrapper = mountCapsulePreviewProbe();
+    await preview.trigger('mouseenter');
+    await vi.advanceTimersByTimeAsync(300);
+    await flushPromises();
+    expect(ownerPreview()).not.toBeNull();
+    expect(findNotifications).toHaveBeenCalledExactlyOnceWith({ page: 1, limit: 10 });
+    expect(getUnreadCount).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted('open')).toHaveLength(1);
 
-    await wrapper.get('[data-testid="capsule-nav-notification"]').trigger('click');
-    await nextTick();
-    expect(wrapper.find('[data-testid="notification-capsule-preview"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="generic-preview-placeholder"]').exists()).toBe(false);
+    await preview.trigger('click');
+    await preview.trigger('mouseleave');
+    await vi.advanceTimersByTimeAsync(200);
+    expect(preview.attributes('aria-expanded')).toBe('true');
 
-    await wrapper.get('[data-testid="notification-capsule-view-all"]').trigger('click');
-    await nextTick();
-    expect(wrapper.find('[data-testid="capsule-preview-notification"]').exists()).toBe(false);
-    expect(wrapper.get('[data-testid="entered"]').text()).toBe('notification');
+    // Direct navigation also dismisses an open owner preview.
+    await navigation.trigger('click');
+    await flushPromises();
+    expect(ownerPreview()).toBeNull();
+    expect(wrapper.emitted('open')).toHaveLength(2);
 
-    await wrapper.get('[data-testid="capsule-nav-goal"]').trigger('click');
-    await nextTick();
-    expect(wrapper.find('[data-testid="goal-capsule-preview"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="generic-preview-placeholder"]').exists()).toBe(false);
+    // Reopening while the list request is pending must reuse that request.
+    await preview.trigger('click', { detail: 0 });
+    await flushPromises();
+    expect(findNotifications).toHaveBeenCalledTimes(1);
+    expect(getUnreadCount).toHaveBeenCalledTimes(1);
+    release();
+    await flushPromises();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(ownerPreview()?.textContent).toContain('No notifications');
 
-    await wrapper.get('[data-testid="goal-capsule-view-all"]').trigger('click');
-    await nextTick();
-    expect(wrapper.get('[data-testid="entered"]').text()).toBe('goal');
+    const footer = document.querySelector<HTMLButtonElement>(
+      '[data-testid="notification-capsule-view-all"]',
+    )!;
+    expect(document.activeElement).toBe(footer);
+    footer.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+    expect(preview.attributes('aria-expanded')).toBe('false');
+    expect(ownerPreview()).toBeNull();
+    expect(document.activeElement).toBe(preview.element);
 
+    // A fresh-cache remount renders the real owner without another list/unread fetch.
+    await preview.trigger('click', { detail: 0 });
+    await flushPromises();
+    expect(ownerPreview()?.textContent).toContain('No notifications');
+    expect(findNotifications).toHaveBeenCalledTimes(1);
+    expect(getUnreadCount).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted('open')).toHaveLength(2);
+  } finally {
     wrapper.unmount();
-  });
+    runtime.dispose();
+    vi.useRealTimers();
+  }
 });

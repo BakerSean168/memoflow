@@ -21,12 +21,31 @@ describe('Schedule single-page architecture', () => {
     expect(scheduleSource).not.toContain('effectiveView');
   });
 
-  it('does not turn a committed schedule create into a save failure when planner refresh rejects', () => {
+  it('does not turn a committed schedule write into a save failure when planner refresh rejects', () => {
     expect(scheduleSource).toContain("toast.success(t('schedule.toast.scheduleCreated'))");
-    expect(scheduleSource).toContain("toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'))");
-    expect(scheduleSource).toContain('if (windowStart.value && windowEnd.value) {');
+    expect(scheduleSource).toContain(
+      "await refreshAfterScheduleWrite('schedule.toast.scheduleCreatedRefreshFailed')",
+    );
+    expect(scheduleSource).toContain(
+      'async function refreshAfterScheduleWrite(refreshFailureKey: string): Promise<void>',
+    );
     expect(scheduleSource).toContain('await fetchForRange(windowStart.value, windowEnd.value)');
-    expect(scheduleSource).toContain('} catch {');
+    expect(scheduleSource).toContain('toast.warning(t(refreshFailureKey))');
+  });
+
+  it('embeds Task owner content and leaves occurrence mutations to Task', () => {
+    expect(scheduleSource).toContain('<TaskOccurrenceQuickSurface');
+    expect(scheduleSource).toContain('#owner-content');
+    expect(scheduleSource).not.toContain('completeOccurrence');
+    expect(scheduleSource).not.toContain('complete-task');
+    const daySource = readFileSync(resolve(dir, '../components/PlannerDayDialog.vue'), 'utf8');
+    expect(daySource).not.toContain('complete-task');
+    const inspectSource = readFileSync(
+      resolve(dir, '../components/PlannerEventDialog.vue'),
+      'utf8',
+    );
+    expect(inspectSource).not.toContain('modules/task');
+    expect(inspectSource).toContain('name="owner-content"');
   });
 
   it('owns navigation in the MemoFlow toolbar and delegates date math/window ownership to FullCalendar', () => {
@@ -37,7 +56,7 @@ describe('Schedule single-page architecture', () => {
     expect(scheduleSource).not.toContain('resolveCalendarWindow');
     expect(scheduleSource).not.toContain('getWeekStart');
     expect(scheduleSource).not.toContain('setMonth(');
-    expect(plannerSource).toContain("headerToolbar: false");
-    expect(plannerSource).toContain("datesSet(info)");
+    expect(plannerSource).toContain('headerToolbar: false');
+    expect(plannerSource).toContain('datesSet(info)');
   });
 });

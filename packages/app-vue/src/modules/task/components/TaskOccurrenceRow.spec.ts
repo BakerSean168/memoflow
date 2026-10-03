@@ -2,7 +2,7 @@
 
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import enTask from '../../../locales/en-US/task';
 import TaskOccurrenceRow from './TaskOccurrenceRow.vue';
@@ -114,6 +114,7 @@ describe('TaskOccurrenceRow', () => {
     await wrapper.get('[data-testid="task-occurrence-skip"]').trigger('click');
     await wrapper.get('button[aria-label="Open plan Morning review"]').trigger('click');
 
+    expect(wrapper.emitted('inspect')).toBeUndefined();
     expect(wrapper.emitted('complete')).toEqual([['occurrence-1']]);
     expect(wrapper.emitted('missed')).toEqual([['occurrence-1']]);
     expect(wrapper.emitted('skip')).toEqual([['occurrence-1']]);
@@ -149,5 +150,32 @@ describe('TaskOccurrenceRow', () => {
     const undo = wrapper.get('[data-testid="task-occurrence-uncomplete"]');
     await undo.trigger('click');
     expect(wrapper.emitted('uncomplete')).toEqual([['occurrence-1']]);
+  });
+});
+
+describe('Today inspect intent', () => {
+  it('opens inspect only from the body, preserving independent controls', async () => {
+    const wrapper = mountRow({
+      checklistState: [
+        {
+          definitionId: 'step',
+          titleSnapshot: 'Step',
+          orderSnapshot: 0,
+          completed: false,
+          completedAt: null,
+        },
+      ],
+    });
+    await wrapper.setProps({ inspect: true });
+    const bubbled = vi.fn();
+    wrapper.element.addEventListener('click', bubbled);
+    for (const id of ['complete', 'missed', 'skip', 'checklist-step']) {
+      await wrapper.get(`[data-testid="task-occurrence-${id}"]`).trigger('click');
+    }
+    expect(wrapper.emitted('inspect')).toBeUndefined();
+    expect(bubbled).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="task-occurrence-body"]').trigger('click');
+    expect(wrapper.emitted('inspect')).toEqual([['occurrence-1']]);
+    expect(wrapper.emitted('open-plan')).toBeUndefined();
   });
 });

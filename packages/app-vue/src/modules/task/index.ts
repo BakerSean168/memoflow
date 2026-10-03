@@ -21,6 +21,3 @@ export {
 
 // Routes
 export { taskRoutes } from './router';
-
-// Components
-export * from './components';

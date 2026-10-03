@@ -35,18 +35,26 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <Card class="border-border/50" data-testid="goal-progress-widget">
-    <CardHeader class="pb-2 px-4 pt-4 flex flex-row items-center justify-between">
-      <CardTitle class="text-sm font-medium text-foreground flex items-center gap-2">
-        <Target class="w-4 h-4 text-muted-foreground" />
+  <Card
+    class="rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
+    data-testid="goal-progress-widget"
+  >
+    <CardHeader class="flex flex-row items-center justify-between px-3.5 pb-2 pt-3.5">
+      <CardTitle class="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+        <Target class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))]" />
         {{ t('goal.homeProgress.title') }}
       </CardTitle>
-      <Button variant="ghost" size="sm" class="h-7 text-xs" @click="$emit('view-all')">
+      <Button
+        variant="ghost"
+        size="sm"
+        class="h-6 rounded-md px-1.5 text-[11px] text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+        @click="$emit('view-all')"
+      >
         {{ t('goal.homeProgress.viewAll') }}
         <ArrowRight class="w-3 h-3 ml-1" />
       </Button>
     </CardHeader>
-    <CardContent class="px-4 pb-4">
+    <CardContent class="px-3.5 pb-3.5">
       <template v-if="loading">
         <div class="space-y-4">
           <div v-for="i in 4" :key="i" class="space-y-1.5">
@@ -61,7 +69,7 @@ const { t } = useI18n();
             v-for="goal in goals"
             :key="goal.id"
             type="button"
-            class="w-full space-y-1.5 rounded-md px-1 py-1 text-left transition-colors hover:bg-muted/50"
+            class="w-full space-y-1.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))]"
             data-testid="goal-progress-item"
             :data-goal-id="goal.id"
             @click="$emit('select', goal.id)"

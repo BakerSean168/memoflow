@@ -1,7 +1,7 @@
 <template>
   <Collapsible
     :open="open"
-    class="overflow-hidden rounded-xl border border-border/70 bg-card/40"
+    class="overflow-hidden rounded-xl bg-[hsl(var(--surface-raised)/0.28)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
     @update:open="emit('update:open', $event)"
   >
     <template #default="{ open: currentOpen }">
@@ -11,7 +11,7 @@
       <slot name="static" :open="currentOpen" />
       <CollapsibleContent>
         <div
-          class="origin-top border-t border-border/70 transition-[opacity,transform] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none"
+          class="origin-top border-t border-[hsl(var(--border-subtle))] transition-[opacity,transform] duration-200 ease-out motion-reduce:transform-none motion-reduce:transition-none"
           :class="currentOpen ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'"
           data-testid="product-expandable-content"
         >

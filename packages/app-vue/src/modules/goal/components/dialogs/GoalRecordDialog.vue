@@ -1,219 +1,118 @@
 <template>
-  <Dialog :open="visible" @update:open="(val) => (visible = val)">
+  <Dialog
+    :open="visible"
+    @update:open="
+      (open) => {
+        if (!isSubmitting) visible = open;
+      }
+    "
+  >
     <ProductDialogShell
       :open="visible"
       test-id="goal-record-dialog"
       size="sm"
       initial-focus-selector="#change-amount"
+      @keydown.esc="handleCancel"
     >
-      <template #title>
-        {{ isEditing ? t('goal.recordDialog.editTitle') : t('goal.recordDialog.addTitle') }}
-      </template>
+      <template #title>{{
+        record ? t('goal.recordDialog.editTitle') : t('goal.recordDialog.addTitle')
+      }}</template>
       <template #description>{{ t('goal.recordDialog.description') }}</template>
-
-      <form id="goal-record-form" class="space-y-5" @submit.prevent="handleSave">
-        <div class="space-y-2">
-          <Label for="change-amount">{{ t('goal.recordDialog.incrementValue') }}</Label>
-          <div class="relative flex items-center">
-            <Plus class="absolute left-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="change-amount"
-              v-model.number="localRecord.changeAmount"
-              type="number"
-              class="h-11 pl-9 pr-16 text-lg font-semibold"
-              min="0.1"
-              step="0.1"
-            />
-            <Badge variant="secondary" class="absolute right-3 font-medium">
-              {{ currentKeyResultUnit || t('goal.recordDialog.unit') }}
-            </Badge>
-          </div>
-          <p v-if="validationError" class="text-xs text-destructive">{{ validationError }}</p>
-          <p v-if="submitError" role="alert" class="text-xs text-destructive">
-            {{ submitError }}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap gap-2" :aria-label="t('goal.recordDialog.quickSelect')">
-          <ProductPropertyChip
-            v-for="quickValue in quickValues"
-            :key="quickValue"
-            :active="localRecord.changeAmount === quickValue"
-            :data-testid="`quick-goal-record-${quickValue}`"
-            :aria-label="`${t('goal.recordDialog.quickSelect')} ${quickValue}`"
-            @click="localRecord.changeAmount = quickValue"
-          >
-            +{{ quickValue }}
-          </ProductPropertyChip>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="record-note">{{ t('goal.recordDialog.remarks') }}</Label>
-          <Textarea
-            id="record-note"
-            v-model="localRecord.note"
-            :placeholder="t('goal.recordDialog.remarksPlaceholder')"
-            :rows="3"
-            class="resize-none"
-          />
-        </div>
-      </form>
-
+      <GoalRecordComposerSurface
+        v-if="visible"
+        :key="session"
+        ref="composer"
+        :goal-id="goalId"
+        :key-result-id="keyResultId"
+        :initial-value="record?.value"
+        :initial-note="record?.comment ?? ''"
+        :editing="!!record"
+        :disabled="isSubmitting || !editable"
+        @validity-change="isValid = $event"
+        @submit="handleSave"
+        @cancel="handleCancel"
+      />
+      <p v-if="!editable" class="text-xs text-muted-foreground">
+        {{ t('goal.recordDialog.editNotAllowed') }}
+      </p>
+      <p v-if="submitError" role="alert" class="text-xs text-destructive">{{ submitError }}</p>
       <template #footer>
-        <Button type="button" variant="ghost" :disabled="isSubmitting" @click="handleCancel">
-          {{ t('goal.recordDialog.cancel') }}
-        </Button>
+        <Button type="button" variant="ghost" :disabled="isSubmitting" @click="handleCancel">{{
+          t('goal.recordDialog.cancel')
+        }}</Button>
         <Button
           type="button"
           data-testid="save-goal-record"
-          :disabled="!isValid || isSubmitting"
+          :disabled="!isValid || isSubmitting || !editable"
           :loading="isSubmitting"
-          @click="handleSave"
+          @click="composer?.submit()"
+          >{{ t('goal.recordDialog.save') }}</Button
         >
-          {{ t('goal.recordDialog.save') }}
-        </Button>
       </template>
     </ProductDialogShell>
   </Dialog>
 </template>
-
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
-import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
-import { Plus } from '@lucide/vue';
-import { ProductDialogShell, ProductPropertyChip } from '../../../../shared/components';
-// composables
+import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
+import { ProductDialogShell } from '../../../../shared/components';
+import GoalRecordComposerSurface from '../GoalRecordComposerSurface.vue';
 import { useGoal } from '../../composables/useGoal';
-
-const { createGoalRecord, getKeyResultById } = useGoal();
-
+const { createGoalRecord, updateGoalRecord } = useGoal();
 const { t } = useI18n();
-
+const emit = defineEmits<{ saved: [] }>();
 const visible = ref(false);
-const propKeyResultId = ref<string>('');
-const propGoalId = ref<string>('');
-const propRecord = ref<GoalRecordClientDTO | null>(null);
+const goalId = ref('');
+const keyResultId = ref('');
+const record = ref<GoalRecordClientDTO | null>(null);
+const session = ref(0);
 const isSubmitting = ref(false);
+const isValid = ref(false);
 const submitError = ref('');
-
-const quickValues = [1, 2, 5, 10];
-
-// 本地表单数据：只需要 changeAmount 和 note
-const localRecord = ref({
-  changeAmount: 0,
-  note: '',
-});
-
-const isEditing = computed(() => !!propRecord.value);
-
-const currentKeyResultUnit = computed(() => {
-  const currentKeyResult = getKeyResultById(propKeyResultId.value);
-  return currentKeyResult?.progress?.unit ?? '';
-});
-
-const valueRules = computed(() => [
-  (v: number) => !!v || t('goal.recordDialog.valueRequired'),
-  (v: number) => v > 0 || t('goal.recordDialog.valuePositive'),
-  (v: number) => v <= 10000 || t('goal.recordDialog.valueMax'),
-]);
-
-const validationError = computed(() => {
-  const v = localRecord.value.changeAmount;
-  for (const rule of valueRules.value) {
-    const result = rule(v);
-    if (result !== true) return result;
-  }
-  return '';
-});
-
-const isValid = computed(() => !validationError.value && localRecord.value.changeAmount > 0);
-
-const handleCreateKeyResult = async (): Promise<boolean> => {
-  if (!propGoalId.value) {
-    submitError.value = t('goal.recordDialog.goalNotFound');
-    return false;
-  }
-
-  const currentKeyResult = getKeyResultById(propKeyResultId.value);
-  if (!currentKeyResult) {
-    submitError.value = t('goal.recordDialog.krNotFound');
-    return false;
-  }
-
-  // ✅ 新的数据模型：value 就是本次记录的独立值
-  // 不需要再加上 previousValue
-  const createdRecord = await createGoalRecord(propGoalId.value, propKeyResultId.value, {
-    value: localRecord.value.changeAmount, // ✅ 直接传递用户输入的值
-    note: localRecord.value.note,
-    recordedAt: Date.now(),
-  });
-  if (!createdRecord) {
-    submitError.value = t('goal.error.createRecordFailed');
-    return false;
-  }
-  return true;
-};
-
-const handleSave = async () => {
-  if (!isValid.value || isSubmitting.value) return;
-
-  if (isEditing.value) {
-    submitError.value = t('goal.recordDialog.editNotAllowed');
-    return;
-  }
-
+const composer = ref<InstanceType<typeof GoalRecordComposerSurface> | null>(null);
+const editable = computed(
+  () =>
+    !record.value ||
+    record.value.authorship === 'Manual' ||
+    record.value.authorship === 'TaskUserMeasurement',
+);
+async function handleSave(intent: { value: number; note: string }) {
+  if (!isValid.value || isSubmitting.value || !editable.value) return;
   submitError.value = '';
   isSubmitting.value = true;
   try {
-    if (await handleCreateKeyResult()) {
-      closeDialog();
-    }
+    const result = record.value
+      ? await updateGoalRecord(goalId.value, keyResultId.value, String(record.value.id), intent)
+      : await createGoalRecord(goalId.value, keyResultId.value, intent);
+    if (result) {
+      visible.value = false;
+      emit('saved');
+    } else
+      submitError.value = t(
+        record.value ? 'goal.error.updateRecordFailed' : 'goal.error.createRecordFailed',
+      );
+  } catch {
+    submitError.value = t(
+      record.value ? 'goal.error.updateRecordFailed' : 'goal.error.createRecordFailed',
+    );
   } finally {
     isSubmitting.value = false;
   }
-};
-
-const handleCancel = () => {
-  closeDialog();
-};
-
-const openDialog = (goalId: string, keyResultId: string, record?: GoalRecordClientDTO) => {
-  propGoalId.value = goalId;
-  propKeyResultId.value = keyResultId;
-  propRecord.value = record || null;
+}
+function handleCancel() {
+  if (!isSubmitting.value) visible.value = false;
+}
+function openDialog(nextGoalId: string, nextKeyResultId: string, nextRecord?: GoalRecordClientDTO) {
+  if (isSubmitting.value) return;
+  goalId.value = nextGoalId;
+  keyResultId.value = nextKeyResultId;
+  record.value = nextRecord ?? null;
   submitError.value = '';
+  isValid.value = false;
+  session.value++;
   visible.value = true;
-};
-
-const closeDialog = () => {
-  visible.value = false;
-};
-
-// 监听弹窗显示，重置表单
-watch(
-  () => visible.value,
-  (show) => {
-    if (show) {
-      if (propRecord.value) {
-        // 编辑模式：显示已有记录
-        localRecord.value = {
-          changeAmount: propRecord.value.value, // 使用 value 属性
-          note: propRecord.value.comment || '',
-        };
-      } else {
-        // 创建模式：重置表单
-        localRecord.value = {
-          changeAmount: 0,
-          note: '',
-        };
-      }
-    }
-  },
-);
-
-defineExpose({
-  openDialog,
-});
+}
+defineExpose({ openDialog });
 </script>

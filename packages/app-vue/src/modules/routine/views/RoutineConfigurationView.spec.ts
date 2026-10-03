@@ -89,6 +89,22 @@ async function mountRoutineView(client: RoutineClientPort, initialPath = '/routi
       provide: {
         [ROUTINE_SERVICE_KEY as symbol]: client,
       },
+      renderStubDefaultSlot: true,
+      stubs: {
+        ModuleHeader: {
+          template:
+            '<header><slot name="leading" /><slot name="actions" /><slot name="subnav" /></header>',
+        },
+        DropdownMenu: { template: '<div><slot /></div>' },
+        DropdownMenuTrigger: { template: '<div><slot /></div>' },
+        DropdownMenuContent: { template: '<div><slot /></div>' },
+        DropdownMenuLabel: { template: '<div><slot /></div>' },
+        DropdownMenuSeparator: { template: '<hr />' },
+        DropdownMenuItem: {
+          inheritAttrs: false,
+          template: '<button type="button" v-bind="$attrs"><slot /></button>',
+        },
+      },
     },
   });
   return { wrapper, router };
@@ -114,6 +130,95 @@ describe('RoutineConfigurationView', () => {
     expect(wrapper.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="routine-method-library"]').exists()).toBe(false);
     expect(wrapper.find('[aria-label="Routine overview"]').exists()).toBe(false);
+  });
+
+  it('keeps profile scope and gate compact while routing low-frequency management through the profile menu', async () => {
+    const client = createRoutineClient();
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+
+    const scope = wrapper.find('[data-testid="routine-profile-scope-control"]');
+    expect(scope.exists()).toBe(true);
+    const createButton = wrapper.find('[data-testid="routine-create-button"]');
+    expect(createButton.classes()).toContain('@2xl/panel:px-3');
+    expect(scope.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(true);
+    expect(scope.find('[data-testid="routine-create-profile-button"]').exists()).toBe(true);
+    expect(scope.find('[data-testid="routine-create-button"]').exists()).toBe(false);
+
+    const globalGate = wrapper.findComponent('[data-testid="routine-global-enabled-switch"]');
+    globalGate.vm.$emit('update:modelValue', false);
+    await flushPromises();
+    expect(client.updatePreferences).toHaveBeenCalledWith({
+      globalEnabled: false,
+      expectedVersion: 0,
+    });
+
+    await wrapper.find('[data-testid="routine-profile-profile-1"]').trigger('click');
+    await flushPromises();
+
+    expect(scope.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(false);
+    expect(scope.find('[data-testid="routine-profile-enabled-control"]').exists()).toBe(true);
+    const profileTrigger = wrapper.find('[data-testid="routine-profile-filter"]');
+    expect(profileTrigger.text()).toContain('Work');
+    expect(profileTrigger.text()).not.toContain('Context:');
+    expect(scope.find('[data-testid="routine-profile-runtime-action"]').exists()).toBe(true);
+    expect(scope.find('[data-testid="routine-profile-delete-profile-1"]').exists()).toBe(true);
+
+    await wrapper.find('[data-testid="routine-profile-runtime-action"]').trigger('click');
+    await flushPromises();
+    expect(client.setProfileActive).toHaveBeenCalledWith('profile-1', { active: false });
+
+    const profileGate = wrapper.findComponent('[data-testid="routine-profile-enabled-switch"]');
+    profileGate.vm.$emit('update:modelValue', false);
+    await flushPromises();
+    expect(client.updateProfile).toHaveBeenCalledWith('profile-1', {
+      expectedVersion: 1,
+      enabled: false,
+    });
+  });
+
+  it('uses a compact paused indicator when a selected profile is gated by the global switch', async () => {
+    const client = createRoutineClient();
+    vi.mocked(client.getConfigurationSnapshot).mockResolvedValue(
+      ok({
+        ...snapshot,
+        preferences: { globalEnabled: false, version: 1 },
+      } as never),
+    );
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+    await wrapper.find('[data-testid="routine-profile-profile-1"]').trigger('click');
+    await flushPromises();
+
+    const scope = wrapper.find('[data-testid="routine-profile-scope-control"]');
+    expect(scope.find('[data-testid="routine-global-paused-indicator"]').exists()).toBe(true);
+    expect(scope.find('[data-testid="routine-global-paused-indicator"]').text()).toContain(
+      'All paused',
+    );
+    expect(wrapper.find('[data-testid="routine-global-paused-badge"]').exists()).toBe(false);
+  });
+
+  it('keeps unsupported profile runtime actions visible but disabled with a host-capability hint', async () => {
+    const client = createRoutineClient();
+    vi.mocked(client.getConfigurationSnapshot).mockResolvedValue(
+      ok({
+        ...snapshot,
+        capabilities: { localRuntime: false },
+      } as never),
+    );
+    const { wrapper } = await mountRoutineView(client);
+
+    await flushPromises();
+    await wrapper.find('[data-testid="routine-profile-profile-1"]').trigger('click');
+    await flushPromises();
+
+    const runtimeAction = wrapper.findComponent('[data-testid="routine-profile-runtime-action"]');
+    expect(runtimeAction.exists()).toBe(true);
+    expect(runtimeAction.attributes('disabled')).toBeDefined();
+    expect(runtimeAction.text()).toContain('Desktop required');
+    expect(client.setProfileActive).not.toHaveBeenCalled();
   });
 
   it('marks local-runtime timing as Desktop-required when the current host cannot execute it', async () => {

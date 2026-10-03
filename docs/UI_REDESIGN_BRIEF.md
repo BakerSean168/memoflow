@@ -1,5 +1,7 @@
 # UI 重构前业务与界面分析（UI Redesign Brief）
 
+> **2026-10-03 GOV-7903 / ADR-113:** Product Governance package、Rule/RuleRevision、UI 与 `/governance/**` 已退休；本文相关内容仅为历史设计记录，不再作为实施输入，也不得并入 Knowledge。当前 Governance 仅指 repository-native Engineering Governance。
+
 > **⚠️ Core vNext Goal/Task 边界更新（2026-09-07）**：GoalFolder、Goal Focus/Comparison、TaskFolder、Task Dependency/DAG/CriticalPath 已按 ADR-053/054 与 Core vNext 从运行时、公开契约和产品 UI 退役。本文中仍出现这些名称的页面清单、数据字段、组件或交互描述均是 **vNext 之前的历史快照，不得作为当前实施依据**；当前产品真值以 `docs/product/modules/goal.md`、`docs/product/modules/task.md` 与相关 ADR 为准；Core vNext 的完整实施证据已归档至 `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`。
 >
 

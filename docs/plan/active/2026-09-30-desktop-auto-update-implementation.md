@@ -13,7 +13,7 @@ updated: 2026-09-30T12:45:00+08:00
 
 # MemoFlow Desktop Auto-Update Implementation Plan
 
-> 本计划执行 [ADR-112](../../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md)。
+> 本计划执行 [ADR-114](../../architecture/adr/ADR-114-desktop-update-domain-runtime-and-installation-ownership.md)。
 >
 > 外部参考研究见 [Desktop Auto-Update Reference Study](../../analysis/2026-09-30-desktop-auto-update-reference-study.md)。
 >
@@ -384,7 +384,7 @@ fixture matrix 至少覆盖：
 
 **Implementation:**
 
-1. 建立 ADR-112 state union。
+1. 建立 ADR-114 state union。
 2. 用 reducer / transition functions 固定合法转换。
 3. illegal transition fail fast in development/tests。
 4. 生产环境将 adapter 异常 normalize 为 `failed`。
@@ -1145,7 +1145,7 @@ Domain / UI contract 不应因此改变。
 
 ## DU-1704 — Write release/update operator runbook
 
-**Status: DONE (2026-10-01).** Added the operator-oriented [Desktop Auto-Update Release Runbook](../../runbooks/desktop-auto-update-release.md), grounded in current release workflows, materializers, metadata/remote asset validators, ADR-112, and delivery-platform operations.
+**Status: DONE (2026-10-01).** Added the operator-oriented [Desktop Auto-Update Release Runbook](../../runbooks/desktop-auto-update-release.md), grounded in current release workflows, materializers, metadata/remote asset validators, ADR-114, and delivery-platform operations.
 
 The runbook covers exact-SHA release/candidate/Draft publication, Windows + Linux installed-update gates, evidence identities, bounded diagnostics, retry/containment/hotfix rules, and immutable version/tag policy. It explicitly separates current GitHub Published/latest exposure from evidence-only p10 controls and future gated live feed/pointer rollout/rollback. macOS DU-1501..1504 remain DEFERRED; DU-1703 remains OPTIONAL. All non-mac implementation/runbook work is closed; no provider cutover, updater upgrade, runtime or workflow changes are included.
 
@@ -1327,7 +1327,7 @@ manual download / unsigned-pilot
 
 整个计划只有在以下全部成立后才归档：
 
-- [ ] Desktop Update Domain 已按 ADR-112 落地。
+- [ ] Desktop Update Domain 已按 ADR-114 落地。
 - [ ] updater 是 shell singleton。
 - [ ] Profile switch 不影响 updater。
 - [ ] electron-updater 被 adapter 隔离。

@@ -43,7 +43,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE identity_id = ?
          AND key_result_id = ?
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY recorded_at ${orderDir}${limitClause}`,
+       ORDER BY recorded_at ${orderDir}, id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, keyResultId, ...params, options.limit]
         : [identityId, keyResultId, ...params],
@@ -68,7 +68,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE gr.identity_id = ?
          AND kr.goal_id = ?
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY gr.recorded_at ${orderDir}${limitClause}`,
+       ORDER BY gr.recorded_at ${orderDir}, gr.id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, goalId, ...params, options.limit]
         : [identityId, goalId, ...params],
@@ -102,7 +102,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
        WHERE identity_id = ?
          AND key_result_id IN (${placeholders})
          ${clauses.length > 0 ? `AND ${clauses.join(' AND ')}` : ''}
-       ORDER BY recorded_at ${orderDir}${limitClause}`,
+       ORDER BY recorded_at ${orderDir}, id ${orderDir}${limitClause}`,
       options?.limit
         ? [identityId, ...keyResultIds, ...params, options.limit]
         : [identityId, ...keyResultIds, ...params],
@@ -159,6 +159,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
              identity_id = ?,
              value = ?,
              note = ?,
+             authorship = ?,
              source_type = ?,
              source_id = ?,
              recorded_at = ?,
@@ -169,6 +170,7 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
           dto.identityId,
           dto.value,
           dto.note,
+          dto.authorship,
           dto.sourceType,
           dto.sourceId,
           toDbDateTime(dto.recordedAt),
@@ -179,15 +181,16 @@ export class GoalRecordPowerSyncRepository implements IGoalRecordRepository {
     } else {
       await this.db.execute(
         `INSERT INTO goal_records (
-           id, key_result_id, identity_id, value, note, source_type, source_id, recorded_at,
+           id, key_result_id, identity_id, value, note, authorship, source_type, source_id, recorded_at,
            created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           dto.id,
           dto.keyResultId,
           dto.identityId,
           dto.value,
           dto.note,
+          dto.authorship,
           dto.sourceType,
           dto.sourceId,
           toDbDateTime(dto.recordedAt),

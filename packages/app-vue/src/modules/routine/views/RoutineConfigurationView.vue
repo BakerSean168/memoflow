@@ -3,196 +3,220 @@
     class="flex h-full min-h-0 flex-col overflow-hidden"
     data-testid="routine-configuration-center"
   >
-    <div
-      class="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-4 @2xl/panel:px-6"
-      data-testid="routine-list-toolbar"
-    >
-      <ResponsiveSegmentedFilter
-        :model-value="selectedState"
-        :options="stateFilters"
-        :accessible-label="t('routine.filter.status')"
-        test-id="routine-state-filter"
-        @update:model-value="updateStateFilter"
-      />
+    <ModuleHeader family="collection" data-testid="routine-list-toolbar">
+      <template #leading>
+        <ResponsiveSegmentedFilter
+          :model-value="selectedState"
+          :options="stateFilters"
+          :accessible-label="t('routine.filter.status')"
+          test-id="routine-state-filter"
+          @update:model-value="updateStateFilter"
+        />
+      </template>
 
-      <div class="flex shrink-0 items-center gap-1">
-        <Badge
-          v-if="selectedProfile && !snapshot.preferences.globalEnabled"
-          variant="outline"
-          class="mr-1 h-6 rounded-full px-2 text-[11px] font-normal text-muted-foreground"
-          data-testid="routine-global-paused-badge"
-        >
-          <Pause class="mr-1 h-3 w-3" />
-          {{ t('routine.profile.globalPaused') }}
-        </Badge>
+      <template #actions>
+        <div class="flex shrink-0 items-center gap-1">
+          <div
+            class="flex h-8 items-center rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] p-0.5"
+            data-testid="routine-profile-scope-control"
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="h-7 max-w-56 gap-1.5 rounded-sm px-2 text-muted-foreground"
+                  data-testid="routine-profile-filter"
+                >
+                  <Layers3 class="h-3.5 w-3.5" />
+                  <span class="truncate">{{ selectedProfileLabel }}</span>
+                  <span
+                    v-if="selectedProfile && !snapshot.preferences.globalEnabled"
+                    class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+                    data-testid="routine-global-paused-indicator"
+                    :title="t('routine.profile.globalPaused')"
+                    role="status"
+                  >
+                    <Pause class="h-2.5 w-2.5" aria-hidden="true" />
+                    <span class="sr-only">{{ t('routine.profile.globalPaused') }}</span>
+                  </span>
+                  <ChevronDown class="h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
 
-        <div
-          v-if="selectedProfile"
-          class="mr-1 flex items-center gap-2 px-1"
-          data-testid="routine-profile-enabled-control"
-        >
-          <span class="text-xs text-muted-foreground">{{
-            t('routine.profile.enabledSetting')
-          }}</span>
-          <Switch
-            :model-value="selectedProfile.enabled"
-            :disabled="loading || mutating"
-            :aria-label="t('routine.profile.enabledHint')"
-            data-testid="routine-profile-enabled-switch"
-            @update:model-value="toggleProfileEnabled(selectedProfile, $event)"
-          />
-        </div>
-        <div
-          v-else
-          class="mr-1 flex items-center gap-2 px-1"
-          data-testid="routine-global-enabled-control"
-        >
-          <span class="text-xs text-muted-foreground">{{
-            t('routine.profile.globalEnabledSetting')
-          }}</span>
-          <Switch
-            :model-value="snapshot.preferences.globalEnabled"
-            :disabled="loading || mutating"
-            :aria-label="t('routine.profile.globalEnabledHint')"
-            data-testid="routine-global-enabled-switch"
-            @update:model-value="toggleGlobalEnabled"
-          />
-        </div>
+              <DropdownMenuContent align="end" class="w-64">
+                <DropdownMenuLabel>{{ t('routine.profile.filter') }}</DropdownMenuLabel>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button
-              variant="ghost"
-              size="sm"
-              class="h-8 max-w-56 gap-1.5 px-2 text-muted-foreground"
-              data-testid="routine-profile-filter"
+                <DropdownMenuItem @click="selectedProfileId = null">
+                  <Check
+                    class="mr-2 h-4 w-4"
+                    :class="selectedProfileId === null ? 'opacity-100' : 'opacity-0'"
+                  />
+                  <span class="flex-1">{{ t('routine.profile.all') }}</span>
+                  <span class="text-xs tabular-nums text-muted-foreground">
+                    {{ snapshot.definitions.length }}
+                  </span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  v-for="profile in snapshot.profiles"
+                  :key="profile.id"
+                  :data-testid="`routine-profile-${profile.id}`"
+                  @click="selectedProfileId = profile.id"
+                >
+                  <Check
+                    class="mr-2 h-4 w-4"
+                    :class="selectedProfileId === profile.id ? 'opacity-100' : 'opacity-0'"
+                  />
+                  <span
+                    class="mr-2 h-1.5 w-1.5 shrink-0 rounded-full"
+                    :class="profile.enabled ? 'bg-success' : 'bg-muted-foreground/30'"
+                  />
+                  <span class="min-w-0 flex-1 truncate">{{ profile.name }}</span>
+                  <span class="text-xs tabular-nums text-muted-foreground">
+                    {{ routineCountForProfile(profile.id) }}
+                  </span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <template v-if="selectedProfile">
+                  <DropdownMenuItem
+                    data-testid="routine-profile-runtime-action"
+                    :disabled="
+                      mutating || !selectedProfile.enabled || !snapshot.capabilities.localRuntime
+                    "
+                    @click="toggleProfileActive(selectedProfile, !selectedProfile.active)"
+                  >
+                    <component
+                      :is="selectedProfile.active ? Pause : Play"
+                      class="mr-2 h-4 w-4 shrink-0"
+                    />
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm">
+                        {{
+                          selectedProfile.active
+                            ? t('routine.profile.pause')
+                            : t('routine.profile.activate')
+                        }}
+                      </p>
+                      <p
+                        v-if="!snapshot.capabilities.localRuntime"
+                        class="text-[11px] text-muted-foreground"
+                      >
+                        {{ t('routine.card.desktopRuntimeRequired') }}
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem @click="openEditProfile(selectedProfile)">
+                    <Pencil class="mr-2 h-4 w-4" />
+                    {{ t('routine.profile.edit') }}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    class="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    :data-testid="`routine-profile-delete-${selectedProfile.id}`"
+                    :disabled="mutating || routineCountForProfile(selectedProfile.id) > 0"
+                    @click="removeProfile(selectedProfile)"
+                  >
+                    <Trash2 class="mr-2 h-4 w-4" />
+                    {{ t('routine.profile.delete') }}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+                </template>
+
+                <DropdownMenuItem
+                  data-testid="routine-create-profile-button"
+                  @click="openCreateProfile"
+                >
+                  <Plus class="mr-2 h-4 w-4" />
+                  {{ t('routine.profile.create') }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div
+              v-if="selectedProfile"
+              class="flex h-7 items-center border-l border-[hsl(var(--border-subtle))] px-2"
+              data-testid="routine-profile-enabled-control"
             >
-              <Layers3 class="h-3.5 w-3.5" />
-              <span class="truncate">{{ selectedProfileLabel }}</span>
-              <ChevronDown class="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end" class="w-64">
-            <DropdownMenuLabel>{{ t('routine.profile.filter') }}</DropdownMenuLabel>
-
-            <DropdownMenuItem @click="selectedProfileId = null">
-              <Check
-                class="mr-2 h-4 w-4"
-                :class="selectedProfileId === null ? 'opacity-100' : 'opacity-0'"
+              <Switch
+                :model-value="selectedProfile.enabled"
+                :disabled="loading || mutating"
+                :aria-label="t('routine.profile.enabledHint')"
+                :title="t('routine.profile.enabledHint')"
+                data-testid="routine-profile-enabled-switch"
+                @update:model-value="toggleProfileEnabled(selectedProfile, $event)"
               />
-              <span class="flex-1">{{ t('routine.profile.all') }}</span>
-              <span class="text-xs tabular-nums text-muted-foreground">
-                {{ snapshot.definitions.length }}
-              </span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              v-for="profile in snapshot.profiles"
-              :key="profile.id"
-              :data-testid="`routine-profile-${profile.id}`"
-              @click="selectedProfileId = profile.id"
+            </div>
+            <div
+              v-else
+              class="flex h-7 items-center border-l border-[hsl(var(--border-subtle))] px-2"
+              data-testid="routine-global-enabled-control"
             >
-              <Check
-                class="mr-2 h-4 w-4"
-                :class="selectedProfileId === profile.id ? 'opacity-100' : 'opacity-0'"
+              <Switch
+                :model-value="snapshot.preferences.globalEnabled"
+                :disabled="loading || mutating"
+                :aria-label="t('routine.profile.globalEnabledHint')"
+                :title="t('routine.profile.globalEnabledHint')"
+                data-testid="routine-global-enabled-switch"
+                @update:model-value="toggleGlobalEnabled"
               />
-              <span
-                class="mr-2 h-1.5 w-1.5 shrink-0 rounded-full"
-                :class="profile.enabled ? 'bg-success' : 'bg-muted-foreground/30'"
-              />
-              <span class="min-w-0 flex-1 truncate">{{ profile.name }}</span>
-              <span class="text-xs tabular-nums text-muted-foreground">
-                {{ routineCountForProfile(profile.id) }}
-              </span>
-            </DropdownMenuItem>
+            </div>
+          </div>
 
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              data-testid="routine-create-profile-button"
-              @click="openCreateProfile"
-            >
-              <Plus class="mr-2 h-4 w-4" />
-              {{ t('routine.profile.create') }}
-            </DropdownMenuItem>
-
-            <template v-if="selectedProfile">
-              <DropdownMenuItem
-                v-if="snapshot.capabilities.localRuntime"
-                :disabled="mutating || !selectedProfile.enabled"
-                @click="toggleProfileActive(selectedProfile, !selectedProfile.active)"
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button
+                size="sm"
+                class="h-8 shrink-0 px-2 shadow-sm shadow-primary/15 @2xl/panel:px-3"
+                :aria-label="t('routine.create')"
+                data-testid="routine-create-button"
               >
-                <component :is="selectedProfile.active ? Pause : Play" class="mr-2 h-4 w-4" />
-                {{
-                  selectedProfile.active
-                    ? t('routine.profile.pause')
-                    : t('routine.profile.activate')
-                }}
+                <Plus class="h-4 w-4 @2xl/panel:mr-1.5" />
+                <span class="hidden @2xl/panel:inline">{{ t('routine.create') }}</span>
+                <ChevronDown class="ml-1 hidden h-3.5 w-3.5 opacity-70 @2xl/panel:block" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="w-72" data-testid="routine-create-menu">
+              <DropdownMenuItem data-testid="routine-create-blank" @click="openCreateRoutine()">
+                <Plus class="mr-2 h-4 w-4" />
+                <div class="min-w-0">
+                  <p class="text-sm">{{ t('routine.method.blank') }}</p>
+                  <p class="text-xs text-muted-foreground">{{ t('routine.method.blankHint') }}</p>
+                </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem @click="openEditProfile(selectedProfile)">
-                <Pencil class="mr-2 h-4 w-4" />
-                {{ t('routine.profile.edit') }}
-              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>{{ t('routine.method.title') }}</DropdownMenuLabel>
 
               <DropdownMenuItem
-                class="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                :data-testid="`routine-profile-delete-${selectedProfile.id}`"
-                :disabled="mutating || routineCountForProfile(selectedProfile.id) > 0"
-                @click="removeProfile(selectedProfile)"
+                v-for="method in ambientMethods"
+                :key="method.id"
+                :data-testid="`routine-template-${method.id}`"
+                class="items-start"
+                @click="openCreateRoutine(method)"
               >
-                <Trash2 class="mr-2 h-4 w-4" />
-                {{ t('routine.profile.delete') }}
+                <Repeat2 class="mr-2 mt-0.5 h-4 w-4 shrink-0" />
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm">{{ methodName(method) }}</p>
+                  <p class="truncate text-xs text-muted-foreground">{{ methodSchedule(method) }}</p>
+                </div>
               </DropdownMenuItem>
-            </template>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button size="sm" class="h-8" data-testid="routine-create-button">
-              <Plus class="mr-1.5 h-4 w-4" />
-              {{ t('routine.create') }}
-              <ChevronDown class="ml-1.5 h-3.5 w-3.5 opacity-70" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" class="w-72" data-testid="routine-create-menu">
-            <DropdownMenuItem data-testid="routine-create-blank" @click="openCreateRoutine()">
-              <Plus class="mr-2 h-4 w-4" />
-              <div class="min-w-0">
-                <p class="text-sm">{{ t('routine.method.blank') }}</p>
-                <p class="text-xs text-muted-foreground">{{ t('routine.method.blankHint') }}</p>
-              </div>
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>{{ t('routine.method.title') }}</DropdownMenuLabel>
-
-            <DropdownMenuItem
-              v-for="method in ambientMethods"
-              :key="method.id"
-              :data-testid="`routine-template-${method.id}`"
-              class="items-start"
-              @click="openCreateRoutine(method)"
-            >
-              <Repeat2 class="mr-2 mt-0.5 h-4 w-4 shrink-0" />
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-sm">{{ methodName(method) }}</p>
-                <p class="truncate text-xs text-muted-foreground">{{ methodSchedule(method) }}</p>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </template>
+    </ModuleHeader>
 
     <div
       class="min-h-0 flex-1 overflow-y-auto"
       data-testid="routine-scroll-host"
       data-scroll-host="routine"
     >
-      <div class="mx-auto max-w-5xl px-4 py-2 @2xl/panel:px-6">
+      <div class="mx-auto max-w-5xl px-4 py-3 @2xl/panel:px-6">
         <div v-if="loading" class="divide-y" data-testid="routine-list-skeleton">
           <div v-for="index in 6" :key="index" class="flex items-center gap-3 py-4">
             <Skeleton class="h-8 w-8 rounded-md" />
@@ -214,16 +238,20 @@
         </div>
 
         <template v-else>
-          <div v-if="visibleDefinitions.length" data-testid="routine-list">
+          <div
+            v-if="visibleDefinitions.length"
+            class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
+            data-testid="routine-list"
+          >
             <article
               v-for="routine in visibleDefinitions"
               :key="routine.id"
-              class="group flex min-h-14 items-center gap-3 border-b border-border/70 last:border-b-0"
+              class="group flex min-h-14 items-center gap-3"
               :data-testid="`routine-card-${routine.id}`"
             >
               <button
                 type="button"
-                class="min-w-0 flex-1 text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+                class="min-w-0 flex-1 text-left transition-colors hover:bg-[hsl(var(--hover)/0.52)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
                 @click="openEditRoutine(routine)"
               >
                 <div
@@ -232,7 +260,7 @@
                 >
                   <div class="min-w-0">
                     <div class="flex min-w-0 items-center gap-2">
-                      <span class="min-w-0 truncate text-sm font-medium text-foreground">
+                      <span class="min-w-0 truncate text-[13px] font-medium text-foreground">
                         {{ routine.name }}
                       </span>
                       <Badge
@@ -252,7 +280,7 @@
                   </div>
 
                   <div class="flex min-w-0 items-center gap-2">
-                    <span class="truncate text-sm text-muted-foreground">
+                    <span class="truncate text-[12px] text-[hsl(var(--foreground-muted))]">
                       {{ triggerSummary(routine.trigger) }}
                     </span>
                     <Badge
@@ -265,7 +293,7 @@
                     </Badge>
                   </div>
 
-                  <span class="truncate text-sm text-muted-foreground">
+                  <span class="truncate text-[12px] text-[hsl(var(--foreground-muted))]">
                     {{ profileSummary(routine.id) }}
                   </span>
                 </div>
@@ -425,6 +453,7 @@ import {
   type RoutineMethodRecord,
 } from '@memoflow/reminder/method-library';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
+import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { ResponsiveSegmentedFilter } from '../../../shared/components';
 import RoutineEditorDialog, {
   type RoutineEditorPreset,
@@ -500,10 +529,8 @@ const selectedProfile = computed(
   () => snapshot.value.profiles.find((profile) => profile.id === selectedProfileId.value) ?? null,
 );
 
-const selectedProfileLabel = computed(() =>
-  selectedProfile.value
-    ? t('routine.profile.filterValue', { name: selectedProfile.value.name })
-    : t('routine.profile.filterAll'),
+const selectedProfileLabel = computed(
+  () => selectedProfile.value?.name ?? t('routine.profile.all'),
 );
 
 const visibleDefinitions = computed(() => {

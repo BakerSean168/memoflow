@@ -1,4 +1,4 @@
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, nextTick } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { Dialog as AppDialog, DialogContent } from '@memoflow/ui-vue-shadcn';
@@ -179,6 +179,30 @@ describe('ProductDialogShell', () => {
     wrapper.unmount();
   });
 
+  it('maps semantic recipes to stable default dialog geometry', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="recipe-dialog" recipe="workspace">
+            <template #title>Workspace</template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    const dialog = document.body.querySelector<HTMLElement>('[data-testid="recipe-dialog"]')!;
+
+    expect(dialog.dataset.productDialogRecipe).toBe('workspace');
+    expect(dialog.classList.contains('sm:max-w-[960px]')).toBe(true);
+    expect(dialog.classList.contains('h-[calc(100dvh-2rem)]')).toBe(true);
+    wrapper.unmount();
+  });
+
   it('can preserve selection-style dialogs by preventing outside interaction', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },
@@ -207,4 +231,33 @@ describe('ProductDialogShell', () => {
     expect(event.defaultPrevented).toBe(true);
     wrapper.unmount();
   });
+});
+
+it('returns focus after Escape for owner-controlled dialogs without a DialogTrigger', async () => {
+  const Host = defineComponent({
+    components: { AppDialog, ProductDialogShell },
+    setup: () => ({ open: ref(false) }),
+    template: `<button data-testid="owner-open" @click="open = true">Create</button>
+      <AppDialog v-model:open="open">
+        <ProductDialogShell :open="open" test-id="owner-dialog" initial-focus-selector="input">
+          <template #title>Owner form</template><input />
+        </ProductDialogShell>
+      </AppDialog>`,
+  });
+  const wrapper = mount(Host, { attachTo: document.body });
+  const opener = wrapper.get<HTMLButtonElement>('[data-testid="owner-open"]');
+  for (let attempt = 0; attempt < 2; attempt++) {
+    opener.element.focus();
+    await opener.trigger('click');
+    await flushPromises();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    const input = document.querySelector<HTMLInputElement>('[data-testid="owner-dialog"] input')!;
+    expect(document.activeElement).toBe(input);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await flushPromises();
+    await nextTick();
+    expect(document.querySelector('[data-testid="owner-dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(opener.element);
+  }
+  wrapper.unmount();
 });

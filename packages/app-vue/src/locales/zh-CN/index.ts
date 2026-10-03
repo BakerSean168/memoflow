@@ -12,7 +12,6 @@ import schedule from './schedule';
 import routine from './routine';
 import notification from './notification';
 import repository from './repository';
-import governance from './governance';
 import setting from './setting';
 
 export default {
@@ -30,6 +29,5 @@ export default {
   routine,
   notification,
   repository,
-  governance,
   setting,
 } as const;

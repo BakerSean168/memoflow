@@ -1,13 +1,10 @@
 // Goal Module Components
-export { default as GoalRecordCard } from './GoalRecordCard.vue';
+export { default as GoalRecordCard } from './cards/GoalRecordCard.vue';
 
 // Product list rows
 export { default as GoalProgressRow } from './GoalProgressRow.vue';
 export { default as GoalTimeframePicker } from './GoalTimeframePicker.vue';
 export { default as GoalReminderChip } from './GoalReminderChip.vue';
-
-// Cards
-export { default as GoalRecordCardFromCards } from './cards/GoalRecordCard.vue';
 
 // Comparison
 
@@ -37,3 +34,5 @@ export { default as WeightTrendChart } from './weight-snapshot/WeightTrendChart.
 
 // Weight
 export { default as WeightSuggestionPanel } from './weight/WeightSuggestionPanel.vue';
+
+export { default as GoalRecordComposerSurface } from './GoalRecordComposerSurface.vue';

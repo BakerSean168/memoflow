@@ -20,6 +20,8 @@ export class KnowledgeCapturePersistenceAdapter implements KnowledgeCaptureMutat
       const persisted = await this.persistence.createKnowledgeNote({
         identityId: input.context.identityId,
         context: input.context,
+        source: input.source,
+        ...(input.source.kind === 'repository' ? { connectionId: input.source.connectionId } : {}),
         knowledgeDocumentId: input.knowledgeDocumentId,
         fileName: input.fileName,
         path: input.path,

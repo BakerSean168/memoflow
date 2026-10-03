@@ -1,4 +1,5 @@
 import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
+import { resolveNotificationDestination } from './notification-destination';
 
 const BROWSER_NOTIFICATION_PREFERENCE_KEY = 'memoflow:notification:browser-system-presentation';
 
@@ -41,6 +42,25 @@ export function setBrowserSystemNotificationEnabled(enabled: boolean): void {
     // Device-local presentation preference is best effort. Canonical
     // Notification Fact/Inbox state remains server-owned.
   }
+}
+
+export function browserSystemNotificationTargetUrl(
+  event: NotificationDispatchInAppEvent,
+  origin: string,
+): string {
+  const destination = resolveNotificationDestination({
+    navigationIntent: event.data?.navigationIntent,
+    category: event.category,
+  });
+  const originUrl = new URL(origin);
+  const url = new URL(destination.path, originUrl);
+  if (url.origin !== originUrl.origin) {
+    return new URL('/notifications', originUrl).toString();
+  }
+  for (const [key, value] of Object.entries(destination.query ?? {})) {
+    url.searchParams.set(key, value);
+  }
+  return url.toString();
 }
 
 export async function requestBrowserSystemNotificationPermission(): Promise<BrowserSystemNotificationPermission> {
@@ -86,8 +106,11 @@ export function presentBrowserSystemNotification(event: NotificationDispatchInAp
   notification.onclick = () => {
     window.focus();
     notification.close();
-    if (window.location.pathname !== '/notifications') {
-      window.location.assign(new URL('/notifications', window.location.origin).toString());
+
+    const targetUrl = browserSystemNotificationTargetUrl(event, window.location.origin);
+    const currentUrl = new URL(window.location.href);
+    if (targetUrl !== currentUrl.toString()) {
+      window.location.assign(targetUrl);
     }
   };
   return true;

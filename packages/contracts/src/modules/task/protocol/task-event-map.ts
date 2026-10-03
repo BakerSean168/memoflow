@@ -8,6 +8,7 @@ import type {
   TaskOccurrencesGeneratedEvent,
   TaskPlanPausedEvent,
   TaskPlanResumedEvent,
+  TaskPlanAbandonedEvent,
   TaskUncompletedEvent,
   TaskRescheduledEvent,
   TaskPlanOutcomeChangedEvent,
@@ -29,6 +30,7 @@ export type TaskEventMap = {
   'task:occurrence-generated': TaskOccurrencesGeneratedEvent;
   'task:plan-paused': TaskPlanPausedEvent;
   'task:plan-resumed': TaskPlanResumedEvent;
+  'task:plan-abandoned': TaskPlanAbandonedEvent;
   'task:occurrence-uncompleted': TaskUncompletedEvent;
   'task:plan-outcome-changed': TaskPlanOutcomeChangedEvent;
   'task:rescheduled': TaskRescheduledEvent;

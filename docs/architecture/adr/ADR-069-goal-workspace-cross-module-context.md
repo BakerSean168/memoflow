@@ -9,12 +9,14 @@ tags:
   - powersync
 description: Goal Workspace 跨模块上下文、Task Goal Link、Note Relation 与只读聚合模型
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
+
+> **2026-09-29 Product vNext 收敛修订（target-design，待实施）：** Task→KR 增加“完成时记录”后，Goal Workspace 仍只消费 Task-owned context projection，不读取 Task repository；Task 侧为了正确展示/预览 measurement，可以读取 Goal-owned KR calculationMethod/unit/current/target 等 bounded presentation context，但不能获得 Goal mutation ownership。
 
 # ADR-069: Goal Workspace 与跨模块 Context Read Model
 
-**状态：** 已采纳并实施（GOAL-7205～7207，2026-09-19）
+**状态：** 已采纳并实施（GOAL-7205～7207，2026-09-19）；2026-09-29 bounded KR context 修订待实施
 **日期：** 2026-09-08
 **影响范围：** Goal、Task、Repository/Knowledge、Relation、contracts、API/Desktop composition、PowerSync、Goal Detail UI
 **修订：** ADR-053 的 Goal Detail 只读上下文细节；ADR-056 的 `keyResultId` 必选约束
@@ -132,12 +134,14 @@ Task: 每天投递 5 个岗位
 -> goalId + keyResultId + contribution(+5)
 ```
 
-### 4.3 Contribution 约束
+### 4.3 KR Record / Contribution 约束
 
-若：
+若 Task 完成会产生任何 KR Record：
 
 ```text
-contribution != null
+fixed automatic contribution
+OR
+completion-time user measurement
 ```
 
 则：
@@ -146,7 +150,12 @@ contribution != null
 keyResultId MUST exist
 ```
 
-并继续遵守 ADR-068/ADR-056：自动 numeric contribution v1 只允许可安全结算的 Sum KR。
+继续遵守 ADR-068/ADR-056：
+
+- fixed automatic numeric contribution 默认只允许 Sum；
+- completion-time user measurement 可以覆盖 Sum/Average/Max/Min/Last；
+- Goal 仍拥有 GoalRecord / aggregation / currentValue；
+- Task 只读取 bounded KR measurement presentation context，不直接写 KR。
 
 ### 4.4 一个 Task 的 Goal ownership
 

@@ -1,61 +1,55 @@
 <template>
-  <Card data-testid="ai-settings-panel">
-    <CardHeader class="gap-3">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <CardTitle>{{ t('setting.ai.title') }}</CardTitle>
-          <CardDescription>{{ t('setting.ai.description') }}</CardDescription>
-        </div>
-        <div class="flex gap-2">
-          <Button variant="outline" size="sm" :disabled="isLoadingProviders" @click="loadProviders">
-            {{ t('setting.ai.refreshProviders') }}
-          </Button>
-          <Button size="sm" data-testid="ai-provider-add" @click="openOnboarding">
-            {{ t('setting.ai.addProvider') }}
-          </Button>
-        </div>
-      </div>
+  <SettingsSection
+    :title="t('setting.ai.title')"
+    :description="t('setting.ai.description')"
+    test-id="ai-settings-panel"
+  >
+    <template #actions>
+      <Button variant="outline" size="sm" :disabled="isLoadingProviders" @click="loadProviders">
+        {{ t('setting.ai.refreshProviders') }}
+      </Button>
+      <Button size="sm" data-testid="ai-provider-add" @click="openOnboarding">
+        {{ t('setting.ai.addProvider') }}
+      </Button>
+    </template>
 
-      <div
+    <div class="space-y-5">
+      <SettingsStatusBlock
         v-if="defaultProvider"
-        class="rounded-xl border border-border/60 bg-muted/30 px-4 py-3"
-        data-testid="ai-provider-default-summary"
+        kind="info"
+        :title="t('setting.ai.currentDefault')"
+        test-id="ai-provider-default-summary"
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {{ t('setting.ai.currentDefault') }}
-            </p>
-            <p class="mt-1 truncate text-sm font-semibold">
-              {{ defaultProvider.name }}
-              <span class="font-normal text-muted-foreground">· {{ defaultProvider.defaultModel || '—' }}</span>
-            </p>
-          </div>
+          <p class="min-w-0 truncate text-sm font-semibold">
+            {{ defaultProvider.name }}
+            <span class="font-normal text-muted-foreground"
+              >· {{ defaultProvider.defaultModel || '—' }}</span
+            >
+          </p>
           <Badge variant="secondary">{{ t('setting.ai.defaultProvider') }}</Badge>
         </div>
-      </div>
-    </CardHeader>
+      </SettingsStatusBlock>
 
-    <CardContent class="space-y-4">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <h3 class="text-base font-semibold">{{ t('setting.ai.connectedProviders') }}</h3>
-          <p class="text-sm text-muted-foreground">{{ t('setting.ai.connectedProvidersDescription') }}</p>
-        </div>
+      <div class="space-y-1">
+        <h3 class="text-sm font-semibold">{{ t('setting.ai.connectedProviders') }}</h3>
+        <p class="text-xs leading-5 text-muted-foreground">
+          {{ t('setting.ai.connectedProvidersDescription') }}
+        </p>
       </div>
 
       <div v-if="providerItems.length" class="space-y-3" data-testid="ai-provider-list">
-        <div
-          v-for="provider in providerItems"
-          :key="provider.id"
-          class="rounded-xl border border-border/60 bg-background/70 p-4"
-        >
+        <SettingsObjectCard v-for="provider in providerItems" :key="provider.id">
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0 space-y-1.5">
               <div class="flex flex-wrap items-center gap-2">
                 <p class="font-medium">{{ provider.name }}</p>
-                <Badge v-if="provider.isDefault" variant="secondary">{{ t('setting.ai.defaultProvider') }}</Badge>
-                <Badge v-if="!provider.isActive" variant="outline">{{ t('setting.ai.inactiveProvider') }}</Badge>
+                <Badge v-if="provider.isDefault" variant="secondary">{{
+                  t('setting.ai.defaultProvider')
+                }}</Badge>
+                <Badge v-if="!provider.isActive" variant="outline">{{
+                  t('setting.ai.inactiveProvider')
+                }}</Badge>
               </div>
               <p class="break-all text-xs text-muted-foreground">{{ provider.baseUrl }}</p>
               <p class="text-sm">
@@ -65,13 +59,13 @@
               <p v-if="provider.credentialRef" class="text-xs text-muted-foreground">
                 Provider credential configured
               </p>
-              <p
+              <SettingsStatusBlock
                 v-if="providerStatusMap[String(provider.id)]"
-                class="text-xs"
-                :class="providerStatusMap[String(provider.id)]?.tone === 'error' ? 'text-destructive' : 'text-muted-foreground'"
-              >
-                {{ providerStatusMap[String(provider.id)]?.message }}
-              </p>
+                :kind="
+                  providerStatusMap[String(provider.id)]?.tone === 'error' ? 'error' : 'success'
+                "
+                :description="providerStatusMap[String(provider.id)]?.message"
+              />
             </div>
 
             <div class="flex flex-wrap justify-end gap-2">
@@ -125,35 +119,40 @@
               </Button>
             </div>
           </div>
-        </div>
+        </SettingsObjectCard>
       </div>
 
-      <div
+      <SettingsStatusBlock
         v-else
-        class="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border/70 px-6 py-8 text-center"
-        data-testid="ai-provider-empty"
+        kind="info"
+        :title="t('setting.ai.emptyTitle')"
+        :description="t('setting.ai.emptyDescription')"
+        test-id="ai-provider-empty"
       >
-        <p class="font-medium">{{ t('setting.ai.emptyTitle') }}</p>
-        <p class="mt-1 max-w-md text-sm text-muted-foreground">{{ t('setting.ai.emptyDescription') }}</p>
-        <Button class="mt-4" @click="openOnboarding">{{ t('setting.ai.addProvider') }}</Button>
-      </div>
-    </CardContent>
-  </Card>
+        <template #actions>
+          <Button size="sm" @click="openOnboarding">{{ t('setting.ai.addProvider') }}</Button>
+        </template>
+      </SettingsStatusBlock>
+    </div>
+  </SettingsSection>
 
   <Dialog :open="onboardingOpen" @update:open="handleDialogOpenChange">
-    <DialogContent class="flex max-h-[88vh] min-h-0 max-w-3xl flex-col overflow-hidden p-0" data-testid="ai-provider-onboarding">
-      <DialogHeader class="shrink-0 border-b px-6 py-5 text-left">
-        <div class="flex items-center gap-2 text-xs text-muted-foreground">
-          <template v-for="(step, index) in flowSteps" :key="step">
-            <span v-if="index > 0">—</span>
-            <span :class="stepClass(step)">{{ index + 1 }}</span>
-          </template>
-        </div>
-        <DialogTitle class="mt-2">{{ onboardingTitle }}</DialogTitle>
-        <DialogDescription>{{ onboardingDescription }}</DialogDescription>
-      </DialogHeader>
+    <SettingsDialogShell
+      :title="onboardingTitle"
+      :description="onboardingDescription"
+      test-id="ai-provider-onboarding"
+      size="wide"
+      class="flex max-h-[88vh] min-h-0 flex-col overflow-hidden"
+      body-class="min-h-0 flex-1 overflow-y-auto px-1"
+    >
+      <div class="mb-5 flex items-center gap-2 text-xs text-muted-foreground">
+        <template v-for="(step, index) in flowSteps" :key="step">
+          <span v-if="index > 0">—</span>
+          <span :class="stepClass(step)">{{ index + 1 }}</span>
+        </template>
+      </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      <div class="min-h-0">
         <div v-if="onboardingStep === 'picker'" class="space-y-4">
           <Input v-model="catalogSearch" :placeholder="t('setting.ai.searchProviders')" autofocus />
           <div v-if="isLoadingCatalog" class="py-10 text-center text-sm text-muted-foreground">
@@ -164,33 +163,44 @@
               v-for="entry in filteredCatalog"
               :key="entry.id"
               type="button"
-              class="group rounded-xl border border-border/70 p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
+              class="group rounded-xl bg-[hsl(var(--surface-raised)/0.38)] p-4 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)] transition-[background-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_8px_22px_-18px_rgba(0,0,0,0.5)]"
               :data-testid="`ai-provider-catalog-${entry.id}`"
               @click="selectCatalogEntry(entry)"
             >
               <div class="flex items-start gap-3">
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold">
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold"
+                >
                   {{ providerGlyph(entry.id) }}
                 </div>
                 <div class="min-w-0">
                   <div class="flex items-center gap-2">
                     <p class="font-medium">{{ entry.name }}</p>
-                    <Badge v-if="entry.id === 'custom'" variant="outline">{{ t('setting.ai.customBadge') }}</Badge>
+                    <Badge v-if="entry.id === 'custom'" variant="outline">{{
+                      t('setting.ai.customBadge')
+                    }}</Badge>
                   </div>
                   <p class="mt-1 text-sm text-muted-foreground">{{ entry.description }}</p>
                 </div>
               </div>
             </button>
           </div>
-          <p v-if="!isLoadingCatalog && !filteredCatalog.length" class="py-8 text-center text-sm text-muted-foreground">
+          <p
+            v-if="!isLoadingCatalog && !filteredCatalog.length"
+            class="py-8 text-center text-sm text-muted-foreground"
+          >
             {{ t('setting.ai.noProviderMatches') }}
           </p>
         </div>
 
         <div v-else-if="onboardingStep === 'connection' && selectedCatalog" class="space-y-5">
-          <div class="rounded-xl border border-border/60 bg-muted/25 p-4">
+          <div
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.4)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]"
+          >
             <div class="flex items-center gap-3">
-              <div class="flex size-10 items-center justify-center rounded-lg bg-muted text-sm font-semibold">
+              <div
+                class="flex size-10 items-center justify-center rounded-lg bg-muted text-sm font-semibold"
+              >
                 {{ providerGlyph(selectedCatalog.id) }}
               </div>
               <div>
@@ -200,19 +210,34 @@
             </div>
           </div>
 
-          <div v-if="selectedCatalog.id === 'custom' && onboardingMode === 'create'" class="space-y-2">
+          <div
+            v-if="selectedCatalog.id === 'custom' && onboardingMode === 'create'"
+            class="space-y-2"
+          >
             <Label for="ai-provider-name">{{ t('setting.ai.providerName') }}</Label>
-            <Input id="ai-provider-name" v-model="connectionName" :placeholder="t('setting.ai.providerNamePlaceholder')" />
+            <Input
+              id="ai-provider-name"
+              v-model="connectionName"
+              :placeholder="t('setting.ai.providerNamePlaceholder')"
+            />
           </div>
 
           <div v-if="selectedCatalog.baseUrlEditable" class="space-y-2">
             <Label for="ai-provider-base-url">{{ t('setting.ai.baseUrl') }}</Label>
-            <Input id="ai-provider-base-url" v-model="connectionBaseUrl" :placeholder="t('setting.ai.providerBaseUrlPlaceholder')" />
-            <p class="text-xs text-muted-foreground">{{ t('setting.ai.customEndpointSecurityHint') }}</p>
+            <Input
+              id="ai-provider-base-url"
+              v-model="connectionBaseUrl"
+              :placeholder="t('setting.ai.providerBaseUrlPlaceholder')"
+            />
+            <p class="text-xs text-muted-foreground">
+              {{ t('setting.ai.customEndpointSecurityHint') }}
+            </p>
           </div>
           <div v-else class="space-y-1">
             <Label>{{ t('setting.ai.endpoint') }}</Label>
-            <p class="break-all rounded-lg border bg-muted/25 px-3 py-2 text-sm text-muted-foreground">
+            <p
+              class="break-all rounded-lg bg-[hsl(var(--surface-raised)/0.42)] px-3 py-2 text-sm text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+            >
               {{ selectedCatalog.defaultBaseUrl }}
             </p>
           </div>
@@ -244,29 +269,40 @@
           </div>
         </div>
 
-        <div v-else-if="onboardingStep === 'model' && probeResult && selectedCatalog" class="space-y-4">
-          <div class="rounded-xl border border-border/60 bg-muted/25 px-4 py-3 text-sm">
+        <div
+          v-else-if="onboardingStep === 'model' && probeResult && selectedCatalog"
+          class="space-y-4"
+        >
+          <div
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.4)] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]"
+          >
             <p class="font-medium">{{ t('setting.ai.connectionVerified') }}</p>
             <p class="mt-1 break-all text-xs text-muted-foreground">{{ probeResult.baseUrl }}</p>
           </div>
 
-          <div
+          <SettingsStatusBlock
             v-for="warning in probeResult.warnings"
             :key="warning"
-            class="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm"
-          >
-            {{ warning }}
-          </div>
+            kind="info"
+            :description="warning"
+          />
 
           <template v-if="probeResult.models.length">
             <Input v-model="modelSearch" :placeholder="t('setting.ai.searchModels')" />
-            <div class="max-h-[360px] space-y-2 overflow-y-auto pr-1" data-testid="ai-provider-model-list">
+            <div
+              class="max-h-[360px] space-y-2 overflow-y-auto pr-1"
+              data-testid="ai-provider-model-list"
+            >
               <button
                 v-for="model in filteredModels"
                 :key="model.id"
                 type="button"
-                class="w-full rounded-xl border p-3 text-left transition-colors"
-                :class="selectedModelId === model.id ? 'border-primary bg-primary/5' : 'border-border/60 hover:bg-muted/40'"
+                class="w-full rounded-xl p-3 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow]"
+                :class="
+                  selectedModelId === model.id
+                    ? 'bg-primary/[0.08] shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.42)]'
+                    : 'bg-[hsl(var(--surface-raised)/0.28)] hover:bg-[hsl(var(--hover)/0.72)]'
+                "
                 @click="selectModel(model.id)"
               >
                 <div class="flex items-start justify-between gap-3">
@@ -281,43 +317,87 @@
                   </div>
                   <span
                     class="mt-0.5 size-4 shrink-0 rounded-full border"
-                    :class="selectedModelId === model.id ? 'border-[5px] border-primary' : 'border-border'"
+                    :class="
+                      selectedModelId === model.id ? 'border-[5px] border-primary' : 'border-border'
+                    "
                   />
                 </div>
-                <div v-if="model.contextWindow || model.inputCostPer1M != null || model.outputCostPer1M != null" class="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span v-if="model.contextWindow">{{ formatContext(model.contextWindow) }} context</span>
-                  <span v-if="model.inputCostPer1M != null">${{ formatPrice(model.inputCostPer1M) }}/1M in</span>
-                  <span v-if="model.outputCostPer1M != null">${{ formatPrice(model.outputCostPer1M) }}/1M out</span>
+                <div
+                  v-if="
+                    model.contextWindow ||
+                    model.inputCostPer1M != null ||
+                    model.outputCostPer1M != null
+                  "
+                  class="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground"
+                >
+                  <span v-if="model.contextWindow"
+                    >{{ formatContext(model.contextWindow) }} context</span
+                  >
+                  <span v-if="model.inputCostPer1M != null"
+                    >${{ formatPrice(model.inputCostPer1M) }}/1M in</span
+                  >
+                  <span v-if="model.outputCostPer1M != null"
+                    >${{ formatPrice(model.outputCostPer1M) }}/1M out</span
+                  >
                 </div>
               </button>
             </div>
           </template>
 
-          <div v-if="needsManualModel" class="space-y-2 rounded-xl border border-dashed border-border/70 p-4">
+          <div
+            v-if="needsManualModel"
+            class="space-y-2 rounded-xl bg-[hsl(var(--surface-raised)/0.24)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.45)]"
+          >
             <p class="font-medium">{{ t('setting.ai.manualModelTitle') }}</p>
-            <p class="text-sm text-muted-foreground">{{ t('setting.ai.manualModelDescription') }}</p>
-            <Input v-model="manualModelId" :placeholder="t('setting.ai.manualModelPlaceholder')" @input="handleManualModelInput" />
+            <p class="text-sm text-muted-foreground">
+              {{ t('setting.ai.manualModelDescription') }}
+            </p>
+            <Input
+              v-model="manualModelId"
+              :placeholder="t('setting.ai.manualModelPlaceholder')"
+              @input="handleManualModelInput"
+            />
           </div>
 
-          <div v-if="effectiveModelId" class="rounded-xl border border-border/60 p-4">
+          <div
+            v-if="effectiveModelId"
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+          >
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="text-xs text-muted-foreground">{{ t('setting.ai.selectedModel') }}</p>
                 <p class="mt-1 break-all text-sm font-medium">{{ effectiveModelId }}</p>
               </div>
-              <Button variant="outline" size="sm" :disabled="isTestingModel" @click="testSelectedModel">
-                {{ isTestingModel ? t('setting.ai.testingModel') : t('setting.ai.testSelectedModel') }}
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="isTestingModel"
+                @click="testSelectedModel"
+              >
+                {{
+                  isTestingModel ? t('setting.ai.testingModel') : t('setting.ai.testSelectedModel')
+                }}
               </Button>
             </div>
-            <p class="mt-2 text-xs text-muted-foreground">{{ t('setting.ai.modelTestCostHint') }}</p>
-            <p v-if="verifiedModelId === effectiveModelId" class="mt-2 text-xs font-medium text-emerald-600">
-              {{ t('setting.ai.modelTestPassed') }}
+            <p class="mt-2 text-xs text-muted-foreground">
+              {{ t('setting.ai.modelTestCostHint') }}
             </p>
+            <SettingsStatusBlock
+              v-if="verifiedModelId === effectiveModelId"
+              class="mt-2"
+              kind="success"
+              :description="t('setting.ai.modelTestPassed')"
+            />
           </div>
         </div>
 
-        <div v-else-if="onboardingStep === 'review' && probeResult && selectedCatalog" class="space-y-4">
-          <div class="rounded-xl border border-border/60 divide-y divide-border/60">
+        <div
+          v-else-if="onboardingStep === 'review' && probeResult && selectedCatalog"
+          class="space-y-4"
+        >
+          <div
+            class="divide-y divide-[hsl(var(--border-subtle))] rounded-xl bg-[hsl(var(--surface-raised)/0.3)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+          >
             <div class="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
               <span class="text-sm text-muted-foreground">{{ t('setting.ai.providerName') }}</span>
               <span class="text-sm font-medium">{{ connectionName }}</span>
@@ -327,18 +407,22 @@
               <span class="break-all text-sm">{{ probeResult.baseUrl }}</span>
             </div>
             <div class="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
-              <span class="text-sm text-muted-foreground">{{ t('setting.ai.defaultModelLabel') }}</span>
+              <span class="text-sm text-muted-foreground">{{
+                t('setting.ai.defaultModelLabel')
+              }}</span>
               <span class="break-all text-sm font-medium">{{ effectiveModelId }}</span>
             </div>
           </div>
 
           <div
             v-if="onboardingMode === 'create'"
-            class="flex items-center justify-between gap-4 rounded-xl border border-border/60 px-4 py-3"
+            class="flex items-center justify-between gap-4 rounded-xl bg-[hsl(var(--surface-raised)/0.3)] px-4 py-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
           >
             <div>
               <p class="text-sm font-medium">{{ t('setting.ai.markAsDefault') }}</p>
-              <p class="text-xs text-muted-foreground">{{ t('setting.ai.markAsDefaultDescription') }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{ t('setting.ai.markAsDefaultDescription') }}
+              </p>
             </div>
             <Switch
               :model-value="isDefaultSelection"
@@ -348,21 +432,30 @@
           </div>
           <div
             v-else
-            class="rounded-xl border border-border/60 bg-muted/25 px-4 py-3 text-sm text-muted-foreground"
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.3)] px-4 py-3 text-sm text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
             data-testid="ai-provider-replacement-preserved-metadata"
           >
             {{ t('setting.ai.replacementPreservesMetadata') }}
           </div>
 
           <p class="text-xs text-muted-foreground">
-            {{ onboardingMode === 'replace' ? t('setting.ai.replacementSecretHint') : t('setting.ai.reviewSecretHint') }}
+            {{
+              onboardingMode === 'replace'
+                ? t('setting.ai.replacementSecretHint')
+                : t('setting.ai.reviewSecretHint')
+            }}
           </p>
         </div>
       </div>
 
-      <DialogFooter class="shrink-0 border-t px-6 py-4">
+      <template #footer>
         <div class="flex w-full items-center justify-between gap-3">
-          <Button v-if="onboardingStep !== flowSteps[0]" variant="ghost" :disabled="isBusy" @click="goBack">
+          <Button
+            v-if="onboardingStep !== flowSteps[0]"
+            variant="ghost"
+            :disabled="isBusy"
+            @click="goBack"
+          >
             {{ t('setting.ai.back') }}
           </Button>
           <span v-else />
@@ -394,14 +487,22 @@
             >
               {{
                 isSaving
-                  ? t(onboardingMode === 'replace' ? 'setting.ai.replacingProvider' : 'setting.ai.savingProvider')
-                  : t(onboardingMode === 'replace' ? 'setting.ai.replaceAndFinish' : 'setting.ai.saveAndFinish')
+                  ? t(
+                      onboardingMode === 'replace'
+                        ? 'setting.ai.replacingProvider'
+                        : 'setting.ai.savingProvider',
+                    )
+                  : t(
+                      onboardingMode === 'replace'
+                        ? 'setting.ai.replaceAndFinish'
+                        : 'setting.ai.saveAndFinish',
+                    )
               }}
             </Button>
           </div>
         </div>
-      </DialogFooter>
-    </DialogContent>
+      </template>
+    </SettingsDialogShell>
   </Dialog>
 </template>
 
@@ -409,30 +510,19 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Switch,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Dialog, Input, Label, Switch } from '@memoflow/ui-vue-shadcn';
 import type {
   AIProviderCatalogEntryDTO,
   AIProviderConfigClientDTO,
   ProbeAIProviderConnectionRes,
 } from '@memoflow/contracts/ai';
 import { useAI } from '../../ai/composables/useAI';
+import {
+  SettingsDialogShell,
+  SettingsObjectCard,
+  SettingsSection,
+  SettingsStatusBlock,
+} from '../../../components/shared/settings';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
 
 type OnboardingStep = 'picker' | 'connection' | 'model' | 'review';
@@ -481,7 +571,9 @@ const providerTestLoading = ref<Record<string, boolean>>({});
 const providerStatusMap = ref<Record<string, ProviderStatusState | null>>({});
 
 const providerItems = computed(() => providers.value);
-const defaultProvider = computed(() => providerItems.value.find((provider) => provider.isDefault) ?? null);
+const defaultProvider = computed(
+  () => providerItems.value.find((provider) => provider.isDefault) ?? null,
+);
 const isBusy = computed(() => isProbing.value || isTestingModel.value || isSaving.value);
 const flowSteps = computed<OnboardingStep[]>(() =>
   onboardingMode.value === 'replace'
@@ -530,20 +622,36 @@ const canContinueFromModel = computed(() => {
 const onboardingTitle = computed(() => {
   const replacing = onboardingMode.value === 'replace';
   switch (onboardingStep.value) {
-    case 'picker': return t('setting.ai.pickerTitle');
-    case 'connection': return t(replacing ? 'setting.ai.replacementConnectionTitle' : 'setting.ai.connectionTitle');
-    case 'model': return t('setting.ai.modelTitle');
-    case 'review': return t(replacing ? 'setting.ai.replacementReviewTitle' : 'setting.ai.reviewTitle');
+    case 'picker':
+      return t('setting.ai.pickerTitle');
+    case 'connection':
+      return t(replacing ? 'setting.ai.replacementConnectionTitle' : 'setting.ai.connectionTitle');
+    case 'model':
+      return t('setting.ai.modelTitle');
+    case 'review':
+      return t(replacing ? 'setting.ai.replacementReviewTitle' : 'setting.ai.reviewTitle');
   }
   return '';
 });
 const onboardingDescription = computed(() => {
   const replacing = onboardingMode.value === 'replace';
   switch (onboardingStep.value) {
-    case 'picker': return t('setting.ai.pickerDescription');
-    case 'connection': return t(replacing ? 'setting.ai.replacementConnectionDescription' : 'setting.ai.connectionDescription');
-    case 'model': return t(replacing ? 'setting.ai.replacementModelDescription' : 'setting.ai.modelDescription');
-    case 'review': return t(replacing ? 'setting.ai.replacementReviewDescription' : 'setting.ai.reviewDescription');
+    case 'picker':
+      return t('setting.ai.pickerDescription');
+    case 'connection':
+      return t(
+        replacing
+          ? 'setting.ai.replacementConnectionDescription'
+          : 'setting.ai.connectionDescription',
+      );
+    case 'model':
+      return t(
+        replacing ? 'setting.ai.replacementModelDescription' : 'setting.ai.modelDescription',
+      );
+    case 'review':
+      return t(
+        replacing ? 'setting.ai.replacementReviewDescription' : 'setting.ai.reviewDescription',
+      );
   }
   return '';
 });
@@ -590,7 +698,8 @@ async function openProviderReplacement(provider: AIProviderConfigClientDTO) {
       entry.id !== 'custom' &&
       normalizeEndpointForCatalog(entry.defaultBaseUrl) === currentEndpoint,
   );
-  const entry = matchedPreset ?? providerCatalog.value.find((candidate) => candidate.id === 'custom');
+  const entry =
+    matchedPreset ?? providerCatalog.value.find((candidate) => candidate.id === 'custom');
   if (!entry) {
     toast.error(t('setting.ai.providerCatalogFailed'));
     return;

@@ -121,6 +121,7 @@ describe('PrismaTaskPlanMapper canonical persistence', () => {
       goalId: GOAL_ID,
       keyResultId: KEY_RESULT_ID,
       contribution: { value: 2, trigger: 'EachCompletion' },
+      progressRule: { mode: 'Fixed', value: 2, trigger: 'EachCompletion' },
     });
     expect(PrismaTaskPlanMapper.toPersistence(plan)).toMatchObject({
       goalId: GOAL_ID,
@@ -128,6 +129,17 @@ describe('PrismaTaskPlanMapper canonical persistence', () => {
       goalRecordValue: 2,
       goalProgressTrigger: 'EachCompletion',
     });
+  });
+
+  it.each([0, -2, null])('round-trips Prompt suggestion %s in separate columns', (suggestedValue) => {
+    const plan = PrismaTaskPlanMapper.toDomain(minimalRow({ goalId: GOAL_ID, keyResultId: KEY_RESULT_ID, goalProgressMode: 'Prompt', goalRecordValue: null, goalProgressTrigger: 'EachCompletion', goalSuggestedValue: suggestedValue }));
+    expect(plan.goalBinding?.progressRule).toEqual({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue });
+    expect(plan.goalBinding?.contribution).toBeNull();
+    expect(PrismaTaskPlanMapper.toPersistence(plan)).toMatchObject({ goalProgressMode: 'Prompt', goalRecordValue: null, goalProgressTrigger: 'EachCompletion', goalSuggestedValue: suggestedValue });
+  });
+  it('round-trips a signed Fixed delta with an explicit mode', () => {
+    const plan = PrismaTaskPlanMapper.toDomain(minimalRow({ goalId: GOAL_ID, keyResultId: KEY_RESULT_ID, goalProgressMode: 'Fixed', goalRecordValue: -2, goalProgressTrigger: 'PlanCompletion' }));
+    expect(PrismaTaskPlanMapper.toPersistence(plan)).toMatchObject({ goalProgressMode: 'Fixed', goalRecordValue: -2, goalSuggestedValue: null });
   });
 
   it('preserves lifecycle/audit fields', () => {

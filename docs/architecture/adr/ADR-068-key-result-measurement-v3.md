@@ -8,12 +8,14 @@ tags:
   - migration
 description: Key Result Measurement V3，以 initial/current/target 为用户真值并分离 tracking seed
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-12T21:49:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
+
+> **2026-09-29 Product vNext 收敛修订（target-design，待实施）：** GoalRecord 输入必须变成 measurement-aware，而不是默认把所有记录理解为正向增量。手动记录与 Task 完成时记录都复用同一套 Goal-owned delta/sample 语义与 preview 计算；Task 固定自动 contribution 继续只适用于兼容的自动语义，Task 用户输入 measurement 可覆盖 Sum/Average/Max/Min/Last。source correlation 与 record provenance 分离。
 
 # ADR-068: Key Result Measurement V3 — Initial / Current / Target
 
-**状态：** 已采纳并实施（GOAL-7204，2026-09-12）
+**状态：** 已采纳并实施（GOAL-7204，2026-09-12）；2026-09-29 Record Composer 修订待实施
 **日期：** 2026-09-08
 **影响范围：** Goal/KR domain、contracts、database、GoalRecord、Task contribution、AI Goal draft、Goal UI、Review snapshot
 **修订：** ADR-055 的用户字段、baseline 与 progress 算法；本 ADR 现为 canonical KR Measurement 真值
@@ -243,6 +245,8 @@ GoalRecord.value 表示 delta：
 current = trackingBaseValue + sum(records.value)
 ```
 
+delta 是 signed finite number，不等价于“永远为正数”。例如下降型累计指标可以记录 `-1`、`-5`。普通 UI 可以把 `0` 视为 no-op 并阻止无意义提交，但 domain measurement 不用 `positive()` 表达方向。
+
 ### 4.2 Average / Max / Min / Last
 
 GoalRecord.value 表示 sample：
@@ -253,6 +257,8 @@ Max     -> max(records)
 Min     -> min(records)
 Last    -> last(records)
 ```
+
+sample 同样只要求 finite number；`0` 和负数在体温偏差、损益、净变化、评分等场景都可能是合法 measurement。
 
 无 records 时：
 
@@ -292,6 +298,8 @@ KR3: 获得正式 Offer          Target: Q4 2026
 
 ## 6. UI
 
+### 6.1 KR editor
+
 默认 KR editor 必须展示：
 
 ```text
@@ -323,19 +331,106 @@ Target [2026-10]
   Weight [3]
 ```
 
+### 6.2 GoalRecord Composer
+
+当前 `GoalRecordDialog` 的“Plus 图标 + 正数 + +1/+2/+5/+10”只适用于部分 Sum KR，不能作为 V3 的长期 Record UI。
+
+目标是一个 Goal-owned measurement-aware composer，手动记录和 Task 完成时记录共享同一套输入语义：
+
+```text
+Sum
+  label = 本次变化
+  value = delta
+
+Average / Max / Min / Last
+  label = 本次记录值
+  value = sample
+```
+
+Composer 展示 live preview：
+
+```text
+Current -> After -> Target
+```
+
+输入改变时实时更新 After 与 progress，但 preview 只是预测；最终 `GoalRecord + currentValue` 仍由 Goal transaction 权威写入。
+
+preview 算法必须复用 Goal-owned `calculateKeyResultProgress` / record aggregation authority，不在 Task/Goal UI 各复制一份。
+
+对于 Max/Min，如果 sample 被保存但不改变 current，UI 必须明确表达：
+
+```text
+记录已保存
+当前最大/最小值保持不变
+```
+
+避免用户误以为提交失败。
+
 ## 7. 与 Task contribution 的边界
+
+必须区分 automatic fixed contribution 与 user-authored completion measurement。
+
+### 7.1 Automatic fixed contribution
 
 Task 自动 numeric contribution 仍默认只支持 `Sum` KR：
 
 ```text
 Task completion
- -> GoalContributionRule
+ -> fixed automatic rule
  -> GoalRecord(delta)
  -> Sum aggregation
  -> currentValue
 ```
 
-Task link 本身可指向非 Sum KR，但自动 numeric contribution 不能绕过 measurement semantics。
+Task link 本身可指向非 Sum KR，但自动 fixed value 不能绕过 measurement semantics。
+
+### 7.2 User-authored completion measurement
+
+Task 可配置“完成时记录”。此时用户点击 Complete 后输入真实值：
+
+```text
+Sum                 -> delta
+Average/Max/Min/Last -> sample
+```
+
+该值不是 Task 推断出来的 contribution，而是用户通过 Task completion surface 提交的 Goal measurement。
+
+链路：
+
+```text
+Task completion + user measurement intent
+ -> durable Task->Goal outbox
+ -> GoalRecord
+ -> Goal-owned aggregation
+```
+
+因此所有 V3 method 都可以被“完成时记录”覆盖，而不破坏 owner boundary。
+
+### 7.3 Source correlation 与 provenance 分离
+
+当前 GoalRecord 使用：
+
+```text
+sourceType
+sourceId
+```
+
+表达记录来自哪个 Task occurrence/plan。这个关联必须继续保留，用于幂等、撤销和审计。
+
+但还需要区分记录作者语义：
+
+```text
+Manual
+TaskAutomatic
+TaskUserMeasurement
+```
+
+至少保证：
+
+- `TaskAutomatic` 是 system fact，不允许普通手工改 value；
+- `TaskUserMeasurement` 保留 Task source correlation，但允许通过 Goal-owned correction command 修改用户输入的 value/note；
+- 修改 measurement 不应强迫用户撤销 Task completion；
+- uncomplete Task 时仍可根据 source correlation 撤销关联 Record。
 
 ## 8. V2 -> V3 无损语义迁移
 

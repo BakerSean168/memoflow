@@ -68,6 +68,23 @@ export default {
       "Unchecked": "GitHub 未检查"
     }
   },
+  capture: {
+    title: '审查 AI 知识笔记',
+    description:
+      '审查笔记并选择保存位置，准备好后即可批准。',
+    noteTitle: '标题',
+    topic: '主题',
+    path: '相对路径',
+    pathHint: '仅使用仓库 / Vault 内的 Markdown 相对路径，不接受绝对文件系统路径。',
+    source: '知识来源',
+    sourcePlaceholder: '选择知识来源',
+    tags: '标签',
+    markdown: 'Markdown 正文',
+    openReview: '打开 Knowledge 审查',
+    confirm: '批准笔记',
+    confirming: '批准中…',
+    validationFailed: '请先检查必填字段后再批准。',
+  },
   "writeRequestLedger": {
     "title": "写入请求账本",
     "description": "每次已提交的写入都有独立的 Git commit 状态与投影状态；投影 Pending 或 Failed 的记录可以重放。",

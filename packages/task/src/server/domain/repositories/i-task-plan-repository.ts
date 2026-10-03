@@ -9,7 +9,7 @@
  */
 
 import type { TaskPlan } from '../aggregates';
-import type { TaskPlanStatus } from '@memoflow/contracts/task';
+import type { ListTaskPlanFilters, TaskPlanStatus } from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 
 export class TaskLabelOwnershipError extends Error {
@@ -24,6 +24,22 @@ export class TaskLabelOwnershipError extends Error {
 /**
  * 任务查询过滤器
  */
+export interface TaskPlanPageQuery {
+  status?: readonly string[];
+  outcome?: Readonly<ListTaskPlanFilters['outcome']>;
+  archiveState?: ListTaskPlanFilters['archiveState'];
+  goalId?: string;
+  keyResultId?: string;
+  labelIdsAll?: readonly string[];
+  limit: number;
+  offset: number;
+}
+
+export interface TaskPlanPage {
+  plans: TaskPlan[];
+  total: number;
+}
+
 export interface TaskFilters {
   status?: string;
   goalId?: string;
@@ -52,6 +68,9 @@ export interface ITaskPlanRepository {
    * 根据用户 ID 查找所有任务模板
    */
   findByIdentityId(identityId: string): Promise<TaskPlan[]>;
+
+  /** Canonical bounded Task Plan list query used by product collection surfaces. */
+  findPage(identityId: string, query: TaskPlanPageQuery): Promise<TaskPlanPage>;
 
   /**
    * 根据状态查找任务模板

@@ -1,86 +1,64 @@
 ---
 tags:
   - governance
+  - engineering-governance
   - playbook
-  - maintenance
-description: Governance 变更手册 - 常见改动的最短路径
+description: Engineering Governance 变更手册
 created: 2026-03-14T00:00:00
-updated: 2026-07-06T00:00:00+08:00
+updated: 2026-10-03T10:30:00+09:00
 ---
 
-# Governance 变更手册
+# Engineering Governance 变更手册
 
-## 新增规则字段
+ADR-113 已退休 Product Governance Runtime。本手册只描述 repository-native Engineering Governance。
 
-1. 更新 `packages/contracts/src/modules/governance/` 中对应 DTO / Zod schema / response schema
-2. 更新 `src/server/domain/aggregates/rule.ts` 的 state / create / load / toDTO
-3. 更新 Prisma / PowerSync mapper
-4. 更新相关 tests
+## 修改 engineering rule metadata
 
-## 新增状态流转
+1. 编辑 `tools/governance/engineering-rules.json`。
+2. 保持 rule code / tags 排序与唯一性，referencePath 必须指向真实、维护中的 standards/architecture source。
+3. 审查语义变化后运行：
+   ```bash
+   node tools/governance/engineering-rule-source-audit.mjs --write
+   node tools/governance/engineering-rule-source-audit.mjs --check
+   ```
+4. 运行 native adapter 的 `check` / `report`。
+5. 运行 `pnpm nx run memoflow:governance-check`。
 
-1. 在 `src/server/domain/aggregates/rule.ts` 增加业务方法
-2. 如有必要，补 domain event
-3. 更新 use case 编排
-4. 更新 controller 错误映射
-5. 更新 tests 与文档
+不要创建 Product Rule、RuleRevision、数据库 seed、HTTP/IPC endpoint 或 Product UI 来承载工程规则。
 
-## 新增 HTTP 端点
+## 新增可执行规则
 
-1. 先判断属于哪个资源：`Rule` 还是 `RuleRevision`
-2. 优先落在现有资源文件：`governance-rules.routes.ts` 或 `governance-rule-revisions.routes.ts`
-3. 只有当某个资源继续膨胀到不优雅时，才在该资源内部继续细分 feature 文件
-4. 在 route 文件内注册 OpenAPI
-5. 在 `src/api/routes/index.ts` 聚合
-6. 补 route contract spec
+优先顺序：
 
-## 新增查询参数
+1. 先在 `docs/standards` 或 ADR 中明确约束与 owner；
+2. 为真实业务 owner 补 characterization / contract evidence；
+3. 在 `tools/governance` 中实现 deterministic audit；
+4. 给 audit 补 pass/fail fixture；
+5. 把 audit 接入 `project.json` 的 `memoflow:governance-check`；
+6. 必要时再把 metadata 加入 `engineering-rules.json`。
 
-1. 修改 `packages/contracts/src/modules/governance/api/*.ts` 中 query schema
-2. 修改 route parser
-3. 修改 use case 输入类型与实现
-4. 补 schema / use case / route 测试
+Audit 必须尽量 fail-closed、可重复、无网络依赖；不得把产品数据库当作规则事实源。
 
-## 新增 IPC 通道或 payload
+## 修改现有 audit
 
-1. 只改 `packages/contracts/src/modules/governance/protocol/*`
-2. 先对齐 `GovernanceChannels` 与 `GovernanceRpcMap`
-3. 再对齐 `src/client/index.ts` 与 `src/electron/index.ts`
-4. 不要回到 `packages/contracts/src/electron/ipc-channels.ts` 添加 governance 常量
+- 优先修改纯函数/library，再修改 CLI wrapper；
+- 保持 production source、fixtures、generated assets 的扫描边界显式；
+- 新增例外必须具备 owner / reason / retirement condition；
+- 如果规则会影响多个业务模块，先在至少两个真实 owner 上证明相同约束后再提升为共享 gate；
+- 任何自动修复默认输出 proposal，除非专门 ADR 明确允许写入。
 
-## 新增持久化实现差异
+## Retirement / negative lock
 
-1. 优先对齐 `src/server/domain/repositories/` 中的仓储接口
-2. 再对齐 Prisma 与 PowerSync 双 mapper
-3. 避免让某一端独享领域语义
+已退休的架构 surface 应进入 `tools/governance/vnext-retirement-manifest.json` 或对应 canonical retirement manifest，使用 forbidden path/reference 做负向锁，不保留为了“证明已退休”而继续依赖旧实现的兼容测试。
 
-## 新增示例规则 seed
+## 最小验收
 
-1. 修改 `src/server/infrastructure/seed/seed-data.ts`
-2. 保证它既能说明业务规则，也能说明代码规范
-3. 不要把 seed 写成只对 demo 有意义的空内容
+```bash
+node tools/governance/engineering-rule-source-audit.mjs --check
+node tools/governance/engineering-input-dependency-audit.mjs
+node tools/governance/vnext-retirement-audit.mjs
+pnpm nx run memoflow:governance-check
+git diff --check
+```
 
-## 调整前端缓存策略
-
-1. `@memoflow/governance/client` 只负责调用并返回 DTO
-2. Pinia 只缓存 POJO / DTO，不缓存 class 实例
-3. app-vue 在 `display-rule.ts` 本地派生展示模型
-4. 只有 UI 真的需要派生字段时，才在 app 层增加 helper
-
-## 调整服务端内部结构
-
-1. 业务模型只进 `src/server/domain/`
-2. 用例和统一调用门面只进 `src/server/application/`
-3. 控制器和 transport 翻译只进 `src/server/transport/`
-4. 模块运行时副作用只进 `src/server/infrastructure/runtime/`
-5. 持久化适配器和组合根只进 `src/server/infrastructure/`
-6. 不要恢复 `domain-shared`、`domain-server`、`application-server`、`controllers` 这种分裂目录
-
-## 调整公开导出面
-
-1. 公共契约只走 `@memoflow/contracts/governance`
-2. server root 只走 `@memoflow/governance`
-3. HTTP 模块只走 `@memoflow/governance/api`
-4. renderer client 只走 `@memoflow/governance/client`
-5. desktop main 只走 `@memoflow/governance/electron`
-6. mocks 只走 `@memoflow/contracts/mocks`
+涉及代码、workspace 或 build graph 时，再运行受影响项目的 typecheck / test / build。

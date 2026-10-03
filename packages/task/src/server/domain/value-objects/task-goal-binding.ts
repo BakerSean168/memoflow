@@ -8,8 +8,10 @@ import type {
   GoalContributionRule,
   TaskGoalLink as ITaskGoalLink,
   TaskGoalLinkDTO,
+  TaskGoalLinkInput,
+  TaskGoalProgressRule,
 } from '@memoflow/contracts/task';
-import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 
 export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITaskGoalLink {
@@ -17,9 +19,19 @@ export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITa
     super(props);
   }
 
-  public static create(props: TaskGoalLinkDTO): TaskGoalBinding {
-    const normalized = this.normalize(props);
-    this.validate(normalized);
+  public static create(props: TaskGoalLinkInput): TaskGoalBinding {
+    if (!props.goalId?.trim()) throw new Error('Goal ID is required');
+    if (props.keyResultId != null && props.keyResultId.trim().length === 0) {
+      throw new Error('Key Result ID cannot be empty');
+    }
+    const configuration = TaskGoalProgressConfigurationSchema.parse(props);
+    if (configuration.progressRule && !props.keyResultId)
+      throw new Error('Goal contribution requires a Key Result');
+    const normalized = {
+      goalId: props.goalId,
+      keyResultId: props.keyResultId ?? null,
+      ...configuration,
+    };
     return new TaskGoalBinding(normalized);
   }
 
@@ -31,33 +43,8 @@ export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITa
     return TaskGoalBinding.create({ goalId, keyResultId, contribution });
   }
 
-  public static fromDTO(dto: TaskGoalLinkDTO): TaskGoalBinding {
+  public static fromDTO(dto: TaskGoalLinkInput): TaskGoalBinding {
     return TaskGoalBinding.create(dto);
-  }
-
-  private static validate(props: TaskGoalLinkDTO): void {
-    if (!props.goalId || props.goalId.trim().length === 0) throw new Error('Goal ID is required');
-    if (props.keyResultId !== null && props.keyResultId.trim().length === 0) {
-      throw new Error('Key Result ID cannot be empty');
-    }
-    if (props.contribution && !props.keyResultId) {
-      throw new Error('Goal contribution requires a Key Result');
-    }
-    if (!props.contribution) return;
-    if (!Number.isFinite(props.contribution.value) || props.contribution.value <= 0) {
-      throw new Error('Goal contribution value must be positive');
-    }
-    if (!Object.values(TaskGoalBindingTrigger).includes(props.contribution.trigger)) {
-      throw new Error('Task goal contribution trigger is invalid');
-    }
-  }
-
-  private static normalize(props: TaskGoalLinkDTO): TaskGoalLinkDTO {
-    return {
-      goalId: props.goalId,
-      keyResultId: props.keyResultId ?? null,
-      contribution: props.contribution ?? null,
-    };
   }
 
   public get goalId(): GoalId {
@@ -68,22 +55,32 @@ export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITa
     return (this.props.keyResultId as KeyResultId | null) ?? null;
   }
 
+  public get progressRule(): TaskGoalProgressRule | null {
+    return this.props.progressRule ? { ...this.props.progressRule } : null;
+  }
+
   public get contribution(): GoalContributionRule | null {
-    return this.props.contribution ? { ...this.props.contribution } : null;
+    const rule = this.progressRule;
+    return rule?.mode === 'Fixed' ? { value: rule.value, trigger: rule.trigger } : null;
   }
 
   public get hasContribution(): boolean {
-    return this.props.contribution !== null;
+    return this.progressRule?.mode === 'Fixed';
   }
 
   public withContribution(contribution: GoalContributionRule | null): TaskGoalBinding {
-    return TaskGoalBinding.create({ ...this.props, contribution });
+    return TaskGoalBinding.create({
+      goalId: this.goalId,
+      keyResultId: this.keyResultId,
+      contribution,
+    });
   }
 
   public getDisplayText(): string {
     const kr = this.props.keyResultId ? `, KR: ${this.props.keyResultId}` : '';
-    const contribution = this.props.contribution
-      ? `, Contribution: ${this.props.contribution.value} (${this.props.contribution.trigger})`
+    const rule = this.contribution;
+    const contribution = rule
+      ? `, Contribution: ${rule.value} (${rule.trigger})`
       : ', Contribution: off';
     return `Goal: ${this.props.goalId}${kr}${contribution}`;
   }
@@ -92,7 +89,8 @@ export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITa
     return {
       goalId: this.props.goalId,
       keyResultId: this.props.keyResultId ?? null,
-      contribution: this.props.contribution ? { ...this.props.contribution } : null,
+      progressRule: this.progressRule,
+      contribution: this.contribution,
     };
   }
 }

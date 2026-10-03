@@ -325,9 +325,9 @@ describe('useAppShellStore (V2 shell tabs)', () => {
   it('resolvePanelWidth clamps for render without mutating preferred width', () => {
     const store = useAppShellStore();
     store.setPanelWidth(760);
-    // 1200 viewport, 260 sidebar => max = min(760, 940-320)=620
+    // 1200 viewport, 260 sidebar, 12px desktop chrome => max = 928-320=608
     const effective = store.resolvePanelWidth(1200, 260);
-    expect(effective).toBe(620);
+    expect(effective).toBe(608);
     expect(store.panelWidth).toBe(760);
   });
 
@@ -335,7 +335,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     const store = useAppShellStore();
 
     expect(store.panelWidth).toBeNull();
-    expect(store.resolvePanelWidth(1280, 240)).toBe(666);
+    expect(store.resolvePanelWidth(1280, 240)).toBe(658);
     expect(store.panelWidth).toBeNull();
   });
 
@@ -344,7 +344,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     store.panelWidth = 520;
 
     expect(store.panelWidthSource).toBe('responsive');
-    expect(store.resolvePanelWidth(1280, 260)).toBe(653);
+    expect(store.resolvePanelWidth(1280, 260)).toBe(645);
 
     store.setPanelWidth(600);
     expect(store.panelWidthSource).toBe('user');
@@ -353,7 +353,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     store.resetPanelWidthPreference();
     expect(store.panelWidth).toBeNull();
     expect(store.panelWidthSource).toBe('responsive');
-    expect(store.resolvePanelWidth(1280, 260)).toBe(653);
+    expect(store.resolvePanelWidth(1280, 260)).toBe(645);
   });
 
   it('does not clamp user widths to a product maximum', () => {

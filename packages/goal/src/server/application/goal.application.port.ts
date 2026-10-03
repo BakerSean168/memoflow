@@ -1,4 +1,5 @@
 import type {
+  KeyResultClientDTO,
   CloneGoalReq,
   CreateGoalReq,
   GetGoalAggregateRes,
@@ -6,6 +7,8 @@ import type {
   GetGoalRes,
   GoalMutationReceipt,
   GoalReviewSystemContext,
+  GoalReviewWindowInput,
+  CreateGoalReviewReq,
   GoalTimeframe,
   ListGoalsQuery,
   QueryGoalsRes,
@@ -23,6 +26,7 @@ import type { ListGoalReviewsResult } from './use-cases/queries/list-goal-review
 /** Transport-neutral callable application surface. */
 export interface GoalApplicationPort {
   createGoal(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>>;
+  getKeyResultMeasurementContext(goalId: string, keyResultId: string, identityId: string): Promise<Result<Pick<KeyResultClientDTO, 'id' | 'title' | 'progress'>>>;
   getGoal(id: string, identityId: string, includeChildren?: boolean): Promise<Result<GetGoalRes>>;
   listGoals(input: ListGoalsQuery): Promise<Result<QueryGoalsRes>>;
   getHomeSummary(identityId: string): Promise<Result<GoalHomeProgressSummary>>;
@@ -118,18 +122,12 @@ export interface GoalApplicationPort {
   addReview(
     goalId: string,
     identityId: string,
-    params: {
-      reflection: string;
-      challenges?: string | null;
-      adjustments?: string | null;
-      windowDays?: number;
-      expectedVersion: number;
-    },
+    params: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
   getReviewContext(
     goalId: string,
     identityId: string,
-    windowDays?: number,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>>;
   listReviews(goalId: string, identityId: string): Promise<Result<ListGoalReviewsResult>>;
   updateReview(

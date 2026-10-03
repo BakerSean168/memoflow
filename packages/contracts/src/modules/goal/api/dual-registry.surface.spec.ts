@@ -32,7 +32,6 @@ import { describe, expect, it } from 'vitest';
       ],
       [resolve(modules, 'task/api/task-schedule.dto.ts'), ['ToggleTaskCompletionRes']],
       [resolve(modules, 'setting/api/sync.dto.ts'), ['SyncSettingsRes']],
-      [resolve(modules, 'governance/api/rule-revisions.ts'), ['GetRuleRevisionRes']],
       // residual 290
       [
         resolve(goalApi, 'goal-crud.dto.ts'),

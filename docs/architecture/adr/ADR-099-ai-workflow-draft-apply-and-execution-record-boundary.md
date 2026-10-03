@@ -11,8 +11,10 @@ tags:
   - vnext
 description: ADR-099 - AI Workflow Draft/Apply、stable draftRef、ExecutionRecord 与 legacy AI persistence retirement
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-18T00:00:00+00:00
+updated: 2026-09-29T13:35:00+08:00
 ---
+
+> **2026-09-29 UI orchestration addendum:** ADR-112 保留本 ADR 的 Mastra draft/draftRef/revision/retry/apply 语义，但改变用户编辑面：internal draft 不再要求一套 AI-owned Goal/Task/Knowledge editor，目标改为把 proposal 投影到 owner-native edit session。ADR-099 继续是 runtime/apply 真值；ADR-112 是 product surface/orchestration 真值。
 
 # ADR-099: AI Workflow Draft、Apply 与 Execution Record Boundary
 

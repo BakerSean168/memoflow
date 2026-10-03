@@ -6,6 +6,7 @@ import { aLoadedTaskPlan, aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } fro
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-case';
+import { TaskGoalBinding } from '../../../../domain/value-objects/task-goal-binding';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('CompleteTaskOccurrenceUseCase', () => {
@@ -217,5 +218,125 @@ describe('CompleteTaskOccurrenceUseCase', () => {
       expect(result.data.occurrence).toBeDefined();
       expect(result.data.occurrence.id).toBe(occurrence.id);
     }
+  });
+  it.each([0, -4])(
+    'embeds Prompt fact %s and keeps task and Goal notes distinct',
+    async (value) => {
+      const plan = aLoadedTaskPlan({
+        title: 'Measure task',
+        goalBinding: TaskGoalBinding.fromDTO({
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 },
+        }),
+      });
+      const occurrence = await aTaskOccurrence({ planId: plan.id });
+      instanceRepo.findByIdForIdentity.mockResolvedValue(occurrence);
+      templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+      const result = await useCase.execute(occurrence.id, occurrence.identityId, {
+        note: 'Task note',
+        goalMeasurement: { value, note: 'Measurement note' },
+      });
+      expect(result).toBeOk();
+      expect(occurrence.result?.note).toBe('Task note');
+      expect(occurrence.domainEvents).toContainEqual(
+        expect.objectContaining({
+          eventType: 'task:occurrence-completed',
+          payload: expect.objectContaining({
+            goalMeasurement: { value, note: 'Measurement note' },
+            goalBinding: plan.goalBinding?.toDTO(),
+          }),
+        }),
+      );
+    },
+  );
+
+  it('completes Prompt without inventing a fact from suggestedValue', async () => {
+    const plan = aLoadedTaskPlan({
+      goalBinding: TaskGoalBinding.fromDTO({
+        goalId: 'goal-1',
+        keyResultId: 'kr-1',
+        progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 },
+      }),
+    });
+    const occurrence = await aTaskOccurrence({ planId: plan.id });
+    instanceRepo.findByIdForIdentity.mockResolvedValue(occurrence);
+    templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+    expect(await useCase.execute(occurrence.id, occurrence.identityId)).toBeOk();
+    const event = occurrence.domainEvents.find(
+      (event) => event.eventType === 'task:occurrence-completed',
+    );
+    expect(event?.payload).not.toHaveProperty('goalMeasurement');
+  });
+
+  it.each(['Fixed', 'LinkOnly', 'GoalOnly', 'Missing'] as const)(
+    'rejects measurement for %s before mutation',
+    async (mode) => {
+      const plan = aLoadedTaskPlan();
+      if (mode === 'Fixed')
+        plan.bindToGoal('goal-1', 'kr-1', {
+          value: 2,
+          trigger: TaskGoalBindingTrigger.EachCompletion,
+        });
+      if (mode === 'LinkOnly') plan.bindToGoal('goal-1', 'kr-1');
+      if (mode === 'GoalOnly') plan.bindToGoal('goal-1');
+      const occurrence = await aTaskOccurrence({ planId: plan.id });
+      const complete = vi.spyOn(occurrence, 'complete');
+      instanceRepo.findByIdForIdentity.mockResolvedValue(occurrence);
+      templateRepo.findByIdForIdentity.mockResolvedValue(mode === 'Missing' ? null : plan);
+      expect(
+        await useCase.execute(occurrence.id, occurrence.identityId, {
+          goalMeasurement: { value: 0 },
+        }),
+      ).toBeErrorWithCode('VALIDATION_ERROR');
+      expect(complete).not.toHaveBeenCalled();
+      expect(instanceRepo.save).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([{ value: Infinity }, { value: 1, note: 'a'.repeat(501) }])(
+    'rejects malformed measurement before mutation',
+    async (goalMeasurement) => {
+      const plan = aLoadedTaskPlan({
+        goalBinding: TaskGoalBinding.fromDTO({
+          goalId: 'goal-1',
+          keyResultId: 'kr-1',
+          progressRule: { mode: 'Prompt', trigger: 'EachCompletion' },
+        }),
+      });
+      const occurrence = await aTaskOccurrence({ planId: plan.id });
+      instanceRepo.findByIdForIdentity.mockResolvedValue(occurrence);
+      templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+      expect(
+        await useCase.execute(occurrence.id, occurrence.identityId, { goalMeasurement }),
+      ).toBeErrorWithCode('VALIDATION_ERROR');
+      expect(occurrence.status).toBe('Pending');
+      expect(instanceRepo.save).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects an invalid persisted Prompt configuration before mutation', async () => {
+    const plan = aLoadedTaskPlan({
+      goalBinding: TaskGoalBinding.fromDTO({
+        goalId: 'goal-1',
+        keyResultId: 'kr-1',
+        progressRule: { mode: 'Prompt', trigger: 'EachCompletion' },
+      }),
+    });
+    const binding = plan.goalBinding!;
+    vi.spyOn(binding, 'toDTO').mockReturnValue({
+      ...binding.toDTO(),
+      progressRule: { mode: 'Prompt', trigger: 'PlanCompletion' } as never,
+    });
+    const occurrence = await aTaskOccurrence({ planId: plan.id });
+    instanceRepo.findByIdForIdentity.mockResolvedValue(occurrence);
+    templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+    expect(
+      await useCase.execute(occurrence.id, occurrence.identityId, {
+        goalMeasurement: { value: 1 },
+      }),
+    ).toBeErrorWithCode('VALIDATION_ERROR');
+    expect(occurrence.status).toBe('Pending');
+    expect(instanceRepo.save).not.toHaveBeenCalled();
   });
 });

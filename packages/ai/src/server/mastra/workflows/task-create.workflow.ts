@@ -1,3 +1,4 @@
+import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { TaskPlannerMode, TaskPlannerPort } from '../agents/task-planner.worker';
+import { taskWorkflowEntityId } from './deterministic-entity-id';
 import { ApplyTaskPlanService } from './apply-task-plan.service';
 
 export const TASK_CREATE_WORKFLOW_ID = 'task-create';
@@ -150,6 +152,17 @@ export function createTaskCreateWorkflow(input: {
         });
         return await suspend({
           type: 'task_draft_review' as const,
+          ownerCreate: {
+            taskId: CreateTaskPlanSchema.shape.id.unwrap().parse(
+              taskWorkflowEntityId({
+                workflowRunId: runId,
+                revision: draft.revision,
+                draftRef: draft.task.draftRef,
+                operation: 'task_plan_create',
+              }),
+            ),
+            draftRef: draft.task.draftRef,
+          },
           draft,
           warnings: draft.warnings,
           revision: draft.revision,

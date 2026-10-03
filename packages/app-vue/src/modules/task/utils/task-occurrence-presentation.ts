@@ -1,8 +1,6 @@
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { endOfDayMs, formatProductYmd, isTodayMs } from '../../../shared/utils/product-time';
-
-export type TaskOccurrenceSurface = 'today' | 'upcoming';
+import { formatProductYmd, isSameDayMs } from '../../../shared/utils/product-time';
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
 
 const OPEN_STATUSES = new Set<TaskOccurrenceClientDTO['status']>(['Pending', 'InProgress']);
@@ -28,15 +26,11 @@ export function isTaskOccurrenceOverdue(
   );
 }
 
-export function isTaskOccurrenceOnSurface(
+export function isTaskOccurrenceOnTodaySurface(
   instance: TaskOccurrenceClientDTO,
-  surface: TaskOccurrenceSurface,
   now = Date.now(),
 ): boolean {
-  if (surface === 'upcoming') {
-    return instance.dueAt > endOfDayMs(now);
-  }
-  return isTodayMs(instance.dueAt) || isTaskOccurrenceOverdue(instance, now);
+  return isSameDayMs(instance.dueAt, now) || isTaskOccurrenceOverdue(instance, now);
 }
 
 export function getTaskOccurrenceStatusLabel(

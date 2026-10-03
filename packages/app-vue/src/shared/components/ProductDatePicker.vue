@@ -26,7 +26,7 @@
     </PopoverTrigger>
     <PopoverContent
       align="start"
-      class="w-[19rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-[10px] border-border/80 bg-[hsl(var(--surface-overlay))] p-0 shadow-lg dark:border-white/10 dark:shadow-[0_18px_40px_rgba(0,0,0,0.38),0_2px_8px_rgba(0,0,0,0.24)]"
+      class="w-[19rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_18px_48px_-22px_rgba(0,0,0,0.52),0_4px_14px_-10px_rgba(0,0,0,0.45),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
     >
       <ProductTemporalPickerSurface
         :label="label"

@@ -52,7 +52,11 @@ export interface TaskClientPort {
     planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrence[]>>;
-  listOccurrencesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>>;
+  listOccurrencesByDateRange(
+    from: number,
+    to: number,
+    options?: { includeOverdueOpen?: boolean },
+  ): Promise<Result<TaskOccurrence[]>>;
   getOccurrence(id: string): Promise<Result<TaskOccurrence>>;
   deleteOccurrence(id: string): Promise<Result<void>>;
   startOccurrence(id: string): Promise<Result<TaskOccurrence>>;

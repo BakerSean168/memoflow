@@ -1,6 +1,6 @@
 # @memoflow/task
 
-任务模块 — 任务模板、实例与依赖管理。Task 与 Governance / Goal 一样使用 host-composer 装配模式：模块只暴露 transport-neutral 的深模块工厂与 ingredient factory，宿主运行时选择持久化 adapter 并组装 instance。
+任务模块 — 任务模板、实例与依赖管理。Task 与 Goal 一样使用 host-composer 装配模式：模块只暴露 transport-neutral 的深模块工厂与 ingredient factory，宿主运行时选择持久化 adapter 并组装 instance。
 
 ## 公开 seam
 

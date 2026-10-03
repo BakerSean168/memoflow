@@ -12,6 +12,7 @@ function applyEvent(
     schemaVersion: 2,
     eventType: 'task.goal-progress-requested',
     action: 'apply',
+    recordingMode: 'FixedAutomatic',
     identityId: 'identity-1' as never,
     taskOccurrenceId: 'instance-1' as never,
     taskPlanId: 'template-1' as never,
@@ -59,6 +60,7 @@ describe('GoalTaskProgressHandler', () => {
       {
         value: 3,
         note: '任务实例完成: Write tests',
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_INSTANCE', id: 'instance-1' },
       },
       'identity-1',
@@ -73,6 +75,7 @@ describe('GoalTaskProgressHandler', () => {
       'kr-1',
       expect.objectContaining({
         note: '任务计划完成: Write tests',
+        authorship: 'TaskAutomatic' as const,
         source: { type: 'TASK_TEMPLATE', id: 'template-1' },
       }),
       'identity-1',
@@ -101,5 +104,41 @@ describe('GoalTaskProgressHandler', () => {
     await expect(handler({ remove }).handle(revertEvent())).rejects.toThrow(
       'Task -> Goal removal failed (NOT_FOUND)',
     );
+  });
+  it.each(['User note', null, undefined])(
+    'maps Prompt to TaskUserMeasurement with note %s',
+    async (note) => {
+      const execute = vi.fn(async () => ok({} as never));
+      await handler({ create: execute }).handle(
+        applyEvent('TaskOccurrence', {
+          recordingMode: 'PromptedUserMeasurement',
+          value: 0,
+          note,
+        }),
+      );
+      expect(execute).toHaveBeenCalledWith(
+        'goal-1',
+        'kr-1',
+        {
+          value: 0,
+          note: note ?? undefined,
+          authorship: 'TaskUserMeasurement',
+          source: { type: 'TASK_INSTANCE', id: 'instance-1' },
+        },
+        'identity-1',
+      );
+    },
+  );
+
+  it('rejects Prompt with a plan source', async () => {
+    const execute = vi.fn();
+    await expect(
+      handler({ create: execute }).handle(
+        applyEvent('TaskPlan', {
+          recordingMode: 'PromptedUserMeasurement',
+        }),
+      ),
+    ).rejects.toThrow('Prompted measurement requires TaskOccurrence source');
+    expect(execute).not.toHaveBeenCalled();
   });
 });

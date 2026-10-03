@@ -1,3 +1,5 @@
+import { ref } from 'vue';
+import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
@@ -53,6 +55,37 @@ describe('useTaskPlanListQuery', () => {
     expect(service.listPlans).toHaveBeenCalledTimes(1);
     expect(first.api.templates.value).toHaveLength(1);
     expect(first.api.total.value).toBe(1);
+  });
+
+  it('stays disabled on Today and automatically fetches the current filtered page on Plans', async () => {
+    const service = makeService();
+    service.listPlans.mockResolvedValue(ok({ plans: [], total: 123 }));
+    const surface = ref('today');
+    const page = ref(1);
+    const { api } = mountTaskComposable(() => useTaskPlanListQuery({
+      params: () => ({ page: page.value, limit: 100, outcome: ['Open'], archiveState: 'active', labelIdsAll: ['b', 'a'] }),
+      enabled: () => surface.value === 'plans',
+    }), { service });
+    await flushPromises();
+    page.value = 2;
+    await flushPromises();
+    expect(service.listPlans).not.toHaveBeenCalled();
+    expect(api.query.fetchStatus.value).toBe('idle');
+
+    surface.value = 'plans';
+    await vi.waitFor(() => expect(api.isLoading.value).toBe(false));
+    expect(service.listPlans).toHaveBeenCalledExactlyOnceWith({
+      page: 2, limit: 100, outcome: ['Open'], archiveState: 'active', labelIdsAll: ['a', 'b'],
+    });
+    expect(api.total.value).toBe(123);
+
+    surface.value = 'today';
+    page.value = 3;
+    await flushPromises();
+    expect(service.listPlans).toHaveBeenCalledTimes(1);
+    surface.value = 'plans';
+    await vi.waitFor(() => expect(service.listPlans).toHaveBeenCalledTimes(2));
+    expect(service.listPlans).toHaveBeenLastCalledWith(expect.objectContaining({ page: 3 }));
   });
 
   it('isolates the Task Plan list cache by identity scope', async () => {

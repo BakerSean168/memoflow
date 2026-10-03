@@ -57,11 +57,17 @@ export { ReminderTriggerType } from './reminder-trigger-type';
 
 export {
   GoalReviewSystemContextSchema,
+  GoalReviewSignalSchema,
+  GoalReviewOverallSignalSchema,
+  GoalReviewKeyResultSignalSchema,
+  GoalReviewActivitySignalSchema,
+  GoalReviewKeyResultMovementEvidenceSchema,
   GoalReviewKeyResultContextSchema,
   GoalReviewTrendPointSchema,
 } from './goal-review-context';
 export type {
   GoalReviewSystemContext,
+  GoalReviewSignal,
   GoalReviewKeyResultContext,
   GoalReviewTrendPoint,
 } from './goal-review-context';

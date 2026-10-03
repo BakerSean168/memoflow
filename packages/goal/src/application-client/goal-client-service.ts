@@ -26,6 +26,7 @@ import type {
   DeleteGoalReviewReq,
   GoalReviewClientDTO,
   GoalReviewSystemContext,
+  GoalReviewWindowInput,
   GoalClientDTO,
   GoalMutationReceipt,
   GoalSystemView,
@@ -124,6 +125,9 @@ function goalRecordFromDTO(dto: GoalRecordClientDTO): GoalRecord {
     value: dto.value,
     valueAfter: dto.valueAfter,
     comment: dto.comment,
+    authorship: dto.authorship,
+    source: dto.source,
+    recordedAt: dto.recordedAt,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
   });
@@ -209,7 +213,13 @@ export interface GoalClientPort {
     goalId: string,
     krId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>>;
+  ): Promise<
+    Result<{
+      records: GoalRecord[];
+      total: number;
+      previewContext?: GetGoalRecordsRes['previewContext'];
+    }>
+  >;
   getGoalRecordsByGoal(
     goalId: string,
     params?: { limit?: number; offset?: number },
@@ -227,7 +237,7 @@ export interface GoalClientPort {
   getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReview[] }>>;
   getGoalReviewContext(
     goalId: string,
-    windowDays?: number,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,
@@ -457,11 +467,18 @@ export class GoalClientService implements GoalClientPort {
     goalId: string,
     krId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>> {
+  ): Promise<
+    Result<{
+      records: GoalRecord[];
+      total: number;
+      previewContext?: GetGoalRecordsRes['previewContext'];
+    }>
+  > {
     const result = await this.goalApi.getGoalRecordsByKeyResult(goalId, krId, params);
     return mapResult(result, (data: GetGoalRecordsRes) => ({
       records: data.data.map((dto) => goalRecordFromDTO(dto)),
       total: data.total,
+      previewContext: data.previewContext,
     }));
   }
 
@@ -503,9 +520,9 @@ export class GoalClientService implements GoalClientPort {
 
   async getGoalReviewContext(
     goalId: string,
-    windowDays: number = 7,
+    input?: GoalReviewWindowInput,
   ): Promise<Result<GoalReviewSystemContext>> {
-    return this.goalApi.getGoalReviewContext(goalId, windowDays);
+    return this.goalApi.getGoalReviewContext(goalId, input);
   }
 
   async updateGoalReview(

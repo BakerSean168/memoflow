@@ -6,7 +6,7 @@ import {
   createServerStateInvalidationDispatcher,
   type ServerStateInvalidation,
 } from './invalidation-dispatcher';
-import { governanceQueryKeys, notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
+import { notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
 
 /** Wait for the current microtask turn so dispatcher turn-batching flushes. */
 async function flushTurn(): Promise<void> {
@@ -145,40 +145,7 @@ describe('invalidation-dispatcher — key mapping', () => {
     expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
 
-  it('governance mutation invalidates lists + details + revision prefix (+ detail(id))', async () => {
-    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
-    await dispatcher.invalidate({
-      target: 'governance',
-      identityScope: 'id-1',
-      source: 'mutation',
-      entityId: 'RuleId_x',
-    });
-    await flushTurn();
 
-    const keys = calledQueryKeys();
-    expect(keys).toContainEqual(governanceQueryKeys.lists('id-1'));
-    expect(keys).toContainEqual(governanceQueryKeys.details('id-1'));
-    expect(keys).toContainEqual(governanceQueryKeys.detail('id-1', 'RuleId_x'));
-    expect(
-      keys.some((k) => k[0] === 'server-state' && k[1] === 'governance' && k[3] === 'revision'),
-    ).toBe(true);
-  });
-
-  it('governance mutation projection revisions invalidates revisions only', async () => {
-    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
-    await dispatcher.invalidate({
-      target: 'governance',
-      identityScope: 'id-1',
-      source: 'mutation',
-      projection: 'revisions',
-    });
-    await flushTurn();
-
-    const keys = calledQueryKeys();
-    expect(keys).toContainEqual([...governanceQueryKeys.identity('id-1'), 'revision'] as QueryKey);
-    expect(keys).not.toContainEqual(governanceQueryKeys.lists('id-1'));
-    expect(keys).not.toContainEqual(governanceQueryKeys.details('id-1'));
-  });
 });
 
 describe('invalidation-dispatcher — turn batching & dedupe', () => {

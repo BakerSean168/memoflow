@@ -5,6 +5,7 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import AIFooterComposer from './AIFooterComposer.vue';
+import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 
 vi.mock('@memoflow/ui-vue-shadcn', async () => {
   const vue = await import('vue');
@@ -131,6 +132,27 @@ function mountComposer(
 describe('AIFooterComposer (Global Composer input)', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('uses floating composer elevation and inset context chips while preserving removal events', async () => {
+    const wrapper = mountComposer({
+      attachments: [
+        { id: 'a1', data: 'data:image/png;base64,AAAA', mediaType: 'image/png', size: 4 },
+      ],
+      contextEntities: [{ entityType: 'task', id: 't1', label: 'Review', origin: 'explicit' }],
+    });
+
+    expect(wrapper.get('[data-testid="ai-composer-surface"]').classes()).toContain(
+      semanticElevationClass('floating'),
+    );
+    for (const selector of ['ai-composer-attachment-chip', 'ai-composer-entity-chip']) {
+      const chip = wrapper.get(`[data-testid="${selector}"]`);
+      expect(chip.classes()).toContain(semanticElevationClass('inset'));
+      await chip.get('button').trigger('click');
+    }
+    expect(wrapper.emitted('remove-attachment')).toEqual([['a1']]);
+    expect(wrapper.emitted('remove-context-entity')).toEqual([['task', 't1']]);
+    wrapper.unmount();
   });
 
   it('sends on Enter and keeps Shift+Enter as newline', async () => {

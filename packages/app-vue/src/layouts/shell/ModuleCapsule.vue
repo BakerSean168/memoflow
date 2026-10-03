@@ -27,6 +27,7 @@ const { t } = useI18n();
 
 type CapsuleOpenMode = 'closed' | 'hover' | 'pinned';
 
+const previewButton = ref<HTMLButtonElement | null>(null);
 const openMode = ref<CapsuleOpenMode>('closed');
 const open = computed(() => openMode.value !== 'closed');
 const previewWidthClass = computed(() => {
@@ -117,6 +118,12 @@ function handleOpenChange(value: boolean): void {
   if (!value) dismissPreview();
 }
 
+function handleEscape(): void {
+  const restoreFocus = previewHasFocus();
+  dismissPreview();
+  if (restoreFocus) void nextTick(() => previewButton.value?.focus({ preventScroll: true }));
+}
+
 function dismissPreview(): void {
   clearOpenTimer();
   clearCloseTimer();
@@ -137,17 +144,18 @@ onBeforeUnmount(() => {
 <template>
   <Popover :open="open" @update:open="handleOpenChange">
     <div
-      class="flex shrink-0 items-center overflow-hidden rounded-full border border-border/70 bg-background/80 shadow-sm transition-colors hover:border-border hover:bg-accent/50"
+      class="module-capsule flex shrink-0 items-center overflow-hidden rounded-lg border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.72)] text-[hsl(var(--foreground-muted))] shadow-[inset_0_1px_0_hsl(var(--foreground)/0.025)] transition-[background-color,border-color,color] duration-150 hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--hover))]"
       :data-testid="`capsule-${id}`"
     >
       <button
         type="button"
-        class="module-capsule-main flex h-8 items-center gap-1.5 px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        class="module-capsule-main flex h-8 min-w-8 items-center gap-1.5 px-2.5 text-[12px] font-medium leading-none text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :data-testid="`capsule-nav-${id}`"
         :title="label"
+        :aria-label="label"
         @click="enterModule"
       >
-        <component :is="icon" class="h-3.5 w-3.5" aria-hidden="true" />
+        <component :is="icon" class="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden="true" />
         <span class="module-capsule-label">{{ label }}</span>
         <span
           v-if="typeof badge === 'number' && badge > 0"
@@ -161,8 +169,9 @@ onBeforeUnmount(() => {
 
       <PopoverAnchor as-child>
         <button
+          ref="previewButton"
           type="button"
-          class="flex h-8 w-7 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="flex h-8 w-8 shrink-0 items-center justify-center border-l border-[hsl(var(--border-subtle))] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :data-testid="`capsule-preview-${id}`"
           :aria-label="t('shell.previewModule', { name: label })"
           :aria-expanded="open"
@@ -171,13 +180,13 @@ onBeforeUnmount(() => {
           @mouseleave="scheduleClose"
           @click="togglePinned"
         >
-          <ChevronDown class="h-3.5 w-3.5" aria-hidden="true" />
+          <ChevronDown class="h-3 w-3" aria-hidden="true" />
         </button>
       </PopoverAnchor>
     </div>
 
     <PopoverContent
-      class="z-50 max-w-[calc(100vw-1rem)] p-3 shadow-lg"
+      class="z-50 max-w-[calc(100vw-1rem)] rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-3 shadow-[0_18px_48px_rgba(0,0,0,0.28),0_2px_8px_rgba(0,0,0,0.18)]"
       :class="previewWidthClass"
       align="start"
       :side-offset="8"
@@ -188,7 +197,7 @@ onBeforeUnmount(() => {
       @focusout="scheduleClose"
       @open-auto-focus.prevent
       @close-auto-focus.prevent
-      @escape-key-down="dismissPreview"
+      @escape-key-down="handleEscape"
       @pointer-down-outside="dismissPreview"
     >
       <slot :close-preview="dismissPreview" />
@@ -197,9 +206,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-@media (max-width: 1000px) {
+@container window-header (max-width: 1120px) {
   .module-capsule-main {
-    padding-inline: 0.5rem;
+    padding-inline: 0.45rem;
+  }
+}
+
+@container window-header (max-width: 900px) {
+  .module-capsule-main {
+    width: 2rem;
+    justify-content: center;
+    padding-inline: 0;
   }
 
   .module-capsule-label {

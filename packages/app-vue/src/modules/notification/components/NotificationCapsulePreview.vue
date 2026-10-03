@@ -1,12 +1,11 @@
 <template>
-  <div
-    class="flex max-h-[30rem] min-h-0 flex-col"
+  <CapsulePreviewShell
+    max-height="30rem"
     data-testid="notification-capsule-preview"
     data-capsule-workspace="notification"
   >
-    <div class="mb-2 flex items-center justify-between gap-2 border-b border-border/40 pb-1.5">
-      <div class="flex items-center gap-2">
-        <p class="text-xs font-semibold">{{ t('notification.drawer.title') }}</p>
+    <CapsulePreviewHeader :title="t('notification.drawer.title')">
+      <template #badge>
         <span
           v-if="unreadCount > 0"
           class="rounded-full bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-primary"
@@ -14,35 +13,37 @@
         >
           {{ unreadCount }}
         </span>
-      </div>
-      <Button
-        v-if="hasUnread"
-        type="button"
-        variant="ghost"
-        size="sm"
-        class="h-7 px-2 text-[11px]"
-        data-testid="notification-capsule-mark-all-read"
-        :disabled="isMarkingAll"
-        @click="handleMarkAllRead"
-      >
-        {{ t('notification.action.markAllRead') }}
-      </Button>
-    </div>
+      </template>
+      <template #actions>
+        <Button
+          v-if="hasUnread"
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="h-7 px-2 text-[11px]"
+          data-testid="notification-capsule-mark-all-read"
+          :disabled="isMarkingAll"
+          @click="handleMarkAllRead"
+        >
+          {{ t('notification.action.markAllRead') }}
+        </Button>
+      </template>
+    </CapsulePreviewHeader>
 
-    <div v-if="isLoading && recentItems.length === 0" class="space-y-2 py-2">
+    <CapsulePreviewState v-if="isLoading && recentItems.length === 0" kind="loading">
       <div v-for="i in 3" :key="i" class="space-y-1">
-        <div class="h-3 w-3/4 rounded bg-muted animate-pulse" />
-        <div class="h-2.5 w-1/2 rounded bg-muted animate-pulse" />
+        <div class="h-3 w-3/4 animate-pulse rounded bg-muted" />
+        <div class="h-2.5 w-1/2 animate-pulse rounded bg-muted" />
       </div>
-    </div>
+    </CapsulePreviewState>
 
-    <div
+    <CapsulePreviewState
       v-else-if="recentItems.length === 0"
-      class="py-4 text-center text-[11px] text-muted-foreground"
+      kind="empty"
       data-testid="notification-capsule-empty"
     >
-      {{ t('notification.empty') }}
-    </div>
+      <p class="text-[11px] text-muted-foreground">{{ t('notification.empty') }}</p>
+    </CapsulePreviewState>
 
     <ul
       v-else
@@ -58,7 +59,7 @@
       >
         <button
           type="button"
-          class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :aria-label="item.title"
           @click="handleItemClick(item)"
         >
@@ -106,18 +107,18 @@
       </li>
     </ul>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <CapsulePreviewFooter>
       <button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="notification-capsule-view-all"
         @click="$emit('view-all')"
       >
         {{ t('notification.drawer.viewAll') }}
         <ArrowRight class="h-3.5 w-3.5" />
       </button>
-    </div>
-  </div>
+    </CapsulePreviewFooter>
+  </CapsulePreviewShell>
 </template>
 
 <script setup lang="ts">
@@ -134,8 +135,14 @@ import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { ArrowRight } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import {
+  CapsulePreviewFooter,
+  CapsulePreviewHeader,
+  CapsulePreviewShell,
+  CapsulePreviewState,
+} from '../../../shared/components';
 import { formatProductRelative } from '../../../shared/utils/product-time';
-import { resolveNotificationDestination } from '../desktop/notification-click-navigation';
+import { resolveNotificationDestination } from '../notification-destination';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';

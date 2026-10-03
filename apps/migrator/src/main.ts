@@ -95,6 +95,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
       },
       {
         executable: process.execPath,
+        args: [resolve(runtimeScripts, 'prepare-goal-record-authorship.js')],
+        cwd: databaseRoot,
+        label: 'backfill GoalRecord authorship',
+      },
+      {
+        executable: process.execPath,
         args: [resolve(runtimeScripts, 'prepare-notification-preference-hierarchy.js')],
         cwd: databaseRoot,
         label: 'prepare notification preference hierarchy',
@@ -127,6 +133,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
   }
 
   commands.push(
+    {
+      executable: process.execPath,
+      args: [resolve(runtimeScripts, 'prepare-goal-record-authorship.js')],
+      cwd: databaseRoot,
+      label: 'ensure GoalRecord authorship constraint',
+    },
     {
       executable: process.execPath,
       args: [resolve(runtimeScripts, 'prepare-ai-provider-onboarding-sessions.js')],

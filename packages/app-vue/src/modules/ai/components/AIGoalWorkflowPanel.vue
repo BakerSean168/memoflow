@@ -102,19 +102,27 @@
         </div>
       </div>
 
-      <template v-if="goalReviewDraft && showGoalDraftEditor">
-        <AIGoalDraftEditor
-          data-testid="goal-workflow-draft-editor"
-          :goal="editableGoal"
-          :key-results="editableKeyResults"
-          :is-submitting="false"
-          :show-confirm-action="false"
-          @add-key-result="$emit('add-key-result')"
-          @remove-key-result="(index) => $emit('remove-key-result', index)"
-          @update-goal="(payload) => $emit('update-goal', payload)"
-          @update-key-result="(payload) => $emit('update-key-result', payload)"
-        />
-
+      <div v-if="goalReviewDraft" class="space-y-2">
+        <p data-testid="goal-native-review-hint" class="text-sm text-muted-foreground">
+          {{
+            t(
+              goalOwnerSubmitted
+                ? 'aiAssistant.chatPage.workflow.goalOwnerSubmittedHint'
+                : 'aiAssistant.chatPage.workflow.goalNativeReviewHint',
+            )
+          }}
+        </p>
+        <Button
+          v-if="!goalOwnerSubmitted"
+          variant="outline"
+          size="sm"
+          data-testid="goal-open-native-review"
+          @click="$emit('open-native-review')"
+        >
+          {{ t('aiAssistant.chatPage.workflow.openGoalNativeReview') }}
+        </Button>
+      </div>
+      <template v-if="goalReviewDraft && !goalOwnerSubmitted">
         <div
           class="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4"
           data-testid="goal-workflow-supporting-drafts-editor"
@@ -131,19 +139,23 @@
                 data-testid="goal-workflow-task-editor"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <span class="text-[10px] font-mono text-muted-foreground">{{
-                    item.draftRef
-                  }}</span>
-                  <Button variant="outline" size="sm" @click="$emit('remove-task', index)">
+                  <Button
+                    :disabled="supportingEditingBlocked"
+                    variant="outline"
+                    size="sm"
+                    @click="!supportingEditingBlocked && $emit('remove-task', index)"
+                  >
                     {{ t('aiAssistant.goalDraft.removeTask') }}
                   </Button>
                 </div>
                 <Input
+                  :disabled="supportingEditingBlocked"
                   :model-value="item.title"
                   :placeholder="t('aiAssistant.goalDraft.taskName')"
                   @update:model-value="updateTask(index, { title: String($event ?? '') })"
                 />
                 <Textarea
+                  :disabled="supportingEditingBlocked"
                   class="min-h-20"
                   :model-value="item.description ?? ''"
                   :placeholder="t('aiAssistant.goalDraft.taskDescription')"
@@ -157,6 +169,7 @@
                       {{ t('aiAssistant.goalDraft.importance') }}
                     </p>
                     <Select
+                      :disabled="supportingEditingBlocked"
                       :model-value="item.importance"
                       @update:model-value="
                         updateTask(index, {
@@ -183,9 +196,6 @@
                     <p class="mt-1 text-foreground">{{ formatTaskSchedule(item) }}</p>
                   </div>
                 </div>
-                <p class="text-xs text-muted-foreground">
-                  {{ item.goalRef }}<span v-if="item.keyResultRef"> → {{ item.keyResultRef }}</span>
-                </p>
               </div>
             </div>
             <p v-else class="text-sm leading-6 text-muted-foreground">
@@ -206,34 +216,39 @@
               >
                 <div class="flex items-center justify-between gap-3">
                   <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-[10px] font-mono text-muted-foreground">{{
-                      item.draftRef
-                    }}</span>
                     <span
                       class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
                     >
                       {{ item.mode }}
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" @click="$emit('remove-knowledge', index)">
+                  <Button
+                    :disabled="supportingEditingBlocked"
+                    variant="outline"
+                    size="sm"
+                    @click="!supportingEditingBlocked && $emit('remove-knowledge', index)"
+                  >
                     Remove
                   </Button>
                 </div>
 
                 <template v-if="item.mode === 'create'">
                   <Input
+                    :disabled="supportingEditingBlocked"
                     :model-value="item.title"
                     @update:model-value="
                       updateKnowledgeCreate(index, { title: String($event ?? '') })
                     "
                   />
                   <Input
+                    :disabled="supportingEditingBlocked"
                     :model-value="item.targetSubpath"
                     @update:model-value="
                       updateKnowledgeCreate(index, { targetSubpath: String($event ?? '') })
                     "
                   />
                   <Textarea
+                    :disabled="supportingEditingBlocked"
                     class="min-h-32"
                     :model-value="item.markdown"
                     @update:model-value="
@@ -254,10 +269,6 @@
                 </template>
                 <template v-else>
                   <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
-                  <p class="break-all font-mono text-xs text-muted-foreground">
-                    {{ item.knowledgeDocument.knowledgeSpaceId }} /
-                    {{ item.knowledgeDocument.documentId }}
-                  </p>
                 </template>
               </div>
             </div>
@@ -299,15 +310,6 @@
           {{ formatExecutionOutcome(goalWorkflowRun.result.status) }}
         </p>
         <div class="grid gap-2 @sm/ai:grid-cols-2">
-          <div
-            v-if="goalWorkflowRun.result.referenceMap['goal']"
-            class="rounded-2xl border bg-muted/20 p-4"
-          >
-            <p class="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Goal</p>
-            <p class="mt-1 break-all text-sm font-medium text-foreground">
-              {{ goalWorkflowRun.result.referenceMap['goal'] }}
-            </p>
-          </div>
           <div class="rounded-2xl border bg-muted/20 p-4">
             <p class="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Mutations</p>
             <p class="mt-1 text-sm font-medium text-foreground">
@@ -454,7 +456,6 @@ import {
   SelectValue,
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
-import AIGoalDraftEditor from './AIGoalDraftEditor.vue';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
 import type {
@@ -476,18 +477,15 @@ const props = defineProps<{
   editableKeyResults: EditableKeyResult[];
   editableTasks: EditableGoalTask[];
   editableKnowledge: EditableGoalKnowledge[];
-  showGoalDraftEditor: boolean;
+  goalOwnerSubmitted?: boolean;
+  supportingEditingBlocked?: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
   formatExecutionOutcome: (status: 'success' | 'partial' | 'failed') => string;
 }>();
 
 const emit = defineEmits<{
   'update:clarificationAnswers': [answers: string[]];
-  confirm: [];
-  'add-key-result': [];
-  'remove-key-result': [index: number];
-  'update-goal': [payload: EditableGoal];
-  'update-key-result': [payload: { index: number; value: EditableKeyResult }];
+  'open-native-review': [];
   'remove-task': [index: number];
   'update-task': [payload: { index: number; value: EditableGoalTask }];
   'remove-knowledge': [index: number];
@@ -525,6 +523,7 @@ function updateClarificationAnswer(index: number, value: string) {
 }
 
 function updateTask(index: number, patch: Partial<EditableGoalTask>) {
+  if (props.supportingEditingBlocked) return;
   const current = props.editableTasks[index];
   if (!current) return;
   emit('update-task', { index, value: { ...current, ...patch } });
@@ -534,6 +533,7 @@ function updateKnowledgeCreate(
   index: number,
   patch: Partial<Extract<EditableGoalKnowledge, { mode: 'create' }>>,
 ) {
+  if (props.supportingEditingBlocked) return;
   const current = props.editableKnowledge[index];
   if (!current || current.mode !== 'create') return;
   emit('update-knowledge', { index, value: { ...current, ...patch } });

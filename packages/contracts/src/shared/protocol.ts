@@ -5,8 +5,6 @@ import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
 import type { DataPortabilityRpcMap } from '../modules/data-portability/protocol/data-portability-rpc-map';
 import type { GoalEventMap } from '../modules/goal/protocol/goal-event-map';
 import type { GoalRpcMap } from '../modules/goal/protocol/goal-rpc-map';
-import type { GovernanceEventMap } from '../modules/governance/protocol/governance-event-map';
-import type { GovernanceRpcMap } from '../modules/governance/protocol/governance-rpc-map';
 import type { NotificationEventMap } from '../modules/notification/protocol/notification-event-map';
 import type { NotificationRpcMap } from '../modules/notification/protocol/notification-rpc-map';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
@@ -37,7 +35,6 @@ export interface AppRpcRegistryExtensions extends Record<string, [unknown, unkno
 type CoreAppEventRegistry = AccountEventMap &
   AIEventMap &
   GoalEventMap &
-  GovernanceEventMap &
   NotificationEventMap &
   RepositoryEventMap &
   ScheduleEventMap &
@@ -51,7 +48,6 @@ type CoreAppRpcRegistry = AccountRpcMap &
   AIRpcMap &
   DataPortabilityRpcMap &
   GoalRpcMap &
-  GovernanceRpcMap &
   NotificationRpcMap &
   RepositoryRpcMap &
   ScheduleRpcMap &

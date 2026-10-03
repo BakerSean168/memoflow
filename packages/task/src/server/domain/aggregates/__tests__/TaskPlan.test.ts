@@ -1113,6 +1113,7 @@ describe('TaskPlan Aggregate', () => {
         goalId: 'goal-123',
         keyResultId: 'kr-456',
         contribution: { value: 10, trigger: TaskGoalBindingTrigger.EachCompletion },
+        progressRule: { mode: 'Fixed', value: 10, trigger: TaskGoalBindingTrigger.EachCompletion },
       });
       expect(plan).not.toHaveProperty('goalId');
       expect(plan).not.toHaveProperty('keyResultId');
@@ -1155,6 +1156,7 @@ describe('TaskPlan Aggregate', () => {
           goalId: 'goal-123',
           keyResultId: null,
           contribution: null,
+          progressRule: null,
         });
       });
 

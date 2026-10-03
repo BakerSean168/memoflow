@@ -41,12 +41,6 @@
       "@memoflow/domain-shared/*": [
         "./packages/domain-shared/dist/*/index.d.ts"
       ],
-      "@memoflow/governance": [
-        "./packages/governance/dist/index.d.ts"
-      ],
-      "@memoflow/governance/*": [
-        "./packages/governance/dist/*/index.d.ts"
-      ],
       "@memoflow/account": [
         "./packages/account/dist/index.d.ts"
       ],

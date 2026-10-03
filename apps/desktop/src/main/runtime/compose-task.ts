@@ -70,6 +70,7 @@ import {
   createTaskRuntimeContribution,
   normalizeTaskRuntimeContributions,
   type TaskApplicationPort,
+  type TaskGoalMeasurementReadPort,
   type ITaskOccurrenceRepository,
   type ITaskPlanRepository,
   type TaskRuntimeContributionsInput,
@@ -89,6 +90,7 @@ export interface ComposeTaskDependencies {
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
   /** Goal's durable Task→Goal progress handler; enables the outbox runtime when present. 目标侧持久 Task→Goal 进度处理器；提供时启用 outbox runtime。 */
   readonly goalProgressHandler?: TaskGoalProgressHandler;
+  readonly goalReadPort?: TaskGoalMeasurementReadPort;
   readonly userTimeContextPort: UserTimeContextPort;
 }
 
@@ -180,6 +182,7 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
     taskWriteTransactionRunner,
     userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
+    goalReadPort: dependencies.goalReadPort,
   });
 
   return {

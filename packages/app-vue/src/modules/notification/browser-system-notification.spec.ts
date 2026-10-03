@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
 import {
   browserSystemNotificationPermission,
+  browserSystemNotificationTargetUrl,
   isBrowserSystemNotificationEnabled,
   isBrowserSystemNotificationSupported,
   presentBrowserSystemNotification,
@@ -26,7 +27,9 @@ class FakeNotification {
   }
 }
 
-function event(): NotificationDispatchInAppEvent {
+function event(
+  overrides: Partial<NotificationDispatchInAppEvent> = {},
+): NotificationDispatchInAppEvent {
   return {
     id: 'notification-1' as NotificationDispatchInAppEvent['id'],
     operationId: 'operation-1',
@@ -35,6 +38,7 @@ function event(): NotificationDispatchInAppEvent {
     body: 'Time for a short break.',
     category: 'Reminder',
     type: 'Reminder',
+    ...overrides,
   } as NotificationDispatchInAppEvent;
 }
 
@@ -102,6 +106,63 @@ describe('browser system notification presentation', () => {
     vi.mocked(document.hasFocus).mockReturnValue(false);
     expect(presentBrowserSystemNotification(event())).toBe(true);
     expect(FakeNotification.instances).toHaveLength(2);
+  });
+
+  it.each([
+    [
+      'Task',
+      event({
+        category: 'Task',
+        data: {
+          navigationIntent: {
+            route: '/tasks/task-42',
+            params: { view: 'today' },
+          },
+        },
+      }),
+      'https://example.test/tasks/task-42?view=today',
+    ],
+    [
+      'Goal',
+      event({
+        category: 'Goal',
+        data: {
+          navigationIntent: {
+            route: '/goals/goal-7',
+          },
+        },
+      }),
+      'https://example.test/goals/goal-7',
+    ],
+    [
+      'unknown',
+      event({
+        category: 'Other',
+        data: {},
+      }),
+      'https://example.test/notifications',
+    ],
+  ])(
+    'resolves %s browser click destination through the canonical policy',
+    (_name, dispatch, expected) => {
+      expect(browserSystemNotificationTargetUrl(dispatch, 'https://example.test')).toBe(expected);
+    },
+  );
+
+  it('fails closed to Notification Center for an external navigation route', () => {
+    expect(
+      browserSystemNotificationTargetUrl(
+        event({
+          category: 'Task',
+          data: {
+            navigationIntent: {
+              route: 'https://example.invalid/tasks/task-42',
+            },
+          },
+        }),
+        'https://example.test',
+      ),
+    ).toBe('https://example.test/notifications');
   });
 
   it('does not present without granted browser permission or local opt-in', () => {

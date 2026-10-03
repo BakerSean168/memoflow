@@ -26,7 +26,9 @@
       "id": "editor-runtime-package",
       "status": "active",
       "decision": "ADR-107",
-      "forbiddenPaths": ["packages/editor"]
+      "forbiddenPaths": [
+        "packages/editor"
+      ]
     },
     {
       "id": "standalone-dashboard-bounded-context",
@@ -45,7 +47,9 @@
       "id": "legacy-editor-persistence",
       "status": "active",
       "decision": "ADR-107 / EDITOR-1702",
-      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
+      "forbiddenPaths": [
+        "packages/database/prisma/schema/editor.prisma"
+      ]
     },
     {
       "id": "account-settings-legacy",
@@ -60,7 +64,9 @@
       "id": "legacy-reminder-model",
       "status": "active",
       "decision": "ADR-076..079 / ROUTINE-2201",
-      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"],
+      "forbiddenPaths": [
+        "packages/reminder/src/server/domain/aggregates/reminder-template.ts"
+      ],
       "requiredPaths": [
         "packages/contracts/src/modules/routine/index.ts",
         "packages/reminder/src/client/index.ts",
@@ -98,6 +104,44 @@
       "decision": "ADR-085 / NOTIF-2401",
       "forbiddenPaths": [
         "packages/notification/src/server/domain/aggregates/notification-template.ts"
+      ]
+    },
+    {
+      "id": "ai-owned-business-editors",
+      "status": "active",
+      "decision": "ADR-112 / PVC-AI-8121",
+      "forbiddenPaths": [
+        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+        "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AITaskDraftEditor.vue"
+      ],
+      "requiredPaths": [
+        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+        "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+        "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.vue"
+      ]
+    },
+    {
+      "id": "product-governance-runtime",
+      "status": "active",
+      "decision": "ADR-113 / GOV-7903",
+      "forbiddenPaths": [
+        "packages/governance",
+        "packages/contracts/src/modules/governance",
+        "packages/app-vue/src/modules/governance",
+        "packages/database/prisma/schema/governance.prisma",
+        "apps/api/src/runtime/compose-governance.ts",
+        "apps/desktop/src/main/runtime/compose-governance.ts",
+        "tools/governance/governance-rule-bundle-adapter.mjs",
+        "tools/governance/published/governance-rule-bundle.v1.json"
+      ],
+      "requiredPaths": [
+        "tools/governance/engineering-rules.json",
+        "tools/governance/pinned-engineering-rules.json",
+        "tools/governance/engineering-rule-adapter.mjs",
+        "docs/governance/README.md",
+        "docs/standards/README.md",
+        "docs/architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md"
       ]
     }
   ]

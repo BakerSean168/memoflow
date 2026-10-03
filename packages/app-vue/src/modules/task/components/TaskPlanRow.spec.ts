@@ -85,7 +85,7 @@ describe('TaskPlanRow', () => {
     expect(wrapper.find('[data-testid="task-plan-card"]').exists()).toBe(false);
   });
 
-  it('keeps low-frequency archive/delete actions in the shared action menu', () => {
+  it('keeps low-frequency end/delete actions in the shared action menu', () => {
     const wrapper = mount(TaskPlanRow, {
       props: { plan: plan() },
       global: { plugins: [i18n] },
@@ -96,13 +96,35 @@ describe('TaskPlanRow', () => {
     expect(actionable.props('moreButtonLabel')).toBe('More actions');
 
     const actions = actionable.props('actions') as MenuAction[];
-    expect(actions.map((action) => action.key)).toEqual(['archive', 'delete']);
+    expect(actions.map((action) => action.key)).toEqual(['abandon', 'delete']);
     expect(actions[1]?.destructive).toBe(true);
 
     actions[0]?.handler();
     actions[1]?.handler();
-    expect(wrapper.emitted('archive')).toHaveLength(1);
+    expect(wrapper.emitted('abandon')).toHaveLength(1);
     expect(wrapper.emitted('delete')).toHaveLength(1);
+  });
+
+  it.each(['Succeeded', 'Failed', 'Abandoned'] as const)('shows terminal %s and hides End Plan independently of archive metadata', (outcome) => {
+    const wrapper = mount(TaskPlanRow, {
+      props: {
+        plan: plan({
+          status: 'CLOSED',
+          statusText: 'Closed',
+          outcome,
+          outcomeText: outcome,
+          stateText: outcome,
+          isActive: false,
+          isPaused: false,
+        }),
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.get('[data-testid="task-plan-row"]').text()).toContain(outcome);
+    expect(wrapper.get('[data-testid="task-plan-row"]').text()).not.toContain('Closed');
+    const actions = wrapper.getComponent(ActionableWrapper).props('actions') as MenuAction[];
+    expect(actions.map((action) => action.key)).toEqual(['delete']);
   });
 
   it('emits navigation from the row body while keeping actions separate', async () => {

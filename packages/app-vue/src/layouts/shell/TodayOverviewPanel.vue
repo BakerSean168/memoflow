@@ -54,20 +54,20 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    class="h-full min-h-0 overflow-y-auto bg-background"
+    class="h-full min-h-0 overflow-y-auto bg-[hsl(var(--background))]"
     data-testid="today-overview-panel"
     data-scroll-host="home"
   >
     <header
-      class="sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-4 backdrop-blur-sm"
+      class="sticky top-0 z-10 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.92)] px-4 py-3 backdrop-blur-sm"
     >
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h2 class="text-base font-semibold text-foreground">
+          <h2 class="text-[15px] font-semibold tracking-[-0.01em] text-foreground">
             {{ t('shell.home.title') }}
           </h2>
           <p
-            class="mt-0.5 text-xs text-muted-foreground"
+            class="mt-0.5 text-[11px] text-[hsl(var(--foreground-subtle))]"
             data-testid="today-overview-date"
           >
             {{ todayLabel }}
@@ -75,9 +75,9 @@ onBeforeUnmount(() => {
         </div>
         <div class="flex shrink-0 items-center gap-1.5" :aria-label="t('shell.home.directActions')">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            class="h-8 px-2.5"
+            class="h-7 rounded-md px-2.5 text-[12px] text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             data-testid="today-overview-create-goal"
             @click="emit('open-route', 'goal', '/goals?dialog=goal')"
           >
@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
           </Button>
           <Button
             size="sm"
-            class="h-8 px-2.5"
+            class="h-7 rounded-md px-2.5 text-[12px] shadow-none"
             data-testid="today-overview-create-task"
             @click="emit('open-route', 'task', '/tasks?dialog=quick-task')"
           >
@@ -97,11 +97,12 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <div class="grid gap-3 p-3" data-testid="today-overview-widgets">
+    <div class="grid gap-2.5 p-3" data-testid="today-overview-widgets">
       <DailyTodoWidget
         class="min-h-[9rem]"
         :active="active"
         @view-all="emit('open-route', 'task', '/tasks')"
+        @open-plan="emit('open-route', 'task', `/tasks/${$event}`)"
         @completed="refreshAfterTaskCompletion"
       />
       <RoutineUpcomingWidget

@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 /**
  * TaskPlan Aggregate Root - Domain Client
  * 任务模板聚合根 - 领域客户端
@@ -198,7 +199,12 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   // ================= 4. Factory Methods =================
   public static load(state: TaskPlanState): TaskPlan {
-    return new TaskPlan(state);
+    return new TaskPlan({
+      ...state,
+      goalBinding: state.goalBinding
+        ? { ...state.goalBinding, ...TaskGoalProgressConfigurationSchema.parse(state.goalBinding) }
+        : null,
+    });
   }
 
   // ================= 5. DTO Conversion =================
@@ -244,7 +250,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       goalId: String(binding.goalId) as GoalId,
       keyResultId:
         binding.keyResultId == null ? null : (String(binding.keyResultId) as KeyResultId),
-      contribution: binding.contribution ? { ...binding.contribution } : null,
+      ...TaskGoalProgressConfigurationSchema.parse(binding),
     };
   }
 }

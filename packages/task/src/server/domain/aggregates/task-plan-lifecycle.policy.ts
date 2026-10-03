@@ -119,6 +119,13 @@ export function abandon(ctx: LifecycleContext, reason?: string): void {
   ctx.props.abandonedReason = reason ?? null;
   ctx.props.updatedAt = now;
   ctx.addHistory('abandoned', { reason: reason ?? null });
+  ctx.publishDomainEvent<TaskEventMap['task:plan-abandoned']>('task:plan-abandoned', {
+    identityId: ctx.props.identityId,
+    taskPlanId: ctx.id,
+    abandonedAt: now,
+    reason: reason ?? null,
+    taskPlan: ctx.toServerDTO(),
+  });
 }
 
 /** Automatic evaluator result; unknown/correctable facts remain Open, never default to Failed. */

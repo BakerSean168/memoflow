@@ -1,20 +1,16 @@
+import type { TaskGoalProgressRule } from '@memoflow/contracts/task';
+import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import type {
   ChecklistItemDefinitionDTO,
   TaskGoalBindingTriggerValue,
+  TaskPlanClientDTO,
   TaskPlanSchedule,
 } from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 
-export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
-
-export interface EditableTaskUI {
-  title: string;
-  description?: string;
-  estimatedHours: number;
-  priority: UIPriority;
-  dependencies?: number[];
-  selected: boolean;
-}
+export type TaskSurface = 'today' | 'plans';
+export type TaskPlanStateFilter =
+  'all' | 'active' | 'paused' | 'succeeded' | 'failed' | 'abandoned' | 'archived';
 
 export interface TaskGoalContributionViewModel {
   value: number;
@@ -24,6 +20,8 @@ export interface TaskGoalContributionViewModel {
 export interface TaskGoalBindingViewModel {
   goalId: string;
   keyResultId: string | null;
+  progressRule?: TaskGoalProgressRule | null;
+  /** @deprecated Input compatibility only. */
   contribution?: TaskGoalContributionViewModel;
 }
 
@@ -46,6 +44,12 @@ export interface GoalBindingOption {
 }
 
 export interface KeyResultBindingOption {
+  calculationMethod: KeyResultCalculationMethod;
+  methodLabel: string;
+  recordInputKind: 'delta' | 'sample';
+  unit: string | null;
+  currentValue: number;
+  targetValue: number;
   id: string;
   title: string;
   weight?: number;
@@ -58,6 +62,10 @@ export interface TaskPlanViewModel {
   description?: string;
   status: string;
   statusText?: string;
+  outcome?: TaskPlanClientDTO['outcome'];
+  outcomeText?: string;
+  stateText?: string;
+  isClosed?: boolean;
   isActive?: boolean;
   isPaused?: boolean;
   isArchived?: boolean;
@@ -105,6 +113,7 @@ export interface TaskPlanFormEmits {
   'update:modelValue': [value: TaskPlanViewModel];
   'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
+  submit: [];
 }
 
 // ── 任务库列表过滤 / 视图模式（UI_PAGE_REDESIGN_PLAN §6）──

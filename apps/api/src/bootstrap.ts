@@ -7,14 +7,14 @@
  * @example
  * ```typescript
  * // Host runtime composes feature modules before registration (see
- * // apps/api/src/runtime/compose-governance.ts and compose-account.ts);
+ * // apps/api/src/runtime/compose-account.ts and compose-goal.ts);
  * // register() only wires transport + lifecycle. 宿主 runtime 先完成 feature 装配，register 只注册 transport。
- * const governanceApiModule = composeGovernance({ db });
  * const accountApiModule = composeAccount({ db, cloudAuth });
+ * const goalApiModule = composeGoal({ db });
  *
  * const app = await new ApiBootstrapper(db)
- *   .register(governanceApiModule)
  *   .register(accountApiModule.module)
+ *   .register(goalApiModule.module)
  *   .init();
  *
  * app.listen(3000);

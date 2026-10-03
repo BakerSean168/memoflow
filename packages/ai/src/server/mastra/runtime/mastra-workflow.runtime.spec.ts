@@ -8,7 +8,7 @@ import {
   KnowledgeNoteDraftContentSchema,
   TaskPlanDraftContentSchema,
 } from '@memoflow/contracts/ai';
-import { ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
@@ -101,6 +101,7 @@ function context(identityId: string, requestId: string): ExecutionContext {
 
 function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
+    readGoal: vi.fn(async () => error('NOT_FOUND', 'Goal not created')),
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),
@@ -153,6 +154,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     conversationShellSource: { loadShell: vi.fn(async () => null) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
+      readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
       resolveLabels: vi.fn(async (names: readonly string[]) =>
         ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
       ),
@@ -430,7 +432,10 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
         runId: started.runId,
         command: {
           type: 'edit_structured',
-          patch: { title: 'Mastra durable workflow notes revised' },
+          patch: {
+            title: 'Mastra durable workflow notes revised',
+            source: { kind: 'repository', connectionId: 'binding-knowledge' },
+          },
         },
       },
     });
@@ -443,6 +448,7 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
           revision: 2,
           title: 'Mastra durable workflow notes revised',
           knowledgeDocumentId: reviewedDocumentId,
+          source: { kind: 'repository', connectionId: 'binding-knowledge' },
         },
       },
     });
@@ -467,6 +473,7 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       workflowRunId: started.runId,
       revision: 2,
       knowledgeDocumentId: reviewedDocumentId,
+      source: { kind: 'repository', connectionId: 'binding-knowledge' },
       path: 'Notes/Engineering',
       title: 'Mastra durable workflow notes revised',
     });
@@ -485,5 +492,134 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
     });
     expect(duplicateApprove).toEqual(completed);
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
+  });
+  it('fails closed on approval without an owner-selected source', async () => {
+    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
+    const started = await runtime.start({
+      context: context('identity-source', 'start-source'),
+      request: {
+        kind: 'knowledge.capture',
+        conversationId: 'source-conversation',
+        input: { topic: 'Source selection' },
+        locale: 'en-US',
+      },
+    });
+    const result = await runtime.resume({
+      context: context('identity-source', 'approve-source'),
+      request: { runId: started.runId, command: { type: 'approve' } },
+    });
+    expect(result.status).toBe('failed');
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+  });
+
+  it('preserves owner source across revise, clarification, regenerate and durable reload', async () => {
+    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
+    const identityId = 'identity-preserve-source';
+    const started = await runtime.start({
+      context: context(identityId, 'start-preserve'),
+      request: {
+        kind: 'knowledge.capture',
+        conversationId: 'preserve-source',
+        input: { topic: 'Durable owner source' },
+        locale: 'en-US',
+      },
+    });
+    const selected = { kind: 'repository' as const, connectionId: 'owner-binding' };
+    await runtime.resume({
+      context: context(identityId, 'select-source'),
+      request: {
+        runId: started.runId,
+        command: { type: 'edit_structured', patch: { source: selected } },
+      },
+    });
+    vi.mocked(runtime.knowledgeCapturePlanner.plan).mockResolvedValueOnce({
+      status: 'needs_clarification',
+      reason: 'More context',
+      questions: ['Which topic?'],
+    });
+    await runtime.resume({
+      context: context(identityId, 'revise-source'),
+      request: {
+        runId: started.runId,
+        command: { type: 'revise_natural_language', instruction: 'Clarify topic' },
+      },
+    });
+    const answered = await runtime.resume({
+      context: context(identityId, 'answer-source'),
+      request: { runId: started.runId, command: { type: 'answer', answers: ['Durability'] } },
+    });
+    expect(answered.suspension).toMatchObject({
+      type: 'knowledge_draft_review',
+      revision: 3,
+      draft: { source: selected },
+    });
+    const regenerated = await runtime.resume({
+      context: context(identityId, 'regenerate-source'),
+      request: { runId: started.runId, command: { type: 'regenerate' } },
+    });
+    expect(regenerated.suspension).toMatchObject({
+      type: 'knowledge_draft_review',
+      revision: 4,
+      draft: { source: selected },
+    });
+    expect((await runtime.get({ identityId, runId: started.runId }))?.suspension).toMatchObject({
+      draft: { source: selected },
+    });
+    const switched = await runtime.resume({
+      context: context(identityId, 'switch-source'),
+      request: {
+        runId: started.runId,
+        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
+      },
+    });
+    expect(switched.suspension).toMatchObject({
+      revision: 5,
+      draft: { source: { kind: 'local_vault' } },
+    });
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+  });
+
+  it('retains reviewed source, revision and stable identity through host recovery retry', async () => {
+    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
+    const identityId = 'identity-retry-source';
+    const started = await runtime.start({
+      context: context(identityId, 'start-retry'),
+      request: {
+        kind: 'knowledge.capture',
+        conversationId: 'retry-source',
+        input: { topic: 'Retry source' },
+        locale: 'en-US',
+      },
+    });
+    await runtime.resume({
+      context: context(identityId, 'select-retry'),
+      request: {
+        runId: started.runId,
+        command: { type: 'edit_structured', patch: { source: { kind: 'local_vault' } } },
+      },
+    });
+    createConfirmedKnowledgeNote.mockResolvedValueOnce(
+      error('SERVICE_UNAVAILABLE', 'Host temporarily unavailable') as never,
+    );
+    const recovery = await runtime.resume({
+      context: context(identityId, 'approve-retry'),
+      request: { runId: started.runId, command: { type: 'approve' } },
+    });
+    expect(recovery.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
+    const restored = await runtime.get({ identityId, runId: started.runId });
+    expect(restored?.suspension).toMatchObject({ type: 'recovery_required' });
+    const completed = await runtime.resume({
+      context: context(identityId, 'retry-host'),
+      request: { runId: started.runId, command: { type: 'retry' } },
+    });
+    expect(completed).toMatchObject({ status: 'completed', result: { revision: 2 } });
+    expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(2);
+    const first = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
+    expect(createConfirmedKnowledgeNote.mock.calls[1]?.[0]).toMatchObject({
+      source: { kind: 'local_vault' },
+      revision: 2,
+      knowledgeDocumentId: first.knowledgeDocumentId,
+      requestId: first.requestId,
+    });
   });
 });

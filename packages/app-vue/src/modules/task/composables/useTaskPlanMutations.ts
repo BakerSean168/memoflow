@@ -3,7 +3,7 @@
  *
  * - create / single delete / batch delete：**server-confirmed**（不伪造临时 id、不猜测多
  *   projection；batch 保持逐项、首错停止、已成功项不回滚的 API 语义）；
- * - update / activate / pause / archive：**optimistic pilot** —— cancel 受影响的 queries、
+ * - update / activate / pause：**optimistic pilot** —— cancel 受影响的 queries、
  *   snapshot 全部匹配 list/detail/graph entries、按 id patch；任一 failure exact restore
  *   快照；onSettled 一律经 dispatcher invalidate（组件不再手动 refresh）。
  *
@@ -287,11 +287,43 @@ export function useTaskPlanMutations() {
     'task.error.pauseSuccess',
     'Paused',
   );
-  const archivePlan = createStatusMutation(
+  function createServerConfirmedPlanMutation(
+    operation: (id: string) => Promise<Result<{ toDTO(): TaskPlanClientDTO }>>,
+    fallbackKey: string,
+    successKey: string,
+  ) {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        const result = await executeTaskOperation(() => operation(id), fallbackKey);
+        return unwrap(result);
+      },
+      onMutate: () => ({ identityScope: resolveIdentityScope() }),
+      onSuccess: (dto, _id, context) => {
+        patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, dto.toDTO());
+        toast.success(t(successKey));
+      },
+      onSettled: (_data, _error, id, context) => {
+        void runtime.dispatcher.invalidate({
+          target: 'task-plan',
+          identityScope: context!.identityScope,
+          source: 'mutation',
+          entityId: id,
+        });
+      },
+    });
+  }
+
+  // Archive remains a compatibility operation, but it must never fake a lifecycle
+  // transition in client state. Only the server-confirmed projection is applied.
+  const archivePlan = createServerConfirmedPlanMutation(
     (id) => service.archivePlan(id),
     'task.error.archiveFailed',
     'task.error.archiveSuccess',
-    'Closed',
+  );
+  const abandonPlan = createServerConfirmedPlanMutation(
+    (id) => service.abandonPlan(id),
+    'task.error.abandonFailed',
+    'task.error.abandonSuccess',
   );
 
   // 视图兼容的 safe wrappers：失败返回 null/false（错误已由 onError/toast 报告），成功返回结果。
@@ -342,6 +374,14 @@ export function useTaskPlanMutations() {
     }
   }
 
+  async function abandonPlanSafe(id: string) {
+    try {
+      return await abandonPlan.mutateAsync(id);
+    } catch {
+      return null;
+    }
+  }
+
   return {
     // Raw mutations (optimistic lifecycle; used by tests / advanced callers).
     createPlan,
@@ -351,6 +391,7 @@ export function useTaskPlanMutations() {
     activatePlan,
     pausePlan,
     archivePlan,
+    abandonPlan,
     // View-compatible safe wrappers.
     createPlanSafe,
     updatePlanSafe,
@@ -358,7 +399,8 @@ export function useTaskPlanMutations() {
     deletePlansSafe,
     activatePlanSafe: (id: string) => statusSafe(activatePlan, id),
     pausePlanSafe: (id: string) => statusSafe(pausePlan, id),
-    archivePlanSafe: (id: string) => statusSafe(archivePlan, id),
+    archivePlanSafe: (id: string) => archivePlan.mutateAsync(id).catch(() => null),
+    abandonPlanSafe,
     isSaving: computed(
       () =>
         createPlan.isPending.value ||
@@ -367,7 +409,8 @@ export function useTaskPlanMutations() {
         deletePlans.isPending.value ||
         activatePlan.isPending.value ||
         pausePlan.isPending.value ||
-        archivePlan.isPending.value,
+        archivePlan.isPending.value ||
+        abandonPlan.isPending.value,
     ),
   };
 }

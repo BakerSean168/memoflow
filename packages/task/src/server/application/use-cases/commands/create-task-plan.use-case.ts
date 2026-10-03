@@ -5,6 +5,9 @@
  * generates initial occurrences upon creation.
  */
 
+import { validateTaskGoalProgress } from './task-goal-progress-validation';
+import type { TaskGoalMeasurementReadPort } from '../../ports';
+import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
@@ -40,6 +43,7 @@ export class CreateTaskPlanUseCase {
     private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
+    private readonly goalReadPort?: TaskGoalMeasurementReadPort,
   ) {
     if (!transactionRunner) {
       throw new Error(
@@ -90,6 +94,9 @@ export class CreateTaskPlanUseCase {
             if (replay) return replay;
           }
 
+          const invalidProgress = await validateTaskGoalProgress(request.identityId, request.goalBinding, this.goalReadPort);
+          if (invalidProgress) return invalidProgress;
+          const binding = request.goalBinding ? TaskGoalBinding.create(request.goalBinding).toDTO() : null;
           const schedule = TaskPlanSchedule.create(request.schedule);
           const reminderConfig = request.reminderConfig
             ? TaskReminderConfig.fromDTO(request.reminderConfig)
@@ -100,7 +107,7 @@ export class CreateTaskPlanUseCase {
             (schedule.recurrence != null &&
               schedule.recurrence.end.kind !== TaskRecurrenceEndKind.Never);
           if (
-            request.goalBinding?.contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
+            binding?.progressRule?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
             !isFinitePlan
           ) {
             return error(
@@ -119,13 +126,7 @@ export class CreateTaskPlanUseCase {
             importance: request.importance,
             completionPolicy: request.completionPolicy,
             checklist: request.checklist,
-            goalBinding: request.goalBinding
-              ? {
-                  goalId: request.goalBinding.goalId,
-                  keyResultId: request.goalBinding.keyResultId,
-                  contribution: request.goalBinding.contribution ?? null,
-                }
-              : null,
+            goalBinding: binding,
           });
 
           // Materialize from canonical schedule before persistence. TaskPlan carries no

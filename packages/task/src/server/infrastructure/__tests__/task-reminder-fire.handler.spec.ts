@@ -264,10 +264,15 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the plan is not Active', async () => {
+  it.each([
+    { status: 'Paused', outcome: 'Open' },
+    { status: 'Closed', outcome: 'Succeeded' },
+    { status: 'Closed', outcome: 'Failed' },
+    { status: 'Closed', outcome: 'Abandoned' },
+  ])('fails closed for plan $status/$outcome even with a pending occurrence', async ({ status, outcome }) => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createPlan({ status: 'Paused' })),
+      createDeps(writer, createInstance(), createPlan({ status, outcome })),
     );
     const result = await registration.handler.execute(createContext());
     expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });

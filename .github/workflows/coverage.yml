@@ -21,7 +21,7 @@ env:
   NODE_ENV: test
   PRISMA_HIDE_UPDATE_MESSAGE: 'true'
   DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
-  GOVERNED_COVERAGE_PROJECTS: 'account,ai,app-vue,domain-shared,goal,governance,notification,reminder,schedule,setting,task'
+  GOVERNED_COVERAGE_PROJECTS: 'account,ai,app-vue,domain-shared,goal,notification,reminder,schedule,setting,task'
 
 jobs:
   coverage:

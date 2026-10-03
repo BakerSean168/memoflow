@@ -1,3 +1,6 @@
+import { ok } from '@memoflow/contracts/result';
+import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { TaskGoalLinkSchema } from '@memoflow/contracts/task';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
@@ -20,6 +23,9 @@ import {
   type TaskWriteTransactionRunner,
 } from '../task-write-support';
 
+const goalReadPort = { getKeyResultMeasurementContext: vi.fn() };
+const testBinding = (progressRule: unknown) => TaskGoalLinkSchema.parse({ goalId: 'GoalId_11111111-1111-4111-8111-111111111111', keyResultId: 'KeyResultId_22222222-2222-4222-8222-222222222222', progressRule });
+
 const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
 };
@@ -30,6 +36,7 @@ describe('UpdateTaskPlanUseCase', () => {
   let useCase: UpdateTaskPlanUseCase;
 
   beforeEach(() => {
+    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } }));
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
@@ -47,7 +54,21 @@ describe('UpdateTaskPlanUseCase', () => {
         occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
+      Date.now,
+      goalReadPort,
     );
+  });
+
+  it.each(Object.values(KeyResultCalculationMethod))('validates Fixed and Prompt against %s before updating', async (method) => {
+    const plan = aOneTimeTask();
+    templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: method } }));
+    const fixed = await useCase.execute(plan.id, plan.identityId, { goalBinding: testBinding({ mode: 'Fixed', trigger: 'EachCompletion', value: -2 }) });
+    expect(fixed.ok).toBe(method === 'Sum');
+    if (method !== 'Sum') expect(templateRepo.save).not.toHaveBeenCalled();
+    const prompt = await useCase.execute(plan.id, plan.identityId, { goalBinding: testBinding({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: -3 }) });
+    expect(prompt.ok).toBe(true);
+    expect(plan.goalBinding?.contribution).toBeNull();
   });
 
   it('throws an error if transactionRunner is missing', () => {

@@ -13,7 +13,6 @@ import ShellHomeRoute from '../layouts/shell/shell-home-route';
 // Module routes
 import { accountRoutes } from '../modules/account/router';
 import { goalRoutes } from '../modules/goal/router';
-import { governanceRoutes } from '../modules/governance/router';
 import { taskRoutes } from '../modules/task/router';
 import { routineRoutes } from '../modules/routine/router';
 import { scheduleRoutes } from '../modules/schedule/router';
@@ -62,7 +61,6 @@ export function createAppRouter(options?: {
         // Module routes
         ...accountRoutes,
         ...goalRoutes,
-        ...governanceRoutes,
         ...taskRoutes,
         ...routineRoutes,
         ...scheduleRoutes,

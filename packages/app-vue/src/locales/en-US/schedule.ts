@@ -22,6 +22,7 @@ export default {
     "viewInDayView": "View in Day View"
   },
   "eventDetail": {
+    "refreshFailed": "The latest schedule could not be refreshed. Refresh the planner and try again.",
     "subtitle": "Planner details",
     "time": "Time",
     "allDay": "All day",
@@ -37,7 +38,8 @@ export default {
       "routineWallClock": "Routine occurrence"
     },
     "conflictHint": "This time slot has a planner conflict",
-    "readOnlyHint": "The calendar is a time projection; editing remains owned by the related goal, task, routine, or schedule object."
+    "readOnlyHint": "The calendar is a time projection; editing remains owned by the related goal, task, or routine.",
+    "entryUnavailable": "This schedule changed or is no longer available. Refresh the planner and try again."
   },
   "planning": {
     "title": "Schedule",
@@ -56,7 +58,11 @@ export default {
     "taskResumed": "Schedule task resumed",
     "taskDeleted": "Schedule task deleted",
     "scheduleCreated": "Schedule created",
-    "scheduleCreatedRefreshFailed": "Schedule created, but the planner could not refresh. Refresh the page to reload the latest view."
+    "scheduleCreatedRefreshFailed": "Schedule created, but the planner could not refresh. Refresh the page to reload the latest view.",
+    "scheduleUpdated": "Schedule updated",
+    "scheduleUpdatedRefreshFailed": "Schedule updated, but the planner could not refresh. Refresh the page to reload the latest view.",
+    "scheduleDeleted": "Schedule deleted",
+    "scheduleDeletedRefreshFailed": "Schedule deleted, but the planner could not refresh. Refresh the page to reload the latest view."
   },
   "plannerMutation": {
     "taskTargetDayConflict": "That day already has an occurrence from the same task plan. The item was restored to its previous position.",
@@ -70,6 +76,8 @@ export default {
   },
   "confirm": {
     "deleteTask": "Delete schedule \"{name}\"?",
+    "deleteCalendarEntryTitle": "Delete \"{name}\"?",
+    "deleteCalendarEntryDescription": "This removes the schedule from your calendar. This action cannot be undone.",
     "endBeforeStart": "End time must be after start time"
   },
   "weekViewPage": {
@@ -307,6 +315,7 @@ export default {
     "health": "Health"
   },
   "error": {
+    "deleteCalendarEntryFailed": "Failed to delete schedule",
     "loadTasksFailed": "Failed to load schedule tasks",
     "updateCalendarEntryFailed": "Failed to update schedule",
     "createTaskFailed": "Failed to create schedule task",

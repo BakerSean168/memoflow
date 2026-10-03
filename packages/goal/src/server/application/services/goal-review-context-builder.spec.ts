@@ -80,6 +80,26 @@ describe('GoalReviewContextBuilder', () => {
         endPercentage: 50,
       }),
     ]);
+    expect(context.signals[1]).toMatchObject({
+      kind: 'key-result-movement',
+      evidence: [
+        {
+          keyResultId: 'kr-distance',
+          direction: 'improved',
+          startPercentage: 20,
+          endPercentage: 40,
+          deltaPercentage: 20,
+        },
+        // 78 → 75 kg is improvement for an 80 → 70 decreasing target.
+        {
+          keyResultId: 'kr-weight',
+          direction: 'improved',
+          startPercentage: 20,
+          endPercentage: 50,
+          deltaPercentage: 30,
+        },
+      ],
+    });
     expect(context.summary).toEqual({
       recordCount: 3,
       manualRecordCount: 2,

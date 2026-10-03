@@ -8,6 +8,7 @@ import {
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
 } from '../../../platform/server-state';
+import { ROUTINE_UPCOMING_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import RoutineCapsulePreview from './RoutineCapsulePreview.vue';
 
 const getUpcomingOccurrences = vi.fn();
@@ -55,6 +56,38 @@ describe('RoutineCapsulePreview quick workspace', () => {
     runtime.dispose();
     vi.useRealTimers();
     vi.clearAllMocks();
+  });
+
+  it('shares pending mounts and reuses the owner snapshot until its stale window expires', async () => {
+    vi.useFakeTimers();
+    const now = new Date('2026-09-28T09:00:00Z');
+    vi.setSystemTime(now);
+    let release!: () => void;
+    getUpcomingOccurrences
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve({ ok: true, data: { occurrences: [] } });
+          }),
+      )
+      .mockResolvedValue({ ok: true, data: { occurrences: [] } });
+    const first = mountPreview();
+    const second = mountPreview();
+    expect(getUpcomingOccurrences).toHaveBeenCalledTimes(1);
+    release();
+    await flushPromises();
+    first.unmount();
+    second.unmount();
+    vi.setSystemTime(now.getTime() + ROUTINE_UPCOMING_STALE_TIME_MS - 1);
+    const fresh = mountPreview();
+    await flushPromises();
+    expect(getUpcomingOccurrences).toHaveBeenCalledTimes(1);
+    fresh.unmount();
+    vi.setSystemTime(now.getTime() + ROUTINE_UPCOMING_STALE_TIME_MS);
+    const stale = mountPreview();
+    await flushPromises();
+    expect(getUpcomingOccurrences).toHaveBeenCalledTimes(2);
+    stale.unmount();
   });
 
   it('shows owner-projected upcoming routine occurrences instead of configuration counts', async () => {

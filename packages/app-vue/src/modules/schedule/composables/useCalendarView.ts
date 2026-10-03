@@ -34,6 +34,7 @@ import {
   projectTaskOccurrence,
   type PlannerProductTimePort,
 } from '../planner';
+import { plannerProjectionSourceLabel } from '../planner/planner-presentation';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
 import { plannerOwnerQueryKeys } from '../../../platform/server-state/query-keys';
 import { PLANNER_OWNER_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
@@ -77,22 +78,14 @@ export function toLocalDateKey(value: Date | number): string {
 }
 
 /**
- * Residual 1291: sole calendarEventSourceLabel — schedule/goal/task source → i18n label.
- * Dual-retired from DayDetailSheet + EventDetailSheet local sourceLabel copies.
- * TIME-1206: capsule HH:mm formatting resolves through the session Product Time facade.
- * Soft residual 1288: Month eventClass translucent + getEventStyle Day/Week layout keep-boundaries remain separate.
+ * Schedule capsule compatibility alias. Source copy now comes from the same
+ * Planner presentation authority used by Day/Week/Month/detail surfaces.
  */
 export function calendarEventSourceLabel(
   source: CalendarEventItem['source'],
   translate: (key: string) => string,
 ): string {
-  const keys: Record<CalendarEventItem['source'], string> = {
-    schedule: 'schedule.source.schedule',
-    goal: 'schedule.source.goal',
-    task: 'schedule.source.task',
-    routine: 'schedule.source.routine',
-  };
-  return translate(keys[source]);
+  return plannerProjectionSourceLabel(source, translate);
 }
 
 /**
@@ -329,13 +322,13 @@ export function useCalendarView() {
     () => schedule.isLoading.value || task.isLoading.value || plannerOwnerReadsLoading.value,
   );
 
-  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
+  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number, force = false) {
     plannerOwnerReadsLoading.value = true;
     const identityScope = resolveIdentityScope();
     try {
       const goalsPromise = runtime.queryClient.fetchQuery<GoalClientDTO[]>({
         queryKey: plannerOwnerQueryKeys.goals(identityScope),
-        staleTime: PLANNER_OWNER_STALE_TIME_MS,
+        staleTime: force ? 0 : PLANNER_OWNER_STALE_TIME_MS,
         queryFn: async () => {
           const collectedGoals: PlannerGoalEntity[] = [];
           let page = 1;
@@ -363,6 +356,7 @@ export function useCalendarView() {
         start: startTime,
         end: endTime,
         limit: 500,
+        force,
       });
 
       const [goalsResult, routinesResult] = await Promise.allSettled([
@@ -370,7 +364,8 @@ export function useCalendarView() {
         routinesPromise,
       ]);
 
-      plannerGoals.value = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
+      plannerGoals.value =
+        goalsResult.status === 'fulfilled' ? goalsResult.value : force ? plannerGoals.value : [];
       plannerRoutineOccurrences.value =
         routinesResult.status === 'fulfilled'
           ? routinesResult.value.map((occurrence) => ({
@@ -384,22 +379,31 @@ export function useCalendarView() {
               revision: occurrence.revision,
               editable: false,
             }))
-          : [];
+          : force
+            ? plannerRoutineOccurrences.value
+            : [];
+      if (force && (goalsResult.status === 'rejected' || routinesResult.status === 'rejected')) {
+        throw new Error('Planner canonical marker refresh failed');
+      }
     } finally {
       plannerOwnerReadsLoading.value = false;
     }
   }
 
   /** Fetch all owner facts for the given Planner time window. */
-  async function fetchForRange(startTime: number, endTime: number) {
+  async function fetchForRange(
+    startTime: number,
+    endTime: number,
+    options: { force?: boolean } = {},
+  ) {
     windowStart.value = startTime;
     windowEnd.value = endTime;
 
     await Promise.all([
-      schedule.fetchCalendarEntries(startTime, endTime),
-      task.fetchInstancesByDateRange(startTime, endTime),
+      schedule.fetchCalendarEntries(startTime, endTime, options),
+      task.fetchInstancesByDateRange(startTime, endTime, options),
       task.fetchTemplates({ page: 1, limit: PLANNER_TASK_PLAN_LIMIT }),
-      fetchPlannerOwnerMarkers(startTime, endTime),
+      fetchPlannerOwnerMarkers(startTime, endTime, options.force),
     ]);
   }
 

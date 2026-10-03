@@ -12,7 +12,12 @@
  *    （顶栏设置按钮、AI settings、Home widget、浏览器后退/前进）都会检查，
  *    不再依赖调用方主动接入 coordinator。
  */
-import type { NavigationGuard } from 'vue-router';
+import type {
+  NavigationGuard,
+  RouteLocationNormalized,
+  RouteLocationRaw,
+  Router,
+} from 'vue-router';
 import { getActivePinia } from 'pinia';
 import { toast } from 'vue-sonner';
 import { getI18nGlobal } from '../../plugins/i18n';
@@ -20,6 +25,11 @@ import { useAppShellStore } from './useAppShellStore';
 import { isStandaloneSettingsPath } from './shell-scene';
 
 type Translate = (key: string) => string;
+type ShellStore = ReturnType<typeof useAppShellStore>;
+
+// Approval belongs to one navigation, never to the draft's dirty/clean status.
+const approvedNavigations = new WeakMap<RouteLocationNormalized, ShellStore>();
+const shellNavigations = new WeakMap<ShellStore, { fullPath: string }>();
 
 /**
  * 检查当前业务 surface 是否允许离开。
@@ -29,7 +39,7 @@ type Translate = (key: string) => string;
  * 未显式传入 `t` 时使用全局 i18n 插件实例（场景守卫路径）；组件上下文
  * （useShellRouterSync）可传入 useI18n() 的 t，避免测试环境强制装插件。
  */
-export function canLeaveBusinessSurface(t?: Translate): boolean {
+export function canLeaveBusinessSurface(t?: Translate, to?: RouteLocationNormalized): boolean {
   const store = getActivePinia() ? useAppShellStore() : null;
   if (!store) return true;
   if (store.panelSurface !== 'business') return true;
@@ -41,8 +51,36 @@ export function canLeaveBusinessSurface(t?: Translate): boolean {
     return false;
   }
   if (store.surfaceStatus !== 'dirty') return true;
+  if (
+    to &&
+    (approvedNavigations.get(to) === store || shellNavigations.get(store)?.fullPath === to.fullPath)
+  ) {
+    return true;
+  }
   if (typeof window === 'undefined') return false;
-  return window.confirm(translate('shell.panel.dirtyTransitionConfirm'));
+  const approved = window.confirm(translate('shell.panel.dirtyTransitionConfirm'));
+  if (approved && to) approvedNavigations.set(to, store);
+  return approved;
+}
+
+/** Share shell preflight approval with component/settings guards for this destination only. */
+export async function navigateBusinessSurface(
+  router: Router,
+  target: RouteLocationRaw,
+  t: Translate,
+  replace = false,
+): Promise<boolean> {
+  if (!canLeaveBusinessSurface(t)) return false;
+  const store = getActivePinia() ? useAppShellStore() : null;
+  const navigation = { fullPath: router.resolve(target).fullPath };
+  if (store) shellNavigations.set(store, navigation);
+  try {
+    return !(await (replace ? router.replace(target) : router.push(target)));
+  } catch {
+    return false;
+  } finally {
+    if (store && shellNavigations.get(store) === navigation) shellNavigations.delete(store);
+  }
 }
 
 /**
@@ -63,6 +101,6 @@ export function createSettingsSceneGuard(): NavigationGuard {
       !isStandaloneSettingsPath(from.path) && from.meta?.shellScene !== 'settings';
     if (!leavingWorkspace) return true;
 
-    return canLeaveBusinessSurface();
+    return canLeaveBusinessSurface(undefined, to);
   };
 }

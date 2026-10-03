@@ -67,7 +67,14 @@ function plainRecord(value: unknown): value is Record<string, unknown> {
 }
 
 const dangerousPatchKeys = new Set(['__proto__', 'prototype', 'constructor']);
-const allowedDraftPatchKeys = new Set(['title', 'topic', 'markdown', 'targetSubpath', 'tags']);
+const allowedDraftPatchKeys = new Set([
+  'title',
+  'topic',
+  'markdown',
+  'targetSubpath',
+  'tags',
+  'source',
+]);
 
 function mergeStructuredPatch(base: unknown, patch: unknown): unknown {
   if (!plainRecord(patch) || !plainRecord(base)) return patch;
@@ -89,7 +96,10 @@ function applyStructuredDraftPatch(
     }
   }
   const { revision: _revision, ...content } = draft;
-  const merged = mergeStructuredPatch(content, patch);
+  const { source, ...contentPatch } = patch;
+  const merged = mergeStructuredPatch(content, contentPatch);
+  if (plainRecord(merged) && Object.prototype.hasOwnProperty.call(patch, 'source'))
+    merged.source = source;
   const parsed = KnowledgeDraftSchema.omit({ revision: true }).parse(merged);
   return KnowledgeDraftSchema.parse({ ...parsed, revision: draft.revision + 1 });
 }
@@ -200,6 +210,7 @@ export function createKnowledgeCaptureWorkflow(input: {
         const draft = KnowledgeDraftSchema.parse({
           ...stripRevision(decision.candidateDraft),
           knowledgeDocumentId: knowledgeCaptureDocumentId({ workflowRunId: runId }),
+          ...(current.draft?.source ? { source: current.draft.source } : {}),
           revision: targetRevision,
         });
         return suspendReview(draft);
@@ -235,6 +246,8 @@ export function createKnowledgeCaptureWorkflow(input: {
 
       const applyAndResolve = async (priorReceipt = current.priorReceipt) => {
         if (!current.draft) throw new Error('knowledge.capture approve requires a persisted draft');
+        if (!current.draft.source)
+          throw new Error('knowledge.capture approve requires an owner-selected source');
         const receipt = await input.applyService.apply({
           workflowRunId: runId,
           draft: current.draft,

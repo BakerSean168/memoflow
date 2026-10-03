@@ -55,12 +55,6 @@
       "@memoflow/domain-shared/*": [
         "./packages/domain-shared/src/*/index.ts"
       ],
-      "@memoflow/governance": [
-        "./packages/governance/src/index.ts"
-      ],
-      "@memoflow/governance/*": [
-        "./packages/governance/src/*/index.ts"
-      ],
       "@memoflow/account": [
         "./packages/account/src/index.ts"
       ],

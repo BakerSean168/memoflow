@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
@@ -16,7 +17,14 @@ const statusMap: Record<string, string> = {
 const statusLabelKeys: Record<string, string> = {
   ACTIVE: 'task.templateCard.statusActive',
   PAUSED: 'task.templateCard.statusPaused',
-  CLOSED: 'task.templateCard.statusArchived',
+  CLOSED: 'task.templateCard.statusClosed',
+};
+
+const outcomeLabelKeys: Record<TaskPlanClientDTO['outcome'], string> = {
+  Open: 'task.templateCard.outcomeOpen',
+  Succeeded: 'task.templateCard.outcomeSucceeded',
+  Failed: 'task.templateCard.outcomeFailed',
+  Abandoned: 'task.templateCard.outcomeAbandoned',
 };
 
 const importanceLabelKeys: Record<string, string> = {
@@ -104,12 +112,18 @@ export function getTaskRecurrenceText(t: Translate, dto: TaskPlanClientDTO): str
 
 export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate): TaskPlanViewModel {
   const status = statusMap[dto.status] ?? dto.status;
+  const statusText = t(statusLabelKeys[status] ?? 'common.unknown');
+  const outcomeText = t(outcomeLabelKeys[dto.outcome] ?? 'common.unknown');
   return {
     id: dto.id,
     title: dto.name,
     description: dto.description ?? undefined,
     status,
-    statusText: t(statusLabelKeys[status] ?? 'common.unknown'),
+    statusText,
+    outcome: dto.outcome,
+    outcomeText,
+    stateText: dto.outcome === 'Open' ? statusText : outcomeText,
+    isClosed: status === 'CLOSED',
     isActive: status === 'ACTIVE',
     isPaused: status === 'PAUSED',
     isArchived: dto.archivedAt !== null,
@@ -123,12 +137,7 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
       ? {
           goalId: dto.goalBinding.goalId,
           keyResultId: dto.goalBinding.keyResultId,
-          contribution: dto.goalBinding.contribution
-            ? {
-                value: dto.goalBinding.contribution.value,
-                trigger: dto.goalBinding.contribution.trigger,
-              }
-            : undefined,
+          progressRule: TaskGoalProgressConfigurationSchema.parse(dto.goalBinding).progressRule,
         }
       : null,
     // TanStack Vue Query exposes cached DTOs through reactive proxies. Parse at the

@@ -6,16 +6,16 @@
     menu-width="w-44"
     more-button-test-id="task-plan-row-more-actions"
     :more-button-label="t('task.management.moreActions')"
-    more-button-class="!border-transparent !bg-transparent !shadow-none !backdrop-blur-none hover:!bg-muted/70"
+    more-button-class="!border-transparent !bg-transparent !shadow-none !backdrop-blur-none hover:!bg-[hsl(var(--hover))]"
   >
     <article
-      class="border-b border-border/70 last:border-b-0"
+      class="border-b border-[hsl(var(--border-subtle))] last:border-b-0"
       data-testid="task-plan-row"
       :data-task-id="plan.id"
     >
       <button
         type="button"
-        class="w-full text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+        class="w-full text-left transition-colors hover:bg-[hsl(var(--hover)/0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
         @click="emit('view')"
       >
         <div
@@ -28,7 +28,7 @@
                 {{ plan.title }}
               </h3>
               <Badge variant="secondary" class="h-5 shrink-0 px-1.5 py-0 text-[10px] font-normal">
-                {{ plan.statusText }}
+                {{ plan.stateText ?? plan.statusText }}
               </Badge>
             </div>
             <div
@@ -44,7 +44,7 @@
               >
                 <span
                   v-if="label.color"
-                  class="h-1.5 w-1.5 rounded-full border border-border/70"
+                  class="h-1.5 w-1.5 rounded-full border border-[hsl(var(--border-subtle))]"
                   :style="{ backgroundColor: label.color }"
                   aria-hidden="true"
                 />
@@ -79,7 +79,7 @@
               <div class="flex min-w-0 items-center gap-2">
                 <h3 class="truncate text-sm font-medium text-foreground">{{ plan.title }}</h3>
                 <Badge variant="secondary" class="h-5 shrink-0 px-1.5 py-0 text-[10px] font-normal">
-                  {{ plan.statusText }}
+                  {{ plan.stateText ?? plan.statusText }}
                 </Badge>
               </div>
               <p v-if="plan.description" class="mt-1 truncate text-xs text-muted-foreground">
@@ -103,7 +103,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Archive, Trash2 } from '@lucide/vue';
+import { CircleStop, Trash2 } from '@lucide/vue';
 import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
 import { ActionableWrapper, type MenuAction } from '../../../components/shared';
 import type { TaskPlanViewModel } from './types';
@@ -113,7 +113,7 @@ import {
 } from '../utils/task-plan-presentation';
 
 const props = defineProps<{ plan: TaskPlanViewModel }>();
-const emit = defineEmits<{ view: []; archive: []; delete: [] }>();
+const emit = defineEmits<{ view: []; abandon: []; delete: [] }>();
 const { t } = useI18n();
 
 const progress = computed(() =>
@@ -128,21 +128,24 @@ const scheduleText = computed(
       props.plan.schedule,
     )}`,
 );
-const actions = computed<MenuAction[]>(() => [
-  {
-    key: 'archive',
-    label: t('task.action.archive'),
-    icon: Archive,
-    disabled: props.plan.isArchived,
-    handler: () => emit('archive'),
-  },
-  {
+const actions = computed<MenuAction[]>(() => {
+  const items: MenuAction[] = [];
+  if (!props.plan.isArchived && (props.plan.isActive || props.plan.isPaused)) {
+    items.push({
+      key: 'abandon',
+      label: t('task.action.abandon'),
+      icon: CircleStop,
+      handler: () => emit('abandon'),
+    });
+  }
+  items.push({
     key: 'delete',
     label: t('common.delete'),
     icon: Trash2,
     destructive: true,
-    separator: true,
+    separator: items.length > 0,
     handler: () => emit('delete'),
-  },
-]);
+  });
+  return items;
+});
 </script>

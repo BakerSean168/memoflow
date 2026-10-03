@@ -22,6 +22,7 @@
     <ProductAutoTextarea
       id="task-plan-title"
       v-model="title"
+      :disabled="readonly"
       :max-length="100"
       :rows="1"
       data-testid="task-plan-title-input"
@@ -44,6 +45,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: TaskPlanViewModel;
+  readonly?: boolean;
 }>();
 const emit = defineEmits<{
   'update:modelValue': [value: TaskPlanViewModel];
@@ -56,6 +58,7 @@ const hasInteracted = ref(false);
 const title = computed({
   get: () => props.modelValue.title,
   set: (value: string) => {
+    if (props.readonly) return;
     emit('update:modelValue', {
       ...props.modelValue,
       title: value,

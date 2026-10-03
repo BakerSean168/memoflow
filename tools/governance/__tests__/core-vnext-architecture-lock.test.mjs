@@ -25,13 +25,43 @@ const canonicalNotificationFiles = [
   },
 ];
 
+const canonicalWorkflowContextFiles = [
+  {
+    relPath: 'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
+    content: `
+      const active = panelSurface === 'workflow';
+      const attention = workflowAttentionCount;
+      const slot = '<slot name="workflow" />';
+    `,
+  },
+  {
+    relPath: 'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
+    content: `
+      function requestWorkflowSurface() {
+        if (this.surfaceStatus !== 'clean') this.workflowAttentionCount = 1;
+      }
+      function closeWorkflowSurface() {}
+    `,
+  },
+  {
+    relPath: 'packages/app-vue/src/modules/ai/views/AIChatView.vue',
+    content: `
+      <AIContextPanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/><AIKnowledgeCapturePanel/></AIContextPanel>
+      requestWorkflowSurface(intent);
+    `,
+  },
+];
+
 const canonicalTaskGoalFiles = [
   {
     relPath: 'packages/database/src/schema/task-goal-binding-constraint.ts',
     content: `
-      const VERSION = 'memoflow.task-goal-binding/v3';
-      const sql = 'goal_id IS NOT NULL AND key_result_id IS NULL';
+      const VERSION = 'memoflow.task-goal-binding/v4';
+      const sql = 'key_result_id IS NULL OR goal_id IS NOT NULL';
       const contribution = 'goal_record_value IS NULL AND goal_progress_trigger IS NULL';
+      const prompt = "goal_progress_mode = 'Prompt' AND goal_record_value IS NULL";
+      const fixed = 'goal_record_value <> 0';
+      const check = ') IS TRUE)';
     `,
   },
   {
@@ -50,6 +80,7 @@ function scan(...files) {
   return findCoreVnextArchitectureLockViolations([
     ...canonicalNotificationFiles,
     ...canonicalTaskGoalFiles,
+    ...canonicalWorkflowContextFiles,
     ...files,
   ]);
 }
@@ -267,7 +298,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
 
     const { violations } = findCoreVnextArchitectureLockViolations(files);
     const kinds = violations.map((violation) => violation.kind);
-    expect(kinds).toContain('task-goal-binding-v3-missing');
+    expect(kinds).toContain('task-goal-binding-v4-missing');
     expect(kinds).toContain('task-goal-context-read-port-missing');
   });
 
@@ -300,5 +331,71 @@ describe('HARD-7102 core vNext architecture lock', () => {
     });
     expect(message).toContain('packages/scheduler/src/api/routes.ts:42');
     expect(message).toContain('diagnostics-only');
+  });
+});
+
+describe('AI workflow context retention boundary', () => {
+  it.each(['GoalDialog', 'TaskPlanDialog', 'KnowledgeCaptureReviewDialog', 'createPlanSafe'])(
+    'rejects owner form or mutation symbol %s inside the retained workflow context',
+    (symbol) => {
+      const { violations } = scan({
+        relPath: 'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
+        content: symbol,
+      });
+      expect(violations.some(({ kind }) => kind === 'ai-workflow-context-owner-leakage')).toBe(
+        true,
+      );
+    },
+  );
+
+  it('requires the retained workflow slot, attention guard, and context composition', () => {
+    const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
+      file.relPath === 'packages/app-vue/src/layouts/shell/BusinessPanel.vue'
+        ? { ...file, content: 'workflowAttentionCount' }
+        : file,
+    );
+    const { violations } = findCoreVnextArchitectureLockViolations([
+      ...canonicalNotificationFiles,
+      ...canonicalTaskGoalFiles,
+      ...brokenWorkflowFiles,
+    ]);
+    expect(violations.some(({ kind }) => kind === 'ai-workflow-context-surface-missing')).toBe(
+      true,
+    );
+  });
+});
+
+describe('AI-owned business editor retirement', () => {
+  it.each([
+    'AIGoalDraftEditor',
+    'AITaskDraftEditor',
+    'showGoalDraftEditor',
+    'showTaskDraftEditor',
+    'toggleGoalDraftEditor',
+    'show-goal-draft-editor',
+    'show-task-draft-editor',
+    'goal-agent-toggle-editor',
+    'goal-workflow-draft-editor',
+    'task-workflow-draft-editor',
+    'knowledge-capture-draft-editor',
+  ])('rejects %s in production imports, exports or wiring', (symbol) => {
+    const result = findCoreVnextArchitectureLockViolations([
+      { relPath: 'packages/app-vue/src/modules/ai/components/index.ts', content: symbol },
+    ]);
+    expect(result.violations.some(({ kind }) => kind === 'ai-owned-business-editor')).toBe(true);
+  });
+  it('allows native and supporting state and historical test assertions', () => {
+    const result = findCoreVnextArchitectureLockViolations([
+      {
+        relPath: 'packages/app-vue/src/modules/ai/composables/current.ts',
+        content:
+          'GoalDialog; TaskPlanDialog; KnowledgeCaptureReviewDialog; editableTasks; editableKnowledge; editorOverlay;',
+      },
+      {
+        relPath: 'packages/app-vue/src/modules/ai/components/retirement.spec.ts',
+        content: 'AIGoalDraftEditor; showGoalDraftEditor;',
+      },
+    ]);
+    expect(result.violations.filter(({ kind }) => kind === 'ai-owned-business-editor')).toEqual([]);
   });
 });

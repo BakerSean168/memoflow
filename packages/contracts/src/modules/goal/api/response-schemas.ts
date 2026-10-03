@@ -15,6 +15,7 @@ import type {
   IdentityId,
   GoalRecordId,
 } from '../../../primitives';
+import { GoalRecordAuthorshipSchema, GoalRecordSourceType } from '../entities/goal-record-server';
 import { GoalStatus } from '../value-objects/goal-status';
 import { GoalReviewSystemContextSchema } from '../value-objects/goal-review-context';
 export type { GoalReviewSystemContext } from '../value-objects/goal-review-context';
@@ -143,6 +144,9 @@ export const GoalRecordClientDTOSchema = z.object({
   value: z.number(),
   valueAfter: z.number(),
   comment: z.string().nullable(),
+  authorship: GoalRecordAuthorshipSchema,
+  source: z.object({ type: z.enum(GoalRecordSourceType), id: z.string().trim().min(1) }).nullable(),
+  recordedAt: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),
 });
@@ -212,6 +216,23 @@ export type GoalHomeProgressSummary = z.infer<typeof GoalHomeProgressSummarySche
 /**
  * 目标聚合视图响应 Schema
  */
+/** Dedicated Goal record composer context; internal state stays out of normal KR DTOs. */
+export const GoalRecordAggregationSnapshotSchema = z.object({
+  count: z.number().int().nonnegative(),
+  sum: z.number().finite(),
+  max: z.number().finite().nullable(),
+  min: z.number().finite().nullable(),
+  last: z.number().finite().nullable(),
+});
+export type GoalRecordAggregationSnapshot = z.infer<typeof GoalRecordAggregationSnapshotSchema>;
+
+export const GoalRecordPreviewContextSchema = KeyResultProgressDTOSchema.extend({
+  keyResultId: brandedId<KeyResultId>(),
+  trackingBaseValue: z.number().finite(),
+  aggregationSnapshot: GoalRecordAggregationSnapshotSchema,
+});
+export type GoalRecordPreviewContext = z.infer<typeof GoalRecordPreviewContextSchema>;
+
 export const GetGoalAggregateResSchema = z.object({
   goal: GoalAggregateReadModelSchema,
   keyResults: z.array(KeyResultClientDTOSchema),
@@ -246,6 +267,7 @@ export const KeyResultListResSchema = z.object({
  * 进度记录列表响应 Schema
  */
 export const GoalRecordListResSchema = z.object({
+  previewContext: GoalRecordPreviewContextSchema.nullable().optional(),
   data: z.array(GoalRecordClientDTOSchema),
   total: z.number(),
 });

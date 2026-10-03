@@ -87,6 +87,6 @@ export interface IApiModuleContext extends ServerTransportModuleContext {}
  * 目标方向（target direction）：runtime-first 装配 —— 宿主（apps/api/src/runtime）
  * 在 register() 之前完成 feature 模块的 Composition Root 组装（选择 adapter →
  * repository → application instance），register() 只负责 transport 注册与模块生命周期
- * （start/dispose）。参见 apps/api/src/runtime/compose-governance.ts 的治理示范。
+ * （start/dispose）。真实业务 owner 的 runtime composer 是该模式的可执行示例。
  */
 export interface IApiModule extends ServerModuleHandle<IApiModuleContext> {}

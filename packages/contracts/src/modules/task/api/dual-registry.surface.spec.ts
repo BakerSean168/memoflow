@@ -88,7 +88,7 @@ import { describe, expect, it } from 'vitest';
     it('exports one ADR-056 link schema with nested contribution and the reminder schema', () => {
       expect(binding).toMatch(/export const TaskGoalLinkSchema = z\s*\.object\(\{/);
       expect(binding).toContain(
-        'contribution: GoalContributionRuleSchema.nullable().optional().default(null)',
+        'contribution: GoalContributionRuleSchema.nullable().optional()',
       );
       expect(binding).toContain('export const TaskGoalBindingSchema = TaskGoalLinkSchema');
       expect(binding).not.toContain('goalRecordValue:');

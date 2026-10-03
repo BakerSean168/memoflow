@@ -8,7 +8,6 @@ export default {
   "reminders": "Reminders",
   "notifications": "Notifications",
   "repositories": "Notes",
-  "governance": "Standards",
   "settings": "Settings",
   "accountCenter": "Account",
   "logout": "Log Out",

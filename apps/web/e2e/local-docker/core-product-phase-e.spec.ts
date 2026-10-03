@@ -67,7 +67,8 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(approvalPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(approvalPanel).toContainText('Phase E 待审批目标');
     await expect(approvalPanel).toContainText(/suspended/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
+    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
+    await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
     await expectNoHorizontalOverflow(page);
 

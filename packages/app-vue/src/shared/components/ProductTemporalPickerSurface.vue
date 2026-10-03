@@ -9,7 +9,7 @@
           :placeholder="inputPlaceholder"
           :data-testid="`${testId}-query`"
           :aria-label="ariaLabel"
-          class="h-8 rounded-md border-border/80 bg-muted/20 px-2.5 pr-8 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
+          class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2.5 pr-8 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
           @update:model-value="emit('update:query', String($event))"
           @keydown.enter.prevent="emit('commit-query')"
         />
@@ -18,7 +18,7 @@
           v-if="query"
           type="button"
           :aria-label="clearLabel"
-          class="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:bg-accent/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           @pointerdown.prevent
           @click="emit('clear')"
         >
@@ -42,7 +42,7 @@
         :key="option.value"
         :value="option.value"
         :data-testid="`${testId}-precision-${option.value}`"
-        class="h-7 min-w-0 shrink-0 rounded-full px-2 text-[11px] font-medium text-muted-foreground shadow-none hover:bg-accent/70 hover:text-foreground data-[state=on]:bg-[hsl(var(--selected))] data-[state=on]:text-foreground"
+        class="h-7 min-w-0 shrink-0 rounded-full px-2 text-[11px] font-medium text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground data-[state=on]:bg-[hsl(var(--selected))] data-[state=on]:text-foreground"
       >
         {{ option.label }}
       </ToggleGroupItem>
@@ -72,7 +72,7 @@
         min="1"
         max="9999"
         :data-testid="`${testId}-year`"
-        class="h-8 rounded-md border-border/80 bg-muted/20 px-2.5 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
+        class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2.5 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
         :aria-label="yearLabel"
         @update:model-value="emit('update-year', Number($event))"
       />

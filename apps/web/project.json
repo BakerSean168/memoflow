@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
-  "tags": [
-    "scope:web",
-    "type:app",
-    "layer:app"
-  ],
+  "tags": ["scope:web", "type:app", "layer:app"],
   "targets": {
     "serve": {
       "configurations": {
@@ -31,13 +27,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/web/vitest.config.ts"
@@ -52,16 +43,12 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,tsx,js,jsx,vue}"
-        ]
+        "args": ["**/*.{ts,tsx,js,jsx,vue}"]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p tsconfig.typecheck.json",
         "cwd": "apps/web"
@@ -234,6 +221,28 @@
       ],
       "options": {
         "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts",
+        "cwd": "apps/web"
+      }
+    },
+    "e2e:visual-regression": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "outputs": ["{workspaceRoot}/apps/web/test-results/visual-regression"],
+      "options": {
+        "command": "playwright test --config playwright.visual-regression.config.ts",
+        "cwd": "apps/web"
+      },
+      "configurations": {
+        "update": {
+          "command": "playwright test --config playwright.visual-regression.config.ts --update-snapshots"
+        }
+      }
+    },
+    "typecheck:visual-regression": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p e2e/visual-regression/tsconfig.json",
         "cwd": "apps/web"
       }
     }

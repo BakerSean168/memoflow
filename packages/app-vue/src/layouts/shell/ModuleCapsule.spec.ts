@@ -1,11 +1,20 @@
 /** @vitest-environment happy-dom */
 
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { Target } from '@lucide/vue';
-import { h, nextTick } from 'vue';
+import { defineComponent, h, nextTick, onMounted, onUnmounted } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ModuleCapsule from './ModuleCapsule.vue';
+import { ok } from '@memoflow/contracts/result';
+import { GOAL_SERVICE_KEY } from '../../di/keys';
+import { GOAL_HOME_STALE_TIME_MS } from '../../platform/server-state/query-policy';
+import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
+import {
+  createTestServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+} from '../../platform/server-state';
 
 const i18n = createI18n({
   legacy: false,
@@ -22,6 +31,107 @@ afterEach(() => {
 });
 
 describe('ModuleCapsule', () => {
+  it('does not duplicate owner requests through hover, focus, pin and pending reopen transitions', async () => {
+    vi.useFakeTimers();
+    const runtime = createTestServerStateRuntime();
+    let release!: () => void;
+    const getHomeSummary = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve(ok({ activeCount: 0, goals: [] }));
+          }),
+      )
+      .mockResolvedValue(ok({ activeCount: 0, goals: [] }));
+    const mounted = vi.fn();
+    const unmounted = vi.fn();
+    const Preview = defineComponent({
+      setup() {
+        const owner = useGoalHomeSummary();
+        onMounted(() => {
+          mounted();
+          void owner.ensure();
+        });
+        onUnmounted(unmounted);
+        return () => h('input', { 'data-testid': 'owner-preview-input' });
+      },
+    });
+    const wrapper = mount(ModuleCapsule, {
+      attachTo: document.body,
+      props: { id: 'goal', label: 'Goals', route: '/goals', icon: Target },
+      slots: {
+        default: ({ closePreview }) => [
+          h(Preview),
+          h('button', { 'data-testid': 'owner-preview-close', onClick: closePreview }, 'Close'),
+        ],
+      },
+      global: {
+        plugins: [i18n],
+        provide: {
+          [GOAL_SERVICE_KEY as symbol]: { getHomeSummary },
+          [SERVER_STATE_RUNTIME_KEY]: runtime,
+          [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
+        },
+      },
+    });
+    try {
+      const trigger = wrapper.get('[data-testid="capsule-preview-goal"]');
+      await trigger.trigger('mouseenter');
+      vi.advanceTimersByTime(300);
+      await flushPromises();
+      expect(mounted).toHaveBeenCalledTimes(1);
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      const input = document.querySelector<HTMLInputElement>(
+        '[data-testid="owner-preview-input"]',
+      )!;
+      input.focus();
+      expect(document.activeElement).toBe(input);
+      await trigger.trigger('mouseleave');
+      vi.advanceTimersByTime(180);
+      await flushPromises();
+      expect(trigger.attributes('aria-expanded')).toBe('true');
+      expect(mounted).toHaveBeenCalledTimes(1);
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      await trigger.trigger('click');
+      await flushPromises();
+      expect(mounted).toHaveBeenCalledTimes(1);
+      document.querySelector<HTMLButtonElement>('[data-testid="owner-preview-close"]')!.click();
+      await flushPromises();
+      await trigger.trigger('click');
+      await flushPromises();
+      expect(unmounted).toHaveBeenCalledTimes(1);
+      expect(mounted).toHaveBeenCalledTimes(2);
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      release();
+      await flushPromises();
+      const settledAt = Date.now();
+      document.querySelector<HTMLButtonElement>('[data-testid="owner-preview-close"]')!.click();
+      await flushPromises();
+      await trigger.trigger('click');
+      await flushPromises();
+      expect(unmounted).toHaveBeenCalledTimes(2);
+      expect(mounted).toHaveBeenCalledTimes(3);
+      expect(getHomeSummary).toHaveBeenCalledTimes(1);
+      for (const [elapsed, mounts, reads] of [
+        [GOAL_HOME_STALE_TIME_MS - 1, 4, 1],
+        [GOAL_HOME_STALE_TIME_MS, 5, 2],
+      ]) {
+        document.querySelector<HTMLButtonElement>('[data-testid="owner-preview-close"]')!.click();
+        await flushPromises();
+        vi.setSystemTime(settledAt + elapsed);
+        await trigger.trigger('click');
+        await flushPromises();
+        expect(unmounted).toHaveBeenCalledTimes(mounts - 1);
+        expect(mounted).toHaveBeenCalledTimes(mounts);
+        expect(getHomeSummary).toHaveBeenCalledTimes(reads);
+      }
+    } finally {
+      wrapper.unmount();
+      runtime.dispose();
+    }
+  });
+
   it('separates direct navigation from hover and pinned preview interactions', async () => {
     vi.useFakeTimers();
     const wrapper = mount(ModuleCapsule, {
@@ -108,9 +218,7 @@ describe('ModuleCapsule', () => {
     await nextTick();
     expect(preview.attributes('aria-expanded')).toBe('true');
 
-    const content = document.querySelector<HTMLElement>(
-      '[data-capsule-preview-content="goal"]',
-    );
+    const content = document.querySelector<HTMLElement>('[data-capsule-preview-content="goal"]');
     const input = document.querySelector<HTMLInputElement>('[data-testid="preview-input"]');
     expect(content).not.toBeNull();
     expect(input).not.toBeNull();
@@ -153,4 +261,26 @@ describe('ModuleCapsule', () => {
 
     wrapper.unmount();
   });
+});
+
+it('returns keyboard Escape focus to the named preview action without reopening it', async () => {
+  const wrapper = mount(ModuleCapsule, {
+    attachTo: document.body,
+    props: { id: 'goal', label: 'Goals', route: '/goals', icon: Target },
+    slots: { default: '<button data-testid="capsule-inner">Preview action</button>' },
+    global: { plugins: [i18n] },
+  });
+  const preview = wrapper.get('[data-testid="capsule-preview-goal"]');
+  expect(wrapper.get('[data-testid="capsule-nav-goal"]').attributes('aria-label')).toBe('Goals');
+  expect(preview.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+  preview.element.focus();
+  await preview.trigger('click', { detail: 0 });
+  await flushPromises();
+  const inner = document.querySelector<HTMLButtonElement>('[data-testid="capsule-inner"]')!;
+  expect(document.activeElement).toBe(inner);
+  inner.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flushPromises();
+  expect(preview.attributes('aria-expanded')).toBe('false');
+  expect(document.activeElement).toBe(preview.element);
+  wrapper.unmount();
 });

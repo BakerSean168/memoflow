@@ -20,27 +20,38 @@
     </div>
     <div
       v-else-if="error && !workspace"
+      role="alert"
+      data-testid="goal-not-found"
       class="m-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
     >
-      {{ error }}
+      {{ t('goal.inspect.goalUnavailable') }}
+      <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
+        t('common.close')
+      }}</Button>
     </div>
 
+    <div v-else-if="!goal" role="alert" data-testid="goal-not-found" class="m-4 p-4 text-sm">
+      {{ t('goal.inspect.goalUnavailable') }}
+      <Button v-if="hasGoalOverlayRoute" variant="ghost" @click="closeGoalOverlay">{{
+        t('common.close')
+      }}</Button>
+    </div>
     <div
       v-else-if="goal && workspace"
       class="min-h-0 flex-1 overflow-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
     >
       <div class="mx-auto max-w-5xl space-y-6">
         <article
-          class="space-y-4 border-b border-border/70 pb-5"
+          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="goal-workspace-header"
         >
-          <div class="space-y-1" data-testid="goal-detail-identity">
+          <ProductEntityIdentity data-testid="goal-detail-identity">
             <ProductAutoTextarea
               v-model="nameDraft"
               :max-length="80"
               :rows="1"
               data-testid="goal-detail-title"
-              class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+              class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
               :placeholder="t('goal.dialog.goalTitlePlaceholder')"
               :disabled="isSaving || !!goal.archivedAt"
               @blur="saveName"
@@ -52,23 +63,20 @@
               :max-length="255"
               :rows="1"
               data-testid="goal-detail-summary"
-              class="-mx-1 min-h-7 rounded-md px-1 text-sm leading-5 text-muted-foreground transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+              class="-mx-1 min-h-7 rounded-md px-1 text-sm leading-5 text-muted-foreground transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
               :placeholder="t('goal.dialog.summaryPlaceholder')"
               :disabled="isSaving || !!goal.archivedAt"
               @blur="saveSummary"
               @keydown.enter.exact.prevent="commitSummaryFromKeyboard"
               @keydown.esc.prevent="resetInlineDrafts"
             />
-          </div>
+          </ProductEntityIdentity>
 
           <div class="space-y-0.5" data-testid="goal-detail-metadata">
-            <div
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+            <ProductMetadataRow
+              :label="t('goal.detail.properties')"
               data-testid="goal-properties-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.detail.properties') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-2">
                 <div data-testid="goal-status" :data-goal-status="goal.status">
                   <GoalStatusPicker
@@ -112,134 +120,122 @@
                   {{ t('goal.list.pastTarget') }}
                 </Badge>
 
-                <DropdownMenu v-if="hasMorePropertiesMenuItems">
-                  <DropdownMenuTrigger as-child>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-8 w-8 rounded-full text-muted-foreground"
-                      :aria-label="t('goal.detail.moreProperties')"
-                      data-testid="goal-properties-more"
-                    >
-                      <MoreHorizontal class="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" class="w-52">
-                    <DropdownMenuItem
-                      v-if="!startDraft && !showStartEditor"
-                      @click="showStartEditor = true"
-                    >
-                      <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
-                      {{ t('goal.dialog.startDate') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      v-if="!targetDraft && !showTargetEditor"
-                      @click="showTargetEditor = true"
-                    >
-                      <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
-                      {{ t('goal.detail.target') }}
-                    </DropdownMenuItem>
-                    <DropdownMenuSub v-if="pendingReminderTriggers.length === 0">
-                      <DropdownMenuSubTrigger>
-                        <BellRing class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.reminder.reminder') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-96 max-w-[calc(100vw-2rem)]">
-                        <GoalReminderMenuItems
-                          :model-value="reminderConfigDraft"
-                          :start="startDraft"
-                          :target="targetDraft"
-                          :disabled="isSaving || !!goal.archivedAt"
-                          @update:model-value="saveReminderConfig"
-                          @request-custom-time="openCustomReminderPicker"
+                <ProductMoreProperties
+                  v-if="hasMorePropertiesMenuItems"
+                  :label="t('goal.detail.moreProperties')"
+                  test-id="goal-properties-more"
+                >
+                  <DropdownMenuItem
+                    v-if="!startDraft && !showStartEditor"
+                    @click="showStartEditor = true"
+                  >
+                    <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
+                    {{ t('goal.dialog.startDate') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="!targetDraft && !showTargetEditor"
+                    @click="showTargetEditor = true"
+                  >
+                    <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
+                    {{ t('goal.detail.target') }}
+                  </DropdownMenuItem>
+                  <DropdownMenuSub v-if="pendingReminderTriggers.length === 0">
+                    <DropdownMenuSubTrigger>
+                      <BellRing class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.reminder.reminder') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-96 max-w-[calc(100vw-2rem)]">
+                      <GoalReminderMenuItems
+                        :model-value="reminderConfigDraft"
+                        :start="startDraft"
+                        :target="targetDraft"
+                        :disabled="isSaving || !!goal.archivedAt"
+                        @update:model-value="saveReminderConfig"
+                        @request-custom-time="openCustomReminderPicker"
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuSub v-if="labelIdsDraft.length === 0 && !showLabelsEditor">
+                    <DropdownMenuSubTrigger>
+                      <Tag class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.dialog.labels') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-60">
+                      <DropdownMenuCheckboxItem
+                        v-for="option in labelOptions"
+                        :key="option.id"
+                        :model-value="labelIdsDraft.includes(option.id)"
+                        @update:model-value="toggleLabelSelection(option.id)"
+                        @select.prevent
+                      >
+                        <span
+                          v-if="option.color"
+                          class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
+                          :style="{ backgroundColor: option.color }"
                         />
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                        <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuItem v-if="labelOptions.length === 0" disabled>
+                        {{ t('goal.list.noLabels') }}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem @click="openLabelsEditor">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createOrManageLabels') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="labelIdsDraft.length === 0 && !showLabelsEditor">
-                      <DropdownMenuSubTrigger>
-                        <Tag class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.dialog.labels') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-60">
-                        <DropdownMenuCheckboxItem
-                          v-for="option in labelOptions"
-                          :key="option.id"
-                          :model-value="labelIdsDraft.includes(option.id)"
-                          @update:model-value="toggleLabelSelection(option.id)"
-                          @select.prevent
-                        >
-                          <span
-                            v-if="option.color"
-                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-border/60"
-                            :style="{ backgroundColor: option.color }"
-                          />
-                          <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuItem v-if="labelOptions.length === 0" disabled>
-                          {{ t('goal.list.noLabels') }}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem @click="openLabelsEditor">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createOrManageLabels') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                  <DropdownMenuSub v-if="taskCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <ListTodo class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.tasks') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-52">
+                      <DropdownMenuItem @click="createTaskForGoal()">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createBoundTask') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="taskCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <ListTodo class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.tasks') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-52">
-                        <DropdownMenuItem @click="createTaskForGoal()">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createBoundTask') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
+                  <DropdownMenuSub v-if="knowledgeCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <NotebookText class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.knowledge') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-72">
+                      <GoalKnowledgeMenuItems
+                        :goal-id="goalId"
+                        :linked-document-ids="linkedKnowledgeDocumentIds"
+                        :disabled="isSaving || !!goal.archivedAt"
+                        @changed="handleKnowledgeChanged"
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
-                    <DropdownMenuSub v-if="knowledgeCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <NotebookText class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.knowledge') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-72">
-                        <GoalKnowledgeMenuItems
-                          :goal-id="goalId"
-                          :linked-document-ids="linkedKnowledgeDocumentIds"
-                          :disabled="isSaving || !!goal.archivedAt"
-                          @changed="handleKnowledgeChanged"
-                        />
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-
-                    <DropdownMenuSub v-if="reviewCount === 0">
-                      <DropdownMenuSubTrigger>
-                        <History class="mr-2 h-4 w-4 text-muted-foreground" />
-                        {{ t('goal.list.reviews') }}
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent class="w-48">
-                        <DropdownMenuItem @click="openReviewCreate">
-                          <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
-                          {{ t('goal.detail.createReview') }}
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  <DropdownMenuSub v-if="reviewCount === 0">
+                    <DropdownMenuSubTrigger>
+                      <History class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('goal.list.reviews') }}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-48">
+                      <DropdownMenuItem @click="openReviewCreate">
+                        <Plus class="mr-2 h-4 w-4 text-muted-foreground" />
+                        {{ t('goal.detail.createReview') }}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </ProductMoreProperties>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="pendingReminderTriggers.length"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.reminder.reminder')"
               data-testid="goal-reminders-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.reminder.reminder') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <DropdownMenu
                   v-for="trigger in pendingReminderTriggers"
@@ -249,7 +245,7 @@
                     <button type="button" class="max-w-64">
                       <Badge
                         variant="outline"
-                        class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                       >
                         <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
                       </Badge>
@@ -290,26 +286,23 @@
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="labelIdsDraft.length || showLabelsEditor"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.dialog.labels')"
               data-testid="goal-labels-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.dialog.labels') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <Badge
                   v-for="option in selectedLabelOptions"
                   :key="option.id"
                   variant="outline"
-                  class="h-7 max-w-48 gap-1.5 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
                 >
                   <span
                     v-if="option.color"
-                    class="h-2 w-2 shrink-0 rounded-full border border-border/60"
+                    class="h-2 w-2 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
                     :style="{ backgroundColor: option.color }"
                   />
                   <span class="truncate">{{ option.name }}</span>
@@ -341,16 +334,13 @@
                   </PopoverContent>
                 </Popover>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="taskCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.tasks')"
               data-testid="goal-tasks-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.tasks') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button
                   v-for="task in taskPreviewItems"
@@ -361,7 +351,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ task.name }}</span>
                   </Badge>
@@ -383,16 +373,13 @@
                   <Plus class="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="knowledgeCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.knowledge')"
               data-testid="goal-knowledge-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.knowledge') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button
                   v-for="note in knowledgePreviewItems"
@@ -403,7 +390,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">
                       {{ note.state === 'Resolved' ? note.title : note.documentId }}
@@ -438,21 +425,18 @@
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </div>
+            </ProductMetadataRow>
 
-            <div
+            <ProductMetadataRow
               v-if="reviewCount > 0"
-              class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 py-1.5"
+              :label="t('goal.list.reviews')"
               data-testid="goal-reviews-row"
             >
-              <span class="pt-1.5 text-xs font-medium text-muted-foreground">
-                {{ t('goal.list.reviews') }}
-              </span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                 <button type="button" class="max-w-72" @click="openLatestReview">
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ latestReviewText }}</span>
                   </Badge>
@@ -474,7 +458,7 @@
                   <Plus class="h-3.5 w-3.5" />
                 </Button>
               </div>
-            </div>
+            </ProductMetadataRow>
           </div>
 
           <p v-if="mutationError || labelCreateError" role="alert" class="text-sm text-destructive">
@@ -491,7 +475,7 @@
             :max-length="10000"
             :rows="3"
             data-testid="goal-detail-description"
-            class="-mx-1 min-h-16 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            class="-mx-1 min-h-16 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
             :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
             :disabled="isSaving || !!goal.archivedAt"
             @blur="saveDescription"
@@ -516,6 +500,7 @@
                 size="sm"
                 class="h-8 gap-1.5 text-muted-foreground"
                 data-testid="goal-add-key-result"
+                :disabled="isSaving || !!goal.archivedAt"
                 @click="openCreateKr"
               >
                 <Plus class="h-4 w-4" />
@@ -528,32 +513,44 @@
             {{ t('goal.detail.progressNeedsKr') }}
           </p>
 
-          <div v-if="keyResults.length" class="divide-y border-y border-border/70">
-            <article v-for="kr in keyResults" :key="kr.id" class="p-4">
-              <button
-                type="button"
-                class="block w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                @click="openKr(kr.id)"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <h3 class="truncate font-medium">◇ {{ kr.title }}</h3>
-                    <p class="mt-1 text-xs text-muted-foreground">
-                      {{ kr.progress.initialValue }} → {{ kr.progress.currentValue }} →
-                      {{ kr.progress.targetValue
-                      }}<span v-if="kr.progress.unit"> {{ kr.progress.unit }}</span>
-                    </p>
-                  </div>
-                  <div class="shrink-0 text-right">
-                    <p class="text-sm font-medium">{{ Math.round(kr.progressPercentage) }}%</p>
-                    <p v-if="kr.target" class="mt-1 text-xs text-muted-foreground">
-                      {{ formatTarget(kr.target) }}
-                    </p>
-                  </div>
-                </div>
-                <Progress class="mt-3" :model-value="kr.progressPercentage" />
-              </button>
-              <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <div
+            v-if="keyResults.length"
+            class="divide-y border-y border-[hsl(var(--border-subtle))]"
+          >
+            <article
+              v-for="kr in keyResults"
+              :key="kr.id"
+              class="px-4 py-3"
+              :data-testid="`goal-kr-summary-${kr.id}`"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <GoalKeyResultDirectControls
+                  class="flex-1"
+                  :key-result="kr"
+                  :goal-target="goal.target"
+                  :disabled="isSaving || !!goal.archivedAt"
+                  :on-save="(patch) => updateKrFields(kr.id, patch)"
+                />
+                <span class="shrink-0 text-sm font-medium tabular-nums"
+                  >{{ Math.round(kr.progressPercentage) }}%</span
+                >
+              </div>
+              <GoalKeyResultTrajectoryPlot
+                readonly
+                :initial-value="kr.progress.initialValue"
+                :current-value="kr.progress.currentValue"
+                :target-value="kr.progress.targetValue"
+                :unit="kr.progress.unit ?? ''"
+                :start-label="
+                  goal.start ? formatTarget(goal.start) : t('goal.dialog.krTrajectoryNotSet')
+                "
+                :current-label="formatProductYmd(getProductTodayYmd())"
+                :target-label="formatTarget(kr.target ?? goal.target)"
+                :check-in-test-id="`goal-quick-check-in-${kr.id}`"
+                :check-in-label="`${t('goal.recordDialog.addTitle')}: ${kr.title}`"
+                @check-in="openQuickCheckIn(kr.id)"
+              />
+              <div class="mt-1 flex flex-wrap items-center justify-between gap-2">
                 <Button
                   v-if="linkedTaskCount(kr.id) > 0"
                   variant="ghost"
@@ -580,13 +577,16 @@
                       <ListTodo class="mr-2 h-4 w-4" />
                       {{ t('goal.detail.createBoundTask') }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @click="openEditKr(kr)">
-                      <Pencil class="mr-2 h-4 w-4" />
-                      {{ t('common.edit') }}
+                    <DropdownMenuItem
+                      :data-testid="`goal-kr-detail-${kr.id}`"
+                      @click="openKr(kr.id)"
+                    >
+                      {{ t('goal.route.krDetail') }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive"
+                      :disabled="isSaving || !!goal.archivedAt"
                       @click="removeKr(String(kr.id))"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />
@@ -612,14 +612,29 @@
           data-testid="goal-workspace-progress"
         >
           <h2 class="font-semibold">{{ t('goal.list.recentProgress') }}</h2>
-          <div class="divide-y border-y border-border/70">
+          <div class="divide-y border-y border-[hsl(var(--border-subtle))]">
             <div v-for="record in workspace.recentProgress" :key="record.id" class="px-4 py-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-medium">{{ keyResultName(record.keyResultId) }}</p>
-                <span class="text-xs text-muted-foreground">{{
-                  formatProductDate(record.createdAt)
-                }}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-muted-foreground">{{
+                    formatProductDate(record.recordedAt)
+                  }}</span>
+                  <Button
+                    v-if="
+                      record.authorship === 'Manual' || record.authorship === 'TaskUserMeasurement'
+                    "
+                    variant="ghost"
+                    size="sm"
+                    :data-testid="`correct-goal-record-${record.id}`"
+                    @click="openRecordCorrection(record)"
+                    >{{ t('goal.recordDialog.editTitle') }}</Button
+                  >
+                </div>
               </div>
+              <p class="mt-1 text-xs text-muted-foreground">
+                {{ t(`goal.cards.cardsRecordCard.authorship.${record.authorship}`) }}
+              </p>
               <p class="mt-1 text-xs text-muted-foreground">
                 {{ record.value >= 0 ? '+' : '' }}{{ record.value }} → {{ record.valueAfter }}
                 <span v-if="record.comment"> · {{ record.comment }}</span>
@@ -649,6 +664,39 @@
       @apply="addCustomAbsoluteReminder"
     />
 
+    <GoalKeyResultInspectDialog
+      v-if="goal && inspectedKrId"
+      :goal="goal"
+      :key-result="inspectedKr"
+      :task-availability="workspace?.taskContext.availability ?? 'Unavailable'"
+      :record-revision="recordRevision"
+      @close="closeGoalOverlay"
+      @check-in="openQuickCheckIn(inspectedKrId)"
+      @open-task="openTask"
+      @open-task-scope="openTaskScope(inspectedKrId)"
+    />
+    <GoalReviewCreateDialog
+      v-if="goal && reviewCreateOpen"
+      :open="reviewCreateOpen"
+      :goal-id="goalId"
+      :goal-name="goal.name"
+      :expected-version="goal.version"
+      @close="closeGoalOverlay"
+      @dirty-change="reviewDraftDirty = $event"
+      @busy-change="reviewDraftBusy = $event"
+      @saved="handleReviewSaved"
+    />
+    <GoalReviewInspectDialog
+      v-if="goal && reviewDetailOpen"
+      :open="reviewDetailOpen"
+      :goal-name="goal.name"
+      :review="reviewDetail"
+      :loading="reviewDetailLoading"
+      :load-error="reviewDetailError"
+      @close="closeGoalOverlay"
+    />
+    <GoalRecordDialog ref="recordDialog" @saved="handleRecordSaved" />
+
     <KeyResultDialog
       ref="krDialog"
       :on-submit="saveKr"
@@ -660,7 +708,13 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  onBeforeRouteLeave,
+  onBeforeRouteUpdate,
+  useRoute,
+  useRouter,
+  type NavigationGuard,
+} from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
   ArrowLeft,
@@ -670,7 +724,6 @@ import {
   ListTodo,
   MoreHorizontal,
   NotebookText,
-  Pencil,
   Plus,
   Tag,
   Trash2,
@@ -702,25 +755,41 @@ import {
   isPastGoalTarget,
   type AddKeyResultReq,
   type GoalReminderConfigDTO,
+  type GoalRecordClientDTO,
+  type GoalReviewClientDTO,
   type ReminderTrigger,
   type GoalStatus as GoalStatusValue,
   type GoalTimeframe,
-  type KeyResultClientDTO,
+  type UpdateKeyResultReq,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { addYmdDays } from '@memoflow/time';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { ProductAutoTextarea, ProductDateTimePicker } from '../../../shared/components';
+import {
+  ProductAutoTextarea,
+  ProductDateTimePicker,
+  ProductEntityIdentity,
+  ProductMetadataRow,
+  ProductMoreProperties,
+} from '../../../shared/components';
 import LabelCommandPanel from '../../../shared/components/LabelCommandPanel.vue';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import {
   formatProductDate,
   formatProductDateTime,
+  formatProductYmd,
   getProductTime,
   getProductTodayYmd,
 } from '../../../shared/utils/product-time';
+import GoalKeyResultInspectDialog from '../components/dialogs/GoalKeyResultInspectDialog.vue';
+import GoalReviewCreateDialog from '../components/dialogs/GoalReviewCreateDialog.vue';
+import GoalReviewInspectDialog from '../components/dialogs/GoalReviewInspectDialog.vue';
+import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
+import GoalKeyResultDirectControls from '../components/GoalKeyResultDirectControls.vue';
 import KeyResultDialog from '../components/dialogs/KeyResultDialog.vue';
+import GoalRecordDialog from '../components/dialogs/GoalRecordDialog.vue';
+import { useGoal } from '../composables/useGoal';
 import GoalKnowledgeMenuItems from '../components/GoalKnowledgeMenuItems.vue';
 import GoalReminderMenuItems from '../components/GoalReminderMenuItems.vue';
 import GoalStatusPicker from '../components/GoalStatusPicker.vue';
@@ -728,6 +797,8 @@ import GoalTimeframePicker from '../components/GoalTimeframePicker.vue';
 import { useGoalWorkspace } from '../composables/useGoalWorkspace';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 type LifecycleAction = 'plan' | 'activate' | 'complete' | 'abandon';
@@ -737,12 +808,75 @@ const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const service = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
-const goalId = computed(() => String(route.params.id ?? ''));
+const goalId = computed(() => String(route.params.id ?? route.params.goalId ?? ''));
+const inspectedKrId = computed(() => String(route.params.keyResultId ?? ''));
+const reviewCreateOpen = computed(() => route.name === 'goal-review-create');
+const reviewDetailOpen = computed(() => route.name === 'goal-review-detail');
+const reviewedReviewId = computed(() =>
+  reviewDetailOpen.value ? String(route.params.reviewId ?? '') : '',
+);
+const hasGoalOverlayRoute = computed(
+  () => !!inspectedKrId.value || reviewCreateOpen.value || reviewDetailOpen.value,
+);
+const inspectedKr = computed(
+  () => keyResults.value.find((kr) => String(kr.id) === inspectedKrId.value) ?? null,
+);
+const recordRevision = ref(0);
+function closeGoalOverlay(): void {
+  void router.push({
+    name: 'goal-detail',
+    params: { id: goalId.value },
+    query: route.query,
+    hash: route.hash,
+  });
+}
+async function handleRecordSaved(): Promise<void> {
+  recordRevision.value += 1;
+  await refresh();
+}
 const { workspace, isLoading, error, refresh } = useGoalWorkspace(goalId);
 const goal = computed(() => workspace.value?.goal ?? null);
 const keyResults = computed(() => goal.value?.keyResults ?? []);
 const krDialog = ref<InstanceType<typeof KeyResultDialog> | null>(null);
+const recordDialog = ref<InstanceType<typeof GoalRecordDialog> | null>(null);
+const { getGoalAggregateView } = useGoal();
+async function openQuickCheckIn(keyResultId: string): Promise<void> {
+  const requestedGoalId = goalId.value;
+  const aggregate = await getGoalAggregateView(requestedGoalId);
+  if (goalId.value !== requestedGoalId) return;
+  if (aggregate) recordDialog.value?.openDialog(requestedGoalId, String(keyResultId));
+}
+async function openRecordCorrection(record: GoalRecordClientDTO) {
+  if (record.authorship !== 'Manual' && record.authorship !== 'TaskUserMeasurement') return;
+  const requestedGoalId = goalId.value;
+  const aggregate = await getGoalAggregateView(requestedGoalId);
+  if (aggregate && goalId.value === requestedGoalId) {
+    recordDialog.value?.openDialog(requestedGoalId, String(record.keyResultId), record);
+  }
+}
 const isSaving = ref(false);
+const reviewDraftDirty = ref(false);
+const reviewDraftBusy = ref(false);
+const reviewSaveTransition = ref(false);
+const reviewSurfaceStatus = computed<'clean' | 'dirty' | 'busy'>(() => {
+  if (reviewDraftBusy.value || reviewSaveTransition.value) return 'busy';
+  return reviewDraftDirty.value ? 'dirty' : 'clean';
+});
+usePanelSurfaceStatus(reviewSurfaceStatus);
+
+const guardReviewDraft: NavigationGuard = (to, from) => {
+  if (from.name !== 'goal-review-create') return true;
+  const sameDraft =
+    to.name === 'goal-review-create' &&
+    String(to.params.goalId ?? '') === String(from.params.goalId ?? '');
+  if (reviewSurfaceStatus.value === 'busy') return false;
+  if (sameDraft) return true;
+  if (!reviewDraftDirty.value) return true;
+  return canLeaveBusinessSurface(t, to);
+};
+onBeforeRouteUpdate(guardReviewDraft);
+onBeforeRouteLeave(guardReviewDraft);
+
 const mutationError = ref<string | null>(null);
 const labelCreateError = ref<string | null>(null);
 const customReminderPickerOpen = ref(false);
@@ -822,6 +956,104 @@ const linkedKnowledgeDocumentIds = computed(() =>
     ? workspace.value.knowledgeContext.preview.map((item) => item.documentId)
     : [],
 );
+
+const reviewDetail = ref<GoalReviewClientDTO | null>(null);
+const reviewDetailLoading = ref(false);
+const reviewDetailError = ref(false);
+const reviewHistoryGoalId = ref('');
+const reviewHistory = ref<GoalReviewClientDTO[]>([]);
+let reviewDetailRequest = 0;
+
+async function syncReviewDetailFromRoute(): Promise<void> {
+  const session = ++reviewDetailRequest;
+  reviewDetailError.value = false;
+  if (!reviewDetailOpen.value || !goal.value || !reviewedReviewId.value) {
+    reviewDetail.value = null;
+    reviewDetailLoading.value = false;
+    return;
+  }
+
+  const reviewId = reviewedReviewId.value;
+  const preview =
+    workspace.value?.recentReviews.find((item) => String(item.id) === reviewId) ?? null;
+  if (preview) {
+    reviewDetail.value = preview;
+    reviewDetailLoading.value = false;
+    return;
+  }
+
+  if (reviewHistoryGoalId.value === goalId.value) {
+    const cached = reviewHistory.value.find((item) => String(item.id) === reviewId);
+    if (cached) {
+      reviewDetail.value = cached;
+      reviewDetailLoading.value = false;
+      return;
+    }
+  }
+
+  reviewDetail.value = null;
+  reviewDetailLoading.value = true;
+  try {
+    const requestedGoalId = goalId.value;
+    const result = await service.getGoalReviews(requestedGoalId);
+    if (
+      session !== reviewDetailRequest ||
+      requestedGoalId !== goalId.value ||
+      reviewId !== reviewedReviewId.value
+    ) {
+      return;
+    }
+    if (!result.ok) {
+      reviewDetailError.value = true;
+      return;
+    }
+    const reviews = result.data.reviews.map((item) => item.toDTO());
+    reviewHistoryGoalId.value = requestedGoalId;
+    reviewHistory.value = reviews;
+    reviewDetail.value = reviews.find((item) => String(item.id) === reviewId) ?? null;
+  } catch {
+    if (session === reviewDetailRequest) reviewDetailError.value = true;
+  } finally {
+    if (session === reviewDetailRequest) reviewDetailLoading.value = false;
+  }
+}
+
+watch(
+  () => [reviewDetailOpen.value, goalId.value, reviewedReviewId.value, workspace.value] as const,
+  () => void syncReviewDetailFromRoute(),
+  { immediate: true },
+);
+
+async function handleReviewSaved(review: GoalReviewClientDTO): Promise<void> {
+  const ownerId = goalId.value;
+  reviewSaveTransition.value = true;
+  reviewDraftDirty.value = false;
+  reviewHistory.value = [
+    review,
+    ...(reviewHistoryGoalId.value === ownerId
+      ? reviewHistory.value.filter((item) => item.id !== review.id)
+      : []),
+  ];
+  reviewHistoryGoalId.value = ownerId;
+  reviewDetail.value = review;
+  reviewDetailError.value = false;
+  try {
+    await refresh();
+    reviewDraftBusy.value = false;
+    reviewSaveTransition.value = false;
+    // Dirty has already been cleared; the shell and route guards see a clean surface.
+    await nextTick();
+    await router.push({
+      name: 'goal-review-detail',
+      params: { goalId: ownerId, reviewId: review.id },
+      query: route.query,
+      hash: route.hash,
+    });
+  } finally {
+    reviewSaveTransition.value = false;
+  }
+}
+
 const reviewCount = computed(() => workspace.value?.recentReviews.length ?? 0);
 const latestReview = computed(() => workspace.value?.recentReviews[0] ?? null);
 const latestReviewText = computed(() => {
@@ -876,8 +1108,8 @@ watch(
   { immediate: true },
 );
 
-function formatTarget(target: GoalTimeframe): string {
-  return goalTimeframeLabel(target, locale.value);
+function formatTarget(target: GoalTimeframe | null | undefined): string {
+  return target ? goalTimeframeLabel(target, locale.value) : t('goal.dialog.krTrajectoryNotSet');
 }
 
 function reminderTriggerKey(trigger: ReminderTrigger): string {
@@ -1138,12 +1370,46 @@ function openCreateKr(): void {
   krDialog.value?.openForCreateKeyResult(goalId.value);
 }
 
-function openEditKr(kr: KeyResultClientDTO): void {
-  krDialog.value?.openForUpdateKeyResult(goalId.value, kr);
+function openKr(keyResultId: string): void {
+  void router.push({
+    name: 'key-result-detail',
+    params: { goalId: goalId.value, keyResultId },
+    query: route.query,
+    hash: route.hash,
+  });
 }
 
-function openKr(keyResultId: string): void {
-  void router.push({ name: 'key-result-detail', params: { goalId: goalId.value, keyResultId } });
+async function updateKrFields(
+  keyResultId: string,
+  patch: Pick<
+    UpdateKeyResultReq,
+    'title' | 'description' | 'calculationMethod' | 'weight' | 'target'
+  >,
+): Promise<boolean> {
+  if (!goal.value || isSaving.value || goal.value.archivedAt) return false;
+  const requestedGoalId = goalId.value;
+  isSaving.value = true;
+  mutationError.value = null;
+  try {
+    const result = await service.updateKeyResult(requestedGoalId, keyResultId, {
+      ...patch,
+      expectedVersion: goal.value.version,
+    });
+    if (goalId.value !== requestedGoalId) return false;
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return false;
+    }
+    if (workspace.value) workspace.value.goal = result.data.readModel;
+    return true;
+  } catch (error) {
+    if (goalId.value === requestedGoalId) {
+      mutationError.value = error instanceof Error ? error.message : t('common.operationFailed');
+    }
+    return false;
+  } finally {
+    isSaving.value = false;
+  }
 }
 
 async function saveKr(payload: {
@@ -1152,19 +1418,24 @@ async function saveKr(payload: {
   isEditing: boolean;
   keyResultId?: string;
 }): Promise<boolean> {
-  if (!goal.value) return false;
-  mutationError.value = null;
-  const request = { ...payload.keyResult, expectedVersion: goal.value.version };
-  const result =
-    payload.isEditing && payload.keyResultId
-      ? await service.updateKeyResult(payload.goalId, payload.keyResultId, request)
-      : await service.createKeyResult(payload.goalId, request);
-  if (!result.ok) {
-    mutationError.value = presentErrorMessage(result.error);
-    return false;
+  if (!goal.value || isSaving.value) return false;
+  isSaving.value = true;
+  try {
+    mutationError.value = null;
+    const request = { ...payload.keyResult, expectedVersion: goal.value.version };
+    const result =
+      payload.isEditing && payload.keyResultId
+        ? await service.updateKeyResult(payload.goalId, payload.keyResultId, request)
+        : await service.createKeyResult(payload.goalId, request);
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return false;
+    }
+    await refresh();
+    return true;
+  } finally {
+    isSaving.value = false;
   }
-  await refresh();
-  return true;
 }
 
 async function removeKr(keyResultId: string): Promise<void> {
@@ -1176,15 +1447,20 @@ async function removeKr(keyResultId: string): Promise<void> {
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
-  if (!confirmed) return;
-  const result = await service.deleteKeyResult(goalId.value, keyResultId, {
-    expectedVersion: goal.value.version,
-  });
-  if (!result.ok) {
-    mutationError.value = presentErrorMessage(result.error);
-    return;
+  if (!confirmed || !goal.value || isSaving.value) return;
+  isSaving.value = true;
+  try {
+    const result = await service.deleteKeyResult(goalId.value, keyResultId, {
+      expectedVersion: goal.value.version,
+    });
+    if (!result.ok) {
+      mutationError.value = presentErrorMessage(result.error);
+      return;
+    }
+    await refresh();
+  } finally {
+    isSaving.value = false;
   }
-  await refresh();
 }
 
 function createTaskForGoal(keyResultId?: string): void {
@@ -1228,7 +1504,12 @@ function openKnowledge(documentId?: string): void {
 
 function openReviewCreate(): void {
   if (!goal.value) return;
-  void router.push({ name: 'goal-review-create', params: { goalId: goal.value.id } });
+  void router.push({
+    name: 'goal-review-create',
+    params: { goalId: goal.value.id },
+    query: route.query,
+    hash: route.hash,
+  });
 }
 
 function openLatestReview(): void {
@@ -1240,6 +1521,8 @@ function openLatestReview(): void {
   void router.push({
     name: 'goal-review-detail',
     params: { goalId: goalId.value, reviewId: review.id },
+    query: route.query,
+    hash: route.hash,
   });
 }
 </script>

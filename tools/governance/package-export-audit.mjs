@@ -52,7 +52,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './goal',
     './label',
     './relation',
-    './governance',
     './routine',
     './repository',
     './account',
@@ -123,7 +122,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './modules/notification',
     './modules/repository',
     './modules/setting',
-    './modules/governance',
     './modules/ai',
   ],
 };

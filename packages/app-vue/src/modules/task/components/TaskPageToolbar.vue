@@ -1,8 +1,5 @@
 <template>
-  <header
-    class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
-    data-testid="task-page-toolbar"
-  >
+  <ProductSurfaceHeader family="collection" data-testid="task-page-toolbar">
     <div class="flex min-w-0 flex-1 items-center gap-1.5" data-testid="task-filter-bar">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
@@ -32,7 +29,7 @@
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div v-if="activeSurface !== 'plans'" class="hidden shrink-0 @2xl/panel:block">
+      <div v-if="activeSurface === 'today'" class="hidden shrink-0 @2xl/panel:block">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button
@@ -43,15 +40,15 @@
               data-testid="task-status-filter"
             >
               <CircleDot class="h-4 w-4" />
-              <span>{{ currentStatusLabel }}</span>
+              <span>{{ currentOccurrenceStatusLabel }}</span>
               <ChevronDown class="h-3.5 w-3.5 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" class="w-44">
             <DropdownMenuItem
               data-testid="task-status-filter-all"
-              :class="statusFilter === 'all' ? 'bg-accent' : ''"
-              @click="emit('update:statusFilter', 'all')"
+              :class="occurrenceStatusFilter === 'all' ? 'bg-accent' : ''"
+              @click="emit('update:occurrenceStatusFilter', 'all')"
             >
               {{ t('task.management.filter.allStatuses') }}
             </DropdownMenuItem>
@@ -59,10 +56,39 @@
               v-for="status in instanceStatuses"
               :key="status"
               :data-testid="`task-status-filter-${status.toLowerCase()}`"
-              :class="statusFilter === status ? 'bg-accent' : ''"
-              @click="emit('update:statusFilter', status)"
+              :class="occurrenceStatusFilter === status ? 'bg-accent' : ''"
+              @click="emit('update:occurrenceStatusFilter', status)"
             >
-              {{ statusLabel(status) }}
+              {{ occurrenceStatusLabel(status) }}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div v-else class="hidden shrink-0 @2xl/panel:block">
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              class="h-8 gap-1.5"
+              data-testid="task-plan-state-filter"
+            >
+              <CircleDot class="h-4 w-4" />
+              <span>{{ currentPlanStateLabel }}</span>
+              <ChevronDown class="h-3.5 w-3.5 opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" class="w-44">
+            <DropdownMenuItem
+              v-for="state in planStateOptions"
+              :key="state"
+              :data-testid="`task-plan-state-filter-${state}`"
+              :class="planStateFilter === state ? 'bg-accent' : ''"
+              @click="emit('update:planStateFilter', state)"
+            >
+              {{ planStateLabel(state) }}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -83,7 +109,7 @@
         />
       </div>
 
-      <div v-if="activeSurface !== 'plans'" class="hidden shrink-0 @2xl/panel:block">
+      <div v-if="activeSurface === 'today'" class="hidden shrink-0 @2xl/panel:block">
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button
@@ -126,7 +152,7 @@
               <ListFilter class="h-4 w-4" />
               <span
                 v-if="activeFilterCount > 0"
-                class="min-w-4 rounded-full bg-muted px-1 text-center text-[10px] tabular-nums text-muted-foreground"
+                class="min-w-4 rounded-full bg-[hsl(var(--selected))] px-1 text-center text-[10px] tabular-nums text-[hsl(var(--foreground-muted))]"
               >
                 {{ activeFilterCount }}
               </span>
@@ -134,28 +160,48 @@
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" class="w-52">
-            <DropdownMenuSub v-if="activeSurface !== 'plans'">
+            <DropdownMenuSub v-if="activeSurface === 'today'">
               <DropdownMenuSubTrigger>
                 <CircleDot class="mr-2 h-4 w-4 text-muted-foreground" />
                 <span class="min-w-0 flex-1">{{ t('task.management.filter.status') }}</span>
                 <span class="ml-3 max-w-24 truncate text-xs text-muted-foreground">
-                  {{ currentStatusLabel }}
+                  {{ currentOccurrenceStatusLabel }}
                 </span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent class="w-44">
                 <DropdownMenuItem
-                  :class="statusFilter === 'all' ? 'bg-accent' : ''"
-                  @click="emit('update:statusFilter', 'all')"
+                  :class="occurrenceStatusFilter === 'all' ? 'bg-accent' : ''"
+                  @click="emit('update:occurrenceStatusFilter', 'all')"
                 >
                   {{ t('task.management.filter.allStatuses') }}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   v-for="status in instanceStatuses"
                   :key="status"
-                  :class="statusFilter === status ? 'bg-accent' : ''"
-                  @click="emit('update:statusFilter', status)"
+                  :class="occurrenceStatusFilter === status ? 'bg-accent' : ''"
+                  @click="emit('update:occurrenceStatusFilter', status)"
                 >
-                  {{ statusLabel(status) }}
+                  {{ occurrenceStatusLabel(status) }}
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub v-else>
+              <DropdownMenuSubTrigger>
+                <CircleDot class="mr-2 h-4 w-4 text-muted-foreground" />
+                <span class="min-w-0 flex-1">{{ t('task.management.filter.planState') }}</span>
+                <span class="ml-3 max-w-24 truncate text-xs text-muted-foreground">
+                  {{ currentPlanStateLabel }}
+                </span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent class="w-44">
+                <DropdownMenuItem
+                  v-for="state in planStateOptions"
+                  :key="state"
+                  :class="planStateFilter === state ? 'bg-accent' : ''"
+                  @click="emit('update:planStateFilter', state)"
+                >
+                  {{ planStateLabel(state) }}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -199,7 +245,7 @@
               </DropdownMenuSubContent>
             </DropdownMenuSub>
 
-            <DropdownMenuSub v-if="activeSurface !== 'plans'">
+            <DropdownMenuSub v-if="activeSurface === 'today'">
               <DropdownMenuSubTrigger>
                 <ArrowUpDown class="mr-2 h-4 w-4 text-muted-foreground" />
                 <span class="min-w-0 flex-1">{{ t('task.management.filter.sort') }}</span>
@@ -222,7 +268,7 @@
 
       <div
         v-if="goalScopeLabel"
-        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-muted/50 px-2 py-1 text-xs text-muted-foreground @2xl/panel:max-w-64 @2xl/panel:px-2.5"
+        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-[hsl(var(--surface-raised)/0.5)] px-2 py-1 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:max-w-64 @2xl/panel:px-2.5"
         data-testid="task-goal-deeplink-filter"
       >
         <span class="truncate">{{ goalScopeLabel }}</span>
@@ -247,7 +293,7 @@
       data-primary-action="create-task"
       @click="emit('createTask')"
     />
-  </header>
+  </ProductSurfaceHeader>
 </template>
 
 <script setup lang="ts">
@@ -278,18 +324,20 @@ import {
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import {
   LabelFilterPopover,
+  ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
 } from '../../../shared/components';
+import type { TaskPlanStateFilter, TaskSurface } from './types';
 import type { TaskOccurrenceSort } from '../utils/task-occurrence-presentation';
 
-type TaskSurface = 'today' | 'upcoming' | 'plans';
 type StatusFilter = 'all' | TaskOccurrenceClientDTO['status'];
 
 const props = defineProps<{
   activeSurface: TaskSurface;
   visibleItemCount: number;
-  statusFilter: StatusFilter;
+  occurrenceStatusFilter: StatusFilter;
+  planStateFilter: TaskPlanStateFilter;
   labelFilterIds: readonly string[];
   labelOptions: readonly LabelPickerOption[];
   occurrenceSort: TaskOccurrenceSort;
@@ -298,7 +346,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:activeSurface': [TaskSurface];
-  'update:statusFilter': [StatusFilter];
+  'update:occurrenceStatusFilter': [StatusFilter];
+  'update:planStateFilter': [TaskPlanStateFilter];
   'update:labelFilterIds': [string[]];
   'update:occurrenceSort': [TaskOccurrenceSort];
   clearGoalScope: [];
@@ -306,7 +355,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const surfaces: TaskSurface[] = ['today', 'upcoming', 'plans'];
+const surfaces: TaskSurface[] = ['today', 'plans'];
 const instanceStatuses: TaskOccurrenceClientDTO['status'][] = [
   'Pending',
   'InProgress',
@@ -314,23 +363,42 @@ const instanceStatuses: TaskOccurrenceClientDTO['status'][] = [
   'Missed',
   'Skipped',
 ];
+const planStateOptions: TaskPlanStateFilter[] = [
+  'all',
+  'active',
+  'paused',
+  'succeeded',
+  'failed',
+  'abandoned',
+  'archived',
+];
 const sortOptions: TaskOccurrenceSort[] = ['time', 'status', 'title'];
 
 const currentSurfaceLabel = computed(() => t(`task.management.surface.${props.activeSurface}`));
-const currentStatusLabel = computed(() =>
-  props.statusFilter === 'all'
+const currentOccurrenceStatusLabel = computed(() =>
+  props.occurrenceStatusFilter === 'all'
     ? t('task.management.filter.allStatuses')
-    : statusLabel(props.statusFilter),
+    : occurrenceStatusLabel(props.occurrenceStatusFilter),
 );
+const currentPlanStateLabel = computed(() => planStateLabel(props.planStateFilter));
 const currentSortLabel = computed(() => t(`task.management.sort.${props.occurrenceSort}`));
 const activeFilterCount = computed(
   () =>
-    (props.activeSurface !== 'plans' && props.statusFilter !== 'all' ? 1 : 0) +
-    props.labelFilterIds.length,
+    (props.activeSurface === 'today'
+      ? props.occurrenceStatusFilter === 'all'
+        ? 0
+        : 1
+      : props.planStateFilter === 'all'
+        ? 0
+        : 1) + props.labelFilterIds.length,
 );
 
-function statusLabel(status: TaskOccurrenceClientDTO['status']): string {
+function occurrenceStatusLabel(status: TaskOccurrenceClientDTO['status']): string {
   return t(`task.occurrence.status.${status.toLowerCase()}`);
+}
+
+function planStateLabel(state: TaskPlanStateFilter): string {
+  return t(`task.management.planState.${state}`);
 }
 
 function toggleCompactLabel(labelId: string): void {

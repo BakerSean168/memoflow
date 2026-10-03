@@ -171,7 +171,7 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(page.getByTestId('task-surface-trigger')).toBeVisible();
     await page.getByTestId('task-surface-trigger').click();
     await expect(page.getByTestId('task-surface-today')).toBeVisible();
-    await expect(page.getByTestId('task-surface-upcoming')).toBeVisible();
+    await expect(page.getByTestId('task-surface-upcoming')).toHaveCount(0);
     await expect(page.getByTestId('task-surface-plans')).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('create-task-plan-button')).toBeVisible();
@@ -466,10 +466,7 @@ function taskOccurrenceByTitle(page: Page, title: string): Locator {
     .first();
 }
 
-async function selectTaskSurface(
-  page: Page,
-  surface: 'today' | 'upcoming' | 'plans',
-): Promise<void> {
+async function selectTaskSurface(page: Page, surface: 'today' | 'plans'): Promise<void> {
   await page.getByTestId('task-surface-trigger').click();
   await page.getByTestId(`task-surface-${surface}`).click();
 }

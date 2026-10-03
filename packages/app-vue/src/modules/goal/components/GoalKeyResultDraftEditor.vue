@@ -1,6 +1,6 @@
 <template>
   <section
-    class="overflow-hidden rounded-xl border border-border/70 bg-background/20"
+    class="overflow-hidden rounded-xl bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]"
     data-testid="goal-key-results-editor"
   >
     <div class="flex min-h-11 items-center justify-between gap-3 px-3">
@@ -25,12 +25,12 @@
       </Button>
     </div>
 
-    <div v-if="keyResults.length" class="border-t border-border/60">
+    <div v-if="keyResults.length" class="border-t border-[hsl(var(--border-subtle))]">
       <div
         v-for="(keyResult, index) in keyResults"
         :key="keyResult.id ?? `new-${index}`"
-        class="flex min-h-11 items-center gap-2 px-3 py-2 transition-colors hover:bg-muted/25"
-        :class="index > 0 ? 'border-t border-border/50' : ''"
+        class="flex min-h-11 items-center gap-2 px-3 py-2 transition-colors hover:bg-[hsl(var(--hover)/0.5)]"
+        :class="index > 0 ? 'border-t border-[hsl(var(--border-subtle))]' : ''"
         data-testid="goal-key-result-draft-row"
       >
         <button
@@ -51,7 +51,7 @@
               class="shrink-0 text-[11px] text-muted-foreground/80"
               data-testid="goal-key-result-draft-calculation"
             >
-              {{ calculationMethodLabel(keyResult.calculationMethod) }}
+              {{ getKeyResultCalculationLabel(keyResult.calculationMethod, t) }}
             </span>
 
             <span
@@ -67,7 +67,7 @@
           type="button"
           variant="ghost"
           size="icon-xs"
-          class="text-muted-foreground/70 hover:bg-muted/60 hover:text-foreground"
+          class="text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('common.delete')"
           :disabled="disabled || editorOpen"
           @click="removeKeyResult(index)"
@@ -79,7 +79,7 @@
 
     <div
       v-if="keyResults.length && !editorOpen"
-      class="flex justify-end border-t border-border/60 px-2 py-1.5"
+      class="flex justify-end border-t border-[hsl(var(--border-subtle))] px-2 py-1.5"
     >
       <Button
         type="button"
@@ -100,7 +100,7 @@
         <div class="min-h-0 overflow-hidden">
           <div
             ref="editorPanelRef"
-            class="space-y-4 border-t border-border/60 p-4"
+            class="space-y-4 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.28)] p-4"
             data-testid="key-result-draft-panel"
           >
             <GoalKeyResultCardEditor
@@ -151,6 +151,7 @@ import {
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
 type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
@@ -339,17 +340,6 @@ function saveDraft(): void {
 function removeKeyResult(index: number): void {
   if (props.disabled || editorOpen.value) return;
   keyResults.value = keyResults.value.filter((_, itemIndex) => itemIndex !== index);
-}
-
-function calculationMethodLabel(method: KeyResultCalculationMethod): string {
-  const labels: Record<KeyResultCalculationMethod, string> = {
-    Sum: t('goal.dialog.krCalculationSum'),
-    Average: t('goal.dialog.krCalculationAverage'),
-    Max: t('goal.dialog.krCalculationMax'),
-    Min: t('goal.dialog.krCalculationMin'),
-    Last: t('goal.dialog.krCalculationLast'),
-  };
-  return labels[method];
 }
 
 function compactTargetLabel(keyResult: DraftKeyResult): string {

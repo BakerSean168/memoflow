@@ -4,6 +4,9 @@
  * 将任务模板绑定至目标
  */
 
+import { validateTaskGoalProgress } from './task-goal-progress-validation';
+import type { TaskGoalMeasurementReadPort } from '../../ports';
+import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { TaskPlanClientDTO, BindToGoalReq } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
@@ -14,6 +17,7 @@ export class BindTaskToGoalUseCase {
   constructor(
     private readonly planRepository: ITaskPlanRepository,
     private readonly userTimeContextPort: UserTimeContextPort,
+    private readonly goalReadPort?: TaskGoalMeasurementReadPort,
   ) {}
 
   async execute(
@@ -26,8 +30,11 @@ export class BindTaskToGoalUseCase {
       return error('NOT_FOUND', `TaskPlan ${planId} not found`);
     }
 
+    const invalidProgress = await validateTaskGoalProgress(identityId, request, this.goalReadPort);
+    if (invalidProgress) return invalidProgress;
+    const binding = TaskGoalBinding.create(request);
     const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-    plan.bindToGoal(request.goalId, request.keyResultId, request.contribution ?? null);
+    plan.bindToGoal(request.goalId, request.keyResultId, binding.progressRule);
     await this.planRepository.save(plan);
 
     return ok(plan.toClientDTOAt(timeContext));

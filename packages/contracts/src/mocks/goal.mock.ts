@@ -181,6 +181,9 @@ export function createMockGoalRecord(
     goalId: `IGoalId_${faker.string.uuid()}` as GoalRecordClientDTO['goalId'],
     value,
     valueAfter: faker.number.int({ min: value, max: 200 }),
+    authorship: 'Manual',
+    source: null,
+    recordedAt: now,
     comment: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     createdAt: now - faker.number.int({ min: 0, max: 30 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
@@ -219,6 +222,7 @@ export function createMockGoalReview(
     challenges: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     adjustments: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     systemContext: {
+      signals: [],
       windowStartAt: start,
       windowEndAt: now,
       overallProgress: { startPercentage: 20, endPercentage: 30, deltaPercentage: 10 },

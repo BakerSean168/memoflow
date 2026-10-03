@@ -29,6 +29,8 @@ model TaskPlan {
   // ============ Goal 绑定（展开的关系值对象） ============
   goalId              String? @map("goal_id")
   keyResultId         String? @map("key_result_id")
+  goalProgressMode   String? @map("goal_progress_mode")
+  goalSuggestedValue Float? @map("goal_suggested_value")
   goalRecordValue     Float?  @map("goal_record_value")
   goalProgressTrigger String? @map("goal_progress_trigger")
 

@@ -7,6 +7,7 @@ import type {
   GoalReviewClientDTO,
   GoalRecordClientDTO,
   GoalMutationReceipt,
+  GetGoalAggregateRes,
 } from '@memoflow/contracts/goal';
 
 export interface GoalState {
@@ -95,6 +96,21 @@ export const useGoalStore = defineStore('goal', {
       state.searchQuery.length > 0 || state.labelIdsAll.length > 0,
   },
   actions: {
+    hydrateAggregate(data: GetGoalAggregateRes) {
+      const goalId = String(data.goal.id);
+      if ((this.goalById[goalId]?.version ?? -1) > data.goal.version) return;
+      this.upsertGoal(data.goal);
+      this.selectGoal(goalId);
+      this.setKeyResults(goalId, data.keyResults, data.goal.version);
+      this.goalRecords = [
+        ...this.goalRecords.filter((record) => String(record.goalId) !== goalId),
+        ...data.records,
+      ];
+      this.goalReviews = [
+        ...this.goalReviews.filter((review) => String(review.goalId) !== goalId),
+        ...data.reviews,
+      ];
+    },
     setGoals(goals: GoalClientDTO[], total?: number) {
       this.goalIds = goals.map((goal) => String(goal.id));
       for (const goal of goals) this.upsertGoal(goal);

@@ -75,7 +75,6 @@
 import { ipcMain } from 'electron';
 import { ok } from '@memoflow/contracts/result';
 import { TaskChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
 import {
   AbandonTaskPlanInvocationSchema,
   BindTaskToGoalInvocationSchema,
@@ -83,6 +82,7 @@ import {
   CreateTaskPlanSchema,
   GenerateOccurrencesInvocationSchema,
   ListTaskPlanFiltersSchema,
+  GetTaskOccurrencesByRangeSchema,
   MarkTaskOccurrenceMissedInvocationSchema,
   RescheduleTaskOccurrenceInvocationSchema,
   SetTaskOccurrenceChecklistItemInvocationSchema,
@@ -140,12 +140,13 @@ const allChannels = Object.values(TaskChannels);
 
 function normalizeTemplateListParams(
   params: Record<string, unknown> | undefined,
-): ListTaskPlanFilters {
+) {
   const status = params?.status;
 
   return {
     ...(params ?? {}),
     status: Array.isArray(status) ? status : typeof status === 'string' ? [status] : undefined,
+    outcome: typeof params?.outcome === 'string' ? [params.outcome] : params?.outcome,
   };
 }
 
@@ -375,13 +376,21 @@ export function createTaskElectronModule(
           }),
         );
         installed.push(TaskChannels.OCCURRENCE_LIST);
-        ipcMain.handle(TaskChannels.OCCURRENCE_LIST_BY_DATE_RANGE, (_, params) =>
-          withAuthenticatedValue(ctx, async (requestContext) => {
-            return instanceController.getOccurrencesByDateRange(requestContext.identityId, {
-              startDate: params?.startDate ?? Date.now(),
-              endDate: params?.endDate ?? Date.now() + 86400000 * 7,
-            });
-          }),
+        registerValidatedChannel(
+          ctx,
+          TaskChannels.OCCURRENCE_LIST_BY_DATE_RANGE,
+          GetTaskOccurrencesByRangeSchema,
+          (data, requestContext) =>
+            instanceController.getOccurrencesByDateRange(requestContext.identityId, data),
+          (args) => {
+            const params =
+              args && typeof args === 'object' ? (args as Record<string, unknown>) : {};
+            return {
+              startDate: params.startDate ?? Date.now(),
+              endDate: params.endDate ?? Date.now() + 86400000 * 7,
+              includeOverdueOpen: params.includeOverdueOpen ?? false,
+            };
+          },
         );
         installed.push(TaskChannels.OCCURRENCE_LIST_BY_DATE_RANGE);
         ipcMain.handle(TaskChannels.OCCURRENCE_GET, (_, payload) =>

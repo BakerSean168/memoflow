@@ -14,6 +14,7 @@ export class PowerSyncGoalRecordMapper {
       keyResultId: KeyResultId.of(String(row.key_result_id)),
       identityId: IdentityId.of(String(row.identity_id)),
       value: Number(row.value ?? 0),
+      authorship: row.authorship as GoalRecord['authorship'],
       note: row.note ? String(row.note) : null,
       sourceType: row.source_type
         ? (String(row.source_type) as GoalRecord['sourceType'])

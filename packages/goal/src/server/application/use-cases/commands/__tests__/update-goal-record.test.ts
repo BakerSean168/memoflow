@@ -30,13 +30,15 @@ function createGoalWithSum() {
 }
 
 describe('UpdateGoalRecordUseCase', () => {
-  it('recalculates Sum from the complete edited record history', async () => {
+  it.each(['Manual', 'TaskUserMeasurement'] as const)('corrects %s and recalculates Sum from the complete edited record history', async (authorship) => {
     const { goal, keyResult } = createGoalWithSum();
     const recordA = GoalRecord.create({
       id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440101' as never,
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 5,
+      authorship,
+      source: authorship === 'TaskUserMeasurement' ? { type: 'TASK_INSTANCE', id: 'task-occurrence-1' } : undefined,
     });
     const recordB = GoalRecord.create({
       id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440102' as never,
@@ -73,6 +75,9 @@ describe('UpdateGoalRecordUseCase', () => {
     expect(result).toBeOk();
     expect(recordA.value).toBe(20);
     expect(recordA.note).toBe('corrected');
+    expect(recordA.authorship).toBe(authorship);
+    expect(recordA.sourceId).toBe(authorship === 'Manual' ? null : 'task-occurrence-1');
+    expect(recordA.sourceType).toBe(authorship === 'Manual' ? null : 'TASK_INSTANCE');
     expect(goal.getKeyResult(String(keyResult.id))?.progress.currentValue).toBe(37);
     expect(recordRepository.save).toHaveBeenCalledWith(recordA);
     expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
@@ -152,6 +157,7 @@ describe('UpdateGoalRecordUseCase', () => {
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 7,
+      authorship: 'TaskAutomatic' as const,
       source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     const goalRepository = createMockRepo<IGoalRepository>({

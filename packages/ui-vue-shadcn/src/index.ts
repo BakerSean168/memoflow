@@ -126,6 +126,7 @@ export * from './components/ui/input';
 export * from './components/ui/label';
 export * from './components/ui/menubar';
 export * from './components/ui/navigation-menu';
+export * from './components/ui/number-field';
 export * from './components/ui/pagination';
 export * from './components/ui/pin-input';
 export * from './components/ui/popover';
@@ -158,5 +159,5 @@ export * from './components/custom/form';
 export * from './components/custom/linear';
 
 // NOTE: All business components (account, authentication, task, schedule,
-// reminder, repository, notification, governance, setting, application)
+// reminder, repository, notification, setting, application)
 // have been migrated to @memoflow/app-vue.

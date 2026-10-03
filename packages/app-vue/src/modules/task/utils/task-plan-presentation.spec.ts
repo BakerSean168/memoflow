@@ -58,4 +58,32 @@ describe('mapTaskPlanDtoToViewModel', () => {
     expect(isReactive(vm.schedule)).toBe(false);
     expect(vm.schedule).not.toBe(dto.schedule);
   });
+
+  it.each([
+    ['Succeeded', 'task.templateCard.outcomeSucceeded'],
+    ['Failed', 'task.templateCard.outcomeFailed'],
+    ['Abandoned', 'task.templateCard.outcomeAbandoned'],
+  ] as const)('presents closed outcome %s independently from lifecycle Closed', (outcome, key) => {
+    const vm = mapTaskPlanDtoToViewModel(
+      taskPlan({ status: 'Closed', outcome, closedAt: 2 }),
+      ((value: string) => value) as never,
+    );
+
+    expect(vm.statusText).toBe('task.templateCard.statusClosed');
+    expect(vm.outcome).toBe(outcome);
+    expect(vm.outcomeText).toBe(key);
+    expect(vm.stateText).toBe(key);
+    expect(vm.isClosed).toBe(true);
+  });
+
+  it('keeps archive visibility metadata independent from lifecycle/outcome presentation', () => {
+    const vm = mapTaskPlanDtoToViewModel(
+      taskPlan({ status: 'Active', outcome: 'Open', archivedAt: 3 }),
+      ((value: string) => value) as never,
+    );
+
+    expect(vm.stateText).toBe('task.templateCard.statusActive');
+    expect(vm.isArchived).toBe(true);
+    expect(vm.isClosed).toBe(false);
+  });
 });

@@ -125,7 +125,7 @@ import type { IGoalRepository } from '@/server/domain/repositories/i-goal-reposi
 **已是默认的部分：**
 
 - 跨包依赖文化与规范已是 `@memoflow/*`（见 monorepo-build-standard + Nx boundaries）。
-- 业务/库 **源码** 中包内 `@/` import 已收敛为相对路径（含 `goal` / `task` / `governance` / `authentication` / `ui-vue-shadcn` 等；见 plan `2026-07-27-import-path-elegance`）。
+- 业务/库 **源码** 中包内 `@/` import 已收敛为相对路径（含 `goal` / `task` / `authentication` / `ui-vue-shadcn` 等；见 plan `2026-07-27-import-path-elegance`）。
 - `contracts`、`app-vue`、`ai`、`account`、`repository`、`time`、`utils` 等库包本就接近纯相对路径。
 
 **仍保留的兼容层（非源码写法）：**

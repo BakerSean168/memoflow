@@ -25,5 +25,13 @@ export { goalRoutes } from './router';
 // ===== Components =====
 export * from './components';
 
+// ===== Calculation Presentation =====
+export {
+  KEY_RESULT_CALCULATION_METHODS,
+  KEY_RESULT_CALCULATION_PRESENTATION,
+  getKeyResultCalculationLabel,
+  getKeyResultRecordPromptLabel,
+} from './utils';
+
 // ===== Startup Hook =====
 export { createGoalStartupHook } from './initialization';

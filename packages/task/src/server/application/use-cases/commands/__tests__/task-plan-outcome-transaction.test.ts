@@ -14,9 +14,9 @@ import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-c
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('Task plan outcome transaction integration (TASK-2202)', () => {
-  it('explicit Missed -> strict Failed, then late completion correction -> Succeeded in the same write runner', async () => {
+  it.each(Object.values(TaskPlanCompletionPolicy))('resolved Missed -> Failed, then correction -> Succeeded regardless of compatibility policy: %s', async (completionPolicy) => {
     const plan = aLoadedTaskPlan({
-      completionPolicy: TaskPlanCompletionPolicy.StrictNoBackfill,
+      completionPolicy,
     });
     const occurrence = await aTaskOccurrence({
       planId: plan.id,

@@ -54,7 +54,6 @@
     "ai": "runtime-lib",
     "cloud-auth": "runtime-lib",
     "goal": "runtime-lib",
-    "governance": "runtime-lib",
     "notification": "runtime-lib",
     "reminder": "runtime-lib",
     "schedule": "runtime-lib",

@@ -150,7 +150,12 @@ const i18n = createI18n({
           attention: 'Update needs attention',
           openSettings: 'Open update settings',
         },
-        conversation: { today: 'Today', last7Days: 'Last 7 days', earlier: 'Earlier' },
+        conversation: {
+          today: 'Today',
+          last7Days: 'Last 7 days',
+          earlier: 'Earlier',
+          resize: 'Resize conversations',
+        },
         panel: {
           home: 'Today',
           workflow: 'Workflow',
@@ -275,6 +280,50 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
+  it('renders a flush sidebar beside one rounded Chat + Business content well', async () => {
+    const { wrapper } = await mountShell();
+
+    expect(wrapper.get('[data-testid="shell-workspace-stage"]').classes()).toContain(
+      'workspace-stage',
+    );
+    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).toContain(
+      'workspace-sidebar-shell',
+    );
+    expect(wrapper.get('[data-testid="shell-workspace-main"]').classes()).toContain(
+      'workspace-content-well',
+    );
+    expect(wrapper.get('[data-testid="shell-ai-column"]').classes()).toContain(
+      'workspace-primary-surface',
+    );
+    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).toContain(
+      'workspace-business-surface',
+    );
+
+    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).not.toContain(
+      'workspace-pane',
+    );
+    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).not.toContain(
+      'workspace-pane',
+    );
+
+    const sidebarResizer = wrapper.get('[data-testid="conversation-sidebar-resizer"]');
+    expect(sidebarResizer.attributes()).toMatchObject({
+      role: 'separator',
+      tabindex: '0',
+      'aria-orientation': 'vertical',
+    });
+    expect(sidebarResizer.classes()).toContain('workspace-resizer--right');
+
+    const businessResizer = wrapper.get('[data-testid="business-panel-resizer"]');
+    expect(businessResizer.attributes()).toMatchObject({
+      role: 'separator',
+      tabindex: '0',
+      'aria-orientation': 'vertical',
+    });
+    expect(businessResizer.classes()).toContain('workspace-resizer--left');
+    wrapper.unmount();
+  });
+
   it('keeps the panel DOM mounted while hidden and keeps Focus independent from the sidebar', async () => {
     const { wrapper, router, store } = await mountShell();
     await router.push('/goals');
@@ -312,6 +361,24 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
+  it('updates the persisted business width from the visible gutter resizer', async () => {
+    const { wrapper, store } = await mountShell('/goals');
+    const resizer = wrapper.get('[data-testid="business-panel-resizer"]');
+
+    expect(store.panelWidth).toBeNull();
+    await resizer.trigger('pointerdown', { pointerId: 11, clientX: 640 });
+    window.dispatchEvent(
+      new PointerEvent('pointermove', { pointerId: 11, clientX: 620, bubbles: true }),
+    );
+    await nextTick();
+
+    expect(store.panelWidthSource).toBe('user');
+    expect(store.panelWidth).toBe(654);
+
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }));
+    wrapper.unmount();
+  });
+
   it('restores the active input after a panel-resize pointer gesture settles', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
@@ -335,9 +402,11 @@ describe('AppShell right-panel integration', () => {
     // Model the browser's trailing native focus behavior after the pointerup listener.
     (resizer.element as HTMLElement).focus();
     expect(document.activeElement).toBe(resizer.element);
-    expect(scheduledFrames).toHaveLength(1);
+    expect(scheduledFrames.length).toBeGreaterThanOrEqual(1);
 
-    scheduledFrames[0]?.(performance.now());
+    for (let index = 0; index < 5 && scheduledFrames.length > 0; index += 1) {
+      scheduledFrames.shift()?.(performance.now());
+    }
     expect(document.activeElement).toBe(input);
 
     animationFrame.mockRestore();

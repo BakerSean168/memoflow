@@ -1,4 +1,12 @@
-import { computed, ref } from 'vue';
+import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import { useGoalNativeSurface } from '../../../layouts/shell/useGoalNativeSurface';
+import type {
+  GoalNativeEditSession,
+  GoalNativeSubmitContext,
+} from '../../goal/composables/goalNativeEditSession';
+import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
+import { computed, onScopeDispose, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
@@ -22,15 +30,190 @@ import {
 import { getAIErrorMessage } from './error';
 
 /**
- * ADR-052 goal.create UI projection.
+ * ADR-112 Goal native review over the ADR-052 durable Workflow.
  *
  * The durable Mastra Workflow is authoritative. This composable owns only
- * editable presentation state and maps existing UI action names onto typed
- * Workflow commands. The durable Workflow is the only execution owner.
+ * supporting Task/Knowledge presentation state and maps actions onto typed
+ * Workflow commands. GoalDialog owns the first Goal/KR mutation; Mastra owns
+ * durable idempotent replay and supporting work.
  */
 export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const { t, locale } = useI18n();
   const router = useRouter();
+  const nativeSurface = useGoalNativeSurface();
+  const labelCatalog = useLabelCatalog();
+  const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  let nativeSession: GoalNativeEditSession | null = null;
+  let projectedRunId: string | null = null;
+  let projectedRevision: number | null = null;
+  let pendingOwnerAttempt: {
+    runId: string;
+    revision: number;
+    goalId: string;
+    keyResultIds: string[];
+  } | null = null;
+  const goalOwnerAttemptPending = ref(false);
+  let pendingLabelNames: string[] = [];
+  let keyResultRefs = new Map<string, string>();
+  let projectionEpoch = 0;
+  // A successful owner submit is remembered until approve returns; retrying approve
+  // must never create a different revision after the native dialog has closed.
+  let submitted: { runId: string; revision: number } | null = null;
+  const goalOwnerSubmitted = ref(false);
+  let nativeProjection: Promise<void> = Promise.resolve();
+  let pendingProjection: { runId: string; revision: number; promise: Promise<void> } | null = null;
+
+  // Equivalent restores/review clicks share the recovery probe until owner registration.
+  // This is session-local in-flight work, not a cache of owner truth or NOT_FOUND.
+  function projectNativeReview(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
+    const review = run.suspension;
+    if (review?.type !== 'goal_draft_review') return Promise.resolve();
+    if (pendingProjection?.runId === run.runId && pendingProjection.revision === review.revision)
+      return pendingProjection.promise;
+    const pending = {
+      runId: run.runId,
+      revision: review.revision,
+      promise: performNativeReview(run).finally(() => {
+        if (pendingProjection === pending) pendingProjection = null;
+      }),
+    };
+    pendingProjection = pending;
+    return pending.promise;
+  }
+
+  async function performNativeReview(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
+    const review = run.suspension;
+    if (review?.type !== 'goal_draft_review') return;
+    if (nativeSession && projectedRunId === run.runId && projectedRevision === review.revision) {
+      try {
+        nativeSession.readDraftState();
+      } catch {
+        nativeSession = null;
+      }
+      if (nativeSession) {
+        await nativeSession.focus('name');
+        return;
+      }
+    }
+    const epoch = ++projectionEpoch;
+    // Recover the owner-first/approve transport gap from canonical owner truth.
+    // Once this revision has created a Goal, another edit revision must not create
+    // a second Goal. Only the existing deterministic replay may continue.
+    const canonical = await goalService.getGoalAggregateView(review.ownerCreate.goalId);
+    if (epoch !== projectionEpoch) return;
+    if (canonical.ok) {
+      const ids = canonical.data.keyResults.map((item) => String(item.id));
+      const expected = Object.values(review.ownerCreate.keyResultIds);
+      if (
+        String(canonical.data.goal.id) !== review.ownerCreate.goalId ||
+        ids.length !== expected.length ||
+        new Set(ids).size !== expected.length ||
+        expected.some((id) => !ids.includes(id))
+      ) {
+        throw new Error('Created Goal does not match the workflow owner identities');
+      }
+      submitted = { runId: run.runId, revision: review.revision };
+      goalOwnerSubmitted.value = true;
+      nativeSession = null;
+      projectedRunId = null;
+      return;
+    }
+    if (canonical.error.code !== 'NOT_FOUND') throw canonical.error;
+    const existing = await labelCatalog.existingNames(review.draft.goal.labels);
+    if (epoch !== projectionEpoch) return;
+    const session = await nativeSurface.openCreate();
+    if (epoch !== projectionEpoch) {
+      session.requestCancel();
+      return;
+    }
+    // Claim coordination before projecting any draft values.
+    session.coordinateSubmit(() => confirmGoalAgentRun());
+    const draft = review.draft;
+    session.patch({
+      name: draft.goal.name,
+      summary: draft.goal.summary ?? '',
+      description: draft.goal.description ?? '',
+      reminderConfig: draft.goal.reminderConfig ?? null,
+      status: draft.goal.status,
+      start: draft.goal.start ?? null,
+      target: draft.goal.target ?? null,
+      labelIds: existing.flatMap((item) => (item.label ? [item.label.id] : [])),
+      keyResults: draft.keyResults.map((item) => ({
+        id: review.ownerCreate.keyResultIds[
+          item.draftRef
+        ] as GoalNativeSubmitContext['keyResultIds'][number],
+        title: item.title,
+        description: item.description ?? null,
+        calculationMethod: item.aggregationMethod,
+        initialValue: item.initialValue,
+        currentValue: item.currentValue,
+        targetValue: item.targetValue,
+        target: item.target ?? null,
+        unit: item.unit ?? '',
+        weight: item.weight,
+      })),
+    });
+    pendingLabelNames = existing.filter((item) => !item.label).map((item) => item.name);
+    keyResultRefs = new Map(
+      Object.entries(review.ownerCreate.keyResultIds).map(([ref, id]) => [id, ref]),
+    );
+    nativeSession = session;
+    projectedRunId = run.runId;
+    projectedRevision = review.revision;
+    submitted = null;
+    goalOwnerSubmitted.value = false;
+  }
+
+  async function openGoalNativeReview(): Promise<void> {
+    const run = goalWorkflowRun.value;
+    if (
+      !run ||
+      run.suspension?.type !== 'goal_draft_review' ||
+      goalAgentResuming.value ||
+      submitted ||
+      pendingOwnerAttempt
+    )
+      return;
+    try {
+      nativeProjection = projectNativeReview(run);
+      await nativeProjection;
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+    }
+  }
+
+  onScopeDispose(retireNativeReview);
+
+  function liveSession(): GoalNativeEditSession {
+    if (!nativeSession || projectedRunId !== goalWorkflowRun.value?.runId)
+      throw new Error('Open the native Goal review before confirming');
+    nativeSession.readDraftState(); // Owner rejects closed/deactivated handles.
+    return nativeSession;
+  }
+
+  function retireNativeReview(): void {
+    pendingProjection = null;
+    projectionEpoch += 1;
+    if (nativeSession) {
+      try {
+        nativeSession.setEditingBlocked(false);
+        nativeSession.requestCancel();
+      } catch {
+        /* Owner already retired the handle. */
+      }
+    }
+    nativeSession = null;
+    projectedRunId = null;
+    submitted = null;
+    pendingOwnerAttempt = null;
+    goalOwnerAttemptPending.value = false;
+    projectedRevision = null;
+    goalOwnerSubmitted.value = false;
+  }
 
   const goalWorkflowRun = ref<Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null>(null);
 
@@ -38,15 +221,33 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const goalWorkflowStage = ref<GoalWorkflowStage>('collect');
   const goalClarification = ref<GoalClarificationView | null>(null);
   const clarificationAnswers = ref<string[]>([]);
-  const showGoalDraftEditor = ref(false);
   const creatingGoal = ref(false);
   const automationLoading = ref(false);
   const automationExecuting = ref(false);
   const goalAgentLoading = ref(false);
   const goalAgentResuming = ref(false);
 
-  const editableGoal = ref<EditableGoal>(createEmptyGoalDraft());
-  const editableKeyResults = ref<EditableKeyResult[]>([]);
+  const editableGoal = computed<EditableGoal>(() => {
+    const goal = currentReviewDraft()?.goal;
+    return goal
+      ? {
+          name: goal.name,
+          summary: goal.summary ?? '',
+          status: goal.status,
+          start: goal.start ?? null,
+          target: goal.target ?? null,
+        }
+      : createEmptyGoalDraft();
+  });
+  const editableKeyResults = computed<EditableKeyResult[]>(() =>
+    (currentReviewDraft()?.keyResults ?? []).map((item) => ({
+      ...item,
+      description: item.description ?? '',
+      target: item.target ?? null,
+      unit: item.unit ?? '',
+    })),
+  );
+
   const editableTasks = ref<EditableGoalTask[]>([]);
   const editableKnowledge = ref<EditableGoalKnowledge[]>([]);
 
@@ -56,38 +257,20 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   }
 
   function projectDraftToEditor(draft: GoalPlanDraft): void {
-    editableGoal.value = {
-      name: draft.goal.name,
-      summary: draft.goal.summary ?? '',
-      status: draft.goal.status,
-      start: draft.goal.start ?? null,
-      target: draft.goal.target ?? null,
-    };
-    editableKeyResults.value = draft.keyResults.map((item) => ({
-      draftRef: item.draftRef,
-      title: item.title,
-      description: item.description ?? '',
-      aggregationMethod: item.aggregationMethod,
-      initialValue: item.initialValue,
-      currentValue: item.currentValue,
-      targetValue: item.targetValue,
-      target: item.target ?? null,
-      unit: item.unit ?? '',
-      weight: item.weight,
-    }));
     const parsedDraft = GoalPlanDraftSchema.parse(draft);
     editableTasks.value = parsedDraft.tasks;
     editableKnowledge.value = parsedDraft.knowledge;
   }
-  function projectRun(run: AIWorkflowRunView | null): void {
+  function projectRun(run: AIWorkflowRunView | null, projectNative = true): Promise<void> {
     if (!run || run.kind !== 'goal.create') {
       goalWorkflowRun.value = null;
       goalWorkflowStage.value = 'collect';
       goalClarification.value = null;
       clarificationAnswers.value = [];
-      return;
+      return Promise.resolve();
     }
 
+    if (run.suspension?.type !== 'goal_draft_review') retireNativeReview();
     goalWorkflowRun.value = run;
     const suspension = run.suspension;
     if (run.status === 'suspended' && suspension?.type === 'clarification_required') {
@@ -98,12 +281,18 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         rationale: null,
       };
       clarificationAnswers.value = suspension.questions.map(() => '');
-      showGoalDraftEditor.value = false;
     } else if (run.status === 'suspended' && suspension?.type === 'goal_draft_review') {
       goalWorkflowStage.value = 'confirm';
       goalClarification.value = null;
       clarificationAnswers.value = [];
       projectDraftToEditor(suspension.draft);
+      if (projectNative) {
+        nativeProjection = projectNativeReview(run);
+        // projectRun is also consumed by shell callers; keep errors visible without an unhandled rejection.
+        void nativeProjection.catch((error) =>
+          toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed')),
+        );
+      }
     } else if (run.status === 'suspended' && suspension?.type === 'recovery_required') {
       goalWorkflowStage.value = 'execute';
       goalClarification.value = null;
@@ -116,49 +305,70 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       goalWorkflowStage.value = 'result';
       goalClarification.value = null;
       clarificationAnswers.value = [];
-      showGoalDraftEditor.value = false;
     } else {
       goalWorkflowStage.value = 'plan';
       goalClarification.value = null;
       clarificationAnswers.value = [];
     }
     options.scrollMessagesToBottom();
+    return projectNative && suspension?.type === 'goal_draft_review'
+      ? nativeProjection
+      : Promise.resolve();
   }
 
   async function syncGoalWorkflowRun(runId: string): Promise<void> {
     if (!runId) return;
     try {
-      projectRun(await options.workflowRuntime.get({ runId }));
+      await projectRun(await options.workflowRuntime.get({ runId }));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     }
   }
 
   function buildEditedDraftContent(draft: GoalPlanDraft): GoalPlanDraftContent {
+    const native = liveSession().readDraftState().draft;
     const goal = {
       ...draft.goal,
-      name: editableGoal.value.name,
-      summary: editableGoal.value.summary.trim() || null,
-      status: editableGoal.value.status,
-      start: editableGoal.value.start,
-      target: editableGoal.value.target,
+      name: native.name,
+      summary: native.summary.trim() || null,
+      status: native.status,
+      start: native.start,
+      target: native.target,
+      description: native.description.trim() || null,
+      reminderConfig: native.reminderConfig,
+      labels: [
+        ...new Set([
+          ...native.labelIds.map((id) => {
+            const label = labelCatalog.labels.value.find((item) => item.id === id);
+            if (!label) throw new Error('Selected Goal label is unavailable');
+            return label.name;
+          }),
+          ...pendingLabelNames,
+        ]),
+      ],
     };
-
-    const priorKeyResults = new Map(draft.keyResults.map((item) => [item.draftRef, item]));
-    const keyResults = editableKeyResults.value.map((item) => ({
-      ...priorKeyResults.get(item.draftRef),
-      draftRef: item.draftRef,
-      title: item.title,
-      description: item.description.trim() || null,
-      aggregationMethod: item.aggregationMethod,
-      initialValue: item.initialValue,
-      currentValue: item.currentValue,
-      targetValue: item.targetValue,
-      target: item.target,
-      unit: item.unit.trim() || null,
-      weight: item.weight,
-    }));
-
+    const used = new Set(draft.keyResults.map((item) => item.draftRef));
+    const keyResults = native.keyResults.map((item) => {
+      let draftRef = item.id ? keyResultRefs.get(item.id) : undefined;
+      if (!draftRef) {
+        let suffix = 1;
+        while (used.has(`kr:new-${suffix}`)) suffix += 1;
+        draftRef = `kr:new-${suffix}`;
+        used.add(draftRef);
+      }
+      return {
+        draftRef,
+        title: item.title,
+        description: item.description?.trim() || null,
+        aggregationMethod: item.calculationMethod,
+        initialValue: item.initialValue,
+        currentValue: item.currentValue,
+        targetValue: item.targetValue,
+        target: item.target ?? null,
+        unit: item.unit?.trim() || null,
+        weight: item.weight,
+      };
+    });
     return GoalPlanDraftContentSchema.parse({
       goal,
       keyResults,
@@ -175,6 +385,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       goal: {
         ...content.goal,
         summary: content.goal.summary ?? null,
+        description: content.goal.description ?? null,
+        reminderConfig: content.goal.reminderConfig ?? null,
         start: content.goal.start ?? null,
         target: content.goal.target ?? null,
       },
@@ -197,11 +409,31 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     const edited = buildEditedDraftContent(draft);
     if (JSON.stringify(edited) === JSON.stringify(canonicalDraftContent(draft))) return run;
 
+    const submittedSnapshot = JSON.stringify(liveSession().readDraftState().draft);
     const next = await options.workflowRuntime.resume({
       runId: run.runId,
       command: { type: 'edit_structured', patch: edited },
     });
-    projectRun(next);
+    await projectRun(next, false);
+    if (next.kind === 'goal.create' && next.suspension?.type === 'goal_draft_review') {
+      const review = next.suspension;
+      const session = liveSession();
+      if (JSON.stringify(session.readDraftState().draft) !== submittedSnapshot)
+        throw new Error('Goal review changed while saving its workflow revision; confirm again');
+      const rows = session.readDraftState().draft.keyResults;
+      session.patch({
+        keyResults: rows.map((item, index) => ({
+          ...item,
+          id: review.ownerCreate.keyResultIds[
+            edited.keyResults[index]!.draftRef
+          ] as GoalNativeSubmitContext['keyResultIds'][number],
+        })),
+      });
+      projectedRevision = review.revision;
+      keyResultRefs = new Map(
+        Object.entries(review.ownerCreate.keyResultIds).map(([ref, id]) => [id, ref]),
+      );
+    }
     return next.kind === 'goal.create' ? next : null;
   }
 
@@ -299,7 +531,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         modelId: selectedModel.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
-      projectRun(run);
+      await projectRun(run);
       const draft =
         run.kind === 'goal.create' && run.suspension?.type === 'goal_draft_review'
           ? run.suspension.draft
@@ -322,7 +554,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     if (!run || !canResumeGoalAgentClarification.value) return;
     goalAgentResuming.value = true;
     try {
-      projectRun(
+      await projectRun(
         await options.workflowRuntime.resume({
           runId: run.runId,
           command: {
@@ -338,6 +570,32 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     }
   }
 
+  async function reconcileOwnerAttempt(): Promise<boolean> {
+    const attempt = pendingOwnerAttempt;
+    if (!attempt) return false;
+    const owner = await goalService.getGoalAggregateView(attempt.goalId);
+    if (!owner.ok) {
+      if (owner.error.code !== 'NOT_FOUND') throw owner.error;
+      // Definite absence permits another owner attempt with these same identities.
+      // Keep the revision frozen: a lost response must never enable edit_structured.
+      return false;
+    }
+    const ids = owner.data.keyResults.map((item) => String(item.id));
+    const expected = attempt.keyResultIds;
+    if (
+      String(owner.data.goal.id) !== attempt.goalId ||
+      ids.length !== expected.length ||
+      new Set(ids).size !== expected.length ||
+      expected.some((id) => !ids.includes(id))
+    )
+      throw new Error('Created Goal does not match the workflow owner identities');
+    submitted = { runId: attempt.runId, revision: attempt.revision };
+    goalOwnerSubmitted.value = true;
+    pendingOwnerAttempt = null;
+    goalOwnerAttemptPending.value = false;
+    return true;
+  }
+
   async function confirmGoalAgentRun(hostOptions?: {
     title?: string;
     description?: string;
@@ -347,21 +605,76 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   }): Promise<void> {
     let run = goalWorkflowRun.value;
     if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value) return;
-    if (hostOptions?.title) editableGoal.value.name = hostOptions.title;
-    if (hostOptions?.description !== undefined)
-      editableGoal.value.summary = hostOptions.description;
+    if (
+      !pendingOwnerAttempt &&
+      !submitted &&
+      (hostOptions?.title || hostOptions?.description !== undefined)
+    )
+      liveSession().patch({
+        ...(hostOptions.title ? { name: hostOptions.title } : {}),
+        ...(hostOptions.description !== undefined ? { summary: hostOptions.description } : {}),
+      });
 
     goalAgentResuming.value = true;
     creatingGoal.value = true;
     try {
-      run = await flushStructuredEdits();
+      if (pendingOwnerAttempt) await reconcileOwnerAttempt();
+      // A failed initial projection can be retried independently by opening review.
+      await nativeProjection;
+      if (
+        !submitted ||
+        submitted.runId !== run.runId ||
+        submitted.revision !== currentReviewDraft()?.revision
+      ) {
+        if (!pendingOwnerAttempt) run = await flushStructuredEdits();
+        if (!run || run.suspension?.type !== 'goal_draft_review') return;
+        const review = run.suspension;
+        const session = liveSession();
+        const expectedDraft = session.readDraftState().draft;
+        let saved;
+        try {
+          // Only the controlled same-revision retry may temporarily release the
+          // owner lock. requestSubmit synchronously takes the owner's busy lock.
+          if (pendingOwnerAttempt) session.setEditingBlocked(false);
+          saved = await session.requestSubmit({
+            onCreateAttempt: () => {
+              pendingOwnerAttempt = {
+                runId: run!.runId,
+                revision: review.revision,
+                goalId: review.ownerCreate.goalId,
+                keyResultIds: Object.values(review.ownerCreate.keyResultIds),
+              };
+              goalOwnerAttemptPending.value = true;
+              session.setEditingBlocked(true);
+            },
+            createId: review.ownerCreate.goalId as GoalNativeSubmitContext['createId'],
+            keyResultIds: review.draft.keyResults.map(
+              (item) =>
+                review.ownerCreate.keyResultIds[
+                  item.draftRef
+                ] as GoalNativeSubmitContext['keyResultIds'][number],
+            ),
+            pendingLabelNames: [...pendingLabelNames],
+            expectedDraft,
+          });
+        } catch (error) {
+          if (!pendingOwnerAttempt || !(await reconcileOwnerAttempt())) throw error;
+        }
+        if (!saved || String(saved.id) !== review.ownerCreate.goalId) {
+          if (!submitted && (!pendingOwnerAttempt || !(await reconcileOwnerAttempt()))) return;
+        }
+        submitted = { runId: run.runId, revision: review.revision };
+        pendingOwnerAttempt = null;
+        goalOwnerAttemptPending.value = false;
+        goalOwnerSubmitted.value = true;
+      }
       if (!run || run.status !== 'suspended' || run.suspension?.type !== 'goal_draft_review')
         return;
       const completed = await options.workflowRuntime.resume({
         runId: run.runId,
         command: { type: 'approve' },
       });
-      projectRun(completed);
+      await projectRun(completed, false);
       if (completed.kind === 'goal.create' && completed.status === 'completed') {
         toast.success(t('aiAssistant.goalAutomation.executionSuccess'));
       }
@@ -370,6 +683,13 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     } finally {
       goalAgentResuming.value = false;
       creatingGoal.value = false;
+      if (pendingOwnerAttempt || submitted) {
+        try {
+          nativeSession?.setEditingBlocked(true);
+        } catch {
+          /* Owner closed after save. */
+        }
+      }
     }
   }
 
@@ -378,18 +698,19 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     revision?: number;
   }): Promise<void> {
     const run = goalWorkflowRun.value;
-    if (!run || goalAgentResuming.value) return;
+    if (!run || goalAgentResuming.value || pendingOwnerAttempt) return;
     goalAgentResuming.value = true;
     try {
+      retireNativeReview();
       if (run.status === 'suspended') {
-        projectRun(
+        await projectRun(
           await options.workflowRuntime.resume({
             runId: run.runId,
             command: { type: 'cancel' },
           }),
         );
       } else {
-        projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
+        await projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
       }
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
@@ -404,10 +725,19 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalId?: string | null;
   }): Promise<void> {
     const run = goalWorkflowRun.value;
-    if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value) return;
-    if (hostOptions?.title) editableGoal.value.name = hostOptions.title;
-    if (hostOptions?.description !== undefined)
-      editableGoal.value.summary = hostOptions.description;
+    if (
+      !run ||
+      !goalAgentWaitingForApproval.value ||
+      goalAgentResuming.value ||
+      submitted ||
+      pendingOwnerAttempt
+    )
+      return;
+    if (hostOptions?.title || hostOptions?.description !== undefined)
+      liveSession().patch({
+        ...(hostOptions.title ? { name: hostOptions.title } : {}),
+        ...(hostOptions.description !== undefined ? { summary: hostOptions.description } : {}),
+      });
     goalAgentResuming.value = true;
     try {
       await flushStructuredEdits();
@@ -423,7 +753,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     if (!run || !canRetryGoalAgentExecution.value) return;
     goalAgentResuming.value = true;
     try {
-      projectRun(
+      await projectRun(
         await options.workflowRuntime.resume({
           runId: run.runId,
           command: { type: 'retry' },
@@ -445,90 +775,56 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     await router.push(`/goals/${automatedGoalId.value}`);
   }
 
-  async function handleCreateGoalFromDraft(): Promise<void> {
-    await confirmGoalAgentRun();
-  }
-
-  function nextKeyResultDraftRef(): EditableKeyResult['draftRef'] {
-    const used = new Set(editableKeyResults.value.map((item) => item.draftRef));
-    let suffix = editableKeyResults.value.length + 1;
-    while (used.has(`kr:new-${suffix}`)) suffix += 1;
-    return `kr:new-${suffix}`;
-  }
-
-  function addKeyResultDraft(): void {
-    editableKeyResults.value.push({
-      draftRef: nextKeyResultDraftRef(),
-      title: '',
-      description: '',
-      aggregationMethod: 'Sum',
-      initialValue: 0,
-      currentValue: 0,
-      targetValue: 1,
-      target: null,
-      unit: '',
-      weight: 3,
-    });
-  }
-  function removeKeyResultDraft(index: number): void {
-    editableKeyResults.value.splice(index, 1);
-  }
-  function updateKeyResultDraft(payload: { index: number; value: EditableKeyResult }): void {
-    editableKeyResults.value[payload.index] = { ...payload.value };
-  }
-  function handleUpdateGoalDraft(payload: EditableGoal): void {
-    editableGoal.value = { ...payload };
-  }
   function removeTaskDraft(index: number): void {
+    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
     editableTasks.value.splice(index, 1);
   }
   function updateTaskDraft(payload: { index: number; value: EditableGoalTask }): void {
+    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
     const currentDraft = currentReviewDraft();
     if (!currentDraft) return;
     const parsed = GoalPlanDraftSchema.parse({
       ...currentDraft,
-      tasks: currentDraft.tasks.map((item, index) =>
+      tasks: editableTasks.value.map((item, index) =>
         index === payload.index ? payload.value : item,
       ),
     });
     editableTasks.value[payload.index] = parsed.tasks[payload.index]!;
   }
   function removeKnowledgeDraft(index: number): void {
+    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
     editableKnowledge.value.splice(index, 1);
   }
   function updateKnowledgeDraft(payload: { index: number; value: EditableGoalKnowledge }): void {
+    if (goalAgentResuming.value || creatingGoal.value || submitted || pendingOwnerAttempt) return;
     const currentDraft = currentReviewDraft();
     if (!currentDraft) return;
     const parsed = GoalPlanDraftSchema.parse({
       ...currentDraft,
-      knowledge: currentDraft.knowledge.map((item, index) =>
+      knowledge: editableKnowledge.value.map((item, index) =>
         index === payload.index ? payload.value : item,
       ),
     });
     editableKnowledge.value[payload.index] = parsed.knowledge[payload.index]!;
   }
-  function toggleGoalDraftEditor(): void {
-    showGoalDraftEditor.value = !showGoalDraftEditor.value;
-  }
 
   function resetGoalArtifacts(): void {
+    retireNativeReview();
     goalWorkflowRun.value = null;
     goalWorkflowStage.value = 'collect';
     goalClarification.value = null;
     clarificationAnswers.value = [];
-    showGoalDraftEditor.value = false;
-    editableGoal.value = createEmptyGoalDraft();
-    editableKeyResults.value = [];
     editableTasks.value = [];
     editableKnowledge.value = [];
   }
   return {
     goalDraftLoading,
+    goalOwnerSubmitted,
+    goalOwnerAttemptPending,
     goalWorkflowStage,
     goalClarification,
     goalWorkflowRun,
     clarificationAnswers,
-    showGoalDraftEditor,
     creatingGoal,
     automationLoading,
     automationExecuting,
@@ -552,6 +848,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     canContinueGoalAgentExecution,
     canRetryGoalAgentExecution,
     projectRun,
+    openGoalNativeReview,
     resetGoalArtifacts,
     generateGoalDraftFromConversation,
     startGoalAgentRun,
@@ -563,15 +860,11 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     retryGoalAgentExecution,
     syncGoalWorkflowRun,
     openAutomatedGoal,
-    handleCreateGoalFromDraft,
-    addKeyResultDraft,
-    removeKeyResultDraft,
-    updateKeyResultDraft,
-    handleUpdateGoalDraft,
     removeTaskDraft,
     updateTaskDraft,
     removeKnowledgeDraft,
     updateKnowledgeDraft,
-    toggleGoalDraftEditor,
   };
 }
+
+export type { UseAIGoalWorkflowOptions } from './types';

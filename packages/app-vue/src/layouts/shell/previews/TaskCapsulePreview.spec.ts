@@ -1,15 +1,17 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 /** @vitest-environment jsdom */
 import { computed, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import TaskCapsulePreview from './TaskCapsulePreview.vue';
+import { getProductTodayYmd } from '../../../shared/utils/product-time';
 
 const instancesRef = ref<Record<string, unknown>[]>([]);
 const templatesRef = ref<Record<string, unknown>[]>([]);
 const errorRef = ref<string | null>(null);
-const fetchInstancesByDateRange = vi.fn().mockResolvedValue(undefined);
-const fetchTemplates = vi.fn().mockResolvedValue(undefined);
+const load = vi.fn().mockResolvedValue(undefined);
 const completeOccurrence = vi.fn().mockResolvedValue(undefined);
 const uncompleteOccurrence = vi.fn().mockResolvedValue(undefined);
 const skipOccurrence = vi.fn().mockResolvedValue(undefined);
@@ -17,17 +19,20 @@ const setOccurrenceChecklistItem = vi.fn().mockResolvedValue(undefined);
 const createPlanSafe = vi.fn().mockResolvedValue({ todayOccurrenceCreated: true });
 const createSaving = ref(false);
 
-vi.mock('../../../modules/task/composables/useTask', () => ({
-  useTask: () => ({
+vi.mock('../../../modules/task/composables/useTaskToday', () => ({
+  useTaskToday: () => ({
     instances: computed(() => instancesRef.value),
     templates: computed(() => templatesRef.value),
     error: computed(() => errorRef.value),
-    fetchInstancesByDateRange,
-    fetchTemplates,
-    completeOccurrence,
-    uncompleteOccurrence,
-    skipOccurrence,
-    setOccurrenceChecklistItem,
+    resolveIdentityScope: () => 'identity-1',
+    isLoading: ref(false),
+    load,
+    operations: {
+      completeOccurrence,
+      uncompleteOccurrence,
+      skipOccurrence,
+      setOccurrenceChecklistItem,
+    },
   }),
 }));
 
@@ -96,13 +101,12 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    expect(fetchInstancesByDateRange).toHaveBeenCalled();
-    expect(fetchTemplates).toHaveBeenCalled();
+    expect(load).toHaveBeenCalled();
     expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain(
       'Write tests',
     );
     expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain('09:00');
-    expect(wrapper.get('[data-testid="task-capsule-progress"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="task-quick-progress"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -146,29 +150,52 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
-    await wrapper.get('input').setValue('Review PR');
-    await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
+    await wrapper.get('[data-testid="task-quick-quick-task"]').trigger('click');
+    await wrapper.get('input').setValue('  Review PR  ');
+    await wrapper.get('[data-testid="task-quick-quick-create"]').trigger('submit');
     await flushPromises();
 
     expect(createPlanSafe).toHaveBeenCalledWith(
-      expect.objectContaining({
+      {
         name: 'Review PR',
-        schedule: expect.objectContaining({
+        description: null,
+        schedule: {
           kind: 'OneTime',
+          date: getProductTodayYmd(),
           timing: { kind: 'AllDay' },
-        }),
-      }),
+        },
+        reminderConfig: null,
+        importance: 'Moderate',
+        labelIds: [],
+        goalBinding: null,
+        checklist: [],
+      },
       'quick',
     );
-    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
+    expect(load).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(false);
+    expect(wrapper.emitted('select')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('keeps the inline quick draft on failure', async () => {
+    createPlanSafe.mockResolvedValueOnce(null);
+    const wrapper = mountPreview();
+    await flushPromises();
+    await wrapper.get('[data-testid="task-quick-quick-task"]').trigger('click');
+    await wrapper.get('input').setValue('Retry later');
+    await wrapper.get('[data-testid="task-quick-quick-create"]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('input').element.value).toBe('Retry later');
+    expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(true);
+    expect(load).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
 
   it('shows empty state when no instances today', async () => {
     const wrapper = mountPreview();
     await flushPromises();
-    expect(wrapper.find('[data-testid="task-capsule-empty"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-quick-empty"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -177,8 +204,25 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    expect(wrapper.find('[data-testid="task-capsule-error"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-quick-error"]').exists()).toBe(true);
     await wrapper.get('button').trigger('click');
     wrapper.unmount();
   });
+});
+
+it('delegates execution presentation and commands to TaskQuickSurface', () => {
+  const source = readFileSync(resolve(__dirname, 'TaskCapsulePreview.vue'), 'utf8');
+  expect(source).toContain('<TaskQuickSurface');
+  expect(source).toContain('useTaskToday');
+  expect(source).not.toMatch(
+    /fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs/,
+  );
+  for (const command of [
+    'completeOccurrence',
+    'uncompleteOccurrence',
+    'markOccurrenceMissed',
+    'skipOccurrence',
+    'setOccurrenceChecklistItem',
+  ])
+    expect(source).not.toContain(`task.${command}`);
 });

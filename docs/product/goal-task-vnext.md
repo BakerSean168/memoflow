@@ -8,7 +8,7 @@ tags:
   - domain
 description: Goal / Task vNext 的产品模型、页面信息架构、交互文案与跨模块闭环
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-12T21:49:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # Goal / Task vNext 产品设计
@@ -159,7 +159,7 @@ lifecycle: Active | Paused | Closed
 outcome:   Open | Succeeded | Failed | Abandoned
 ```
 
-`Failed` 由 completion policy 判断成功已经不可能；`Abandoned` 是用户主动停止；Delete 只用于误创建。详见 ADR-057。
+`Failed` 不是用户直接点击的状态，也不向用户暴露 completion policy 配置。Overdue 本身仍不代表失败；用户先明确某次 Occurrence 是 Completed / Missed / Skipped。对于有限 Plan，当范围已经结束且仍存在明确的 Missed 时，Plan outcome 才派生为 `Failed`；Missed 后续被纠正为 Completed 时允许重新评估。`Abandoned` 是用户主动结束计划；Delete 只用于误创建。
 
 ## 3. Shared Labels
 
@@ -180,7 +180,7 @@ Goal 与 Task 使用同一套 Label：
 
 ```text
 Goal system views: 进行中 / 已完成 / 全部
-Task system views: 今天 / 即将到来 / 全部 / 已完成
+Task system views: 今天 / 计划；未来安排统一进入 Schedule / Calendar
 ```
 
 Label 多选默认 AND：
@@ -471,12 +471,17 @@ Review detail 可以使用 drawer/inline expansion，不强制独立 route。
 
 ## 10. Task Home
 
-Task 首页从 TaskTemplate management 改为执行视图：
+Task 首页是执行入口，同时保留 Plan 作为一级 owner surface：
 
 ```text
 任务                                             [+ 新建任务]
 
-[今天 5] [即将到来] [全部] [已完成] [标签 ▾]
+[今天 5] [计划]
+
+逾期
+--------------------------------
+○ 昨天应完成的任务                       已逾期
+  [补完成] [未完成] [跳过]
 
 今天 · 8月25日
 --------------------------------
@@ -485,7 +490,7 @@ Task 首页从 TaskTemplate management 改为执行视图：
 
 ○ 植物观察打卡                           全天
   第 5 / 15 次 · #二课
-  🎯 毕业 / 二课分 · 完成计划后 +1分
+  🎯 毕业 / 二课分
 
 ○ 修改 MemoFlow Provider UI              全天
   #工作 #AI
@@ -493,7 +498,7 @@ Task 首页从 TaskTemplate management 改为执行视图：
 ✓ 完成 TLS 配置                           11:30
 ```
 
-Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
+未来任务不再维护独立 Upcoming 列表；查看未来安排进入 Schedule / Calendar。Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 
 ## 11. 创建 Task
 
@@ -521,16 +526,20 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 [顺利完成大学毕业要求]
 [二课分达到毕业要求]
 
-[✓] 完成任务后自动更新关键结果
+关键结果更新
+○ 仅关联
+● 自动记录固定值
+○ 完成时记录
 
-计入方式
-○ 每次完成
-● 完成整个计划
-
-贡献
+自动记录
 [1] 分
 
-完成全部 15 次打卡后，“二课分达到毕业要求”将增加 1 分。
+高级
+计入时机 [完成整个计划 ▾]
+
+完成全部 15 次打卡后，“二课分达到毕业要求”将自动记录 +1 分。
+
+若选择“完成时记录”，则在点击 Complete 时出现 measurement-aware 弹窗；Sum 输入本次变化，Average / Max / Min / Last 输入本次 sample，并实时预览 Current → After → Target。
 
 ▸ 更多设置
   描述
@@ -541,7 +550,7 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
                           取消   创建任务
 ```
 
-### 11.1 Goal link 无 contribution
+### 11.1 Goal / KR link without record
 
 报名任务：
 
@@ -549,7 +558,10 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 关联目标
 毕业 / 二课分
 
-[ ] 完成任务后自动更新关键结果
+关键结果更新
+● 仅关联
+○ 自动记录固定值
+○ 完成时记录
 ```
 
 完成报名不会修改二课分。
@@ -564,13 +576,9 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 
 用户只操作“时间”。内部自动映射 `TaskTimeType`。
 
-## 12. Repeating Task / Task Plan 管理
+## 12. Task Plan 管理
 
-作为二级入口：
-
-```text
-... -> 管理重复任务
-```
+Task Home 直接保留 `计划` 一级入口。Plan 不再作为隐藏的 Template 管理页，而是用户可以直接管理的 action-plan owner。
 
 列表：
 
@@ -587,11 +595,14 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 可操作：
 
 ```text
-编辑重复
+编辑计划
 暂停
 恢复
-放弃计划
+结束计划
+删除误创建
 ```
+
+其中 `结束计划` = Abandon：关闭 Plan、保留历史，并停止 future occurrence / reminder / Schedule projection。普通 Task UX 不提供 Archive；Archive 不承担业务结束语义。
 
 计划历史保留 outcome：
 
@@ -602,13 +613,13 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 已放弃
 ```
 
-“未达成/Failed”不是用户随手点击的状态；由 completion policy 根据 occurrence facts 判断。
+“未达成/Failed”不是用户随手点击的状态，也不暴露 completion policy。Overdue 继续保持未决；用户明确选择 Missed 后，有限 Plan 在范围结束且仍有 Missed 时派生为 Failed。
 
 不显示 DAG / Critical Path / dependency graph。
 
-## 13. Task Detail
+## 13. Task occurrence inspect / Plan detail
 
-默认打开具体任务实例：
+Today 行不新增独立 Occurrence Detail route。高频动作直接行内完成；点击 occurrence 打开 compact Dialog / Sheet，需要修改整个计划时再显式进入 `/tasks/:planId`。
 
 ```text
 植物观察打卡
@@ -622,16 +633,24 @@ Goal link 是 metadata，不抢夺 Task title/date 的视觉优先级。
 顺利完成大学毕业要求
 › 二课分达到毕业要求
 
-整个计划完成后 +1 分
-
 备注
 ...
 
-                         完成
+[查看计划]                         [完成]
 ... -> 未完成 / 跳过本次
 ```
 
-`未完成` = `Missed`；`跳过本次` = 明确豁免，二者不能混用。若任务已过期但尚未确认结果，显示 `已逾期` badge，仍允许补标完成。
+若该 Task 配置了“完成时记录”KR，点击完成先打开 Goal-owned measurement-aware 记录弹窗：
+
+```text
+[Target icon] 更新关键结果
+本次记录 [ 3.5 ] 小时
+Current 2.8 -> After 3.1 -> Target 4.0
+
+[仅完成任务] [记录并完成]
+```
+
+`未完成` = `Missed`；`跳过本次` = 明确豁免，二者不能混用。若任务已过期但尚未确认结果，显示 `已逾期` badge，仍允许补标完成。用户在完成时输入的 KR measurement 与自动 fixed contribution provenance 不同：前者允许通过 Goal-owned correction 修改值，不能要求先撤销 Task completion。
 
 如果来自 recurrence：
 
@@ -733,12 +752,13 @@ Day 7 -> Completed
 
 ```text
 Day 7 -> Missed
-strict 15/15 + no backfill
+-> 这是用户明确记录的未完成事实
+-> 若有限 Plan 的范围已结束且仍保留 Missed
 -> Task Plan outcome = Failed
--> 不产生 +1 二课分
+-> 不产生 PlanCompletion +1 二课分
 ```
 
-若活动官方当天暂停，则使用 `Skipped/waived`，不能记成 Missed；completion policy 根据该计划的豁免规则重新计算 required scope。
+若活动官方当天暂停，则使用 `Skipped/waived`，不能记成 Missed；Skipped 从 required completion scope 中豁免。若用户之后确认 Day 7 实际已经完成，可把该 Occurrence 纠正为 Completed，并重新评估 Plan outcome。
 
 ### 15.6 15/15
 

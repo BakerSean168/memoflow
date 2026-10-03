@@ -4,7 +4,6 @@
  * It owns canonical load/mutate/reset state so the Settings root never shadows this owner.
  */
 import { computed, onMounted, ref, watch } from 'vue';
-import { Loader2 } from '@lucide/vue';
 import {
   DEFAULT_USER_PREFERENCE_PROFILE,
   type PresentationPreferences,
@@ -14,6 +13,7 @@ import {
 import AppearanceSettings from './AppearanceSettings.vue';
 import LocaleSettings from './LocaleSettings.vue';
 import SettingsResetSection from './SettingsResetSection.vue';
+import { SettingsStatusBlock } from '../../../components/shared/settings';
 
 type PreferenceResetTarget = 'all' | 'presentation' | 'regional';
 import { useUserPreferences } from '../composables/useUserPreferences';
@@ -64,7 +64,9 @@ function hydrateCanonicalPreferences(): void {
   setProductTimePreferences(profile);
 }
 
-async function handleAppearanceUpdate(value: { theme?: PresentationPreferences['theme'] }): Promise<void> {
+async function handleAppearanceUpdate(value: {
+  theme?: PresentationPreferences['theme'];
+}): Promise<void> {
   const nextTheme = value.theme ?? appearance.value.theme;
   const previousTheme = appearance.value.theme;
   if (nextTheme === previousTheme) return;
@@ -95,9 +97,7 @@ async function handleLocaleUpdate(
   const presentationOk = presentationChanged
     ? await patchPresentation({ language: value.language })
     : true;
-  const regionalOk = Object.keys(regionalPatch).length
-    ? await patchRegional(regionalPatch)
-    : true;
+  const regionalOk = Object.keys(regionalPatch).length ? await patchRegional(regionalPatch) : true;
   if (presentationOk && regionalOk) return;
 
   await loadPreferences();
@@ -108,9 +108,7 @@ async function handleReset(target: PreferenceResetTarget): Promise<void> {
   resetting.value = true;
   try {
     const resetOk =
-      target === 'all'
-        ? await resetAllUserPreferences()
-        : await resetPreferenceNamespace(target);
+      target === 'all' ? await resetAllUserPreferences() : await resetPreferenceNamespace(target);
     if (resetOk) hydrateCanonicalPreferences();
   } finally {
     resetting.value = false;
@@ -126,29 +124,27 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="space-y-8" data-testid="user-preference-settings-section">
-    <div v-if="isLoading && !hasLoadedPreferences" class="flex items-center justify-center py-12">
-      <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
+  <section class="space-y-7" data-testid="user-preference-settings-section">
+    <SettingsStatusBlock
+      v-if="isLoading && !hasLoadedPreferences"
+      kind="loading"
+      test-id="user-preference-loading"
+    />
 
-    <div
+    <SettingsStatusBlock
       v-else-if="error && !hasLoadedPreferences"
-      role="alert"
-      class="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-      data-testid="user-preference-load-error"
-    >
-      {{ error }}
-    </div>
+      kind="error"
+      :description="error"
+      test-id="user-preference-load-error"
+    />
 
     <template v-else>
-      <p
+      <SettingsStatusBlock
         v-if="error"
-        role="alert"
-        class="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-        data-testid="user-preference-mutation-error"
-      >
-        {{ error }}
-      </p>
+        kind="error"
+        :description="error"
+        test-id="user-preference-mutation-error"
+      />
       <AppearanceSettings :model-value="appearance" @update:model-value="handleAppearanceUpdate" />
       <LocaleSettings :model-value="locale" @update:model-value="handleLocaleUpdate" />
       <SettingsResetSection

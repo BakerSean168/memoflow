@@ -20,7 +20,6 @@ import {
   TaskWorkspaceChannels,
   WindowChannels,
 } from '@memoflow/contracts/electron';
-import { GovernanceChannels } from '@memoflow/contracts/governance';
 
 export const SUPPORTED_REPOSITORY_CHANNELS = [
   RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_START,
@@ -65,7 +64,6 @@ export const ALLOWED_CHANNELS = [
   ...SUPPORTED_REPOSITORY_CHANNELS,
   ...Object.values(SettingChannels),
   ...Object.values(WindowChannels),
-  ...Object.values(GovernanceChannels),
   ...Object.values(AIChannels),
   ...Object.values(AIStreamChannels),
   ...Object.values(DataPortabilityChannels),

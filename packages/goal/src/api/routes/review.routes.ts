@@ -94,7 +94,12 @@ export function registerReviewRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.getReviewContext(data.params.id, data.query.windowDays, ctx),
+    (data, ctx) =>
+      controller.getReviewContext(
+        data.params.id,
+        data.query.window === undefined ? data.query.windowDays : data.query,
+        ctx,
+      ),
   );
 
   // GET /:id/reviews — 获取目标复盘列表

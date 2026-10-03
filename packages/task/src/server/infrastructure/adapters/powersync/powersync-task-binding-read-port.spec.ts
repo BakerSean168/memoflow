@@ -14,6 +14,8 @@ function createDb(): IElectronDatabase {
     outcome TEXT NOT NULL DEFAULT 'Open',
     goal_id TEXT,
     key_result_id TEXT,
+    goal_progress_mode TEXT,
+    goal_suggested_value REAL,
     goal_record_value REAL,
     goal_progress_trigger TEXT,
     created_at INTEGER NOT NULL,
@@ -101,6 +103,16 @@ describe('PowerSyncTaskBindingReadPort', () => {
     const page = await port.listTasksByKeyResult('id-A', 'goal-1', 'kr-1');
     expect(page.total).toBe(2);
     expect(page.items.map((item) => item.taskPlanId)).toEqual(['t3', 't2']);
+  });
+
+  it('projects Prompt as a KR link without claiming automatic contribution', async () => {
+    const db = createDb();
+    await db.execute(`INSERT INTO task_plans (id, identity_id, name, status, goal_id, key_result_id, goal_progress_mode, goal_suggested_value, goal_progress_trigger, created_at)
+      VALUES ('prompt', 'id-A', 'Measure temperature', 'Active', 'goal-1', 'kr-1', 'Prompt', -2, 'EachCompletion', 1)`);
+    const port = new PowerSyncTaskBindingReadPort(db);
+    const page = await port.listTasksByKeyResult('id-A', 'goal-1', 'kr-1');
+    expect(page.items[0]).toMatchObject({ keyResultId: 'kr-1', hasContribution: false });
+    expect(await port.getTaskGoalContextSummary('id-A', 'goal-1')).toMatchObject({ total: 1, goalLevel: 0, byKeyResult: [{ keyResultId: 'kr-1', total: 1, active: 1 }] });
   });
 
   it('summarizes Goal-level and KR-level Task context without hydrating all Task aggregates', async () => {

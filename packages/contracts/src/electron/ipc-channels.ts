@@ -281,7 +281,7 @@ export const DevChannels = {
   MEMORY_FORCE_GC: 'dev:memory:force-gc',
 } as const;
 
-/** Canonical Desktop Update transport (ADR-112 / DU-1301). */
+/** Canonical Desktop Update transport (ADR-114 / DU-1301). */
 export const DesktopUpdateChannels = {
   GET_SNAPSHOT: 'desktop-update:get-snapshot',
   GET_DIAGNOSTICS: 'desktop-update:get-diagnostics',

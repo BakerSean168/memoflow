@@ -2,6 +2,7 @@ import {
   TaskLabelOwnershipError,
   type ITaskPlanRepository,
   type TaskFilters,
+  type TaskPlanPageQuery,
 } from '../../../domain/repositories/i-task-plan-repository';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
@@ -107,6 +108,8 @@ export class PowerSyncTaskPlanRepository
       ['version', data.version],
       ['updated_at', data.updatedAt],
       ['deleted_at', data.deletedAt],
+      ['goal_progress_mode', data.goalProgressMode],
+      ['goal_suggested_value', data.goalSuggestedValue],
     ];
 
     if (existing) {
@@ -142,6 +145,58 @@ export class PowerSyncTaskPlanRepository
       'SELECT * FROM task_plans WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId],
     );
+  }
+
+  async findPage(
+    identityId: string,
+    query: TaskPlanPageQuery,
+  ): Promise<{ plans: TaskPlan[]; total: number }> {
+    const clauses = ['identity_id = ?', 'deleted_at IS NULL'];
+    const params: unknown[] = [identityId];
+    if (query.status?.length) {
+      clauses.push(`status IN (${query.status.map(() => '?').join(', ')})`);
+      params.push(...query.status);
+    }
+    if (query.outcome?.length) {
+      clauses.push(`outcome IN (${query.outcome.map(() => '?').join(', ')})`);
+      params.push(...query.outcome);
+    }
+    if (query.archiveState === 'active') clauses.push('archived_at IS NULL');
+    if (query.archiveState === 'archived') clauses.push('archived_at IS NOT NULL');
+    if (query.goalId) {
+      clauses.push('goal_id = ?');
+      params.push(query.goalId);
+    }
+    if (query.keyResultId) {
+      clauses.push('key_result_id = ?');
+      params.push(query.keyResultId);
+    }
+    const requiredLabelIds = [...new Set(query.labelIdsAll ?? [])];
+    if (requiredLabelIds.length > 0) {
+      clauses.push(
+        `id IN (
+          SELECT task_plan_id FROM task_labels
+          WHERE identity_id = ? AND label_id IN (${requiredLabelIds.map(() => '?').join(', ')})
+          GROUP BY task_plan_id
+          HAVING COUNT(DISTINCT label_id) = ?
+        )`,
+      );
+      params.push(identityId, ...requiredLabelIds, requiredLabelIds.length);
+    }
+    const where = clauses.join(' AND ');
+    const countRow = await this.db.get<{ count: number }>(
+      `SELECT COUNT(*) AS count FROM task_plans WHERE ${where}`,
+      params,
+    );
+    const plans = await this.queryTemplates(
+      identityId,
+      `SELECT * FROM task_plans
+       WHERE ${where}
+       ORDER BY created_at DESC, id ASC
+       LIMIT ? OFFSET ?`,
+      [...params, query.limit, query.offset],
+    );
+    return { plans, total: Number(countRow.count ?? 0) };
   }
 
   async findByStatus(identityId: string, status: TaskPlanStatus): Promise<TaskPlan[]> {

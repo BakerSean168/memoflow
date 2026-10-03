@@ -1,8 +1,5 @@
 <template>
-  <header
-    class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
-    data-testid="goal-page-toolbar"
-  >
+  <ProductSurfaceHeader family="collection" data-testid="goal-page-toolbar">
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <Button variant="ghost" size="sm" class="h-8 gap-1.5">
@@ -16,7 +13,7 @@
         <DropdownMenuItem
           v-for="view in systemViews"
           :key="view.id"
-          :class="activeSystemView === view.id ? 'bg-accent' : ''"
+          :class="activeSystemView === view.id ? 'bg-[hsl(var(--selected))]' : ''"
           @click="emit('select-system-view', view.id)"
         >
           {{ view.label }}
@@ -45,7 +42,7 @@
       data-primary-action="create-goal"
       @click="emit('create-goal')"
     />
-  </header>
+  </ProductSurfaceHeader>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +59,7 @@ import {
 import type { GoalSystemView } from '@memoflow/contracts/goal';
 import {
   LabelFilterPopover,
+  ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
 } from '../../../shared/components';

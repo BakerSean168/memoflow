@@ -60,8 +60,6 @@ const i18n = createI18n({
           progressPlaceholder: 'Value',
           points: 'points',
           progressText: 'Progress increases after completion.',
-          contributionEnable: 'Automatically contribute progress',
-          contributionHint: 'Leave this off for a link-only relationship.',
           weight: 'Weight {value}',
           configPreview: 'Preview',
           trigger: {
@@ -101,6 +99,12 @@ function makeKeyResult(id: string, title: string): KeyResultBindingOption {
     id,
     title,
     weight: 1,
+    calculationMethod: 'Sum',
+    methodLabel: 'Cumulative',
+    recordInputKind: 'delta',
+    unit: 'km',
+    currentValue: 0,
+    targetValue: 10,
     progress: { current: 0, target: 10, percentage: 0 },
   };
 }
@@ -217,10 +221,8 @@ async function enableLink(wrapper: ReturnType<typeof mountSection>) {
   await nextTick();
 }
 
-async function toggleContribution(wrapper: ReturnType<typeof mountSection>) {
-  const switches = wrapper.findAll('[role="switch"]');
-  if (switches.length < 2) throw new Error('Contribution switch not mounted');
-  await switches[1].trigger('click');
+async function selectMode(wrapper: ReturnType<typeof mountSection>, mode: string) {
+  wrapper.findAllComponents(SelectStub)[2].vm.$emit('update:modelValue', mode);
   await nextTick();
 }
 
@@ -269,22 +271,114 @@ describe('KeyResultLinksSection', () => {
     await nextTick();
 
     const switches = wrapper.findAll('[role="switch"]');
-    expect(switches).toHaveLength(2);
-    expect(switches[1].attributes('aria-checked')).toBe('false');
+    expect(switches).toHaveLength(1);
+    expect(wrapper.findAllComponents(SelectStub)[2].props('modelValue')).toBe('LinkOnly');
 
-    await toggleContribution(wrapper);
+    await selectMode(wrapper, 'FixedAutomatic');
     expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toMatchObject({
       goalBinding: {
         goalId: 'goal-a',
         keyResultId: 'kr-a',
-        contribution: { value: 1, trigger: 'EachCompletion' },
+        progressRule: { mode: 'Fixed', value: 1, trigger: 'EachCompletion' },
       },
     });
 
-    await toggleContribution(wrapper);
+    await selectMode(wrapper, 'LinkOnly');
     const emitted = wrapper.emitted('update:modelValue')?.at(-1)?.[0];
     expect(emitted).toMatchObject({ goalBinding: { goalId: 'goal-a', keyResultId: 'kr-a' } });
     expect(emitted.goalBinding).not.toHaveProperty('contribution');
+  });
+
+  it('forces Goal-only LinkOnly and hides update modes', async () => {
+    const template = makeTemplate();
+    template.goalBinding = { goalId: 'goal-a', keyResultId: null };
+    const wrapper = mountSection({ template, request: vi.fn() });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-goal-mode"]').exists()).toBe(false);
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([true]);
+  });
+  it('loads legacy Fixed and accepts a negative delta in the actual unit', async () => {
+    const template = makeTemplate();
+    template.goalBinding = {
+      goalId: 'goal-a',
+      keyResultId: 'kr-a',
+      contribution: { value: 2, trigger: 'PlanCompletion' },
+    };
+    const wrapper = mountSection({
+      template,
+      request: vi.fn(),
+      keyResultsByGoal: { 'goal-a': [makeKeyResult('kr-a', 'Running')] },
+    });
+    await nextTick();
+    expect(wrapper.findAllComponents(SelectStub)[2].props('modelValue')).toBe('FixedAutomatic');
+    wrapper.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', '-2');
+    await nextTick();
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0].goalBinding.progressRule).toEqual({
+      mode: 'Fixed',
+      trigger: 'PlanCompletion',
+      value: -2,
+    });
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([true]);
+    expect(wrapper.text()).toContain('km');
+  });
+  it.each([0, -3])('loads and round-trips Prompt suggestion %s', async (suggestedValue) => {
+    const template = makeTemplate();
+    template.goalBinding = {
+      goalId: 'goal-a',
+      keyResultId: 'kr-a',
+      progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue },
+    };
+    const kr = {
+      ...makeKeyResult('kr-a', 'Temperature'),
+      calculationMethod: 'Average' as const,
+      methodLabel: 'Average',
+      recordInputKind: 'sample' as const,
+    };
+    const wrapper = mountSection({
+      template,
+      request: vi.fn(),
+      keyResultsByGoal: { 'goal-a': [kr] },
+    });
+    await nextTick();
+    expect(
+      wrapper.get('[data-testid="task-goal-mode-FixedAutomatic"]').attributes('disabled'),
+    ).toBeDefined();
+    expect(wrapper.find('[data-testid="task-goal-trigger"]').exists()).toBe(false);
+    wrapper.findComponent({ name: 'Input' }).vm.$emit('update:modelValue', String(suggestedValue));
+    await nextTick();
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0].goalBinding).toMatchObject({
+      progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue },
+    });
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([true]);
+    await selectMode(wrapper, 'FixedAutomatic');
+    expect(wrapper.findAllComponents(SelectStub)[2].props('modelValue')).toBe(
+      'PromptedMeasurement',
+    );
+  });
+  it('moves Fixed to Prompt when selected KR changes to a non-Sum method', async () => {
+    const template = makeTemplate();
+    template.goalBinding = {
+      goalId: 'goal-a',
+      keyResultId: 'kr-a',
+      progressRule: { mode: 'Fixed', trigger: 'EachCompletion', value: 2 },
+    };
+    const kr = makeKeyResult('kr-a', 'Running');
+    const wrapper = mountSection({
+      template,
+      request: vi.fn(),
+      keyResultsByGoal: { 'goal-a': [kr] },
+    });
+    await nextTick();
+    await wrapper.setProps({
+      keyResultsByGoal: {
+        'goal-a': [{ ...kr, calculationMethod: 'Last', recordInputKind: 'sample' }],
+      },
+    });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0].goalBinding.progressRule).toEqual({
+      mode: 'Prompt',
+      trigger: 'EachCompletion',
+      suggestedValue: null,
+    });
   });
 
   it('keeps enable-before-selection local through a controlled parent round-trip', async () => {

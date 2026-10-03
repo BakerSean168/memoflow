@@ -7,6 +7,7 @@ function applyEvent(): TaskGoalProgressOutboxEventV2 {
     schemaVersion: 2,
     eventType: 'task.goal-progress-requested',
     action: 'apply',
+    recordingMode: 'FixedAutomatic',
     identityId: 'identity-1' as never,
     taskOccurrenceId: 'occurrence-1' as never,
     taskPlanId: 'plan-1' as never,
@@ -24,6 +25,7 @@ describe('TaskGoalProgressOutboxEventV2', () => {
     expect(applyEvent()).toMatchObject({
       schemaVersion: 2,
       action: 'apply',
+      recordingMode: 'FixedAutomatic',
       source: { type: 'TaskOccurrence', id: 'occurrence-1' },
     });
   });

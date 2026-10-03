@@ -10,7 +10,8 @@ defineProps<{
   goalClarification: GoalClarificationView | null;
   automatedGoalId: string | null;
   goalAgentResuming: boolean;
-  showGoalDraftEditor: boolean;
+  goalOwnerSubmitted: boolean;
+  goalOwnerAttemptPending: boolean;
   canResumeGoalAgentClarification: boolean;
   canContinueGoalAgentExecution: boolean;
   canRetryGoalAgentExecution: boolean;
@@ -24,7 +25,6 @@ defineProps<{
   cancelGoalAgentRun: () => void;
   continueGoalAgentExecution: () => void;
   retryGoalAgentExecution: () => void;
-  toggleGoalDraftEditor: () => void;
   openAutomatedGoal: () => void;
   exitToolMode: () => void;
 }>();
@@ -58,35 +58,19 @@ const { t } = useI18n();
 
         <template v-else-if="goalAgentWaitingForApproval">
           <Button
+            v-if="goalOwnerSubmitted || goalOwnerAttemptPending"
             variant="outline"
             size="sm"
             :disabled="goalAgentResuming"
-            data-testid="goal-agent-toggle-editor"
-            @click="toggleGoalDraftEditor"
-          >
-            {{
-              showGoalDraftEditor
-                ? t('aiAssistant.chatPage.workflow.hideGoalEditor')
-                : t('aiAssistant.chatPage.workflow.editGoalBeforeCreate')
-            }}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            :disabled="goalAgentResuming"
-            data-testid="goal-agent-confirm-run"
+            data-testid="goal-agent-retry-approval"
             @click="confirmGoalAgentRun"
           >
-            {{
-              goalAgentResuming
-                ? t('aiAssistant.dialogs.agent.resuming')
-                : t('aiAssistant.dialogs.agent.confirmRun')
-            }}
+            {{ goalAgentResuming ? t('aiAssistant.dialogs.agent.resuming') : t('common.retry') }}
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            :disabled="goalAgentResuming"
+            :disabled="goalAgentResuming || goalOwnerSubmitted || goalOwnerAttemptPending"
             data-testid="goal-agent-cancel-run"
             @click="cancelGoalAgentRun"
           >
@@ -126,7 +110,7 @@ const { t } = useI18n();
           <Button
             variant="ghost"
             size="sm"
-            :disabled="goalAgentResuming"
+            :disabled="goalAgentResuming || goalOwnerSubmitted || goalOwnerAttemptPending"
             data-testid="goal-agent-cancel-run"
             @click="cancelGoalAgentRun"
           >

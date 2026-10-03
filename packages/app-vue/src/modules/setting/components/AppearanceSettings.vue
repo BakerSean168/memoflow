@@ -1,45 +1,42 @@
 <template>
-  <Card data-testid="appearance-settings-card">
-    <CardHeader>
-      <CardTitle>{{ t('setting.appearance.title') }}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div class="space-y-2">
-        <Label for="theme-select">{{ t('setting.appearance.theme') }}</Label>
-        <Select
-          :model-value="modelValue.theme"
-          @update:model-value="
-            (value: any) =>
-              emit('update:modelValue', { ...modelValue, theme: value as AppearanceTheme })
-          "
-        >
-          <SelectTrigger id="theme-select" data-testid="appearance-theme-trigger">
-            <SelectValue :placeholder="t('setting.appearance.themePlaceholder')" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="option in themeOptions"
-              :key="option.value"
-              :value="option.value"
-              :data-testid="`appearance-theme-option-${option.value}`"
-            >
-              {{ option.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        <p class="text-sm text-muted-foreground">
-          {{ t('setting.appearance.themeDescription') }}
-        </p>
-      </div>
-    </CardContent>
-  </Card>
+  <SettingsSection
+    :title="t('setting.appearance.title')"
+    :description="t('setting.appearance.themeDescription')"
+    test-id="appearance-settings-card"
+  >
+    <SettingsPropertyRow
+      :label="t('setting.appearance.theme')"
+      html-for="theme-select"
+      test-id="appearance-theme-row"
+    >
+      <Select
+        :model-value="modelValue.theme"
+        @update:model-value="
+          (value: any) =>
+            emit('update:modelValue', { ...modelValue, theme: value as AppearanceTheme })
+        "
+      >
+        <SelectTrigger id="theme-select" class="w-full" data-testid="appearance-theme-trigger">
+          <SelectValue :placeholder="t('setting.appearance.themePlaceholder')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="option in themeOptions"
+            :key="option.value"
+            :value="option.value"
+            :data-testid="`appearance-theme-option-${option.value}`"
+          >
+            {{ option.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </SettingsPropertyRow>
+  </SettingsSection>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Card, CardContent, CardHeader, CardTitle } from '@memoflow/ui-vue-shadcn';
-import { Label } from '@memoflow/ui-vue-shadcn';
 import {
   Select,
   SelectContent,
@@ -47,6 +44,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@memoflow/ui-vue-shadcn';
+import { SettingsPropertyRow, SettingsSection } from '../../../components/shared/settings';
 
 const { t } = useI18n();
 
@@ -72,9 +70,9 @@ const emit = defineEmits<{
 const themeOptions = computed(
   () =>
     props.themeOptions ?? [
-      { label: `☀️ ${t('setting.appearance.themeLight')}`, value: 'light' },
-      { label: `🌙 ${t('setting.appearance.themeDark')}`, value: 'dark' },
-      { label: `🖥️ ${t('setting.appearance.themeAuto')}`, value: 'auto' },
+      { label: '☀️ ' + t('setting.appearance.themeLight'), value: 'light' },
+      { label: '🌙 ' + t('setting.appearance.themeDark'), value: 'dark' },
+      { label: '🖥️ ' + t('setting.appearance.themeAuto'), value: 'auto' },
     ],
 );
 </script>

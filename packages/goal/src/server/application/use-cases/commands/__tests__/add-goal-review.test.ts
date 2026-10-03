@@ -9,6 +9,7 @@ const NOW = Date.UTC(2026, 7, 26, 0, 0, 0);
 const UTC_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 const UTC_TIME_PORT = { getUserTimeContext: vi.fn().mockResolvedValue(UTC_CONTEXT) };
 const context = {
+  signals: [],
   windowStartAt: NOW - 7 * 24 * 60 * 60 * 1000,
   windowEndAt: NOW,
   overallProgress: { startPercentage: 40, endPercentage: 50, deltaPercentage: 10 },

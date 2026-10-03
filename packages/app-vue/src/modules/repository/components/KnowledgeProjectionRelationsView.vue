@@ -6,13 +6,13 @@
   >
     <div
       class="flex min-h-10 flex-wrap items-center gap-2"
-      :class="compact ? 'px-3 py-2' : 'border-b px-4 py-2'"
+      :class="compact ? 'px-3 py-2' : 'border-b border-[hsl(var(--border-subtle))] px-4 py-2'"
     >
       <span class="text-xs font-medium text-muted-foreground">{{
         t('repository.projection.graphDepth')
       }}</span>
       <div
-        class="inline-flex h-8 items-center rounded-md border bg-muted/30 p-0.5"
+        class="inline-flex h-8 items-center rounded-lg bg-[hsl(var(--surface-raised)/0.5)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]"
         role="group"
         :aria-label="t('repository.projection.graphDepth')"
       >
@@ -23,8 +23,8 @@
           class="h-7 min-w-8 rounded px-2 text-xs"
           :class="
             depth === depthOption
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground'
+              ? 'bg-[hsl(var(--surface-overlay))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62)]'
+              : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))]'
           "
           :aria-pressed="depth === depthOption"
           :data-testid="'knowledge-projection-depth-' + depthOption"
@@ -96,7 +96,7 @@
               v-for="item in directOutgoingLinks"
               :key="item.edge.id"
               type="button"
-              class="block w-full rounded-md px-2 py-2 text-left hover:bg-accent/60"
+              class="block w-full rounded-md px-2 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.65)]"
               :data-testid="'knowledge-projection-graph-node-' + item.node.projectionId"
               @click="emit('select', item.node.projectionId)"
             >
@@ -122,7 +122,7 @@
               v-for="item in directBacklinks"
               :key="item.edge.id"
               type="button"
-              class="block w-full rounded-md px-2 py-2 text-left hover:bg-accent/60"
+              class="block w-full rounded-md px-2 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.65)]"
               :data-testid="'knowledge-projection-graph-node-' + item.node.projectionId"
               @click="emit('select', item.node.projectionId)"
             >
@@ -151,7 +151,7 @@
               v-for="node in relatedNodes"
               :key="node.projectionId"
               type="button"
-              class="min-w-0 rounded-md px-2 py-2 text-left hover:bg-accent/60"
+              class="min-w-0 rounded-md px-2 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.65)]"
               @click="emit('select', node.projectionId)"
             >
               <span class="block truncate text-sm font-medium">{{ node.title }}</span>

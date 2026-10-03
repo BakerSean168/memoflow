@@ -81,6 +81,10 @@ export function useTaskOccurrences() {
   ): Promise<TaskOccurrenceDTO> {
     const dto = entity.toDTO();
     store.updateInstance(dto);
+    runtime.queryClient.setQueryData(
+      taskOccurrenceQueryKeys.detail(resolveIdentityScope(), String(dto.id)),
+      dto,
+    );
     runtime.queryClient.setQueriesData<TaskOccurrenceDTO[]>(
       { queryKey: taskOccurrenceQueryKeys.ranges(resolveIdentityScope()) },
       (current) =>
@@ -113,10 +117,16 @@ export function useTaskOccurrences() {
   async function fetchInstancesByDateRange(
     startDate: number,
     endDate: number,
-    options: { force?: boolean } = {},
+    options: { force?: boolean; includeOverdueOpen?: boolean } = {},
   ) {
     const identityScope = resolveIdentityScope();
-    const queryKey = taskOccurrenceQueryKeys.range(identityScope, startDate, endDate);
+    const includeOverdueOpen = options.includeOverdueOpen ?? false;
+    const queryKey = taskOccurrenceQueryKeys.range(
+      identityScope,
+      startDate,
+      endDate,
+      includeOverdueOpen,
+    );
     const cachedInstances = runtime.queryClient.getQueryData<TaskOccurrenceDTO[]>(queryKey);
     if (cachedInstances) store.setInstances(cachedInstances);
     store.setLoading(cachedInstances === undefined);
@@ -127,8 +137,12 @@ export function useTaskOccurrences() {
         staleTime: options.force ? 0 : TASK_OCCURRENCE_STALE_TIME_MS,
         queryFn: async () => {
           const result = await executeTaskOperation(
-            () => service.listOccurrencesByDateRange(startDate, endDate),
+            () =>
+              service.listOccurrencesByDateRange(startDate, endDate, {
+                includeOverdueOpen,
+              }),
             'task.error.loadInstancesFailed',
+            { suppressErrorReport: true },
           );
           if (!result.ok) throw result.error;
           return (result.data ?? []).map((instance) =>
@@ -136,11 +150,15 @@ export function useTaskOccurrences() {
           );
         },
       });
+      if (identityScope !== resolveIdentityScope()) return [];
       store.setInstances(instances);
-    } catch {
-      // executeTaskOperation already translated/reported the Result failure.
+      return instances;
+    } catch (error) {
+      if (identityScope === resolveIdentityScope())
+        handleError(error, 'task.error.loadInstancesFailed');
+      return identityScope === resolveIdentityScope() ? (cachedInstances ?? []) : [];
     } finally {
-      store.setLoading(false);
+      if (identityScope === resolveIdentityScope()) store.setLoading(false);
     }
   }
 
@@ -210,10 +228,16 @@ export function useTaskOccurrences() {
     return result;
   }
 
-  async function setOccurrenceChecklistItem(id: string, request: SetTaskOccurrenceChecklistItemReq) {
+  async function setOccurrenceChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ) {
     const result = await executeTaskOperation(
       () =>
-        service.setOccurrenceChecklistItem(id, sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq),
+        service.setOccurrenceChecklistItem(
+          id,
+          sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq,
+        ),
       'task.error.operationFailed',
     );
     if (result.ok) {

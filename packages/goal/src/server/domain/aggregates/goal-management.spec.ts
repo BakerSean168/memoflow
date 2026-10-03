@@ -208,6 +208,7 @@ describe('Goal aggregate management', () => {
     const goal = createGoal();
     goal.createAndAddKeyResult({ title: 'KR1', targetValue: 100, currentValue: 50, weight: 3 });
     const systemContext = {
+      signals: [],
       windowStartAt: 1000,
       windowEndAt: 2000,
       overallProgress: { startPercentage: 40, endPercentage: 50, deltaPercentage: 10 },

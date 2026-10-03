@@ -2,12 +2,14 @@
 tags: [adr, governance, reference-module, dev-tools, standards]
 description: Governance 作为永久可执行参考模块与开发模式编码规范工作台，保留 Rule/RuleRevision 和完整纵向链路
 created: 2026-09-09T10:30:00+09:00
-updated: 2026-09-09T10:30:00+09:00
+updated: 2026-10-03T10:30:00+09:00
 ---
+
+> **2026-10-03 superseded note:** ADR-113 已采纳并实施，Product Governance Runtime 已完成 destructive retirement，Engineering Governance 改为 repository-native input。本 ADR 仅保留 reference-module 决策历史。
 
 # ADR-110: Governance as a Permanent Executable Reference Module
 
-**状态：** 已采纳
+**状态：** 已被 ADR-113 取代
 **日期：** 2026-09-09
 **取代：** ADR-109
 

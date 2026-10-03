@@ -32,6 +32,7 @@ describe('KnowledgeCapturePersistenceAdapter', () => {
       title: 'Mastra',
       content: '# Mastra',
       knowledgeDocumentId: DOCUMENT_ID,
+      source: { kind: 'repository', connectionId: 'binding-1' },
       requestId: 'run-1:2:knowledge',
       context,
     });
@@ -42,6 +43,8 @@ describe('KnowledgeCapturePersistenceAdapter', () => {
         proposalId: 'run-1',
         proposalRevision: 2,
         requestId: 'run-1:2:knowledge',
+        source: { kind: 'repository', connectionId: 'binding-1' },
+        connectionId: 'binding-1',
       }),
     );
   });

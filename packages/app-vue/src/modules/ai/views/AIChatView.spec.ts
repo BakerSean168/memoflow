@@ -36,6 +36,7 @@ describe('AIChatView Mastra-native workbench', () => {
     resolve(__dirname, '../components/AIKnowledgeCapturePanel.vue'),
     'utf8',
   );
+  const composer = readFileSync(resolve(__dirname, '../components/AIFooterComposer.vue'), 'utf8');
 
   it('composes only canonical workflow projections in the right workbench', () => {
     expect(source).toContain('AIGoalWorkflowPanel');
@@ -86,11 +87,19 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@confirm="confirmTaskAgentRun"');
     expect(source).toContain('@cancel="cancelTaskAgentRun"');
     expect(source).toContain('@retry="retryTaskAgentExecution"');
-    expect(source).toContain('@confirm="confirmKnowledgeCaptureRun"');
+    expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
+    expect(source).toContain('@submit-clarification="submitKnowledgeClarification"');
     expect(source).toContain('@cancel="cancelKnowledgeCaptureRun"');
     expect(source).toContain('@retry="retryKnowledgeCaptureExecution"');
     expect(taskPanel).toContain('data-testid="task-agent-confirm-run"');
-    expect(capturePanel).toContain('data-testid="knowledge-capture-agent-confirm-run"');
+    expect(capturePanel).toContain('data-testid="knowledge-capture-open-native-review"');
+    expect(capturePanel).not.toContain('data-testid="knowledge-capture-agent-confirm-run"');
+  });
+
+  it('wires completed Task workflow results to the canonical Task detail route', () => {
+    expect(viewComposable).toContain('openCreatedTask,');
+    expect(viewComposable).toContain('async function openCreatedTask(taskId: string)');
+    expect(viewComposable).toContain('await router.push(`/tasks/${taskId}`)');
   });
 
   it('preserves durable goal HITL and completed-only deep-link behavior', () => {
@@ -108,11 +117,21 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('max-w-[52rem]');
   });
 
-  it('keeps workflow surface availability owned by the shell integration', () => {
+  it('keeps the retained workflow surface as non-owner context/status composition', () => {
     expect(source).toContain('shellStore?.setWorkflowAvailable(available, itemCount)');
     expect(source).toContain("requestContextPanel('automatic')");
     expect(source).toContain('shellStore.closeWorkflowSurface()');
     expect(source).toContain('SHELL_WORKFLOW_MOUNT_KEY');
+    expect(source).toContain('<AIContextPanel');
+    expect(source).toContain('<AIGoalWorkflowPanel');
+    expect(source).toContain('<AITaskWorkflowPanel');
+    expect(source).toContain('<AIKnowledgeCapturePanel');
+    expect(goalPanel).toContain("suspension?.type === 'recovery_required'");
+    expect(taskPanel).toContain("suspension?.type === 'clarification_required'");
+    expect(capturePanel).toContain("suspension?.type === 'clarification_required'");
+    expect(source).not.toContain('GoalDialog');
+    expect(source).not.toContain('TaskPlanDialog');
+    expect(source).not.toContain('KnowledgeCaptureReviewDialog');
   });
 
   it('projects the currently open goal, task, or registered knowledge note into composer context without a manual mode selector', () => {
@@ -128,6 +147,18 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('getActiveSurface: () =>');
     expect(source).toContain("shellStore.panelSurface !== 'business'");
     expect(source).not.toContain('ai-chat-tool-menu-trigger');
+  });
+
+  it('owns one composer mount path with shell teleport and local disabled fallback', () => {
+    expect(source.match(/<AIFooterComposer/g)).toHaveLength(1);
+    expect(source).toContain(
+      '<Teleport :to="shellComposerMount ?? \'body\'" :disabled="!shellComposerMount">',
+    );
+    expect(source).not.toContain('<Teleport v-if="shellComposerMount"');
+    expect(source).not.toMatch(/<AIFooterComposer[\s\S]*?v-else/);
+    expect(composer).toContain("semanticElevationClass('floating')");
+    expect(composer).not.toContain('rgba(');
+    expect(composer).not.toMatch(/shadow-\[[^\]]*rgba/);
   });
 
   it('preserves mobile conversation navigation without runtime-history rows', () => {
@@ -148,5 +179,57 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(actionBar).not.toContain('goal-agent-start-run');
     expect(source).not.toContain('knowledge-generate');
     expect(actionBar).not.toContain('knowledge-generate');
+  });
+  it('restores durable Goal/supporting state before independently attempting native projection', () => {
+    const projection = viewComposable.indexOf('await goalWorkflow.projectRun(run, false)');
+    const overlay = viewComposable.indexOf(
+      'persistence.applyEditorOverlay(persisted.editorOverlay, run)',
+    );
+    const opening = viewComposable.indexOf(
+      "if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview()",
+    );
+    expect(projection).toBeGreaterThan(0);
+    expect(overlay).toBeGreaterThan(projection);
+    expect(opening).toBeGreaterThan(overlay);
+    expect(viewComposable).toContain('error instanceof AIWorkflowRestoreError &&');
+  });
+  it('persists authoritative Task pointer before recoverable native opening and wires native actions', () => {
+    const projection = viewComposable.indexOf('await taskWorkflow.projectRun(run, false)');
+    const persistence = viewComposable.indexOf(
+      'persistence.persistWorkflowState(conversationId)',
+      projection,
+    );
+    const opening = viewComposable.indexOf(
+      "if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview()",
+      projection,
+    );
+    expect(projection).toBeGreaterThan(0);
+    expect(persistence).toBeGreaterThan(projection);
+    expect(opening).toBeGreaterThan(persistence);
+    expect(source).toContain('@open-native-review="openTaskNativeReview"');
+    expect(taskPanel).not.toContain('AITaskDraftEditor');
+  });
+  it('guards Task conversation departure during owner/revision work and uses canonical dirty leave checks', () => {
+    expect(viewComposable).toContain(
+      'taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value',
+    );
+    expect(viewComposable).toContain('return canLeaveBusinessSurface(t)');
+    expect(viewComposable.match(/if \(!canLeaveTaskReview\(\)\) return/g)).toHaveLength(3);
+  });
+  it('routes all normal reviews to native owners without retired editor wiring', () => {
+    for (const symbol of [
+      'AIGoalDraftEditor',
+      'AITaskDraftEditor',
+      'showGoalDraftEditor',
+      'showTaskDraftEditor',
+      'toggleGoalDraftEditor',
+    ]) {
+      expect(source).not.toContain(symbol);
+      expect(viewComposable).not.toContain(symbol);
+      expect(actionBar).not.toContain(symbol);
+    }
+    expect(source).toContain('@open-native-review="openGoalNativeReview"');
+    expect(source).toContain('@open-native-review="openTaskNativeReview"');
+    expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
   });
 });

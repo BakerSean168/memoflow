@@ -17,14 +17,16 @@
     <form
       v-else
       ref="formRef"
+      :inert="props.readonly"
       class="task-plan-form flex min-h-0 flex-1 flex-col gap-6"
-      @submit.prevent
+      @submit.prevent="!props.readonly && emit('submit')"
     >
       <section
-        class="space-y-4 border-b border-border/70 pb-5"
+        class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
         data-testid="task-plan-identity-section"
       >
         <BasicInfoSection
+          :readonly="props.readonly"
           :model-value="taskPlanBeingEdited"
           @update:validation="updateBasicValidation"
           @update:model-value="handlePlanUpdate"
@@ -51,7 +53,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-schedule-popover"
             >
               <TimeConfigSection
@@ -79,7 +81,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-recurrence-popover"
             >
               <RecurrenceSection
@@ -103,7 +105,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-goal-popover"
             >
               <KeyResultLinksSection
@@ -136,7 +138,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-reminder-popover"
             >
               <ReminderSection
@@ -161,11 +163,7 @@
                 {{ importanceChipLabel }}
               </ProductPropertyChip>
             </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              class="w-60 rounded-xl border-border/80 p-1.5 shadow-xl"
-              data-testid="task-importance-popover"
-            >
+            <PopoverContent align="start" class="w-60 p-1.5" data-testid="task-importance-popover">
               <div class="px-2 py-1.5 text-xs text-muted-foreground">
                 {{ t('task.metadata.selectImportance') }}
               </div>
@@ -287,6 +285,12 @@ const emit = defineEmits<TaskPlanFormEmits>();
 const formRef = ref();
 type PropertyEditor = 'schedule' | 'recurrence' | 'goal' | 'reminder' | 'importance';
 const activeProperty = ref<PropertyEditor | null>(null);
+watch(
+  () => props.readonly,
+  (readonly) => {
+    if (readonly) activeProperty.value = null;
+  },
+);
 const labelCreateError = ref<string | null>(null);
 
 const {
@@ -381,6 +385,7 @@ function setPropertyOpen(property: PropertyEditor, open: boolean): void {
 }
 
 function handlePlanUpdate(updatedPlan: TaskPlanViewModel): void {
+  if (props.readonly) return;
   emit('update:modelValue', updatedPlan);
 }
 
@@ -402,6 +407,7 @@ function setImportance(value: ImportanceLevel): void {
 }
 
 function updateLabelIds(ids: string[]): void {
+  if (props.readonly) return;
   if (!taskPlanBeingEdited.value) return;
   const selected = new Set(ids);
   handlePlanUpdate({
@@ -412,6 +418,7 @@ function updateLabelIds(ids: string[]): void {
 }
 
 async function createAndSelectLabel(name: string): Promise<void> {
+  if (props.readonly) return;
   labelCreateError.value = null;
   try {
     const label = await createLabel(name);

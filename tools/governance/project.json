@@ -29,5 +29,36 @@
         "cwd": "tools/governance"
       }
     }
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals",
+      "!{projectRoot}/.tmp-*",
+      "!{projectRoot}/**/.tmp-*",
+      "!{projectRoot}/**/*.tmp",
+      "{workspaceRoot}/AGENT.md",
+      "{workspaceRoot}/docs/architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md",
+      "{workspaceRoot}/docs/architecture/adr/ADR-110-governance-permanent-executable-reference-module.md",
+      "{workspaceRoot}/apps/**/src/**/*",
+      "{workspaceRoot}/packages/**/src/**/*",
+      "{workspaceRoot}/packages/database/prisma/schema/**/*",
+      "{workspaceRoot}/apps/**/package.json",
+      "{workspaceRoot}/packages/**/package.json",
+      "{workspaceRoot}/docker/powersync/sync-config.yaml",
+      "{workspaceRoot}/.env",
+      "{workspaceRoot}/.env.example",
+      "{workspaceRoot}/.env.production",
+      "{workspaceRoot}/.env.staging",
+      "{workspaceRoot}/.env.test",
+      "{workspaceRoot}/Dockerfile.api",
+      "{workspaceRoot}/eslint.config.ts",
+      "{workspaceRoot}/vitest*.ts",
+      "{workspaceRoot}/tsconfig.workspace-*.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/graph.json",
+      "{workspaceRoot}/tools/nx-test-system/src/generators/sync-test-targets/generator.js",
+      "{workspaceRoot}/tools/test/test-target-governance.mjs"
+    ]
   }
 }

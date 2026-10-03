@@ -38,8 +38,6 @@ describe('moduleForPath (V2 §3 module matrix + settings scene D)', () => {
     expect(moduleForPath('/repository')).toBe('note');
     // retired /note/:id editor route no longer maps into the shell
     expect(moduleForPath('/note/n-1')).toBeNull();
-    expect(moduleForPath('/governance')).toBe('note');
-    expect(moduleForPath('/governance/r-1/history')).toBe('note');
     // Legacy Reminder routes are physically retired; notifications remain a shell module.
     expect(moduleForPath('/reminders')).toBeNull();
     expect(moduleForPath('/notifications')).toBe('notification');

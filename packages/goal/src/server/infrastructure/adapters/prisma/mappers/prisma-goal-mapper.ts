@@ -11,6 +11,7 @@ import type {
   GoalReview as PrismaGoalReview,
   KeyResultWeightSnapshot as PrismaKeyResultWeightSnapshot,
 } from '@memoflow/database';
+import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import type { KeyResultWeightSnapshotDTO } from '@memoflow/contracts/goal';
 import type { RawGoalData, RawKeyResultData, RawGoalReviewData } from './goal-state-mapper';
 
@@ -106,7 +107,7 @@ export class PrismaGoalMapper {
   static parseReviewSystemContext(
     raw: string,
   ): import('@memoflow/contracts/goal').GoalReviewSystemContext {
-    return JSON.parse(raw) as import('@memoflow/contracts/goal').GoalReviewSystemContext;
+    return GoalReviewSystemContextSchema.parse(JSON.parse(raw));
   }
 
   static mapGoalReview(row: PrismaGoalReview): RawGoalReviewData {

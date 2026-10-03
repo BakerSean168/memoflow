@@ -12,10 +12,7 @@ const MINUTE_MS = 60_000;
 
 export type PlannerMutationKind = 'move' | 'resize';
 
-export type PlannerMutationConflictReason =
-  | 'target-date-occupied'
-  | 'stale-version'
-  | 'generic';
+export type PlannerMutationConflictReason = 'target-date-occupied' | 'stale-version' | 'generic';
 
 export interface PlannerMutationRequest {
   readonly kind: PlannerMutationKind;
@@ -86,6 +83,11 @@ function conflictReason(
   result: Extract<Result<unknown>, { ok: false }>,
   code: string,
 ): PlannerMutationConflictReason {
+  const versions = result.error.context;
+  const hasVersionConflict =
+    typeof versions?.currentVersion === 'number' &&
+    typeof versions.expectedVersion === 'number' &&
+    versions.currentVersion !== versions.expectedVersion;
   const detailCodes = new Set((result.error.details ?? []).map((detail) => detail.code));
 
   if (detailCodes.has('TASK_OCCURRENCE_TARGET_DATE_CONFLICT')) {
@@ -93,6 +95,7 @@ function conflictReason(
   }
 
   if (
+    hasVersionConflict ||
     detailCodes.has('TASK_OCCURRENCE_VERSION_CONFLICT') ||
     code === 'VERSION_CONFLICT' ||
     code === 'OPTIMISTIC_CONCURRENCY'
@@ -259,7 +262,10 @@ export function createPlannerOwnerCommandRouter(
           }
           const requestBody =
             semantic === 'goal-start'
-              ? { start: { kind: 'day' as const, date: nextDay }, expectedVersion: projection.revision }
+              ? {
+                  start: { kind: 'day' as const, date: nextDay },
+                  expectedVersion: projection.revision,
+                }
               : {
                   target: { kind: 'day' as const, date: nextDay },
                   expectedVersion: projection.revision,

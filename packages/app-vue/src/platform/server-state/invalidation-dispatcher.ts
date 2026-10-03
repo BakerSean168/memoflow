@@ -19,7 +19,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
 import {
   goalHomeQueryKeys,
-  governanceQueryKeys,
   notificationQueryKeys,
   plannerOwnerQueryKeys,
   recentKnowledgeQueryKeys,
@@ -49,14 +48,7 @@ export type ServerStateInvalidation =
       entityId?: string;
       dedupeKey?: string;
     }
-  | {
-      target: 'governance';
-      identityScope: string;
-      source: 'mutation' | 'powersync' | 'reconnect';
-      projection?: 'all' | 'lists' | 'details' | 'revisions';
-      entityId?: string;
-      dedupeKey?: string;
-    };
+;
 
 /**
  * Dispatcher public interface: `invalidate` for intents, `clearIdentity` on identity change.
@@ -166,36 +158,9 @@ export function createServerStateInvalidationDispatcher(
     return keys;
   }
 
-  function governanceIntentKeys(
-    intent: Extract<ServerStateInvalidation, { target: 'governance' }>,
-  ): QueryKey[] {
-    const scope = intent.identityScope;
-    const projection = intent.projection ?? 'all';
-    const keys: QueryKey[] = [];
-    if (projection === 'revisions') {
-      keys.push(governanceQueryKeys.identity(scope).concat('revision') as QueryKey);
-    } else if (projection === 'lists') {
-      keys.push(governanceQueryKeys.lists(scope));
-    } else if (projection === 'details') {
-      keys.push(governanceQueryKeys.details(scope));
-    } else {
-      // 'all' — mutation semantics differ from table changes (see task-plan above).
-      keys.push(
-        governanceQueryKeys.lists(scope),
-        governanceQueryKeys.details(scope),
-        governanceQueryKeys.identity(scope).concat('revision') as QueryKey,
-      );
-    }
-    if (intent.entityId !== undefined) {
-      keys.push(governanceQueryKeys.detail(scope, intent.entityId));
-    }
-    return keys;
-  }
-
   function intentKeys(intent: ServerStateInvalidation): QueryKey[] {
     if (intent.target === 'notification') return notificationIntentKeys(intent);
-    if (intent.target === 'task-plan') return taskPlanIntentKeys(intent);
-    return governanceIntentKeys(intent);
+    return taskPlanIntentKeys(intent);
   }
 
   async function flush(): Promise<void> {
@@ -259,7 +224,6 @@ export function createServerStateInvalidationDispatcher(
         goalHomeQueryKeys.identity,
         recentKnowledgeQueryKeys.identity,
         routineUpcomingQueryKeys.identity,
-        governanceQueryKeys.identity,
       ]) {
         queryClient.removeQueries({ queryKey: key(identityScope) });
       }

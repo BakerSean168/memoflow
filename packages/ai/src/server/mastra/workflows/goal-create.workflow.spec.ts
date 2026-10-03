@@ -1,3 +1,4 @@
+import { goalWorkflowEntityId } from './deterministic-entity-id';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -106,6 +107,7 @@ function mastraRequestContext(requestId: string): RequestContext {
 
 function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
+    readGoal: vi.fn(async () => error('NOT_FOUND', 'Goal not created')),
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),
@@ -158,6 +160,52 @@ function stepSuspendPayload(result: unknown): unknown {
 }
 
 describe('ADR-052 goal.create durable Workflow', () => {
+  it('publishes fresh deterministic owner hints on natural-language revise and regenerate', async () => {
+    const planner: GoalPlannerPort = {
+      plan: vi.fn(async () => ({
+        status: 'draft_ready',
+        reason: '',
+        candidateDraft: draftContent,
+      })),
+    };
+    const { buildWorkflow } = await harness(planner);
+    const runId = 'workflow-revise-native';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    await run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('start'),
+    });
+    for (const [command, revision] of [
+      [{ type: 'revise_natural_language', instruction: 'Keep the native review' }, 2],
+      [{ type: 'regenerate' }, 3],
+    ] as const) {
+      const result = await run.resume({
+        step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+        resumeData: command,
+        requestContext: mastraRequestContext(`revise-${revision}`),
+      });
+      expect(stepSuspendPayload(result)).toMatchObject({
+        revision,
+        ownerCreate: {
+          goalId: goalWorkflowEntityId({
+            workflowRunId: runId,
+            revision,
+            kind: 'goal',
+            draftRef: 'goal',
+          }),
+          keyResultIds: {
+            'kr:mock-exams': goalWorkflowEntityId({
+              workflowRunId: runId,
+              revision,
+              kind: 'key_result',
+              draftRef: 'kr:mock-exams',
+            }),
+          },
+        },
+      });
+    }
+  });
   it('survives restart across clarification, draft review, structured edit and approve', async () => {
     const decisions: GoalPlanningDecision[] = [
       {
@@ -232,6 +280,29 @@ describe('ADR-052 goal.create durable Workflow', () => {
       revision: 2,
       draft: { revision: 2, goal: { name: 'Pass JLPT N1 with a strong score' } },
     });
+    for (const [result, revision] of [
+      [second, 1],
+      [edited, 2],
+    ] as const) {
+      expect(stepSuspendPayload(result)).toMatchObject({
+        ownerCreate: {
+          goalId: goalWorkflowEntityId({
+            workflowRunId: runId,
+            revision,
+            kind: 'goal',
+            draftRef: 'goal',
+          }),
+          keyResultIds: {
+            'kr:mock-exams': goalWorkflowEntityId({
+              workflowRunId: runId,
+              revision,
+              kind: 'key_result',
+              draftRef: 'kr:mock-exams',
+            }),
+          },
+        },
+      });
+    }
     // Structured editing is deterministic and must not call the LLM.
     expect(plan).toHaveBeenCalledTimes(2);
 

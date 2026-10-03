@@ -1,9 +1,23 @@
+import { createHash } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
+import {
+  AIWorkflowRunViewSchema,
+  KnowledgeDraftSchema,
+  TaskPlanDraftContentSchema,
+} from '@memoflow/contracts/ai';
 import type {
   AIWorkflowRunView,
   GoalPlanDraft,
   GoalPlanExecutionFailure,
 } from '@memoflow/contracts/ai';
+import {
+  KnowledgeNoteProjectionClientSchema,
+  KnowledgeNoteProjectionListResponseSchema,
+  KnowledgeNoteTreeResponseSchema,
+  ListKnowledgeRepositoryConnectionsResSchema,
+} from '@memoflow/contracts/repository';
+import { CreateTaskPlanSchema, type CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
@@ -257,30 +271,33 @@ test.describe('AI Goal Workflow', () => {
       seedConversation: true,
     });
 
-    // ADR-052: the durable Mastra Workflow panel (AIWorkflowRunView) owns this
-    // surface — not a legacy goal-agent-panel AgentRun / Host Proposal.
+    // Native GoalDialog owns visible review; the durable Workflow projection may be hidden.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
-    await expect(workflowPanel).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
-    await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText('Complete the restored workflow approval');
+    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     // Full main-app remount after reload needs NAVIGATION budget (same as bootstrap).
-    await expect(page.getByTestId('ai-chat-view')).toBeVisible({
+    await expect(page.getByTestId('goal-dialog')).toBeVisible({
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
 
-    await expect(workflowPanel).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText('Complete the restored workflow approval');
+    await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
   });
 
@@ -288,6 +305,7 @@ test.describe('AI Goal Workflow', () => {
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
+    const draft = createGoalAgentWorkflowDraft();
 
     await sendComposerMessage(
       page,
@@ -302,16 +320,32 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(workflowPanel).toContainText(/suspended/i);
+    const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
+    expect(ownerGoalId).toBeTruthy();
+    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
+    await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
+    await expect(
+      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+    ).toContainText(draft.keyResults[0].title);
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
-    // Task and Knowledge details render inside the optional draft editor; the review card
-    // stays a compact projection of Goal/KR/rationale.
+    // Goal/KR editing stays native; supporting Task/Knowledge overlays remain in the workflow.
     await expect(workflowPanel).toContainText(
       /Create the approved goal draft with a measurable key result/i,
     );
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
-    await page.getByTestId('goal-agent-confirm-run').click();
+    // Owner-native controlled confirmation: native Save delegates through the workflow
+    // coordinator; it is not an independent direct create.
+    await page.getByTestId('goal-dialog').getByTestId('save-goal-button').click();
+    await expect(page.getByTestId('goal-dialog')).toBeHidden({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+
+    // Native Goal creation returns to Goals; select Workflow to inspect recovery.
+    await page.getByTestId('business-panel-workflow').click();
 
     // Controlled executor: the first approved execution is partial, so the
     // durable runtime suspends with a recovery_required suspension.
@@ -326,6 +360,8 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
     expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
+    expect(telemetry.ownerGoalCreateCount).toBe(1);
+    expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
     expect(telemetry.goalAgentApprovalResumeCount).toBe(1);
     expect(telemetry.goalAgentExecuteRequestCount).toBe(1);
 
@@ -342,12 +378,7 @@ test.describe('AI Goal Workflow', () => {
     await expect(retryButton).toHaveCount(0, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByTestId('goal-workflow-result'))
-      .toContainText(/goal-e2e-1/i, {
-        timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-      })
-      .catch(() => undefined);
-    await expect(page).toHaveURL(/\/goals\/goal-e2e-1/, {
+    await expect(page).toHaveURL(new RegExp(`/goals/${ownerGoalId}$`), {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     expect(telemetry.goalAgentRetryResumeCount).toBe(1);
@@ -362,58 +393,65 @@ test.describe('AI Goal Workflow', () => {
       workflowEntry: createPendingTaskApprovalWorkflowEntry(),
       seedConversation: true,
     });
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Restored Mastra task workflow/i);
-    await expect(page.getByTestId('task-agent-confirm-run')).toBeVisible();
-
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Restored Mastra task workflow',
+    );
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.locator('#quick-task-form')).toHaveCount(0);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(page.getByTestId('ai-chat-view')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
-    await expect(workflowPanel).toContainText(/Restored Mastra task workflow/i);
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Restored Mastra task workflow',
+    );
+    expect(telemetry.ownerTaskCreateCount).toBe(0);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
-  test('[P0] completes task.create through the canonical Mastra Workflow panel', async ({
+  test('[P0] completes task.create through native full TaskPlanDialog before Mastra approve', async ({
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
-
     await sendComposerMessage(page, 'Create a weekly task to review the Mastra-only AI migration.');
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Review the Mastra migration/i);
-    await expect(page.getByTestId('task-agent-confirm-run')).toBeVisible();
-    await page.getByTestId('task-agent-confirm-run').click();
-
-    const result = page.getByTestId('task-workflow-result');
-    await expect(result).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(result).toContainText(/task-plan-e2e-mastra-1/i);
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
+      'Review the Mastra migration',
+    );
+    await page.getByTestId('task-recurrence-chip').click();
+    await expect(page.getByTestId('task-recurrence-popover')).toBeVisible();
+    await expect(page.locator('#task-recurrence-frequency')).toContainText(/week/i);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
+    await expect(page.locator('#quick-task-form')).toHaveCount(0);
+    // A manual native edit must be saved to Mastra before its fresh identity is submitted.
+    await page.getByTestId('task-plan-title-input').fill('Review the Mastra migration today');
+    await page.getByTestId('task-dialog-save-button').click();
+    await expect(dialog).not.toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect.poll(() => telemetry.taskWorkflowApproveCount).toBe(1);
+    expect(telemetry.ownerTaskCreateCount).toBe(1);
+    expect(telemetry.lastOwnerTaskCreateBody?.name).toBe('Review the Mastra migration today');
+    expect(telemetry.taskConfirmationEvents).toEqual(['owner_create', 'approve']);
+    const canonicalId = telemetry.lastOwnerTaskCreateBody?.id;
+    expect(canonicalId).toBeTruthy();
+    await expect(page).toHaveURL(new RegExp(`/tasks/${canonicalId}$`));
+    await expect(page.getByTestId('task-workflow-draft-editor')).toHaveCount(0);
     expect(telemetry.taskWorkflowStartCount).toBe(1);
-    expect(telemetry.taskWorkflowApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
-  test('[P0] cancels task.create at approval without invoking a legacy runtime', async ({
+  test('[P0] cancels task.create at approval and closes native review without creating Task', async ({
     page,
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
-
     await sendComposerMessage(page, 'Draft a task but do not create it until I approve.');
-
-    const workflowPanel = page.getByTestId('task-workflow-panel');
-    await expect(page.getByTestId('task-agent-cancel-run')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await page.getByTestId('task-agent-cancel-run').click();
-    await expect(workflowPanel).toContainText(/cancelled/i, {
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    expect(telemetry.taskWorkflowCancelCount).toBe(1);
+    const dialog = page.getByTestId('task-plan-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect.poll(() => telemetry.taskWorkflowCancelCount).toBe(1);
+    expect(telemetry.ownerTaskCreateCount).toBe(0);
     expect(telemetry.taskWorkflowApproveCount).toBe(0);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
@@ -436,9 +474,7 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('knowledge-citation-open')).toBeVisible();
 
     await page.getByTestId('knowledge-citation-open').click();
-    await expect(page).toHaveURL(
-      /\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/,
-    );
+    await expect(page).toHaveURL(/\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
@@ -452,18 +488,68 @@ test.describe('AI Goal Workflow', () => {
       'Capture this conversation as a reusable note about durable Mastra workflow recovery.',
     );
 
-    const workflowPanel = page.getByTestId('knowledge-capture-workflow-panel');
-    await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(workflowPanel).toContainText(/Conversation Agent Checkpoints/i);
-    await expect(page.getByTestId('knowledge-capture-agent-confirm-run')).toBeVisible();
-    await page.getByTestId('knowledge-capture-agent-confirm-run').click();
-
-    await expect(page).toHaveURL(/\/repository\?note=resource-note-e2e-mastra-1/i, {
+    const native = page.getByTestId('knowledge-capture-native-dialog');
+    await expect(native).toBeVisible();
+    await expect(page.getByTestId('knowledge-capture-draft-editor')).toHaveCount(0);
+    await expect(page.getByTestId('knowledge-capture-agent-confirm-run')).toHaveCount(0);
+    await expect(page.getByTestId('knowledge-capture-native-source')).toContainText(
+      'owner/knowledge',
+    );
+    await page.getByTestId('knowledge-capture-native-title').fill('Owner-reviewed durable note');
+    await page.getByTestId('knowledge-capture-native-confirm').click();
+    await expect(page).toHaveURL(/\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440701/i, {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(page.getByTestId('knowledge-projection-preview')).toBeVisible();
+    expect(telemetry.knowledgeCaptureEvents).toEqual([
+      'edit_structured',
+      'approve',
+      'host_persist',
+    ]);
+    expect(telemetry.knowledgeCapturePersistedDraft).toMatchObject({
+      title: 'Owner-reviewed durable note',
+      revision: 2,
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
+      source: {
+        kind: 'repository',
+        connectionId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+      },
     });
     expect(telemetry.knowledgeCaptureStartCount).toBe(1);
     expect(telemetry.knowledgeCaptureApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
+  });
+
+  test('[P0] cancels native Knowledge review without a note', async ({ page }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page);
+    await sendComposerMessage(page, 'Capture this conversation as a reusable note.');
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible();
+    await page.getByTestId('knowledge-capture-native-cancel').click();
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toHaveCount(0);
+    await expect.poll(() => telemetry.knowledgeCaptureCancelCount).toBe(1);
+    expect(telemetry.knowledgeCaptureEvents).toEqual([]);
+    expect(telemetry.knowledgeCapturePersistedDraft).toBeNull();
+    expect(telemetry.knowledgeCaptureApproveCount).toBe(0);
+  });
+
+  test('[P0] restores native Knowledge review after refresh', async ({ page }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page);
+    await sendComposerMessage(page, 'Capture this conversation as a reusable note.');
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible();
+    const activeRunId = telemetry.knowledgeCaptureRunId;
+    expect(activeRunId).toBeTruthy();
+    await page.reload();
+    await expect(page.getByTestId('knowledge-capture-native-dialog')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('knowledge-capture-native-title')).toHaveValue(
+      'Conversation Agent Checkpoints',
+    );
+    expect(telemetry.knowledgeCaptureRestoredRunIds).toContain(activeRunId);
+    expect(telemetry.knowledgeCaptureRunId).toBe(activeRunId);
+    expect(telemetry.knowledgeCaptureStartCount).toBe(1);
+    expect(telemetry.knowledgeCapturePersistedDraft).toBeNull();
+    await page.getByTestId('knowledge-capture-native-cancel').click();
   });
 
   test('[P0] shows insufficient evidence when knowledge citations are missing', async ({
@@ -511,10 +597,16 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(workflowPanel).toContainText(/suspended/i);
-    await expect(page.getByTestId('goal-agent-confirm-run')).toBeVisible();
+    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
+    await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
+    // Native Goal review is modal owner UI; close it before acting on workflow context controls.
+    const nativeReview = page.getByTestId('goal-dialog');
+    await expect(nativeReview).toBeVisible();
+    await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
+    await expect(nativeReview).toBeHidden();
     await page.getByTestId('goal-agent-cancel-run').click();
 
     await expect(workflowPanel).toContainText(/cancelled/i, {
@@ -536,7 +628,14 @@ type GoalWorkflowMockOptions = {
 };
 
 type GoalWorkflowMockTelemetry = {
+  ownerTaskCreateCount: number;
+  lastOwnerTaskCreateBody: CreateTaskPlanReq | null;
+  taskConfirmationEvents: ('owner_create' | 'approve')[];
+  ownerGoalCreateCount: number;
+  lastOwnerGoalCreateBody: CreateGoalReq | null;
+  goalConfirmationEvents: ('owner_create' | 'approve')[];
   goalAgentStartCount: number;
+  lastGoalWorkflowOwnerCreate: GoalReviewSuspension['ownerCreate'] | null;
   lastGoalAgentStart?: {
     idea?: string;
     providerId?: string;
@@ -553,14 +652,24 @@ type GoalWorkflowMockTelemetry = {
   knowledgeCaptureStartCount: number;
   knowledgeCaptureApproveCount: number;
   knowledgeCaptureCancelCount: number;
+  knowledgeCaptureRunId: string | null;
+  knowledgeCaptureRestoredRunIds: string[];
+  knowledgeCaptureEvents: string[];
+  knowledgeCapturePersistedDraft: KnowledgeCaptureMockRun['draft'] | null;
   legacyEndpointCallCount: number;
 };
+
+type GoalReviewSuspension = Extract<
+  NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']>,
+  { type: 'goal_draft_review' }
+>;
 
 type GoalWorkflowMockRun = {
   runId: string;
   conversationId: string;
   createdAt: number;
   draft: GoalPlanDraft;
+  ownerCreate: GoalReviewSuspension['ownerCreate'];
   /** Durable V2 apply receipt state after approved child mutations. */
   referenceMap: Record<string, string>;
   relationIds: Record<string, string>;
@@ -584,6 +693,7 @@ type KnowledgeCaptureMockRun = {
   runId: string;
   conversationId: string;
   createdAt: number;
+  status: 'suspended' | 'completed' | 'cancelled';
   draft: Extract<
     NonNullable<Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>['suspension']>,
     { type: 'knowledge_draft_review' }
@@ -639,6 +749,20 @@ function createKnowledgeCaptureDraft(
   };
 }
 
+function taskOwnerIdentity(run: TaskWorkflowMockRun): string {
+  const bytes = createHash('sha256')
+    .update(
+      `memoflow:task.create:v2:${run.runId}:${run.draft.revision}:${run.draft.task.draftRef}:task_plan_create`,
+      'utf8',
+    )
+    .digest()
+    .subarray(0, 16);
+  bytes[6] = (bytes[6]! & 0x0f) | 0x80;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const hex = bytes.toString('hex');
+  return `ITaskPlanId_${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
 function createTaskReviewRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView {
   return {
     runId: mockRun.runId,
@@ -647,6 +771,10 @@ function createTaskReviewRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView {
     status: 'suspended',
     suspension: {
       type: 'task_draft_review',
+      ownerCreate: {
+        taskId: CreateTaskPlanSchema.shape.id.unwrap().parse(taskOwnerIdentity(mockRun)),
+        draftRef: mockRun.draft.task.draftRef,
+      },
       draft: mockRun.draft,
       warnings: mockRun.draft.warnings,
       revision: mockRun.draft.revision,
@@ -666,7 +794,7 @@ function createTaskCompletedRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      referenceMap: { [mockRun.draft.task.draftRef]: 'task-plan-e2e-mastra-1' },
+      referenceMap: { [mockRun.draft.task.draftRef]: taskOwnerIdentity(mockRun) },
       failures: [],
       retryable: false,
     },
@@ -713,7 +841,7 @@ function createKnowledgeCaptureCompletedRun(mockRun: KnowledgeCaptureMockRun): A
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      noteId: 'resource-note-e2e-mastra-1',
+      noteId: mockRun.draft.knowledgeDocumentId,
       noteName: `${mockRun.draft.title}.md`,
       notePath: `notes/ai/${mockRun.draft.title}.md`,
       failures: [],
@@ -842,16 +970,41 @@ function createGoalAgentWorkflowDraft(): GoalPlanDraft {
   };
 }
 
+function createOwnerIdentities(
+  runId: string,
+  draft: GoalPlanDraft,
+): GoalReviewSuspension['ownerCreate'] {
+  const entityId = (prefix: 'IGoalId' | 'IKeyResultId', draftRef: string) => {
+    const hash = createHash('sha256')
+      .update(`${runId}:${draft.revision}:${prefix}:${draftRef}`)
+      .digest('hex');
+    const uuid = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    return `${prefix}_${uuid}`;
+  };
+  return {
+    goalId: entityId('IGoalId', draft.goal.draftRef),
+    keyResultIds: Object.fromEntries(
+      draft.keyResults.map((keyResult) => [
+        keyResult.draftRef,
+        entityId('IKeyResultId', keyResult.draftRef),
+      ]),
+    ),
+  };
+}
+
 function createGoalWorkflowMockRun(request: {
   runId?: string;
   conversationId?: string | null;
+  draft?: GoalPlanDraft;
 }): GoalWorkflowMockRun {
-  const draft = createGoalAgentWorkflowDraft();
+  const runId = request.runId ?? 'workflow-e2e-goal-1';
+  const draft = request.draft ?? createGoalAgentWorkflowDraft();
   return {
-    runId: request.runId ?? 'workflow-e2e-goal-1',
+    runId,
     conversationId: request.conversationId ?? e2eConversationId,
     createdAt: Date.now(),
     draft,
+    ownerCreate: createOwnerIdentities(runId, draft),
     referenceMap: {},
     relationIds: {},
     failures: [],
@@ -859,36 +1012,27 @@ function createGoalWorkflowMockRun(request: {
   };
 }
 
-function goalReviewSuspension(
-  draft: GoalPlanDraft,
-): NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']> {
-  // E2E mock: draft fields carry the canonical GoalPlanDraft contract shape at
-  // runtime; the loose local type is only for authoring ergonomics. The client
-  // re-validates with AIWorkflowRunViewSchema before projection, so malformed
-  // fixtures fail loudly rather than silently.
+function goalReviewSuspension(mockRun: GoalWorkflowMockRun): GoalReviewSuspension {
   return {
     type: 'goal_draft_review',
-    draft: draft as unknown as NonNullable<
-      Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']
-    > extends { type: 'goal_draft_review' }
-      ? Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']
-      : never,
-    warnings: draft.warnings,
-    revision: draft.revision,
-  } as NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['suspension']>;
+    draft: mockRun.draft,
+    ownerCreate: mockRun.ownerCreate,
+    warnings: mockRun.draft.warnings,
+    revision: mockRun.draft.revision,
+  };
 }
 
 function createGoalReviewRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView {
   const now = Date.now();
-  return {
+  return AIWorkflowRunViewSchema.parse({
     runId: mockRun.runId,
     kind: 'goal.create',
     conversationId: mockRun.conversationId,
     status: 'suspended',
-    suspension: goalReviewSuspension(mockRun.draft),
+    suspension: goalReviewSuspension(mockRun),
     createdAt: mockRun.createdAt,
     updatedAt: now,
-  };
+  });
 }
 
 function createGoalRecoveryRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView {
@@ -963,8 +1107,8 @@ function executeGoalWorkflowMockRun(
   const retrySucceeded = telemetry.goalAgentExecuteRequestCount > 1;
 
   mockRun.referenceMap = {
-    goal: 'goal-e2e-1',
-    'kr:end-to-end': 'kr-e2e-1',
+    [mockRun.draft.goal.draftRef]: mockRun.ownerCreate.goalId,
+    ...mockRun.ownerCreate.keyResultIds,
     'note:goal-brief': 'kdoc_e2e_goal_brief',
     ...(retrySucceeded ? { 'task:review-execution': 'task-plan-e2e-1' } : {}),
   };
@@ -996,7 +1140,14 @@ async function installGoalWorkflowMocks(
   let conversationName = 'Goal Workflow Session';
   let generateGoalStep = options.seedConversation ? 1 : 0;
   const telemetry: GoalWorkflowMockTelemetry = {
+    ownerTaskCreateCount: 0,
+    lastOwnerTaskCreateBody: null,
+    taskConfirmationEvents: [],
+    ownerGoalCreateCount: 0,
+    lastOwnerGoalCreateBody: null,
+    goalConfirmationEvents: [],
     goalAgentStartCount: 0,
+    lastGoalWorkflowOwnerCreate: null,
     goalAgentApprovalResumeCount: 0,
     goalAgentRetryResumeCount: 0,
     goalAgentCancelCount: 0,
@@ -1008,8 +1159,135 @@ async function installGoalWorkflowMocks(
     knowledgeCaptureStartCount: 0,
     knowledgeCaptureApproveCount: 0,
     knowledgeCaptureCancelCount: 0,
+    knowledgeCaptureRunId: null,
+    knowledgeCaptureRestoredRunIds: [],
+    knowledgeCaptureEvents: [],
+    knowledgeCapturePersistedDraft: null,
     legacyEndpointCallCount: 0,
   };
+  await page.route('**/api/v1/repositories/**', async (route) => {
+    if (telemetry.knowledgeCaptureStartCount === 0) {
+      await route.fallback();
+      return;
+    }
+    expect(route.request().method()).toBe('GET');
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname.endsWith('/knowledge-connections')) {
+      await fulfillJson(
+        route,
+        ListKnowledgeRepositoryConnectionsResSchema.parse({
+          connections: [
+            {
+              id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+              knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440703',
+              identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440704',
+              provider: 'GitHub',
+              installationId: 'installation-e2e',
+              repositoryId: 'repository-e2e',
+              repositoryFullNameSnapshot: 'owner/knowledge',
+              connectedAt: 1,
+              disconnectedAt: null,
+              observation: {
+                bindingId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+                observedAt: 1,
+                accountId: '42',
+                repositoryFullName: 'owner/knowledge',
+                defaultBranch: 'main',
+                private: true,
+                archived: false,
+                disabled: false,
+                contentsPermission: 'write',
+                installationSuspended: false,
+                eligibility: { state: 'Ready' },
+              },
+              historyFence: null,
+              projectionCheckpoint: null,
+            },
+          ],
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes/resolve') && telemetry.knowledgeCapturePersistedDraft) {
+      const draft = telemetry.knowledgeCapturePersistedDraft;
+      expect(new URL(route.request().url()).searchParams.get('reference')).toBe(
+        draft.knowledgeDocumentId,
+      );
+      await fulfillJson(
+        route,
+        KnowledgeNoteProjectionClientSchema.parse({
+          id: 'projection-created-note',
+          connectionId: draft.source!.kind === 'repository' ? draft.source!.connectionId : '',
+          knowledgeDocumentId: draft.knowledgeDocumentId,
+          relativePath: `notes/ai/${draft.title}.md`,
+          title: draft.title,
+          commitSha: 'b'.repeat(40),
+          blobSha: 'c'.repeat(40),
+          contentHash: 'd'.repeat(64),
+          markdownContent: draft.markdown,
+          frontmatter: {},
+          createdAt: 1,
+          updatedAt: 2,
+          deletedAt: null,
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes/tree')) {
+      await fulfillJson(
+        route,
+        KnowledgeNoteTreeResponseSchema.parse({
+          parent: new URL(route.request().url()).searchParams.get('parent') ?? '',
+          metadata: null,
+          nodes: [],
+        }),
+      );
+      return;
+    }
+    if (pathname.endsWith('/knowledge-notes')) {
+      await fulfillJson(
+        route,
+        KnowledgeNoteProjectionListResponseSchema.parse({
+          notes: [],
+          total: 0,
+          nextCursor: null,
+        }),
+      );
+      return;
+    }
+    await route.fallback();
+  });
+  // Pass-through Task telemetry exercises the real owner API and test database.
+  await page.route(
+    (url) => url.pathname === '/api/v1/task-plans',
+    async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.fallback();
+        return;
+      }
+      telemetry.ownerTaskCreateCount += 1;
+      telemetry.lastOwnerTaskCreateBody = CreateTaskPlanSchema.parse(
+        route.request().postDataJSON(),
+      );
+      telemetry.taskConfirmationEvents.push('owner_create');
+      await route.continue();
+    },
+  );
+  // Observe only native owner create; Goal reads/status/updates remain real API calls.
+  await page.route(
+    (url) => url.pathname === '/api/v1/goals',
+    async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.fallback();
+        return;
+      }
+      telemetry.ownerGoalCreateCount += 1;
+      telemetry.lastOwnerGoalCreateBody = route.request().postDataJSON() as CreateGoalReq;
+      telemetry.goalConfirmationEvents.push('owner_create');
+      await route.continue();
+    },
+  );
+
   await page.route('**/api/v1/settings/preferences', async (route) => {
     if (route.request().method() !== 'GET') {
       await route.continue();
@@ -1317,8 +1595,8 @@ async function installGoalWorkflowMocks(
   const restoredApprovalRun = createGoalWorkflowMockRun({
     runId: 'workflow-e2e-restored-approval',
     conversationId,
+    draft: createRestoredGoalWorkflowDraft(),
   });
-  restoredApprovalRun.draft = createRestoredGoalWorkflowDraft();
   const restoredTaskApprovalRun: TaskWorkflowMockRun = {
     runId: 'workflow-e2e-restored-task-approval',
     conversationId,
@@ -1352,7 +1630,11 @@ async function installGoalWorkflowMocks(
         providerId: request.providerId,
         model: request.modelId,
       };
-      const mockRun = createGoalWorkflowMockRun({ conversationId: request.conversationId });
+      const mockRun = createGoalWorkflowMockRun({
+        runId: `workflow-e2e-goal-${telemetry.goalAgentStartCount}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        conversationId: request.conversationId,
+      });
+      telemetry.lastGoalWorkflowOwnerCreate = mockRun.ownerCreate;
       workflowRunsByRunId.set(mockRun.runId, mockRun);
       await fulfillJson(route, createGoalReviewRun(mockRun));
       return;
@@ -1362,7 +1644,7 @@ async function installGoalWorkflowMocks(
       expect(request.input?.idea?.trim().length).toBeGreaterThan(0);
       telemetry.taskWorkflowStartCount += 1;
       const mockRun: TaskWorkflowMockRun = {
-        runId: `workflow-e2e-task-${telemetry.taskWorkflowStartCount}`,
+        runId: `workflow-e2e-task-${telemetry.taskWorkflowStartCount}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         conversationId: request.conversationId ?? conversationId,
         createdAt: Date.now(),
         draft: createTaskWorkflowDraft(),
@@ -1380,7 +1662,9 @@ async function installGoalWorkflowMocks(
         conversationId: request.conversationId ?? conversationId,
         createdAt: Date.now(),
         draft: createKnowledgeCaptureDraft(),
+        status: 'suspended',
       };
+      telemetry.knowledgeCaptureRunId = mockRun.runId;
       knowledgeCaptureRunsByRunId.set(mockRun.runId, mockRun);
       await fulfillJson(route, createKnowledgeCaptureReviewRun(mockRun));
       return;
@@ -1416,7 +1700,17 @@ async function installGoalWorkflowMocks(
       return;
     }
     const captureRun = knowledgeCaptureRunsByRunId.get(request.runId ?? '');
-    await fulfillJson(route, captureRun ? createKnowledgeCaptureReviewRun(captureRun) : null);
+    if (captureRun) telemetry.knowledgeCaptureRestoredRunIds.push(captureRun.runId);
+    await fulfillJson(
+      route,
+      captureRun
+        ? captureRun.status === 'completed'
+          ? createKnowledgeCaptureCompletedRun(captureRun)
+          : captureRun.status === 'cancelled'
+            ? createKnowledgeCaptureCancelledRun(captureRun)
+            : createKnowledgeCaptureReviewRun(captureRun)
+        : null,
+    );
   });
 
   await page.route('**/api/v1/ai/runtime/workflow/list', async (route) => {
@@ -1436,7 +1730,7 @@ async function installGoalWorkflowMocks(
     }
     const request = route.request().postDataJSON() as {
       runId?: string;
-      command?: { type?: string };
+      command?: { type?: string; patch?: Record<string, unknown> };
     };
     expect(request).not.toHaveProperty('identityId');
     const commandType = request.command?.type;
@@ -1452,11 +1746,18 @@ async function installGoalWorkflowMocks(
         return;
       }
       if (commandType === 'approve') {
+        expect(telemetry.ownerTaskCreateCount).toBe(1);
+        expect(telemetry.lastOwnerTaskCreateBody?.id).toBe(taskOwnerIdentity(taskRun));
+        telemetry.taskConfirmationEvents.push('approve');
         telemetry.taskWorkflowApproveCount += 1;
         await fulfillJson(route, createTaskCompletedRun(taskRun));
         return;
       }
       if (commandType === 'edit_structured') {
+        const edited = TaskPlanDraftContentSchema.parse(
+          (route.request().postDataJSON() as { command: { patch: unknown } }).command.patch,
+        );
+        taskRun.draft = { ...edited, revision: taskRun.draft.revision + 1 };
         await fulfillJson(route, createTaskReviewRun(taskRun));
         return;
       }
@@ -1466,16 +1767,30 @@ async function installGoalWorkflowMocks(
     const captureRun = knowledgeCaptureRunsByRunId.get(runId);
     if (captureRun) {
       if (commandType === 'cancel') {
+        captureRun.status = 'cancelled';
         telemetry.knowledgeCaptureCancelCount += 1;
         await fulfillJson(route, createKnowledgeCaptureCancelledRun(captureRun));
         return;
       }
       if (commandType === 'approve') {
+        expect(captureRun.draft.source).toEqual({
+          kind: 'repository',
+          connectionId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440702',
+        });
+        captureRun.status = 'completed';
+        telemetry.knowledgeCaptureEvents.push('approve', 'host_persist');
+        telemetry.knowledgeCapturePersistedDraft = captureRun.draft;
         telemetry.knowledgeCaptureApproveCount += 1;
         await fulfillJson(route, createKnowledgeCaptureCompletedRun(captureRun));
         return;
       }
       if (commandType === 'edit_structured') {
+        telemetry.knowledgeCaptureEvents.push('edit_structured');
+        captureRun.draft = KnowledgeDraftSchema.parse({
+          ...captureRun.draft,
+          ...(request.command?.patch as Record<string, unknown>),
+          revision: captureRun.draft.revision + 1,
+        });
         await fulfillJson(route, createKnowledgeCaptureReviewRun(captureRun));
         return;
       }
@@ -1498,6 +1813,16 @@ async function installGoalWorkflowMocks(
       return;
     }
     if (commandType === 'approve') {
+      const ownerCreateRun = mockRun ?? restoredApprovalRun;
+      telemetry.goalConfirmationEvents.push('approve');
+      expect(telemetry.ownerGoalCreateCount).toBe(1);
+      expect(telemetry.lastOwnerGoalCreateBody?.id).toBe(ownerCreateRun.ownerCreate.goalId);
+      expect(telemetry.lastOwnerGoalCreateBody?.initialKeyResults?.map((kr) => kr.id)).toEqual(
+        ownerCreateRun.draft.keyResults.map(
+          (kr) => ownerCreateRun.ownerCreate.keyResultIds[kr.draftRef],
+        ),
+      );
+      expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
       telemetry.goalAgentApprovalResumeCount += 1;
       if (mockRun) executeGoalWorkflowMockRun(mockRun, telemetry);
       const completed = mockRun && mockRun.executionStatus === 'success';

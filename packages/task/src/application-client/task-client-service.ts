@@ -1,3 +1,4 @@
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
 /**
  * Task Client Service
  *
@@ -8,7 +9,7 @@
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import { map as mapResult } from '@memoflow/contracts/result';
+import { error, ok, map as mapResult } from '@memoflow/contracts/result';
 import type {
   CreateTaskPlanReq,
   UpdateTaskPlanReq,
@@ -79,7 +80,7 @@ function parseGoalBinding(dto: TaskGoalBindingDTO): TaskGoalBinding {
   return {
     goalId: dto.goalId,
     keyResultId: dto.keyResultId,
-    contribution: dto.contribution ? { ...dto.contribution } : null,
+    ...TaskGoalProgressConfigurationSchema.parse(dto),
   };
 }
 
@@ -115,7 +116,10 @@ export class TaskClientService implements TaskClientPort {
     this.setOccurrenceChecklistItem = this.setOccurrenceChecklistItem.bind(this);
   }
 
-  async getWorkspace(id: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+  async getWorkspace(
+    id: string,
+    request?: GetTaskWorkspaceReq,
+  ): Promise<Result<TaskPlanWorkspace>> {
     return this.templateApi.getWorkspace(id, request);
   }
 
@@ -148,7 +152,9 @@ export class TaskClientService implements TaskClientPort {
 
   async getPlan(id: string): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.getTaskPlanById(id);
-    return mapResult(result, (dto) => taskPlanFromDTO(dto));
+    if (!result.ok) return result;
+    if (!result.data) return error('NOT_FOUND', 'Task plan not found');
+    return ok(taskPlanFromDTO(result.data));
   }
 
   async updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>> {
@@ -221,10 +227,15 @@ export class TaskClientService implements TaskClientPort {
     );
   }
 
-  async listOccurrencesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>> {
+  async listOccurrencesByDateRange(
+    from: number,
+    to: number,
+    options: { includeOverdueOpen?: boolean } = {},
+  ): Promise<Result<TaskOccurrence[]>> {
     const request: GetTaskOccurrencesByRangeReq = {
       startDate: from,
       endDate: to,
+      includeOverdueOpen: options.includeOverdueOpen ?? false,
     };
     const result = await this.instanceApi.getTaskOccurrencesByDateRange(request);
     return mapResult(result, (dtos) =>
@@ -259,7 +270,10 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async skipOccurrence(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrence>> {
+  async skipOccurrence(
+    id: string,
+    request?: SkipTaskOccurrenceReq,
+  ): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.skipTaskOccurrence(id, request);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }

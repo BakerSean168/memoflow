@@ -2,7 +2,7 @@
  * Create Goal Use Case
  *
  * 创建新目标的应用服务
- * 遵循 governance 模块 Result<T> 规范
+ * 遵循共享 Result<T> contract
  */
 
 import type { IGoalRepository, IGoalRecordRepository } from '../../../domain';
@@ -153,6 +153,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         );
         goal.hydrateLabels(labels);
       }
+      // Portability deliberately restores measurements as Manual, without Task provenance.
       for (const record of input.records) {
         await goalRecordRepository.save(
           GoalRecord.load({
@@ -161,8 +162,9 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
             identityId: IdentityId.of(cx.identityId),
             value: record.value,
             note: record.note,
-            sourceType: record.sourceType,
-            sourceId: record.sourceId,
+            authorship: 'Manual',
+            sourceType: null,
+            sourceId: null,
             recordedAt: record.recordedAt,
             createdAt: record.createdAt,
             updatedAt: record.updatedAt,

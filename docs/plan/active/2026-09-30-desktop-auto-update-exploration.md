@@ -3,12 +3,12 @@
 - Date: 2026-09-30
 - Branch: `explore/desktop-auto-update`
 - Scope: Desktop version discovery, background download, restart-to-apply update, release-feed integrity, and update UX.
-- Status: Research precursor; detailed design moved to ADR-112 and the implementation plan
+- Status: Research precursor; detailed design moved to ADR-114 and the implementation plan
 
 Detailed follow-up:
 
 - [Reference study](../../analysis/2026-09-30-desktop-auto-update-reference-study.md)
-- [ADR-112 — Desktop Update Domain、Runtime Boundary 与 Installation Ownership](../../architecture/adr/ADR-112-desktop-update-domain-runtime-and-installation-ownership.md)
+- [ADR-114 — Desktop Update Domain、Runtime Boundary 与 Installation Ownership](../../architecture/adr/ADR-114-desktop-update-domain-runtime-and-installation-ownership.md)
 - [Implementation plan](./2026-09-30-desktop-auto-update-implementation.md)
 
 ## 1. Executive summary

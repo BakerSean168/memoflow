@@ -169,21 +169,74 @@ describe('createTaskElectronModule IPC lifecycle', () => {
     expect(fake.api.listTaskOccurrencesByAccount).toHaveBeenCalledTimes(1);
   });
 
+  it.each([true, false, 'true', 'false', 'invalid'])(
+    'validates range flag %s over IPC',
+    async (flag) => {
+      await moduleDef.register(context);
+      const result = await registered(TaskChannels.OCCURRENCE_LIST_BY_DATE_RANGE)(undefined, {
+        startDate: 1000,
+        endDate: 2000,
+        includeOverdueOpen: flag,
+      });
+      if (flag === 'invalid') {
+        expect(result).toMatchObject({ ok: false });
+        expect(fake.api.getTaskOccurrencesByDateRange).not.toHaveBeenCalled();
+      } else {
+        expect(fake.api.getTaskOccurrencesByDateRange).toHaveBeenCalledWith(
+          expect.any(String),
+          1000,
+          2000,
+          flag === true || flag === 'true',
+        );
+      }
+    },
+  );
+
   it('validates Goal+KR list filters before invoking the Task application port', async () => {
     await moduleDef.register(context);
     const handler = registered(TaskChannels.PLAN_LIST);
     const goalId = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
     const keyResultId = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';
 
-    const valid = await handler(undefined, { goalId, keyResultId });
+    const valid = await handler(undefined, { goalId, keyResultId, page: '2', limit: '10' });
     expect(valid).toMatchObject({ ok: true });
     expect(fake.api.listTaskPlans).toHaveBeenLastCalledWith(
-      expect.objectContaining({ goalId, keyResultId }),
+      expect.objectContaining({ goalId, keyResultId, page: 2, limit: 10 }),
     );
 
     vi.mocked(fake.api.listTaskPlans).mockClear();
     const invalid = await handler(undefined, { keyResultId });
     expect(invalid).toMatchObject({ ok: false });
+    expect(fake.api.listTaskPlans).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Open', 'active'],
+    [['Succeeded', 'Failed'], 'all'],
+    [['Abandoned'], 'archived'],
+  ])('passes validated outcome %s and archive state %s through IPC', async (outcome, archiveState) => {
+    await moduleDef.register(context);
+    const result = await registered(TaskChannels.PLAN_LIST)(undefined, {
+      page: 2, limit: 10, status: 'Active', labelIdsAll: ['a', 'b'], outcome, archiveState,
+    });
+    expect(result).toMatchObject({ ok: true });
+    expect(fake.api.listTaskPlans).toHaveBeenCalledWith(expect.objectContaining({
+      identityId: expect.any(String), page: 2, limit: 10, status: ['Active'], labelIdsAll: ['a', 'b'],
+      outcome: typeof outcome === 'string' ? [outcome] : outcome, archiveState,
+    }));
+  });
+
+  it.each([
+    { outcome: ['Unknown'] },
+    { outcome: ['Open', 'unknown'] },
+    { outcome: 42 },
+    { outcome: { value: 'Open' } },
+    { archiveState: 'deleted' },
+    { archiveState: ['active'] },
+  ])('rejects invalid Plan state filters over IPC: %s', async (params) => {
+    await moduleDef.register(context);
+    const result = await registered(TaskChannels.PLAN_LIST)(undefined, params);
+    expect(result).toMatchObject({ ok: false });
     expect(fake.api.listTaskPlans).not.toHaveBeenCalled();
   });
 

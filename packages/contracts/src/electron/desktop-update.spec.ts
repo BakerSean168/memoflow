@@ -64,7 +64,7 @@ describe('Desktop Update contract', () => {
       ).toBe(false);
     }
   });
-  it('owns the narrow replayable IPC surface introduced by ADR-112', () => {
+  it('owns the narrow replayable IPC surface introduced by ADR-114', () => {
     expect(DesktopUpdateChannels).toEqual({
       GET_SNAPSHOT: 'desktop-update:get-snapshot',
       GET_DIAGNOSTICS: 'desktop-update:get-diagnostics',

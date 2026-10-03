@@ -84,9 +84,16 @@ describe('toTaskGoalOutboxRecord V2', () => {
     expect(JSON.parse(first!.payload)).toMatchObject({
       schemaVersion: 2,
       action: 'apply',
+      recordingMode: 'FixedAutomatic',
       value: 2,
       source: { type: 'TaskOccurrence', id: 'occurrence-1' },
     });
+  });
+
+  it.each([0, -2, null])('never enqueues a Prompt suggestion %s as a fact', (suggestedValue) => {
+    const event = completionEvent(null);
+    event.payload.goalBinding!.progressRule = { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue };
+    expect(toTaskGoalOutboxRecord(event)).toBeNull();
   });
 
   it('never enqueues progress for a link-only Task', () => {
@@ -121,6 +128,7 @@ describe('toTaskGoalOutboxRecord V2', () => {
     expect(retry?.eventId).toBe(first?.eventId);
     expect(JSON.parse(first!.payload)).toMatchObject({
       action: 'apply',
+      recordingMode: 'FixedAutomatic',
       source: { type: 'TaskPlan', id: 'plan-1' },
       value: 3,
     });
@@ -178,4 +186,24 @@ describe('toTaskGoalOutboxRecord V2', () => {
       sources: [{ type: 'TaskOccurrence', id: 'occurrence-1' }],
     });
   });
+  it.each([0, -4])(
+    'enqueues actual Prompt measurement %s with stable occurrence source',
+    (value) => {
+      const event = completionEvent(null);
+      event.payload.goalBinding!.progressRule = {
+        mode: 'Prompt',
+        trigger: 'EachCompletion',
+        suggestedValue: 99,
+      };
+      event.payload.goalMeasurement = { value, note: 'User note' };
+      const record = toTaskGoalOutboxRecord(event)!;
+      expect(JSON.parse(record.payload)).toMatchObject({
+        recordingMode: 'PromptedUserMeasurement',
+        value,
+        note: 'User note',
+        source: { type: 'TaskOccurrence', id: 'occurrence-1' },
+      });
+      expect(toTaskGoalOutboxRecord(event)?.eventId).toBe(record.eventId);
+    },
+  );
 });

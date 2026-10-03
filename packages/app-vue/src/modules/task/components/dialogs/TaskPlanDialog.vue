@@ -3,8 +3,7 @@
     <ProductDialogShell
       :open="visible"
       test-id="task-plan-dialog"
-      size="lg"
-      height-mode="workspace"
+      recipe="workspace"
       body-class="flex flex-col"
       initial-focus-selector="[data-testid='task-plan-title-input']"
     >
@@ -47,6 +46,7 @@
         @update:model-value="handleTemplateUpdate"
         @update:validation="handleValidationUpdate"
         @close="handleCancel"
+        @submit="handleSave"
       />
 
       <template #footer>
@@ -69,11 +69,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRaw, watch } from 'vue';
+import {
+  computed,
+  ref,
+  toRaw,
+  watch,
+  nextTick,
+  onBeforeUnmount,
+  onDeactivated,
+  onActivated,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Dialog, Button } from '@memoflow/ui-vue-shadcn';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
+import { buildTaskPlanCreateRequest } from '../../utils/task-plan-create-request';
+import type {
+  TaskNativeEditSession,
+  TaskNativeSubmitContext,
+} from '../../composables/taskNativeEditSession';
+import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
@@ -167,6 +183,10 @@ const props = withDefaults(
     template?: TaskPlanViewModel | null;
     mode?: 'create' | 'edit' | 'copy';
     saving?: boolean;
+    submitOwner?: (
+      draft: TaskPlanViewModel,
+      context?: TaskNativeSubmitContext,
+    ) => Promise<TaskPlanClientDTO | null>;
     initialGoalBinding?: TaskPlanViewModel['goalBinding'];
   }>(),
   {
@@ -182,6 +202,8 @@ const emit = defineEmits<{
   (e: 'save', value: TaskPlanViewModel): void;
   (e: 'cancel'): void;
   (e: 'dirty-change', dirty: boolean): void;
+  (e: 'busy-change', busy: boolean): void;
+  (e: 'session-change', session: TaskNativeEditSession | null): void;
 }>();
 
 const formRef = ref<InstanceType<typeof TaskPlanForm> | null>(null);
@@ -191,7 +213,14 @@ const currentDraftKey = ref<string | null>(null);
 const isValid = ref(false);
 const visible = computed(() => props.modelValue);
 const mode = computed(() => props.mode);
-const saving = computed(() => props.saving);
+const submitting = ref(false);
+const editingBlocked = ref(false);
+const saving = computed(() => props.saving || submitting.value || editingBlocked.value);
+const { resolveNames } = useLabelCatalog();
+let submitCoordinator: (() => Promise<void>) | null = null;
+let cancelCoordinator: (() => Promise<void>) | null = null;
+let invalidateSession: (() => void) | null = null;
+watch(saving, (busy) => emit('busy-change', busy), { immediate: true });
 const canSave = computed(() => !!localTemplate.value && isValid.value && !saving.value);
 async function loadGoals() {
   await loadGoalOptions();
@@ -251,6 +280,7 @@ watch(
   visible,
   async (open, wasOpen) => {
     if (!open) {
+      retireSession();
       clearDraft();
       draftBaseline.value = null;
       emit('dirty-change', false);
@@ -270,6 +300,7 @@ watch(
         initializeDraft();
       }
     }
+    if (!wasOpen) publishSession();
     await loadGoals();
   },
   { immediate: true },
@@ -286,12 +317,20 @@ watch(
 
 const setVisible = (value: boolean) => {
   if (!value && saving.value) return;
-  if (!value) clearDraft();
+  if (!value && cancelCoordinator) {
+    void cancelCoordinator();
+    return;
+  }
+  if (!value) {
+    clearDraft();
+    retireSession();
+  }
   emit('update:modelValue', value);
 };
 
 const handleTemplateUpdate = (value: TaskPlanViewModel) => {
-  localTemplate.value = value;
+  if (saving.value) return;
+  localTemplate.value = cloneTemplate(value);
 };
 
 const handleValidationUpdate = (validation: { isValid: boolean }) => {
@@ -300,6 +339,15 @@ const handleValidationUpdate = (validation: { isValid: boolean }) => {
 
 const handleCancel = () => {
   if (saving.value) return;
+  if (cancelCoordinator) {
+    void cancelCoordinator();
+    return;
+  }
+  cancelOwner();
+};
+
+function cancelOwner() {
+  retireSession();
   clearDraft();
   localTemplate.value = null;
   draftBaseline.value = null;
@@ -308,10 +356,118 @@ const handleCancel = () => {
   emit('dirty-change', false);
   emit('cancel');
   emit('update:modelValue', false);
+}
+
+const handleSave = async () => {
+  if (!canSave.value) return;
+  if (submitCoordinator) return submitCoordinator();
+  if (props.submitOwner) await saveOwner();
+  else if (localTemplate.value) emit('save', cloneTemplate(localTemplate.value));
 };
 
-const handleSave = () => {
-  if (!localTemplate.value || !canSave.value) return;
-  emit('save', localTemplate.value);
-};
+async function saveOwner(context?: TaskNativeSubmitContext): Promise<TaskPlanClientDTO | null> {
+  if (!localTemplate.value || !canSave.value || !formRef.value?.validate()) return null;
+  const draft = cloneTemplate(localTemplate.value);
+  if (context && JSON.stringify(draft) !== JSON.stringify(context.expectedDraft))
+    throw new Error('Task draft changed while saving workflow revision');
+  if (!props.submitOwner) throw new Error('Task owner submission is unavailable');
+  buildTaskPlanCreateRequest(draft, context?.createId);
+  submitting.value = true;
+  try {
+    // Native form validation precedes label commands and owner persistence.
+    if (context?.pendingLabelNames.length) {
+      draft.labelIds = [
+        ...new Set([...(draft.labelIds ?? []), ...(await resolveNames(context.pendingLabelNames))]),
+      ];
+    }
+    return await props.submitOwner(draft, context);
+  } finally {
+    submitting.value = false;
+  }
+}
+
+function retireSession(): void {
+  invalidateSession?.();
+  invalidateSession = null;
+  submitCoordinator = null;
+  cancelCoordinator = null;
+  editingBlocked.value = false;
+  emit('session-change', null);
+}
+function publishSession(): void {
+  retireSession();
+  if (props.mode !== 'create') return;
+  let active = true;
+  invalidateSession = () => {
+    active = false;
+  };
+  function assertActive() {
+    if (!active || !visible.value || !localTemplate.value)
+      throw new Error('Task edit session is closed');
+  }
+  function assertEditable() {
+    assertActive();
+    if (saving.value) throw new Error('Task edit session is busy');
+  }
+  const session: TaskNativeEditSession = {
+    patch(changes) {
+      assertEditable();
+      const fields = [
+        'title',
+        'description',
+        'schedule',
+        'reminderConfig',
+        'importance',
+        'labelIds',
+        'goalBinding',
+        'checklist',
+      ] as const;
+      const next = cloneTemplate(localTemplate.value!);
+      for (const field of fields)
+        if (changes[field] !== undefined)
+          Object.assign(next, { [field]: toCloneableData(changes[field]) });
+      localTemplate.value = cloneTemplate(next);
+    },
+    async focus() {
+      assertActive();
+      await nextTick();
+      assertActive();
+      const form: HTMLFormElement | undefined = formRef.value?.formRef;
+      form?.querySelector<HTMLTextAreaElement>('[data-testid=task-plan-title-input]')?.focus();
+    },
+    readDraftState() {
+      assertActive();
+      return {
+        draft: cloneTemplate(localTemplate.value!),
+        dirty: JSON.stringify(localTemplate.value) !== draftBaseline.value,
+        busy: saving.value,
+      };
+    },
+    coordinateSubmit(submit, cancel) {
+      assertEditable();
+      submitCoordinator = submit;
+      cancelCoordinator = cancel;
+    },
+    setEditingBlocked(blocked) {
+      assertActive();
+      editingBlocked.value = blocked;
+    },
+    requestSubmit(context) {
+      assertEditable();
+      if (submitCoordinator && !context)
+        throw new Error('Coordinated Task submit requires owner context');
+      return saveOwner(context);
+    },
+    requestCancel() {
+      assertEditable();
+      cancelOwner();
+    },
+  };
+  emit('session-change', session);
+}
+onBeforeUnmount(retireSession);
+onDeactivated(retireSession);
+onActivated(() => {
+  if (visible.value && !invalidateSession) publishSession();
+});
 </script>

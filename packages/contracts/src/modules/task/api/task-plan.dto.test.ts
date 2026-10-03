@@ -83,8 +83,20 @@ describe('task plan contracts', () => {
     expect(request).not.toContain('includeChildren');
   });
 
-  it('accepts a valid create payload', () => {
+  it('accepts a valid create payload and only the canonical TaskPlanId prefix', () => {
     expect(CreateTaskPlanSchema.safeParse(validCreatePayload()).success).toBe(true);
+    expect(
+      CreateTaskPlanSchema.safeParse({
+        ...validCreatePayload(),
+        id: `ITaskPlanId_${uuid}`,
+      }).success,
+    ).toBe(true);
+    expect(
+      CreateTaskPlanSchema.safeParse({
+        ...validCreatePayload(),
+        id: `TaskPlanId_${uuid}`,
+      }).success,
+    ).toBe(false);
   });
 
   it('accepts exactly the vNext Goal link states and rejects contribution without a Key Result', () => {

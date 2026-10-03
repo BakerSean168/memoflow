@@ -100,9 +100,6 @@
       "@memoflow/task/client": [
         "../../packages/task/dist/client/index.d.ts"
       ],
-      "@memoflow/governance/client": [
-        "../../packages/governance/dist/client/index.d.ts"
-      ],
       "@memoflow/repository/client": [
         "../../packages/repository/dist/client/index.d.ts"
       ],

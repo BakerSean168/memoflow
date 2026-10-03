@@ -2,8 +2,7 @@
  * Convenience factory — PowerSync-backed goal module for Electron.
  * 便捷工厂 — 基于 PowerSync 的 Electron 目标模块。
  *
- * Mirrors `packages/governance/src/infrastructure/powersync.ts`.
- * 对标 `packages/governance/src/infrastructure/powersync.ts`。
+ * Goal-owned PowerSync adapter boundary; no synthetic reference feature dependency.
  */
 
 import type { UserTimeContextPort } from '@memoflow/time';

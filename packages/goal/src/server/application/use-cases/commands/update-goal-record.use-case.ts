@@ -39,10 +39,10 @@ export class UpdateGoalRecordUseCase {
         if (!record || String(record.keyResultId) !== keyResultId) {
           return error('NOT_FOUND', `Goal record not found: ${recordId}`);
         }
-        if (record.sourceType || record.sourceId) {
+        if (!record.canUserCorrect) {
           return error(
             'VALIDATION_ERROR',
-            'Source-correlated Goal records are system facts and cannot be edited manually',
+            'Automatic Task Goal records are system facts and cannot be edited manually',
           );
         }
 

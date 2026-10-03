@@ -135,6 +135,7 @@ function ids(workflowRunId = 'workflow-1', revision = 1) {
 function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   const expected = ids();
   return {
+    readGoal: vi.fn(async () => error('NOT_FOUND', 'Goal not created')),
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
     ),
@@ -167,6 +168,34 @@ function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof
 }
 
 describe('ApplyGoalPlanService V2', () => {
+  it('replays native-owned deterministic Goal/KRs without redundant activation and completes supporting work', async () => {
+    const port = mutationPort();
+    const expected = ids();
+    port.createGoal.mockResolvedValue(
+      ok({
+        goalId: expected.goal,
+        goalVersion: 2,
+        keyResultIds: [expected.kr],
+        goalStatus: 'InProgress',
+      }),
+    );
+    const service = new ApplyGoalPlanService(port);
+    const first = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    expect(first.status).toBe('success');
+    expect(first.appliedGoalStatus).toBe('InProgress');
+    expect(port.activateGoal).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
+    expect(port.createKnowledgeDocument).toHaveBeenCalledOnce();
+    const replay = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      priorReceipt: first,
+    });
+    expect(replay).toEqual(first);
+    expect(port.createGoal).toHaveBeenCalledOnce();
+    expect(port.activateGoal).not.toHaveBeenCalled();
+  });
   it('applies Goal/KR, explicit lifecycle, Knowledge create/link and Task owner requests by draftRef', async () => {
     const port = mutationPort();
     const service = new ApplyGoalPlanService(port);
@@ -451,5 +480,129 @@ describe('ApplyGoalPlanService V2', () => {
     expect(port.createKnowledgeDocument).toHaveBeenCalledTimes(1);
     expect(port.linkGoalKnowledge).toHaveBeenCalledTimes(2);
     expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
+  });
+  it('reads committed native Goal/KRs before labels and continues supporting work even when Goal labels fail', async () => {
+    const port = mutationPort();
+    const expected = ids();
+    port.readGoal.mockResolvedValue(
+      ok({
+        goalId: expected.goal,
+        goalVersion: 2,
+        goalStatus: 'InProgress',
+        keyResultIds: [expected.kr],
+      }),
+    );
+    port.resolveLabels.mockImplementation(async (names) =>
+      names === draft.goal.labels ? error('NETWORK_ERROR', 'Goal labels unavailable') : ok([]),
+    );
+    const service = new ApplyGoalPlanService(port);
+    const first = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    expect(first.status).toBe('success');
+    expect(first.referenceMap.goal).toBe(expected.goal);
+    for (const item of draft.keyResults)
+      expect(first.referenceMap[item.draftRef]).toBe(expected.kr);
+    expect(first.goalVersion).toBe(2);
+    expect(first.appliedGoalStatus).toBe('InProgress');
+    expect(port.createGoal).not.toHaveBeenCalled();
+    expect(port.activateGoal).not.toHaveBeenCalled();
+    expect(port.resolveLabels).not.toHaveBeenCalledWith(draft.goal.labels, context);
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
+    expect(port.createKnowledgeDocument).toHaveBeenCalledOnce();
+    const replay = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      priorReceipt: first,
+    });
+    expect(replay).toEqual(first);
+    expect(port.readGoal).toHaveBeenCalledOnce();
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
+  });
+
+  it('retains canonical Goal/KR facts in a partial receipt when supporting labels fail and retries only supporting work', async () => {
+    const port = mutationPort();
+    const expected = ids();
+    port.readGoal.mockResolvedValue(
+      ok({
+        goalId: expected.goal,
+        goalVersion: 2,
+        goalStatus: 'InProgress',
+        keyResultIds: [expected.kr],
+      }),
+    );
+    port.resolveLabels.mockResolvedValue(error('NETWORK_ERROR', 'Labels unavailable'));
+    const service = new ApplyGoalPlanService(port);
+    const partial = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    expect(partial.status).toBe('partial');
+    expect(partial.retryable).toBe(true);
+    expect(partial.referenceMap.goal).toBe(expected.goal);
+    expect(partial.referenceMap[draft.keyResults[0].draftRef]).toBe(expected.kr);
+    expect(partial.goalVersion).toBe(2);
+    expect(partial.appliedGoalStatus).toBe('InProgress');
+    expect(partial.failures).toHaveLength(draft.tasks.length);
+    expect(partial.failures.every((item) => item.operation === 'label_resolve')).toBe(true);
+    port.resolveLabels.mockResolvedValue(ok([]));
+    const retried = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      priorReceipt: partial,
+    });
+    expect(retried.status).toBe('success');
+    expect(retried.referenceMap.goal).toBe(expected.goal);
+    expect(port.createGoal).not.toHaveBeenCalled();
+    expect(port.activateGoal).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(draft.tasks.length);
+  });
+
+  it('fails closed on a mismatched native KR identity set before resolving labels', async () => {
+    const port = mutationPort();
+    port.readGoal.mockResolvedValue(
+      ok({ goalId: ids().goal, goalVersion: 1, keyResultIds: ['wrong-kr'] }),
+    );
+    const result = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+    });
+    expect(result.status).toBe('failed');
+    expect(result.failures[0].code).toBe('AI_WORKFLOW_MUTATION_ID_MISMATCH');
+    expect(result.referenceMap).toEqual({});
+    expect(port.resolveLabels).not.toHaveBeenCalled();
+    expect(port.createGoal).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
+  });
+
+  it.each(['error', 'throw'])(
+    'returns structured failure for unknown owner read: %s',
+    async (outcome) => {
+      const port = mutationPort();
+      if (outcome === 'error')
+        port.readGoal.mockResolvedValue(error('NETWORK_ERROR', 'Read failed'));
+      else port.readGoal.mockRejectedValue(new Error('Read failed'));
+      const result = await new ApplyGoalPlanService(port).apply({
+        workflowRunId: 'workflow-1',
+        draft,
+        context,
+      });
+      expect(result.status).toBe('failed');
+      expect(result.failures[0].operation).toBe('goal_create');
+      expect(result.retryable).toBe(true);
+      expect(port.resolveLabels).not.toHaveBeenCalled();
+      expect(port.createGoal).not.toHaveBeenCalled();
+    },
+  );
+
+  it('uses normal label/create path after a definite owner NOT_FOUND', async () => {
+    const port = mutationPort();
+    const result = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+    });
+    expect(result.status).toBe('success');
+    expect(port.readGoal).toHaveBeenCalledWith(ids().goal, context);
+    expect(port.resolveLabels).toHaveBeenCalledWith(draft.goal.labels, context);
+    expect(port.createGoal).toHaveBeenCalledOnce();
   });
 });

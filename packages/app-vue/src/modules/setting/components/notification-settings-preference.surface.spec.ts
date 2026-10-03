@@ -21,8 +21,11 @@ describe('notification settings preference surface', () => {
     'utf8',
   );
 
-  it('settings mounts module channel card and loads preferences on mount', () => {
-    expect(settings).toContain('data-testid="notification-delivery-card"');
+  it('settings mounts the shared delivery section and loads preferences on mount', () => {
+    expect(settings).toContain('test-id="notification-delivery-card"');
+    expect(settings).toContain('<SettingsSection');
+    expect(settings).toContain('<SettingsPropertyRow');
+    expect(settings).not.toContain('<Card');
     expect(settings).toContain('useNotificationPreferences');
     expect(settings).toContain('loadPreferences');
     expect(settings).toContain('setGlobalChannel');
@@ -41,8 +44,6 @@ describe('notification settings preference surface', () => {
     expect(clientPort).toContain(
       'getPreferences(): Promise<Result<NotificationPreferenceClientDTO>>;',
     );
-    expect(clientPort).toMatch(
-      /updatePreferences\(\s*request: UpdateNotificationPreferenceReq,/,
-    );
+    expect(clientPort).toMatch(/updatePreferences\(\s*request: UpdateNotificationPreferenceReq,/);
   });
 });

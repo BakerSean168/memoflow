@@ -3,22 +3,29 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(__dirname, 'TaskManagementView.vue'), 'utf8');
+const todaySource = readFileSync(resolve(__dirname, '../composables/useTaskToday.ts'), 'utf8');
 const toolbarSource = readFileSync(resolve(__dirname, '../components/TaskPageToolbar.vue'), 'utf8');
 
 describe('TaskManagementView occurrence-first surface', () => {
-  it('defaults to Today and keeps Upcoming occurrences separate from long-lived plans', () => {
-    expect(source).toContain("type TaskSurface = 'today' | 'upcoming' | 'plans'");
+  it('converges Task Home to Today and Plans, with future browsing delegated to Schedule', () => {
     expect(source).toContain("ref<TaskSurface>('today')");
     expect(source).toContain('data-testid="task-occurrence-list"');
     expect(source).toContain('data-testid="task-plan-list"');
     expect(source).toContain('<TaskPlanRow');
     expect(source).toContain('task-plan-list-column-header');
+    expect(source).toContain('isTaskOccurrenceOnTodaySurface');
+    expect(source).toContain(':data-testid="`task-occurrence-group-${group.key}`"');
+    expect(source).toContain("key: 'overdue' as const");
+    expect(source).toContain("key: 'today' as const");
+    expect(source).toContain('data-testid="task-open-schedule"');
+    expect(source).toContain("name: 'ScheduleCalendar'");
+    expect(source).not.toContain("'upcoming'");
+    expect(source).not.toContain('emptyUpcoming');
     expect(source).not.toContain('task-plan-card');
     expect(source).not.toContain('openEditDialog');
     expect(source).not.toContain("ref<'create' | 'edit'>");
     expect(source).not.toContain('updatePlanSafe');
     expect(source).toContain('mode="create"');
-    expect(source).toContain('isTaskOccurrenceOnSurface');
   });
 
   it('keeps category/filter/sort/create controls in one Goal-style toolbar', () => {
@@ -27,6 +34,7 @@ describe('TaskManagementView occurrence-first surface', () => {
     for (const selector of [
       'task-surface-trigger',
       'task-status-filter',
+      'task-plan-state-filter',
       'task-label-filter',
       'task-compact-view-options',
       'task-occurrence-sort',
@@ -45,6 +53,50 @@ describe('TaskManagementView occurrence-first surface', () => {
     for (const retired of ['TaskDAG', 'DependencyManager', 'CriticalPath', 'graph mode']) {
       expect(source).not.toContain(retired);
     }
+  });
+
+  it('keeps occurrence and plan-state filters independent across the two surfaces', () => {
+    expect(source).toContain(
+      "const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all')",
+    );
+    expect(source).toContain("const planStateFilter = ref<TaskPlanStateFilter>('all')");
+    expect(source).toContain('occurrence.status === occurrenceStatusFilter.value');
+    expect(source).toContain('matchesPlanState(template)');
+    expect(source).not.toMatch(/filteredPlans[\s\S]{0,500}occurrenceStatusFilter/);
+    expect(
+      source.slice(
+        source.indexOf('const visibleOccurrences'),
+        source.indexOf('const occurrenceGroups'),
+      ),
+    ).not.toContain('planStateFilter');
+  });
+
+  it('uses bounded Today reads and a server-scoped Goal/KR plan query without raw ids', () => {
+    expect(source).toContain('useTaskToday()');
+    expect(source).not.toContain('fetchInstancesByDateRange');
+    expect(todaySource).toContain('includeOverdueOpen: true');
+    expect(todaySource).toContain('startOfDayMs(now)');
+    expect(todaySource).toContain('endOfDayMs(now)');
+    expect(source).not.toContain('fetchOccurrencesMutation({ page: 1, limit: 500 })');
+    expect(source).not.toContain('limit: 500');
+    expect(source).toContain('limit: 100');
+    expect(source).toContain('{ keyResultId: queryKeyResultId.value }');
+    expect(source).toContain('goalService.getGoal(goalId)');
+    expect(source).toContain('goalService.getKeyResults(goalId)');
+    expect(source).toContain('scopedGoalName.value');
+    expect(source).toContain('scopedKeyResultTitle.value');
+    expect(source).not.toContain('`Goal ${queryGoalId.value}');
+    expect(source).not.toContain('KR ${queryKeyResultId.value}');
+    expect(source).not.toContain(':position="occurrencePositions');
+  });
+
+  it('exposes bounded Plan pages and reports missing occurrence-plan failures', () => {
+    expect(source).toContain('page: planPage.value');
+    expect(source).toContain('total: planTotal');
+    expect(source).toContain('data-testid="task-plan-pagination"');
+    expect(source).toContain('planPage * 100 >= planTotal');
+    expect(source).toContain('todayDetailsError.value');
+    expect(source).toContain('identityScope !== resolveIdentityScope()');
   });
 
   it('accepts a create-and-bind intent without turning it into a persistent Goal filter', () => {
@@ -67,22 +119,26 @@ describe('TaskManagementView occurrence-first surface', () => {
     }
   });
 
-  it('aliases occurrence mutations before local wrappers to prevent self-recursion', () => {
-    for (const alias of [
-      'completeOccurrenceMutation',
-      'uncompleteOccurrenceMutation',
-      'markOccurrenceMissedMutation',
-      'skipOccurrenceMutation',
-      'setOccurrenceChecklistItemMutation',
-    ]) {
-      expect(source).toContain(alias);
-    }
-    expect(source).toContain('runOccurrenceAction(id, completeOccurrenceMutation)');
-    expect(source).toContain('runOccurrenceAction(occurrenceId, (id) =>');
-    expect(source).toContain('setOccurrenceChecklistItemMutation(id,');
-    expect(source).not.toContain('runOccurrenceAction(id, completeOccurrence)');
-    expect(source).not.toContain('runOccurrenceAction(id, uncompleteOccurrence)');
-    expect(source).not.toContain('runOccurrenceAction(id, markOccurrenceMissed)');
-    expect(source).not.toContain('runOccurrenceAction(id, skipOccurrence)');
+  it('uses the canonical coordinator with the existing operations instance', () => {
+    expect(source).toContain('useTaskOccurrenceActionCoordinator({');
+    expect(source).toContain('operations: occurrenceOperations');
+    for (const action of [
+      'requestComplete',
+      'requestUncomplete',
+      'requestMissed',
+      'requestSkip',
+      'requestChecklistChange',
+    ])
+      expect(source).toContain(action);
+    expect(source).not.toContain('runOccurrenceAction');
   });
+});
+
+it('keeps Task Plan as the only detail route and inspect selection local', () => {
+  const routes = readFileSync(resolve(__dirname, '../router/index.ts'), 'utf8');
+  expect(routes.match(/path:/g)).toHaveLength(3);
+  expect(routes).toContain("name: 'task-detail'");
+  expect(routes).not.toMatch(/occurrence|inspect/i);
+  expect(source).toContain('@inspect="openOccurrenceInspect"');
+  expect(source).not.toContain('route.query.occurrence');
 });

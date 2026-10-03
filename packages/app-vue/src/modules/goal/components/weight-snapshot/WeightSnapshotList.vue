@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
-    <Card>
-      <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card class="border-0 bg-transparent shadow-none">
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 px-0 pb-2 pt-0">
         <CardTitle>{{ t('goal.weightSnapshotList.title') }}</CardTitle>
         <div class="flex items-center gap-0.5">
           <Button
@@ -16,7 +16,7 @@
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent class="px-0 pb-0">
         <!-- 筛选器 -->
         <div class="mb-4 grid grid-cols-12 gap-4">
           <div class="col-span-12 @md/panel:col-span-4">
@@ -67,7 +67,7 @@
           <div
             v-for="snapshot in filteredSnapshots"
             :key="snapshot.id"
-            class="border-b border-border/50 transition-colors hover:bg-muted/50"
+            class="border-b border-[hsl(var(--border-subtle))] transition-colors hover:bg-[hsl(var(--hover)/0.52)]"
           >
             <button
               type="button"
@@ -130,7 +130,7 @@
             <!-- 展开详情 -->
             <div
               v-show="expandedItems.has(snapshot.id)"
-              class="mx-2 mb-3 p-3 bg-muted/50 rounded transition-all"
+              class="mx-2 mb-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] transition-all"
             >
               <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -303,7 +303,7 @@ const formatSnapshotTime = (timestamp: number) => {
 const getWeightChangeAvatarClass = (delta: number) => {
   if (delta > 0) return 'bg-success/15 text-success dark:bg-green-900 dark:text-success';
   if (delta < 0) return 'bg-destructive/15 text-destructive dark:bg-red-900 dark:text-destructive';
-  return 'bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground';
+  return 'bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-muted))]';
 };
 
 // 获取权重变化图标组件

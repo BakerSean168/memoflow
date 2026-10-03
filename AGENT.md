@@ -53,20 +53,20 @@
 - 如果更干净的结构性重构可行，优先于局部修补。
 - 保持实现直接、明确、易读。
 
-## 治理模块（试点示范）
+## 架构试点规则（真实业务 owner）
 
-`packages/governance` 是仓库的**治理模块（reference module）**：
+ADR-113 已退休虚构的 Product Governance Runtime。`Governance` 在当前仓库中仅指 Engineering Governance：`tools/governance`、`docs/governance`、`docs/standards` 与 CI architecture gates；它不再是产品 bounded context，也不存在 `packages/governance` reference module。
 
-- 它的业务功能是**虚构的**，并不是项目真实需要的业务需求。不要因为它看起来有业务含义就去扩展它的领域模型。
-- 它更根本的作用，是作为仓库业务模块的**"活文档" / 严格参考实现**：完整展示业务 feature 包应有的统一公开结构（`contracts → api / client / electron → server(domain/application/infrastructure/transport)`），是所有业务模块遵循 ADR-031 标准形态的样板。相关决策依据见归档计划 `docs/plan/archive/2026-07-06-governance-reference-module-rebuild.md` 与 ADR-031。
+进行较大的系统性重构 / 架构优化时，使用**真实业务 owner vertical slice** 验证：
 
-**试点铁律**：进行较大的重构 / 架构优化时，**必须先把 `packages/governance` 作为最先的试点模块**跑通，确认新模式可行后再推广。若 governance 目前过于简单、不足以承担试点功能，可以给它增加必要的复杂业务（领域规则、事件、跨模块 Port 等），确保它能真实覆盖目标重构的全部形态。
+1. 选择能覆盖目标问题的**最小真实 owner**（如 Goal、Task、Schedule、Knowledge、Notification）；
+2. 先补 characterization / contract tests，固定已有业务语义；
+3. 在该 owner 上完成实现与端到端验证；
+4. 再选择第二个真实 owner 验证模式是否可迁移；
+5. 只有至少两个真实 owner 出现稳定重复后，才提升共享 abstraction / framework；
+6. 不为了“做样板”而创建或扩展虚构业务、虚构持久化模型或虚构 UI。
 
-**试点推进顺序**（一次一个大阶段，每阶段独立验证）：
-
-1. **governance 模块先行**：跑通目标重构 + 添加详细注释，作为优雅示范（reference module）。
-2. **goal、task 模块**：在 governance 验证的模式上迁移（这两个模块组合最深：Prisma/PowerSync 双 adapter、event listener、schedule contribution、HTTP/IPC parity、AI executor 耦合）。
-3. **批量推广**：其余模块（reminder、schedule、notification、account、repository、data-portability 等）按相同模式批量套用。
+Engineering Governance 负责把已经确定的结构约束编码成 deterministic audit；它验证架构，不承载产品业务。
 
 ## 配置与文档边界
 

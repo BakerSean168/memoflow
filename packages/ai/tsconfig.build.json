@@ -22,7 +22,6 @@
       ],
       "@memoflow/utils": ["../utils/dist/index.d.ts"],
       "@memoflow/utils/*": ["../utils/dist/*/index.d.ts", "../utils/dist/*.d.ts"],
-      "@memoflow/governance": ["../governance/dist/index.d.ts"]
     }
   },
   "include": ["src"],

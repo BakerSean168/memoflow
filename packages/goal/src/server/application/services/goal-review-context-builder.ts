@@ -1,3 +1,4 @@
+import { analyzeGoalReviewSignals } from './goal-review-signal-analyzer';
 import type { GoalReviewSystemContext } from '@memoflow/contracts/goal';
 import type { Goal } from '../../domain/aggregates/goal';
 import type { IGoalRecordRepository } from '../../domain/repositories/i-goal-record-repository';
@@ -36,7 +37,10 @@ export class GoalReviewContextBuilder {
           Number(record.recordedAt) <= window.windowEndAt,
       );
       const start = calculateKeyResultProgress(kr.progress, priorValues);
-      const end = calculateKeyResultProgress(kr.progress, records.map((record) => record.value));
+      const end = calculateKeyResultProgress(
+        kr.progress,
+        records.map((record) => record.value),
+      );
       const rollingValues = [...priorValues];
       const trend = [
         { at: window.windowStartAt, progressPercentage: start.percentage },
@@ -72,7 +76,7 @@ export class GoalReviewContextBuilder {
     );
     const windowRecords = contexts.flatMap((item) => item.records);
 
-    return {
+    const facts: Omit<GoalReviewSystemContext, 'signals'> = {
       windowStartAt: window.windowStartAt,
       windowEndAt: window.windowEndAt,
       overallProgress: {
@@ -85,10 +89,12 @@ export class GoalReviewContextBuilder {
         recordCount: windowRecords.length,
         manualRecordCount: windowRecords.filter((record) => record.sourceType === null).length,
         taskContributionCount: windowRecords.filter(
-          (record) => record.sourceType === 'TASK_INSTANCE' || record.sourceType === 'TASK_TEMPLATE',
+          (record) =>
+            record.sourceType === 'TASK_INSTANCE' || record.sourceType === 'TASK_TEMPLATE',
         ).length,
       },
     };
+    return { ...facts, signals: analyzeGoalReviewSignals(facts) };
   }
 }
 

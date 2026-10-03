@@ -32,8 +32,19 @@ describe('TaskGoalOutboxDispatcher', () => {
 
     await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
 
-    expect(handler.handle).toHaveBeenCalledWith(JSON.parse(pendingEvent.payload));
+    expect(handler.handle).toHaveBeenCalledWith({
+      ...JSON.parse(pendingEvent.payload),
+      recordingMode: 'FixedAutomatic',
+    });
     expect(store.markDelivered).toHaveBeenCalledWith('event-1');
+    expect(store.markRetry).not.toHaveBeenCalled();
+  });
+
+  it('delivers a signed non-zero fixed delta', async () => {
+    const store = { claimPending: vi.fn(async () => [{ ...pendingEvent, payload: JSON.stringify({ ...JSON.parse(pendingEvent.payload), value: -2 }) }]), markDelivered: vi.fn(), markRetry: vi.fn(), replayDeadLetter: vi.fn() };
+    const handler = { handle: vi.fn(async () => {}) };
+    await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
+    expect(handler.handle).toHaveBeenCalledWith(expect.objectContaining({ value: -2 }));
     expect(store.markRetry).not.toHaveBeenCalled();
   });
 
@@ -85,5 +96,63 @@ describe('TaskGoalOutboxDispatcher', () => {
 
     expect(store.markDelivered).not.toHaveBeenCalled();
     expect(store.markRetry).toHaveBeenCalledWith('event-1', 'Goal unavailable');
+  });
+  it.each([0, -3])('delivers Prompt fact %s with user note', async (value) => {
+    const event = {
+      ...pendingEvent,
+      payload: JSON.stringify({
+        ...JSON.parse(pendingEvent.payload),
+        recordingMode: 'PromptedUserMeasurement',
+        value,
+        note: 'User note',
+      }),
+    };
+    const store = {
+      claimPending: vi.fn(async () => [event]),
+      markDelivered: vi.fn(),
+      markRetry: vi.fn(),
+      replayDeadLetter: vi.fn(),
+    };
+    const handler = { handle: vi.fn(async () => {}) };
+    await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
+    expect(handler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingMode: 'PromptedUserMeasurement',
+        value,
+        note: 'User note',
+      }),
+    );
+    expect(store.markRetry).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { source: { type: 'TaskPlan', id: 'plan-1' } },
+    { value: null },
+    { value: 'Infinity' },
+    { note: 'a'.repeat(501) },
+    { note: 42 },
+    { recordingMode: null },
+    { recordingMode: 'unknown' },
+    { recordingMode: 'FixedAutomatic', value: 0 },
+  ])('retries invalid recording intent %j without Goal writes', async (invalid) => {
+    const event = {
+      ...pendingEvent,
+      payload: JSON.stringify({
+        ...JSON.parse(pendingEvent.payload),
+        recordingMode: 'PromptedUserMeasurement',
+        ...invalid,
+      }),
+    };
+    const store = {
+      claimPending: vi.fn(async () => [event]),
+      markDelivered: vi.fn(),
+      markRetry: vi.fn(),
+      replayDeadLetter: vi.fn(),
+    };
+    const handler = { handle: vi.fn() };
+    await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
+    expect(handler.handle).not.toHaveBeenCalled();
+    expect(store.markDelivered).not.toHaveBeenCalled();
+    expect(store.markRetry).toHaveBeenCalledWith(event.eventId, expect.any(String));
   });
 });

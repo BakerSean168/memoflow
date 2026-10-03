@@ -8,13 +8,14 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
-      common: { cancel: 'Cancel', edit: 'Edit' },
+      common: { cancel: 'Cancel' },
+      repository: { capture: { openReview: 'Open Knowledge review' } },
       aiAssistant: {
         errors: { workflowExecutionFailed: 'Execution failed' },
         chatPage: { workflow: { knowledgeCaptureAwaitingApprovalHint: 'Review note' } },
         dialogs: {
           agent: { retry: 'Retry' },
-          automation: { confirm: 'Confirm', recoveryRetryReady: 'Fix the issue and retry.' },
+          automation: { recoveryRetryReady: 'Fix the issue and retry.' },
         },
       },
     },
@@ -22,7 +23,7 @@ const i18n = createI18n({
 });
 
 describe('AIKnowledgeCapturePanel', () => {
-  it('shows the stable memoflow_id before knowledge draft approval', () => {
+  it('keeps raw stable identity out of the normal panel and opens native Repository review', async () => {
     const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440530';
     const wrapper = mount(AIKnowledgeCapturePanel, {
       global: { plugins: [i18n] },
@@ -54,9 +55,12 @@ describe('AIKnowledgeCapturePanel', () => {
       },
     });
 
-    expect(wrapper.get('[data-testid="knowledge-capture-workflow-document-id"]').text()).toBe(
-      `memoflow_id: ${documentId}`,
+    expect(wrapper.text()).not.toContain(documentId);
+    expect(wrapper.find('[data-testid="knowledge-capture-workflow-document-id"]').exists()).toBe(
+      false,
     );
+    await wrapper.get('[data-testid="knowledge-capture-open-native-review"]').trigger('click');
+    expect(wrapper.emitted('open-native-review')).toHaveLength(1);
   });
 
   it('redacts raw knowledge persistence failure messages', () => {
@@ -91,5 +95,31 @@ describe('AIKnowledgeCapturePanel', () => {
     expect(wrapper.text()).toContain('Fix the issue and retry.');
     expect(wrapper.text()).toContain('Execution failed (WRITE_FAILED)');
     expect(wrapper.text()).not.toContain('internal-secret');
+  });
+  it('renders clarification answers and delegates submit without a business editor', async () => {
+    const wrapper = mount(AIKnowledgeCapturePanel, {
+      global: { plugins: [i18n] },
+      props: {
+        toolMode: 'knowledge-capture',
+        clarificationAnswers: [''],
+        canSubmitClarification: false,
+        knowledgeCaptureRun: {
+          runId: 'clarify',
+          conversationId: 'conv',
+          kind: 'knowledge.capture',
+          status: 'suspended',
+          createdAt: 1,
+          updatedAt: 1,
+          suspension: { type: 'clarification_required', questions: ['Which topic?'] },
+        },
+      },
+    });
+    await wrapper.get('textarea').setValue('Durability');
+    expect(wrapper.emitted('update-clarification-answer')).toEqual([[0, 'Durability']]);
+    await wrapper.setProps({ clarificationAnswers: ['Durability'], canSubmitClarification: true });
+    await wrapper.get('[data-testid="knowledge-capture-submit-clarification"]').trigger('click');
+    expect(wrapper.emitted('submit-clarification')).toHaveLength(1);
+    expect(wrapper.text()).not.toContain('clarify');
+    wrapper.unmount();
   });
 });

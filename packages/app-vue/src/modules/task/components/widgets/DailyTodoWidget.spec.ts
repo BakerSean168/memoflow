@@ -1,12 +1,19 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineComponent, ref } from 'vue';
+import { createI18n } from 'vue-i18n';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { useTask } from '../../composables/useTask';
+import { useTaskToday } from '../../composables/useTaskToday';
 import DailyTodoWidget from './DailyTodoWidget.vue';
 
-vi.mock('../../composables/useTask', () => ({
-  useTask: vi.fn(),
+vi.mock('../../composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),
+}));
+
+vi.mock('../../composables/useTaskToday', () => ({
+  useTaskToday: vi.fn(),
 }));
 
 const PassThroughStub = defineComponent({
@@ -64,18 +71,18 @@ describe('DailyTodoWidget', () => {
       return instances.value.find((instance) => instance.id === id) ?? null;
     });
 
-    vi.mocked(useTask).mockReturnValue({
+    vi.mocked(useTaskToday).mockReturnValue({
       instances,
       templates,
       isLoading: ref(false),
-      fetchInstancesByDateRange: vi.fn().mockResolvedValue(undefined),
-      fetchTemplates: vi.fn().mockResolvedValue(undefined),
-      completeOccurrence,
-      uncompleteOccurrence,
-    } as unknown as ReturnType<typeof useTask>);
+      resolveIdentityScope: () => 'identity-1',
+      load: vi.fn().mockResolvedValue(undefined),
+      operations: { completeOccurrence, uncompleteOccurrence },
+    } as unknown as ReturnType<typeof useTaskToday>);
 
     const wrapper = mount(DailyTodoWidget, {
       global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
         stubs: {
           Card: PassThroughStub,
           CardHeader: PassThroughStub,
@@ -99,7 +106,7 @@ describe('DailyTodoWidget', () => {
       'width: 0%',
     );
 
-    await wrapper.get('button[title="标记完成"]').trigger('click');
+    await wrapper.get('button[aria-label="task.action.complete"]').trigger('click');
     await flushPromises();
 
     expect(completeOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
@@ -110,7 +117,7 @@ describe('DailyTodoWidget', () => {
     expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
       'width: 100%',
     );
-    const undoButton = wrapper.get('button[title="撤销完成"]');
+    const undoButton = wrapper.get('button[aria-label="task.action.undoComplete"]');
     expect(undoButton.attributes('disabled')).toBeUndefined();
 
     await undoButton.trigger('click');
@@ -124,22 +131,21 @@ describe('DailyTodoWidget', () => {
   });
 
   it('refreshes today data when the kept-alive Home surface becomes active again', async () => {
-    const fetchInstancesByDateRange = vi.fn().mockResolvedValue(undefined);
-    const fetchTemplates = vi.fn().mockResolvedValue(undefined);
+    const load = vi.fn().mockResolvedValue(undefined);
 
-    vi.mocked(useTask).mockReturnValue({
+    vi.mocked(useTaskToday).mockReturnValue({
       instances: ref<TaskOccurrenceClientDTO[]>([]),
       templates: ref<TaskPlanClientDTO[]>([]),
       isLoading: ref(false),
-      fetchInstancesByDateRange,
-      fetchTemplates,
-      completeOccurrence: vi.fn(),
-      uncompleteOccurrence: vi.fn(),
-    } as unknown as ReturnType<typeof useTask>);
+      resolveIdentityScope: () => 'identity-1',
+      load,
+      operations: { completeOccurrence: vi.fn(), uncompleteOccurrence: vi.fn() },
+    } as unknown as ReturnType<typeof useTaskToday>);
 
     const wrapper = mount(DailyTodoWidget, {
       props: { active: false },
       global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
         stubs: {
           Card: PassThroughStub,
           CardHeader: PassThroughStub,
@@ -158,20 +164,34 @@ describe('DailyTodoWidget', () => {
     });
     await flushPromises();
 
-    expect(fetchInstancesByDateRange).not.toHaveBeenCalled();
-    expect(fetchTemplates).not.toHaveBeenCalled();
+    expect(load).not.toHaveBeenCalled();
 
     await wrapper.setProps({ active: true });
     await flushPromises();
 
-    expect(fetchInstancesByDateRange).toHaveBeenCalledOnce();
-    expect(fetchTemplates).toHaveBeenCalledWith({ page: 1, limit: 200 });
+    expect(load).toHaveBeenCalledOnce();
 
     await wrapper.setProps({ active: false });
     await wrapper.setProps({ active: true });
     await flushPromises();
 
-    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
-    expect(fetchTemplates).toHaveBeenCalledTimes(2);
+    expect(load).toHaveBeenCalledTimes(2);
   });
+});
+
+it('delegates execution presentation and commands to TaskQuickSurface', () => {
+  const source = readFileSync(resolve(__dirname, 'DailyTodoWidget.vue'), 'utf8');
+  expect(source).toContain('<TaskQuickSurface');
+  expect(source).toContain('useTaskToday');
+  expect(source).not.toMatch(
+    /fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs/,
+  );
+  for (const command of [
+    'completeOccurrence',
+    'uncompleteOccurrence',
+    'markOccurrenceMissed',
+    'skipOccurrence',
+    'setOccurrenceChecklistItem',
+  ])
+    expect(source).not.toContain(`task.${command}`);
 });

@@ -15,7 +15,7 @@ updated: 2026-09-30T12:45:00+08:00
 
 | 计划                                                                                     | 当前状态                                                                                    |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [Desktop Auto-Update Implementation](./2026-09-30-desktop-auto-update-implementation.md) | ADR-112 执行计划；Phase 0～7 / DU-1001～1704，当前待从 baseline characterization 开始实施。 |
+| [Desktop Auto-Update Implementation](./2026-09-30-desktop-auto-update-implementation.md) | ADR-114 执行计划；Phase 0～7 / DU-1001～1704，当前待从 baseline characterization 开始实施。 |
 
 ## 本轮已归档（2026-09-25）
 

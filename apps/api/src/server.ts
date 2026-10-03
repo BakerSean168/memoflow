@@ -7,9 +7,8 @@
  *
  * 模块注册策略：
  * - 每个模块实现 IApiModule 接口
- * - 宿主（本文件 runtime 层）负责 feature 装配：治理的 adapter/application
- *   组装由 apps/api/src/runtime/compose-governance.ts 完成（选择 Prisma repository
- *   → event-log runtime → createGovernanceModule），模块只注册 transport 与生命周期
+ * - 宿主（本文件 runtime 层）负责 feature 装配：各真实业务 owner 的 adapter/application
+ *   由对应 runtime composer 组装，模块只注册 transport 与生命周期
  * - 故障模块：注释掉即可，不影响其他模块启动
  *
  * RefArch Phase 6: this module is imported dynamically from the preflight entry
@@ -40,7 +39,6 @@ import { ensurePowerSyncPublication } from './shared/infrastructure/database/ens
 
 // === 模块导入 ===
 // 新模块（来自独立包，完全自治）
-import { composeGovernance } from './runtime/compose-governance';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
 import { composeRoutine } from './runtime/compose-routine';
@@ -272,6 +270,10 @@ async function bootstrap(): Promise<void> {
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPrismaHandler(prisma),
     userTimeContextPort: settingApiModule.userTimeContextPort,
+    goalReadPort: {
+      getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
+        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+    },
   });
   const taskDashboardUseCase = new GetTaskDashboardUseCase(
     taskComposed.taskPlanRepository,
@@ -350,7 +352,6 @@ async function bootstrap(): Promise<void> {
       aiComposed.portableCapability,
     ],
   });
-  const governanceApiModule = composeGovernance({ db: prisma });
   // App-local infrastructure modules: DB-backed dependencies are bound by the
   // runtime composer/factory closure BEFORE registration; register() only
   // mounts routes against the transport-only context.
@@ -372,7 +373,6 @@ async function bootstrap(): Promise<void> {
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
   const app = await bootstrapper
     // === 核心：白名单注册 ===
-    .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
     .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(routineApiModule) // ✅ Routine vNext configuration transport

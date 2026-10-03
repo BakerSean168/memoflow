@@ -164,4 +164,16 @@ describe('DeleteGoalRecordUseCase', () => {
     expect(result.error.code).toBe('NOT_FOUND');
     expect(recordRepository.delete).not.toHaveBeenCalled();
   });
+  it.each(['TaskAutomatic', 'TaskUserMeasurement'] as const)('rejects normal deletion of %s', async (authorship) => {
+    const record = GoalRecord.create({ keyResultId: 'kr-1' as never, identityId: 'identity-1' as never,
+      value: 2, authorship, source: { type: 'TASK_INSTANCE', id: 'task-source' } });
+    const goalRepository = createMockRepo<IGoalRepository>({ findByIdForIdentity: vi.fn().mockResolvedValue({ version: 1 }) });
+    const recordRepository = createMockRepo<IGoalRecordRepository>({ findByIdForIdentity: vi.fn().mockResolvedValue(record), delete: vi.fn() });
+    const useCase = new DeleteGoalRecordUseCase(goalRepository, recordRepository,
+      createInlineGoalWriteTransactionRunner({ goalRepository, goalRecordRepository: recordRepository }, new InMemoryGoalReliableOperationAdapter()));
+    const result = await useCase.execute('goal-1', 'kr-1', record.id, 'identity-1', 1);
+    expect(result).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(recordRepository.delete).not.toHaveBeenCalled();
+  });
+
 });

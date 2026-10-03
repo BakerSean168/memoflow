@@ -11,6 +11,8 @@ updated: 2026-04-19T00:00:00
 
 # 总览与边界
 
+> **2026-10-02 current status (PVC-AI-8121):** Goal/Task AI-owned editors and their visibility flags are retired. Normal editing uses GoalDialog, full TaskPlanDialog and Repository KnowledgeCaptureReviewDialog. Mastra retains draft/revision/receipt/recovery authority; Goal supporting Task/Knowledge overlays remain. The older flow examples below describe historical behavior. See [current AI module](../../../product/modules/ai.md).
+
 ## 先看核心结论
 
 当前版本的 AI 创建 Goal，不是“模型直接帮你把 goal 建进数据库”。
@@ -23,23 +25,23 @@ updated: 2026-04-19T00:00:00
 
 ## 两条链路
 
-| 链路 | 入口 | AI 先返回什么 | 谁做最终创建 | 是否需要二次确认 |
-| --- | --- | --- | --- | --- |
-| 聊天 goal draft | `AIChatView.vue` | `goal + keyResults` 草稿 | 前端调用 `useGoal.createGoal/addKeyResult` | 需要，用户编辑后手动点创建 |
-| Goal automation | `AIWorkspaceToolbox.vue` | `summary + plan + actions` | automation executor 调 goal/task 模块 | 需要，先 plan，再 confirm 执行 |
+| 链路            | 入口                     | AI 先返回什么              | 谁做最终创建                               | 是否需要二次确认               |
+| --------------- | ------------------------ | -------------------------- | ------------------------------------------ | ------------------------------ |
+| 聊天 goal draft | `AIChatView.vue`         | `goal + keyResults` 草稿   | 前端调用 `useGoal.createGoal/addKeyResult` | 需要，用户编辑后手动点创建     |
+| Goal automation | `AIWorkspaceToolbox.vue` | `summary + plan + actions` | automation executor 调 goal/task 模块      | 需要，先 plan，再 confirm 执行 |
 
 这两条链路共享 provider、planner、execution log 等基础设施，但它们不是同一个工作流的前后半段。
 
 ## 当前职责边界
 
-| 层 | 当前职责 | 不负责什么 |
-| --- | --- | --- |
-| Vue 页面 | 收集上下文、触发请求、展示草稿、做本地状态持久化 | 不直接决定最终 provider 配置，不直接拼 prompt |
-| `AIClientService` | UI 统一门面，转发到 HTTP / IPC adapter | 不做业务判断 |
-| controller | 校验 transport DTO，转 Result 错误 | 不做 prompt，不直接落库 |
-| application service | 解析 provider、调用 planning port、记录 execution log、决定是否执行 automation | 不直接访问前端状态 |
-| planning port / adapter | 调模型，返回结构化结果 | 不创建真实业务实体 |
-| `goal` / `task` 模块 | 创建真实 goal、KR、task template | 不负责 AI 推理 |
+| 层                      | 当前职责                                                                       | 不负责什么                                    |
+| ----------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| Vue 页面                | 收集上下文、触发请求、展示草稿、做本地状态持久化                               | 不直接决定最终 provider 配置，不直接拼 prompt |
+| `AIClientService`       | UI 统一门面，转发到 HTTP / IPC adapter                                         | 不做业务判断                                  |
+| controller              | 校验 transport DTO，转 Result 错误                                             | 不做 prompt，不直接落库                       |
+| application service     | 解析 provider、调用 planning port、记录 execution log、决定是否执行 automation | 不直接访问前端状态                            |
+| planning port / adapter | 调模型，返回结构化结果                                                         | 不创建真实业务实体                            |
+| `goal` / `task` 模块    | 创建真实 goal、KR、task template                                               | 不负责 AI 推理                                |
 
 ## 当前版本的数据分层
 

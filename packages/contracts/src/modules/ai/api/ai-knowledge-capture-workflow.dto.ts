@@ -73,8 +73,22 @@ export const KnowledgeNoteDraftContentSchema = KnowledgeNoteDraftSchema.omit({ t
   .strict();
 export type KnowledgeNoteDraftContent = z.infer<typeof KnowledgeNoteDraftContentSchema>;
 
+/** Host-neutral owner-selected persistence source. The planner never chooses this. */
+export const KnowledgeCaptureSourceSchema = z.discriminatedUnion('kind', [
+  z
+    .object({
+      kind: z.literal('repository'),
+      connectionId: z.string().trim().min(1).max(200),
+    })
+    .strict(),
+  z.object({ kind: z.literal('local_vault') }).strict(),
+]);
+export type KnowledgeCaptureSource = z.infer<typeof KnowledgeCaptureSourceSchema>;
+
 export const KnowledgeDraftSchema = KnowledgeNoteDraftContentSchema.extend({
   knowledgeDocumentId: KnowledgeDocumentIdSchema,
+  /** Selected by the native Repository owner surface, never by the planner. */
+  source: KnowledgeCaptureSourceSchema.optional(),
   revision: z.number().int().positive(),
 }).strict();
 export type KnowledgeDraft = z.infer<typeof KnowledgeDraftSchema>;

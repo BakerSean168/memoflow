@@ -64,6 +64,7 @@ export type TaskScheduleProjectionEventMap = Pick<
   | 'task:plan-resumed'
   | 'task:deleted'
   | 'task:plan-paused'
+  | 'task:plan-abandoned'
   | 'task:occurrence-completed'
   | 'task:occurrence-skipped'
   | 'task:occurrence-deleted'
@@ -78,6 +79,7 @@ export const taskScheduleProjectionEventNames = [
   'task:plan-resumed',
   'task:deleted',
   'task:plan-paused',
+  'task:plan-abandoned',
   'task:occurrence-completed',
   'task:occurrence-skipped',
   'task:occurrence-deleted',
@@ -328,6 +330,8 @@ export function createTaskScheduleProjectionEventHandlers(
     'task:deleted': async (event) =>
       handlers.deletePlan(event.taskPlanId, String(event.identityId)),
     'task:plan-paused': async (event) =>
+      handlers.deletePlan(event.taskPlanId, String(event.identityId)),
+    'task:plan-abandoned': async (event) =>
       handlers.deletePlan(event.taskPlanId, String(event.identityId)),
     'task:occurrence-completed': async (event) =>
       handlers.upsertPlan(event.taskPlanId, String(event.identityId)),

@@ -60,4 +60,16 @@ describe('ResponsiveSegmentedFilter', () => {
     expect(source).toContain('DropdownMenuRadioGroup');
     expect(source).toContain('ToggleGroup');
   });
+
+  it('supports stable compact collections with counts and compatibility option ids', () => {
+    const source = readFileSync(resolve(__dirname, './ResponsiveSegmentedFilter.vue'), 'utf8');
+
+    expect(source).toContain("collapseMode === 'dropdown'");
+    expect(source).toContain('expandedOptionTestIdPrefix');
+    expect(source).toContain('option.countTestId');
+    expect(source).toContain('currentOption?.count');
+    expect(source).toContain(
+      `:aria-selected="optionRole === 'tab' ? modelValue === option.value : undefined"`,
+    );
+  });
 });

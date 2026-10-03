@@ -24,14 +24,26 @@ export class GetTaskOccurrencesByDateRangeUseCase {
     identityId: string,
     startDate: number,
     endDate: number,
+    includeOverdueOpen = false,
   ): Promise<Result<GetTaskOccurrencesByRangeRes>> {
     const timeContext = await this.projection.getTimeContext(identityId);
     const time = createTimeFacade({ context: timeContext });
-    const occurrences = await this.occurrenceRepository.findByDateRange(
-      identityId,
-      time.calendar.toYmd(startDate),
-      time.calendar.toYmd(endDate),
-    );
+    const startYmd = time.calendar.toYmd(startDate);
+    const endYmd = time.calendar.toYmd(endDate);
+    const [rangeOccurrences, overdueOpenOccurrences] = await Promise.all([
+      this.occurrenceRepository.findByDateRange(identityId, startYmd, endYmd),
+      includeOverdueOpen
+        ? this.occurrenceRepository.findOpenBeforeDate(identityId, startYmd)
+        : Promise.resolve([]),
+    ]);
+    const occurrences = [
+      ...new Map(
+        [...overdueOpenOccurrences, ...rangeOccurrences].map((occurrence) => [
+          String(occurrence.id),
+          occurrence,
+        ]),
+      ).values(),
+    ];
 
     return ok({
       data: this.projection.projectManyWithContext(occurrences, timeContext),
