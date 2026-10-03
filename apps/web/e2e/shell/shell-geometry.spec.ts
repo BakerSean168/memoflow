@@ -9,11 +9,16 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
+// E2E reads the canonical pure geometry contract without loading the Vue shell barrel.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import {
+  AI_HARD_MIN,
+  BUSINESS_HARD_MIN,
+  COMPOSER_MAX,
+  PANEL_COLLAPSE_THRESHOLD,
+  computePanelGeometry,
+} from '../../../../packages/app-vue/src/layouts/shell/panel-geometry';
 import { boxOf, containsBox, DesktopGuestShellController } from './helpers/desktop-guest';
-
-const CHAT_MIN = 420;
-const PANEL_MIN = 360;
-const COMPOSER_MAX = 740;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MATRIX_SHOT_DIR = path.resolve(__dirname, '..', '..', 'test-results', 'shell-matrix');
@@ -33,7 +38,19 @@ async function openModuleFromCapsule(page: Page, moduleId: string): Promise<void
   await expect(page.getByTestId('business-panel')).toBeVisible({ timeout: 15_000 });
 }
 
-async function dragPanelToExtreme(page: Page, direction: 'max' | 'min'): Promise<void> {
+async function currentPanelGeometry(page: Page) {
+  const viewportWidth = await page.evaluate(() => window.innerWidth);
+  const sidebar = page.getByTestId('shell-sidebar-pane');
+  const sidebarOccupiedWidth = (await sidebar.isVisible())
+    ? (await boxOf(page, 'shell-sidebar-pane')).width
+    : 0;
+  return computePanelGeometry({ viewportWidth, sidebarOccupiedWidth });
+}
+
+async function dragPanelToExtreme(
+  page: Page,
+  direction: 'max' | 'min' | 'collapse',
+): Promise<void> {
   const resizer = page.getByTestId('business-panel-resizer');
   await expect(resizer).toBeVisible();
   await resizer.hover();
@@ -42,8 +59,16 @@ async function dragPanelToExtreme(page: Page, direction: 'max' | 'min'): Promise
 
   const startX = box.x + box.width / 2;
   const startY = box.y + box.height / 2;
-  // max panel => drag left; min panel => drag right
-  const endX = direction === 'max' ? 40 : box.x + 900;
+  const workspace = await boxOf(page, 'shell-workspace-main');
+  const geometry = await currentPanelGeometry(page);
+  const targetWidth =
+    direction === 'max'
+      ? geometry.panelMax + PANEL_COLLAPSE_THRESHOLD
+      : direction === 'min'
+        ? BUSINESS_HARD_MIN - PANEL_COLLAPSE_THRESHOLD / 2
+        : BUSINESS_HARD_MIN - PANEL_COLLAPSE_THRESHOLD - 1;
+  // Exercise clamping outside the legal split range, then separately cross the collapse threshold.
+  const endX = workspace.x + workspace.width - targetWidth;
   await page.mouse.move(startX, startY);
   await page.mouse.down();
   await page.mouse.move(endX, startY, { steps: 18 });
@@ -115,12 +140,13 @@ test.describe('Electron shell geometry matrix', () => {
     const shell = page.getByTestId('app-shell');
     await expect(shell).toHaveAttribute('data-shell-state', 'split');
 
+    const geometry = await currentPanelGeometry(page);
+    expect(geometry.canSplit).toBe(true);
     const panel = await boxOf(page, 'business-panel');
-    expect(panel.width).toBeGreaterThanOrEqual(440);
-    expect(panel.width).toBeLessThanOrEqual(490);
+    expect(Math.abs(panel.width - geometry.defaultPanelWidth)).toBeLessThanOrEqual(1);
 
     const aiBefore = await boxOf(page, 'shell-ai-column');
-    expect(aiBefore.width).toBeGreaterThanOrEqual(CHAT_MIN);
+    expect(aiBefore.width).toBeGreaterThanOrEqual(AI_HARD_MIN);
 
     const composer = await boxOf(page, 'global-composer');
     expect(containsBox(aiBefore, composer, 4)).toBe(true);
@@ -131,18 +157,23 @@ test.describe('Electron shell geometry matrix', () => {
     await dragPanelToExtreme(page, 'max');
     const aiMax = await boxOf(page, 'shell-ai-column');
     const panelMax = await boxOf(page, 'business-panel');
-    expect(aiMax.width).toBeGreaterThanOrEqual(CHAT_MIN - 1);
-    expect(panelMax.width).toBeGreaterThanOrEqual(PANEL_MIN);
+    expect(aiMax.width).toBeGreaterThanOrEqual(AI_HARD_MIN - 1);
+    expect(Math.abs(panelMax.width - geometry.panelMax)).toBeLessThanOrEqual(1);
 
     const composerMax = await boxOf(page, 'global-composer');
     expect(containsBox(aiMax, composerMax, 4)).toBe(true);
 
     await dragPanelToExtreme(page, 'min');
+    const panelMin = await boxOf(page, 'business-panel');
+    expect(Math.abs(panelMin.width - BUSINESS_HARD_MIN)).toBeLessThanOrEqual(1);
+
+    await dragPanelToExtreme(page, 'collapse');
     await expect(page.getByTestId('business-panel')).toBeHidden();
+    await expect(shell).toHaveAttribute('data-shell-state', 'chat');
     await page.getByTestId('shell-right-panel-toggle').click();
     await expect(page.getByTestId('business-panel')).toBeVisible();
     const panelRestored = await boxOf(page, 'business-panel');
-    expect(panelRestored.width).toBeGreaterThanOrEqual(PANEL_MIN - 1);
+    expect(panelRestored.width).toBeGreaterThanOrEqual(BUSINESS_HARD_MIN - 1);
 
     await saveMatrixShot(page, '1200x800-split-task.png');
   });
@@ -201,7 +232,7 @@ test.describe('Electron shell geometry matrix', () => {
   test('[P0] 1024 and 1440 viewports keep legal panel/AI geometry', async () => {
     const page = desktop.page;
 
-    // 1024 with sidebar open cannot split (workspace too narrow) -> focus.
+    // 1024 cannot fit the sidebar plus both hard minimums and content-well chrome -> focus.
     await desktop.setWindowSize({ width: 1024, height: 768 });
     await page.waitForTimeout(300);
     await openModuleFromCapsule(page, 'goal');
@@ -226,15 +257,18 @@ test.describe('Electron shell geometry matrix', () => {
 
     const panel = await boxOf(page, 'business-panel');
     const ai = await boxOf(page, 'shell-ai-column');
-    expect(panel.width).toBeGreaterThanOrEqual(PANEL_MIN);
-    expect(ai.width).toBeGreaterThanOrEqual(CHAT_MIN);
+    expect(panel.width).toBeGreaterThanOrEqual(BUSINESS_HARD_MIN);
+    expect(ai.width).toBeGreaterThanOrEqual(AI_HARD_MIN);
 
     const composer = await boxOf(page, 'global-composer');
     expect(containsBox(ai, composer, 4)).toBe(true);
 
     await dragPanelToExtreme(page, 'max');
     const aiMax = await boxOf(page, 'shell-ai-column');
-    expect(aiMax.width).toBeGreaterThanOrEqual(CHAT_MIN - 1);
+    const panelMax = await boxOf(page, 'business-panel');
+    const geometry = await currentPanelGeometry(page);
+    expect(Math.abs(aiMax.width - AI_HARD_MIN)).toBeLessThanOrEqual(1);
+    expect(Math.abs(panelMax.width - geometry.panelMax)).toBeLessThanOrEqual(1);
     await saveMatrixShot(page, '1440x900-split-task.png');
   });
 
