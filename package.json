@@ -6,7 +6,7 @@
     "email": "lulouhao@stu.sicau.edu.cn"
   },
   "description": "MemoFlow Nx monorepo for desktop, web, api, and shared domain packages",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "type": "module",
   "packageManager": "pnpm@11.20.0",
   "engines": {
