@@ -397,7 +397,7 @@ jobs:
     name: Web Flow Shard (${{ matrix.shard }})
     needs: [scope-detector, build]
     if: needs.scope-detector.result == 'success' && needs.build.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy: { fail-fast: false, matrix: { shard: ['1/4', '2/4', '3/4', '4/4'] } }
     env:
       DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
@@ -443,6 +443,22 @@ jobs:
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
         env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
       - run: pnpm exec playwright install chromium
+      - name: Provision visual regression fonts
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
+          # Browser caching does not provision host fonts; every shard needs this prerequisite.
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3
+          fc-cache -f
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk
+          font_family=$(fc-match -f '%{family}' 'Inter:lang=zh-cn')
+          echo "Visual font preflight: Inter:lang=zh-cn -> $font_family"
+          if [[ "$font_family" != 'Noto Sans CJK SC' ]]; then
+            echo "::error::Visual baselines require the Noto Sans CJK SC fallback for Chinese text."
+            exit 1
+          fi
       # start-api-server.ts builds the API immediately before launching its isolated process.
       - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
         env:

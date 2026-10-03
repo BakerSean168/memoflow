@@ -11317,6 +11317,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/visual-font-workflow.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/workflow-history-contract.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11831,7 +11839,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 31
+      "fileCount": 32
     },
     {
       "id": "memoflow:test:governance",
@@ -12723,6 +12731,6 @@
     "boundary-main": 8,
     "e2e": 64,
     "perf": 2,
-    "governance": 62
+    "governance": 63
   }
 }
