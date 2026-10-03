@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue';
+import { defineComponent, h, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -193,6 +193,7 @@ function setup(start = review()) {
 
   return {
     vm,
+    wrapper,
     runtime,
     options,
     session,
@@ -215,6 +216,24 @@ afterEach(() => {
 });
 
 describe('useAIKnowledgeCapture native Repository orchestration', () => {
+  it('reuses the registered owner review across rerender, review and restore without reprojecting its draft', async () => {
+    const { vm, runtime, session, manualEdit, ownerDraft, wrapper } = setup();
+    runtime.get.mockResolvedValue(review());
+    await vm.startKnowledgeCaptureRun();
+    manualEdit('Live owner edit');
+    wrapper.vm.$forceUpdate();
+    await nextTick();
+    await vm.openKnowledgeNativeReview();
+    await vm.syncKnowledgeCaptureRun('run-1');
+    await vm.openKnowledgeNativeReview();
+    expect(session.projectDraft).toHaveBeenCalledTimes(1);
+    expect(session.coordinateSubmit).toHaveBeenCalledTimes(1);
+    expect(ownerDraft().title).toBe('Live owner edit');
+    // Authoritative workflow refresh remains explicit; native opening locates the live owner.
+    expect(runtime.get).toHaveBeenCalledTimes(1);
+    expect(session.requestSubmit).not.toHaveBeenCalled();
+  });
+
   it('starts with client-safe input and projects the workflow draft into native Repository review', async () => {
     const { vm, runtime, session, ownerDraft } = setup();
     await vm.startKnowledgeCaptureRun();

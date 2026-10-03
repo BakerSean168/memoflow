@@ -652,6 +652,135 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(native.requestSubmit).not.toHaveBeenCalled();
     expect(runtime.resume).not.toHaveBeenCalled();
   });
+  it('retries owner truth after a shared pending read fails without opening a native session', async () => {
+    const runtime = createRuntimeStub();
+    runtime.get.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }),
+    );
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    let reject!: (cause: Error) => void;
+    native.readGoal.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, rejectRead) => {
+          reject = rejectRead;
+        }),
+    );
+    const first = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    const second = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    expect(native.readGoal).toHaveBeenCalledTimes(1);
+    reject(new Error('Owner unavailable'));
+    await Promise.all([first, second]);
+    expect(native.openCreate).not.toHaveBeenCalled();
+    await vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+    expect(native.openCreate).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
+  it('keeps a newer pending projection shared when the superseded read settles first', async () => {
+    const runtime = createRuntimeStub();
+    runtime.get
+      .mockResolvedValueOnce(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }))
+      .mockResolvedValue(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(2)) }));
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    let releaseOld!: () => void;
+    let releaseNew!: () => void;
+    native.readGoal
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            releaseOld = () => resolve(error('NOT_FOUND', 'Not created'));
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            releaseNew = () => resolve(error('NOT_FOUND', 'Not created'));
+          }),
+      );
+    const old = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    const newer = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+    releaseOld();
+    await old;
+    expect(native.openCreate).not.toHaveBeenCalled();
+    const repeat = vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+    releaseNew();
+    await Promise.all([newer, repeat]);
+    expect(native.openCreate).toHaveBeenCalledTimes(1);
+    expect(native.state!.keyResults[0].id).toBe('KeyResultId_revision-2-0');
+    wrapper.unmount();
+  });
+
+  it('shares an in-flight recovery probe across equivalent restore and review requests', async () => {
+    const runtime = createRuntimeStub();
+    const restored = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    runtime.get.mockResolvedValue(restored);
+    let release!: () => void;
+    native.readGoal.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(error('NOT_FOUND', 'Not created'));
+        }),
+    );
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const first = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    const second = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    const reviewRequest = vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(1);
+    release();
+    await Promise.all([first, second, reviewRequest]);
+    expect(native.openCreate).toHaveBeenCalledTimes(1);
+    native.state!.name = 'Live edit';
+    wrapper.vm.$forceUpdate();
+    await vm.syncGoalWorkflowRun('run-1');
+    await vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(1);
+    expect(native.state!.name).toBe('Live edit');
+    native.active = false;
+    await vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not share a pending recovery read with a newer review revision', async () => {
+    const runtime = createRuntimeStub();
+    runtime.get
+      .mockResolvedValueOnce(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }))
+      .mockResolvedValueOnce(
+        makeGoalRun({ status: 'suspended', suspension: review(makeDraft(2)) }),
+      );
+    let release!: () => void;
+    native.readGoal.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(error('NOT_FOUND', 'Not created'));
+        }),
+    );
+    const vm = mountComposable(makeOptions(runtime)).vm as unknown as ReturnType<
+      typeof useAIGoalWorkflow
+    >;
+    const old = vm.syncGoalWorkflowRun('run-1');
+    await Promise.resolve();
+    await vm.syncGoalWorkflowRun('run-1');
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+    expect(native.openCreate).toHaveBeenCalledTimes(1);
+    release();
+    await old;
+    expect(native.openCreate).toHaveBeenCalledTimes(1);
+    await vm.openGoalNativeReview();
+    expect(native.readGoal).toHaveBeenCalledTimes(2);
+  });
+
   it('reuses a live native review and preserves its unsaved edits', async () => {
     const runtime = createRuntimeStub();
     runtime.start.mockResolvedValue(

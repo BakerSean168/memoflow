@@ -12,6 +12,7 @@ import {
   SERVER_STATE_RUNTIME_KEY,
   type ServerStateRuntime,
 } from '../../../platform/server-state';
+import { SCHEDULE_CALENDAR_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { useSchedule } from './useSchedule';
 
 const i18n = createI18n({
@@ -72,6 +73,51 @@ function mountSchedule(
 describe('useScheduleCalendar shared owner cache', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('shares pending owner reads across windows and expires at the owner policy boundary', async () => {
+    const now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    const runtime = createTestServerStateRuntime();
+    const pinia = createTestPinia();
+    let release!: () => void;
+    const service = {
+      getSchedulesByAccount: vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              release = () => resolve(ok([scheduleEntry()]));
+            }),
+        )
+        .mockResolvedValue(ok([scheduleEntry()])),
+    };
+    const first = mountSchedule(runtime, pinia, service);
+    const second = mountSchedule(runtime, pinia, service);
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29);
+    try {
+      const reads = [
+        first.api.fetchCalendarEntries(start, end),
+        second.api.fetchCalendarEntries(end, end + 86_400_000),
+      ];
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(1);
+      release();
+      const [today, tomorrow] = await Promise.all(reads);
+      expect(today).toHaveLength(1);
+      expect(tomorrow).toEqual([]);
+      clock.mockReturnValue(now + SCHEDULE_CALENDAR_STALE_TIME_MS - 1);
+      await second.api.fetchCalendarEntries(start, end);
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(now + SCHEDULE_CALENDAR_STALE_TIME_MS);
+      await second.api.fetchCalendarEntries(start, end);
+      expect(service.getSchedulesByAccount).toHaveBeenCalledTimes(2);
+    } finally {
+      first.wrapper.unmount();
+      second.wrapper.unmount();
+      runtime.dispose();
+      clock.mockRestore();
+    }
   });
 
   it('reuses the fresh account schedule read after the consumer is unmounted and remounted', async () => {

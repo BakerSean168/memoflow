@@ -32,4 +32,31 @@ it('both adapters read only open facts strictly before the owner Product Time da
     ),
     ['owner', date],
   );
+  expect(getAll.mock.calls[0][0]).not.toMatch(/\bLIMIT\b/i);
+});
+
+it('both adapters bound Today to the owner date window before materializing occurrences', async () => {
+  const start = '2026-11-01' as Ymd;
+  const end = '2026-11-01' as Ymd;
+  const findMany = vi.fn().mockResolvedValue([]);
+  const prisma = new TaskOccurrencePrismaRepository({
+    taskOccurrence: { findMany },
+  } as unknown as PrismaClient);
+  await prisma.findByDateRange('owner', start, end);
+  expect(findMany).toHaveBeenCalledExactlyOnceWith({
+    where: { identityId: 'owner', scheduleDate: { gte: start, lte: end }, deletedAt: null },
+    orderBy: { scheduleDate: 'asc' },
+  });
+  const getAll = vi.fn().mockResolvedValue([]);
+  const sqlite = new PowerSyncTaskOccurrenceRepository({
+    getAll,
+  } as unknown as IElectronDatabaseTransaction);
+  await sqlite.findByDateRange('owner', start, end);
+  expect(getAll).toHaveBeenCalledExactlyOnceWith(
+    expect.stringContaining(
+      'identity_id = ? AND schedule_date >= ? AND schedule_date <= ? AND deleted_at IS NULL',
+    ),
+    ['owner', start, end],
+  );
+  expect(getAll.mock.calls[0][0]).not.toMatch(/\bLIMIT\b/i);
 });

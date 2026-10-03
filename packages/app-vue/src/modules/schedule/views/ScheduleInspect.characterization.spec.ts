@@ -112,7 +112,7 @@ const projection: CalendarEventProjection = {
 
 const planner = defineComponent({
   name: 'PlannerCalendar',
-  emits: ['event-click', 'select-range', 'day-click', 'mutation'],
+  emits: ['event-click', 'select-range', 'day-click', 'mutation', 'range-change'],
   setup:
     (_, { emit }) =>
     () =>
@@ -243,6 +243,29 @@ describe('Schedule CalendarEntry inspect — SCHED-4201', () => {
       expect(wrapper.findComponent(TaskOccurrenceQuickSurface).exists()).toBe(false);
     },
   );
+
+  it('repeated inspect and rerender paths reuse loaded owner facts without another range fetch', async () => {
+    const wrapper = await mountView();
+    wrapper.getComponent(planner).vm.$emit('range-change', {
+      view: 'month',
+      start: projection.start,
+      end: projection.end,
+    });
+    await flushPromises();
+    expect(mocks.fetchForRange).toHaveBeenCalledTimes(1);
+    const initialReads = mocks.fetchForRange.mock.calls.length;
+    for (let i = 0; i < 3; i++) {
+      await wrapper.get('[data-testid="entry-click"]').trigger('click');
+      await flushPromises();
+      expect(wrapper.getComponent(PlannerEventDialog).props('event')).toEqual(projection);
+      wrapper.vm.$forceUpdate();
+      wrapper.getComponent(PlannerEventDialog).vm.$emit('update:open', false);
+      await flushPromises();
+    }
+    expect(mocks.fetchForRange).toHaveBeenCalledTimes(initialReads);
+    expect(mocks.updateCalendarEntry).not.toHaveBeenCalled();
+    expect(mocks.deleteCalendarEntry).not.toHaveBeenCalled();
+  });
 
   it('reuses CreateScheduleDialog edit mode and sends the current version to the owner command', async () => {
     const wrapper = await mountView();

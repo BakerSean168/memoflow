@@ -1,5 +1,5 @@
 import { defineComponent, h } from 'vue';
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,6 +12,7 @@ import {
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
 } from '../../../platform/server-state';
+import { TASK_OCCURRENCE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';
@@ -258,6 +259,41 @@ describe('useTaskOccurrences template projection refresh', () => {
     });
     expect(useTaskStore().instances[0]?.checklistState[0]?.completed).toBe(true);
     expect(service.getPlan).toHaveBeenCalledWith('template-a');
+  });
+
+  it('shares pending range requests and expires at the Task occurrence policy boundary', async () => {
+    const now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    const { composable, service, runtime } = mountComposable();
+    let release!: () => void;
+    service.listOccurrencesByDateRange.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(ok([entity(instance('Pending'))]));
+        }),
+    );
+    const start = Date.UTC(2026, 8, 28);
+    const end = Date.UTC(2026, 8, 29) - 1;
+    try {
+      const reads = [
+        composable.fetchInstancesByDateRange(start, end),
+        composable.fetchInstancesByDateRange(start, end),
+      ];
+      await flushPromises();
+      expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(1);
+      release();
+      await Promise.all(reads);
+      clock.mockReturnValue(now + TASK_OCCURRENCE_STALE_TIME_MS - 1);
+      await composable.fetchInstancesByDateRange(start, end);
+      expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(1);
+      clock.mockReturnValue(now + TASK_OCCURRENCE_STALE_TIME_MS);
+      await composable.fetchInstancesByDateRange(start, end);
+      expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(2);
+      expect(service.getPlan).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+      runtime.dispose();
+    }
   });
 
   it('deduplicates repeated range reads inside the stale window and only refetches when forced', async () => {

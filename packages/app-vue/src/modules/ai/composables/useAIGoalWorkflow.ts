@@ -61,8 +61,29 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   let submitted: { runId: string; revision: number } | null = null;
   const goalOwnerSubmitted = ref(false);
   let nativeProjection: Promise<void> = Promise.resolve();
+  let pendingProjection: { runId: string; revision: number; promise: Promise<void> } | null = null;
 
-  async function projectNativeReview(
+  // Equivalent restores/review clicks share the recovery probe until owner registration.
+  // This is session-local in-flight work, not a cache of owner truth or NOT_FOUND.
+  function projectNativeReview(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
+    const review = run.suspension;
+    if (review?.type !== 'goal_draft_review') return Promise.resolve();
+    if (pendingProjection?.runId === run.runId && pendingProjection.revision === review.revision)
+      return pendingProjection.promise;
+    const pending = {
+      runId: run.runId,
+      revision: review.revision,
+      promise: performNativeReview(run).finally(() => {
+        if (pendingProjection === pending) pendingProjection = null;
+      }),
+    };
+    pendingProjection = pending;
+    return pending.promise;
+  }
+
+  async function performNativeReview(
     run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
   ): Promise<void> {
     const review = run.suspension;
@@ -175,6 +196,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   }
 
   function retireNativeReview(): void {
+    pendingProjection = null;
     projectionEpoch += 1;
     if (nativeSession) {
       try {

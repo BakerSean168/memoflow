@@ -195,6 +195,115 @@ afterEach(() => {
 });
 
 describe('useAITaskWorkflow native owner orchestration', () => {
+  it('retries owner truth after a shared pending read fails without opening a native session', async () => {
+    const { vm, runtime } = setup();
+    runtime.get.mockResolvedValue(review());
+    let reject!: (cause: Error) => void;
+    mocks.getPlan.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, rejectRead) => {
+          reject = rejectRead;
+        }),
+    );
+    const first = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    const second = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(1);
+    reject(new Error('Owner unavailable'));
+    await Promise.all([first, second]);
+    expect(mocks.open).not.toHaveBeenCalled();
+    await vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a newer pending projection shared when the superseded read settles first', async () => {
+    const { vm, runtime, session } = setup();
+    runtime.get.mockResolvedValueOnce(review(1)).mockResolvedValue(review(2, 'New revision'));
+    let releaseOld!: () => void;
+    let releaseNew!: () => void;
+    mocks.getPlan
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            releaseOld = () => resolve(error('NOT_FOUND', 'Not created'));
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            releaseNew = () => resolve(error('NOT_FOUND', 'Not created'));
+          }),
+      );
+    const old = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    const newer = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+    releaseOld();
+    await old;
+    expect(mocks.open).not.toHaveBeenCalled();
+    const repeat = vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+    releaseNew();
+    await Promise.all([newer, repeat]);
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+    expect(session.readDraftState().draft.title).toBe('New revision');
+  });
+
+  it('shares equivalent in-flight restore/review reads and rechecks a retired owner session', async () => {
+    const { vm, runtime, session, manualEdit } = setup();
+    runtime.get.mockResolvedValue(review());
+    let release!: () => void;
+    mocks.getPlan.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(error('NOT_FOUND', 'Not created'));
+        }),
+    );
+    const first = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    const second = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    const reviewRequest = vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(1);
+    release();
+    await Promise.all([first, second, reviewRequest]);
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+    manualEdit('Live edit');
+    await vm.syncTaskWorkflowRun('run-1');
+    await vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(1);
+    expect(session.readDraftState().draft.title).toBe('Live edit');
+    session.requestCancel();
+    await vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not share a pending owner probe with a newer review revision', async () => {
+    const { vm, runtime, session } = setup();
+    runtime.get.mockResolvedValueOnce(review(1)).mockResolvedValueOnce(review(2, 'New revision'));
+    let release!: () => void;
+    mocks.getPlan.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve(error('NOT_FOUND', 'Not created'));
+        }),
+    );
+    const old = vm.syncTaskWorkflowRun('run-1');
+    await Promise.resolve();
+    await vm.syncTaskWorkflowRun('run-1');
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+    release();
+    await old;
+    expect(mocks.open).toHaveBeenCalledTimes(1);
+    expect(session.readDraftState().draft.title).toBe('New revision');
+    await vm.openTaskNativeReview();
+    expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+  });
+
   it('starts a client-safe run and projects full native fields without owner persistence', async () => {
     const { vm, runtime, session, submit } = setup();
     await vm.startTaskAgentRun();

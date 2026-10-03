@@ -412,6 +412,59 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     });
   });
 
+  it('loads only the root until a visible branch is expanded, then reuses that branch without fetching bodies', async () => {
+    const service = createService({
+      listKnowledgeNoteTree: vi.fn(async (request?: { parent?: string }) =>
+        ok({
+          parent: request?.parent ?? '',
+          nodes: request?.parent
+            ? [treeNote({ relativePath: 'notes/architecture.md' })]
+            : [
+                {
+                  kind: 'directory' as const,
+                  name: 'notes',
+                  relativePath: 'notes',
+                  noteCount: 1,
+                  hasChildren: true as const,
+                },
+                {
+                  kind: 'directory' as const,
+                  name: 'other',
+                  relativePath: 'other',
+                  noteCount: 1000,
+                  hasChildren: true as const,
+                },
+              ],
+          metadata: null,
+        }),
+      ),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(1);
+    expect(service.listKnowledgeNoteTree).toHaveBeenLastCalledWith(
+      expect.objectContaining({ parent: '' }),
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    expect(service.listKnowledgeNoteProjections).not.toHaveBeenCalled();
+    expect(service.getKnowledgeNoteProjection).not.toHaveBeenCalled();
+    const catalog = wrapper.getComponent(KnowledgeNoteCatalog);
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(2);
+    expect(service.listKnowledgeNoteTree).toHaveBeenLastCalledWith(
+      expect.objectContaining({ parent: 'notes' }),
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    catalog.vm.$emit('toggle-directory', 'notes');
+    await flushPromises();
+    expect(service.listKnowledgeNoteTree).toHaveBeenCalledTimes(2);
+    expect(service.getKnowledgeNoteProjection).not.toHaveBeenCalled();
+    expect(service.listKnowledgeNoteProjections).not.toHaveBeenCalled();
+  });
+
   it('loads the lightweight file tree, shows the real total, and fetches only selected note detail', async () => {
     const listKnowledgeNoteTree = vi.fn(async () =>
       ok({

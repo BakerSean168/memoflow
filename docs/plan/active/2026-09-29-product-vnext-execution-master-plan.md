@@ -1520,6 +1520,8 @@ Product DB, or exporter. B3 proved native parity for all five rules and all thre
 
 ## PVC-UI-9003 — Performance/query closure
 
+**Execution (2026-10-03): Accepted / frozen after delegated implementation and independent review.** Task Today, capsule stale reuse/hover dedupe, Knowledge lazy catalog, and Schedule owner cache were already correct; missing deterministic bound/concurrency/expiry/lazy/inspect contracts were added without introducing a new cache layer. The only production repair is session-local in-flight projection dedupe in Goal/Task AI native workflows (3 equivalent recovery reads → 1), keyed by exact run/revision and cleared on settle/retirement; failures are not cached and newer-revision/owner-truth authority remains intact. Final delegated evidence passed App-Vue **8 files / 104 tests**, surface contracts **9 / 94**, capsule owner queries **4 / 19**, Task owner **4 / 47**, relevant uncached typechecks/lint, inventory/target/sync and full uncached governance. Independent acceptance reran the two AI workflow specs plus real Capsule reuse (**3 / 60**) and Task query core (**2 / 8**) uncached; both passed. No visual baselines changed; no latency/load/browser-trace claim, arbitrary Task row cap, global cache or Schedule pagination is made. Final integration reconciles the docs-only UI-9002 canonical commit `10d4e098dbf`. See [six-check evidence, exact commands and non-claims](../archive/2026-10-03-pvc-ui-9003-performance-query-closure.md).
+
 **Checks:**
 
 - Task Today bounded query；
