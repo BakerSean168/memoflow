@@ -52,7 +52,7 @@ export class DesktopGoalPlanMutationAdapter implements GoalPlanMutationPort {
     return ok({
       goalId: String(result.data.goalId),
       goalVersion: result.data.goalVersion,
-      goalStatus: result.data.readModel.goal.status,
+      goalStatus: result.data.readModel.status,
       keyResultIds: result.data.affectedEntityIds.keyResultIds.map(String),
     });
   }
