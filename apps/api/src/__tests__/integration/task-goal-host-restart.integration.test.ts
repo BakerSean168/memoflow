@@ -28,6 +28,14 @@ import { createTimeFacade } from '@memoflow/time';
 
 const execFileAsync = promisify(execFile);
 
+function composeGoalHost() {
+  return createGoalPrismaModule(prisma, {
+    taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+    userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
+  });
+}
+
 function composeRestartedTaskHost(): TaskApiModuleDef {
   const taskRepositories = createTaskPrismaRepositories(prisma);
   const runtimeContributions = [
@@ -37,6 +45,7 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
   const instance = createTaskModule({
     ...taskRepositories,
     userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    goalReadPort: composeGoalHost().api,
     runtimeContributions,
   });
 
@@ -57,11 +66,7 @@ describe('API host Task -> Goal restart recovery', () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
-    const goalModule = createGoalPrismaModule(prisma, {
-      taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
-      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
-    });
+    const goalModule = composeGoalHost();
     const createdGoal = await goalModule.api.createGoal(
       {
         name: 'Recover Task contribution after restart',
@@ -92,6 +97,7 @@ describe('API host Task -> Goal restart recovery', () => {
 
     const taskModule = createTaskPrismaModule(prisma, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      goalReadPort: goalModule.api,
     });
     const taskDate = createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(
       Date.now(),
@@ -108,7 +114,7 @@ describe('API host Task -> Goal restart recovery', () => {
         contribution: { value: 2, trigger: TaskGoalBindingTrigger.EachCompletion },
       },
     });
-    expect(createdTask.ok).toBe(true);
+    expect(createdTask.ok, JSON.stringify(createdTask)).toBe(true);
     if (!createdTask.ok) return;
 
     const taskOccurrence = await prisma.taskOccurrence.findFirstOrThrow({
