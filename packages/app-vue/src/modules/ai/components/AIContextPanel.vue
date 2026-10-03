@@ -32,16 +32,16 @@ const { t } = useI18n();
     <div class="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
       <div class="min-w-0">
         <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          {{ t('aiAssistant.chatPage.context.title') }}
+          {{ t('aiAssistant.chatPage.workbench.title') }}
         </p>
         <p class="truncate text-sm font-medium text-foreground">{{ toolLabel }}</p>
       </div>
       <Button
         variant="ghost"
         size="icon"
-        :aria-label="t('aiAssistant.chatPage.context.hide')"
+        :aria-label="t('aiAssistant.chatPage.workbench.hide')"
         :class="embedded ? 'h-8 w-8' : 'h-8 w-8 md:hidden'"
-        :title="t('aiAssistant.chatPage.context.hide')"
+        :title="t('aiAssistant.chatPage.workbench.hide')"
         data-testid="ai-context-panel-close"
         @click="$emit('close')"
       >

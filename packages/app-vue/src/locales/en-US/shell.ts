@@ -55,6 +55,9 @@ export default {
     today: 'Today',
     last7Days: 'Last 7 days',
     earlier: 'Earlier',
+    searchPlaceholder: 'Search conversations…',
+    noMatches: 'No matching conversations',
+    clearSearch: 'Clear conversation search',
     resize: 'Resize conversation sidebar',
   },
   home: {

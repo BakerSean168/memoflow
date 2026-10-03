@@ -34,6 +34,17 @@ export default {
     modelSelectorLabel: 'AI model',
     emptyModels:
       'No model is available yet. Open Settings to configure an AI provider and sync models.',
+    workbench: {
+      title: 'Workbench',
+      show: 'Show workbench',
+      hide: 'Hide workbench',
+      empty:
+        'The workbench has no structured artifact yet — ask AI to create a goal, task, or note.',
+    },
+    message: {
+      copy: 'Copy',
+      copied: 'Copied',
+    },
     context: {
       title: 'Context',
       show: 'Show context',

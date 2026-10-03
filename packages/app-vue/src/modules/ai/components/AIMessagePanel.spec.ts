@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import AIMessagePanel from './AIMessagePanel.vue';
@@ -28,6 +28,7 @@ const i18n = createI18n({
           emptyTitle: 'Start',
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
+          message: { copy: 'Copy', copied: 'Copied' },
           toolIntro: {
             goalCreate: { title: 'Goal mode', description: 'Goal desc' },
             taskCreate: { title: 'Task mode', description: 'Task desc' },
@@ -147,6 +148,34 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.emitted('configure-ai')).toHaveLength(1);
     expect(wrapper.emitted('create-goal')).toHaveLength(1);
     expect(wrapper.emitted('quick-task')).toHaveLength(1);
+  });
+
+  it('renders assistant Markdown and exposes a quiet copy action', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'm-assistant',
+            role: 'assistant',
+            content: '## Result\n\n- one\n- two',
+            status: 'success',
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.get('[data-testid="ai-message-markdown"] h2').text()).toBe('Result');
+    expect(wrapper.findAll('[data-testid="ai-message-markdown"] li')).toHaveLength(2);
+    await wrapper.get('[data-testid="ai-message-copy"]').trigger('click');
+    expect(writeText).toHaveBeenCalledWith('## Result\n\n- one\n- two');
   });
 
   it('shows workflow surface slot when requested', () => {

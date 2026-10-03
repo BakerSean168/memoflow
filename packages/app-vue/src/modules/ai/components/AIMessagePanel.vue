@@ -5,7 +5,7 @@
     data-testid="ai-message-panel"
   >
     <div
-      class="mx-auto flex w-full max-w-3xl flex-col gap-6"
+      class="mx-auto flex w-full max-w-[52rem] flex-col gap-7"
       role="log"
       aria-live="polite"
       aria-relevant="additions text"
@@ -49,9 +49,10 @@
             >
               <Bot class="h-3.5 w-3.5" />
             </div>
-            <div class="min-w-0 flex-1 pt-0.5 text-sm leading-7 text-foreground">
-              <p class="whitespace-pre-wrap break-words">
-                {{ item.content || typingPlaceholder(item) }}
+            <div class="group/message min-w-0 flex-1 pt-0.5">
+              <AIMessageContent v-if="item.content.trim()" :content="item.content" />
+              <p v-else class="text-sm leading-7 text-muted-foreground">
+                {{ typingPlaceholder(item) }}
               </p>
               <p
                 v-if="item.status === 'aborted' || item.status === 'error'"
@@ -61,6 +62,36 @@
               >
                 {{ getMessageStatusLabel(item) }}
               </p>
+              <div
+                v-if="item.content.trim()"
+                class="mt-1.5 flex h-7 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/message:opacity-100"
+                data-testid="ai-message-actions"
+              >
+                <button
+                  type="button"
+                  class="inline-flex h-7 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                  :title="
+                    copiedMessageId === item.id
+                      ? t('aiAssistant.chatPage.message.copied')
+                      : t('aiAssistant.chatPage.message.copy')
+                  "
+                  :aria-label="
+                    copiedMessageId === item.id
+                      ? t('aiAssistant.chatPage.message.copied')
+                      : t('aiAssistant.chatPage.message.copy')
+                  "
+                  data-testid="ai-message-copy"
+                  @click="copyMessage(item.id, item.content)"
+                >
+                  <Check v-if="copiedMessageId === item.id" class="h-3.5 w-3.5" />
+                  <Copy v-else class="h-3.5 w-3.5" />
+                  <span>{{
+                    copiedMessageId === item.id
+                      ? t('aiAssistant.chatPage.message.copied')
+                      : t('aiAssistant.chatPage.message.copy')
+                  }}</span>
+                </button>
+              </div>
             </div>
           </div>
         </article>
@@ -178,8 +209,13 @@
               >
                 <component :is="entry.icon" class="h-3.5 w-3.5" />
               </span>
-              <span class="truncate font-medium">
-                {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.title`) }}
+              <span class="min-w-0 flex-1">
+                <span class="block truncate font-medium text-foreground">
+                  {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.title`) }}
+                </span>
+                <span class="mt-0.5 block line-clamp-1 text-xs text-muted-foreground">
+                  {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`) }}
+                </span>
               </span>
             </button>
           </div>
@@ -199,9 +235,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import {
   Bot,
+  Check,
+  Copy,
   ClipboardCheck,
   NotebookPen,
   ImageIcon,
@@ -213,6 +251,7 @@ import {
   Target,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import AIMessageContent from './AIMessageContent.vue';
 import { getToolLocaleKey, type ChatItem, type WorkflowMode } from '../composables/types';
 import { useAIFormatters } from '../composables/useAIFormatters';
 
@@ -246,6 +285,27 @@ const shortcutEntries = [
 ];
 
 const viewport = ref<HTMLElement | null>(null);
+const copiedMessageId = ref<string | null>(null);
+let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function copyMessage(messageId: string, content: string) {
+  if (!content.trim() || typeof navigator === 'undefined' || !navigator.clipboard?.writeText)
+    return;
+  try {
+    await navigator.clipboard.writeText(content);
+  } catch {
+    return;
+  }
+  copiedMessageId.value = messageId;
+  if (copyResetTimer) clearTimeout(copyResetTimer);
+  copyResetTimer = setTimeout(() => {
+    if (copiedMessageId.value === messageId) copiedMessageId.value = null;
+  }, 1600);
+}
+
+onBeforeUnmount(() => {
+  if (copyResetTimer) clearTimeout(copyResetTimer);
+});
 
 defineExpose({ viewport });
 
