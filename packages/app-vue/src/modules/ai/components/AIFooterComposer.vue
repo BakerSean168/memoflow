@@ -479,7 +479,7 @@ const footerPaddingClass = computed(() => {
 });
 
 const maxWidthClass = computed(() =>
-  props.density === 'comfortable' ? 'max-w-[50rem]' : 'max-w-none',
+  props.density === 'comfortable' ? 'max-w-[52rem]' : 'max-w-none',
 );
 
 defineExpose({ composerTextarea });

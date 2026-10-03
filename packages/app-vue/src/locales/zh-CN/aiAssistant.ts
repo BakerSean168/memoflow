@@ -29,6 +29,16 @@ export default {
     modelPending: '未选择模型',
     modelSelectorLabel: 'AI 模型',
     emptyModels: '当前没有可用模型，可以前往设置配置 AI 提供方和模型。',
+    workbench: {
+      title: '工作台',
+      show: '显示工作台',
+      hide: '隐藏工作台',
+      empty: '工作台暂无结构化产物——让 AI 创建目标、任务或知识笔记。',
+    },
+    message: {
+      copy: '复制',
+      copied: '已复制',
+    },
     context: {
       title: '上下文',
       show: '显示上下文',

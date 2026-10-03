@@ -3628,6 +3628,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3886,6 +3894,14 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/modules/ai/components/AIContextPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3911,6 +3927,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11975,7 +11999,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 267
+      "fileCount": 270
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12692,7 +12716,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1120,
+    "unit": 1123,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

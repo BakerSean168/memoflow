@@ -240,7 +240,10 @@ const conversationGroups = computed(() => {
   const todayMs = Number(time.calendar.startOfDay(Date.now()));
   const weekMs = Number(time.calendar.addDays(todayMs, -6));
 
-  const buckets: Record<'today' | 'last7Days' | 'earlier', { id: string; title: string }[]> = {
+  const buckets: Record<
+    'today' | 'last7Days' | 'earlier',
+    { id: string; title: string; timestamp: number }[]
+  > = {
     today: [],
     last7Days: [],
     earlier: [],
@@ -250,16 +253,29 @@ const conversationGroups = computed(() => {
     const entry = {
       id: String(item.id),
       title: (item as { name?: string }).name || t('common.untitled'),
+      timestamp: ts,
     };
     if (ts >= todayMs) buckets.today.push(entry);
     else if (ts >= weekMs) buckets.last7Days.push(entry);
     else buckets.earlier.push(entry);
   }
+  for (const bucket of Object.values(buckets)) {
+    bucket.sort((a, b) => b.timestamp - a.timestamp);
+  }
   return (
     [
-      { labelKey: 'shell.conversation.today', items: buckets.today },
-      { labelKey: 'shell.conversation.last7Days', items: buckets.last7Days },
-      { labelKey: 'shell.conversation.earlier', items: buckets.earlier },
+      {
+        labelKey: 'shell.conversation.today',
+        items: buckets.today.map(({ id, title }) => ({ id, title })),
+      },
+      {
+        labelKey: 'shell.conversation.last7Days',
+        items: buckets.last7Days.map(({ id, title }) => ({ id, title })),
+      },
+      {
+        labelKey: 'shell.conversation.earlier',
+        items: buckets.earlier.map(({ id, title }) => ({ id, title })),
+      },
     ] as const
   ).filter((group) => group.items.length > 0);
 });
@@ -866,7 +882,6 @@ function panelCacheKey(
               @new-conversation="handleNewConversation"
               @select-conversation="handleSelectConversation"
               @delete-conversation="handleDeleteConversation"
-              @open-search="handleNewConversation"
               @open-settings="openSettings"
               @open-account="openAccount"
               @open-cloud-connection="openCloudConnection"

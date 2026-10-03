@@ -55,6 +55,9 @@ export default {
     today: '今天',
     last7Days: '近 7 天',
     earlier: '更早',
+    searchPlaceholder: '搜索会话…',
+    noMatches: '没有匹配的会话',
+    clearSearch: '清空会话搜索',
     resize: '调整会话侧栏宽度',
   },
   home: {

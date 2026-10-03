@@ -67,9 +67,18 @@
         class="flex h-11 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
       >
         <div class="flex w-full items-center justify-between gap-3">
-          <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
-            {{ currentConversationLabel }}
-          </h1>
+          <div class="flex min-w-0 items-center gap-2">
+            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
+              {{ currentConversationLabel }}
+            </h1>
+            <span
+              v-if="toolMode !== 'chat'"
+              data-testid="ai-active-intent"
+              class="hidden shrink-0 rounded-full border border-border/60 bg-muted/35 px-2 py-0.5 text-[10px] font-medium text-muted-foreground @sm/ai:inline-flex"
+            >
+              {{ currentToolLabel }}
+            </span>
+          </div>
           <div class="flex items-center gap-2">
             <AIRuntimeUsageBadge :usage="lastRuntimeUsage" />
             <div class="flex items-center gap-1 md:hidden">
@@ -90,14 +99,14 @@
                 size="icon"
                 :aria-label="
                   contextPanelOpen
-                    ? t('aiAssistant.chatPage.context.hide')
-                    : t('aiAssistant.chatPage.context.show')
+                    ? t('aiAssistant.chatPage.workbench.hide')
+                    : t('aiAssistant.chatPage.workbench.show')
                 "
                 class="h-8 w-8"
                 :title="
                   contextPanelOpen
-                    ? t('aiAssistant.chatPage.context.hide')
-                    : t('aiAssistant.chatPage.context.show')
+                    ? t('aiAssistant.chatPage.workbench.hide')
+                    : t('aiAssistant.chatPage.workbench.show')
                 "
                 data-testid="ai-context-panel-toggle"
                 @click="toggleContextPanel"
@@ -132,7 +141,7 @@
       />
 
       <div v-show="!composerOnly" class="px-4 @md/ai:px-6">
-        <div class="mx-auto w-full max-w-3xl">
+        <div class="mx-auto w-full max-w-[52rem]">
           <AIWorkflowActionBar
             :tool-mode="toolMode"
             :workflow-status-text="workflowStatusText"
@@ -252,7 +261,7 @@
           class="rounded-lg border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground"
           data-testid="ai-context-empty-state"
         >
-          {{ t('aiAssistant.chatPage.context.empty') }}
+          {{ t('aiAssistant.chatPage.workbench.empty') }}
         </div>
       </AIContextPanel>
     </Teleport>
