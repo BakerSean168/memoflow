@@ -1,10 +1,21 @@
 # MemoFlow Product vNext Convergence — UI + Interaction + Logic Closure
 
-Date: 2026-09-29  
-Status: active planning / implementation branch opened  
-Branch: `product/vnext-convergence`  
-Base snapshot: `main@d3a32135709` (PR #398 merged)
-Parent integration status: PR `#398` has landed on `main`; this branch has been rebased onto that merged baseline.
+Date: 2026-09-29
+
+Updated: 2026-10-03 UTC
+
+Status: completed / merged
+
+Final integration branch: `product/vnext-batch1-task-lifecycle` (PR #403)
+
+Merged main snapshot: `main@8546e3dfffe8ca4f28024f66ab3a0378c5a1aabf`
+Integration status: PR #403, "feat: complete Product vNext convergence", has landed on `main` from exact head `f1068531413f65d5f47e9c78f48365c73a5c370a`.
+
+## Completion / closeout record
+
+Product vNext implementation is complete. Exact-head PR CI, post-merge main CI and Coverage, Publish Main Candidate (including staging promotion), and Prepare Release all succeeded. The [Execution Master Plan closeout record](./2026-09-29-product-vnext-execution-master-plan.md#completion--closeout-record) contains the authoritative run links and closure evidence; all implementation tickets are closed/accepted, including Accepted / frozen UI-9004.
+
+At closeout, release PR #387 (`chore(main): release 0.15.0`) remains OPEN with `autorelease: pending` and all checks green. Release PR merge, formal Release publication, and Production rollout are outside this closeout. Both completed plan files retain their existing active paths for stable historical references; the execution narrative below records the original plan.
 
 ## 0. Executive decision
 
@@ -77,22 +88,13 @@ Observable outcomes:
 
 ## 2.1 Branch state
 
-PR #398 has merged into `main`.
-
-This branch is now based on:
+The final integration branch `product/vnext-batch1-task-lifecycle` was merged through PR #403 into:
 
 ```text
-main@d3a32135709
+main@8546e3dfffe8ca4f28024f66ab3a0378c5a1aabf
 ```
 
-The previous UI integration head is already contained in this `main` history, including the final follow-up commit from that branch.
-
-Therefore:
-
-- `product/vnext-convergence` now directly owns the next product convergence cycle;
-- no duplicate UI-integration commits should exist above `main`;
-- future work should rebase from current `origin/main` when necessary rather than from the retired integration branch;
-- the remaining branch diff should contain only Product vNext planning/implementation work.
+Its exact PR head was `f1068531413f65d5f47e9c78f48365c73a5c370a`. The earlier PR #398 baseline (`main@d3a32135709`) is historical context already contained in the merged history. Product vNext implementation is complete; this plan no longer owns an open implementation branch.
 
 ## 2.2 Proven current primitives
 

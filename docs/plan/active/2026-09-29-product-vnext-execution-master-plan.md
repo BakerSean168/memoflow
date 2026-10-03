@@ -13,13 +13,26 @@ tags:
   - ui
   - shell
   - governance
-status: active
+status: completed
 created: 2026-09-29T13:00:00+08:00
-updated: 2026-09-30T08:26:17Z
+updated: 2026-10-03T12:54:04Z
 description: MemoFlow Product vNext 全量执行拆分方案，将 Goal、Task 与剩余模块审查结果转成可独立实施/审查的 tickets
 ---
 
 # MemoFlow Product vNext — Execution Master Plan
+
+## Completion / closeout record
+
+Product vNext implementation is **completed / merged** as of 2026-10-03 UTC. All implementation tickets are closed/accepted; UI-9004 is Accepted / frozen.
+
+- [PR #403 — feat: complete Product vNext convergence](https://github.com/BakerSean168/memoflow/pull/403) merged from `product/vnext-batch1-task-lifecycle`, with exact PR head `f1068531413f65d5f47e9c78f48365c73a5c370a`, into `main` at merge commit `8546e3dfffe8ca4f28024f66ab3a0378c5a1aabf`.
+- Exact-head [PR CI run 37121735318](https://github.com/BakerSean168/memoflow/actions/runs/37121735318): all checks **SUCCESS**, including 4/4 Web Flow shards and visual matrices.
+- Post-merge [main CI run 37122470359](https://github.com/BakerSean168/memoflow/actions/runs/37122470359): **SUCCESS**, including Scope Detector, Static Analysis, Build, Typecheck, Unit Tests, Verification Children, Governance, all Oracles, 4/4 Web Flow shards/visual matrices, and Delivery Observation. Post-merge [Coverage run 37122470370](https://github.com/BakerSean168/memoflow/actions/runs/37122470370): **SUCCESS**.
+- [Publish Main Candidate run 37123251180](https://github.com/BakerSean168/memoflow/actions/runs/37123251180): **SUCCESS**, including API/Web/Migrator images, canonical `candidate-set/v1`, staging runtime, and coherent `staging-latest` promotion. [Prepare Release run 37123251235](https://github.com/BakerSean168/memoflow/actions/runs/37123251235): **SUCCESS**.
+
+**Release / production boundary:** At closeout, [release PR #387 — chore(main): release 0.15.0](https://github.com/BakerSean168/memoflow/pull/387) remains **OPEN**, labeled `autorelease: pending`, with all checks green. Merging that PR, publishing a formal Release, and Production rollout are intentionally outside this implementation closeout; staging candidate success does not imply those steps are complete.
+
+This completed plan remains at `docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md` solely to preserve stable historical references. Its `status: completed` is authoritative; the directory name does not indicate ongoing implementation. Historical execution evidence and ticket-specific acceptance records below remain unchanged.
 
 ## 1. 目的
 
