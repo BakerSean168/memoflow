@@ -61,7 +61,7 @@ Status/evidence: active execution master plan and this archive note.
 
 ## Validation
 
-- Focused App-Vue: **11 files / 112 tests passed**, including ProductDialogShell, ProductOverlayStateRecipes, Reka contracts, ModuleCapsule, BusinessPanel, WindowHeader, panel-responsive contracts, TaskPlanDialog/Form, GoalDialog and CreateScheduleDialog. Reproduction command below.
+- Focused App-Vue reviewer acceptance: **11 files / 112 tests passed**, including ProductDialogShell, ProductOverlayStateRecipes, Reka contracts, ModuleCapsule, BusinessPanel, WindowHeader, panel-responsive contracts, TaskPlanDialog/Form, GoalDialog and CreateScheduleDialog. Reproduction command below.
 - Final reviewer follow-up: BusinessPanel/WindowHeader **2 files / 17 tests passed**; the added Home/Workflow remembered-active-tab cases keep a single roving tab stop and restore the remembered tab only on the business surface.
 - Product Sheet close-label localization review: Schedule inspect/settings focused suite **3 files / 45 tests passed**; both narrow Planner sheets assert the zh-CN accessible close name and reject the English fallback. App-Vue typecheck passed again after all direct Sheet consumers were localized.
 - `NX_DAEMON=false pnpm nx run ui-vue-shadcn:test --skip-nx-cache`: **2 files / 10 tests passed**.
@@ -77,7 +77,7 @@ Status/evidence: active execution master plan and this archive note.
 
 No Electron OS host, assistive-technology session, or authenticated prod-like deployment was run. Browser evidence uses the existing production-component fixtures with deterministic owner doubles. Compact owner-specific button variants were not globally enlarged; repaired sizes follow the workspace shell contract. No product-wide accessibility compliance claim is made.
 
-The known full App-Vue shell-width/Task-capsule failures and contracts stale Goal index failure were not repaired or rerun; those suites are outside this scoped closure. An optional Nx visual-fixture typecheck initially encountered a concurrent dependency clean/build race, not a source error; dependency declarations were restored and the direct final fixture typecheck passed. Independent review re-ran the complete 11-file App-Vue matrix at **112/112**, UI primitives at **10/10**, the complete Chromium matrix at **29/29**, serial App-Vue/UI typechecks, inventory/target/sync checks and full uncached governance. No blockers remain for the implemented scope after final validation.
+The known full App-Vue shell-width/Task-capsule failures and contracts stale Goal index failure were not repaired or rerun; those suites are outside this scoped closure. An optional Nx visual-fixture typecheck initially encountered a concurrent dependency clean/build race, not a source error; dependency declarations were restored and the direct final fixture typecheck passed. Independent review re-ran the complete 11-file App-Vue matrix at **112/112**, UI primitives at **10/10**, the complete Chromium matrix at **29/29**, serial App-Vue/UI typechecks, inventory/target/sync checks and full uncached governance. No blockers remain for the implemented scope after independent review and final validation.
 
 Focused App-Vue reproduction:
 
