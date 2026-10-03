@@ -450,13 +450,19 @@ jobs:
           # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
           # Browser caching does not provision host fonts; every shard needs this prerequisite.
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8
           fc-cache -f
-          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fonts-wqy-zenhei
           font_family=$(fc-match -f '%{family}' 'Inter:lang=zh-cn')
           echo "Visual font preflight: Inter:lang=zh-cn -> $font_family"
           if [[ "$font_family" != 'Noto Sans CJK SC' ]]; then
             echo "::error::Visual baselines require the Noto Sans CJK SC fallback for Chinese text."
+            exit 1
+          fi
+          font_family=$(fc-match -f '%{family}' 'Inter:lang=en:charset=4e00')
+          echo "Visual font preflight: Inter:lang=en:charset=4e00 -> $font_family"
+          if [[ "$font_family" != 'WenQuanYi Zen Hei' ]]; then
+            echo "::error::Visual baselines require the WenQuanYi Zen Hei fallback for CJK glyphs in English text."
             exit 1
           fi
       # start-api-server.ts builds the API immediately before launching its isolated process.

@@ -18,26 +18,48 @@ const script = fontStep
   .map((line) => line.replace(/^ {10}/u, ''))
   .join('\n');
 
-function runPreflight({ family = 'Noto Sans CJK SC', fail = '' } = {}) {
+function runPreflight({
+  family = 'Noto Sans CJK SC',
+  englishFamily = 'WenQuanYi Zen Hei',
+  fail = '',
+} = {}) {
   assert.ok(script, 'font prerequisite must have an executable script');
   // Execute the actual workflow script without installing packages or changing host fonts.
   return spawnSync('bash', ['-s'], {
     encoding: 'utf8',
-    env: { ...process.env, FONT_TEST_FAMILY: family, FONT_TEST_FAIL: fail },
+    env: {
+      ...process.env,
+      FONT_TEST_FAMILY: family,
+      FONT_TEST_ENGLISH_FAMILY: englishFamily,
+      FONT_TEST_FAIL: fail,
+    },
     input: `
       sudo() {
-        echo "$*"
+        echo "sudo $*" >&2
         [[ "$FONT_TEST_FAIL" != "$*" ]]
       }
       fc-cache() {
-        echo "fc-cache $*"
+        echo "fc-cache $*" >&2
         [[ "$FONT_TEST_FAIL" != 'cache' ]]
       }
-      dpkg-query() { echo 'fonts-noto-cjk 1:20230817+repack1-3'; }
+      dpkg-query() {
+        echo "dpkg-query $*" >&2
+        [[ "$FONT_TEST_FAIL" != 'query' ]] || return 1
+        printf '%s\\n' 'fonts-noto-cjk 1:20230817+repack1-3' 'fonts-wqy-zenhei 0.9.45-8'
+      }
       fc-match() {
-        [[ "$*" == '-f %{family} Inter:lang=zh-cn' ]] || return 2
-        [[ "$FONT_TEST_FAIL" != 'match' ]] || return 1
-        printf '%s' "$FONT_TEST_FAMILY"
+        echo "fc-match $*" >&2
+        case "$*" in
+          '-f %{family} Inter:lang=zh-cn')
+            [[ "$FONT_TEST_FAIL" != 'match-zh' ]] || return 1
+            printf '%s' "$FONT_TEST_FAMILY"
+            ;;
+          '-f %{family} Inter:lang=en:charset=4e00')
+            [[ "$FONT_TEST_FAIL" != 'match-en' ]] || return 1
+            printf '%s' "$FONT_TEST_ENGLISH_FAMILY"
+            ;;
+          *) return 2 ;;
+        esac
       }
       ${script}
     `,
@@ -53,7 +75,7 @@ test('every Web Flow shard provisions Noble fonts before functional and visual b
   assert.match(script, /set -euo pipefail/u);
   assert.match(
     script,
-    /sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817\+repack1-3/u,
+    /sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817\+repack1-3 fonts-wqy-zenhei=0\.9\.45-8/u,
   );
   const provisionIndex = shard.indexOf('- name: Provision visual regression fonts');
   assert.ok(shard.indexOf('playwright install chromium') < provisionIndex);
@@ -62,35 +84,57 @@ test('every Web Flow shard provisions Noble fonts before functional and visual b
   assert.equal((workflow.match(/name: Provision visual regression fonts/gu) ?? []).length, 1);
 });
 
-test('font preflight refreshes the cache and reports the matching Chinese fallback', () => {
+test('font preflight provisions both pinned packages before checking both CJK fallbacks', () => {
   const result = runPreflight();
   assert.equal(result.status, 0, result.stderr);
-  const updateIndex = result.stdout.indexOf('apt-get update');
-  const installIndex = result.stdout.indexOf('apt-get install');
-  const cacheIndex = result.stdout.indexOf('fc-cache -f');
-  const preflightIndex = result.stdout.indexOf('Visual font preflight:');
-  assert.ok(updateIndex >= 0 && updateIndex < installIndex);
-  assert.ok(installIndex < cacheIndex && cacheIndex < preflightIndex);
+  assert.deepEqual(result.stderr.trim().split('\n'), [
+    'sudo apt-get update',
+    'sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8',
+    'fc-cache -f',
+    'dpkg-query -W -f=${Package} ${Version}\\n fonts-noto-cjk fonts-wqy-zenhei',
+    'fc-match -f %{family} Inter:lang=zh-cn',
+    'fc-match -f %{family} Inter:lang=en:charset=4e00',
+  ]);
+  assert.match(result.stdout, /fonts-noto-cjk 1:20230817\+repack1-3/u);
+  assert.match(result.stdout, /fonts-wqy-zenhei 0\.9\.45-8/u);
   assert.match(result.stdout, /Inter:lang=zh-cn -> Noto Sans CJK SC/u);
+  assert.match(result.stdout, /Inter:lang=en:charset=4e00 -> WenQuanYi Zen Hei/u);
 });
 
-test('font preflight fails closed on missing glyph coverage or the wrong regional fallback', () => {
-  for (const family of ['', 'DejaVu Sans', 'Noto Sans CJK JP']) {
+test('font preflight fails closed on missing glyph coverage or either wrong fallback', () => {
+  for (const family of ['', 'DejaVu Sans', 'Noto Sans CJK JP', 'Noto Sans CJK SC,DejaVu Sans']) {
     const result = runPreflight({ family });
-    assert.equal(result.status, 1, `unexpected acceptance of ${family}`);
-    assert.match(result.stdout, /::error::Visual baselines require/u);
+    assert.equal(result.status, 1, `unexpected acceptance of Chinese fallback ${family}`);
+    assert.match(result.stdout, /::error::Visual baselines require the Noto Sans CJK SC/u);
+    assert.doesNotMatch(result.stderr, /Inter:lang=en:charset=4e00/u);
+  }
+  for (const englishFamily of [
+    '',
+    'DejaVu Sans',
+    'Noto Sans CJK SC',
+    'WenQuanYi Zen Hei,DejaVu Sans',
+  ]) {
+    const result = runPreflight({ englishFamily });
+    assert.equal(result.status, 1, `unexpected acceptance of English fallback ${englishFamily}`);
+    assert.match(result.stdout, /Inter:lang=zh-cn -> Noto Sans CJK SC/u);
+    assert.match(result.stdout, /::error::Visual baselines require the WenQuanYi Zen Hei/u);
   }
 });
 
 test('font preflight fails closed on provisioning, cache, or fontconfig command errors', () => {
   for (const fail of [
     'apt-get update',
-    'apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3',
+    'apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8',
     'cache',
-    'match',
+    'query',
+    'match-zh',
+    'match-en',
   ]) {
     const result = runPreflight({ fail });
     assert.notEqual(result.status, 0, `unexpected acceptance of ${fail} failure`);
-    assert.doesNotMatch(result.stdout, /Visual font preflight:/u);
+    assert.doesNotMatch(result.stdout, /Inter:lang=en:charset=4e00 ->/u);
+    if (fail !== 'match-en') {
+      assert.doesNotMatch(result.stdout, /Visual font preflight:/u);
+    }
   }
 });
