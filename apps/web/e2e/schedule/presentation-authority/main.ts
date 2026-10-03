@@ -1,3 +1,4 @@
+import { bootstrapVisualApp } from '../../visual-regression/app-environment';
 import { createApp, defineComponent, h, onMounted, onUnmounted } from 'vue';
 import { createI18n } from 'vue-i18n';
 import type {
@@ -6,7 +7,6 @@ import type {
   CreateScheduleRequest,
   UpdateScheduleRequest,
 } from '@memoflow/contracts/schedule';
-import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/contracts/setting';
 import { asInstant, asYmd } from '@memoflow/time';
 import PlannerCalendar, {
   type PlannerCalendarView,
@@ -15,7 +15,6 @@ import PlannerDayDialog from '@memoflow/app-vue/modules/schedule/components/Plan
 import PlannerEventDialog from '@memoflow/app-vue/modules/schedule/components/PlannerEventDialog.vue';
 import ScheduleCapsulePreview from '@memoflow/app-vue/layouts/shell/previews/ScheduleCapsulePreview.vue';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
-import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import { fail, ok } from '@memoflow/contracts/result';
@@ -42,25 +41,10 @@ import { useScheduleStore } from '@memoflow/app-vue/modules/schedule/stores/sche
 import '../../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);
-const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
-const theme = params.get('theme') === 'dark' ? 'dark' : 'light';
+const { locale, theme } = bootstrapVisualApp(params);
 const surface = params.get('surface') ?? 'calendar';
 const view = (params.get('view') ?? 'week') as PlannerCalendarView;
 const selectedSource = params.get('source') ?? 'goal';
-
-document.documentElement.lang = locale;
-document.documentElement.classList.toggle('dark', theme === 'dark');
-setProductTimePreferences({
-  ...DEFAULT_USER_PREFERENCE_PROFILE,
-  presentation: {
-    ...DEFAULT_USER_PREFERENCE_PROFILE.presentation,
-    language: locale,
-  },
-  regional: {
-    ...DEFAULT_USER_PREFERENCE_PROFILE.regional,
-    timeZone: 'UTC',
-  },
-});
 
 const projections: CalendarEventProjection[] = [
   {
@@ -230,6 +214,7 @@ let occurrence = instance({
     {
       definitionId: 'step',
       titleSnapshot: 'Review checklist',
+      orderSnapshot: 0,
       completed: false,
       completedAt: null,
     },

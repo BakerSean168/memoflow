@@ -2174,6 +2174,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/visual-regression/matrix.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/src/auth/DeviceAuthorizationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11975,6 +11983,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/test-system-v2/__tests__/visual-matrix.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "test-system-v2:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/test-system-v2/__tests__/vitest-reporting.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12253,6 +12269,13 @@
       "fileCount": 1
     },
     {
+      "id": "apps/web/playwright.visual-regression.config.ts",
+      "type": "primary",
+      "suite": "e2e",
+      "runner": "playwright",
+      "fileCount": 1
+    },
+    {
       "id": "ci-cd-platform:test",
       "type": "primary",
       "suite": "governance",
@@ -12271,7 +12294,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 8
+      "fileCount": 9
     },
     {
       "id": "tools/governance/vitest.config.ts",
@@ -13187,8 +13210,8 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
-    "e2e": 63,
+    "e2e": 64,
     "perf": 2,
-    "governance": 67
+    "governance": 68
   }
 }

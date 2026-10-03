@@ -1,3 +1,4 @@
+import { bootstrapVisualApp } from '../../visual-regression/app-environment';
 import { faker } from '@faker-js/faker';
 import { createApp, defineComponent, h, ref } from 'vue';
 import { createPinia } from 'pinia';
@@ -9,8 +10,7 @@ import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
-import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/contracts/setting';
+import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
 import TaskDetailView from '@memoflow/app-vue/modules/task/views/TaskDetailView.vue';
 import TaskPlanDialog from '@memoflow/app-vue/modules/task/components/dialogs/TaskPlanDialog.vue';
 import {
@@ -21,13 +21,7 @@ import '../../../../../apps/web/src/styles/index.css';
 
 faker.seed(3101);
 const params = new URLSearchParams(location.search);
-const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
-document.documentElement.classList.toggle('dark', params.get('theme') === 'dark');
-setProductTimePreferences({
-  ...DEFAULT_USER_PREFERENCE_PROFILE,
-  presentation: { ...DEFAULT_USER_PREFERENCE_PROFILE.presentation, language: locale },
-  regional: { ...DEFAULT_USER_PREFERENCE_PROFILE.regional, timeZone: 'UTC' },
-});
+const { locale } = bootstrapVisualApp(params, 'UTC');
 const labels = [
   { id: 'label-1', name: 'Focus / 专注', color: '#5588aa' },
   { id: 'label-2', name: 'Weekly review / 每周回顾', color: '#aa8855' },
@@ -67,6 +61,18 @@ const calls: UpdateTaskPlanReq[] = [];
 const ok = <T>(data: T) => ({ ok: true as const, data });
 // Partial injected ports: unexpected operations fail instead of pretending success.
 const taskService = {
+  async listPlans() {
+    return ok({ plans: [{ toDTO: () => plan }], total: 1 });
+  },
+  async listOccurrencesByDateRange() {
+    return ok([{ toDTO: () => instance() }]);
+  },
+  async getPlan() {
+    return ok({ toDTO: () => plan });
+  },
+  async getOccurrence() {
+    return ok({ toDTO: () => instance() });
+  },
   async getWorkspace() {
     return ok({
       plan,
@@ -136,7 +142,7 @@ const router = createRouter({
     {
       path: '/tasks',
       name: 'task-list',
-      component: defineComponent({ render: () => h('p', 'Task list') }),
+      component: TaskManagementView,
     },
   ],
 });
@@ -163,7 +169,7 @@ installServerStateRuntime(app, 'web', { identityScope: 'task-visual-grammar' });
 app.provide(TASK_SERVICE_KEY, taskService);
 app.provide(GOAL_SERVICE_KEY, goalService);
 app.provide(LABEL_SERVICE_KEY, labelService);
-await router.push('/tasks/plan-1');
+await router.push(params.get('surface') === 'collection' ? '/tasks' : '/tasks/plan-1');
 await router.isReady();
 app.mount('#app');
 Object.assign(window, {

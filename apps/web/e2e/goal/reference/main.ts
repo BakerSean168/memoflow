@@ -1,3 +1,4 @@
+import { bootstrapVisualApp } from '../../visual-regression/app-environment';
 import { faker } from '@faker-js/faker';
 import { createApp, defineComponent, h, ref } from 'vue';
 import { createPinia } from 'pinia';
@@ -26,8 +27,8 @@ import type {
 } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/product-time';
-import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/contracts/setting';
+import GoalModuleLayout from '@memoflow/app-vue/modules/goal/views/GoalModuleLayout.vue';
+import GoalListView from '@memoflow/app-vue/modules/goal/views/GoalListView.vue';
 import GoalDetailView from '@memoflow/app-vue/modules/goal/views/GoalDetailView.vue';
 import GoalDialog from '@memoflow/app-vue/modules/goal/components/dialogs/GoalDialog.vue';
 import { goalRoutes } from '@memoflow/app-vue/modules/goal/router';
@@ -36,13 +37,7 @@ import '../../../../../apps/web/src/styles/index.css';
 const { previewGoalRecord } = await import('@memoflow/goal/client');
 faker.seed(1601);
 const params = new URLSearchParams(location.search);
-const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
-document.documentElement.classList.toggle('dark', params.get('theme') === 'dark');
-setProductTimePreferences({
-  ...DEFAULT_USER_PREFERENCE_PROFILE,
-  presentation: { ...DEFAULT_USER_PREFERENCE_PROFILE.presentation, language: locale },
-  regional: { ...DEFAULT_USER_PREFERENCE_PROFILE.regional, timeZone: 'America/Los_Angeles' },
-});
+const { locale } = bootstrapVisualApp(params, 'America/Los_Angeles');
 const methods = ['Sum', 'Last', 'Max', 'Min', 'Average'] as const;
 let goal = createMockGoalMutationReceipt({
   id: 'goal-reference' as never,
@@ -100,6 +95,9 @@ function previewContext() {
 }
 // Deliberately partial ports: unimplemented operations must fail, rather than fake success.
 const service = {
+  async listGoals() {
+    return ok({ goals: [{ toDTO: () => goal }], pagination: { hasMore: false, total: 1 } });
+  },
   async getGoalWorkspace() {
     calls.push('workspace');
     return ok({
@@ -136,9 +134,9 @@ const service = {
             progress: {
               aggregationMethod: kr.calculationMethod,
               initialValue: kr.initialValue,
-              currentValue: kr.currentValue,
+              currentValue: kr.currentValue ?? kr.initialValue,
               targetValue: kr.targetValue,
-              unit: kr.unit,
+              unit: kr.unit ?? null,
             },
           }),
         ) ?? [],
@@ -212,9 +210,19 @@ const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     {
-      ...parent,
-      component: RouterView,
-      children: parent.children!.map((route) => ({ ...route, component: GoalDetailView })),
+      path: parent.path,
+      name: parent.name,
+      meta: parent.meta,
+      component: params.get('surface') === 'collection' ? GoalModuleLayout : RouterView,
+      children: parent.children!.map((route) => ({
+        path: route.path,
+        name: route.name,
+        meta: route.meta,
+        component:
+          params.get('surface') === 'collection' && route.name === 'goal-list'
+            ? GoalListView
+            : GoalDetailView,
+      })),
     },
   ],
 });
@@ -246,9 +254,11 @@ app.provide(GOAL_SERVICE_KEY, service);
 app.provide(LABEL_SERVICE_KEY, { listLabels: async () => ok([]) } as unknown as ILabelService);
 app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, {} as IGoalKnowledgeService);
 await router.push(
-  params.get('state') === 'review'
-    ? '/goals/goal-reference/review/create'
-    : '/goals/goal-reference',
+  params.get('surface') === 'collection'
+    ? '/goals'
+    : params.get('state') === 'review'
+      ? '/goals/goal-reference/review/create'
+      : '/goals/goal-reference',
 );
 await router.isReady();
 app.mount('#app');

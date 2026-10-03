@@ -21,7 +21,7 @@ describe('GOV-7902 reference-policy proposal activation gate', () => {
 
   it('keeps real-owner replacement acceptance tests proposed and inactive', () => {
     const proposal = read(
-      'docs/plan/active/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md',
+      'docs/plan/archive/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md',
     );
     expect(proposal).toContain('Activation requires accepted ADR-113');
     expect(proposal).toContain('characterization tests');

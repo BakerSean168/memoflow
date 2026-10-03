@@ -1635,6 +1635,7 @@
         "docs/plan/README.md",
         "docs/plan/active/2026-09-29-product-vnext-convergence.md",
         "docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md",
+        "docs/plan/archive/2026-10-02-pvc-ui-9001-full-screenshot-matrix.md",
         "docs/plan/active/2026-09-30-desktop-auto-update-implementation.md",
         "docs/plan/active/2026-10-02-pvc-gov-7901-governance-retirement-inventory.md",
         "docs/plan/active/README.md",
@@ -1649,7 +1650,7 @@
         "docs/test/ci-validation.md",
         "docs/test/test-system-v2.md",
         "docs/zh-CN/README.md",
-        "docs/plan/active/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md"
+        "docs/plan/archive/2026-10-02-pvc-gov-7902-engineering-governance-input-decoupling.md"
       ],
       "symbols": ["Governance", "governance-check"],
       "artifact": "source",

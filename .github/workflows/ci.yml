@@ -449,6 +449,11 @@ jobs:
           TEST_REPORT_NAME: web-flow-${{ strategy.job-index }}
           DELIVERY_LANE: web
           E2E_PREBUILT_ARTIFACT: '1'
+      - name: Product visual matrix (compare only)
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
+        env:
+          TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
+          DELIVERY_LANE: web
       - name: Secure AI Provider product acceptance
         if: matrix.shard == '1/4'
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider

@@ -285,6 +285,8 @@ Repeatable package batch: `pnpm nx run-many -t test --projects=goal,task,schedul
 
 **Acceptance:** 至少 3 个核心 surface 可重复生成与比较 screenshot。
 
+**Execution (2026-10-02):** Subsumed by PVC-UI-9001. The canonical source-owned matrix now covers Goal create/detail, Task Today/TaskPlan/create, and Schedule Day/Week/Month with deterministic production fixtures. All 27 baselines passed two consecutive compare-only runs at a zero-pixel threshold. See [UI-9001 implementation evidence](../archive/2026-10-02-pvc-ui-9001-full-screenshot-matrix.md). BASE-003 is fulfilled by this entry point; no separate foundation harness remains to implement.
+
 **Dependencies:** none.
 
 ---
@@ -1502,6 +1504,8 @@ ADR-113 remains Proposed, `destructiveAllowed=false`, and GOV-7903 remains block
 - light/dark + representative zh-CN/en-US
 
 **Acceptance:** deterministic screenshot diffs run in review/CI path。
+
+**Execution (2026-10-02/03): Accepted after independent review.** Implemented one manifest-driven Web matrix with 25 required surfaces plus 2 BASE-003 create cases, shared Goal/Task/Schedule fixture bootstrap, 27 source PNG baselines, a dedicated compare/update Nx target and existing four-shard CI integration. Writer compare-only runs were 27/27 twice at zero differing pixels; independent acceptance reran the matrix 27/27 and enumerated all four CI shards as 7 + 7 + 7 + 6 = 27 cases. Review found and repaired one Nx architecture-lint issue in the governance test import; targeted ESLint/Prettier/diff checks and test-system-v2 24/24 are green after repair. Direct visual-fixture vue-tsc is green once dependency outputs are present. Full governance remains blocked only by the pre-existing GOV-7902 active-to-archive inventory drift; no destructive retirement changes were made. See [matrix inventory, commands and validation evidence](../archive/2026-10-02-pvc-ui-9001-full-screenshot-matrix.md).
 
 ---
 
