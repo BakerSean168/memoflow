@@ -765,6 +765,8 @@ The sole client DTO, server projection, Goal client entity/service, Prisma and P
 
 **Dependencies:** TASK-3002D.
 
+**Completed (2026-10-03 evidence reconciliation):** Current canonical Task Home exposes only `Today | Plans`; Today groups current-day plus unresolved overdue occurrences through the bounded owner projection, Today occurrence filters/sort are independent from Plan lifecycle/outcome filters, and future browsing routes to Schedule. The missing historical completion marker was discovered during final Product vNext ticket audit; no production behavior was added in this closure. Independent verification passed **3 files / 36 tests**. Evidence: [TASK-3003A Today | Plans closure](../archive/2026-10-03-pvc-task-3003a-today-plans-closure.md).
+
 ---
 
 ## PVC-TASK-3003B — Bound Task queries and canonical Goal/KR scope
