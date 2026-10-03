@@ -1535,6 +1535,8 @@ Product DB, or exporter. B3 proved native parity for all five rules and all thre
 
 ## PVC-UI-9004 — Dead surface/component cleanup
 
+**Execution (2026-10-03): Accepted / frozen after delegated implementation and independent review.** Prior-ticket deletions remain CLOSED and legacy Goal KR/Review and Account routes retain owner-native compatibility mappings. DailyTodo/Capsule now compose the canonical Task Today owner projection (bounded day + overdue-open facts, distinct referenced Plan detail keys, identity/request guards), retiring both capped Plan-list query paths. The unused GoalRecord alias, six proven mock-only Account/Schedule recipes, one dead Task AI generation editor/public barrel, and their obsolete source-lock/helper surfaces are retired; live Settings/Auth/Account/Schedule/AI capabilities remain. AuthPlatformEntry uses localized semantic workspace loading grammar with unchanged hard redirect ownership. Acceptance passed focused behavior/source contracts, App-Vue uncached typecheck, package-export verification, 1,304-file inventory, target/sync/lint/format/diff checks and full uncached governance. Evidence: [UI-9004 inventory and cleanup](../archive/2026-10-03-pvc-ui-9004-dead-surface-cleanup.md).
+
 **Only after parity:** retire standalone KR/Review pages, DailyTodo duplicate logic, Schedule old detail sheets/action panel, AI-owned editors, duplicate GoalRecord cards, dead legacy settings/dialog recipes。
 
 **Acceptance:** grep/route/component inventory 无 dead public render path；无 unrelated mass refactor。

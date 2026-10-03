@@ -3,7 +3,7 @@
  *
  * 组合 template list query、instances（非 pilot，维持现状）与 dependencies 操作。
  * Management/Detail 视图直接使用 graph/detail query 与 template mutations（Step 4），
- * 本 facade 只服务 Daily widget / calendar / capsule 等非 pilot consumer：
+ * 本 facade 服务 calendar / AI 等命令式 consumer；Today surfaces 使用 useTaskToday：
  * `templates` 来自 template list key，`fetchTemplates(params)` 以 canonical key 预取并
  * await 收敛，保留命令式语义。
  */
@@ -69,9 +69,9 @@ export function useTask() {
     templates: templateList.templates,
     instances: computed(() => store.instances),
     isLoading: computed(() => templateList.isLoading.value || store.isLoading),
-    // Surface the template list query error so legacy consumers (e.g. TaskCapsulePreview)
+    // Surface the template list query error so legacy consumers (e.g. calendar integrations)
     // see failed template fetches instead of treating them as success (P2-2).
-    // 暴露 template list query 的 error，让 legacy consumer（如 TaskCapsulePreview）能看到失败而非当作成功（P2-2）。
+    // 暴露 template list query 的 error，让 legacy consumer（如 calendar integrations）能看到失败而非当作成功（P2-2）。
     error: computed(() => store.error ?? templateList.error.value),
     pagination: computed(() => store.pagination),
     // Template operations (list key)

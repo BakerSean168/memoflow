@@ -11,8 +11,7 @@ import { getProductTodayYmd } from '../../../shared/utils/product-time';
 const instancesRef = ref<Record<string, unknown>[]>([]);
 const templatesRef = ref<Record<string, unknown>[]>([]);
 const errorRef = ref<string | null>(null);
-const fetchInstancesByDateRange = vi.fn().mockResolvedValue(undefined);
-const fetchTemplates = vi.fn().mockResolvedValue(undefined);
+const load = vi.fn().mockResolvedValue(undefined);
 const completeOccurrence = vi.fn().mockResolvedValue(undefined);
 const uncompleteOccurrence = vi.fn().mockResolvedValue(undefined);
 const skipOccurrence = vi.fn().mockResolvedValue(undefined);
@@ -20,17 +19,20 @@ const setOccurrenceChecklistItem = vi.fn().mockResolvedValue(undefined);
 const createPlanSafe = vi.fn().mockResolvedValue({ todayOccurrenceCreated: true });
 const createSaving = ref(false);
 
-vi.mock('../../../modules/task/composables/useTask', () => ({
-  useTask: () => ({
+vi.mock('../../../modules/task/composables/useTaskToday', () => ({
+  useTaskToday: () => ({
     instances: computed(() => instancesRef.value),
     templates: computed(() => templatesRef.value),
     error: computed(() => errorRef.value),
-    fetchInstancesByDateRange,
-    fetchTemplates,
-    completeOccurrence,
-    uncompleteOccurrence,
-    skipOccurrence,
-    setOccurrenceChecklistItem,
+    resolveIdentityScope: () => 'identity-1',
+    isLoading: ref(false),
+    load,
+    operations: {
+      completeOccurrence,
+      uncompleteOccurrence,
+      skipOccurrence,
+      setOccurrenceChecklistItem,
+    },
   }),
 }));
 
@@ -99,8 +101,7 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    expect(fetchInstancesByDateRange).toHaveBeenCalled();
-    expect(fetchTemplates).toHaveBeenCalled();
+    expect(load).toHaveBeenCalled();
     expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain(
       'Write tests',
     );
@@ -171,7 +172,7 @@ describe('TaskCapsulePreview quick workspace', () => {
       },
       'quick',
     );
-    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
+    expect(load).toHaveBeenCalledTimes(2);
     expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(false);
     expect(wrapper.emitted('select')).toBeUndefined();
     wrapper.unmount();
@@ -187,7 +188,7 @@ describe('TaskCapsulePreview quick workspace', () => {
     await flushPromises();
     expect(wrapper.get('input').element.value).toBe('Retry later');
     expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(true);
-    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(1);
+    expect(load).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
 
@@ -212,6 +213,10 @@ describe('TaskCapsulePreview quick workspace', () => {
 it('delegates execution presentation and commands to TaskQuickSurface', () => {
   const source = readFileSync(resolve(__dirname, 'TaskCapsulePreview.vue'), 'utf8');
   expect(source).toContain('<TaskQuickSurface');
+  expect(source).toContain('useTaskToday');
+  expect(source).not.toMatch(
+    /fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs/,
+  );
   for (const command of [
     'completeOccurrence',
     'uncompleteOccurrence',

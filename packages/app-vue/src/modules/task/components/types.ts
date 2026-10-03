@@ -8,20 +8,9 @@ import type {
 } from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 
-export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
-
 export type TaskSurface = 'today' | 'plans';
 export type TaskPlanStateFilter =
   'all' | 'active' | 'paused' | 'succeeded' | 'failed' | 'abandoned' | 'archived';
-
-export interface EditableTaskUI {
-  title: string;
-  description?: string;
-  estimatedHours: number;
-  priority: UIPriority;
-  dependencies?: number[];
-  selected: boolean;
-}
 
 export interface TaskGoalContributionViewModel {
   value: number;

@@ -11,6 +11,10 @@
  * this Web identity fallback.
  */
 import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ProductSurfaceState from '../shared/components/ProductSurfaceState.vue';
+
+const { t } = useI18n();
 
 onMounted(() => {
   if (typeof window === 'undefined') {
@@ -22,11 +26,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex min-h-full items-center justify-center bg-[#0b0b10] text-sm text-white/60"
-    data-testid="auth-platform-entry"
-    role="status"
-  >
-    Redirecting to sign in…
-  </div>
+  <ProductSurfaceState
+    family="workspace"
+    kind="loading"
+    class="min-h-full bg-background"
+    :title="t('auth.page.redirecting')"
+    test-id="auth-platform-entry"
+  />
 </template>

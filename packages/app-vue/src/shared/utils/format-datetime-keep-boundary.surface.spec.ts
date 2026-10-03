@@ -9,10 +9,6 @@ describe('Product date-time presentation boundary', () => {
     resolve(dir, '../../../../app-react/src/utils/entity-presentation.ts'),
     'utf8',
   );
-  const eventList = readFileSync(
-    resolve(dir, '../../modules/schedule/components/ScheduleEventList.vue'),
-    'utf8',
-  );
   const goalReview = readFileSync(
     resolve(dir, '../../modules/goal/components/dialogs/GoalReviewInspectDialog.vue'),
     'utf8',
@@ -20,8 +16,7 @@ describe('Product date-time presentation boundary', () => {
 
   it('keeps date-time surfaces on the shared Product Time facade', () => {
     expect(react).toContain('formatProductDateTime');
-    expect(eventList).toContain('formatProductDateTime');
-    for (const source of [react, eventList]) {
+    for (const source of [react]) {
       expect(source).not.toMatch(/function formatDateTime\b/);
       expect(source).not.toContain('toLocaleString');
     }

@@ -79,13 +79,6 @@
       "symbol": "formatTaskDuration",
       "reason": "L4 duration dictionary over Product Time duration splitting",
       "owner": "task"
-    },
-    {
-      "kind": "boundary",
-      "path": "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts",
-      "symbol": "formatScheduleDurationMinutes",
-      "reason": "L4 schedule duration dictionary over Product Time duration splitting",
-      "owner": "schedule"
     }
   ]
 }

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(__dirname, 'TaskManagementView.vue'), 'utf8');
+const todaySource = readFileSync(resolve(__dirname, '../composables/useTaskToday.ts'), 'utf8');
 const toolbarSource = readFileSync(resolve(__dirname, '../components/TaskPageToolbar.vue'), 'utf8');
 
 describe('TaskManagementView occurrence-first surface', () => {
@@ -71,10 +72,11 @@ describe('TaskManagementView occurrence-first surface', () => {
   });
 
   it('uses bounded Today reads and a server-scoped Goal/KR plan query without raw ids', () => {
-    expect(source).toContain('fetchInstancesByDateRange: fetchOccurrencesByDateRange');
-    expect(source).toContain('includeOverdueOpen: true');
-    expect(source).toContain('startOfDayMs(now)');
-    expect(source).toContain('endOfDayMs(now)');
+    expect(source).toContain('useTaskToday()');
+    expect(source).not.toContain('fetchInstancesByDateRange');
+    expect(todaySource).toContain('includeOverdueOpen: true');
+    expect(todaySource).toContain('startOfDayMs(now)');
+    expect(todaySource).toContain('endOfDayMs(now)');
     expect(source).not.toContain('fetchOccurrencesMutation({ page: 1, limit: 500 })');
     expect(source).not.toContain('limit: 500');
     expect(source).toContain('limit: 100');

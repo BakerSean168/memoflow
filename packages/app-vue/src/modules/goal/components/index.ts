@@ -1,8 +1,5 @@
 // Goal Module Components
-export {
-  default as GoalRecordCard,
-  default as GoalRecordCardFromCards,
-} from './cards/GoalRecordCard.vue';
+export { default as GoalRecordCard } from './cards/GoalRecordCard.vue';
 
 // Product list rows
 export { default as GoalProgressRow } from './GoalProgressRow.vue';

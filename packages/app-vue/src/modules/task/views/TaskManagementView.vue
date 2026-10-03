@@ -246,7 +246,7 @@ import {
   Loader2,
   RefreshCw,
 } from '@lucide/vue';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';
@@ -256,7 +256,7 @@ import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
 import type { TaskPlanStateFilter, TaskPlanViewModel, TaskSurface } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
-import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskToday } from '../composables/useTaskToday';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
@@ -274,15 +274,10 @@ import {
   sortTaskOccurrences,
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
-import { endOfDayMs, isTodayMs, startOfDayMs } from '../../../shared/utils/product-time';
-import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
-import { unwrap } from '@memoflow/contracts/result';
-import {
-  taskPlanQueryKeys,
-  type TaskPlanListQueryInput,
-} from '../../../platform/server-state/query-keys';
-import { TASK_TEMPLATE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
-import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { isTodayMs } from '../../../shared/utils/product-time';
+import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { type TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
+import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 
 const route = useRoute();
@@ -313,12 +308,7 @@ const fullCreateBusy = ref(false);
 const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
 
 const resolveIdentityScope = useServerStateIdentityScope();
-const runtime = useServerStateRuntime();
-const taskService = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
 const planPage = ref(1);
-const todayDetailsLoading = ref(false);
-const todayDetailsError = ref(false);
-let todayRequest = 0;
 
 const activeSurface = ref<TaskSurface>('today');
 const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
@@ -330,7 +320,6 @@ const showQuickTaskDialog = ref(false);
 const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
 const scopedGoalName = ref<string | null>(null);
 const scopedKeyResultTitle = ref<string | null>(null);
-const occurrencePlanDetails = ref<TaskPlanClientDTO[]>([]);
 
 const queryGoalId = computed(() =>
   typeof route.query.goalId === 'string' && route.query.goalId.length > 0
@@ -389,8 +378,13 @@ usePanelSurfaceStatus(
     fullCreateBusy.value || isSaving.value ? 'busy' : fullCreateDirty.value ? 'dirty' : 'clean',
   ),
 );
-const occurrenceOperations = useTaskOccurrences();
-const { fetchInstancesByDateRange: fetchOccurrencesByDateRange } = occurrenceOperations;
+const {
+  operations: occurrenceOperations,
+  templates: occurrencePlanDetails,
+  detailsLoading: todayDetailsLoading,
+  detailsError: todayDetailsError,
+  load: loadTodayOccurrences,
+} = useTaskToday();
 const actionCoordinator = useTaskOccurrenceActionCoordinator({
   operations: occurrenceOperations,
   resolveGoalBinding: (id) => {
@@ -544,40 +538,6 @@ const visibleItemCount = computed(() =>
   activeSurface.value === 'plans' ? filteredPlans.value.length : visibleOccurrences.value.length,
 );
 
-async function loadTodayOccurrences(force = false) {
-  const request = ++todayRequest;
-  const identityScope = resolveIdentityScope();
-  todayDetailsLoading.value = true;
-  todayDetailsError.value = false;
-  try {
-    const now = Date.now();
-    const occurrences = await fetchOccurrencesByDateRange(startOfDayMs(now), endOfDayMs(now), {
-      force,
-      includeOverdueOpen: true,
-    });
-    if (request !== todayRequest || identityScope !== resolveIdentityScope()) return;
-    const missingPlanIds = [...new Set(occurrences.map((occurrence) => String(occurrence.planId)))];
-    // Read each referenced plan through its canonical identity-scoped detail key.
-    const details = await Promise.all(
-      missingPlanIds.map((planId) =>
-        runtime.queryClient.fetchQuery({
-          queryKey: taskPlanQueryKeys.detail(identityScope, planId),
-          staleTime: force ? 0 : TASK_TEMPLATE_STALE_TIME_MS,
-          queryFn: async () => unwrap(await taskService.getPlan(planId)).toDTO(),
-        }),
-      ),
-    );
-    if (request !== todayRequest || identityScope !== resolveIdentityScope()) return;
-    occurrencePlanDetails.value = details;
-  } catch {
-    if (request === todayRequest && identityScope === resolveIdentityScope())
-      todayDetailsError.value = true;
-  } finally {
-    if (request === todayRequest && identityScope === resolveIdentityScope())
-      todayDetailsLoading.value = false;
-  }
-}
-
 async function reloadSurface() {
   if (activeSurface.value === 'plans') await refetchTemplates();
   else await loadTodayOccurrences(true);
@@ -697,10 +657,6 @@ watch(
 watch(resolveIdentityScope, () => {
   selectedOccurrence.value = null;
   planPage.value = 1;
-  ++todayRequest;
-  occurrencePlanDetails.value = [];
-  todayDetailsLoading.value = false;
-  todayDetailsError.value = false;
   void resolveGoalScopeLabel();
   if (activeSurface.value === 'today') void loadTodayOccurrences();
 });

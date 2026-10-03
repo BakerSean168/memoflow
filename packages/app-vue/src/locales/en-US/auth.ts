@@ -1,5 +1,6 @@
 export default {
   "page": {
+    "redirecting": "Redirecting to sign in…",
     "description": "Sign in to use sync and online capabilities",
     "languageSelector": "Interface language",
     "legalNoticePrefix": "By continuing, you agree to the ",

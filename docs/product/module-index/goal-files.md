@@ -20,9 +20,6 @@ updated: 2026-09-29T11:38:00+08:00
 | [`packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue`](../../../packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue) | 目标模块布局 |
 | [`packages/app-vue/src/modules/goal/views/GoalListView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalListView.vue) | 目标列表页 |
 | [`packages/app-vue/src/modules/goal/views/GoalDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalDetailView.vue) | 目标详情页 |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue) | 目标复盘创建页 |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue) | 目标复盘详情页 |
-| [`packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue) | 关键结果详情页 |
 
 ## 前端状态、组合函数与组件
 
@@ -38,9 +35,6 @@ updated: 2026-09-29T11:38:00+08:00
 | [`packages/app-vue/src/modules/goal/components/GoalProgressRow.vue`](../../../packages/app-vue/src/modules/goal/components/GoalProgressRow.vue) | vNext 目标进度行 |
 | [`packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue`](../../../packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue) | 当前 Sum-biased Record 输入；target measurement-aware Record Composer |
 | [`packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.vue`](../../../packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.vue) | KR trajectory editor；仅复用视觉语法，不直接充当 Record Preview |
-| [`packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/KeyResultDetailView.vue) | 当前 legacy 深层 KR route；Product vNext target 计划消灭常规 KR detail navigation |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewCreationView.vue) | 当前 Review creation route；Product vNext target 改为 Goal 内 Dialog/Sheet workflow |
-| [`packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue`](../../../packages/app-vue/src/modules/goal/views/GoalReviewDetailView.vue) | 当前 Review detail route；target 不新增/强化深层页面 |
 
 ## 移动端入口
 

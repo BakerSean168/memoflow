@@ -152,9 +152,8 @@ describe('MemoFlow product surface polish', () => {
     const checklist = read('modules/task/components/TaskPlanForm/sections/ChecklistSection.vue');
     const reminder = read('modules/task/components/TaskPlanForm/sections/ReminderSection.vue');
     const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
-    const taskAi = read('modules/task/components/TaskAIGenerationDialog.vue');
 
-    for (const source of [krCard, krDrafts, checklist, reminder, schedule, taskAi]) {
+    for (const source of [krCard, krDrafts, checklist, reminder, schedule]) {
       expect(source).toContain('surface-raised');
       expect(source).not.toContain('border bg-card');
     }

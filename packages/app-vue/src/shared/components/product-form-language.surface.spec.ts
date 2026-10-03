@@ -22,7 +22,6 @@ describe('MemoFlow product form language', () => {
       'modules/goal/components/dialogs/GoalDialog.vue',
       'modules/goal/components/dialogs/GoalRecordDialog.vue',
       'modules/task/components/dialogs/TaskPlanDialog.vue',
-      'modules/task/components/TaskAIGenerationDialog.vue',
       'modules/task/components/dialogs/TemplateSelectionDialog.vue',
       'modules/schedule/components/CreateScheduleDialog.vue',
     ]) {

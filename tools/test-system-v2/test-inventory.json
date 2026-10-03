@@ -3860,14 +3860,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/account/components/account-birthday-ymd.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5144,6 +5136,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5522,14 +5522,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/utils/describe-conflict-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/utils/desktopAuthRecovery.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5691,6 +5683,14 @@
     },
     {
       "path": "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/views/dead-surfaces.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"

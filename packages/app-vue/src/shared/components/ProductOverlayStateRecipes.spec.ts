@@ -91,10 +91,8 @@ describe('product overlay and state recipes', () => {
   it('routes representative owner surfaces through the matching state family', () => {
     const documentState = read('modules/repository/components/DocumentWorkspaceState.vue');
     const notifications = read('modules/notification/views/NotificationListPage.vue');
-    const taskAi = read('modules/task/components/TaskAIGenerationDialog.vue');
 
     expect(documentState).toContain('family="workspace"');
     expect(notifications.match(/family="collection"/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(taskAi.match(/family="dialog"/g)?.length).toBe(2);
   });
 });

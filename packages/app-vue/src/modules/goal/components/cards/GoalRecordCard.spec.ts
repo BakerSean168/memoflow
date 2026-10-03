@@ -17,7 +17,11 @@ const i18n = createI18n({
       goal: {
         cards: {
           cardsRecordCard: {
-            authorship: { Manual: 'Manual record', TaskAutomatic: 'Automatic Task contribution', TaskUserMeasurement: 'Measurement entered on Task completion' },
+            authorship: {
+              Manual: 'Manual record',
+              TaskAutomatic: 'Automatic Task contribution',
+              TaskUserMeasurement: 'Measurement entered on Task completion',
+            },
             recordValue: 'Record value: ',
           },
         },
@@ -44,11 +48,12 @@ function createRecord(overrides: Partial<GoalRecordClientDTO> = {}): GoalRecordC
 }
 
 describe('GoalRecordCard', () => {
-  it('exports both public names from the single neutral implementation', () => {
+  it('exports only the canonical name from the single neutral implementation', () => {
     const index = readFileSync(resolve(__dirname, '../index.ts'), 'utf8');
-    expect(index).toMatch(
-      /default as GoalRecordCard,\s*default as GoalRecordCardFromCards[\s\S]*?from '\.\/cards\/GoalRecordCard.vue'/,
+    expect(index).toContain(
+      "export { default as GoalRecordCard } from './cards/GoalRecordCard.vue'",
     );
+    expect(index).not.toContain('GoalRecordCardFromCards');
     expect(existsSync(resolve(__dirname, '../GoalRecordCard.vue'))).toBe(false);
     const component = readFileSync(resolve(__dirname, './GoalRecordCard.vue'), 'utf8');
     expect(component).not.toMatch(/\bPlus\b/);
@@ -96,8 +101,13 @@ describe('GoalRecordCard', () => {
     ['TaskAutomatic', 'Automatic Task contribution'],
     ['TaskUserMeasurement', 'Measurement entered on Task completion'],
   ] as const)('renders localized %s provenance with recordedAt', (authorship, label) => {
-    const record = createRecord({ authorship, recordedAt: 1700000000000, createdAt: 1600000000000,
-      source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'private-task-source-id' } });
+    const record = createRecord({
+      authorship,
+      recordedAt: 1700000000000,
+      createdAt: 1600000000000,
+      source:
+        authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'private-task-source-id' },
+    });
     const wrapper = mount(GoalRecordCard, { props: { record }, global: { plugins: [i18n] } });
     expect(wrapper.text()).toContain(label);
     expect(wrapper.text()).toContain(formatProductDateTime(record.recordedAt));
@@ -107,15 +117,22 @@ describe('GoalRecordCard', () => {
   });
 
   it.each([
-    ['en-US', enGoal], ['zh-CN', zhGoal],
+    ['en-US', enGoal],
+    ['zh-CN', zhGoal],
   ] as const)('uses the shipped %s provenance catalog', (locale, catalog) => {
-    const localized = createI18n({ legacy: false, locale, messages: { [locale]: { goal: catalog } } });
+    const localized = createI18n({
+      legacy: false,
+      locale,
+      messages: { [locale]: { goal: catalog } },
+    });
     for (const authorship of ['Manual', 'TaskAutomatic', 'TaskUserMeasurement'] as const) {
-      const wrapper = mount(GoalRecordCard, { props: { record: createRecord({ authorship }) }, global: { plugins: [localized] } });
+      const wrapper = mount(GoalRecordCard, {
+        props: { record: createRecord({ authorship }) },
+        global: { plugins: [localized] },
+      });
       expect(wrapper.text()).toContain(catalog.cards.cardsRecordCard.authorship[authorship]);
       expect(wrapper.text()).not.toContain('goal.cards.cardsRecordCard.authorship.');
       wrapper.unmount();
     }
   });
-
 });
