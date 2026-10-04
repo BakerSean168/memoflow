@@ -13,10 +13,9 @@ const VALID_LANES = new Set([
   'local-validation',
   'visual-artifact',
   'reference',
-  'debug',
   'desktop',
 ]);
-const VALID_ROLES = new Set(['canonical', 'supplemental', 'diagnostic', 'reference', 'artifact']);
+const VALID_ROLES = new Set(['canonical', 'supplemental', 'reference', 'artifact']);
 const VALID_LIFECYCLES = new Set(['active', 'retired']);
 const VALID_EXECUTION_KINDS = new Set(['nx', 'manual']);
 

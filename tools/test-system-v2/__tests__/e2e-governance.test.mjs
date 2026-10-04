@@ -19,7 +19,9 @@ test('repository E2E ownership is execution-aware and complete', () => {
   assert.deepEqual(inventory.e2eGovernance.issues, []);
   assert.equal(inventory.e2eGovernance.countsByLane.required, 22);
   assert.equal(inventory.e2eGovernance.countsByLane.nightly, 5);
+  assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
   assert.equal(inventory.e2eGovernance.countsByRole.canonical, 25);
+  assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
 
   const goalWorkflow = inventory.primary.find(
     (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow.spec.ts',
@@ -36,8 +38,8 @@ test('repository E2E ownership is execution-aware and complete', () => {
 
 test('repository retirement contract blocks retired E2E surfaces', () => {
   assert.deepEqual(inventory.e2eRetirement.issues, []);
-  assert.equal(inventory.e2eRetirement.retiredSpecCount, 7);
-  assert.equal(inventory.e2eRetirement.forbiddenReferenceCount, 2);
+  assert.equal(inventory.e2eRetirement.retiredSpecCount, 20);
+  assert.equal(inventory.e2eRetirement.forbiddenReferenceCount, 3);
 });
 
 test('collector-only Playwright configs fail closed without an execution contract', async () => {
@@ -98,6 +100,37 @@ test('retired spec paths cannot be reintroduced as active E2E files', async () =
         issue.reason === 'retired-spec-reintroduced',
     ),
   );
+});
+
+test('retired E2E references are scanned from active browser tests', async () => {
+  const contract = structuredClone(retirement);
+  contract.forbiddenReferences.push({
+    id: 'governance-fixture-current-add-context',
+    needle: 'ai-chat-add-context',
+    reason: 'test fixture for governance validation',
+  });
+
+  const governance = await analyzeE2ERetirement(root, contract);
+  assert.ok(
+    governance.issues.some(
+      (issue) =>
+        issue.id === 'governance-fixture-current-add-context' &&
+        issue.reason === 'retired-reference' &&
+        issue.path === 'apps/web/e2e/local-docker/core-product-phase-e.spec.ts',
+    ),
+  );
+});
+
+test('one-off browser debugging stays on the canonical Web Flow instead of a debug primary lane', async () => {
+  const [webProjectSource, packageSource] = await Promise.all([
+    readFile('apps/web/project.json', 'utf8'),
+    readFile('package.json', 'utf8'),
+  ]);
+  const webProject = JSON.parse(webProjectSource);
+  const packageJson = JSON.parse(packageSource);
+
+  assert.equal(webProject.targets['e2e:debug'], undefined);
+  assert.equal(packageJson.scripts['e2e:debug'], 'pnpm nx run web:e2e --configuration=debug');
 });
 
 test('Nightly audit collects the full failure map without enabling parallel workers', async () => {

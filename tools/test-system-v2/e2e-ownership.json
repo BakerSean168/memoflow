@@ -43,14 +43,6 @@
         "target": "web:e2e"
       }
     },
-    "apps/web/playwright.debug.config.ts": {
-      "lane": "debug",
-      "lifecycle": "active",
-      "execution": {
-        "kind": "nx",
-        "target": "web:e2e:debug"
-      }
-    },
     "apps/web/playwright.desktop-screenshot.config.ts": {
       "lane": "visual-artifact",
       "lifecycle": "active",
@@ -174,12 +166,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/authentication/auth-login-debug.spec.ts": {
-      "surface": "authentication",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
     "apps/web/e2e/authentication/auth-login.spec.ts": {
       "surface": "authentication",
       "role": "canonical",
@@ -216,36 +202,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/debug-login.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/debug-task-page.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/debug-tasks-page.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/debug/localstorage-debug.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/debug/store-debug.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
     "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts": {
       "surface": "desktop-screenshots",
       "role": "artifact",
@@ -258,35 +214,11 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.desktop-screenshot.config.ts"
     },
-    "apps/web/e2e/explore.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/explore2.spec.ts": {
-      "surface": "debug",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
     "apps/web/e2e/goal/goal-crud.spec.ts": {
       "surface": "goal",
       "role": "canonical",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/goal/goal-debug.spec.ts": {
-      "surface": "goal",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/goal/goal-edit-debug.spec.ts": {
-      "surface": "goal",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
     },
     "apps/web/e2e/goal/reference/goal-reference.spec.ts": {
       "surface": "goal",
@@ -413,24 +345,6 @@
       "role": "canonical",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.sync.config.ts"
-    },
-    "apps/web/e2e/task/check-route.spec.ts": {
-      "surface": "task",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/task/debug-dialog.spec.ts": {
-      "surface": "task",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
-    },
-    "apps/web/e2e/task/debug-page.spec.ts": {
-      "surface": "task",
-      "role": "diagnostic",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.debug.config.ts"
     },
     "apps/web/e2e/task/task-completion-loop.spec.ts": {
       "surface": "task",
