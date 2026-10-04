@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-30T12:45:00+08:00
+updated: 2026-10-04T00:00:00+08:00
 ---
 
 # Active Plans
@@ -13,9 +13,10 @@ updated: 2026-09-30T12:45:00+08:00
 
 ## 当前计划
 
-| 计划                                                                                     | 当前状态                                                                                    |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [Desktop Auto-Update Implementation](./2026-09-30-desktop-auto-update-implementation.md) | ADR-114 执行计划；Phase 0～7 / DU-1001～1704，当前待从 baseline characterization 开始实施。 |
+| 计划                                                                                                   | 当前状态                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Desktop Auto-Update Implementation](./2026-09-30-desktop-auto-update-implementation.md)               | ADR-114 执行计划；Phase 0～7 / DU-1001～1704，当前待从 baseline characterization 开始实施。                                                                                           |
+| [AI Interaction + Goal Workflow Convergence](./2026-10-04-ai-interaction-goal-workflow-convergence.md) | 基于 2026-10-04 GCP Dev 实机审查：先修 history signal、tool approval 与 Chat runtime P0，再完成 Goal progressive native workflow、Chat clarification 与 workflow surface retirement。 |
 
 ## 本轮已归档（2026-09-25）
 
