@@ -220,7 +220,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
       expect.any(AbortSignal),
     );
     expect(service.dispatchAssistant).not.toHaveBeenCalled();
-    expect(runtime.listMessages).toHaveBeenCalledWith('conv-1');
+    expect(runtime.listMessages).not.toHaveBeenCalled();
     expect(usageRuntime.get).toHaveBeenCalledWith({ conversationId: 'conv-1' });
   });
 
@@ -327,6 +327,15 @@ describe('useAIChatSession Mastra-native open chat', () => {
       size: 5,
     });
     composable.chatMessage.value = '';
+    runtime.listMessages.mockResolvedValue({ conversationId: 'conv-1', messages: [] });
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(
+        event(1, 'assistant.run.completed', {
+          content: 'image reply',
+          assistantMessageId: 'image-answer',
+        }),
+      );
+    });
 
     await composable.handleSendChat(service as never, MODEL, 'New chat', () => {});
 
@@ -340,6 +349,16 @@ describe('useAIChatSession Mastra-native open chat', () => {
         },
       ],
     });
+    expect(composable.chatTimeline.value).toMatchObject([
+      {
+        role: 'user',
+        content: '',
+        status: 'success',
+        attachments: [{ mediaType: 'image/png', filename: 'screen.png' }],
+      },
+      { id: 'image-answer', role: 'assistant', content: 'image reply', status: 'success' },
+    ]);
+    expect(runtime.listMessages).not.toHaveBeenCalled();
   });
 
   it('deletes Mastra memory before the legacy Conversation shell so a shell failure remains recoverable', async () => {
@@ -414,7 +433,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(command).not.toHaveProperty('runId');
   });
 
-  it('applies canonical delta/usage/completed events then replaces drafts from persisted Mastra history', async () => {
+  it('retains the completed live turn despite lagging history and refreshes usage independently', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
     const usageRuntime = createUsageRuntimeStub();
@@ -425,7 +444,10 @@ describe('useAIChatSession Mastra-native open chat', () => {
       totalTokens: 134,
       estimatedCost: 0.000081,
     });
-    runtime.listMessages.mockResolvedValue(persistedHistory('authoritative persisted reply'));
+    runtime.listMessages.mockResolvedValue({
+      conversationId: 'conv-1',
+      messages: persistedHistory('stale reply').messages.slice(1),
+    });
     const composable = mountComposable(service, runtime, 'web', usageRuntime);
 
     await send(composable, service, runtime, [
@@ -450,6 +472,32 @@ describe('useAIChatSession Mastra-native open chat', () => {
       estimatedCost: 0.000081,
     });
     expect(usageRuntime.get).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+    expect(composable.chatTimeline.value).toEqual([
+      {
+        id: expect.stringMatching(/^user-draft-/),
+        role: 'user',
+        content: 'hello',
+        status: 'success',
+      },
+      {
+        id: 'assistant-stream-id',
+        role: 'assistant',
+        content: 'stream final',
+        status: 'success',
+      },
+    ]);
+    expect(composable.hasWorkflowUserMessages.value).toBe(true);
+    expect(runtime.listMessages).not.toHaveBeenCalled();
+
+    // Explicit reselect/reload still replaces the live projection from Mastra.
+    runtime.listMessages.mockResolvedValue(persistedHistory('authoritative persisted reply'));
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+    expect(runtime.listMessages).toHaveBeenCalledWith('conv-1');
     expect(composable.chatTimeline.value).toEqual([
       { id: 'user-1', role: 'user', content: 'hello', status: 'success' },
       {
@@ -502,6 +550,13 @@ describe('useAIChatSession Mastra-native open chat', () => {
     await pending;
 
     expect(runtime.cancelRun).toHaveBeenCalledWith('run-1');
+    expect(composable.chatTimeline.value[0]).toMatchObject({
+      role: 'user',
+      content: 'hello',
+      status: 'success',
+    });
+    expect(composable.hasWorkflowUserMessages.value).toBe(true);
+    expect(runtime.listMessages).not.toHaveBeenCalled();
     expect(composable.chatTimeline.value.find((item) => item.role === 'assistant')?.status).toBe(
       'aborted',
     );
@@ -521,5 +576,11 @@ describe('useAIChatSession Mastra-native open chat', () => {
     runtime.streamMessage.mockRejectedValueOnce(new Error('provider unavailable'));
     await composable.handleSendChat(service as never, MODEL, 'New chat', () => {});
     expect(toastMocks.error).toHaveBeenCalled();
+    expect(composable.chatTimeline.value.filter((item) => item.role === 'user')).toMatchObject([
+      { content: 'hello', status: 'success' },
+      { content: 'again', status: 'success' },
+    ]);
+    expect(composable.hasWorkflowUserMessages.value).toBe(true);
+    expect(runtime.listMessages).not.toHaveBeenCalled();
   });
 });

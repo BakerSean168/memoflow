@@ -1,3 +1,7 @@
+import {
+  applyMemoFlowSessionToolPolicy,
+  MEMOFLOW_PRODUCT_TOOL_POLICY,
+} from '../tools/product-tool-policy';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -194,6 +198,67 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
   resources.push({ runtime, file });
   return { runtime, file, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
 }
+
+describe('MastraAIRuntime Assistant tool policy', () => {
+  it('installs the manifest on real controller sessions despite permissive persisted state', async () => {
+    const { runtime } = await createRuntime();
+    await runtime.init();
+    const session = await runtime.controller.createSession({
+      id: 'policy-session',
+      ownerId: 'identity-1',
+      resourceId: 'identity-1',
+    });
+    await session.state.set({
+      yolo: true,
+      permissionRules: {
+        categories: { read: 'deny', edit: 'allow', execute: 'allow', other: 'allow' },
+        tools: { knowledge_search: 'deny', routine_create: 'allow' },
+      },
+    });
+    // Cached sessions retain identity; policy reinitialization clears only permission state.
+    const reused = await runtime.controller.createSession({
+      id: 'policy-session',
+      ownerId: 'identity-1',
+      resourceId: 'identity-1',
+    });
+    expect(reused).toBe(session);
+    await applyMemoFlowSessionToolPolicy(reused);
+    // Mastra exposes this implementation seam as private in its declaration only.
+    const controller = runtime.controller as unknown as {
+      resolveModeActiveTools(session: typeof reused): string[];
+    };
+    expect(controller.resolveModeActiveTools(reused).sort()).toEqual(
+      Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).sort(),
+    );
+    await session.state.set({ yolo: true });
+    for (const name of [
+      'knowledge_search',
+      'workspace_overview',
+      'planner_today_summary',
+      'planner_conflicts',
+      'planner_upcoming_tasks',
+      'notification_unread_summary',
+      'routine_pause_protocol',
+      'routine_resume_protocol',
+      'routine_end_protocol',
+    ]) {
+      expect(session.resolveToolApproval(name)).toBe('allow');
+    }
+    for (const name of [
+      'routine_create',
+      'routine_set_profile_active',
+      'routine_set_temporary_override',
+      'routine_clear_temporary_override',
+      'routine_start_protocol',
+      'notification_execute_action',
+    ]) {
+      expect(session.resolveToolApproval(name)).toBe('ask');
+    }
+    for (const name of ['unknown', '__proto__', 'constructor', 'toString']) {
+      expect(session.resolveToolApproval(name)).toBe('deny');
+    }
+  });
+});
 
 describe('MastraAIRuntime goal.create product projection', () => {
   it('owns start/get/list/resume and short-circuits a second approve after terminal completion', async () => {

@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { MastraDBMessage } from '@mastra/core/agent';
+import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { createMastraStorage } from './storage';
 import { AssistantHistoryService } from './assistant-history.service';
@@ -37,6 +37,18 @@ describe('AssistantHistoryService persistent restart authority', () => {
 
     await firstMemory.saveMessages({
       messages: [
+        createSignal({
+          type: 'user',
+          id: 'native-user',
+          createdAt: new Date(20),
+          contents: 'persisted question',
+        }).toDBMessage({ threadId: 'conversation-1', resourceId: 'identity-1' }),
+        createSignal({
+          type: 'reactive',
+          id: 'internal',
+          createdAt: new Date(10),
+          contents: 'hidden reminder',
+        }).toDBMessage({ threadId: 'conversation-1', resourceId: 'identity-1' }),
         {
           id: 'mastra-message',
           role: 'assistant',
@@ -63,7 +75,10 @@ describe('AssistantHistoryService persistent restart authority', () => {
       restartedService.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }),
     ).resolves.toMatchObject({
       conversationId: 'conversation-1',
-      messages: [{ id: 'mastra-message', role: 'assistant', content: 'answer from Mastra memory' }],
+      messages: [
+        { id: 'native-user', role: 'user', content: 'persisted question' },
+        { id: 'mastra-message', role: 'assistant', content: 'answer from Mastra memory' },
+      ],
     });
     expect(restartedSource.loadShell).not.toHaveBeenCalled();
 

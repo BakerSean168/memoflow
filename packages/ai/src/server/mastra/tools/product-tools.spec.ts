@@ -2,6 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { RequestContext } from '@mastra/core/request-context';
 import { createMemoFlowProductTools, RoutineTriggerSchema } from './product-tools';
+import {
+  MEMOFLOW_PRODUCT_TOOL_POLICY,
+  assertMemoFlowToolClassification,
+  applyMemoFlowSessionToolPolicy,
+} from './product-tool-policy';
 
 function context() {
   const requestContext = new RequestContext();
@@ -40,6 +45,31 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     expect(tools.routine_pause_protocol.requireApproval).not.toBe(true);
     expect(tools.routine_resume_protocol.requireApproval).not.toBe(true);
     expect(tools.routine_end_protocol.requireApproval).not.toBe(true);
+  });
+
+  it('classifies every registered tool and derives its explicit approval setting', () => {
+    const tools = createMemoFlowProductTools({});
+    expect(Object.keys(tools).sort()).toEqual(Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).sort());
+    for (const [name, rule] of Object.entries(MEMOFLOW_PRODUCT_TOOL_POLICY)) {
+      expect(tools[name as keyof typeof tools].requireApproval).toBe(rule.requireApproval);
+    }
+    expect(() => assertMemoFlowToolClassification({ unknown: { id: 'unknown' } })).toThrow(
+      'Unclassified',
+    );
+    expect(() => assertMemoFlowToolClassification({ constructor: { id: 'constructor' } })).toThrow(
+      'Unclassified',
+    );
+  });
+
+  it('fails closed for unknown and prototype names independent of native policy', async () => {
+    const session = {
+      state: { set: vi.fn(async () => {}) },
+      resolveToolApproval: (_name: string): 'allow' | 'ask' | 'deny' => 'allow',
+    };
+    await applyMemoFlowSessionToolPolicy(session);
+    for (const name of ['unknown', '__proto__', 'constructor', 'toString']) {
+      expect(session.resolveToolApproval(name)).toBe('deny');
+    }
   });
 
   it('exposes a strict canonical Routine trigger union', () => {

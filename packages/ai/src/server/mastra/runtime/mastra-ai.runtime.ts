@@ -1,3 +1,4 @@
+import { applyMemoFlowSessionToolPolicy, memoFlowToolCategory } from '../tools/product-tool-policy';
 import { randomUUID } from 'node:crypto';
 import { AgentController } from '@mastra/core/agent-controller';
 import type { AgentControllerEvent } from '@mastra/core/agent-controller';
@@ -201,6 +202,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     this.controller = new AgentController({
       id: 'memoflow-assistant-controller',
+      toolCategoryResolver: memoFlowToolCategory,
       storage: deps.storage,
       memory: this.memory,
       agent: this.assistant,
@@ -223,6 +225,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         'subagent',
       ],
     });
+    this.controller.onSessionCreated(applyMemoFlowSessionToolPolicy, { blocking: true });
     this.mastra = new Mastra({
       storage: deps.storage,
       agents: {
@@ -990,6 +993,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       threadId: input.conversationId,
       requestContext,
     });
+    // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
+    await applyMemoFlowSessionToolPolicy(session);
     const queue = new AsyncEventQueue<AssistantRuntimeEvent>();
     const fallbackRunId = `turn:${input.conversationId}:${randomUUID()}`;
     let runId = '';

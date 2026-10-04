@@ -2349,3 +2349,32 @@ AIC-2001 → AIC-2005 Goal vertical slice
 ```
 
 这种顺序比直接改 `AIGoalWorkflowPanel` 更安全，也更符合当前根因证据。
+
+## Batch A implementation evidence (2026-10-04; bounded scope)
+
+AIC-1001, AIC-1002 and AIC-1101 are implemented locally; this is **not** overall
+plan completion or live GCP acceptance. No tool-event/approval UI, composer,
+Goal routing/native draft, streaming performance or workflow-surface retirement
+work is included.
+
+- Canonical history projects only native `signal` rows with
+  `content.metadata.signal.type === 'user'`; other signals fail closed. Mastra
+  remains transcript authority; owner-thread checks and attachment redaction remain.
+- Successful turns retain SSE/local user and completed assistant projection;
+  post-turn refresh fetches usage only. Explicit reload/reselect replaces the
+  transcript from authoritative history.
+- One MemoFlow tool-policy manifest classifies all fifteen product tools.
+  Six read tools auto-allow; six high-impact mutation tools ask and require
+  approval; pause/resume/end preserve explicit no-approval intent. Unknown and
+  prototype-key names deny; unclassified registrations fail construction.
+  Session policy initialization resets only permission rules/yolo before turns,
+  including cached sessions; owner authorization is unchanged.
+
+Regression evidence: focused history/tool/runtime tests 42 passed; chat session
+13 passed. Uncached `ai:test`: 447 tests / 89 files passed; uncached
+`app-vue:test`: 1712 tests / 274 files passed. Both package typecheck targets,
+`pnpm test:inventory:check`, governance check and changed-file lint passed.
+Red/green, installed Mastra precedence and exact command/log evidence are recorded
+in the managed Batch A artifacts (`history.md`, `live-turn.md`, `tool-policy.md`,
+`validation.md`), not in a second runtime store. Live provider/GCP validation
+remains outstanding; later plan batches remain unimplemented.

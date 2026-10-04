@@ -1,4 +1,4 @@
-import type { MastraDBMessage } from '@mastra/core/agent';
+import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
 import { describe, expect, it, vi } from 'vitest';
 import {
   AssistantConversationUnavailableError,
@@ -181,6 +181,92 @@ describe('AssistantHistoryService', () => {
     });
     expect(JSON.stringify(result)).not.toContain('data:image/png');
   });
+
+  it('projects native user signals with stable sorting and redacted attachments', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1' });
+    const signal = createSignal({
+      id: 'a-user',
+      type: 'user',
+      createdAt: new Date(20),
+      contents: [
+        { type: 'text', text: 'native question' },
+        { type: 'file', data: 'private-file-data', mediaType: 'image/png', filename: 'screen.png' },
+      ],
+    }).toDBMessage({ threadId: 'conversation-1', resourceId: 'identity-1' });
+    harness.messages.set('z-answer', {
+      ...signal,
+      id: 'z-answer',
+      role: 'assistant',
+      content: { format: 2, parts: [{ type: 'text', text: 'answer' }] },
+    });
+    harness.messages.set(signal.id, signal);
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+    const result = await service.listMessages({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+    });
+    expect(result.messages).toMatchObject([
+      {
+        id: 'a-user',
+        role: 'user',
+        content: 'native question',
+        createdAt: 20,
+        attachments: [{ mediaType: 'image/png', filename: 'screen.png' }],
+      },
+      { id: 'z-answer', role: 'assistant', content: 'answer', createdAt: 20 },
+    ]);
+    expect(JSON.stringify(result)).not.toContain('private-file-data');
+  });
+
+  it.each([
+    undefined,
+    null,
+    'user',
+    [],
+    {},
+    { type: 'user-message' },
+    { type: 'system' },
+    { type: 'state' },
+    { type: 'reactive' },
+    { type: 'notification' },
+    { type: 'controller' },
+    { type: 1 },
+  ])('filters signals with invalid or non-user metadata: %j', async (signalMetadata) => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1' });
+    const message = createSignal({
+      type: 'user',
+      id: 'hidden',
+      contents: 'internal',
+    }).toDBMessage();
+    message.content.metadata = { signal: signalMetadata };
+    harness.messages.set(message.id, message);
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+    expect(
+      (await service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }))
+        .messages,
+    ).toEqual([]);
+  });
+
+  it.each(['user', 'assistant', 'system'] as const)(
+    'preserves direct %s messages',
+    async (role) => {
+      const harness = createMemoryHarness();
+      harness.setThread({ id: 'conversation-1', resourceId: 'identity-1' });
+      const message = createSignal({
+        type: 'reactive',
+        id: 'direct',
+        contents: 'direct text',
+      }).toDBMessage();
+      harness.messages.set(message.id, { ...message, role });
+      const service = new AssistantHistoryService(harness.memory, shellSource());
+      expect(
+        (await service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }))
+          .messages,
+      ).toMatchObject([{ role, content: 'direct text' }]);
+    },
+  );
 
   it('deletes only an owner-scoped Mastra thread', async () => {
     const harness = createMemoryHarness();

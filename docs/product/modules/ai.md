@@ -67,6 +67,20 @@ Task panel 的 confirm 委托同一个 native owner submit coordinator，保留 
 
 **2026-10-02 PVC-AI-8131:** `BusinessPanel.workflow` 经 native parity 后评估为继续保留，但职责已收缩为 non-owner workflow context/status。Goal/Task/Knowledge clarification、recovery/retry、Goal supporting overlays、revision/result diagnostics 与 shell dirty/busy/attention 仍没有等价宿主；owner business editing 则全部留在 GoalDialog、TaskPlanDialog、Repository Knowledge review。Governance 禁止 workflow context 引入 owner form 或直接 owner mutation。
 
+### Assistant transcript / tool permission truth (Batch A, 2026-10-04)
+
+Mastra Memory 是唯一 transcript authority。History 仅将 native `signal` 且
+`content.metadata.signal.type === 'user'` 投影为用户消息；其它 signal 不展示为用户。
+发送完成保留 SSE/live turn，不用可能落后的 history 覆盖当前 turn；usage 独立刷新，
+显式 reload/reselect 仍由 authoritative history 替换本地 projection。
+
+MemoFlow-owned tool manifest 同时决定 controller permission 和 tool
+`requireApproval`：Knowledge/workspace/Planner/Notification 六个只读工具自动允许；
+六个高影响 mutation 保持 ask/requireApproval；既有 ProtocolSession 的
+pause/resume/end 显式允许且不要求 approval。未知工具（包括 prototype key）拒绝，
+新注册工具缺少分类会阻止构建 runtime。Session 重用时重新应用产品 permission policy，
+不允许 yolo/grant 放宽此边界；owner identity、authorization 与 timer truth 不变。
+
 ## 4. Routine command tools（AI-6102）
 
 Assistant 当前可调用：
