@@ -51,6 +51,7 @@ describe('AIConversationSidebar email verification degrade', () => {
           ChevronDown: true,
           FileText: true,
           Bot: true,
+          MemoFlowAiIcon: true,
           MessageSquare: true,
           MoreHorizontal: true,
           Plus: true,
