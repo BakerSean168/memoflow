@@ -102,6 +102,10 @@ export interface GitHubFileCommitResult {
 }
 
 export interface IGitHubAppClient {
+  /** Discover an already-installed copy of this App for a verified GitHub account. */
+  findInstallationForAccount?(
+    accountId: string,
+  ): Promise<{ installationId: string; accountId: string } | null>;
   getInstallationInventory(installationId: string): Promise<GitHubAppInstallationInventory>;
   getRepositorySnapshot(
     installationId: string,

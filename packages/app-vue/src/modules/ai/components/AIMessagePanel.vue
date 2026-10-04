@@ -49,7 +49,7 @@
               :class="semanticElevationClass('inset')"
               aria-hidden="true"
             >
-              <Bot class="h-3.5 w-3.5" />
+              <MemoFlowAiIcon class="h-3.5 w-3.5" />
             </div>
             <div class="group/message min-w-0 flex-1 pt-0.5">
               <AIMessageContent v-if="item.content.trim()" :content="item.content" />
@@ -121,7 +121,7 @@
                       ? ClipboardCheck
                       : toolMode === 'knowledge-qa'
                         ? Search
-                        : Bot
+                        : MemoFlowAiIcon
               "
               class="h-[18px] w-[18px]"
             />
@@ -245,7 +245,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue';
 import {
-  Bot,
   Check,
   Copy,
   ClipboardCheck,
@@ -260,6 +259,7 @@ import {
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import AIMessageContent from './AIMessageContent.vue';
+import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import { getToolLocaleKey, type ChatItem, type WorkflowMode } from '../composables/types';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import { useAIFormatters } from '../composables/useAIFormatters';

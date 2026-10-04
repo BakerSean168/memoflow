@@ -5,10 +5,11 @@
   >
     <ModuleHeader family="collection" data-testid="routine-list-toolbar">
       <template #leading>
-        <ResponsiveSegmentedFilter
+        <ProductSingleSelectFilter
           :model-value="selectedState"
           :options="stateFilters"
           :accessible-label="t('routine.filter.status')"
+          :icon="CircleDot"
           test-id="routine-state-filter"
           @update:model-value="updateStateFilter"
         />
@@ -420,6 +421,7 @@ import { toast } from 'vue-sonner';
 import {
   Check,
   ChevronDown,
+  CircleDot,
   Clock3,
   Layers3,
   MoreHorizontal,
@@ -454,7 +456,7 @@ import {
 } from '@memoflow/reminder/method-library';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { ResponsiveSegmentedFilter } from '../../../shared/components';
+import { ProductSingleSelectFilter } from '../../../shared/components';
 import RoutineEditorDialog, {
   type RoutineEditorPreset,
 } from '../components/RoutineEditorDialog.vue';

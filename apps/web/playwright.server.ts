@@ -159,59 +159,55 @@ export function createApiServer() {
 }
 
 /**
- * Residual 1339: real interactive GitHub OAuth Playwright path.
- * Loads gitignored `.env.development.local` for GITHUB_OAUTH_* and forces
- * RUNTIME_LANE=host-dev so getGithubOAuthConfig does NOT replace credentials
- * with placeholder e2e values (residual 1333 keep-boundary).
+ * Real-provider OAuth acceptance must run against the canonical host-dev runtime
+ * that owns the registered MemoFlow Dev Test callback. Starting a second
+ * localhost API would create OAuth state in one process while GitHub returns the
+ * callback to another process.
+ *
+ * The browser test therefore needs only the public host-dev origin; server
+ * credentials remain owned by the machine-scoped host-dev launcher.
  */
-function loadGithubOAuthCredentialsFromLocalEnv(): {
-  clientId: string;
-  clientSecret: string;
-} {
-  // Explicit process.env wins (tests / CI inject). Files only fill gaps.
-  const presetId = process.env.GITHUB_OAUTH_CLIENT_ID?.trim() ?? '';
-  const presetSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET?.trim() ?? '';
-  if (!presetId || !presetSecret) {
+export function getRealOAuthHostDevOrigin(): string {
+  const explicit = process.env.E2E_REAL_OAUTH_WEB_ORIGIN?.trim() ?? '';
+  if (!explicit && !(process.env.MEMOFLOW_WEB_URL?.trim() ?? '')) {
     loadEnvFile(resolve(WORKSPACE_ROOT, '.env.development.local'));
-    loadEnvFile(resolve(WORKSPACE_ROOT, '.env.test.local'));
   }
-  if (presetId) process.env.GITHUB_OAUTH_CLIENT_ID = presetId;
-  if (presetSecret) process.env.GITHUB_OAUTH_CLIENT_SECRET = presetSecret;
-  return {
-    clientId: process.env.GITHUB_OAUTH_CLIENT_ID?.trim() ?? '',
-    clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET?.trim() ?? '',
-  };
+
+  const configured =
+    explicit || process.env.MEMOFLOW_WEB_URL?.trim() || process.env.E2E_WEB_BASE_URL?.trim() || '';
+
+  if (!configured) {
+    throw new Error(
+      'Real OAuth acceptance requires canonical host-dev ingress. Run pnpm dev:host first or set E2E_REAL_OAUTH_WEB_ORIGIN.',
+    );
+  }
+
+  const origin = normalizeOrigin(configured);
+  if (!origin.startsWith('https://')) {
+    throw new Error(
+      `Real OAuth acceptance requires the HTTPS host-dev origin, received: ${origin}`,
+    );
+  }
+
+  process.env.E2E_REAL_OAUTH_WEB_ORIGIN = origin;
+  process.env.E2E_WEB_BASE_URL = origin;
+  // Host-dev Web owns the browser boundary and proxies /api to its API.
+  process.env.E2E_API_BASE_URL = origin;
+  process.env.E2E_API_FULL_URL = `${origin}/api/v1`;
+  return origin;
 }
 
-export function createRealOAuthApiServer() {
-  const apiOrigin = getApiOrigin();
-  const { clientId, clientSecret } = loadGithubOAuthCredentialsFromLocalEnv();
-
-  return {
-    command: 'corepack pnpm exec tsx ./e2e/helpers/start-api-server.ts',
-    cwd: '.',
-    url: `${apiOrigin}/healthz`,
-    env: {
-      ...process.env,
-      NODE_ENV: 'test',
-      // host-dev: real provider when both secrets present (not e2e-mock).
-      RUNTIME_LANE: 'host-dev',
-      E2E_REAL_GITHUB_OAUTH: '1',
-      GITHUB_OAUTH_CLIENT_ID: clientId,
-      GITHUB_OAUTH_CLIENT_SECRET: clientSecret,
-      AUTH_BASE_URL: `${apiOrigin}/api/auth`,
-      MEMOFLOW_WEB_URL: getE2EWebOrigin(),
-      CORS_ORIGIN: getCorsOrigins(),
-    },
-    ...apiServerOptions,
-  };
-}
-
-export function hasRealGithubOAuthCredentials(): boolean {
-  const { clientId, clientSecret } = loadGithubOAuthCredentialsFromLocalEnv();
-  if (!clientId || !clientSecret) return false;
-  if (clientId === 'e2e-mock' || clientId === 'mock') return false;
-  return true;
+/**
+ * Playwright config modules are also loaded by the test inventory collector.
+ * Discovery must be side-effect free and must not require machine credentials
+ * or a live host-dev ingress. Actual real-provider execution stays fail-closed
+ * through getRealOAuthHostDevOrigin().
+ */
+export function getRealOAuthPlaywrightBaseURL(): string {
+  if (process.env.TEST_INVENTORY_LIST === '1') {
+    return 'https://real-oauth-inventory.invalid';
+  }
+  return getRealOAuthHostDevOrigin();
 }
 
 export function createPowerSyncTestServer() {
@@ -266,6 +262,5 @@ export function createOpenAICompatibleMockServer() {
     timeout: 60 * 1000,
   };
 }
-
 
 export { DEFAULT_API_ORIGIN as defaultApiOrigin };

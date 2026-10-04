@@ -3,7 +3,7 @@
     <!-- Header：新建会话为主操作；刷新/设置收进 ⋯ 菜单（§1-5） -->
     <div class="flex h-14 items-center border-b px-4">
       <div class="flex items-center gap-2 font-semibold">
-        <Bot class="h-5 w-5 text-primary" />
+        <MemoFlowAiIcon class="h-5 w-5 text-primary" />
         <span>{{ t('aiAssistant.title') }}</span>
       </div>
 
@@ -197,8 +197,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { semanticToneStatusClass } from '../../../shared/constants/semantic-tone';
+import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
-  Bot,
   ChevronDown,
   FileText,
   MessageSquare,

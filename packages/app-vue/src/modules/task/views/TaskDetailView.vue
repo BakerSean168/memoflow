@@ -628,13 +628,13 @@
               @checklist-change="setOccurrenceChecklistItem"
             />
           </div>
-          <div
+          <AppEmptyState
             v-else
-            class="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground"
-            data-testid="task-detail-occurrences-empty"
-          >
-            {{ t('task.detail.noOccurrences') }}
-          </div>
+            :icon="CalendarClock"
+            :title="t('task.detail.noOccurrences')"
+            density="inline"
+            testid="task-detail-occurrences-empty"
+          />
         </section>
       </div>
 
@@ -727,6 +727,7 @@ import {
   type TaskReminderConfigDTO,
   type UpdateTaskPlanReq,
 } from '@memoflow/contracts/task';
+import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import {
   ProductAutoTextarea,

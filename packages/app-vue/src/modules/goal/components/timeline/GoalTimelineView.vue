@@ -25,16 +25,13 @@
     </div>
 
     <!-- 无数据状态 -->
-    <div v-else-if="!hasTimeline" class="empty-state">
-      <svg viewBox="0 0 24 24" class="empty-icon">
-        <path
-          d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
-          fill="currentColor"
-        />
-      </svg>
-      <h3>{{ t('goal.timeline.empty') }}</h3>
-      <p>{{ t('goal.timeline.emptyHint') }}</p>
-    </div>
+    <AppEmptyState
+      v-else-if="!hasTimeline"
+      :icon="History"
+      :title="t('goal.timeline.empty')"
+      :description="t('goal.timeline.emptyHint')"
+      density="inline"
+    />
 
     <!-- 时间线内容 -->
     <template v-else>
@@ -96,10 +93,12 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { History } from '@lucide/vue';
 import * as echarts from 'echarts';
 
 const { t } = useI18n();
 import type { ECharts } from 'echarts';
+import AppEmptyState from '../../../../components/shared/AppEmptyState.vue';
 import TimelineControls from './TimelineControls.vue';
 import { useGoalTimeline } from '../../composables/useGoalTimeline';
 import type { TimelineSnapshot } from '../../utils/goal-timeline';
@@ -310,37 +309,6 @@ function handleResize() {
   to {
     transform: rotate(360deg);
   }
-}
-
-/* 空状态 */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px;
-  background: #fff;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  color: #bbb;
-  margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  color: #666;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 14px;
-  color: #999;
 }
 
 /* 可视化区域 */

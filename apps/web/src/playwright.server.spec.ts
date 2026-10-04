@@ -159,21 +159,42 @@ describe('playwright.server', () => {
     expect(createWebServer().reuseExistingServer).toBe(false);
   });
 
-  it('real OAuth API server uses host-dev lane (residual 1339, not e2e-mock)', async () => {
-    process.env.GITHUB_OAUTH_CLIENT_ID = 'Ov23test-real-client';
-    process.env.GITHUB_OAUTH_CLIENT_SECRET = 'real-secret-for-test-only';
+  it('real OAuth acceptance targets the canonical HTTPS host-dev runtime', async () => {
+    process.env.E2E_REAL_OAUTH_WEB_ORIGIN = 'https://gcp-dev.example.ts.net:20220/';
 
-    const { createApiServer, createRealOAuthApiServer } = await import('../playwright.server');
+    const { createApiServer, getRealOAuthHostDevOrigin } = await import('../playwright.server');
 
     const mockLane = createApiServer();
     expect(mockLane.env?.RUNTIME_LANE).toBe('e2e');
 
-    const realLane = createRealOAuthApiServer();
-    expect(realLane.env?.RUNTIME_LANE).toBe('host-dev');
-    expect(realLane.env?.E2E_REAL_GITHUB_OAUTH).toBe('1');
-    expect(realLane.env?.AUTH_BASE_URL).toBe('http://localhost:3000/api/auth');
-    expect(realLane.env?.MEMOFLOW_WEB_URL).toBe('http://127.0.0.1:5173');
-    expect(realLane.env?.GITHUB_OAUTH_CLIENT_ID).toBe('Ov23test-real-client');
-    expect(realLane.env?.GITHUB_OAUTH_CLIENT_SECRET).toBe('real-secret-for-test-only');
+    expect(getRealOAuthHostDevOrigin()).toBe('https://gcp-dev.example.ts.net:20220');
+    expect(process.env.E2E_WEB_BASE_URL).toBe('https://gcp-dev.example.ts.net:20220');
+    expect(process.env.E2E_API_BASE_URL).toBe('https://gcp-dev.example.ts.net:20220');
+    expect(process.env.E2E_API_FULL_URL).toBe('https://gcp-dev.example.ts.net:20220/api/v1');
+  });
+
+  it('rejects non-HTTPS origins for real OAuth acceptance', async () => {
+    process.env.E2E_REAL_OAUTH_WEB_ORIGIN = 'http://127.0.0.1:5173';
+
+    const { getRealOAuthHostDevOrigin } = await import('../playwright.server');
+
+    expect(() => getRealOAuthHostDevOrigin()).toThrow(
+      'Real OAuth acceptance requires the HTTPS host-dev origin',
+    );
+  });
+
+  it('keeps Playwright inventory discovery side-effect free without weakening real OAuth execution', async () => {
+    process.env.TEST_INVENTORY_LIST = '1';
+    process.env.MEMOFLOW_WEB_URL = 'http://127.0.0.1:4173';
+    process.env.E2E_WEB_BASE_URL = 'http://127.0.0.1:4173';
+    delete process.env.E2E_REAL_OAUTH_WEB_ORIGIN;
+
+    const { getRealOAuthPlaywrightBaseURL, getRealOAuthHostDevOrigin } =
+      await import('../playwright.server');
+
+    expect(getRealOAuthPlaywrightBaseURL()).toBe('https://real-oauth-inventory.invalid');
+    expect(() => getRealOAuthHostDevOrigin()).toThrow(
+      'Real OAuth acceptance requires the HTTPS host-dev origin',
+    );
   });
 });

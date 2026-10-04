@@ -93,7 +93,8 @@ const messages = {
       startFailed: 'Start failed',
       installationPending: 'Installation pending',
       pendingAuthorizationTitle: 'Waiting for GitHub authorization',
-      pendingAuthorizationDescription: 'Use Check authorization to resume a verified authorization.',
+      pendingAuthorizationDescription:
+        'Use Check authorization to resume a verified authorization.',
       checkAuthorization: 'Check authorization',
       installationExpired: 'Installation expired',
       reconciliation: {
@@ -250,7 +251,9 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
     executeKnowledgeRepositoryReconciliation: vi.fn(),
     syncKnowledgeRepository: vi.fn(),
     openLocalVaultInObsidian: vi.fn(),
-    startKnowledgeRepositoryInstallation: vi.fn(),
+    startKnowledgeRepositoryInstallation: vi.fn(async () =>
+      fail({ code: 'NOT_FOUND', message: 'No existing installation' }),
+    ),
     getLocalVaultBinding: vi.fn(),
     selectLocalVault: vi.fn(),
     detachLocalVault: vi.fn(),
@@ -379,7 +382,88 @@ describe('KnowledgeRepositorySettings', () => {
       '_blank',
       'noopener,noreferrer',
     );
-    expect(service.startKnowledgeRepositoryInstallation).not.toHaveBeenCalled();
+    expect(service.startKnowledgeRepositoryInstallation).toHaveBeenCalledWith({
+      returnUrl: expect.stringContaining('/settings?tab=repository'),
+      clientKind: 'web',
+      recoverOnly: true,
+    });
+    open.mockRestore();
+  });
+
+  it('opens GitHub App authorization in a dedicated popup and completes it from the parent page', async () => {
+    const replace = vi.fn();
+    const popup = {
+      closed: false,
+      location: { replace },
+      close: vi.fn(function (this: { closed: boolean }) {
+        this.closed = true;
+      }),
+    };
+    const open = vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window);
+    const startKnowledgeRepositoryInstallation = vi.fn(async (request) =>
+      request.recoverOnly
+        ? fail({ code: 'NOT_FOUND', message: 'No existing installation' })
+        : ok({
+            intentId: 'intent-web-popup',
+            installationUrl:
+              'https://github.com/apps/memoflow/installations/new?state=mfi1.dev.popup',
+            expiresAt: Date.now() + 600_000,
+            requiresExternalBrowser: true,
+          }),
+    );
+    const getKnowledgeRepositoryInstallationIntentStatus = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-popup',
+        status: 'CallbackReceived' as const,
+        clientKind: 'web' as const,
+        expiresAt: Date.now() + 600_000,
+        installationId: 'installation-1',
+      }),
+    );
+    const finalizeKnowledgeRepositoryInstallationIntent = vi.fn(async () =>
+      ok({
+        installationId: 'installation-1',
+        githubAccountId: '42',
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        repositories: [
+          {
+            id: 'repository-1',
+            nodeId: 'R_1',
+            fullName: 'owner/thought-forest',
+            ownerId: '42',
+            private: true,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+        ],
+      }),
+    );
+    const wrapper = mountSettings(
+      createService({
+        startKnowledgeRepositoryInstallation,
+        getKnowledgeRepositoryInstallationIntentStatus,
+        finalizeKnowledgeRepositoryInstallationIntent,
+      }),
+    );
+    await flushPromises();
+
+    await wrapper.get('[data-testid="github-repository-connect"]').trigger('click');
+    await flushPromises();
+
+    expect(open).toHaveBeenCalledWith(
+      'about:blank',
+      'memoflow-github-installation',
+      expect.stringContaining('popup=yes'),
+    );
+    expect(replace).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/apps/memoflow/installations/new'),
+    );
+    expect(getKnowledgeRepositoryInstallationIntentStatus).toHaveBeenCalledWith('intent-web-popup');
+    expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith('intent-web-popup');
+    expect(wrapper.text()).toContain('owner/thought-forest');
+    expect(popup.close).toHaveBeenCalled();
     open.mockRestore();
   });
 
@@ -615,9 +699,9 @@ describe('KnowledgeRepositorySettings', () => {
     );
     await flushPromises();
 
-    expect(wrapper.get('[data-testid="knowledge-repository-installation-pending"]').text()).toContain(
-      'Waiting for GitHub authorization',
-    );
+    expect(
+      wrapper.get('[data-testid="knowledge-repository-installation-pending"]').text(),
+    ).toContain('Waiting for GitHub authorization');
     expect(wrapper.get('[data-testid="github-repository-connect"]').text()).toContain(
       'Check authorization',
     );
@@ -675,7 +759,16 @@ describe('KnowledgeRepositorySettings', () => {
     expect(wrapper.text()).toContain('owner/thought-forest');
   });
 
-  it('resumes a finalized Web authorization without reopening GitHub', async () => {
+  it('automatically rediscovers a finalized Web authorization without opening GitHub', async () => {
+    const replace = vi.fn();
+    const popup = {
+      closed: false,
+      location: { replace },
+      close: vi.fn(function (this: { closed: boolean }) {
+        this.closed = true;
+      }),
+    };
+    const open = vi.spyOn(window, 'open').mockReturnValue(popup as unknown as Window);
     const startKnowledgeRepositoryInstallation = vi.fn(async () =>
       ok({
         intentId: 'intent-web-resumed',
@@ -712,16 +805,87 @@ describe('KnowledgeRepositorySettings', () => {
     );
     await flushPromises();
 
-    await wrapper.get('[data-testid="github-repository-connect"]').trigger('click');
-    await flushPromises();
-
+    expect(startKnowledgeRepositoryInstallation).toHaveBeenCalledWith({
+      returnUrl: expect.stringContaining('/settings?tab=repository'),
+      clientKind: 'web',
+      recoverOnly: true,
+    });
     expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith(
       'intent-web-resumed',
     );
+    expect(open).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+    expect(popup.close).not.toHaveBeenCalled();
     expect(wrapper.text()).toContain('owner/thought-forest');
     expect(
       window.sessionStorage.getItem('memoflow:knowledge-repository:web-installation-intent'),
     ).toBe('intent-web-resumed');
+    open.mockRestore();
+  });
+
+  it('checks a pending Web authorization through server rediscovery without opening GitHub', async () => {
+    window.sessionStorage.setItem(
+      'memoflow:knowledge-repository:web-installation-intent',
+      'intent-web-pending',
+    );
+    const open = vi.spyOn(window, 'open');
+    const getKnowledgeRepositoryInstallationIntentStatus = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-pending',
+        status: 'Pending' as const,
+        clientKind: 'web' as const,
+        expiresAt: Date.now() + 600_000,
+        installationId: null,
+      }),
+    );
+    const startKnowledgeRepositoryInstallation = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-recovered',
+        installationUrl: 'https://github.com/settings/installations/123',
+        expiresAt: Date.now() + 600_000,
+        requiresExternalBrowser: false,
+      }),
+    );
+    const finalizeKnowledgeRepositoryInstallationIntent = vi.fn(async () =>
+      ok({
+        installationId: '123',
+        githubAccountId: '42',
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        repositories: [
+          {
+            id: 'repository-1',
+            nodeId: 'R_1',
+            fullName: 'owner/thought-forest',
+            ownerId: '42',
+            private: true,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+        ],
+      }),
+    );
+    const wrapper = mountSettings(
+      createService({
+        getKnowledgeRepositoryInstallationIntentStatus,
+        startKnowledgeRepositoryInstallation,
+        finalizeKnowledgeRepositoryInstallationIntent,
+      }),
+    );
+    await flushPromises();
+
+    expect(startKnowledgeRepositoryInstallation).toHaveBeenCalledWith({
+      returnUrl: expect.stringContaining('/settings?tab=repository'),
+      clientKind: 'web',
+      recoverOnly: true,
+    });
+    expect(open).not.toHaveBeenCalled();
+    expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith(
+      'intent-web-recovered',
+    );
+    expect(wrapper.text()).toContain('owner/thought-forest');
+    open.mockRestore();
   });
 
   it('resumes a verified Desktop installation without reopening GitHub', async () => {

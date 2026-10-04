@@ -44,11 +44,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Zap } from '@lucide/vue';
 import { Button, Dialog, Input, Label } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 
 const props = withDefaults(
   defineProps<{
@@ -67,11 +68,12 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const title = ref('');
+const isDirty = computed(() => props.modelValue && title.value.trim().length > 0);
 
 watch(
   title,
   (value) => {
-    emit('dirty-change', props.modelValue && value.length > 0);
+    emit('dirty-change', props.modelValue && value.trim().length > 0);
   },
   { immediate: true },
 );
@@ -89,17 +91,25 @@ watch(
   { immediate: true },
 );
 
-function setVisible(value: boolean): void {
-  if (!value) {
-    handleCancel();
-  }
-}
-
-function handleCancel(): void {
+function closeNow(): void {
   title.value = '';
   emit('dirty-change', false);
   emit('cancel');
   emit('update:modelValue', false);
+}
+
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: () => props.saving,
+  onClose: closeNow,
+});
+
+function setVisible(value: boolean): void {
+  if (!value) void requestClose();
+}
+
+function handleCancel(): void {
+  void requestClose();
 }
 
 function handleSave(): void {

@@ -117,6 +117,14 @@ export function composeRepository(
     storageBaseDir: dependencies.storageBaseDir,
     closureChecker: dependencies.closureChecker,
     githubApp: dependencies.githubApp,
+    githubAccountIdResolver: async (identityId) => {
+      const account = await dependencies.db.cloudAuthProviderAccount.findFirst({
+        where: { userId: identityId, providerId: 'github' },
+        orderBy: { updatedAt: 'desc' },
+        select: { accountId: true },
+      });
+      return account?.accountId ?? null;
+    },
     knowledgeRepositoryCloudDataPurger: dependencies.knowledgeRepositoryCloudDataPurger,
   });
 

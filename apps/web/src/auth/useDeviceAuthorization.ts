@@ -1,6 +1,7 @@
 import type { CloudAccountSummary } from '@memoflow/contracts';
 import type { ResultError } from '@memoflow/contracts/result';
 import { computed, ref } from 'vue';
+import { startGithubPopupSignIn } from './github-popup-sign-in';
 import { useAuthService } from './service';
 
 export type DeviceApprovalState =
@@ -46,9 +47,12 @@ export function useDeviceAuthorization(initialUserCode: string) {
     const verification = await service.getDeviceAuthorization(userCode.value);
     if (!verification.ok) {
       error.value = verification.error;
-      state.value = verification.error.code === 'EXPIRED_TOKEN'
-        ? 'expired'
-        : verification.error.code === 'INVALID_REQUEST' ? 'invalid' : 'failed';
+      state.value =
+        verification.error.code === 'EXPIRED_TOKEN'
+          ? 'expired'
+          : verification.error.code === 'INVALID_REQUEST'
+            ? 'invalid'
+            : 'failed';
       return;
     }
     if (verification.data.status === 'approved') {
@@ -85,15 +89,18 @@ export function useDeviceAuthorization(initialUserCode: string) {
   }
 
   async function startGithubLogin() {
-    const callbackURL = new URL(window.location.href);
-    callbackURL.search = new URLSearchParams({ user_code: userCode.value }).toString();
-    const result = await service.beginGithubSignIn(callbackURL.toString());
-    if (!result.ok) {
+    error.value = null;
+    const result = await startGithubPopupSignIn(service);
+    if (result.kind === 'failed') {
       error.value = result.error;
       state.value = 'failed';
       return;
     }
-    window.location.assign(result.data.url);
+    if (result.kind === 'cancelled') {
+      state.value = 'sign_in_required';
+      return;
+    }
+    await load();
   }
 
   return {

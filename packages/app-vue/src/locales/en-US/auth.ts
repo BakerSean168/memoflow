@@ -10,6 +10,14 @@ export default {
     "privacyPolicy": "Privacy Policy",
     "locales": { "zhCN": "中文", "enUS": "EN" }
   },
+  "popup": {
+    "completingTitle": "Completing GitHub sign-in",
+    "completingDescription": "This window will close automatically when authorization finishes.",
+    "completeTitle": "GitHub sign-in complete",
+    "completeDescription": "You can safely close this window and return to MemoFlow.",
+    "failedTitle": "Unable to complete GitHub sign-in",
+    "failedDescription": "Close this window, return to MemoFlow, and try again."
+  },
   "login": {
     "heading": "Sign in to {app}",
     "submitting": "Signing in...",

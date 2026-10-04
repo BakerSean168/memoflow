@@ -75,6 +75,7 @@ export interface CreateRepositoryPrismaModuleOptions {
   readonly runtimeContributions?:
     RepositoryModuleRuntimeContribution | readonly RepositoryModuleRuntimeContribution[];
   readonly githubApp?: GithubAppConfig;
+  readonly githubAccountIdResolver?: (identityId: string) => Promise<string | null>;
   readonly knowledgeRepositoryCloudDataPurger?: IKnowledgeRepositoryCloudDataPurger;
 }
 
@@ -167,6 +168,7 @@ export interface CreateRepositoryPrismaRuntimeContributionsInput {
   readonly storageBaseDir?: string;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
   readonly githubApp?: GithubAppConfig;
+  readonly githubAccountIdResolver?: (identityId: string) => Promise<string | null>;
   readonly knowledgeRepositoryCloudDataPurger?: IKnowledgeRepositoryCloudDataPurger;
 }
 
@@ -240,6 +242,7 @@ export function createRepositoryPrismaRuntimeContributions(
           projectionCheckpointRepository: repositories.projectionCheckpointRepository,
           bindingWriteTransactionRunner: repositories.bindingWriteTransactionRunner,
           githubAppClient,
+          githubAccountIdResolver: deps.githubAccountIdResolver,
           installationIntentRepository:
             githubApp.installationIntentRepository ?? repositories.installationIntentRepository,
           installationRouting: githubApp.installationRouting,
@@ -321,6 +324,7 @@ export function createRepositoryPrismaModule(
     repositories,
     closureChecker: options.closureChecker,
     githubApp: options.githubApp,
+    githubAccountIdResolver: options.githubAccountIdResolver,
     knowledgeRepositoryCloudDataPurger: options.knowledgeRepositoryCloudDataPurger,
   });
 

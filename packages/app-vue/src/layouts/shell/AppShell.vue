@@ -21,6 +21,7 @@ import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef,
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
 import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
@@ -60,11 +61,11 @@ import {
   panelWidthFromPointer,
   resolveComposerDensity,
   resolveWorkspaceChromeMetrics,
+  resolveSidebarPresentation,
   sidebarWidthFromPointer,
   workspaceChromeBudget,
   shouldCollapsePanelWidth,
   shouldCollapseSidebarWidth,
-  shouldAutoCollapseSidebar,
   type ComposerDensity,
 } from './panel-geometry';
 import {
@@ -155,10 +156,49 @@ const workspaceChromeStyle = computed(() => {
     '--workspace-sidebar-gap': `${gap}px`,
   };
 });
-/** 用户 Toggle 是持久化偏好；极窄视口只临时释放侧栏预算。 */
-const showSidebar = computed(
-  () => !sidebarCollapsed.value && !shouldAutoCollapseSidebar(effectiveViewportWidth.value),
+/**
+ * Responsive sidebar contract:
+ * - >= 960px: docked/persistent, consuming workspace width and honoring the persisted preference;
+ * - < 960px: off-canvas overlay, closed by default and controlled by transient shell state.
+ * Narrow geometry never mutates the user's docked preference.
+ */
+const sidebarPresentation = computed(() =>
+  resolveSidebarPresentation(effectiveViewportWidth.value),
 );
+const overlaySidebarOpen = ref(false);
+const showDockedSidebar = computed(
+  () => sidebarPresentation.value === 'docked' && !sidebarCollapsed.value,
+);
+const headerSidebarCollapsed = computed(() =>
+  sidebarPresentation.value === 'overlay' ? !overlaySidebarOpen.value : sidebarCollapsed.value,
+);
+const overlaySidebarWidth = computed(() =>
+  Math.max(
+    SIDEBAR_HARD_MIN,
+    Math.min(
+      sidebarWidth.value,
+      360,
+      Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - 48),
+    ),
+  ),
+);
+
+function closeOverlaySidebar(): void {
+  overlaySidebarOpen.value = false;
+}
+
+function handleShellSidebarToggle(): void {
+  if (isSettingsScene.value) {
+    store.toggleSettingsNavigation();
+    return;
+  }
+  if (sidebarPresentation.value === 'overlay') {
+    overlaySidebarOpen.value = !overlaySidebarOpen.value;
+    return;
+  }
+  store.toggleSidebar();
+}
+
 /** 右侧面板显隐由独立持久化偏好控制。 */
 const showPanel = computed(() => rightPanelOpen.value);
 /** 当前几何下的有效侧栏宽度；用户偏好本身不被动态边界改写。 */
@@ -302,6 +342,7 @@ function handleToggleWorkspaceFocus(): void {
 }
 
 async function handleSelectConversation(id: string) {
+  closeOverlaySidebar();
   // Selecting an existing conversation must never inherit a pending preference from an unsaved draft.
   pendingConversationLayoutPreference.value = null;
   const summary = conversations.value.find((item) => String(item.id) === id);
@@ -316,6 +357,7 @@ function handleDeleteConversation(id: string) {
 
 /** 「新对话」= 新建会话 + 关面板回 STATE A（V2 §5）。 */
 async function handleNewConversation() {
+  closeOverlaySidebar();
   pendingConversationLayoutPreference.value = null;
   store.setLayout('split', 'default');
   aiRef.value?.startNewConversation('chat');
@@ -426,12 +468,12 @@ function resizeSidebarBy(delta: number): void {
 }
 
 function occupiedSidebarWidth(): number {
-  return showSidebar.value ? effectiveSidebarWidth.value : 0;
+  return showDockedSidebar.value ? effectiveSidebarWidth.value : 0;
 }
 
-/** 分栏态会占用的侧栏宽度（不受 focus 隐藏影响，避免 canSplit 抖动）。 */
+/** 分栏态只计算 docked sidebar；overlay 永远不占 workspace geometry。 */
 function prospectiveSidebarOccupied(): number {
-  return showSidebar.value ? effectiveSidebarWidth.value : 0;
+  return showDockedSidebar.value ? effectiveSidebarWidth.value : 0;
 }
 
 function effectivePanelWidth(): number {
@@ -586,7 +628,7 @@ onBeforeUnmount(() => {
 });
 
 // 侧栏折叠/改宽后重新派生有效面板宽（偏好不变，渲染层读 effectivePanelWidth）
-watch([showSidebar, sidebarWidth, sidebarCollapsed, shellState, panelWidth], () => {
+watch([showDockedSidebar, sidebarWidth, sidebarCollapsed, shellState, panelWidth], () => {
   measureComposerHosts();
 });
 
@@ -608,9 +650,17 @@ watch(activeConversationId, (conversationId, previousConversationId) => {
   onViewportGeometryChange();
 });
 
-watch([showSidebar, sidebarWidth, sidebarCollapsed], () => {
+watch([showDockedSidebar, sidebarWidth, sidebarCollapsed], () => {
   // 触发一次布局派生，便于 focus 自动恢复规则与宽度消费保持一致
   onViewportGeometryChange();
+});
+
+watch(sidebarPresentation, (presentation) => {
+  if (presentation === 'docked') closeOverlaySidebar();
+});
+
+watch(isSettingsScene, (settings) => {
+  if (settings) closeOverlaySidebar();
 });
 
 watch(rightPanelOpen, (open) => {
@@ -708,10 +758,12 @@ function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
 }
 
 function openSettings(path = '/settings') {
+  closeOverlaySidebar();
   void sync.openSettings(path);
 }
 
 function openAccount() {
+  closeOverlaySidebar();
   void sync.openSettings('/settings?tab=account');
 }
 
@@ -720,6 +772,7 @@ function openUpdateSettings() {
 }
 
 function openCloudConnection() {
+  closeOverlaySidebar();
   if (isDesktop) {
     cloudConnectionOpen.value = true;
     return;
@@ -728,6 +781,7 @@ function openCloudConnection() {
 }
 
 async function handleLogout() {
+  closeOverlaySidebar();
   await logout?.();
 }
 
@@ -779,14 +833,14 @@ function panelCacheKey(
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->
     <WindowHeader
       :mode="isSettingsScene ? 'settings' : 'workspace'"
-      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : sidebarCollapsed"
+      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed"
       :right-panel-open="rightPanelOpen"
       :workflow-attention-count="workflowAttentionCount"
       :is-desktop="isDesktop"
       :is-mac="isMac"
       :window-controls="windowControls.windowControlsState"
       :capsules="headerCapsules"
-      @toggle-sidebar="isSettingsScene ? store.toggleSettingsNavigation() : store.toggleSidebar()"
+      @toggle-sidebar="handleShellSidebarToggle"
       @toggle-right-panel="() => void sync.togglePanel()"
       @go-back="router.back()"
       @go-forward="router.forward()"
@@ -857,13 +911,14 @@ function panelCacheKey(
       :style="workspaceChromeStyle"
       data-testid="shell-workspace-stage"
     >
-      <!-- 会话侧栏只响应自己的 Toggle，和右栏/Focus 独立。 -->
+      <!-- 宽屏会话侧栏：docked/persistent，参与 workspace geometry。 -->
       <Transition name="shell-sidebar">
         <div
-          v-if="showSidebar"
+          v-if="showDockedSidebar"
           class="relative shrink-0"
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
+          data-sidebar-presentation="docked"
           data-testid="shell-sidebar-pane-host"
         >
           <div
@@ -1024,6 +1079,54 @@ function panelCacheKey(
         />
       </div>
     </div>
+
+    <!-- 窄屏会话导航：统一复用 Sheet（Modal Navigation Drawer）原语。
+         它不占 workspace geometry；focus trap / Escape / backdrop / Portal 由 UI 基础层统一负责。 -->
+    <Sheet
+      v-if="sidebarPresentation === 'overlay' && !isSettingsScene"
+      :open="overlaySidebarOpen"
+      @update:open="overlaySidebarOpen = $event"
+    >
+      <SheetContent
+        side="left"
+        hide-close
+        :close-label="t('common.close')"
+        class="w-auto max-w-none border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--workspace-navigation))] p-0 text-sidebar-foreground sm:max-w-none"
+        :style="{
+          width: overlaySidebarWidth + 'px',
+          maxWidth: 'calc(100vw - 48px)',
+        }"
+        data-sidebar-presentation="overlay"
+        data-testid="shell-sidebar-pane-host"
+      >
+        <SheetTitle class="sr-only">{{ t('shell.conversation.navigation') }}</SheetTitle>
+        <SheetDescription class="sr-only">
+          {{ t('shell.conversation.navigation') }}
+        </SheetDescription>
+        <div
+          class="workspace-sidebar-shell h-full w-full overflow-hidden"
+          data-testid="shell-sidebar-pane"
+        >
+          <ConversationSidebar
+            class="h-full w-full"
+            :groups="conversationGroups"
+            :active-conversation-id="activeConversationId"
+            :user-name="userName"
+            :identity-kind="shellIdentityKind"
+            :cloud-connected="isAuthenticated"
+            :loading="Boolean(aiRef?.conversationListLoading)"
+            :is-desktop="isDesktop"
+            @new-conversation="handleNewConversation"
+            @select-conversation="handleSelectConversation"
+            @delete-conversation="handleDeleteConversation"
+            @open-settings="openSettings"
+            @open-account="openAccount"
+            @open-cloud-connection="openCloudConnection"
+            @logout="() => void handleLogout()"
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
   </div>
   <CloudConnectionDialog
     v-if="isDesktop"
@@ -1141,10 +1244,6 @@ function panelCacheKey(
   .workspace-content-well {
     margin: 0;
     border-radius: 0;
-    box-shadow: none;
-  }
-
-  .workspace-sidebar-shell {
     box-shadow: none;
   }
 }

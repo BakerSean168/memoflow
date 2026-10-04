@@ -1,27 +1,35 @@
 <script setup lang="ts">
 /**
- * AppEmptyState — 统一空态（UI_PAGE_REDESIGN_PLAN §0.3）
+ * Compatibility convenience wrapper for product empty states.
  *
- * 图标（lucide, muted）+ 一句话标题 + 可选描述
- *   + 可选主操作按钮（与页头主操作同一动作，通过 @action 发出）
- *   + 可选次链接（#secondary slot 或 secondaryLabel/@secondary）
- *
- * testid 约定：传入 `testid`（如 `goals-empty-state`），或用默认插槽自定义。
+ * ProductSurfaceState is the canonical loading/error/empty primitive. This
+ * wrapper preserves the simple page-level API used by Goal/Task/Routine while
+ * delegating all layout and typography to that shared grammar.
  */
 import type { Component } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import ProductSurfaceState from '../../shared/components/ProductSurfaceState.vue';
 
-defineProps<{
-  /** @lucide/vue 图标组件 */
-  icon?: Component;
-  title: string;
-  description?: string;
-  /** 主操作按钮文案；缺省则不渲染主按钮 */
-  actionLabel?: string;
-  /** 次链接文案；缺省则不渲染次链接 */
-  secondaryLabel?: string;
-  testid?: string;
-}>();
+withDefaults(
+  defineProps<{
+    /** @lucide/vue icon component */
+    icon?: Component;
+    title: string;
+    description?: string;
+    actionLabel?: string;
+    secondaryLabel?: string;
+    testid?: string;
+    density?: 'page' | 'inline';
+  }>(),
+  {
+    icon: undefined,
+    description: undefined,
+    actionLabel: undefined,
+    secondaryLabel: undefined,
+    testid: undefined,
+    density: 'page',
+  },
+);
 
 defineEmits<{
   action: [];
@@ -30,34 +38,40 @@ defineEmits<{
 </script>
 
 <template>
-  <div
-    class="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center"
-    :data-testid="testid"
+  <ProductSurfaceState
+    :family="density === 'inline' ? 'workspace' : 'collection'"
+    kind="empty"
+    :title="title"
+    :description="description"
+    :test-id="testid"
   >
-    <component :is="icon" v-if="icon" class="h-10 w-10 text-muted-foreground/60" />
-    <div class="space-y-1">
-      <p class="text-sm font-medium text-foreground">{{ title }}</p>
-      <p v-if="description" class="mx-auto max-w-sm text-xs text-muted-foreground">
-        {{ description }}
-      </p>
-    </div>
-    <div v-if="actionLabel || $slots.action" class="mt-1">
+    <template v-if="icon" #icon>
+      <component :is="icon" class="h-10 w-10 text-muted-foreground/60" />
+    </template>
+
+    <template v-if="actionLabel || secondaryLabel || $slots.action || $slots.secondary" #actions>
       <slot name="action">
-        <Button size="sm" data-testid="empty-state-action" @click="$emit('action')">
+        <Button
+          v-if="actionLabel"
+          size="sm"
+          data-testid="empty-state-action"
+          @click="$emit('action')"
+        >
           {{ actionLabel }}
         </Button>
       </slot>
-    </div>
-    <slot name="secondary">
-      <button
-        v-if="secondaryLabel"
-        type="button"
-        class="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-        data-testid="empty-state-secondary"
-        @click="$emit('secondary')"
-      >
-        {{ secondaryLabel }}
-      </button>
-    </slot>
-  </div>
+
+      <slot name="secondary">
+        <button
+          v-if="secondaryLabel"
+          type="button"
+          class="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          data-testid="empty-state-secondary"
+          @click="$emit('secondary')"
+        >
+          {{ secondaryLabel }}
+        </button>
+      </slot>
+    </template>
+  </ProductSurfaceState>
 </template>

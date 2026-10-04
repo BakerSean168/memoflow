@@ -114,6 +114,7 @@ export default {
     created: '目标已创建',
     updated: '目标已更新',
     allGoals: '所有目标',
+    systemView: '目标视图',
     searchGoals: '搜索目标...',
     newGoal: '新建目标',
     labels: '标签',

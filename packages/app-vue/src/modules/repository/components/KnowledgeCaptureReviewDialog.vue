@@ -136,6 +136,7 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../shared/components';
+import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
 import { useKnowledgeNativeSurfaceRegistration } from '../../../layouts/shell/useKnowledgeNativeSurface';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
@@ -374,14 +375,23 @@ async function handleConfirm(): Promise<void> {
   await submitCoordinator.value();
 }
 
-async function handleCancel(): Promise<void> {
-  if (busy.value) return;
+async function performCancel(): Promise<void> {
   if (cancelCoordinator) await cancelCoordinator();
   else emit('update:open', false);
 }
 
+const { requestClose } = useDialogCloseGuard({
+  dirty,
+  busy,
+  onClose: performCancel,
+});
+
+async function handleCancel(): Promise<void> {
+  await requestClose();
+}
+
 function handleOpenChange(next: boolean): void {
-  if (!next && !busy.value) void handleCancel();
+  if (!next) void requestClose();
 }
 
 onDeactivated(() => {

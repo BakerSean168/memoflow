@@ -114,6 +114,7 @@ describe('composeRepository assembly order', () => {
       storageBaseDir,
       closureChecker,
       githubApp,
+      githubAccountIdResolver: expect.any(Function),
       knowledgeRepositoryCloudDataPurger: cloudDataPurger,
     });
   });

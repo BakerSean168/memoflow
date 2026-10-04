@@ -15,7 +15,7 @@ export default {
   },
   filter: {
     status: 'Routine status',
-    all: 'All',
+    all: 'All statuses',
     enabled: 'Enabled',
     disabled: 'Disabled',
   },

@@ -78,6 +78,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.find('[data-testid="ai-welcome-entry-task-create"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-capture"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-qa"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-welcome-state"] [data-testid="memoflow-ai-icon"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-today-overview"]').exists()).toBe(false);
   });
 
@@ -112,6 +113,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(messages[1].get('[aria-hidden="true"]').classes()).toContain(
       semanticElevationClass('inset'),
     );
+    expect(messages[1].find('[data-testid="memoflow-ai-icon"]').exists()).toBe(true);
     wrapper.unmount();
   });
 

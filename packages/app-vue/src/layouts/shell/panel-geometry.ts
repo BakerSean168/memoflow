@@ -17,6 +17,7 @@ export const PANEL_COLLAPSE_THRESHOLD = 96;
 export const SIDEBAR_COLLAPSE_THRESHOLD = 96;
 /** Below this effective viewport, release the sidebar budget without changing user preference. */
 export const SIDEBAR_AUTO_COLLAPSE_VIEWPORT = 960;
+export type SidebarPresentation = 'docked' | 'overlay';
 
 /**
  * Hybrid workspace chrome. The sidebar stays flush with the shell while the
@@ -95,8 +96,18 @@ export interface ComposerLayout {
   left: number;
 }
 
+export function resolveSidebarPresentation(viewportWidth: number): SidebarPresentation {
+  return Math.max(0, Math.floor(viewportWidth)) < SIDEBAR_AUTO_COLLAPSE_VIEWPORT
+    ? 'overlay'
+    : 'docked';
+}
+
+/**
+ * Compatibility helper for geometry callers. Narrow viewports no longer make
+ * navigation unavailable; they switch the sidebar to an off-canvas overlay.
+ */
 export function shouldAutoCollapseSidebar(viewportWidth: number): boolean {
-  return Math.max(0, Math.floor(viewportWidth)) < SIDEBAR_AUTO_COLLAPSE_VIEWPORT;
+  return resolveSidebarPresentation(viewportWidth) === 'overlay';
 }
 
 // Residual 1001: clamp elevated to ./clamp.

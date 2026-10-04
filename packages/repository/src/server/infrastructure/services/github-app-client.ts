@@ -144,6 +144,32 @@ export class GitHubAppClient implements IGitHubAppClient {
     this.now = options.now ?? Date.now;
   }
 
+  async findInstallationForAccount(
+    accountId: string,
+  ): Promise<{ installationId: string; accountId: string } | null> {
+    if (!accountId.trim()) return null;
+    for (let page = 1; page <= 10; page += 1) {
+      const installations = await this.requestJson<GitHubInstallationResponse[]>(
+        `/app/installations?per_page=100&page=${page}`,
+        { authorization: `Bearer ${this.createAppJwt()}` },
+      );
+      for (const installation of installations) {
+        if (
+          installation.id &&
+          installation.account?.id &&
+          String(installation.account.id) === accountId
+        ) {
+          return {
+            installationId: String(installation.id),
+            accountId: String(installation.account.id),
+          };
+        }
+      }
+      if (installations.length < 100) break;
+    }
+    return null;
+  }
+
   async getInstallationInventory(installationId: string): Promise<GitHubAppInstallationInventory> {
     const installation = await this.requestJson<GitHubInstallationResponse>(
       `/app/installations/${encodeURIComponent(installationId)}`,

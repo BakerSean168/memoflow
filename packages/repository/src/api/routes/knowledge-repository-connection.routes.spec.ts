@@ -276,6 +276,38 @@ describe('knowledge repository connection routes', () => {
     );
   });
 
+  it('forwards recover-only installation discovery without widening the transport contract', async () => {
+    const api = createApiStub();
+    const router = registerKnowledgeRepositoryConnectionRoutes(api, {
+      auth: passThrough,
+      requireEmailVerified: passThrough,
+    });
+    const handler = getRouteHandler(router, 'post', '/knowledge-connections/installations/start');
+    const req = {
+      body: {
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        clientKind: 'web',
+        recoverOnly: true,
+      },
+      headers: { 'user-agent': 'Mozilla/5.0' },
+      user: { identityId: 'identity-route' },
+      requestContext: carrier(),
+    };
+    const res = createResponse();
+
+    await handler(req, res);
+
+    expect(api.startKnowledgeRepositoryInstallation).toHaveBeenCalledWith(
+      expect.objectContaining({ identityId: 'identity-route' }),
+      {
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        clientKind: 'web',
+        recoverOnly: true,
+      },
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('rejects invalid callback input before invoking the application port', async () => {
     const api = createApiStub();
     const router = registerKnowledgeRepositoryConnectionRoutes(api, { auth: passThrough });

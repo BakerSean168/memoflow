@@ -293,6 +293,7 @@ import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog'
 import { isGoalStatusTransitionAllowed } from '../../composables/goalStatusTransitions';
 import { useGoal } from '../../composables/useGoal';
 import { useTransientFeedback } from '../../../../shared/composables/useTransientFeedback';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 
 import type {
   GoalDraftKeyResult as DraftKeyResult,
@@ -470,7 +471,9 @@ function publishSession(): void {
     },
     requestCancel() {
       assertEditable();
-      setOpen(false);
+      // Programmatic owner/workflow cancellation is not a user dismissal.
+      // Bypass the dirty-close prompt so automation cannot deadlock on UI confirmation.
+      publishOpen(false);
     },
     readDraftState() {
       assertActive();
@@ -497,6 +500,7 @@ onActivated(() => {
 });
 
 const initialSnapshot = ref('');
+const isDirty = computed(() => props.open && snapshotDraft() !== initialSnapshot.value);
 const labelCreateError = ref<string | null>(null);
 const formError = ref<string | null>(null);
 const nameLimitFeedback = useTransientFeedback();
@@ -562,13 +566,20 @@ watch(
   },
   { immediate: true, deep: false },
 );
-watch(draft, () => emit('dirty-change', props.open && snapshotDraft() !== initialSnapshot.value), {
-  deep: true,
+watch(draft, () => emit('dirty-change', isDirty.value), { deep: true });
+
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: isBusy,
+  onClose: () => publishOpen(false),
 });
 
 function setOpen(value: boolean): void {
-  if (!value && isBusy.value) return;
-  publishOpen(value);
+  if (value) {
+    publishOpen(true);
+    return;
+  }
+  void requestClose();
 }
 
 function publishOpen(value: boolean): void {

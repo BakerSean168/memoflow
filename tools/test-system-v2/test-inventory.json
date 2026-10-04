@@ -2034,6 +2034,15 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/shell/responsive-sidebar.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts",
+        "apps/web/playwright.shell.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/shell/shell-geometry.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2170,6 +2179,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/src/auth/OAuthPopupCompleteView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/web/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/src/auth/WebAuthView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2179,6 +2196,14 @@
     },
     {
       "path": "apps/web/src/auth/capabilities.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/web/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/web/src/auth/github-popup-sign-in.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/web/vitest.config.ts"
@@ -3732,6 +3757,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/persisted-business-route.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/previews/GoalCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3959,6 +3992,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIWorkflowActionBar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5379,6 +5420,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11762,7 +11811,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "apps/web/playwright.debug.config.ts",
@@ -11811,7 +11860,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "apps/web/playwright.sync.config.ts",
@@ -11986,7 +12035,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 19
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12007,7 +12056,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 270
+      "fileCount": 273
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12724,12 +12773,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1123,
+    "unit": 1128,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
-    "e2e": 64,
+    "e2e": 65,
     "perf": 2,
     "governance": 63
   }

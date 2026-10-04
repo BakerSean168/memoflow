@@ -101,6 +101,7 @@ const emit = defineEmits<{
   submit: [intent: { value: number; note: string }];
   cancel: [];
   'validity-change': [valid: boolean];
+  'dirty-change': [dirty: boolean];
 }>();
 const { t } = useI18n();
 const { getKeyResultById, getGoalRecordPreviewContext } = useGoal();
@@ -148,6 +149,10 @@ const isValid = computed(
   () => !!progress.value && !validationError.value && draft.value.note.length <= 500,
 );
 watch(isValid, (valid) => emit('validity-change', valid), { immediate: true });
+const isDirty = computed(
+  () => draft.value.value !== (props.initialValue ?? '') || draft.value.note !== props.initialNote,
+);
+watch(isDirty, (dirty) => emit('dirty-change', dirty), { immediate: true });
 const recordPreview = computed(() => {
   if (
     !previewContext.value ||

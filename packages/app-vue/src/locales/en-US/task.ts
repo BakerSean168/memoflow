@@ -89,6 +89,7 @@ export default {
       plans: 'Plans',
     },
     filter: {
+      surface: 'View',
       status: 'Status',
       planState: 'Plan state',
       allStatuses: 'All statuses',

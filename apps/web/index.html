@@ -36,11 +36,12 @@
       }
 
       .startup-splash__mark {
-        width: 44px;
-        height: 44px;
+        width: 52px;
+        height: 52px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #8b5cf6, #38bdf8);
-        box-shadow: 0 12px 32px rgb(56 189 248 / 0.18);
+        display: block;
+        object-fit: contain;
+        filter: drop-shadow(0 10px 24px rgba(244, 170, 36, 0.28));
       }
 
       .startup-splash__title {
@@ -67,18 +68,17 @@
         display: block;
         width: 40%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgb(56 189 248 / 0.9), transparent);
+        background: linear-gradient(90deg, transparent, rgb(244 170 36 / 0.95), transparent);
         animation: startup-splash-slide 1.15s infinite;
       }
 
       @media (prefers-color-scheme: light) {
         .startup-splash__mark {
-          background: linear-gradient(135deg, #7c3aed, #2563eb);
-          box-shadow: 0 12px 32px rgb(37 99 235 / 0.16);
+          filter: drop-shadow(0 10px 24px rgba(217, 119, 6, 0.22));
         }
 
         .startup-splash__bar::before {
-          background: linear-gradient(90deg, transparent, rgb(37 99 235 / 0.9), transparent);
+          background: linear-gradient(90deg, transparent, rgb(217 119 6 / 0.95), transparent);
         }
       }
 
@@ -103,7 +103,14 @@
     <div id="app">
       <div id="startup-splash" aria-live="polite" aria-label="应用正在加载">
         <div class="startup-splash__card">
-          <div class="startup-splash__mark" aria-hidden="true"></div>
+          <img
+            class="startup-splash__mark"
+            src="/assets/logos/MemoFlow-128.png"
+            alt="知行 MemoFlow"
+            width="52"
+            height="52"
+            aria-hidden="true"
+          />
           <div class="startup-splash__title">知行 MemoFlow</div>
           <div class="startup-splash__subtitle">正在进入工作区...</div>
           <div class="startup-splash__bar" aria-hidden="true"></div>

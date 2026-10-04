@@ -1,13 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
-import {
-  createRealOAuthApiServer,
-  createWebServer,
-  getE2EWebOrigin,
-} from './playwright.server';
+import { getRealOAuthPlaywrightBaseURL } from './playwright.server';
+
+const hostDevOrigin = getRealOAuthPlaywrightBaseURL();
 
 /**
- * Residual 1339: real-provider GitHub OAuth only.
- * Separate from default playwright.config.ts (e2e-mock lane).
+ * Real-provider GitHub OAuth acceptance.
+ *
+ * This lane deliberately does NOT start localhost API/Web servers. MemoFlow Dev
+ * Test owns the canonical Tailnet callback, so the browser must exercise the
+ * already-running host-dev runtime that issued the OAuth state.
  */
 export default defineConfig({
   testDir: './e2e',
@@ -19,7 +20,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['json', { outputFile: 'test-results/oauth-real-results.json' }]],
   use: {
-    baseURL: getE2EWebOrigin(),
+    baseURL: hostDevOrigin,
     headless: false,
     trace: 'on',
     screenshot: 'on',
@@ -33,5 +34,4 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], headless: false },
     },
   ],
-  webServer: [createRealOAuthApiServer(), createWebServer()],
 });

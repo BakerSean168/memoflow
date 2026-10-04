@@ -1,97 +1,37 @@
 <template>
   <ProductSurfaceHeader family="collection" data-testid="task-page-toolbar">
     <div class="flex min-w-0 flex-1 items-center gap-1.5" data-testid="task-filter-bar">
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            class="h-8 max-w-40 shrink-0 gap-1.5 px-2"
-            data-testid="task-surface-trigger"
-          >
-            <ListChecks class="h-4 w-4 shrink-0" />
-            <span class="truncate">{{ currentSurfaceLabel }}</span>
-            <span class="text-xs tabular-nums text-muted-foreground">{{ visibleItemCount }}</span>
-            <ChevronDown class="h-3.5 w-3.5 shrink-0 opacity-60" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" class="w-44">
-          <DropdownMenuItem
-            v-for="surface in surfaces"
-            :key="surface"
-            :data-testid="`task-surface-${surface}`"
-            :class="activeSurface === surface ? 'bg-accent' : ''"
-            @click="emit('update:activeSurface', surface)"
-          >
-            {{ t(`task.management.surface.${surface}`) }}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ProductSingleSelectFilter
+        :model-value="activeSurface"
+        :options="surfaceFilterOptions"
+        :accessible-label="t('task.management.filter.surface')"
+        :icon="ListChecks"
+        show-current-count
+        test-id="task-surface-trigger"
+        menu-class="w-44"
+        @update:model-value="emit('update:activeSurface', $event as TaskSurface)"
+      />
 
       <div v-if="activeSurface === 'today'" class="hidden shrink-0 @2xl/panel:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              class="h-8 gap-1.5"
-              data-testid="task-status-filter"
-            >
-              <CircleDot class="h-4 w-4" />
-              <span>{{ currentOccurrenceStatusLabel }}</span>
-              <ChevronDown class="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" class="w-44">
-            <DropdownMenuItem
-              data-testid="task-status-filter-all"
-              :class="occurrenceStatusFilter === 'all' ? 'bg-accent' : ''"
-              @click="emit('update:occurrenceStatusFilter', 'all')"
-            >
-              {{ t('task.management.filter.allStatuses') }}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              v-for="status in instanceStatuses"
-              :key="status"
-              :data-testid="`task-status-filter-${status.toLowerCase()}`"
-              :class="occurrenceStatusFilter === status ? 'bg-accent' : ''"
-              @click="emit('update:occurrenceStatusFilter', status)"
-            >
-              {{ occurrenceStatusLabel(status) }}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProductSingleSelectFilter
+          :model-value="occurrenceStatusFilter"
+          :options="occurrenceStatusOptions"
+          :accessible-label="t('task.management.filter.status')"
+          :icon="CircleDot"
+          test-id="task-status-filter"
+          @update:model-value="emit('update:occurrenceStatusFilter', $event as StatusFilter)"
+        />
       </div>
 
       <div v-else class="hidden shrink-0 @2xl/panel:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              class="h-8 gap-1.5"
-              data-testid="task-plan-state-filter"
-            >
-              <CircleDot class="h-4 w-4" />
-              <span>{{ currentPlanStateLabel }}</span>
-              <ChevronDown class="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" class="w-44">
-            <DropdownMenuItem
-              v-for="state in planStateOptions"
-              :key="state"
-              :data-testid="`task-plan-state-filter-${state}`"
-              :class="planStateFilter === state ? 'bg-accent' : ''"
-              @click="emit('update:planStateFilter', state)"
-            >
-              {{ planStateLabel(state) }}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProductSingleSelectFilter
+          :model-value="planStateFilter"
+          :options="planStateFilterOptions"
+          :accessible-label="t('task.management.filter.planState')"
+          :icon="CircleDot"
+          test-id="task-plan-state-filter"
+          @update:model-value="emit('update:planStateFilter', $event as TaskPlanStateFilter)"
+        />
       </div>
 
       <div class="hidden shrink-0 @2xl/panel:block" data-testid="task-label-filter">
@@ -110,32 +50,15 @@
       </div>
 
       <div v-if="activeSurface === 'today'" class="hidden shrink-0 @2xl/panel:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              class="h-8 gap-1.5"
-              data-testid="task-occurrence-sort"
-            >
-              <ArrowUpDown class="h-4 w-4" />
-              <span class="hidden @2xl/panel:inline">{{ currentSortLabel }}</span>
-              <ChevronDown class="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" class="w-40">
-            <DropdownMenuItem
-              v-for="sort in sortOptions"
-              :key="sort"
-              :data-testid="`task-occurrence-sort-${sort}`"
-              :class="occurrenceSort === sort ? 'bg-accent' : ''"
-              @click="emit('update:occurrenceSort', sort)"
-            >
-              {{ t(`task.management.sort.${sort}`) }}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProductSingleSelectFilter
+          :model-value="occurrenceSort"
+          :options="sortFilterOptions"
+          :accessible-label="t('task.management.filter.sort')"
+          :icon="ArrowUpDown"
+          test-id="task-occurrence-sort"
+          menu-class="w-40"
+          @update:model-value="emit('update:occurrenceSort', $event as TaskOccurrenceSort)"
+        />
       </div>
 
       <div class="shrink-0 @2xl/panel:hidden">
@@ -324,6 +247,7 @@ import {
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import {
   LabelFilterPopover,
+  ProductSingleSelectFilter,
   ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
@@ -374,7 +298,40 @@ const planStateOptions: TaskPlanStateFilter[] = [
 ];
 const sortOptions: TaskOccurrenceSort[] = ['time', 'status', 'title'];
 
-const currentSurfaceLabel = computed(() => t(`task.management.surface.${props.activeSurface}`));
+const surfaceFilterOptions = computed(() =>
+  surfaces.map((surface) => ({
+    value: surface,
+    label: t(`task.management.surface.${surface}`),
+    ...(surface === props.activeSurface ? { count: props.visibleItemCount } : {}),
+    itemTestId: `task-surface-${surface}`,
+  })),
+);
+const occurrenceStatusOptions = computed(() => [
+  {
+    value: 'all',
+    label: t('task.management.filter.allStatuses'),
+    itemTestId: 'task-status-filter-all',
+  },
+  ...instanceStatuses.map((status) => ({
+    value: status,
+    label: occurrenceStatusLabel(status),
+    itemTestId: `task-status-filter-${status.toLowerCase()}`,
+  })),
+]);
+const planStateFilterOptions = computed(() =>
+  planStateOptions.map((state) => ({
+    value: state,
+    label: planStateLabel(state),
+    itemTestId: `task-plan-state-filter-${state}`,
+  })),
+);
+const sortFilterOptions = computed(() =>
+  sortOptions.map((sort) => ({
+    value: sort,
+    label: t(`task.management.sort.${sort}`),
+    itemTestId: `task-occurrence-sort-${sort}`,
+  })),
+);
 const currentOccurrenceStatusLabel = computed(() =>
   props.occurrenceStatusFilter === 'all'
     ? t('task.management.filter.allStatuses')

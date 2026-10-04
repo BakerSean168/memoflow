@@ -8,15 +8,16 @@ describe('Task occurrence filters', () => {
   it('keeps one canonical Goal-style toolbar across panel tiers', () => {
     expect(source.match(/data-testid="task-page-toolbar"/g)).toHaveLength(1);
     for (const selector of [
-      'task-surface-trigger',
-      'task-status-filter',
-      'task-plan-state-filter',
-      'task-label-filter',
-      'task-compact-view-options',
-      'task-occurrence-sort',
+      'test-id="task-surface-trigger"',
+      'test-id="task-status-filter"',
+      'test-id="task-plan-state-filter"',
+      'data-testid="task-label-filter"',
+      'data-testid="task-compact-view-options"',
+      'test-id="task-occurrence-sort"',
     ]) {
       expect(source).toContain(selector);
     }
+    expect(source).toContain('<ProductSingleSelectFilter');
     expect(source).toContain('<LabelFilterPopover');
     expect(source).toContain('<ResponsivePrimaryAction');
     expect(source).toContain('@2xl/panel:hidden');

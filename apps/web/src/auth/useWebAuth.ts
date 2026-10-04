@@ -2,6 +2,7 @@ import type { CloudSignInRequest, CloudSignUpRequest } from '@memoflow/contracts
 import type { ResultError } from '@memoflow/contracts/result';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { startGithubPopupSignIn } from './github-popup-sign-in';
 import { translateAuthResultError } from './result-error';
 import { useAuthService } from './service';
 
@@ -68,7 +69,10 @@ export function useWebAuth() {
     }
   }
 
-  async function registerByEmail(input: CloudSignUpRequest): Promise<AuthSuccessOutcome | false> {
+  async function registerByEmail(
+    input: CloudSignUpRequest,
+    successUrl = '/',
+  ): Promise<AuthSuccessOutcome | false> {
     const data = await run(() => service.signUp(input));
     if (!data) return false;
     if (!data.session) {
@@ -76,7 +80,7 @@ export function useWebAuth() {
       successMessage.value = '验证邮件已发送，请通过邮件中的链接完成验证。';
       return 'needs-email-verification';
     }
-    window.location.replace('/');
+    window.location.replace(successUrl);
     return 'authenticated';
   }
 
@@ -94,11 +98,22 @@ export function useWebAuth() {
     return true;
   }
 
-  async function startGithubLogin(callbackURL?: string): Promise<boolean> {
-    const data = await run(() => service.beginGithubSignIn(callbackURL));
-    if (!data) return false;
-    window.location.assign(data.url);
-    return true;
+  async function startGithubLogin(successUrl = '/'): Promise<boolean> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const result = await startGithubPopupSignIn(service);
+      if (result.kind === 'failed') {
+        error.value = result.error;
+        return false;
+      }
+      if (result.kind === 'cancelled') return false;
+
+      window.location.replace(successUrl);
+      return true;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   return {

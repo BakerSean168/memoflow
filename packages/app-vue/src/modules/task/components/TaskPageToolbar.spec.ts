@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { LabelFilterPopover } from '../../../shared/components';
+import { LabelFilterPopover, ProductSingleSelectFilter } from '../../../shared/components';
 import TaskPageToolbar from './TaskPageToolbar.vue';
 
 const i18n = createI18n({
@@ -22,6 +22,7 @@ const i18n = createI18n({
             plans: 'Plans',
           },
           filter: {
+            surface: 'View',
             status: 'Status',
             planState: 'Plan state',
             allStatuses: 'All statuses',
@@ -104,18 +105,22 @@ describe('TaskPageToolbar', () => {
     expect(wrapper.findAll('[data-testid="task-filter-bar"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-primary-action="create-task"]')).toHaveLength(1);
     for (const selector of [
-      'task-surface-trigger',
-      'task-status-filter',
-      'task-plan-state-filter',
-      'task-compact-view-options',
-      'task-occurrence-sort',
+      'test-id="task-surface-trigger"',
+      'test-id="task-status-filter"',
+      'test-id="task-plan-state-filter"',
+      'data-testid="task-compact-view-options"',
+      'test-id="task-occurrence-sort"',
     ]) {
-      expect(source).toContain(`data-testid="${selector}"`);
+      expect(source).toContain(selector);
     }
-    expect(source).toContain('{{ currentSurfaceLabel }}');
     expect(source).toContain("const surfaces: TaskSurface[] = ['today', 'plans']");
     expect(source).not.toContain("'upcoming'");
-    expect(source).toContain('{{ visibleItemCount }}');
+    expect(source).toContain('count: props.visibleItemCount');
+    const sharedFilters = wrapper.findAllComponents(ProductSingleSelectFilter);
+    expect(sharedFilters).toHaveLength(3);
+    expect(sharedFilters[0]!.props('modelValue')).toBe('today');
+    expect(sharedFilters[1]!.props('modelValue')).toBe('all');
+    expect(sharedFilters[2]!.props('modelValue')).toBe('time');
     expect(wrapper.findComponent(LabelFilterPopover).exists()).toBe(true);
     expect(source).toContain('<ResponsivePrimaryAction');
     expect(source).not.toContain('task-goal-filter');
@@ -139,9 +144,12 @@ describe('TaskPageToolbar', () => {
     await wrapper.setProps({ activeSurface: 'plans', planStateFilter: 'failed' });
 
     expect(source).toContain('v-if="activeSurface === \'today\'"');
-    expect(source).toContain('data-testid="task-plan-state-filter"');
-    expect(source).toContain("props.planStateFilter === 'all'");
-    expect(source).toContain('planStateLabel(props.planStateFilter)');
+    expect(source).toContain('test-id="task-plan-state-filter"');
+    expect(source).toContain('planStateFilterOptions');
+    const planFilter = wrapper
+      .findAllComponents(ProductSingleSelectFilter)
+      .find((filter) => filter.props('modelValue') === 'failed');
+    expect(planFilter?.exists()).toBe(true);
     expect(wrapper.props('planStateFilter')).toBe('failed');
     expect(wrapper.props('occurrenceStatusFilter')).toBe('all');
   });

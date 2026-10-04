@@ -31,6 +31,14 @@ export const zhCNAuthMessages = {
         enUS: 'EN',
       },
     },
+    popup: {
+      completingTitle: '正在完成 GitHub 登录',
+      completingDescription: '授权完成后，此窗口会自动关闭。',
+      completeTitle: 'GitHub 登录已完成',
+      completeDescription: '可以安全关闭此窗口并返回 MemoFlow。',
+      failedTitle: '无法完成 GitHub 登录',
+      failedDescription: '请关闭此窗口并返回 MemoFlow 后重试。',
+    },
     login: {
       heading: '登录{app}',
       submitting: '登录中...',
@@ -170,6 +178,14 @@ export const enUSAuthMessages = {
         enUS: 'EN',
       },
     },
+    popup: {
+      completingTitle: 'Completing GitHub sign-in',
+      completingDescription: 'This window will close automatically when authorization finishes.',
+      completeTitle: 'GitHub sign-in complete',
+      completeDescription: 'You can safely close this window and return to MemoFlow.',
+      failedTitle: 'Unable to complete GitHub sign-in',
+      failedDescription: 'Close this window, return to MemoFlow, and try again.',
+    },
     login: {
       heading: 'Sign in to {app}',
       submitting: 'Signing in...',
@@ -213,7 +229,8 @@ export const enUSAuthMessages = {
       success: 'Email verified',
       skipLater: 'Later',
       backToLogin: 'Back to sign in',
-      linkInstruction: 'Open the verification link in your email. You can close this page afterward.',
+      linkInstruction:
+        'Open the verification link in your email. You can close this page afterward.',
     },
     field: {
       name: 'Name',

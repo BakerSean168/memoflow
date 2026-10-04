@@ -157,7 +157,7 @@
           variant="ghost"
           data-testid="routine-editor-cancel"
           :disabled="saving"
-          @click="emit('update:open', false)"
+          @click="requestClose()"
         >
           {{ t('routine.form.cancel') }}
         </Button>
@@ -205,6 +205,7 @@ import {
   ProductPropertyChip,
 } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
+import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
 import { getProductTime, getProductTodayYmd } from '../../../shared/utils/product-time';
 import ActiveUsageTriggerEditor from './ActiveUsageTriggerEditor.vue';
 import ElapsedTriggerEditor from './ElapsedTriggerEditor.vue';
@@ -271,6 +272,7 @@ const activeMinutes = ref(50);
 const naturalBreakMinutes = ref(5);
 const activeAnchor = ref<RoutineActiveAnchor>('last-satisfied');
 const selectedProfileIds = ref<string[]>([]);
+const formBaseline = ref('');
 const nameLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
 
@@ -297,6 +299,28 @@ const requiresDesktopRuntime = computed(
     (triggerType.value === 'ActiveUsage' ||
       (triggerType.value === 'Elapsed' && elapsedAnchor.value === 'profile-activation')),
 );
+
+function snapshotForm(): string {
+  return JSON.stringify({
+    name: name.value,
+    description: description.value,
+    triggerType: triggerType.value,
+    localTime: localTime.value,
+    timeZone: timeZone.value,
+    startDate: startDate.value,
+    frequency: frequency.value,
+    recurrenceInterval: recurrenceInterval.value,
+    selectedWeekdays: [...selectedWeekdays.value],
+    durationMinutes: durationMinutes.value,
+    elapsedAnchor: elapsedAnchor.value,
+    activeMinutes: activeMinutes.value,
+    naturalBreakMinutes: naturalBreakMinutes.value,
+    activeAnchor: activeAnchor.value,
+    selectedProfileIds: [...selectedProfileIds.value],
+  });
+}
+
+const isDirty = computed(() => props.open && snapshotForm() !== formBaseline.value);
 
 function localYmd(): string {
   return String(getProductTodayYmd());
@@ -337,6 +361,7 @@ function resetForm(): void {
         : 0
       : 5;
   activeAnchor.value = trigger?.type === 'ActiveUsage' ? trigger.anchor : 'last-satisfied';
+  formBaseline.value = snapshotForm();
 }
 
 watch(
@@ -439,7 +464,17 @@ function submit(): void {
   });
 }
 
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: () => props.saving,
+  onClose: () => emit('update:open', false),
+});
+
 function handleOpenChange(value: boolean): void {
-  emit('update:open', value);
+  if (value) {
+    emit('update:open', true);
+    return;
+  }
+  void requestClose();
 }
 </script>

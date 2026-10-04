@@ -1,6 +1,6 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   RoutineDefinitionDto,
   RoutineProfileDto,
@@ -11,6 +11,12 @@ import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import { getProductTodayYmd, setProductTimePreferences } from '../../../shared/utils/product-time';
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
+
 import RoutineEditorDialog from './RoutineEditorDialog.vue';
 
 const wallClock: RoutineTriggerDto = {
@@ -28,6 +34,11 @@ const wallClock: RoutineTriggerDto = {
   },
 };
 const wrappers: ReturnType<typeof mount>[] = [];
+
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
 
 afterEach(() => {
   wrappers.splice(0).forEach((wrapper) => wrapper.unmount());
@@ -261,6 +272,36 @@ describe('RoutineEditorDialog Product controls', () => {
       { profileIds: string[]; trigger: RoutineTriggerDto | null } | undefined;
     expect(saved?.profileIds).toEqual(['profile-1']);
     expect(saved?.trigger).toBeNull();
+  });
+
+  it('guards dirty cancellation from the canonical opening snapshot', async () => {
+    const wrapper = await openEditor(wallClock);
+
+    await testId('routine-editor-cancel').trigger('click');
+    await flushPromises();
+    expect(confirmMock).not.toHaveBeenCalled();
+    expect(wrapper.emitted('update:open')).toEqual([[false]]);
+
+    await wrapper.setProps({ open: true });
+    await flushPromises();
+    await testId('routine-name-input').setValue('Changed morning');
+    await testId('routine-editor-cancel').trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+  });
+
+  it('keeps a dirty Routine draft open when discard confirmation is rejected', async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    const wrapper = await openEditor(wallClock);
+    await testId('routine-description-input').setValue('Keep this draft');
+    await testId('routine-editor-cancel').trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('update:open')).toBeUndefined();
+    expect(testId('routine-description-input').element).toHaveProperty('value', 'Keep this draft');
   });
 
   it('blocks edits and saving while busy', async () => {

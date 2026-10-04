@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -56,6 +57,36 @@ describe('vNext retirement governance', () => {
       ],
     };
 
+    expect(findVnextRetirementViolations(root, manifest)).toEqual([
+      {
+        id: 'retired',
+        decision: 'ADR-test',
+        relativePath: 'packages/retired',
+      },
+    ]);
+  });
+
+  it('ignores gitignored build residue under a retired root but still catches source', () => {
+    const root = tempRoot();
+    execFileSync('git', ['init', '--quiet', root]);
+    writeFileSync(path.join(root, '.gitignore'), 'dist\n');
+    mkdirSync(path.join(root, 'packages/retired/dist'), { recursive: true });
+    writeFileSync(path.join(root, 'packages/retired/dist/index.js'), 'export {};');
+    const manifest = {
+      version: 1,
+      entries: [
+        {
+          id: 'retired',
+          status: 'active',
+          decision: 'ADR-test',
+          forbiddenPaths: ['packages/retired'],
+        },
+      ],
+    };
+
+    expect(findVnextRetirementViolations(root, manifest)).toEqual([]);
+
+    writeFileSync(path.join(root, 'packages/retired/index.ts'), 'export {};');
     expect(findVnextRetirementViolations(root, manifest)).toEqual([
       {
         id: 'retired',

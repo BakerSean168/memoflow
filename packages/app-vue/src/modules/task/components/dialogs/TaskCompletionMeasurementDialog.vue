@@ -5,6 +5,7 @@ import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import { GoalRecordComposerSurface } from '../../../goal';
 import { ProductDialogShell } from '../../../../shared/components';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 import type { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
 const props = defineProps<{ coordinator: ReturnType<typeof useTaskOccurrenceActionCoordinator> }>();
 const emit = defineEmits<{ completed: [occurrence: TaskOccurrenceClientDTO] }>();
@@ -13,6 +14,7 @@ const session = computed(() => props.coordinator.pendingMeasurement.value);
 const busy = computed(() => props.coordinator.busyOccurrenceId.value !== null);
 const composer = ref<InstanceType<typeof GoalRecordComposerSurface> | null>(null);
 const valid = ref(false);
+const dirty = ref(false);
 const failed = ref(false);
 const composerSession = ref(0);
 watch(
@@ -20,10 +22,17 @@ watch(
   () => {
     composerSession.value++;
     valid.value = false;
+    dirty.value = false;
     failed.value = false;
   },
   { flush: 'sync' },
 );
+const { requestClose } = useDialogCloseGuard({
+  dirty,
+  busy,
+  onClose: () => props.coordinator.cancelMeasurement(),
+});
+
 async function complete(intent?: { value: number; note: string }) {
   if (busy.value) return;
   failed.value = false;
@@ -45,7 +54,7 @@ async function complete(intent?: { value: number; note: string }) {
     :open="true"
     @update:open="
       (open) => {
-        if (!open) coordinator.cancelMeasurement();
+        if (!open) requestClose();
       }
     "
   >
@@ -54,7 +63,7 @@ async function complete(intent?: { value: number; note: string }) {
       test-id="task-completion-measurement-dialog"
       size="sm"
       initial-focus-selector="#change-amount"
-      @keydown.esc="coordinator.cancelMeasurement()"
+      @keydown.esc="requestClose()"
     >
       <template #title>{{ t('task.measurement.title') }}</template>
       <template #description>{{ t('task.measurement.description') }}</template>
@@ -66,20 +75,17 @@ async function complete(intent?: { value: number; note: string }) {
         :initial-value="session.suggestedValue"
         :disabled="busy"
         @validity-change="valid = $event"
+        @dirty-change="dirty = $event"
         @submit="complete"
-        @cancel="coordinator.cancelMeasurement()"
+        @cancel="requestClose()"
       />
       <p v-if="failed" role="alert" class="text-xs text-destructive">
         {{ t('task.measurement.failed') }}
       </p>
       <template #footer>
-        <Button
-          type="button"
-          variant="ghost"
-          :disabled="busy"
-          @click="coordinator.cancelMeasurement()"
-          >{{ t('common.cancel') }}</Button
-        >
+        <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">{{
+          t('common.cancel')
+        }}</Button>
         <Button
           type="button"
           variant="outline"

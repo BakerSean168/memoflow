@@ -123,6 +123,7 @@ export default {
     created: 'Goal created',
     updated: 'Goal updated',
     allGoals: 'All Goals',
+    systemView: 'Goal view',
     searchGoals: 'Search goals...',
     newGoal: 'New Goal',
     labels: 'Labels',

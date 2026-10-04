@@ -61,7 +61,7 @@
           size="icon"
           :aria-label="t('common.refresh')"
           :disabled="busy"
-          @click="loadConnections"
+          @click="refreshKnowledgeRepositoryState"
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': busyAction === 'load' }" />
         </Button>
@@ -375,7 +375,11 @@
           <Button
             :disabled="busy"
             data-testid="github-repository-connect"
-            @click="startInstallation"
+            @click="
+              webInstallationPending && !desktopBridge
+                ? checkAuthorizationStatus()
+                : startInstallation()
+            "
           >
             <Loader2 v-if="busyAction === 'start'" class="mr-2 h-4 w-4 animate-spin" />
             <ExternalLink v-else class="mr-2 h-4 w-4" />
@@ -545,6 +549,7 @@ const GITHUB_NEW_PRIVATE_REPOSITORY_URL =
 const INSTALLATION_POLL_INTERVAL_MS = 1_500;
 const WEB_INSTALLATION_INTENT_SESSION_KEY = 'memoflow:knowledge-repository:web-installation-intent';
 let installationPollGeneration = 0;
+let webInstallationPopup: Window | null = null;
 
 function rememberWebInstallationIntent(intentId: string): void {
   if (desktopBridge || typeof window === 'undefined') return;
@@ -643,6 +648,17 @@ async function loadConnections(): Promise<void> {
   busyAction.value = null;
 }
 
+async function refreshKnowledgeRepositoryState(): Promise<void> {
+  await loadConnections();
+  if (desktopBridge || connections.value.length > 0 || installationRepositories.value.length > 0) {
+    return;
+  }
+  await restoreRememberedWebInstallation();
+  if (connections.value.length === 0 && installationRepositories.value.length === 0) {
+    await checkAuthorizationStatus();
+  }
+}
+
 async function loadLocalVault(): Promise<void> {
   if (!desktopBridge) return;
   const result = await service.getLocalVaultBinding();
@@ -682,13 +698,46 @@ async function detachLocalVault(): Promise<void> {
   busyAction.value = null;
 }
 
-async function startInstallation(): Promise<void> {
+function openWebInstallationPopup(): Window | null {
+  if (typeof window === 'undefined') return null;
+  const width = Math.min(980, Math.max(720, window.screen.availWidth - 120));
+  const height = Math.min(780, Math.max(640, window.screen.availHeight - 120));
+  const left = Math.max(0, Math.round((window.screen.availWidth - width) / 2));
+  const top = Math.max(0, Math.round((window.screen.availHeight - height) / 2));
+  return window.open(
+    'about:blank',
+    'memoflow-github-installation',
+    `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`,
+  );
+}
+
+function closeWebInstallationPopup(): void {
+  try {
+    if (webInstallationPopup && !webInstallationPopup.closed) webInstallationPopup.close();
+  } catch {
+    // Window lifecycle is best-effort; server intent state remains canonical.
+  }
+  webInstallationPopup = null;
+}
+
+async function beginInstallation(
+  openExternalProvider: boolean,
+  recoverOnly = false,
+): Promise<void> {
   if (!canUseCloudKnowledgeRepo.value) {
     errorMessage.value = isGuest.value
       ? t('setting.knowledgeRepository.guestCloudBlocked')
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }
+  if (!desktopBridge && openExternalProvider) {
+    webInstallationPopup = openWebInstallationPopup();
+    if (!webInstallationPopup) {
+      errorMessage.value = t('setting.knowledgeRepository.popupBlocked');
+      return;
+    }
+  }
+
   busyAction.value = 'start';
   errorMessage.value = '';
   const returnUrl = desktopBridge
@@ -700,8 +749,15 @@ async function startInstallation(): Promise<void> {
   const result = await service.startKnowledgeRepositoryInstallation({
     returnUrl,
     clientKind: desktopBridge ? 'desktop' : 'web',
+    ...(recoverOnly ? { recoverOnly: true } : {}),
   });
   if (!result.ok) {
+    closeWebInstallationPopup();
+    if (recoverOnly && result.error.code === 'NOT_FOUND') {
+      errorMessage.value = '';
+      busyAction.value = null;
+      return;
+    }
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.startFailed'));
     busyAction.value = null;
     return;
@@ -710,6 +766,7 @@ async function startInstallation(): Promise<void> {
   if (!desktopBridge) {
     rememberWebInstallationIntent(result.data.intentId);
     if (result.data.requiresExternalBrowser === false) {
+      closeWebInstallationPopup();
       webInstallationPending.value = false;
       await applyFinalizedInstallationIntent(result.data.intentId);
       busyAction.value = null;
@@ -734,7 +791,34 @@ async function startInstallation(): Promise<void> {
     return;
   }
 
-  window.location.assign(result.data.installationUrl);
+  if (openExternalProvider) {
+    try {
+      if (!webInstallationPopup || webInstallationPopup.closed) {
+        errorMessage.value = t('setting.knowledgeRepository.popupBlocked');
+        busyAction.value = null;
+        return;
+      }
+      webInstallationPopup.location.replace(result.data.installationUrl);
+    } catch {
+      closeWebInstallationPopup();
+      errorMessage.value = t('setting.knowledgeRepository.startFailed');
+      busyAction.value = null;
+      return;
+    }
+    busyAction.value = null;
+    void pollWebInstallationIntent(result.data.intentId, result.data.expiresAt);
+    return;
+  }
+
+  busyAction.value = null;
+}
+
+async function startInstallation(): Promise<void> {
+  await beginInstallation(true);
+}
+
+async function checkAuthorizationStatus(): Promise<void> {
+  await beginInstallation(false, true);
 }
 
 async function applyFinalizedInstallationIntent(intentId: string): Promise<boolean> {
@@ -746,8 +830,43 @@ async function applyFinalizedInstallationIntent(intentId: string): Promise<boole
   pendingInstallationId.value = result.data.installationId;
   installationRepositories.value = result.data.repositories;
   webInstallationPending.value = false;
+  closeWebInstallationPopup();
   errorMessage.value = '';
   return true;
+}
+
+async function pollWebInstallationIntent(intentId: string, expiresAt: number): Promise<void> {
+  const generation = ++installationPollGeneration;
+  while (generation === installationPollGeneration && Date.now() < expiresAt) {
+    const result = await service.getKnowledgeRepositoryInstallationIntentStatus(intentId);
+    if (generation !== installationPollGeneration) return;
+    if (result.ok) {
+      if (result.data.status === 'CallbackReceived' || result.data.status === 'Finalized') {
+        busyAction.value = 'complete';
+        await applyFinalizedInstallationIntent(intentId);
+        if (generation === installationPollGeneration) busyAction.value = null;
+        return;
+      }
+      if (result.data.status === 'Consumed') {
+        closeWebInstallationPopup();
+        clearRememberedWebInstallationIntent(intentId);
+        await loadConnections();
+        return;
+      }
+      if (result.data.status === 'Expired') break;
+    } else if (!['SERVICE_UNAVAILABLE', 'RATE_LIMITED'].includes(result.error.code)) {
+      closeWebInstallationPopup();
+      errorMessage.value = resultError(result, t('setting.knowledgeRepository.completeFailed'));
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, INSTALLATION_POLL_INTERVAL_MS));
+  }
+  if (generation === installationPollGeneration) {
+    closeWebInstallationPopup();
+    webInstallationPending.value = false;
+    clearRememberedWebInstallationIntent(intentId);
+    errorMessage.value = t('setting.knowledgeRepository.installationExpired');
+  }
 }
 
 async function pollDesktopInstallationIntent(intentId: string, expiresAt: number): Promise<void> {
@@ -1144,6 +1263,7 @@ async function executeReconciliation(connection: KnowledgeRemoteBindingClientDTO
 
 onBeforeUnmount(() => {
   installationPollGeneration += 1;
+  closeWebInstallationPopup();
 });
 
 onMounted(async () => {
@@ -1154,5 +1274,13 @@ onMounted(async () => {
   await Promise.all([loadConnections(), loadLocalVault()]);
   await completeInstallationFromQuery();
   await restoreRememberedWebInstallation();
+  if (
+    !desktopBridge &&
+    canUseCloudKnowledgeRepo.value &&
+    connections.value.length === 0 &&
+    installationRepositories.value.length === 0
+  ) {
+    await checkAuthorizationStatus();
+  }
 });
 </script>

@@ -70,8 +70,28 @@ test.describe('Routine authenticated product journey', () => {
     const routineTestId = await createdCard.getAttribute('data-testid');
     expect(routineTestId).toBeTruthy();
     const routineId = routineTestId!.replace('routine-card-', '');
-    const toggle = page.getByTestId(`routine-toggle-${routineId}`);
 
+    // A dirty edit must survive an accidental backdrop click until the user
+    // explicitly confirms that the draft can be discarded.
+    const dirtyRoutineName = `Unsaved Routine ${suffix}`;
+    await createdCard.locator('button').first().click();
+    await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
+    await page.getByTestId('routine-name-input').fill(dirtyRoutineName);
+    await page.mouse.click(8, 8);
+    await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
+    await page.getByTestId('global-confirm-cancel').click();
+    await expect(page.getByTestId('global-confirm-dialog')).toBeHidden();
+    await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
+    await expect(page.getByTestId('routine-name-input')).toHaveValue(dirtyRoutineName);
+
+    await page.mouse.click(8, 8);
+    await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
+    await page.getByTestId('global-confirm-confirm').click();
+    await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();
+    await expect(createdCard).toContainText(routineName);
+    await expect(createdCard).not.toContainText(dirtyRoutineName);
+
+    const toggle = page.getByTestId(`routine-toggle-${routineId}`);
     await expect(toggle).toHaveAttribute('data-state', 'checked');
     await toggle.click();
     await expect(toggle).toHaveAttribute('data-state', 'unchecked');

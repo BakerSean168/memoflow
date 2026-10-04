@@ -10,6 +10,14 @@ export default {
     "privacyPolicy": "隐私政策",
     "locales": { "zhCN": "中文", "enUS": "EN" }
   },
+  "popup": {
+    "completingTitle": "正在完成 GitHub 登录",
+    "completingDescription": "授权完成后，此窗口会自动关闭。",
+    "completeTitle": "GitHub 登录已完成",
+    "completeDescription": "可以安全关闭此窗口并返回 MemoFlow。",
+    "failedTitle": "无法完成 GitHub 登录",
+    "failedDescription": "请关闭此窗口并返回 MemoFlow 后重试。"
+  },
   "login": {
     "heading": "登录{app}",
     "submitting": "登录中...",

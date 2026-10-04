@@ -17,6 +17,7 @@ describe('ModuleHeader product-surface grammar', () => {
     const header = wrapper.get('header');
     expect(header.attributes('data-testid')).toBe('owner-detail-toolbar');
     expect(header.attributes('data-surface-header-family')).toBe('entity');
+    expect(wrapper.get('header > div').classes()).toContain('w-full');
     expect(wrapper.get('[data-testid="leading"]').text()).toBe('Back');
     expect(wrapper.get('[data-testid="action"]').text()).toBe('More');
   });
@@ -29,6 +30,7 @@ describe('ModuleHeader product-surface grammar', () => {
       });
 
       expect(wrapper.get('header').attributes('data-surface-header-family')).toBe(family);
+      expect(wrapper.get('header > div').classes()).toContain('w-full');
       expect(wrapper.get('[data-testid="subnav"]').text()).toBe('Filters');
     }
   });

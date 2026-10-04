@@ -86,6 +86,7 @@ export default {
       plans: '计划',
     },
     filter: {
+      surface: '视图',
       status: '状态',
       planState: '计划状态',
       allStatuses: '全部状态',
@@ -199,7 +200,8 @@ export default {
     goalBindingConfigured: '已配置 Goal 贡献',
     goalBindingNone: '未配置 Goal 贡献',
     occurrences: '最近执行',
-    occurrencesDescription: '这里只显示最近的发生项，并非完整历史。可纠正单个发生项状态，不改写计划或相邻发生项。',
+    occurrencesDescription:
+      '这里只显示最近的发生项，并非完整历史。可纠正单个发生项状态，不改写计划或相邻发生项。',
     completedCount: '已完成 {count}',
     openCount: '待处理 {count}',
     noOccurrences: '这项计划尚未生成任何发生项。',

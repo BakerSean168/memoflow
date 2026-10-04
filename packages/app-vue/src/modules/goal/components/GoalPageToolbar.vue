@@ -1,25 +1,15 @@
 <template>
   <ProductSurfaceHeader family="collection" data-testid="goal-page-toolbar">
-    <DropdownMenu>
-      <DropdownMenuTrigger as-child>
-        <Button variant="ghost" size="sm" class="h-8 gap-1.5">
-          <Target class="h-4 w-4" />
-          <span>{{ currentLabel }}</span>
-          <span class="text-xs text-muted-foreground">{{ visibleGoalCount }}</span>
-          <ChevronDown class="h-3.5 w-3.5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" class="w-48">
-        <DropdownMenuItem
-          v-for="view in systemViews"
-          :key="view.id"
-          :class="activeSystemView === view.id ? 'bg-[hsl(var(--selected))]' : ''"
-          @click="emit('select-system-view', view.id)"
-        >
-          {{ view.label }}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ProductSingleSelectFilter
+      :model-value="activeSystemView"
+      :options="systemViewOptions"
+      :accessible-label="t('goal.list.systemView')"
+      :icon="Target"
+      show-current-count
+      test-id="goal-system-view-filter"
+      menu-class="w-48"
+      @update:model-value="emit('select-system-view', $event as GoalSystemView)"
+    />
 
     <LabelFilterPopover
       :model-value="selectedLabelIds"
@@ -30,6 +20,7 @@
       :empty-text="t('goal.list.noLabels')"
       :clear-label="t('common.clear')"
       :selection-hint="t('goal.list.matchesAllLabels')"
+      :aria-label="t('goal.list.labels')"
       compact
       @update:model-value="emit('update-labels', $event)"
     />
@@ -48,17 +39,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronDown, Plus, Target } from '@lucide/vue';
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@memoflow/ui-vue-shadcn';
+import { Plus, Target } from '@lucide/vue';
 import type { GoalSystemView } from '@memoflow/contracts/goal';
 import {
   LabelFilterPopover,
+  ProductSingleSelectFilter,
   ProductSurfaceHeader,
   ResponsivePrimaryAction,
   type LabelPickerOption,
@@ -80,9 +65,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const currentLabel = computed(
-  () =>
-    props.systemViews.find((view) => view.id === props.activeSystemView)?.label ??
-    t('goal.systemFolders.active'),
+const systemViewOptions = computed(() =>
+  props.systemViews.map((view) => ({
+    value: view.id,
+    label: view.label,
+    ...(view.id === props.activeSystemView ? { count: props.visibleGoalCount } : {}),
+  })),
 );
 </script>

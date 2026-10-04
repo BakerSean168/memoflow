@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import ProductSurfaceHeader from '../../shared/components/ProductSurfaceHeader.vue';
 import type { ProductSurfaceHeaderFamily } from '../../shared/components/product-surface-header.types';
 
@@ -8,7 +9,7 @@ import type { ProductSurfaceHeaderFamily } from '../../shared/components/product
  * Entity is the default for detail/inspect pages. List and diagnostic owners opt into
  * their legal family explicitly without changing the slot or behavior contract.
  */
-withDefaults(
+const props = withDefaults(
   defineProps<{
     family?: ProductSurfaceHeaderFamily;
   }>(),
@@ -16,11 +17,17 @@ withDefaults(
     family: 'entity',
   },
 );
+
+const innerClass = computed(() =>
+  props.family === 'entity'
+    ? 'flex min-h-11 w-full items-center gap-2 px-3 @2xl/panel:px-4'
+    : 'flex w-full items-center gap-2',
+);
 </script>
 
 <template>
   <ProductSurfaceHeader :family="family" data-testid="module-header">
-    <div class="flex min-h-11 items-center gap-2 px-3 @2xl/panel:px-4">
+    <div :class="innerClass">
       <div class="flex min-w-0 flex-1 items-center gap-2">
         <slot name="leading" />
       </div>

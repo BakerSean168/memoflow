@@ -85,6 +85,23 @@ for (const entry of matrix) {
   });
 }
 
+test('post-vNext chat header aligns with the business tab strip', async ({ page }) => {
+  const entry = matrix.find((entry) => entry.surface === 'shell.split')!;
+  await openVisualCase(page, entry);
+  await expect(page.getByTestId('business-panel')).toBeVisible();
+  await waitForVisualLayout(page);
+
+  const chatHeader = await page.getByTestId('ai-chat-header').boundingBox();
+  const businessTabs = await page.getByTestId('business-panel-tab-strip').boundingBox();
+  expect(chatHeader).not.toBeNull();
+  expect(businessTabs).not.toBeNull();
+  expect(chatHeader!.height).toBeCloseTo(businessTabs!.height, 0);
+  expect(chatHeader!.y + chatHeader!.height).toBeCloseTo(
+    businessTabs!.y + businessTabs!.height,
+    0,
+  );
+});
+
 test('UI-9002 narrow shell target, keyboard and scroll ownership', async ({ page }) => {
   const entry = matrix.find((entry) => entry.surface === 'shell.narrow')!;
   await openVisualCase(page, { ...entry, query: `${entry.query}&tabs=8` });

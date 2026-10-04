@@ -92,10 +92,27 @@ const AIChatViewStub = defineComponent({
   },
 });
 
-const WindowHeaderStatusActionsStub = defineComponent({
+const WindowHeaderStub = defineComponent({
   name: 'WindowHeader',
-  setup(_props, { slots }) {
-    return () => h('header', { 'data-testid': 'window-header-stub' }, slots['status-actions']?.());
+  props: {
+    sidebarCollapsed: { type: Boolean, default: false },
+  },
+  emits: ['toggle-sidebar'],
+  setup(props, { emit, slots }) {
+    return () =>
+      h('header', { 'data-testid': 'window-header-stub' }, [
+        h(
+          'button',
+          {
+            type: 'button',
+            'data-testid': 'shell-sidebar-toggle',
+            'aria-expanded': String(!props.sidebarCollapsed),
+            onClick: () => emit('toggle-sidebar'),
+          },
+          'Toggle sidebar',
+        ),
+        slots['status-actions']?.(),
+      ]);
   },
 });
 
@@ -133,7 +150,7 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
-      common: { untitled: 'Untitled' },
+      common: { untitled: 'Untitled', close: 'Close' },
       nav: {
         capsule: {
           goal: 'Goals',
@@ -154,6 +171,7 @@ const i18n = createI18n({
           today: 'Today',
           last7Days: 'Last 7 days',
           earlier: 'Earlier',
+          navigation: 'Conversation navigation',
           resize: 'Resize conversations',
         },
         panel: {
@@ -199,7 +217,7 @@ async function mountShell(
       provide: updateService ? { [DESKTOP_UPDATE_SERVICE_KEY as symbol]: updateService } : {},
       stubs: {
         AIChatView: AIChatViewStub,
-        WindowHeader: updateService ? WindowHeaderStatusActionsStub : true,
+        WindowHeader: WindowHeaderStub,
         ConversationSidebar: ConversationSidebarStub,
         BusinessPanel,
         TodayOverviewPanel: TodayOverviewPanelStub,
@@ -324,6 +342,75 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
+  it('uses an off-canvas overlay sidebar below 960px without mutating the docked preference', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 900 });
+    const { wrapper, store } = await mountShell('/goals');
+
+    expect(store.sidebarCollapsed).toBe(false);
+    expect(wrapper.find('[data-testid="shell-sidebar-pane-host"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="shell-sidebar-toggle"]').attributes('aria-expanded')).toBe(
+      'false',
+    );
+
+    await wrapper.get('[data-testid="shell-sidebar-toggle"]').trigger('click');
+    await nextTick();
+
+    const overlay = document.querySelector<HTMLElement>(
+      '[data-testid="shell-sidebar-pane-host"][data-sidebar-presentation="overlay"]',
+    );
+    expect(overlay).not.toBeNull();
+    expect(overlay?.getAttribute('role')).toBe('dialog');
+    expect(wrapper.find('[data-testid="conversation-sidebar-resizer"]').exists()).toBe(false);
+    expect(store.sidebarCollapsed).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    await flushPromises();
+    expect(
+      document.querySelector(
+        '[data-testid="shell-sidebar-pane-host"][data-sidebar-presentation="overlay"]',
+      ),
+    ).toBeNull();
+    expect(store.sidebarCollapsed).toBe(false);
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    window.dispatchEvent(new Event('resize'));
+    await nextTick();
+
+    const docked = wrapper.get('[data-testid="shell-sidebar-pane-host"]');
+    expect(docked.attributes('data-sidebar-presentation')).toBe('docked');
+    expect(wrapper.get('[data-testid="conversation-sidebar-resizer"]').exists()).toBe(true);
+    expect(store.sidebarCollapsed).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps a collapsed desktop preference while still allowing narrow overlay navigation', async () => {
+    const { wrapper, store } = await mountShell('/goals');
+    store.setSidebarCollapsed(true);
+    await nextTick();
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 900 });
+    window.dispatchEvent(new Event('resize'));
+    await nextTick();
+
+    expect(wrapper.find('[data-testid="shell-sidebar-pane-host"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="shell-sidebar-toggle"]').trigger('click');
+    await nextTick();
+    expect(
+      document
+        .querySelector('[data-testid="shell-sidebar-pane-host"]')
+        ?.getAttribute('data-sidebar-presentation'),
+    ).toBe('overlay');
+    expect(store.sidebarCollapsed).toBe(true);
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    window.dispatchEvent(new Event('resize'));
+    await nextTick();
+    expect(wrapper.find('[data-testid="shell-sidebar-pane-host"]').exists()).toBe(false);
+    expect(store.sidebarCollapsed).toBe(true);
+    wrapper.unmount();
+  });
+
   it('keeps the panel DOM mounted while hidden and keeps Focus independent from the sidebar', async () => {
     const { wrapper, router, store } = await mountShell();
     await router.push('/goals');
@@ -375,7 +462,9 @@ describe('AppShell right-panel integration', () => {
     expect(store.panelWidthSource).toBe('user');
     expect(store.panelWidth).toBe(654);
 
-    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }));
+    window.dispatchEvent(
+      new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }),
+    );
     wrapper.unmount();
   });
 
@@ -383,7 +472,8 @@ describe('AppShell right-panel integration', () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
     const { wrapper } = await mountShell('/goals', host);
-    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]').element as HTMLInputElement;
+    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+      .element as HTMLInputElement;
     const resizer = wrapper.get('[data-testid="business-panel-resizer"]');
     const scheduledFrames: FrameRequestCallback[] = [];
     const animationFrame = vi
