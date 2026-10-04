@@ -36,6 +36,10 @@ pnpm nx run web:e2e:report
 - 常规 E2E 配置常量：[`apps/web/e2e/config.ts`](./config.ts)
 - sync 账号与 desktop 启动 helper：[`apps/web/e2e/sync/helpers/`](./sync/helpers/)
 
+## Ownership 与执行车道
+
+E2E 的执行归属不由目录或 Playwright config 的存在自动推断。`tools/test-system-v2/e2e-ownership.json` 是 collector/spec execution ownership 的真源；`tools/test-system-v2/e2e-retirement.json` 记录不得恢复的 retired acceptance。新增、移动或退休 E2E 时必须同步这两个契约，并通过 `pnpm nx run test-system-v2:test:governance`。
+
 ## 维护约定
 
 - 文档只解释目录边界和入口，不维护测试数量、覆盖率统计或历史规划。

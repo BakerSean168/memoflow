@@ -25,7 +25,9 @@ if (
   inventory.missing.length ||
   inventory.duplicate.length ||
   inventory.unexpected.length ||
-  inventory.measurementOnly.length
+  inventory.measurementOnly.length ||
+  inventory.e2eGovernance.issues.length ||
+  inventory.e2eRetirement.issues.length
 ) {
   console.error(
     JSON.stringify(
@@ -34,6 +36,8 @@ if (
         duplicate: inventory.duplicate,
         unexpected: inventory.unexpected,
         measurementOnly: inventory.measurementOnly,
+        e2eGovernance: inventory.e2eGovernance,
+        e2eRetirement: inventory.e2eRetirement,
       },
       null,
       2,

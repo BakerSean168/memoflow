@@ -7,6 +7,12 @@ import {
   collectTestFiles,
 } from '../lib/test-inventory.mjs';
 
+const repositoryRoot = process.cwd();
+const [repositoryInventory, repositoryTestFiles] = await Promise.all([
+  buildInventory(repositoryRoot),
+  collectTestFiles(repositoryRoot),
+]);
+
 test('classifies explicit boundary and measurement file names', () => {
   assert.equal(classifyTest('apps/desktop/src/main/ipc/system-handlers.spec.ts'), 'boundary-ipc');
   assert.equal(classifyTest('apps/desktop/src/main/database/db.spec.ts'), 'boundary-main');
@@ -15,10 +21,10 @@ test('classifies explicit boundary and measurement file names', () => {
 });
 
 test('gives every Desktop primary file exactly one owner', async () => {
-  const root = process.cwd();
-  const [inventory, testFiles] = await Promise.all([buildInventory(root), collectTestFiles(root)]);
-  const desktop = inventory.primary.filter((entry) => entry.path.startsWith('apps/desktop/src/'));
-  const desktopFiles = testFiles.filter((file) => file.startsWith('apps/desktop/src/'));
+  const desktop = repositoryInventory.primary.filter((entry) =>
+    entry.path.startsWith('apps/desktop/src/'),
+  );
+  const desktopFiles = repositoryTestFiles.filter((file) => file.startsWith('apps/desktop/src/'));
 
   assert.deepEqual(
     desktop.map((entry) => entry.path),
@@ -33,15 +39,14 @@ test('gives every Desktop primary file exactly one owner', async () => {
       `Desktop test must stay in its classified primary suite: ${entry.path}`,
     );
   }
-  assert.deepEqual(inventory.missing, []);
-  assert.deepEqual(inventory.duplicate, []);
-  assert.deepEqual(inventory.unexpected, []);
-  assert.deepEqual(inventory.measurementOnly, []);
+  assert.deepEqual(repositoryInventory.missing, []);
+  assert.deepEqual(repositoryInventory.duplicate, []);
+  assert.deepEqual(repositoryInventory.unexpected, []);
+  assert.deepEqual(repositoryInventory.measurementOnly, []);
 });
 
 test('primary collectors always own at least one test file', async () => {
-  const inventory = await buildInventory(process.cwd());
-  const emptyPrimaryCollectors = inventory.collectors
+  const emptyPrimaryCollectors = repositoryInventory.collectors
     .filter((collector) => collector.type === 'primary' && collector.fileCount === 0)
     .map((collector) => collector.id);
 

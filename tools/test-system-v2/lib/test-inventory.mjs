@@ -3,10 +3,17 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import fg from 'fast-glob';
+import {
+  analyzeE2EOwnership,
+  analyzeE2ERetirement,
+  decorateE2EOwnership,
+  loadE2EOwnership,
+  loadE2ERetirement,
+} from './e2e-governance.mjs';
 
 const execFileAsync = promisify(execFile);
 
-export const INVENTORY_VERSION = 2;
+export const INVENTORY_VERSION = 3;
 export const PRIMARY_SUITES = Object.freeze([
   'unit',
   'integration',
@@ -408,7 +415,15 @@ export function analyzeInventory(files, collectors) {
 export async function buildInventory(root, options = {}) {
   const files = options.files ?? await collectTestFiles(root);
   const collectors = options.collectors ?? await collectConfiguredTests(root);
-  return analyzeInventory(files, collectors);
+  const baseInventory = analyzeInventory(files, collectors);
+  const contract = options.e2eOwnership ?? await loadE2EOwnership(root);
+  const retirement = options.e2eRetirement ?? await loadE2ERetirement(root);
+  const inventory = decorateE2EOwnership(baseInventory, contract);
+  return {
+    ...inventory,
+    e2eGovernance: await analyzeE2EOwnership(root, inventory, contract),
+    e2eRetirement: await analyzeE2ERetirement(root, retirement),
+  };
 }
 
 export async function writeInventory(root, output = 'tools/test-system-v2/test-inventory.json') {

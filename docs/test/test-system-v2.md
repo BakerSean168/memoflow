@@ -84,7 +84,22 @@ Test System V2 将测试文件、执行器、Nx 项目图、CI DAG、GitHub rule
 
 已有与源码同目录和 `__tests__` 两种组织方式都可以保留，但目录名本身不再决定测试层级。
 
-### 4.3 Desktop 专项边界
+### 4.3 E2E execution ownership 与 retirement
+
+Test inventory v3 不再把“某个 Playwright config 能收集文件”等同于真实 ownership。`tools/test-system-v2/e2e-ownership.json` 为每个 Playwright collector 声明 lane、lifecycle 和 execution，并为每个 E2E spec 声明 surface、role 与唯一 `primaryCollector`。同一个 spec 可以被 specialized/local collector 重复执行，但必须只有一个 canonical primary owner。
+
+Execution contract 只有两种合法形态：
+
+- `nx`：必须绑定真实存在的 `project:target`，且 target 或其显式 entrypoint 必须实际引用对应 Playwright config。
+- `manual`：仅用于明确的 reference/browser acceptance，命令必须显式绑定对应 config；不能再通过“config 文件存在”伪装成 CI owner。
+
+当前 lane vocabulary 包括 required、nightly、specialized、secure-acceptance、local-validation、visual-artifact、reference、debug 和 desktop。`test-inventory.json` 会把这些 metadata 投影到 collector/spec，并输出按 lane/role 的结构化计数。
+
+`tools/test-system-v2/e2e-retirement.json` 记录已经退休的 E2E spec 和高置信度 retired surface reference。治理检查会拒绝重新引入这些 spec，也会拒绝 E2E 再引用明确退休的 route/API。Retirement contract 只收录已确认的稳定事实，不使用模糊 selector 猜测产品是否退休。
+
+Nightly Web Flow 是 supplemental audit lane：保持单 worker，避免共享状态并发污染；同时覆盖 `maxFailures: 0`，一次 scheduled run 必须尽量收集完整 failure map，而不是继承 Required Web Flow 的 early-stop budget。
+
+### 4.4 Desktop 专项边界
 
 目标收集关系：
 
