@@ -28,7 +28,14 @@ function findFreeLoopbackPort() {
 const mockPort = process.env.E2E_OPENAI_MOCK_PORT || String(await findFreeLoopbackPort());
 console.log(`[test-system-v2] Web Flow OpenAI mock port: ${mockPort}`);
 
-const args = ['exec', 'playwright', 'test', ...shard.specs.map((spec) => `e2e/${spec}`)];
+const args = [
+  'exec',
+  'playwright',
+  'test',
+  '--config',
+  'playwright.config.ts',
+  ...shard.specs.map((spec) => `e2e/${spec}`),
+];
 const exitCode = await new Promise((resolve) => {
   const child = spawn('pnpm', args, {
     cwd: 'apps/web',

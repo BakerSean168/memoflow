@@ -5,6 +5,9 @@ import { WEB_AUDIT_SPECS } from './web-audit-specs.mjs';
 export default defineConfig(baseConfig, {
   testMatch: WEB_AUDIT_SPECS.map((spec) => `**/${spec}`),
   testIgnore: [],
+  // Nightly is an audit lane: collect the complete failure map instead of inheriting
+  // the required Web Flow early-stop budget. Keep one worker until state isolation is proven.
+  maxFailures: 0,
   retries: 0,
   reporter:
     process.env.TEST_INVENTORY_LIST === '1'

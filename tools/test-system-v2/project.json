@@ -29,9 +29,10 @@
       "dependsOn": ["contracts:build"],
       "cache": true,
       "inputs": [
+        "{workspaceRoot}/apps/**/*",
+        "{workspaceRoot}/packages/**/*",
         "{workspaceRoot}/tools/test-system-v2/**/*",
-        "{workspaceRoot}/apps/**/project.json",
-        "{workspaceRoot}/packages/**/project.json"
+        "{workspaceRoot}/tools/test/test-target-governance.mjs"
       ],
       "options": {
         "command": "node ./tools/test-system-v2/inventory.mjs --check && node ./tools/test/test-target-governance.mjs --check"

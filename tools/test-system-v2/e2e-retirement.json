@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "retiredSpecs": [
+    {
+      "path": "apps/web/e2e/authentication/auth-login-debug.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/debug-login.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/debug-task-page.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/debug-tasks-page.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/debug/localstorage-debug.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/debug/store-debug.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/explore.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/explore2.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/goal/goal-debug.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/goal/goal-edit-debug.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/goal/goal-edit.spec.ts",
+      "reason": "Legacy Goal editor acceptance was replaced by the canonical Goal CRUD flow."
+    },
+    {
+      "path": "apps/web/e2e/goal/goal-keyresult.spec.ts",
+      "reason": "Legacy Key Result editor acceptance was replaced by canonical Goal/KR behavior."
+    },
+    {
+      "path": "apps/web/e2e/reminder.spec.ts",
+      "reason": "Reminder acceptance moved into current Task planning and notification owners."
+    },
+    {
+      "path": "apps/web/e2e/schedule/schedule-crud.spec.ts",
+      "reason": "Legacy Schedule CRUD acceptance was replaced by the canonical calendar/planner flows."
+    },
+    {
+      "path": "apps/web/e2e/task/check-route.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/task/debug-dialog.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/task/debug-page.spec.ts",
+      "reason": "Ad-hoc diagnostic Playwright script retired; debug the canonical Web Flow via pnpm e2e:debug instead."
+    },
+    {
+      "path": "apps/web/e2e/user-settings/appearance.spec.ts",
+      "reason": "Appearance acceptance moved to the current Settings owner."
+    },
+    {
+      "path": "apps/web/e2e/user-settings/error-handling.spec.ts",
+      "reason": "Legacy UserSetting API error handling no longer owns a product surface."
+    },
+    {
+      "path": "apps/web/e2e/user-settings/shortcuts.spec.ts",
+      "reason": "Shortcut acceptance moved to the global command palette owner."
+    }
+  ],
+  "forbiddenReferences": [
+    {
+      "id": "legacy-profile-route",
+      "needle": "/profile",
+      "reason": "The standalone profile route is retired; Account & Privacy is owned by Settings.",
+      "replacement": "/settings?tab=account"
+    },
+    {
+      "id": "legacy-user-settings-api",
+      "needle": "/api/user-settings/",
+      "reason": "The generic UserSetting API is retired in favor of owner-specific APIs.",
+      "replacement": "Use the current owning API contract."
+    },
+    {
+      "id": "legacy-ai-tool-menu-trigger",
+      "needle": "ai-chat-tool-menu-trigger",
+      "reason": "The manual AI intent/tool selector is retired; workflow intent is inferred or entered through current product entry points.",
+      "replacement": "Use automatic workflow intent or the current AI entry surface."
+    }
+  ]
+}

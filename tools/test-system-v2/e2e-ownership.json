@@ -1,0 +1,431 @@
+{
+  "version": 2,
+  "collectors": {
+    "apps/desktop/playwright.config.ts": {
+      "lane": "desktop",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "desktop:e2e"
+      }
+    },
+    "apps/web/playwright.ai-provider.config.ts": {
+      "lane": "secure-acceptance",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:ai-provider",
+        "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "target": "web:e2e:ai-provider"
+        },
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/web-flow-audit.yml",
+          "target": "web:e2e:ai-provider"
+        }
+      ]
+    },
+    "apps/web/playwright.ai-workspace.config.ts": {
+      "lane": "specialized",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:ai-workspace",
+        "entrypoint": "apps/web/e2e/helpers/run-ai-workspace-playwright.ts"
+      }
+    },
+    "apps/web/playwright.audit.config.ts": {
+      "lane": "nightly",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:audit"
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/web-flow-audit.yml",
+          "target": "web:e2e:audit"
+        }
+      ]
+    },
+    "apps/web/playwright.config.ts": {
+      "lane": "required",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e"
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+        }
+      ]
+    },
+    "apps/web/playwright.desktop-screenshot.config.ts": {
+      "lane": "visual-artifact",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:desktop-screenshots"
+      }
+    },
+    "apps/web/playwright.goal-reference.config.ts": {
+      "lane": "reference",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "manual",
+        "command": "pnpm exec playwright test --config apps/web/playwright.goal-reference.config.ts"
+      }
+    },
+    "apps/web/playwright.local-docker.config.ts": {
+      "lane": "local-validation",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:local-docker",
+        "entrypoint": "apps/web/e2e/helpers/run-local-docker-playwright.mjs"
+      }
+    },
+    "apps/web/playwright.oauth-real.config.ts": {
+      "lane": "secure-acceptance",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:oauth-real"
+      }
+    },
+    "apps/web/playwright.schedule-presentation-authority.config.ts": {
+      "lane": "reference",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "manual",
+        "command": "pnpm exec playwright test --config apps/web/playwright.schedule-presentation-authority.config.ts"
+      }
+    },
+    "apps/web/playwright.shell.config.ts": {
+      "lane": "specialized",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:shell"
+      }
+    },
+    "apps/web/playwright.sync.config.ts": {
+      "lane": "specialized",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:sync"
+      }
+    },
+    "apps/web/playwright.task-visual-grammar.config.ts": {
+      "lane": "reference",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "manual",
+        "command": "pnpm exec playwright test --config apps/web/playwright.task-visual-grammar.config.ts"
+      }
+    },
+    "apps/web/playwright.visual-regression.config.ts": {
+      "lane": "visual-artifact",
+      "lifecycle": "active",
+      "execution": {
+        "kind": "nx",
+        "target": "web:e2e:visual-regression"
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "target": "web:e2e:visual-regression"
+        }
+      ]
+    }
+  },
+  "specs": {
+    "apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
+    "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts": {
+      "surface": "packaged-runtime",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
+    "apps/web/e2e/account/account-management.spec.ts": {
+      "surface": "account",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/account/account-profile.spec.ts": {
+      "surface": "account",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/multi-engine-host.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/provider-onboarding.spec.ts": {
+      "surface": "ai",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-flow.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-login.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-oauth-real.spec.ts": {
+      "surface": "authentication",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-oauth.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-page-contract.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-password.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/authentication/auth-register.spec.ts": {
+      "surface": "authentication",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts": {
+      "surface": "desktop-screenshots",
+      "role": "artifact",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.desktop-screenshot.config.ts"
+    },
+    "apps/web/e2e/desktop-screenshots/workspace-layout-matrix.spec.ts": {
+      "surface": "desktop-screenshots",
+      "role": "artifact",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.desktop-screenshot.config.ts"
+    },
+    "apps/web/e2e/goal/goal-crud.spec.ts": {
+      "surface": "goal",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/goal/reference/goal-reference.spec.ts": {
+      "surface": "goal",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.goal-reference.config.ts"
+    },
+    "apps/web/e2e/local-docker/core-product-phase-a.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
+    "apps/web/e2e/local-docker/core-product-phase-b.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
+    "apps/web/e2e/local-docker/core-product-phase-c.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
+    "apps/web/e2e/local-docker/core-product-phase-d.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
+    "apps/web/e2e/local-docker/core-product-phase-e.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
+    "apps/web/e2e/note/legacy-note-mutation-boundary.spec.ts": {
+      "surface": "note",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/note/note-workspace.spec.ts": {
+      "surface": "note",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/notification/notification-center.spec.ts": {
+      "surface": "notification",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/notification/notification-inbox-loop.spec.ts": {
+      "surface": "notification",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/performance/ai-workspace-performance.spec.ts": {
+      "surface": "performance",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/routine/routine-configuration.spec.ts": {
+      "surface": "routine",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/schedule/planner-task-revert.spec.ts": {
+      "surface": "schedule",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/schedule/presentation-authority/collision-regression.spec.ts": {
+      "surface": "schedule",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+    },
+    "apps/web/e2e/schedule/presentation-authority/schedule-presentation-authority.spec.ts": {
+      "surface": "schedule",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+    },
+    "apps/web/e2e/schedule/presentation-authority/task-quick.spec.ts": {
+      "surface": "schedule",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+    },
+    "apps/web/e2e/schedule/schedule-calendar.spec.ts": {
+      "surface": "schedule",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/setting/setting-appearance.spec.ts": {
+      "surface": "setting",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/shell/responsive-sidebar.spec.ts": {
+      "surface": "shell",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/shell/shell-geometry.spec.ts": {
+      "surface": "shell",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.shell.config.ts"
+    },
+    "apps/web/e2e/sync/goal-sync-regression.spec.ts": {
+      "surface": "sync",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.sync.config.ts"
+    },
+    "apps/web/e2e/task/task-completion-loop.spec.ts": {
+      "surface": "task",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/task/task-plan-crud.spec.ts": {
+      "surface": "task",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts": {
+      "surface": "task",
+      "role": "reference",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
+    },
+    "apps/web/e2e/user-settings/data-portability.spec.ts": {
+      "surface": "user-settings",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/user-settings/notifications.spec.ts": {
+      "surface": "user-settings",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/user-settings/persistence.spec.ts": {
+      "surface": "user-settings",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ux/command-palette.spec.ts": {
+      "surface": "ux",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/visual-regression/matrix.spec.ts": {
+      "surface": "visual-regression",
+      "role": "artifact",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+    }
+  }
+}

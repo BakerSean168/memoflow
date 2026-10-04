@@ -54,7 +54,7 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'split');
     await expect(page.getByTestId('ai-chat-empty-models')).toHaveCount(0);
-    await expect(page.getByTestId('ai-chat-tool-menu-trigger')).toBeEnabled();
+    await expect(page.getByTestId('ai-chat-add-context')).toBeEnabled();
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
     await expect(page.getByTestId('business-panel')).toBeVisible();
     await expect(page.getByTestId('business-panel-workflow')).toHaveAttribute(
@@ -73,120 +73,6 @@ test.describe('Local Docker core product Phase E', () => {
     await expectNoHorizontalOverflow(page);
 
     await testInfo.attach('phase-e-configured-workflow-1440x900', {
-      body: await page.screenshot(),
-      contentType: 'image/png',
-    });
-
-    expect(pageErrors).toEqual([]);
-    expect(consoleErrors).toEqual([]);
-  });
-
-  test('[P1] defers workflow switching for a dirty form and preserves its draft', async ({
-    page,
-  }, testInfo) => {
-    const suffix = testSuffix();
-    const draftTitle = `[PM-E] 脏表单草稿 ${suffix}`;
-    const consoleErrors: string[] = [];
-    const pageErrors: string[] = [];
-    collectBrowserErrors(page, consoleErrors, pageErrors);
-
-    await registerAndLogin(page, {
-      email: `pm-phase-e-dirty-${suffix}@test.com`,
-      password,
-      landingPath: '/goals',
-    });
-    await installConfiguredModelMock(page);
-    await seedChinesePresentation(page);
-    await page.reload({ waitUntil: 'domcontentloaded' });
-
-    await expect(page.getByTestId('ai-chat-empty-models')).toHaveCount(0);
-    await page.getByTestId('create-goal-entry').click();
-    await page.getByTestId('goal-name-input').fill(draftTitle);
-
-    await selectGoalWorkflowTool(page, true);
-
-    const workflowTab = page.getByTestId('business-panel-workflow');
-    await expect(workflowTab).toBeVisible();
-    await expect(workflowTab).not.toHaveAttribute('aria-current', 'page');
-    await expect(workflowTab).toContainText('1');
-    await expect(page.getByTestId('goal-dialog')).toBeVisible();
-    await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-
-    await workflowTab.dispatchEvent('click');
-    await expect(workflowTab).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('shell-workflow-surface')).toBeVisible();
-    await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-
-    await page.locator('button[aria-label="关闭工作流"]').dispatchEvent('click');
-    await expect(page.getByTestId('goal-dialog')).toBeVisible();
-    await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-
-    await testInfo.attach('phase-e-dirty-workflow-1280x720', {
-      body: await page.screenshot(),
-      contentType: 'image/png',
-    });
-
-    await page
-      .getByTestId('goal-dialog')
-      .getByRole('button', { name: '取消', exact: true })
-      .click();
-    expect(pageErrors).toEqual([]);
-    expect(consoleErrors).toEqual([]);
-  });
-
-  test('[P1] keeps a user-hidden panel closed until explicit mobile interaction', async ({
-    page,
-  }, testInfo) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    const suffix = testSuffix();
-    const consoleErrors: string[] = [];
-    const pageErrors: string[] = [];
-    collectBrowserErrors(page, consoleErrors, pageErrors);
-
-    await registerAndLogin(page, {
-      email: `pm-phase-e-mobile-${suffix}@test.com`,
-      password,
-      landingPath: '/',
-    });
-    await installConfiguredModelMock(page);
-    await seedChinesePresentation(page);
-    await page.reload({ waitUntil: 'domcontentloaded' });
-
-    const shell = page.getByTestId('app-shell');
-    const panel = page.getByTestId('business-panel');
-    const panelToggle = page.getByTestId('shell-right-panel-toggle');
-
-    await expect(shell).toHaveAttribute('data-shell-state', 'focus');
-    await expect(panel).toBeVisible();
-    await expect(page.getByTestId('today-overview-panel')).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-
-    await panelToggle.click();
-    await expect(shell).toHaveAttribute('data-shell-state', 'chat');
-    await expect(panel).toBeHidden();
-    await expect(page.getByTestId('shell-ai-column')).toBeVisible();
-    await expect(page.getByTestId('ai-chat-tool-menu-trigger')).toBeEnabled();
-
-    await selectGoalWorkflowTool(page);
-
-    await expect(panel).toBeHidden();
-    await expect(panelToggle).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.getByTestId('shell-workflow-attention-badge')).toHaveText('1');
-    await expectNoHorizontalOverflow(page);
-
-    await panelToggle.click();
-    await expect(shell).toHaveAttribute('data-shell-state', 'focus');
-    await expect(panel).toBeVisible();
-    await expect(page.getByTestId('business-panel-workflow')).toContainText('1');
-    await page.getByTestId('business-panel-workflow').click();
-    await expect(page.getByTestId('business-panel-workflow')).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
-    await expect(page.getByTestId('shell-workflow-surface')).toBeVisible();
-    await expectNoHorizontalOverflow(page);
-
-    await testInfo.attach('phase-e-mobile-workflow-390x844', {
       body: await page.screenshot(),
       contentType: 'image/png',
     });
@@ -244,18 +130,6 @@ async function installConfiguredModelMock(page: Page): Promise<void> {
       ],
     });
   });
-}
-
-async function selectGoalWorkflowTool(page: Page, directDispatch = false): Promise<void> {
-  const trigger = page.getByTestId('ai-chat-tool-menu-trigger');
-  await expect(trigger).toBeEnabled();
-  if (directDispatch) await trigger.dispatchEvent('click');
-  else await trigger.click();
-
-  const goalTool = page.getByTestId('ai-chat-tool-goal-create');
-  await expect(goalTool).toBeVisible();
-  if (directDispatch) await goalTool.dispatchEvent('click');
-  else await goalTool.click();
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {

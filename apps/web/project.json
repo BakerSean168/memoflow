@@ -148,25 +148,6 @@
         "cwd": "apps/web"
       }
     },
-    "e2e:debug": {
-      "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/apps/web/test-results",
-        "{workspaceRoot}/apps/web/playwright-debug-report"
-      ],
-      "options": {
-        "command": "playwright test --config playwright.debug.config.ts",
-        "cwd": "apps/web"
-      },
-      "configurations": {
-        "headed": {
-          "command": "playwright test --config playwright.debug.config.ts --headed"
-        },
-        "debug": {
-          "command": "playwright test --config playwright.debug.config.ts --debug"
-        }
-      }
-    },
     "e2e:shell": {
       "executor": "nx:run-commands",
       "outputs": [

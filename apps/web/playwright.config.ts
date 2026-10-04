@@ -17,16 +17,7 @@ export default defineConfig({
   testDir: './e2e',
   // 默认入口进一步收口成 AI 可依赖的核心业务回归集合。
   testMatch: WEB_FLOW_SPECS.map((spec) => `**/${spec}`),
-  testIgnore: [
-    'sync/**',
-    'desktop-screenshots/**',
-    'performance/**',
-    'debug/**',
-    '**/debug*.spec.ts',
-    '**/*-debug.spec.ts',
-    '**/explore*.spec.ts',
-    '**/check-route.spec.ts',
-  ],
+  testIgnore: ['sync/**', 'desktop-screenshots/**', 'performance/**'],
 
   // 单个测试最大执行时间 (5分钟，因为需要等待 Reminder 触发)
   timeout: 5 * 60 * 1000,
@@ -91,9 +82,5 @@ export default defineConfig({
   ],
 
   // 默认业务回归依赖真实登录和 CRUD，必须同时托管 API + Web。
-  webServer: [
-    createOpenAICompatibleMockServer(),
-    createApiServer(),
-    createWebServer(),
-  ],
+  webServer: [createOpenAICompatibleMockServer(), createApiServer(), createWebServer()],
 });
