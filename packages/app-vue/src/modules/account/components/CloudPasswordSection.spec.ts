@@ -180,6 +180,21 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
     }
   });
 
+  it('keeps password actions enabled while the password service is idle', () => {
+    const pinia = createPinia();
+    seedAuthenticatedAccount(pinia);
+    const wrapper = mountSection(createService(), pinia);
+
+    expect(
+      (wrapper.get('[data-testid="cloud-password-change-button"]').element as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+    expect(
+      (wrapper.get('[data-testid="cloud-password-forgot-button"]').element as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+  });
+
   it('renders the structured receipt with message, request id and retry action after a failed change-password', async () => {
     const service = createService({
       changePassword: vi.fn().mockResolvedValue(

@@ -108,6 +108,13 @@ export const TIMEOUT_CONFIG = {
   API_REQUEST: 10000,
   
   /**
+   * Auth mutation timeout. The first Better Auth write in a serial audit can
+   * include cold server/module/DB initialization, so it gets a wider budget
+   * without weakening ordinary API request failure detection.
+   */
+  AUTH_MUTATION: 30000,
+
+  /**
    * 登录操作超时
    */
   LOGIN: 15000,

@@ -1,46 +1,65 @@
-/**
- * Account Profile E2E Test
- * ??????????
- */
 import { test, expect } from '@playwright/test';
-import { login } from '../helpers/testHelpers';
-import { TEST_USERS } from '../config';
-test.describe('Account - Profile Management', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.MAIN.username, TEST_USERS.MAIN.password);
-    await page.goto('/account/profile');
+import { TIMEOUT_CONFIG } from '../config';
+import { createAccountAuditEmail, openAccountSettings } from './account-settings.helpers';
+
+test.describe('Account profile canonical surface', () => {
+  test('[P0] redirects the legacy account-center deep link into Account & Privacy settings', async ({
+    page,
+  }) => {
+    await openAccountSettings(page);
+
+    await page.goto('/account/center', {
+      waitUntil: 'domcontentloaded',
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+
+    await expect(page).toHaveURL(/\/settings\?tab=account(?:&|$)/, {
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('account-settings-section')).toBeVisible();
+    await expect(page.getByTestId('account-center-view')).toBeVisible();
   });
 
-  test('[P0] should display user profile information', async ({ page }) => {
-    await expect(page.locator('[data-testid="profile-username"]')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[data-testid="profile-email"]')).toBeVisible();
+  test('[P0] persists profile avatar URL and bio on the canonical account owner', async ({
+    page,
+  }) => {
+    await openAccountSettings(page);
+
+    const avatar = 'https://example.com/audit-avatar.png';
+    const bio = `Nightly audit bio ${Date.now()}`;
+    await page.locator('#avatar').fill(avatar);
+    await page.locator('#bio').fill(bio);
+
+    const updateResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PUT' &&
+        new URL(response.url()).pathname.endsWith('/api/v1/accounts/me'),
+      { timeout: TIMEOUT_CONFIG.API_REQUEST },
+    );
+    await page.getByTestId('account-profile-save').click();
+    expect((await updateResponse).ok()).toBe(true);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#avatar')).toHaveValue(avatar, {
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(page.locator('#bio')).toHaveValue(bio);
   });
 
-  test('[P0] should update profile information', async ({ page }) => {
-    await page.click('[data-testid="edit-profile-button"]');
-    
-    const newDisplayName = 'Updated User';
-    await page.fill('[data-testid="display-name-input"]', newDisplayName);
-    await page.click('[data-testid="save-profile-button"]');
+  test('[P1] keeps the cloud identity email visible but outside the editable profile fields', async ({
+    page,
+  }) => {
+    const email = createAccountAuditEmail('e2e-account-identity');
+    await openAccountSettings(page, { email });
 
-    await expect(page.locator('text=/Updated successfully/i')).toBeVisible({ timeout: 5000 });
-  });
+    await expect(page.getByTestId('account-center-view')).toContainText(email);
+    await expect(page.locator('input[type="email"]')).toHaveCount(1);
+    await expect(page.getByTestId('cloud-password-forgot-email')).toHaveValue(email);
+    await expect(page.locator('#nickname')).toBeEditable();
+    await expect(page.locator('#avatar')).toBeEditable();
+    await expect(page.locator('#bio')).toBeEditable();
 
-  test('[P1] should upload avatar', async ({ page }) => {
-    await page.click('[data-testid="avatar-upload-button"]');
-    
-    // ??????
-    const fileInput = page.locator('[data-testid="avatar-file-input"]');
-    if (await fileInput.isVisible()) {
-      await expect(page.locator('[data-testid="avatar-preview"]')).toBeVisible({ timeout: 5000 });
-    }
-  });
-
-  test('[P1] should update email with verification', async ({ page }) => {
-    await page.click('[data-testid="edit-profile-button"]');
-    await page.fill('[data-testid="email-input"]', 'newemail@example.com');
-    await page.click('[data-testid="save-profile-button"]');
-
-    await expect(page.locator('text=/???????|Verification email sent/i')).toBeVisible({ timeout: 5000 });
+    // Cloud Auth owns the login email; Account profile editing intentionally has no email field.
+    await expect(page.locator('#email')).toHaveCount(0);
   });
 });

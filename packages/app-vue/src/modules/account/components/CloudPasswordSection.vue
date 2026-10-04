@@ -26,7 +26,7 @@ import { useAuthenticationStore } from '../../authentication/stores/authenticati
 
 const { t } = useI18n();
 const store = useAuthenticationStore();
-const password = usePassword();
+const { isLoading: passwordLoading, changePassword, forgotPassword } = usePassword();
 
 const changeForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' });
 const forgotEmail = ref(store.currentIdentity?.email ?? '');
@@ -55,7 +55,7 @@ async function handleChangePassword() {
   if (passwordMismatch.value) {
     return;
   }
-  const changed = await password.changePassword({
+  const changed = await changePassword({
     currentPassword: changeForm.value.currentPassword,
     newPassword: changeForm.value.newPassword,
   });
@@ -65,7 +65,7 @@ async function handleChangePassword() {
 }
 
 async function handleSendResetEmail() {
-  await password.forgotPassword({ email: forgotEmail.value });
+  await forgotPassword({ email: forgotEmail.value });
 }
 
 /** Retry the failed operation. Reset tokens are never persisted by design, so a
@@ -175,7 +175,7 @@ function handleDismiss() {
             <Button
               type="submit"
               data-testid="cloud-password-change-button"
-              :disabled="password.isLoading"
+              :disabled="passwordLoading"
             >
               {{ t('account.password.changePassword') }}
             </Button>
@@ -199,7 +199,7 @@ function handleDismiss() {
               autocomplete="email"
             />
           </div>
-          <Button type="submit" variant="outline" data-testid="cloud-password-forgot-button" :disabled="password.isLoading">
+          <Button type="submit" variant="outline" data-testid="cloud-password-forgot-button" :disabled="passwordLoading">
             <Mail class="mr-2 h-4 w-4" />
             {{ t('account.password.sendResetEmail') }}
           </Button>
