@@ -184,7 +184,7 @@ async function registerViaAuth(page: Page, email: string, password: string): Pro
   const signUpResponsePromise = page.waitForResponse(
     (response) =>
       response.url().includes('/api/auth/sign-up/email') && response.request().method() === 'POST',
-    { timeout: TIMEOUT_CONFIG.API_REQUEST },
+    { timeout: TIMEOUT_CONFIG.AUTH_MUTATION },
   );
   await page.getByTestId('register-submit-button').click();
   const signUpResponse = await signUpResponsePromise;
