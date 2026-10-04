@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "collectors": {
     "apps/desktop/playwright.config.ts": {
       "lane": "desktop",
@@ -16,7 +16,19 @@
         "kind": "nx",
         "target": "web:e2e:ai-provider",
         "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
-      }
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "target": "web:e2e:ai-provider"
+        },
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/web-flow-audit.yml",
+          "target": "web:e2e:ai-provider"
+        }
+      ]
     },
     "apps/web/playwright.ai-workspace.config.ts": {
       "lane": "specialized",
@@ -33,7 +45,14 @@
       "execution": {
         "kind": "nx",
         "target": "web:e2e:audit"
-      }
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/web-flow-audit.yml",
+          "target": "web:e2e:audit"
+        }
+      ]
     },
     "apps/web/playwright.config.ts": {
       "lane": "required",
@@ -41,7 +60,14 @@
       "execution": {
         "kind": "nx",
         "target": "web:e2e"
-      }
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+        }
+      ]
     },
     "apps/web/playwright.desktop-screenshot.config.ts": {
       "lane": "visual-artifact",
@@ -114,7 +140,14 @@
       "execution": {
         "kind": "nx",
         "target": "web:e2e:visual-regression"
-      }
+      },
+      "automation": [
+        {
+          "kind": "github-workflow",
+          "workflow": ".github/workflows/ci.yml",
+          "target": "web:e2e:visual-regression"
+        }
+      ]
     }
   },
   "specs": {

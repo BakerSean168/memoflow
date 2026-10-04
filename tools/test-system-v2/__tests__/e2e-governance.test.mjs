@@ -22,6 +22,8 @@ test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
   assert.equal(inventory.e2eGovernance.countsByRole.canonical, 25);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
+  assert.equal(inventory.e2eGovernance.automatedCollectorCount, 4);
+  assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
 
   const goalWorkflow = inventory.primary.find(
     (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow.spec.ts',
@@ -52,6 +54,35 @@ test('collector-only Playwright configs fail closed without an execution contrac
       (issue) =>
         issue.collector === 'apps/web/playwright.goal-reference.config.ts' &&
         issue.reason === 'missing-collector-ownership',
+    ),
+  );
+});
+
+test('required and nightly collectors fail closed without automation ownership', async () => {
+  const contract = structuredClone(ownership);
+  delete contract.collectors['apps/web/playwright.config.ts'].automation;
+
+  const governance = await analyzeE2EOwnership(root, inventory, contract);
+  assert.ok(
+    governance.issues.some(
+      (issue) =>
+        issue.collector === 'apps/web/playwright.config.ts' &&
+        issue.reason === 'missing-automation-owner',
+    ),
+  );
+});
+
+test('declared GitHub workflow automation must bind its target', async () => {
+  const contract = structuredClone(ownership);
+  contract.collectors['apps/web/playwright.audit.config.ts'].automation[0].target =
+    'web:e2e:missing-audit';
+
+  const governance = await analyzeE2EOwnership(root, inventory, contract);
+  assert.ok(
+    governance.issues.some(
+      (issue) =>
+        issue.collector === 'apps/web/playwright.audit.config.ts' &&
+        issue.reason === 'workflow-does-not-bind-target',
     ),
   );
 });

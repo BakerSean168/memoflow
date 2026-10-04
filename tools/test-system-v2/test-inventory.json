@@ -11946,7 +11946,19 @@
           "kind": "nx",
           "target": "web:e2e:ai-provider",
           "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
-        }
+        },
+        "automation": [
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/ci.yml",
+            "target": "web:e2e:ai-provider"
+          },
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/web-flow-audit.yml",
+            "target": "web:e2e:ai-provider"
+          }
+        ]
       }
     },
     {
@@ -11977,7 +11989,14 @@
         "execution": {
           "kind": "nx",
           "target": "web:e2e:audit"
-        }
+        },
+        "automation": [
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/web-flow-audit.yml",
+            "target": "web:e2e:audit"
+          }
+        ]
       }
     },
     {
@@ -11992,7 +12011,14 @@
         "execution": {
           "kind": "nx",
           "target": "web:e2e"
-        }
+        },
+        "automation": [
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/ci.yml",
+            "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+          }
+        ]
       }
     },
     {
@@ -12128,7 +12154,14 @@
         "execution": {
           "kind": "nx",
           "target": "web:e2e:visual-regression"
-        }
+        },
+        "automation": [
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/ci.yml",
+            "target": "web:e2e:visual-regression"
+          }
+        ]
       }
     },
     {
@@ -13031,7 +13064,7 @@
     "governance": 64
   },
   "e2eGovernance": {
-    "version": 1,
+    "version": 2,
     "issues": [],
     "countsByLane": {
       "desktop": 2,
@@ -13048,7 +13081,9 @@
       "canonical": 25,
       "reference": 5,
       "supplemental": 13
-    }
+    },
+    "automatedCollectorCount": 4,
+    "automationBindingCount": 5
   },
   "e2eRetirement": {
     "version": 1,

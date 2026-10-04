@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import fg from 'fast-glob';
 
-export const E2E_OWNERSHIP_VERSION = 1;
+export const E2E_OWNERSHIP_VERSION = 2;
 export const E2E_RETIREMENT_VERSION = 1;
 
 const VALID_LANES = new Set([
@@ -18,6 +18,8 @@ const VALID_LANES = new Set([
 const VALID_ROLES = new Set(['canonical', 'supplemental', 'reference', 'artifact']);
 const VALID_LIFECYCLES = new Set(['active', 'retired']);
 const VALID_EXECUTION_KINDS = new Set(['nx', 'manual']);
+const VALID_AUTOMATION_KINDS = new Set(['github-workflow']);
+const AUTOMATION_REQUIRED_LANES = new Set(['required', 'nightly']);
 
 function normalizePath(value) {
   return value.replaceAll(path.sep, '/');
@@ -213,6 +215,109 @@ async function validateExecution(root, collectorId, ownership, projects) {
   return issues;
 }
 
+async function validateAutomation(root, collectorId, ownership) {
+  const issues = [];
+  const automations = ownership?.automation;
+
+  if (
+    AUTOMATION_REQUIRED_LANES.has(ownership?.lane) &&
+    (!Array.isArray(automations) || automations.length === 0)
+  ) {
+    issues.push({
+      collector: collectorId,
+      reason: 'missing-automation-owner',
+      lane: ownership.lane,
+    });
+    return issues;
+  }
+
+  if (automations == null) return issues;
+  if (!Array.isArray(automations)) {
+    issues.push({ collector: collectorId, reason: 'invalid-automation-contract' });
+    return issues;
+  }
+
+  const configBase = path.basename(collectorId);
+  for (const automation of automations) {
+    if (!automation || !VALID_AUTOMATION_KINDS.has(automation.kind)) {
+      issues.push({
+        collector: collectorId,
+        reason: 'invalid-automation-kind',
+        kind: automation?.kind ?? null,
+      });
+      continue;
+    }
+    if (typeof automation.workflow !== 'string' || automation.workflow === '') {
+      issues.push({ collector: collectorId, reason: 'missing-automation-workflow' });
+      continue;
+    }
+
+    const workflowPath = path.resolve(root, automation.workflow);
+    const workflowSource = await fs.readFile(workflowPath, 'utf8').catch(() => null);
+    if (workflowSource == null) {
+      issues.push({
+        collector: collectorId,
+        reason: 'missing-automation-workflow',
+        workflow: automation.workflow,
+      });
+      continue;
+    }
+
+    if (typeof automation.target === 'string') {
+      if (!workflowSource.includes(automation.target)) {
+        issues.push({
+          collector: collectorId,
+          reason: 'workflow-does-not-bind-target',
+          workflow: automation.workflow,
+          target: automation.target,
+        });
+      }
+      continue;
+    }
+
+    if (typeof automation.entrypoint === 'string') {
+      const entrypointBase = path.basename(automation.entrypoint);
+      if (
+        !workflowSource.includes(automation.entrypoint) &&
+        !workflowSource.includes(entrypointBase)
+      ) {
+        issues.push({
+          collector: collectorId,
+          reason: 'workflow-does-not-bind-entrypoint',
+          workflow: automation.workflow,
+          entrypoint: automation.entrypoint,
+        });
+        continue;
+      }
+      const entrypointSource = await fs
+        .readFile(path.resolve(root, automation.entrypoint), 'utf8')
+        .catch(() => null);
+      if (entrypointSource == null) {
+        issues.push({
+          collector: collectorId,
+          reason: 'missing-automation-entrypoint',
+          entrypoint: automation.entrypoint,
+        });
+      } else if (!entrypointSource.includes(configBase)) {
+        issues.push({
+          collector: collectorId,
+          reason: 'automation-entrypoint-does-not-bind-collector',
+          entrypoint: automation.entrypoint,
+        });
+      }
+      continue;
+    }
+
+    issues.push({
+      collector: collectorId,
+      reason: 'automation-binding-missing-target-or-entrypoint',
+      workflow: automation.workflow,
+    });
+  }
+
+  return issues;
+}
+
 export async function analyzeE2EOwnership(root, inventory, contract = null) {
   contract ??= await loadE2EOwnership(root);
   const issues = [];
@@ -255,6 +360,7 @@ export async function analyzeE2EOwnership(root, inventory, contract = null) {
       });
     }
     issues.push(...(await validateExecution(root, collector.id, ownership, projects)));
+    issues.push(...(await validateAutomation(root, collector.id, ownership)));
   }
 
   for (const collectorId of Object.keys(contractCollectors)) {
@@ -323,6 +429,14 @@ export async function analyzeE2EOwnership(root, inventory, contract = null) {
     ),
     countsByLane: Object.fromEntries(Object.entries(countsByLane).sort()),
     countsByRole: Object.fromEntries(Object.entries(countsByRole).sort()),
+    automatedCollectorCount: Object.values(contractCollectors).filter(
+      (ownership) => Array.isArray(ownership.automation) && ownership.automation.length > 0,
+    ).length,
+    automationBindingCount: Object.values(contractCollectors).reduce(
+      (count, ownership) =>
+        count + (Array.isArray(ownership.automation) ? ownership.automation.length : 0),
+      0,
+    ),
   };
 }
 

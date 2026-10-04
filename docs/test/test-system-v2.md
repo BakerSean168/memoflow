@@ -93,7 +93,9 @@ Execution contract 只有两种合法形态：
 - `nx`：必须绑定真实存在的 `project:target`，且 target 或其显式 entrypoint 必须实际引用对应 Playwright config。
 - `manual`：仅用于明确的 reference/browser acceptance，命令必须显式绑定对应 config；不能再通过“config 文件存在”伪装成 CI owner。
 
-当前 lane vocabulary 包括 required、nightly、specialized、secure-acceptance、local-validation、visual-artifact、reference 和 desktop。`test-inventory.json` 会把这些 metadata 投影到 collector/spec，并输出按 lane/role 的结构化计数。
+Execution 只回答“这个 collector 能否被真实执行”。Automation contract 另行回答“谁会自动执行它”：`required` 与 `nightly` lane 必须至少声明一个 GitHub workflow owner；workflow 必须真实引用对应 Nx target 或显式 entrypoint，entrypoint 又必须绑定 collector config。Required Web Flow 的 shard runner 因此显式传入 `playwright.config.ts`，不再依赖 Playwright 默认配置文件发现规则。其他 on-demand/manual lane 可以没有 automation owner，但不能伪装成 CI coverage。
+
+当前 lane vocabulary 包括 required、nightly、specialized、secure-acceptance、local-validation、visual-artifact、reference 和 desktop。`test-inventory.json` 会把这些 metadata 投影到 collector/spec，并输出按 lane/role 的结构化计数，以及 automated collector/binding 计数。
 
 `tools/test-system-v2/e2e-retirement.json` 记录已经退休的 E2E spec 和高置信度 retired surface reference。治理检查会拒绝重新引入这些 spec，也会拒绝 E2E 再引用明确退休的 route/API。Retirement contract 只收录已确认的稳定事实，不使用模糊 selector 猜测产品是否退休。
 
