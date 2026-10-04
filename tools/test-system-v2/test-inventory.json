@@ -1866,22 +1866,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/goal/goal-edit.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/goal/goal-keyresult.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/goal/reference/goal-reference.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2018,14 +2002,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/schedule/schedule-crud.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/setting/setting-appearance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2107,26 +2083,10 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/user-settings/appearance.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/user-settings/data-portability.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/user-settings/error-handling.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -2143,14 +2103,6 @@
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/user-settings/shortcuts.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -5484,6 +5436,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/global-command-palette-shortcut-owner.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11804,7 +11764,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 11
+      "fileCount": 5
     },
     {
       "id": "apps/web/playwright.config.ts",
@@ -12056,7 +12016,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 273
+      "fileCount": 274
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12773,12 +12733,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1128,
+    "unit": 1129,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
-    "e2e": 65,
+    "e2e": 59,
     "perf": 2,
     "governance": 63
   }
