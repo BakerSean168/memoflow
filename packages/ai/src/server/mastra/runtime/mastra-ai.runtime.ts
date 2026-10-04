@@ -1,4 +1,8 @@
-import { applyMemoFlowSessionToolPolicy, memoFlowToolCategory } from '../tools/product-tool-policy';
+import {
+  applyMemoFlowSessionToolPolicy,
+  memoFlowToolCategory,
+  memoFlowToolPolicy,
+} from '../tools/product-tool-policy';
 import { randomUUID } from 'node:crypto';
 import { AgentController } from '@mastra/core/agent-controller';
 import type { AgentControllerEvent } from '@mastra/core/agent-controller';
@@ -11,6 +15,8 @@ import {
 import type { MastraCompositeStore } from '@mastra/core/storage';
 import { Memory } from '@mastra/memory';
 import {
+  AssistantToolNameSchema,
+  type AssistantRuntimeApprovalCommand,
   AIWorkflowRunViewSchema,
   AIWorkflowSuspensionSchema,
   GoalCreateWorkflowInputSchema,
@@ -130,7 +136,9 @@ export interface MastraAIRuntimeDependencies {
 
 type ActiveRun = {
   readonly identityId: string;
-  readonly abort: () => void;
+  readonly abort: () => boolean;
+  readonly conversationId: string;
+  readonly decide: (command: AssistantRuntimeApprovalCommand, context: ExecutionContext) => boolean;
 };
 
 /** Mastra is the authoritative AI execution runtime; MemoFlow owns only product/domain truth. */
@@ -896,8 +904,21 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   cancelRun(input: { identityId: string; runId: string }): boolean {
     const active = this.activeRuns.get(input.runId);
     if (!active || active.identityId !== input.identityId) return false;
-    active.abort();
-    return true;
+    return active.abort();
+  }
+
+  decideToolApproval(input: {
+    context: ExecutionContext;
+    command: AssistantRuntimeApprovalCommand;
+  }): boolean {
+    const active = this.activeRuns.get(input.command.runId);
+    if (
+      !active ||
+      active.identityId !== input.context.identityId ||
+      active.conversationId !== input.command.conversationId
+    )
+      return false;
+    return active.decide(input.command, input.context);
   }
 
   async *dispatchMessage(input: {
@@ -993,8 +1014,16 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       threadId: input.conversationId,
       requestContext,
     });
+    const conversationBusy = () =>
+      [...this.activeRuns.values()].some(
+        (active) => active.conversationId === input.conversationId,
+      );
+    if (conversationBusy() || session.run.isRunning())
+      throw new Error('Assistant conversation already has an active turn');
     // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
     await applyMemoFlowSessionToolPolicy(session);
+    if (conversationBusy() || session.run.isRunning())
+      throw new Error('Assistant conversation already has an active turn');
     const queue = new AsyncEventQueue<AssistantRuntimeEvent>();
     const fallbackRunId = `turn:${input.conversationId}:${randomUUID()}`;
     let runId = '';
@@ -1005,8 +1034,24 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     let lastUsage: AssistantUsageSnapshot | undefined;
     const observabilityWrites: Promise<void>[] = [];
     let settled = false;
+    let stopping = false;
+    const bindingGeneration = session.run.bindingGeneration();
+    let nativeRunId: string | null = null;
+    const tools = new Map<
+      string,
+      Extract<AssistantRuntimeEvent, { type: 'assistant.approval.required' }>['data']
+    >();
+    const pending = new Set<string>();
+    const ownsTurn = () =>
+      !settled &&
+      session.run.bindingGeneration() === bindingGeneration &&
+      session.thread.getId() === input.conversationId &&
+      session.identity.getOwnerId() === input.identityId &&
+      session.identity.getResourceId() === input.identityId &&
+      this.activeRuns.get(runId || fallbackRunId)?.decide === decide;
+    const ownsNativeRun = () => ownsTurn() && session.getCurrentRunId() === nativeRunId;
 
-    const currentRunId = (): string => runId || session.getCurrentRunId() || fallbackRunId;
+    const currentRunId = (): string => runId || fallbackRunId;
 
     const emit = <T extends AssistantRuntimeEvent['type']>(
       type: T,
@@ -1029,6 +1074,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       type: 'assistant.run.completed' | 'assistant.run.failed' | 'assistant.run.cancelled',
     ): void => {
       if (settled) return;
+      for (const toolCallId of pending) {
+        emit('assistant.approval.resolved', {
+          toolCallId,
+          resolution: type === 'assistant.run.cancelled' ? 'cancelled' : 'failed',
+        });
+      }
+      pending.clear();
       settled = true;
       if (type === 'assistant.run.completed') {
         emit(type, {
@@ -1058,21 +1110,136 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           ),
         );
       }
-      this.activeRuns.delete(currentRunId());
+      if (this.activeRuns.get(currentRunId())?.decide === decide)
+        this.activeRuns.delete(currentRunId());
       queue.end();
     };
 
+    const abort = (): boolean => {
+      if (!ownsTurn() || stopping || (runId && !ownsNativeRun())) return false;
+      stopping = true;
+      for (const toolCallId of pending)
+        emit('assistant.approval.resolved', { toolCallId, resolution: 'cancelled' });
+      pending.clear();
+      // Native startup can clear an earlier abort and assign its id before agent_start.
+      // Keep the reservation and replay Stop only once that run is bound.
+      if (!runId) nativeRunId = session.getCurrentRunId();
+      else session.abortRun();
+      return true;
+    };
+    const onAbort = (): void => {
+      if (!abort() && !stopping) settle('assistant.run.cancelled');
+    };
+    const decide = (
+      command: AssistantRuntimeApprovalCommand,
+      context: ExecutionContext,
+    ): boolean => {
+      if (
+        !ownsNativeRun() ||
+        stopping ||
+        session.run.isAbortRequested() ||
+        !pending.has(command.toolCallId) ||
+        !session.approval.isArmed() ||
+        session.approval.getToolCallId() !== command.toolCallId
+      )
+        return false;
+      pending.delete(command.toolCallId);
+      const decisionContext = new RequestContext(requestContext.entries());
+      decisionContext.setRaw('identityId', input.identityId);
+      decisionContext.setRaw('executionContext', context);
+      decisionContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId);
+      decisionContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
+      session.respondToToolApproval({
+        decision: command.decision,
+        toolCallId: command.toolCallId,
+        requestContext: decisionContext,
+      });
+      if (session.approval.isArmed()) {
+        pending.add(command.toolCallId);
+        return false;
+      }
+      emit('assistant.approval.resolved', {
+        toolCallId: command.toolCallId,
+        resolution: command.decision === 'approve' ? 'approved' : 'declined',
+      });
+      return true;
+    };
+    const activeRun: ActiveRun = {
+      identityId: input.identityId,
+      conversationId: input.conversationId,
+      abort,
+      decide,
+    };
+    // Reserve synchronously before sendMessage; never let native queued follow-ups become product turns.
+    this.activeRuns.set(fallbackRunId, activeRun);
     const unsubscribe = session.subscribe((event) => {
+      if (settled) return;
+      if (!ownsTurn()) {
+        settle(stopping ? 'assistant.run.cancelled' : 'assistant.run.failed');
+        return;
+      }
+      if ('threadId' in event && event.threadId && event.threadId !== input.conversationId) return;
       if (event.type === 'agent_start') {
-        runId = session.getCurrentRunId() ?? fallbackRunId;
-        this.activeRuns.set(runId, {
-          identityId: input.identityId,
-          abort: () => session.abortRun(),
-        });
+        const nextNativeRunId = session.getCurrentRunId();
+        // A native resume belongs to this turn only while it retains the native run id.
+        if (runId || nativeRunId) {
+          if (nextNativeRunId !== nativeRunId) {
+            settle(stopping ? 'assistant.run.cancelled' : 'assistant.run.failed');
+            return;
+          }
+          if (runId) return;
+        }
+        nativeRunId = nextNativeRunId;
+        runId = nextNativeRunId ?? fallbackRunId;
+        this.activeRuns.delete(fallbackRunId);
+        this.activeRuns.set(runId, activeRun);
         emit('assistant.run.started', {
           modelId: resolvedModel.modelId,
           providerId: resolvedModel.providerId,
         });
+        if (stopping) session.abortRun();
+        return;
+      }
+      if (!ownsNativeRun()) return;
+      if (stopping) {
+        if (event.type === 'agent_end') settle('assistant.run.cancelled');
+        return;
+      }
+      if (event.type === 'tool_start' || event.type === 'tool_approval_required') {
+        const name = AssistantToolNameSchema.safeParse(event.toolName);
+        const policy = memoFlowToolPolicy(event.toolName);
+        if (!name.success || !policy || event.toolCallId.length > 512 || !event.toolCallId) {
+          abort();
+          return;
+        }
+        const category = policy.category;
+        if (category !== 'read' && category !== 'edit' && category !== 'execute') return;
+        const tool = {
+          toolCallId: event.toolCallId,
+          toolName: name.data,
+          category,
+          risk: policy.requireApproval ? ('high' as const) : ('low' as const),
+        };
+        tools.set(event.toolCallId, tool);
+        if (event.type === 'tool_approval_required') {
+          if (!policy.requireApproval || stopping) {
+            abort();
+            return;
+          }
+          pending.add(event.toolCallId);
+          emit('assistant.approval.required', tool);
+        } else emit('assistant.activity', { activityType: 'tool', ...tool, state: 'running' });
+        return;
+      }
+      if (event.type === 'tool_end') {
+        const tool = tools.get(event.toolCallId);
+        if (tool)
+          emit('assistant.activity', {
+            activityType: 'tool',
+            ...tool,
+            state: event.denied ? 'denied' : event.isError ? 'failed' : 'completed',
+          });
+        tools.delete(event.toolCallId);
         return;
       }
       if (event.type === 'message_start' && event.message.role === 'assistant') {
@@ -1106,26 +1273,41 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       if (event.type === 'agent_end') {
         if (event.reason === 'aborted') settle('assistant.run.cancelled');
         else if (event.reason === 'error') settle('assistant.run.failed');
-        else settle('assistant.run.completed');
+        else if (event.reason === 'suspended' || pending.size) {
+          abort();
+          settle('assistant.run.failed');
+        } else settle('assistant.run.completed');
       }
     });
 
-    const abort = () => session.abortRun();
-    input.signal?.addEventListener('abort', abort, { once: true });
-    void session
-      .sendMessage({
-        content: input.content,
-        files: input.attachments?.map((attachment) => ({
-          data: attachment.data,
-          mediaType: attachment.mediaType,
-          ...(attachment.filename ? { filename: attachment.filename } : {}),
-        })),
-        requestContext,
-      })
-      .catch((error) => {
-        lastRuntimeError = publicRuntimeError(error);
-        settle('assistant.run.failed');
-      });
+    input.signal?.addEventListener('abort', onAbort, { once: true });
+    if (input.signal?.aborted) {
+      stopping = true;
+      settle('assistant.run.cancelled');
+    }
+    const sending = settled
+      ? Promise.resolve()
+      : session
+          .sendMessage({
+            content: input.content,
+            files: input.attachments?.map((attachment) => ({
+              data: attachment.data,
+              mediaType: attachment.mediaType,
+              ...(attachment.filename ? { filename: attachment.filename } : {}),
+            })),
+            requestContext,
+          })
+          .then(() => {
+            // Startup may end without agent_start/agent_end (for example a rejected delivery).
+            if (stopping) settle('assistant.run.cancelled');
+          })
+          .catch((error) => {
+            if (settled) return;
+            const wasStopping = stopping;
+            if (pending.size) abort();
+            lastRuntimeError = publicRuntimeError(error);
+            settle(wasStopping ? 'assistant.run.cancelled' : 'assistant.run.failed');
+          });
 
     try {
       while (true) {
@@ -1134,9 +1316,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         yield next.value;
       }
     } finally {
-      input.signal?.removeEventListener('abort', abort);
+      input.signal?.removeEventListener('abort', onAbort);
+      if (!settled) {
+        abort();
+        await sending;
+      }
       unsubscribe();
-      if (runId) this.activeRuns.delete(runId);
+      if (this.activeRuns.get(currentRunId()) === activeRun) this.activeRuns.delete(currentRunId());
       if (observabilityWrites.length > 0) {
         await Promise.allSettled(observabilityWrites);
       }

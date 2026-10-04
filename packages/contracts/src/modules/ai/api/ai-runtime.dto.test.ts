@@ -13,6 +13,39 @@ import {
 } from './ai-runtime.dto';
 
 describe('AI vNext runtime contracts', () => {
+  it('accepts only bound approve/decline commands and safe typed approval events', () => {
+    const command = {
+      type: 'tool_approval',
+      conversationId: 'c',
+      runId: 'r',
+      toolCallId: 't',
+      decision: 'approve',
+    };
+    expect(AssistantRuntimeClientCommandSchema.safeParse(command).success).toBe(true);
+    for (const extra of [
+      { identityId: 'foreign' },
+      { decision: 'always_allow_category' },
+      { args: { secret: 'secret' } },
+    ]) {
+      expect(AssistantRuntimeClientCommandSchema.safeParse({ ...command, ...extra }).success).toBe(
+        false,
+      );
+    }
+    const event = {
+      eventId: 'r:1',
+      runId: 'r',
+      conversationId: 'c',
+      sequence: 1,
+      createdAt: 0,
+      type: 'assistant.approval.required',
+      data: { toolCallId: 't', toolName: 'routine_create', category: 'edit', risk: 'high' },
+    };
+    expect(AssistantRuntimeEventSchema.safeParse(event).success).toBe(true);
+    expect(
+      AssistantRuntimeEventSchema.safeParse({ ...event, data: { ...event.data, args: 'private' } })
+        .success,
+    ).toBe(false);
+  });
   it('rejects client identity injection for assistant commands', () => {
     const result = AssistantRuntimeClientCommandSchema.safeParse({
       type: 'message',

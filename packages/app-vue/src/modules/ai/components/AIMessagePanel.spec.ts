@@ -30,6 +30,18 @@ const i18n = createI18n({
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
           message: { copy: 'Copy', copied: 'Copied' },
+          tools: {
+            approvalTitle: 'Tool approval',
+            pending: 'Waiting for your decision',
+            sending: 'Sending decision…',
+            impact: 'This action can change workspace data.',
+            approve: 'Approve',
+            decline: 'Decline',
+            capabilities: {
+              knowledge_search: 'Searching knowledge',
+              routine_create: 'Create a routine',
+            },
+          },
           toolIntro: {
             goalCreate: { title: 'Goal mode', description: 'Goal desc' },
             taskCreate: { title: 'Task mode', description: 'Task desc' },
@@ -78,7 +90,9 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.find('[data-testid="ai-welcome-entry-task-create"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-capture"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-welcome-entry-knowledge-qa"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-welcome-state"] [data-testid="memoflow-ai-icon"]').exists()).toBe(true);
+    expect(
+      wrapper.find('[data-testid="ai-welcome-state"] [data-testid="memoflow-ai-icon"]').exists(),
+    ).toBe(true);
     expect(wrapper.find('[data-testid="ai-today-overview"]').exists()).toBe(false);
   });
 
@@ -217,5 +231,68 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
 
     expect(wrapper.find('[data-testid="ai-workflow-message-surface"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="wf-slot"]').exists()).toBe(true);
+  });
+});
+
+describe('Assistant inline tool decisions', () => {
+  it('renders quiet static read activity and native accessible approval buttons with retry error', async () => {
+    const approval = {
+      toolCallId: 'w',
+      toolName: 'routine_create' as const,
+      category: 'edit' as const,
+      risk: 'high' as const,
+      conversationId: 'c',
+      runId: 'r',
+      status: 'pending' as const,
+      errorMessage: 'Try again',
+    };
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'a',
+            role: 'assistant',
+            content: '',
+            status: 'generating',
+            toolActivity: {
+              activityType: 'tool',
+              toolCallId: 'read',
+              toolName: 'knowledge_search',
+              category: 'read',
+              risk: 'low',
+              state: 'running',
+            },
+            approvals: [approval],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+    expect(wrapper.get('[data-testid="ai-tool-activity"]').attributes('role')).toBe('status');
+    const approve = wrapper.get('[data-testid="ai-tool-approve"]');
+    expect(approve.element.tagName).toBe('BUTTON');
+    expect(approve.classes().join(' ')).toContain('focus-visible:');
+    expect(wrapper.get('[role="alert"]').text()).toBe('Try again');
+    await approve.trigger('click');
+    expect(wrapper.emitted('tool-decision')?.[0]).toEqual([approval, 'approve']);
+    await wrapper.setProps({
+      timeline: [
+        {
+          id: 'a',
+          role: 'assistant',
+          content: '',
+          status: 'generating',
+          approvals: [{ ...approval, status: 'sending', errorMessage: undefined }],
+        },
+      ],
+    });
+    expect(
+      (wrapper.get('[data-testid="ai-tool-approve"]').element as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (wrapper.get('[data-testid="ai-tool-decline"]').element as HTMLButtonElement).disabled,
+    ).toBe(true);
+    wrapper.unmount();
   });
 });

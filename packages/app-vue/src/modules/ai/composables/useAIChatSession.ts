@@ -1,4 +1,4 @@
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, shallowRef } from 'vue';
 import type {
   AIRuntimeUsage,
   AssistantRuntimeEvent,
@@ -11,6 +11,7 @@ import { toast } from 'vue-sonner';
 import type {
   AIChatService,
   ChatItem,
+  ChatToolApproval,
   ChatModelOption,
   ComposerAttachment,
   ComposerContextEntity,
@@ -66,7 +67,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   const lastActiveConversationId = ref('');
   const messagesViewport = ref<HTMLElement | null>(null);
   const composerTextarea = ref<HTMLTextAreaElement | null>(null);
-  const activeStreamAbortController = ref<AbortController | null>(null);
+  const activeStreamAbortController = shallowRef<AbortController | null>(null);
   const activeRuntimeRunId = ref<string | null>(null);
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
   const composerAttachments = ref<ComposerAttachment[]>([]);
@@ -295,7 +296,63 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     );
   }
 
+  function settleVisibleApprovals(
+    resolution: 'cancelled' | 'failed',
+    scope?: { conversationId?: string; assistantDraftId?: string },
+  ) {
+    if (scope?.conversationId && chatConversationId.value !== scope.conversationId) return;
+    const items = scope?.assistantDraftId
+      ? chatTimeline.value.filter((item) => item.id === scope.assistantDraftId)
+      : chatTimeline.value;
+    for (const item of items) {
+      if (item.toolActivity) delete item.toolActivity;
+      for (const approval of item.approvals ?? []) {
+        if (approval.status === 'pending' || approval.status === 'sending') {
+          approval.status = resolution;
+          approval.errorMessage = undefined;
+        }
+      }
+    }
+  }
+
+  async function decideToolApproval(approval: ChatToolApproval, decision: 'approve' | 'decline') {
+    if (
+      approval.status !== 'pending' ||
+      approval.runId !== activeRuntimeRunId.value ||
+      approval.conversationId !== chatConversationId.value ||
+      !chatLoading.value
+    )
+      return;
+    approval.status = 'sending';
+    approval.errorMessage = undefined;
+    const stillWaiting = () =>
+      approval.status === 'sending' &&
+      approval.runId === activeRuntimeRunId.value &&
+      approval.conversationId === chatConversationId.value &&
+      chatLoading.value;
+    try {
+      const accepted = await options.runtime.decideToolApproval({
+        type: 'tool_approval',
+        conversationId: approval.conversationId,
+        runId: approval.runId,
+        toolCallId: approval.toolCallId,
+        decision,
+      });
+      // The event stream, not an acknowledgement, owns resolution.
+      if (!accepted && stillWaiting()) {
+        approval.status = 'stale';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.stale');
+      }
+    } catch {
+      if (stillWaiting()) {
+        approval.status = 'pending';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+      }
+    }
+  }
+
   function abortActiveStream() {
+    settleVisibleApprovals('cancelled');
     if (!activeStreamAbortController.value) return;
     activeStreamAbortController.value.abort();
     activeStreamAbortController.value = null;
@@ -467,6 +524,48 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   function applyRuntimeEvent(event: AssistantRuntimeEvent, assistantDraftId: string) {
+    if (event.conversationId !== chatConversationId.value) return;
+    if (activeRuntimeRunId.value && event.runId !== activeRuntimeRunId.value) return;
+    const item = chatTimeline.value.find((candidate) => candidate.id === assistantDraftId);
+    if (!item) return;
+    if (event.type === 'assistant.activity') {
+      if (event.data.activityType === 'tool') {
+        if (event.data.state === 'running') item.toolActivity = event.data;
+        else if (item.toolActivity?.toolCallId === event.data.toolCallId) delete item.toolActivity;
+      }
+      return;
+    }
+    if (event.type === 'assistant.approval.required') {
+      if (item.toolActivity) delete item.toolActivity;
+      item.approvals ??= [];
+      if (!item.approvals.some((approval) => approval.toolCallId === event.data.toolCallId))
+        item.approvals.push({
+          ...event.data,
+          conversationId: event.conversationId,
+          runId: event.runId,
+          status: 'pending',
+        });
+      return;
+    }
+    if (event.type === 'assistant.approval.resolved') {
+      const approval = item.approvals?.find(
+        (candidate) => candidate.toolCallId === event.data.toolCallId,
+      );
+      if (approval) {
+        approval.status = event.data.resolution;
+        approval.errorMessage = undefined;
+      }
+      return;
+    }
+    if (
+      event.type === 'assistant.run.completed' ||
+      event.type === 'assistant.run.failed' ||
+      event.type === 'assistant.run.cancelled'
+    )
+      settleVisibleApprovals(event.type === 'assistant.run.cancelled' ? 'cancelled' : 'failed', {
+        conversationId: event.conversationId,
+        assistantDraftId,
+      });
     if (event.type === 'assistant.run.started') {
       activeRuntimeRunId.value = event.runId;
       return;
@@ -579,7 +678,13 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           selectedEntities: pendingEntities,
         },
         {
-          onEvent: (event) => applyRuntimeEvent(event, assistantDraftId),
+          onEvent: (event) => {
+            if (
+              activeStreamAbortController.value === streamController &&
+              !streamController?.signal.aborted
+            )
+              applyRuntimeEvent(event, assistantDraftId);
+          },
         },
         streamController.signal,
       );
@@ -606,6 +711,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         toast.error(errorMessage);
       }
     } finally {
+      if (assistantDraftId)
+        settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {
+          conversationId,
+          assistantDraftId,
+        });
       if (activeStreamAbortController.value === streamController) {
         activeStreamAbortController.value = null;
       }
@@ -642,6 +752,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     hasWorkflowUserMessages,
     abortActiveStream,
     stopGenerating,
+    decideToolApproval,
     updateLastActiveConversation,
     clearLastActiveConversation,
     buildConversationTranscript,

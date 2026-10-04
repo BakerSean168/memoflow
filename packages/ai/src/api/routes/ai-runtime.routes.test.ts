@@ -202,9 +202,7 @@ describe('registerAIRuntimeRoutes', () => {
 
     expect(writes).toHaveLength(1);
     expect(writes[0]).toContain('AI_CAPABILITY_UNSUPPORTED');
-    expect(writes[0]).toContain(
-      'The selected AI model does not support the required capability',
-    );
+    expect(writes[0]).toContain('The selected AI model does not support the required capability');
     expect(writes[0]).not.toContain('secret.example');
     expect(writes[0]).not.toContain('server-secret');
   });
@@ -520,5 +518,44 @@ describe('registerAIRuntimeRoutes', () => {
 
     expect(capturedSignal?.aborted).toBe(true);
     expect(writes).toEqual([]);
+  });
+});
+
+describe('authenticated Assistant approval route', () => {
+  it('binds the strict command to server ExecutionContext and fails closed without identity', async () => {
+    const stub = runtimeStub();
+    const decideToolApproval = vi.fn(() => false);
+    Object.assign(stub.runtime, { decideToolApproval });
+    const router = registerAIRuntimeRoutes(stub.runtime, { auth: (_req, _res, next) => next() });
+    const handler = getRouteHandler(router, 'post', '/assistant/approval');
+    const command = {
+      type: 'tool_approval',
+      conversationId: 'c',
+      runId: 'r',
+      toolCallId: 't',
+      decision: 'approve',
+    };
+    const { res } = response();
+    await handler(request(command) as Request, res as unknown as Response);
+    expect(decideToolApproval).toHaveBeenCalledWith({
+      command,
+      context: expect.objectContaining({
+        identityId: 'identity-1',
+        requestId: 'request-runtime-1',
+      }),
+    });
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { accepted: false } }));
+    for (const body of [
+      { ...command, identityId: 'attacker' },
+      { ...command, decision: 'always_allow_category' },
+    ]) {
+      const invalid = response().res;
+      await handler(request(body) as Request, invalid as unknown as Response);
+      expect(invalid.statusCode).toBe(400);
+    }
+    const unauth = response().res;
+    await handler(request(command, '') as Request, unauth as unknown as Response);
+    expect(unauth.statusCode).toBe(401);
+    expect(decideToolApproval).toHaveBeenCalledTimes(1);
   });
 });

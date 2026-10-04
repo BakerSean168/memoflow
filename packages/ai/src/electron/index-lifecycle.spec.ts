@@ -41,6 +41,7 @@ const CURRENT_CHANNELS = [
   AIChannels.CONVERSATION_DELETE,
   AIChannels.RUNTIME_ASSISTANT_START,
   AIChannels.RUNTIME_ASSISTANT_CANCEL,
+  AIChannels.RUNTIME_ASSISTANT_APPROVAL,
   AIChannels.RUNTIME_ASSISTANT_HISTORY,
   AIChannels.RUNTIME_ASSISTANT_DELETE,
   AIChannels.RUNTIME_USAGE_GET,
@@ -96,6 +97,7 @@ function createFakeInstance() {
     totalTokens: 125,
     estimatedCost: 0.0000375,
   }));
+  const decideToolApproval = vi.fn(() => false);
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
   const instance = {
@@ -106,7 +108,7 @@ function createFakeInstance() {
     assistantConversation,
     knowledge,
     evaluationOperations,
-    mastraRuntime: { summarizeUsage } as never,
+    mastraRuntime: { summarizeUsage, decideToolApproval } as never,
     workflowRuntime: null,
     start,
     dispose,
@@ -118,6 +120,7 @@ function createFakeInstance() {
     knowledge,
     evaluationOperations,
     summarizeUsage,
+    decideToolApproval,
     start,
     dispose,
   };
@@ -202,6 +205,38 @@ describe('createAIElectronModule lifecycle', () => {
       commitPayload.request,
       expect.objectContaining({ identityId: 'identity-1' }),
     );
+  });
+
+  it('binds tool approval IPC to host identity and validates the same strict command as HTTP', async () => {
+    const ctx = createFakeContext();
+    await moduleDef.register(ctx);
+    const handler = mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_APPROVAL)!;
+    const command = {
+      type: 'tool_approval',
+      conversationId: 'c',
+      runId: 'r',
+      toolCallId: 't',
+      decision: 'decline',
+    };
+    expect(await handler(undefined, command)).toMatchObject({
+      ok: true,
+      data: { accepted: false },
+    });
+    expect(fake.decideToolApproval).toHaveBeenCalledWith({
+      context: expect.objectContaining({ identityId: 'identity-1' }),
+      command,
+    });
+    expect(await handler(undefined, { ...command, identityId: 'foreign' })).toMatchObject({
+      ok: false,
+      error: { code: 'VALIDATION_ERROR' },
+    });
+    expect(
+      await handler(undefined, { ...command, decision: 'always_allow_category' }),
+    ).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(fake.decideToolApproval).toHaveBeenCalledTimes(1);
+    vi.mocked(ctx.auth.requireRequestContext).mockRejectedValueOnce(new Error('unauthorized'));
+    expect(await handler(undefined, command)).toMatchObject({ ok: false });
+    expect(fake.decideToolApproval).toHaveBeenCalledTimes(1);
   });
 
   it('queries runtime usage through authenticated IPC identity and rejects identity injection', async () => {

@@ -191,6 +191,21 @@ describe('AIFooterComposer (Global Composer input)', () => {
     wrapper.unmount();
   });
 
+  it('allows typing during a run without submitting or queueing and keeps Stop independent', async () => {
+    const wrapper = mountComposer({ loading: true, modelValue: 'next' });
+    const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
+    expect((textarea.element as HTMLTextAreaElement).disabled).toBe(false);
+    await textarea.setValue('next message');
+    await textarea.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['next message']);
+    expect(wrapper.emitted('send')).toBeUndefined();
+    await wrapper.get('[data-testid="ai-chat-stop-generating"]').trigger('click');
+    expect(wrapper.emitted('stop')).toHaveLength(1);
+    await wrapper.setProps({ loading: false, modelValue: 'next message' });
+    expect(wrapper.emitted('send')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('emits stop while loading and send when idle', async () => {
     const loading = mountComposer({ loading: true, modelValue: 'x' });
     await loading.get('[data-testid="ai-chat-stop-generating"]').trigger('click');

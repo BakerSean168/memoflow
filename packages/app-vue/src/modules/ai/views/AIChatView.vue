@@ -139,6 +139,7 @@
         @configure-ai="openAISettings"
         @create-goal="openGoalWithoutAI"
         @quick-task="openQuickTaskWithoutAI"
+        @tool-decision="decideToolApproval"
       />
 
       <div v-show="!composerOnly" class="px-4 @md/ai:px-6">
@@ -378,6 +379,7 @@ const {
   startNewConversation: startNewConversationBase,
   handleSendChat: handleSendChatBase,
   stopGenerating,
+  decideToolApproval,
 } = session;
 
 const { selectedModelKey, modelGroups, canSendMessage, selectModel } = model;

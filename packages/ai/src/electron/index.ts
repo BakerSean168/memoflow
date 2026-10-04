@@ -69,6 +69,8 @@ import {
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
 import {
+  AssistantRuntimeApprovalCommandSchema,
+  AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
@@ -408,6 +410,25 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_START);
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_APPROVAL, async (_, command) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.mastraRuntime)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            const parsed = AssistantRuntimeApprovalCommandSchema.safeParse(command);
+            if (!parsed.success)
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid runtime assistant approval command',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            const accepted = aiModule.mastraRuntime.decideToolApproval({
+              context: requestContext,
+              command: parsed.data,
+            });
+            return ok(AssistantRuntimeApprovalResultSchema.parse({ accepted }));
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_APPROVAL);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_CANCEL, async (_, command) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.mastraRuntime) {

@@ -580,6 +580,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           adjustComposerHeight,
         ),
       stopGenerating: () => chatSession.stopGenerating(),
+      decideToolApproval: chatSession.decideToolApproval,
     },
     model: {
       selectedModelKey: modelSelection.selectedModelKey,

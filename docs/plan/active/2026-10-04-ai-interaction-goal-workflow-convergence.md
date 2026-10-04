@@ -1511,6 +1511,16 @@ packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts
 
 ## AIC-1102 — Expose typed tool activity and approval events
 
+### Batch B protocol freeze (2026-10-04, parent approved before source implementation)
+
+- Installed `@mastra/core` 1.70.0 after frozen install. Verified `node_modules/@mastra/core/dist/agent-controller/types.d.ts:580-679`, `session.d.ts:1270-1346,1520-1542`, and actual `agent-controller-BUMUZlT3.js:629-686,2208-2278,3815-3856,3928-3940,4472-4533`.
+- Existing `assistant.activity` carries bounded static tool identity/category/risk and quiet status; only decision state adds `assistant.approval.required/resolved`. Never forward native arguments, results, titles, errors, provider payload, prompts or secrets.
+- Strict `tool_approval` command binds conversation/run/toolCall and only approve/decline. Authenticated host ExecutionContext owns identity; Batch A manifest remains sole permission truth. Public acceptance means native gate consumed, not owner write executed.
+- Validate active owner/conversation/public turn/native binding/armed gate and abort state; synchronously claim and call `respondToToolApproval`, confirming consumption with no intervening await. Duplicate/concurrent/stale/unknown fail closed. Never call low-level approve/decline directly or grant permission.
+- Actual AgentController + Agent integration confirms the owner tool retains the original trusted turn ExecutionContext; the approval boundary receives the latest authenticated decision context. Parent approved this native behavior: identity must remain exact, latest requestId propagation is not required. No native-context override or dependency patch.
+- Public originating-turn binding remains stable across native approval resume. Filter native thread events and fence successor sessions. Cancel-first rejects decisions; approve-first may be cancelled before execution, with no rollback promise for started writes. Terminal and Stop settle visible parked gates; unexpected native suspension is not successful completion.
+- SSE projection is authoritative over late approval transport replies. Errors remain retryable without resurrecting settled cards. Editable next-message composer never queues submission; send remains unavailable during an ordinary run and Stop remains independent. Native user history and live-turn retention remain protected.
+
 **Goal:** Assistant runtime 能告诉 UI 正在使用什么能力、是否等待用户决定。
 
 **Why now:** F-004/F-011。
@@ -2378,3 +2388,36 @@ Red/green, installed Mastra precedence and exact command/log evidence are record
 in the managed Batch A artifacts (`history.md`, `live-turn.md`, `tool-policy.md`,
 `validation.md`), not in a second runtime store. Live provider/GCP validation
 remains outstanding; later plan batches remain unimplemented.
+
+## Batch B implementation evidence (2026-10-05; bounded scope)
+
+AIC-1102, AIC-1103 and AIC-1201 are implemented on the Batch B branch; this is **not**
+overall plan completion or Goal-workflow convergence. No AIC-2001+ Goal
+routing/clarification/native-draft, Task/Knowledge migration, workflow-surface
+retirement, streaming-performance or Release/Production work is included.
+
+- Assistant runtime now exposes bounded typed tool activity and approval lifecycle
+  events plus a strict approve/decline command. HTTP and Electron decision paths derive
+  identity from authenticated host context; conversation/run/toolCall binding,
+  native-run ownership, stale/duplicate/concurrent decision rejection, unknown-tool
+  fail-close and cancel settlement stay runtime-owned. Batch A product-tool policy
+  remains the single permission truth.
+- Chat projects read/tool activity quietly and renders high-impact write approval
+  inline with retryable transport-error/stale states; stream events remain authoritative
+  over late acknowledgements. Stop/cancel settles parked UI state. Tool activity teardown
+  is call-id aware, and old stream finalizers are conversation/draft scoped so they
+  cannot clear a successor conversation's state.
+- The composer textarea remains editable while the current turn streams, executes tools
+  or waits for approval. Send remains unavailable for the active turn and Stop remains
+  independently reachable; no queued follow-up submission was introduced.
+
+Validation evidence: focused approval/activity/composer tests 40 passed; uncached
+`ai:test` 463/463 and final uncached `app-vue:test` 1718/1718 passed.
+`contracts:test` reached 548 passing tests with one confirmed pre-existing baseline
+failure in `product-module-index-paths.surface.spec.ts`:
+`docs/product/module-index/goal-files.md` on `origin/main` also references the
+missing `apps/web/e2e/goal/goal-keyresult.spec.ts`. Contracts/AI/App Vue typechecks
+passed, test inventory and full governance passed, changed-file ESLint/Prettier and
+`git diff --check` passed. No browser E2E requiring destructive local DB setup was
+introduced; exact-head GitHub CI remains the integration authority. No
+Release/Production action was taken.

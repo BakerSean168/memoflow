@@ -23,6 +23,8 @@ import type { ExpandKnowledgeReq, ExpandKnowledgeRes } from '../api/ai-knowledge
 import type { QueryAnalyticsReq, QueryAnalyticsRes } from '../api/ai-analytics-query.dto';
 import type { QueryKnowledgeReq, QueryKnowledgeRes } from '../api/ai-knowledge-query.dto';
 import type {
+  AssistantRuntimeApprovalCommand,
+  AssistantRuntimeApprovalResult,
   AssistantRuntimeClientCommand,
   AssistantRuntimeCancelResult,
   AssistantRuntimeConversationDeleteResult,
@@ -58,6 +60,10 @@ export type AIRpcMap = {
   'ai:runtime:assistant:start': [
     { streamId: string; command: AssistantRuntimeClientCommand },
     void,
+  ];
+  'ai:runtime:assistant:approval': [
+    AssistantRuntimeApprovalCommand,
+    AssistantRuntimeApprovalResult,
   ];
   'ai:runtime:assistant:cancel': [AssistantRuntimeClientCommand, AssistantRuntimeCancelResult];
   'ai:runtime:assistant:history': [

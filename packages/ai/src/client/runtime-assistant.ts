@@ -1,4 +1,7 @@
 import {
+  AssistantRuntimeApprovalCommandSchema,
+  AssistantRuntimeApprovalResultSchema,
+  type AssistantRuntimeApprovalCommand,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
@@ -41,6 +44,7 @@ export interface AssistantRuntimeClient {
     signal?: AbortSignal,
   ): Promise<void>;
   cancelRun(runId: string): Promise<boolean>;
+  decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
 
 const TERMINAL_TYPES = new Set<AssistantRuntimeEvent['type']>([
@@ -178,6 +182,15 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     }
   }
 
+  async decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean> {
+    const validated = AssistantRuntimeApprovalCommandSchema.parse(command);
+    const result = await this.httpClient.post<unknown>('/ai/runtime/assistant/approval', validated);
+    const parsed = AssistantRuntimeApprovalResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success)
+      throw runtimeProtocolError('AI runtime approval failed protocol validation');
+    return parsed.data.accepted;
+  }
+
   async cancelRun(runId: string): Promise<boolean> {
     const command = AssistantRuntimeClientCommandSchema.parse({ type: 'cancel_run', runId });
     const result = await this.httpClient.post<unknown>(this.cancelUrl, command);
@@ -310,6 +323,18 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     }
 
     await completion;
+  }
+
+  async decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean> {
+    const validated = AssistantRuntimeApprovalCommandSchema.parse(command);
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_ASSISTANT_APPROVAL,
+      validated,
+    );
+    const parsed = AssistantRuntimeApprovalResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success)
+      throw runtimeProtocolError('AI runtime approval failed protocol validation');
+    return parsed.data.accepted;
   }
 
   async cancelRun(runId: string): Promise<boolean> {

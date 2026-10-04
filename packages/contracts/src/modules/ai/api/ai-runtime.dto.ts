@@ -84,8 +84,47 @@ export const AssistantRuntimeSelectedEntitySchema = z
   .strict();
 export type AssistantRuntimeSelectedEntity = z.infer<typeof AssistantRuntimeSelectedEntitySchema>;
 
+export const AssistantToolNameSchema = z.enum([
+  'knowledge_search',
+  'workspace_overview',
+  'planner_today_summary',
+  'planner_conflicts',
+  'planner_upcoming_tasks',
+  'notification_unread_summary',
+  'routine_create',
+  'routine_set_profile_active',
+  'routine_set_temporary_override',
+  'routine_clear_temporary_override',
+  'routine_start_protocol',
+  'notification_execute_action',
+  'routine_pause_protocol',
+  'routine_resume_protocol',
+  'routine_end_protocol',
+]);
+export type AssistantToolName = z.infer<typeof AssistantToolNameSchema>;
+const AssistantToolShape = {
+  toolCallId: z.string().min(1).max(512),
+  toolName: AssistantToolNameSchema,
+  category: z.enum(['read', 'edit', 'execute']),
+  risk: z.enum(['low', 'high']),
+};
+export const AssistantRuntimeApprovalCommandSchema = z
+  .object({
+    type: z.literal('tool_approval'),
+    conversationId: z.string().min(1).max(512),
+    runId: z.string().min(1).max(512),
+    toolCallId: z.string().min(1).max(512),
+    decision: z.enum(['approve', 'decline']),
+    identityId: z.never().optional(),
+  })
+  .strict();
+export type AssistantRuntimeApprovalCommand = z.infer<typeof AssistantRuntimeApprovalCommandSchema>;
+export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boolean() }).strict();
+export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
+
 export const AssistantRuntimeClientCommandSchema = z
   .discriminatedUnion('type', [
+    AssistantRuntimeApprovalCommandSchema,
     z
       .object({
         type: z.literal('message'),
@@ -211,11 +250,38 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
   z.object({
     ...RuntimeEventBaseShape,
     type: z.literal('assistant.activity'),
-    data: z.object({
-      activityType: z.string().min(1),
-      message: z.string().optional(),
-    }),
+    data: z.union([
+      z
+        .object({
+          activityType: z.literal('tool'),
+          ...AssistantToolShape,
+          state: z.enum(['running', 'completed', 'failed', 'denied']),
+        })
+        .strict(),
+      z
+        .object({ activityType: z.literal('generating'), message: z.string().max(240).optional() })
+        .strict(),
+    ]),
   }),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.approval.required'),
+      data: z.object({ ...AssistantToolShape }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.approval.resolved'),
+      data: z
+        .object({
+          toolCallId: AssistantToolShape.toolCallId,
+          resolution: z.enum(['approved', 'declined', 'cancelled', 'failed']),
+        })
+        .strict(),
+    })
+    .strict(),
   z.object({
     ...RuntimeEventBaseShape,
     type: z.literal('assistant.usage.updated'),

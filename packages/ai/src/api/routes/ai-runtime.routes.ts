@@ -1,5 +1,7 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import {
+  AssistantRuntimeApprovalCommandSchema,
+  AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
@@ -34,7 +36,12 @@ interface PlatformMiddleware {
 
 type AssistantRuntimePort = Pick<
   MastraAIRuntime,
-  'dispatchMessage' | 'cancelRun' | 'listMessages' | 'deleteConversation' | 'summarizeUsage'
+  | 'decideToolApproval'
+  | 'dispatchMessage'
+  | 'cancelRun'
+  | 'listMessages'
+  | 'deleteConversation'
+  | 'summarizeUsage'
 >;
 
 function authenticatedIdentity(req: Request): string | undefined {
@@ -207,6 +214,40 @@ export function registerAIRuntimeRoutes(
         }),
       });
       res.status(200).json(responseBuilder.success(result));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res
+        .status(failure.statusCode)
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+    }
+  });
+
+  router.post('/assistant/approval', auth, (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    if (!authenticatedIdentity(req)) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    if (!runtime) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable'));
+      return;
+    }
+    const parsed = AssistantRuntimeApprovalCommandSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues)));
+      return;
+    }
+    try {
+      const accepted = runtime.decideToolApproval({
+        context: extractAiExpressExecutionContext(req),
+        command: parsed.data,
+      });
+      res
+        .status(200)
+        .json(responseBuilder.success(AssistantRuntimeApprovalResultSchema.parse({ accepted })));
     } catch (error) {
       const failure = toAITransportFailure(error, {
         fallbackCode: 'AI_RUNTIME_ERROR',

@@ -1,6 +1,7 @@
 import type { Ref } from 'vue';
 import type {
   AIContextEntityType,
+  AssistantRuntimeEvent,
   AssistantRuntimeAttachment,
   ConversationListRes,
   GoalPlanDraft,
@@ -88,6 +89,16 @@ export type ComposerContextEntity = {
   origin: 'explicit' | 'surface';
 };
 
+export type ChatToolApproval = Extract<
+  AssistantRuntimeEvent,
+  { type: 'assistant.approval.required' }
+>['data'] & {
+  conversationId: string;
+  runId: string;
+  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale';
+  errorMessage?: string;
+};
+
 export type ChatItem = {
   id: string;
   role: 'user' | 'assistant';
@@ -95,6 +106,11 @@ export type ChatItem = {
   status: MessageStatus;
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
+  toolActivity?: Extract<
+    Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
+    { activityType: 'tool' }
+  >;
+  approvals?: ChatToolApproval[];
 };
 
 export type ConversationSummary = ConversationListRes['data'][number];
