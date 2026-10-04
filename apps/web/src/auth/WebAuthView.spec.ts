@@ -237,11 +237,51 @@ describe('WebAuthView three-login surface contract', () => {
     await wrapper.get('[data-testid="login-github-button"]').trigger('click');
     await flushPromises();
 
-    expect(webAuthMocks.startGithubLogin).toHaveBeenCalledWith(
-      new URL('/', window.location.origin).toString(),
-    );
+    expect(webAuthMocks.startGithubLogin).toHaveBeenCalledWith('/');
     expect(webAuthMocks.loginByEmail).not.toHaveBeenCalled();
 
+    wrapper.unmount();
+  });
+
+  it('honors the shell guard redirect parameter as a safe post-login return path', async () => {
+    window.history.replaceState({}, '', '/auth?redirect=%2Frepository%3Ftab%3Dknowledge');
+    const wrapper = mountView();
+    await wrapper.get('#email').setValue('person@example.com');
+    await wrapper.get('#password').setValue('Correct-password-123');
+
+    await wrapper.get('[data-testid="login-form"]').trigger('submit');
+    await flushPromises();
+
+    expect(webAuthMocks.loginByEmail).toHaveBeenCalledWith(
+      {
+        email: 'person@example.com',
+        password: 'Correct-password-123',
+      },
+      '/repository?tab=knowledge',
+    );
+    wrapper.unmount();
+  });
+
+  it('rejects an external post-login redirect and falls back to the app root', async () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/auth?redirect=' + encodeURIComponent('//attacker.example/phish'),
+    );
+    const wrapper = mountView();
+    await wrapper.get('#email').setValue('person@example.com');
+    await wrapper.get('#password').setValue('Correct-password-123');
+
+    await wrapper.get('[data-testid="login-form"]').trigger('submit');
+    await flushPromises();
+
+    expect(webAuthMocks.loginByEmail).toHaveBeenCalledWith(
+      {
+        email: 'person@example.com',
+        password: 'Correct-password-123',
+      },
+      '/',
+    );
     wrapper.unmount();
   });
 

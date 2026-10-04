@@ -44,8 +44,22 @@ locale.value = currentLocale.value;
 
 const query = new URLSearchParams(window.location.search);
 const resetToken = query.get('token') ?? '';
-const requestedReturnTo = query.get('returnTo');
-const returnTo = requestedReturnTo?.startsWith('/auth/device?') ? requestedReturnTo : '/';
+function normalizeReturnTo(value: string | null): string {
+  if (!value || !value.startsWith('/')) return '/';
+  try {
+    const resolved = new URL(value, window.location.origin);
+    if (resolved.origin !== window.location.origin) return '/';
+    if (resolved.pathname === '/auth' || resolved.pathname.startsWith('/auth/')) {
+      return resolved.pathname === '/auth/device'
+        ? `${resolved.pathname}${resolved.search}${resolved.hash}`
+        : '/';
+    }
+    return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return '/';
+  }
+}
+const returnTo = normalizeReturnTo(query.get('returnTo') ?? query.get('redirect'));
 const scene = ref<Scene>(
   query.get('scene') === 'reset' && resetToken
     ? 'reset'
@@ -199,11 +213,14 @@ async function submitRegistration() {
   }
 
   action.value = 'register';
-  const outcome = await registerByEmail({
-    email: email.value.trim(),
-    password: password.value,
-    name: name.value.trim() || undefined,
-  });
+  const outcome = await registerByEmail(
+    {
+      email: email.value.trim(),
+      password: password.value,
+      name: name.value.trim() || undefined,
+    },
+    returnTo,
+  );
   action.value = null;
   if (outcome === 'needs-email-verification') switchScene('verify', { keepSuccess: true });
 }
@@ -270,7 +287,7 @@ function handleReceiptDismiss() {
 
 async function handleGithubLogin() {
   action.value = 'github';
-  await startGithubLogin(new URL(returnTo, window.location.origin).toString());
+  await startGithubLogin(returnTo);
   action.value = null;
 }
 
