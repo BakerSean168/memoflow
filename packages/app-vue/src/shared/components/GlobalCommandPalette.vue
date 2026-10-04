@@ -10,7 +10,6 @@
  *   2. 通过 registerStaticCommands / registerDynamicCommands 注册命令
  *   3. 用户按 Ctrl+K 即可呼出
  */
-import { onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { _getCommandPaletteState, _setOpen, useCommandGroups } from '@memoflow/ui-vue-shadcn';
 import {
@@ -32,21 +31,6 @@ function handleSelect(action: () => void) {
   // Execute after dialog closes for smooth transition
   setTimeout(action, 150);
 }
-
-function handleKeydown(e: KeyboardEvent) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault();
-    _setOpen(!state.open);
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <template>
