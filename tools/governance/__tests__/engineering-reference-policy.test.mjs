@@ -1,9 +1,16 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const read = (file) => readFileSync(path.join(ROOT, file), 'utf8');
+const hasSourcePath = (relativePath) =>
+  execFileSync(
+    'git',
+    ['ls-files', '--cached', '--others', '--exclude-standard', '--', relativePath],
+    { cwd: ROOT, encoding: 'utf8' },
+  ).trim().length > 0;
 
 describe('ADR-113 real-owner architecture policy', () => {
   it('keeps ADR-113 accepted and the AGENT policy on real owner vertical slices', () => {
@@ -35,9 +42,9 @@ describe('ADR-113 real-owner architecture policy', () => {
     expect(entry.forbiddenPaths).toContain('packages/governance');
     expect(entry.requiredPaths).toContain('tools/governance/engineering-rules.json');
 
-    expect(existsSync(path.join(ROOT, 'packages/governance'))).toBe(false);
-    expect(existsSync(path.join(ROOT, 'packages/contracts/src/modules/governance'))).toBe(false);
-    expect(existsSync(path.join(ROOT, 'packages/app-vue/src/modules/governance'))).toBe(false);
+    expect(hasSourcePath('packages/governance')).toBe(false);
+    expect(hasSourcePath('packages/contracts/src/modules/governance')).toBe(false);
+    expect(hasSourcePath('packages/app-vue/src/modules/governance')).toBe(false);
     expect(existsSync(path.join(ROOT, 'tools/governance/engineering-rules.json'))).toBe(true);
   });
 
