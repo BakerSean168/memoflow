@@ -30,6 +30,25 @@ export class AssistantConversationUnavailableError extends Error {
   }
 }
 
+function productRole(message: MastraDBMessage): 'user' | 'assistant' | 'system' | undefined {
+  if (message.role === 'user' || message.role === 'assistant' || message.role === 'system') {
+    return message.role;
+  }
+  // AgentController persists native signal identity under content.metadata, not the row type.
+  const signal = message.content.metadata?.signal;
+  if (
+    message.role === 'signal' &&
+    signal !== null &&
+    typeof signal === 'object' &&
+    !Array.isArray(signal) &&
+    'type' in signal &&
+    signal.type === 'user'
+  ) {
+    return 'user';
+  }
+  return undefined;
+}
+
 function messageText(message: MastraDBMessage): string {
   return message.content.parts
     .filter(
@@ -90,18 +109,20 @@ export class AssistantHistoryService {
     await this.ensureConversation(input);
     const recalled = await this.memory.recall({ threadId: input.conversationId, perPage: false });
     const messages = recalled.messages
-      .filter(
-        (message): message is MastraDBMessage & { role: 'user' | 'assistant' | 'system' } =>
-          message.role === 'user' || message.role === 'assistant' || message.role === 'system',
-      )
-      .map((message) => ({
-        id: message.id,
-        conversationId: input.conversationId,
-        role: message.role,
-        content: messageText(message),
-        attachments: messageAttachments(message),
-        createdAt: message.createdAt.getTime(),
-      }))
+      .flatMap((message) => {
+        const role = productRole(message);
+        if (!role) return [];
+        return [
+          {
+            id: message.id,
+            conversationId: input.conversationId,
+            role,
+            content: messageText(message),
+            attachments: messageAttachments(message),
+            createdAt: message.createdAt.getTime(),
+          },
+        ];
+      })
       .sort((left, right) => left.createdAt - right.createdAt || left.id.localeCompare(right.id));
     return { conversationId: input.conversationId, messages };
   }

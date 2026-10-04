@@ -584,12 +584,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         streamController.signal,
       );
 
-      // Mastra memory is the authority after cutover. Refresh from persisted
-      // history instead of accepting draft ids/content as durable truth.
-      await Promise.all([
-        refreshRuntimeHistory(conversationId),
-        refreshRuntimeUsage(conversationId),
-      ]);
+      // Retain the live turn: persisted history may still lag behind the stream.
+      // Explicit conversation reload/reselect remains authoritative.
+      await refreshRuntimeUsage(conversationId);
     } catch (error) {
       const assistantDraft = chatTimeline.value.find((item) => item.id === assistantDraftId);
       const userDraft = chatTimeline.value.find((item) => item.id === userDraftId);

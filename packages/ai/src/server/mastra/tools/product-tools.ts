@@ -1,3 +1,7 @@
+import {
+  MEMOFLOW_PRODUCT_TOOL_POLICY,
+  assertMemoFlowToolClassification,
+} from './product-tool-policy';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
@@ -139,7 +143,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'routine_create',
     description:
       'Create a MemoFlow Routine configuration from one canonical WallClock, Elapsed, or ActiveUsage trigger. Persistent configuration change: explicit user approval is required. Protocol sessions must use routine_start_protocol instead.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_create.requireApproval,
     inputSchema: z.strictObject({
       name: z.string().trim().min(1).max(200),
       description: z.string().trim().max(1000).optional(),
@@ -158,7 +162,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'routine_set_profile_active',
     description:
       'Activate or deactivate a Routine Profile gate without rewriting the member routines. Persistent profile configuration change: explicit user approval is required.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_set_profile_active.requireApproval,
     inputSchema: z.strictObject({
       profileId: z.string().min(1),
       active: z.boolean(),
@@ -174,7 +178,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'routine_set_temporary_override',
     description:
       'Set temporary Routine runtime state (snooze/suppress/temporary interval) without rewriting long-lived trigger configuration. Explicit user approval is required.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_set_temporary_override.requireApproval,
     inputSchema: z.strictObject({
       routineId: z.string().min(1),
       snoozeUntil: z.number().int().nonnegative().nullable().optional(),
@@ -194,7 +198,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'routine_clear_temporary_override',
     description:
       'Clear a Routine temporary override and restore canonical trigger behavior. Explicit user approval is required.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_clear_temporary_override.requireApproval,
     inputSchema: z.object({ routineId: z.string().min(1) }),
     execute: async (input, { requestContext }) =>
       requirePort(deps.routineCommandPort, 'Routine command capability').clearTemporaryOverride({
@@ -207,7 +211,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'routine_start_protocol',
     description:
       'Start a deterministic 50/10 or Pomodoro ProtocolSession. Explicit approval is required before starting a new persistent session; the model never owns timer truth.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.routine_start_protocol.requireApproval,
     inputSchema: z.strictObject({
       methodId: z.enum(['50-10-protocol', 'pomodoro']),
       focusMinutes: z.number().int().positive().optional(),
@@ -331,7 +335,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     id: 'notification_execute_action',
     description:
       'Execute one typed Notification Inbox action. The Notification owner validates the action and routes owner commands to the owning domain; delivery state is not exposed.',
-    requireApproval: true,
+    requireApproval: MEMOFLOW_PRODUCT_TOOL_POLICY.notification_execute_action.requireApproval,
     inputSchema: z.strictObject({
       notificationId: z.string().trim().min(1),
       actionKey: z.string().trim().min(1).max(200),
@@ -343,7 +347,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
       }),
   });
 
-  return {
+  const tools = {
     knowledge_search: knowledgeSearch,
     workspace_overview: workspaceOverview,
     routine_create: routineCreate,
@@ -360,6 +364,14 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     notification_unread_summary: notificationUnread,
     notification_execute_action: notificationExecuteAction,
   };
+  assertMemoFlowToolClassification(tools);
+  for (const [name, tool] of Object.entries(tools)) {
+    tool.requireApproval =
+      MEMOFLOW_PRODUCT_TOOL_POLICY[
+        name as keyof typeof MEMOFLOW_PRODUCT_TOOL_POLICY
+      ].requireApproval;
+  }
+  return tools;
 }
 
 export type MemoFlowProductTools = ReturnType<typeof createMemoFlowProductTools>;

@@ -197,12 +197,13 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
       content,
       createdAt: now,
     };
-    const assistantContent = `Mastra persisted reply ${turn}.`;
+    const assistantContent = `Mastra live reply ${turn}.`;
+    const authoritativeContent = `Mastra authoritative reply ${turn}.`;
     const assistantMessage: RuntimeMessage = {
       id: `assistant-e2e-mastra-${turn}`,
       conversationId,
       role: 'assistant',
-      content: assistantContent,
+      content: authoritativeContent,
       createdAt: now + 1,
     };
     messages.push(userMessage, assistantMessage);
@@ -310,8 +311,14 @@ test.describe('AI Mastra open-chat product cutover', () => {
     );
     expect(capture.messageCommands[0]).not.toHaveProperty('identityId');
     expect(capture.messageCommands[0]).not.toHaveProperty('executionProfileId');
-    await expect(page.getByTestId('ai-message-panel')).toContainText('Mastra persisted reply 1.');
-    expect(capture.historyRequests.length).toBeGreaterThanOrEqual(1);
+    await expect(page.getByTestId('ai-message-panel')).toContainText(
+      'Use the canonical Mastra runtime.',
+    );
+    await expect(page.getByTestId('ai-message-panel')).toContainText('Mastra live reply 1.');
+    await expect(page.getByTestId('ai-message-panel')).not.toContainText(
+      'Mastra authoritative reply 1.',
+    );
+    expect(capture.historyRequests).toHaveLength(0);
   });
 
   test('[P0] reload restores the authoritative Mastra transcript instead of legacy persisted history', async ({
@@ -319,7 +326,14 @@ test.describe('AI Mastra open-chat product cutover', () => {
   }) => {
     const capture = await bootstrapMastraOpenChat(page);
     await sendMastraMessage(page, 'Persist this turn in Mastra memory.');
-    await expect(page.getByTestId('ai-message-panel')).toContainText('Mastra persisted reply 1.');
+    await expect(page.getByTestId('ai-message-panel')).toContainText(
+      'Persist this turn in Mastra memory.',
+    );
+    await expect(page.getByTestId('ai-message-panel')).toContainText('Mastra live reply 1.');
+    await expect(page.getByTestId('ai-message-panel')).not.toContainText(
+      'Mastra authoritative reply 1.',
+    );
+    expect(capture.historyRequests).toHaveLength(0);
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
     await page.getByTestId('ai-chat-view').waitFor({
@@ -331,8 +345,11 @@ test.describe('AI Mastra open-chat product cutover', () => {
       'Persist this turn in Mastra memory.',
       { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
     );
-    await expect(page.getByTestId('ai-message-panel')).toContainText('Mastra persisted reply 1.');
-    expect(capture.historyRequests.length).toBeGreaterThanOrEqual(2);
+    await expect(page.getByTestId('ai-message-panel')).toContainText(
+      'Mastra authoritative reply 1.',
+    );
+    await expect(page.getByTestId('ai-message-panel')).not.toContainText('Mastra live reply 1.');
+    expect(capture.historyRequests).toHaveLength(1);
     expect(capture.historyRequests.every((body) => !('identityId' in body))).toBe(true);
   });
 });
