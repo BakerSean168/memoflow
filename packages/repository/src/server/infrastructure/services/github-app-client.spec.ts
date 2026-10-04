@@ -39,6 +39,49 @@ function verifyAppJwt(jwt: string) {
 }
 
 describe('GitHubAppClient', () => {
+  it('discovers an existing App installation for the verified GitHub account', async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse([
+        { id: 7, account: { id: 41 }, permissions: { contents: 'write' }, suspended_at: null },
+        { id: 8, account: { id: 42 }, permissions: { contents: 'write' }, suspended_at: null },
+      ]),
+    );
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+
+    await expect(client.findInstallationForAccount('42')).resolves.toEqual({
+      installationId: '8',
+      accountId: '42',
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl.mock.calls[0]?.[0]).toBe(
+      'https://api.github.com/app/installations?per_page=100&page=1',
+    );
+    expect(getAuthorization(fetchImpl.mock.calls[0]?.[1])).toMatch(/^Bearer /);
+  });
+
+  it('returns null when the App is not installed for that GitHub account', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        jsonResponse([
+          { id: 7, account: { id: 41 }, permissions: { contents: 'write' }, suspended_at: null },
+        ]),
+      );
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+
+    await expect(client.findInstallationForAccount('42')).resolves.toBeNull();
+  });
+
   it('signs a bounded RS256 app JWT and scopes installation tokens to one repository', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()

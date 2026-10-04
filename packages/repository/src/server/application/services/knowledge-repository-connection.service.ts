@@ -131,6 +131,8 @@ export interface KnowledgeRepositoryConnectionServiceOptions {
   bindingWriteTransactionRunner: IKnowledgeRemoteBindingWriteTransactionRunner;
   cloudDataPurger?: IKnowledgeRepositoryCloudDataPurger;
   githubAppClient: IGitHubAppClient;
+  /** Host-owned identity bridge; returns the verified GitHub account id linked to this MemoFlow identity. */
+  githubAccountIdResolver?: (identityId: string) => Promise<string | null>;
   installationIntentRepository: IKnowledgeRepositoryInstallationIntentRepository;
   installationRouting: KnowledgeRepositoryInstallationRoutingConfig;
   now?: () => number;
@@ -174,6 +176,30 @@ export class KnowledgeRepositoryConnectionService {
           installationUrl: `https://github.com/apps/${encodeURIComponent(this.options.appSlug)}/installations/new`,
           expiresAt: recovered.data.expiresAt,
           requiresExternalBrowser: false,
+        });
+      }
+
+      const rediscovered = await this.tryRediscoverInstalledApp(
+        identityId,
+        clientKind,
+        returnPath,
+        now,
+        expiresAt,
+      );
+      if (!rediscovered.ok) return rediscovered;
+      if (rediscovered.data) {
+        return ok({
+          intentId: rediscovered.data.id,
+          installationUrl: `https://github.com/settings/installations/${encodeURIComponent(rediscovered.data.installationId ?? '')}`,
+          expiresAt: rediscovered.data.expiresAt,
+          requiresExternalBrowser: false,
+        });
+      }
+
+      if (request.recoverOnly) {
+        return fail({
+          code: 'NOT_FOUND',
+          message: 'No existing GitHub App installation could be recovered for this identity',
         });
       }
 
@@ -757,6 +783,89 @@ export class KnowledgeRepositoryConnectionService {
           error instanceof Error ? error.message : 'GitHub repository HEAD confirmation failed',
       });
     }
+  }
+
+  private async tryRediscoverInstalledApp(
+    identityId: string,
+    clientKind: KnowledgeRepositoryInstallationClientKind,
+    returnPath: string,
+    now: number,
+    expiresAt: number,
+  ): Promise<Result<KnowledgeRepositoryInstallationIntentRecord | null>> {
+    const resolver = this.options.githubAccountIdResolver;
+    const discover = this.options.githubAppClient.findInstallationForAccount;
+    if (!resolver || !discover) return ok(null);
+
+    let accountId: string | null;
+    let discovered: { installationId: string; accountId: string } | null;
+    try {
+      accountId = await resolver(identityId);
+      if (!accountId) return ok(null);
+      discovered = await discover.call(this.options.githubAppClient, accountId);
+      if (!discovered || discovered.accountId !== accountId) return ok(null);
+    } catch (error) {
+      return fail({
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Existing GitHub App installation discovery failed',
+      });
+    }
+
+    const inventory = await this.getValidInstallationInventory(discovered.installationId);
+    if (!inventory.ok) {
+      // A missing/suspended/under-permissioned installation should fall back to
+      // the normal provider setup flow rather than binding it silently.
+      if (inventory.error.code === 'FORBIDDEN') return ok(null);
+      return inventory;
+    }
+    if (inventory.data.accountId !== accountId) return ok(null);
+
+    const intentId = `knowledge-install-intent-${randomUUID()}`;
+    const state = createKnowledgeRepositoryInstallationState(
+      this.options.installationRouting.routeKey,
+    );
+    await this.options.installationIntentRepository.create({
+      id: intentId,
+      identityId,
+      stateHash: state.stateHash,
+      routeKey: state.routeKey,
+      clientKind,
+      returnPath,
+      expiresAt,
+      createdAt: now,
+    });
+    const callback = await this.options.installationIntentRepository.recordCallback({
+      stateHash: state.stateHash,
+      installationId: inventory.data.installationId,
+      providerAccountId: inventory.data.accountId,
+      setupAction: 'install',
+      now,
+    });
+    if (
+      callback.kind === 'not_found' ||
+      callback.kind === 'expired' ||
+      callback.kind === 'conflict'
+    ) {
+      return fail({
+        code: 'CONFLICT',
+        message: 'Existing GitHub App installation could not be recovered safely',
+      });
+    }
+    const finalized = await this.options.installationIntentRepository.markFinalized({
+      identityId,
+      intentId,
+      installationId: inventory.data.installationId,
+      providerAccountId: inventory.data.accountId,
+      now,
+    });
+    return finalized
+      ? ok(finalized)
+      : fail({
+          code: 'CONFLICT',
+          message: 'Existing GitHub App installation could not be finalized safely',
+        });
   }
 
   private async tryRecoverVerifiedDesktopIntent(

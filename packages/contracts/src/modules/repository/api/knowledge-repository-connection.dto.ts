@@ -32,6 +32,8 @@ export type KnowledgeRepositoryInstallationIntentStatus = z.infer<
 export const StartKnowledgeRepositoryInstallationSchema = z.object({
   returnUrl: z.string().url().optional(),
   clientKind: KnowledgeRepositoryInstallationClientKindSchema.optional(),
+  /** Rediscover an already-installed App only; never create a new pending installation intent. */
+  recoverOnly: z.boolean().optional(),
 });
 
 export type StartKnowledgeRepositoryInstallationReq = z.infer<

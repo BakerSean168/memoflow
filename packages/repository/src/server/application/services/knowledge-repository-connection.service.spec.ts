@@ -184,6 +184,7 @@ function createService(
   github = createGithubClient(),
   cloudDataPurger?: IKnowledgeRepositoryCloudDataPurger,
   now: () => number = () => SERVICE_NOW,
+  githubAccountIdResolver?: (identityId: string) => Promise<string | null>,
 ) {
   const knowledgeSpaceRepository = new MemoryKnowledgeSpaceRepository();
   const bindingRepository = new MemoryBindingRepository();
@@ -211,6 +212,7 @@ function createService(
         }),
     },
     githubAppClient: github,
+    githubAccountIdResolver,
     installationIntentRepository,
     installationRouting: {
       routeKey: 'dev',
@@ -361,6 +363,102 @@ describe('KnowledgeRepositoryConnectionService', () => {
     if (!retried.ok) throw new Error('expected retry');
     expect(new URL(retried.data.installationUrl).searchParams.has('state')).toBe(false);
     expect(github.getInstallationInventory).toHaveBeenCalledWith('installation-1');
+  });
+
+  it('rediscovers an existing GitHub App installation from the authenticated GitHub identity after local intent state was lost', async () => {
+    const github = createGithubClient({
+      findInstallationForAccount: vi.fn(async (accountId) =>
+        accountId === 'github-account-1' ? { installationId: 'installation-1', accountId } : null,
+      ),
+    });
+    const resolver = vi.fn(async (identityId: string) =>
+      identityId === 'identity-1' ? 'github-account-1' : null,
+    );
+    const { service } = createService(github, undefined, () => SERVICE_NOW, resolver);
+
+    const recovered = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+
+    expect(recovered).toMatchObject({
+      ok: true,
+      data: {
+        requiresExternalBrowser: false,
+      },
+    });
+    if (!recovered.ok) throw new Error('expected rediscovered installation');
+    expect(resolver).toHaveBeenCalledWith('identity-1');
+    expect(github.findInstallationForAccount).toHaveBeenCalledWith('github-account-1');
+    expect(github.getInstallationInventory).toHaveBeenCalledWith('installation-1');
+    await expect(
+      service.getInstallationIntentStatus('identity-1', recovered.data.intentId),
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        status: 'Finalized',
+        installationId: 'installation-1',
+      },
+    });
+    await expect(
+      service.finalizeInstallationIntent('identity-1', recovered.data.intentId),
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        installationId: 'installation-1',
+        githubAccountId: 'github-account-1',
+        repositories: [expect.objectContaining({ id: 'repository-1' })],
+      },
+    });
+  });
+
+  it('recover-only lookup never creates a fresh pending intent when no existing installation is found', async () => {
+    const github = createGithubClient({
+      findInstallationForAccount: vi.fn(async () => null),
+    });
+    const { service, installationIntentRepository } = createService(
+      github,
+      undefined,
+      () => SERVICE_NOW,
+      async () => 'github-account-1',
+    );
+    const createIntent = vi.spyOn(installationIntentRepository, 'create');
+
+    const result = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+      recoverOnly: true,
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: 'NOT_FOUND' } });
+    expect(github.findInstallationForAccount).toHaveBeenCalledWith('github-account-1');
+    expect(github.getInstallationInventory).not.toHaveBeenCalled();
+    expect(createIntent).not.toHaveBeenCalled();
+  });
+
+  it('does not rediscover an App installation owned by a different GitHub identity', async () => {
+    const github = createGithubClient({
+      findInstallationForAccount: vi.fn(async () => ({
+        installationId: 'installation-1',
+        accountId: 'github-account-other',
+      })),
+    });
+    const { service } = createService(
+      github,
+      undefined,
+      () => SERVICE_NOW,
+      async () => 'github-account-1',
+    );
+
+    const started = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+
+    expect(started).toMatchObject({ ok: true, data: { requiresExternalBrowser: true } });
+    if (!started.ok) throw new Error('expected fresh setup');
+    expect(new URL(started.data.installationUrl).searchParams.has('state')).toBe(true);
+    expect(github.getInstallationInventory).not.toHaveBeenCalled();
   });
 
   it('does not recover a Web callback before authenticated finalize', async () => {
