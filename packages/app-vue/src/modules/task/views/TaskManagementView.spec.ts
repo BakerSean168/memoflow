@@ -32,7 +32,7 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain('<TaskPageToolbar');
     expect(source).not.toContain('<ModuleHeader');
     for (const selector of [
-      'test-id="task-surface"',
+      'test-id="task-surface-trigger"',
       'task-status-filter',
       'task-plan-state-filter',
       'task-label-filter',

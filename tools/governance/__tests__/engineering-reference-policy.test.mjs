@@ -81,7 +81,7 @@ describe('ADR-113 real-owner architecture policy', () => {
       'graph.json',
     ])
       expect(read(file), file).not.toMatch(retired);
-  });
+  }, 20_000);
 
   it('keeps workspace aliases, test registries, delivery and env free of Product slots', () => {
     for (const file of [

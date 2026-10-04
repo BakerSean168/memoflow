@@ -105,7 +105,7 @@ describe('TaskPageToolbar', () => {
     expect(wrapper.findAll('[data-testid="task-filter-bar"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-primary-action="create-task"]')).toHaveLength(1);
     for (const selector of [
-      'test-id="task-surface"',
+      'test-id="task-surface-trigger"',
       'test-id="task-status-filter"',
       'test-id="task-plan-state-filter"',
       'data-testid="task-compact-view-options"',

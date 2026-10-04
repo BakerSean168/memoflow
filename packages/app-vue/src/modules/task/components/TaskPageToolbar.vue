@@ -7,7 +7,7 @@
         :accessible-label="t('task.management.filter.surface')"
         :icon="ListChecks"
         show-current-count
-        test-id="task-surface"
+        test-id="task-surface-trigger"
         menu-class="w-44"
         @update:model-value="emit('update:activeSurface', $event as TaskSurface)"
       />

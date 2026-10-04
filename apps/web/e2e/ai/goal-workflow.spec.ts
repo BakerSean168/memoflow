@@ -449,6 +449,8 @@ test.describe('AI Goal Workflow', () => {
     const dialog = page.getByTestId('task-plan-dialog');
     await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
+    await page.getByTestId('global-confirm-confirm').click();
     await expect(dialog).not.toBeVisible();
     await expect.poll(() => telemetry.taskWorkflowCancelCount).toBe(1);
     expect(telemetry.ownerTaskCreateCount).toBe(0);
@@ -606,6 +608,8 @@ test.describe('AI Goal Workflow', () => {
     const nativeReview = page.getByTestId('goal-dialog');
     await expect(nativeReview).toBeVisible();
     await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
+    await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
+    await page.getByTestId('global-confirm-confirm').click();
     await expect(nativeReview).toBeHidden();
     await page.getByTestId('goal-agent-cancel-run').click();
 

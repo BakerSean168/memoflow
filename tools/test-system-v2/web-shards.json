@@ -4,46 +4,47 @@
   "shards": [
     {
       "shard": 1,
-      "estimatedDurationMs": 317877,
+      "estimatedDurationMs": 351728,
       "specs": [
         "schedule/planner-task-revert.spec.ts",
-        "schedule/schedule-calendar.spec.ts",
-        "notification/notification-inbox-loop.spec.ts",
+        "user-settings/notifications.spec.ts",
+        "ai/multi-engine-host.spec.ts",
+        "note/note-workspace.spec.ts",
         "note/legacy-note-mutation-boundary.spec.ts"
       ]
     },
     {
       "shard": 2,
-      "estimatedDurationMs": 315518,
+      "estimatedDurationMs": 339864,
       "specs": [
         "routine/routine-configuration.spec.ts",
-        "notification/notification-center.spec.ts",
-        "authentication/auth-login.spec.ts",
-        "authentication/auth-page-contract.spec.ts",
-        "authentication/auth-register.spec.ts"
+        "goal/goal-crud.spec.ts",
+        "authentication/auth-flow.spec.ts",
+        "notification/notification-inbox-loop.spec.ts",
+        "task/task-completion-loop.spec.ts"
       ]
     },
     {
       "shard": 3,
-      "estimatedDurationMs": 317296,
+      "estimatedDurationMs": 347611,
       "specs": [
         "ai/goal-workflow.spec.ts",
-        "goal/goal-crud.spec.ts",
-        "user-settings/notifications.spec.ts",
-        "ai/multi-engine-host.spec.ts",
-        "task/task-completion-loop.spec.ts",
-        "note/note-workspace.spec.ts"
+        "task/task-plan-crud.spec.ts",
+        "notification/notification-center.spec.ts",
+        "authentication/auth-login.spec.ts",
+        "authentication/auth-password.spec.ts",
+        "authentication/auth-register.spec.ts"
       ]
     },
     {
       "shard": 4,
-      "estimatedDurationMs": 310305,
+      "estimatedDurationMs": 341793,
       "specs": [
+        "shell/responsive-sidebar.spec.ts",
         "user-settings/data-portability.spec.ts",
-        "task/task-plan-crud.spec.ts",
         "user-settings/persistence.spec.ts",
-        "authentication/auth-flow.spec.ts",
-        "authentication/auth-password.spec.ts",
+        "schedule/schedule-calendar.spec.ts",
+        "authentication/auth-page-contract.spec.ts",
         "authentication/auth-oauth.spec.ts"
       ]
     }

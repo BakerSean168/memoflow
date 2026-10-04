@@ -8,7 +8,7 @@ describe('Task occurrence filters', () => {
   it('keeps one canonical Goal-style toolbar across panel tiers', () => {
     expect(source.match(/data-testid="task-page-toolbar"/g)).toHaveLength(1);
     for (const selector of [
-      'test-id="task-surface"',
+      'test-id="task-surface-trigger"',
       'test-id="task-status-filter"',
       'test-id="task-plan-state-filter"',
       'data-testid="task-label-filter"',
