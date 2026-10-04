@@ -64,7 +64,8 @@
     <section class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden">
       <header
         v-show="!composerOnly"
-        class="flex h-11 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
+        class="flex h-9 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
+        data-testid="ai-chat-header"
       >
         <div class="flex w-full items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">

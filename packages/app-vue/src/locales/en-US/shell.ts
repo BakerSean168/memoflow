@@ -58,6 +58,7 @@ export default {
     searchPlaceholder: 'Search conversations…',
     noMatches: 'No matching conversations',
     clearSearch: 'Clear conversation search',
+    navigation: 'Conversation navigation',
     resize: 'Resize conversation sidebar',
   },
   home: {

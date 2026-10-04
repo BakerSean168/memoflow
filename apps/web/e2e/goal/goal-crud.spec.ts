@@ -282,9 +282,10 @@ test.describe('Goal vNext product surface', () => {
     await expectToolbarToFit(toolbar);
 
     await openSystemViewMenu(page);
-    await expect(page.getByRole('menuitem', { name: /^(Active|进行中)$/ })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /^(Completed|已完成)$/ })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /^(All|全部)$/ })).toBeVisible();
+    await expect(page.getByRole('menuitemradio')).toHaveCount(3);
+    await expect(page.getByTestId('goal-system-view-filter-active')).toContainText(/Active|进行中/);
+    await expect(page.getByTestId('goal-system-view-filter-completed')).toContainText(/Completed|已完成/);
+    await expect(page.getByTestId('goal-system-view-filter-all')).toContainText(/All|全部/);
     await page.keyboard.press('Escape');
 
     await labelFilter.click();

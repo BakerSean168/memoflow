@@ -1,7 +1,13 @@
 import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
+
 import QuickTaskDialog from './QuickTaskDialog.vue';
 
 const passThrough = (name: string, tag = 'div') =>
@@ -17,7 +23,12 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
-      common: { cancel: 'Cancel' },
+      common: {
+        cancel: 'Cancel',
+        unsavedChangesTitle: 'Discard unsaved changes?',
+        unsavedChangesDescription: 'Closing will discard changes.',
+        discardChanges: 'Discard changes',
+      },
       task: {
         quickTask: {
           title: 'Quick task',
@@ -67,6 +78,10 @@ function mountDialog() {
 }
 
 describe('QuickTaskDialog', () => {
+  beforeEach(() => {
+    confirmMock.mockReset();
+    confirmMock.mockResolvedValue(true);
+  });
   it('keeps capture title-only with a fixed Today / All day default', () => {
     const wrapper = mountDialog();
     expect(wrapper.findAll('input')).toHaveLength(1);
@@ -85,7 +100,9 @@ describe('QuickTaskDialog', () => {
     await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('save')).toBeUndefined();
     expect(wrapper.get('input').element.value).toBe('Keep this draft');
-    expect(wrapper.get('[data-testid="quick-task-save-button"]').attributes('disabled')).toBeDefined();
+    expect(
+      wrapper.get('[data-testid="quick-task-save-button"]').attributes('disabled'),
+    ).toBeDefined();
   });
 
   it('submits a trimmed title from the compact form', async () => {
@@ -118,13 +135,30 @@ describe('QuickTaskDialog', () => {
     expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
   });
 
-  it('clears draft and dirty state on cancel', async () => {
+  it('confirms before discarding a dirty draft and then clears it', async () => {
     const wrapper = mountDialog();
     await wrapper.get('input').setValue('Unsaved');
     await wrapper.get('button[type="button"]').trigger('click');
+    await Promise.resolve();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
     expect(wrapper.emitted('cancel')).toEqual([[]]);
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
     expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
     expect(wrapper.get('input').element.value).toBe('');
+  });
+
+  it('keeps a dirty draft open when discard confirmation is rejected', async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    const wrapper = mountDialog();
+    await wrapper.get('input').setValue('Keep me');
+    await wrapper.get('button[type="button"]').trigger('click');
+    await Promise.resolve();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('cancel')).toBeUndefined();
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(wrapper.get('input').element.value).toBe('Keep me');
+    expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([true]);
   });
 });

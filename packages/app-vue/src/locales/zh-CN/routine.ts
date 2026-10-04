@@ -15,7 +15,7 @@ export default {
   },
   filter: {
     status: '例程状态',
-    all: '全部',
+    all: '全部状态',
     enabled: '已启用',
     disabled: '已停用',
   },

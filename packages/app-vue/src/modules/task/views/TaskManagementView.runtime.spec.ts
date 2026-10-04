@@ -21,6 +21,7 @@ import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 
 type ListParams = TaskPlanListQueryInput;
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
 const mocks = vi.hoisted(() => ({
   range: vi.fn(),
   complete: vi.fn(),
@@ -91,7 +92,7 @@ vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => ({
       () =>
         h('button', slots.default?.()),
   }),
-  useConfirm: vi.fn(),
+  useConfirm: confirmMock,
 }));
 vi.mock('../components/dialogs/TaskPlanDialog.vue', () => ({
   default: defineComponent({
@@ -105,7 +106,12 @@ import TaskManagementView from './TaskManagementView.vue';
 const toolbar = defineComponent({
   name: 'TaskPageToolbar',
   props: ['goalScopeLabel'],
-  emits: ['update:active-surface', 'update:plan-state-filter', 'update:label-filter-ids', 'create-task'],
+  emits: [
+    'update:active-surface',
+    'update:plan-state-filter',
+    'update:label-filter-ids',
+    'create-task',
+  ],
   setup: (props) => () => h('div', props.goalScopeLabel),
 });
 const occurrenceRow = defineComponent({
@@ -118,6 +124,8 @@ afterEach(() => {
 });
 beforeEach(() => {
   vi.clearAllMocks();
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
   mocks.route = reactive({ query: {}, hash: '' });
   mocks.replace.mockImplementation(async (location: { query?: LocationQuery; hash?: string }) => {
     mocks.route.query = location.query ?? {};
@@ -126,7 +134,10 @@ beforeEach(() => {
   mocks.createPlanSafe.mockResolvedValue({ todayOccurrenceCreated: true });
 });
 
-function render(detailFails = false, goalBinding: import('@memoflow/contracts/task').TaskGoalBindingDTO | null = null) {
+function render(
+  detailFails = false,
+  goalBinding: import('@memoflow/contracts/task').TaskGoalBindingDTO | null = null,
+) {
   const pinia = createTestPinia();
   const store = useTaskStore(pinia);
   const occurrences = [
@@ -138,18 +149,16 @@ function render(detailFails = false, goalBinding: import('@memoflow/contracts/ta
   });
   const getPlan = detailFails
     ? vi.fn().mockRejectedValue(new Error('offline'))
-    : vi
-        .fn()
-        .mockResolvedValue(
-          ok({
-            toDTO: () => ({
-              id: 'outside-page',
-              name: 'Plan outside page',
-              labels: [],
-              goalBinding,
-            }),
+    : vi.fn().mockResolvedValue(
+        ok({
+          toDTO: () => ({
+            id: 'outside-page',
+            name: 'Plan outside page',
+            labels: [],
+            goalBinding,
           }),
-        );
+        }),
+      );
   const goalService = {
     getGoal: vi.fn().mockResolvedValue(ok({ name: 'Readable Goal' })),
     getKeyResults: vi
@@ -185,10 +194,16 @@ function render(detailFails = false, goalBinding: import('@memoflow/contracts/ta
           name: 'DialogStub',
           props: ['open'],
           emits: ['update:open'],
-          setup: (props, { slots }) => () => props.open ? h('div', slots.default?.()) : null,
+          setup:
+            (props, { slots }) =>
+            () =>
+              props.open ? h('div', slots.default?.()) : null,
         }),
         ProductDialogShell: defineComponent({
-          setup: (_, { slots }) => () => h('div', [slots.default?.(), slots.footer?.()]),
+          setup:
+            (_, { slots }) =>
+            () =>
+              h('div', [slots.default?.(), slots.footer?.()]),
         }),
       },
     },
@@ -227,27 +242,49 @@ describe('Task Management quick create', () => {
     expect(mocks.replace).not.toHaveBeenCalled();
   });
 
-  it.each(['cancel', 'dismiss'] as const)('clears only quick dialog state on %s without reopening', async (action) => {
-    const unrelated = { source: 'overview', labels: ['a', 'b'], flag: null };
+  it.each(['cancel', 'dismiss'] as const)(
+    'clears only quick dialog state on %s without reopening',
+    async (action) => {
+      const unrelated = { source: 'overview', labels: ['a', 'b'], flag: null };
+      mocks.route.query = { ...unrelated, dialog: 'quick-task' };
+      mocks.route.hash = '#today';
+      const { wrapper } = render();
+      await flushPromises();
+      const dialog = wrapper.findComponent(QuickTaskDialog);
+      await wrapper.get('input').setValue('Unsaved draft');
+      if (action === 'cancel') await dialog.get('button[type="button"]').trigger('click');
+      else dialog.findComponent({ name: 'DialogStub' }).vm.$emit('update:open', false);
+      await flushPromises();
+      expect(dialog.props('modelValue')).toBe(false);
+      expect(mocks.route.query).toEqual(unrelated);
+      expect(mocks.route.hash).toBe('#today');
+      expect(mocks.replace).toHaveBeenCalledTimes(1);
+      mocks.route.query = { ...mocks.route.query, source: 'ai' };
+      await flushPromises();
+      expect(dialog.props('modelValue')).toBe(false);
+      expect(mocks.replace).toHaveBeenCalledTimes(1);
+      expect(mocks.createPlanSafe).not.toHaveBeenCalled();
+      expect(mocks.range).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('keeps a dirty quick draft open when discard confirmation is rejected', async () => {
+    const unrelated = { source: 'overview' };
     mocks.route.query = { ...unrelated, dialog: 'quick-task' };
-    mocks.route.hash = '#today';
     const { wrapper } = render();
     await flushPromises();
     const dialog = wrapper.findComponent(QuickTaskDialog);
-    await wrapper.get('input').setValue('Unsaved draft');
-    if (action === 'cancel') await dialog.get('button[type="button"]').trigger('click');
-    else dialog.findComponent({ name: 'DialogStub' }).vm.$emit('update:open', false);
+    await wrapper.get('input').setValue('Keep draft');
+    confirmMock.mockResolvedValueOnce(false);
+
+    await dialog.get('button[type="button"]').trigger('click');
     await flushPromises();
-    expect(dialog.props('modelValue')).toBe(false);
-    expect(mocks.route.query).toEqual(unrelated);
-    expect(mocks.route.hash).toBe('#today');
-    expect(mocks.replace).toHaveBeenCalledTimes(1);
-    mocks.route.query = { ...mocks.route.query, source: 'ai' };
-    await flushPromises();
-    expect(dialog.props('modelValue')).toBe(false);
-    expect(mocks.replace).toHaveBeenCalledTimes(1);
-    expect(mocks.createPlanSafe).not.toHaveBeenCalled();
-    expect(mocks.range).toHaveBeenCalledTimes(1);
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(dialog.props('modelValue')).toBe(true);
+    expect(wrapper.get('input').element.value).toBe('Keep draft');
+    expect(mocks.route.query).toEqual({ ...unrelated, dialog: 'quick-task' });
+    expect(mocks.replace).not.toHaveBeenCalled();
   });
 
   it('keeps the draft on failure, then creates the canonical quick plan and refreshes bounded Today on retry', async () => {
@@ -284,7 +321,10 @@ describe('Task Management quick create', () => {
     expect(mocks.route.query).toEqual({ source: 'ai', tags: ['a', 'b'] });
     expect(mocks.replace).toHaveBeenCalledTimes(1);
     expect(mocks.range).toHaveBeenCalledTimes(2);
-    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, { force: true, includeOverdueOpen: true });
+    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, {
+      force: true,
+      includeOverdueOpen: true,
+    });
     expect(mocks.refetch).not.toHaveBeenCalled();
     expect(mocks.push).not.toHaveBeenCalled();
   });
@@ -352,7 +392,10 @@ describe('Task Management bounded reads', () => {
     await wrapper.get('[data-testid="task-error-state"] button').trigger('click');
     await flushPromises();
     expect(mocks.refetch).not.toHaveBeenCalled();
-    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, { force: true, includeOverdueOpen: true });
+    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, {
+      force: true,
+      includeOverdueOpen: true,
+    });
   });
 
   it.each([
@@ -375,7 +418,12 @@ describe('Task Management bounded reads', () => {
     expect(mocks.listParams!.value.page).toBe(2);
     controls.vm.$emit('update:plan-state-filter', state);
     await flushPromises();
-    expect(mocks.listParams!.value).toEqual({ page: 1, limit: 100, labelIdsAll: ['a', 'b'], ...filter });
+    expect(mocks.listParams!.value).toEqual({
+      page: 1,
+      limit: 100,
+      labelIdsAll: ['a', 'b'],
+      ...filter,
+    });
     mocks.listTotal!.value = 7;
     await flushPromises();
     expect(wrapper.find('[data-testid="task-plan-pagination"]').exists()).toBe(false);
@@ -461,7 +509,6 @@ describe('Task Management bounded reads', () => {
   });
 });
 
-
 describe('Today occurrence inspect', () => {
   it('opens local inspect instead of navigating, tracks store corrections and navigates only with View Plan', async () => {
     const { wrapper, store } = render();
@@ -487,11 +534,13 @@ describe('Today occurrence inspect', () => {
     expect(dialog.props('occurrence')).toMatchObject({ status: 'Pending', version: 3 });
     dialog.vm.$emit('view-plan', 'outside-page');
     await flushPromises();
-    expect(mocks.push).toHaveBeenCalledWith({ name: 'task-detail', params: { id: 'outside-page' } });
+    expect(mocks.push).toHaveBeenCalledWith({
+      name: 'task-detail',
+      params: { id: 'outside-page' },
+    });
     expect(wrapper.findComponent(TaskOccurrenceInspectDialog).exists()).toBe(false);
   });
 });
-
 
 it('uses the same coordinator for row and inspect intents, with selected busy state', async () => {
   const { wrapper } = render();
@@ -501,7 +550,12 @@ it('uses the same coordinator for row and inspect intents, with selected busy st
   await flushPromises();
   const dialog = wrapper.findComponent(TaskOccurrenceInspectDialog);
   let finish!: () => void;
-  mocks.complete.mockImplementationOnce(() => new Promise<void>((resolve) => { finish = resolve; }));
+  mocks.complete.mockImplementationOnce(
+    () =>
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+  );
   row.vm.$emit('complete', 'occurrence');
   await flushPromises();
   expect(dialog.props('busy')).toBe(true);
@@ -511,8 +565,10 @@ it('uses the same coordinator for row and inspect intents, with selected busy st
   await flushPromises();
   expect(dialog.props('busy')).toBe(false);
   for (const [event, operation] of [
-    ['complete', mocks.complete], ['uncomplete', mocks.uncomplete],
-    ['missed', mocks.missed], ['skip', mocks.skip],
+    ['complete', mocks.complete],
+    ['uncomplete', mocks.uncomplete],
+    ['missed', mocks.missed],
+    ['skip', mocks.skip],
   ] as const) {
     dialog.vm.$emit(event, 'occurrence');
     await flushPromises();
@@ -520,31 +576,52 @@ it('uses the same coordinator for row and inspect intents, with selected busy st
   }
   dialog.vm.$emit('checklist-change', 'occurrence', 'step', true, 9);
   await flushPromises();
-  expect(mocks.checklist).toHaveBeenCalledWith('occurrence', { definitionId: 'step', completed: true, expectedVersion: 9 });
+  expect(mocks.checklist).toHaveBeenCalledWith('occurrence', {
+    definitionId: 'step',
+    completed: true,
+    expectedVersion: 9,
+  });
 });
 
-it.each(['row', 'inspect'])('Home %s resolves Prompt using the occurrence Plan outside the paged list', async host => {
-  const { wrapper, store } = render(false, { goalId: 'goal' as never, keyResultId: 'kr' as never, contribution: null,
-    progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 0 } });
-  await flushPromises();
-  const row = wrapper.findComponent(occurrenceRow);
-  if (host === 'inspect') {
-    row.vm.$emit('inspect', 'occurrence');
+it.each(['row', 'inspect'])(
+  'Home %s resolves Prompt using the occurrence Plan outside the paged list',
+  async (host) => {
+    const { wrapper, store } = render(false, {
+      goalId: 'goal' as never,
+      keyResultId: 'kr' as never,
+      contribution: null,
+      progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 0 },
+    });
     await flushPromises();
-    wrapper.getComponent(TaskOccurrenceInspectDialog).vm.$emit('complete', 'occurrence');
-  } else row.vm.$emit('complete', 'occurrence');
-  await flushPromises();
-  const dialog = wrapper.getComponent(TaskCompletionMeasurementDialog);
-  const coordinator = dialog.props('coordinator');
-  expect(coordinator.pendingMeasurement.value).toEqual({ occurrenceId: 'occurrence', goalId: 'goal', keyResultId: 'kr', suggestedValue: 0 });
-  expect(mocks.complete).not.toHaveBeenCalled();
-  const completed = { ...store.instances[0], status: 'Completed' as const };
-  mocks.complete.mockResolvedValue(completed);
-  await coordinator.submitMeasurement(-2, 'actual');
-  expect(mocks.complete).toHaveBeenCalledExactlyOnceWith('occurrence', { goalMeasurement: { value: -2, note: 'actual' } });
-  // Completed overdue rows can leave Today; the dialog must still update an open Inspect.
-  store.setInstances([]);
-  dialog.vm.$emit('completed', completed);
-  await flushPromises();
-  if (host === 'inspect') expect(wrapper.getComponent(TaskOccurrenceInspectDialog).props('occurrence')).toEqual(completed);
-});
+    const row = wrapper.findComponent(occurrenceRow);
+    if (host === 'inspect') {
+      row.vm.$emit('inspect', 'occurrence');
+      await flushPromises();
+      wrapper.getComponent(TaskOccurrenceInspectDialog).vm.$emit('complete', 'occurrence');
+    } else row.vm.$emit('complete', 'occurrence');
+    await flushPromises();
+    const dialog = wrapper.getComponent(TaskCompletionMeasurementDialog);
+    const coordinator = dialog.props('coordinator');
+    expect(coordinator.pendingMeasurement.value).toEqual({
+      occurrenceId: 'occurrence',
+      goalId: 'goal',
+      keyResultId: 'kr',
+      suggestedValue: 0,
+    });
+    expect(mocks.complete).not.toHaveBeenCalled();
+    const completed = { ...store.instances[0], status: 'Completed' as const };
+    mocks.complete.mockResolvedValue(completed);
+    await coordinator.submitMeasurement(-2, 'actual');
+    expect(mocks.complete).toHaveBeenCalledExactlyOnceWith('occurrence', {
+      goalMeasurement: { value: -2, note: 'actual' },
+    });
+    // Completed overdue rows can leave Today; the dialog must still update an open Inspect.
+    store.setInstances([]);
+    dialog.vm.$emit('completed', completed);
+    await flushPromises();
+    if (host === 'inspect')
+      expect(wrapper.getComponent(TaskOccurrenceInspectDialog).props('occurrence')).toEqual(
+        completed,
+      );
+  },
+);

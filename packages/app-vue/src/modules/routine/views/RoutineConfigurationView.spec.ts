@@ -4,7 +4,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { describe, expect, it, vi } from 'vitest';
 import type { RoutineClientPort } from '@memoflow/reminder/client';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
-import { ResponsiveSegmentedFilter } from '../../../shared/components';
+import { ProductSingleSelectFilter } from '../../../shared/components';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import RoutineConfigurationView from './RoutineConfigurationView.vue';
 
@@ -123,10 +123,11 @@ describe('RoutineConfigurationView', () => {
     expect(wrapper.find('[data-testid="routine-card-routine-1"]').text()).toContain('Work');
     expect(wrapper.findAll('[data-testid="routine-list-toolbar"]')).toHaveLength(1);
     expect(wrapper.find('[data-testid="routine-page-toolbar"]').exists()).toBe(false);
-    const stateFilter = wrapper.findComponent(ResponsiveSegmentedFilter);
+    const stateFilter = wrapper.findComponent(ProductSingleSelectFilter);
     expect(stateFilter.exists()).toBe(true);
     expect(stateFilter.props('modelValue')).toBe('all');
     expect(stateFilter.props('options')).toHaveLength(3);
+    expect(stateFilter.props('options')[0]?.label).toBe('All statuses');
     expect(wrapper.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="routine-method-library"]').exists()).toBe(false);
     expect(wrapper.find('[aria-label="Routine overview"]').exists()).toBe(false);

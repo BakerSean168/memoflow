@@ -8,9 +8,15 @@ import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskNativeEditSession } from '../../composables/taskNativeEditSession';
 import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
 import { createMockTaskPlan } from '@memoflow/contracts/mocks';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
 
 const source = fs.readFileSync(path.resolve(__dirname, 'TaskPlanDialog.vue'), 'utf8');
 
@@ -99,6 +105,10 @@ function render() {
   wrappers.push(wrapper);
   return { wrapper, submitOwner, session: nativeSession(wrapper) };
 }
+beforeEach(() => {
+  confirmMock.mockReset();
+  confirmMock.mockResolvedValue(true);
+});
 afterEach(() => {
   for (const wrapper of wrappers.splice(0)) wrapper.unmount();
   document.body.innerHTML = '';
@@ -183,6 +193,7 @@ describe('Task full-create native session', () => {
       .querySelector('[role="dialog"]')!
       .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await flushPromises();
+    expect(confirmMock).toHaveBeenCalledOnce();
     expect(cancel).toHaveBeenCalledOnce();
     session.setEditingBlocked(true);
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));

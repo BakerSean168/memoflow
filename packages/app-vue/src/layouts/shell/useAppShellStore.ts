@@ -22,6 +22,7 @@ import { defineStore } from 'pinia';
 import { BUSINESS_HARD_MIN, SIDEBAR_HARD_MIN, computePanelGeometry } from './panel-geometry';
 // Residual 1001: sole clamp (local dual retired).
 import { clamp } from './clamp';
+import { canonicalizePersistedBusinessRoute } from './persisted-business-route';
 
 /** 面板可容纳的最大 Tab 数（V2 §2.3 建议 8）。 */
 export const MAX_BUSINESS_TABS = 8;
@@ -379,18 +380,26 @@ export const useAppShellStore = defineStore('app-shell', {
      * Settings 已升级为独立场景，不再属于 BusinessTab。
      */
     sanitizeLegacyTabs(): void {
-      const next = this.tabs.filter(
-        (tab) =>
-          isBusinessModule(tab.module) &&
-          // Residual 539: retired existing-note editor routes (/note/:id) no longer exist
-          // Residual 885: portable boundary re-lock — strip /note tabs from persisted shell state.
-          !(
-            tab.route === '/note' ||
-            tab.route.startsWith('/note/') ||
-            tab.route.startsWith('/note?')
-          ),
-      );
-      if (next.length !== this.tabs.length) {
+      const next = this.tabs
+        .filter(
+          (tab) =>
+            isBusinessModule(tab.module) &&
+            // Residual 539: retired existing-note editor routes (/note/:id) no longer exist
+            // Residual 885: portable boundary re-lock — strip /note tabs from persisted shell state.
+            !(
+              tab.route === '/note' ||
+              tab.route.startsWith('/note/') ||
+              tab.route.startsWith('/note?')
+            ),
+        )
+        .map((tab) => ({
+          ...tab,
+          route: canonicalizePersistedBusinessRoute(tab.route),
+        }));
+      const tabsChanged =
+        next.length !== this.tabs.length ||
+        next.some((tab, index) => tab.route !== this.tabs[index]?.route);
+      if (tabsChanged) {
         this.tabs = next;
         if (this.activeTabId && !next.some((tab) => tab.id === this.activeTabId)) {
           this.activeTabId = next.length > 0 ? next[next.length - 1]!.id : null;

@@ -15,6 +15,7 @@ export const WEB_FLOW_SPECS = Object.freeze([
   'routine/routine-configuration.spec.ts',
   'schedule/schedule-calendar.spec.ts',
   'schedule/planner-task-revert.spec.ts',
+  'shell/responsive-sidebar.spec.ts',
   'task/task-plan-crud.spec.ts',
   'task/task-completion-loop.spec.ts',
   'user-settings/notifications.spec.ts',

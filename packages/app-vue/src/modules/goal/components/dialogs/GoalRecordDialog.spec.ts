@@ -1,4 +1,4 @@
-import { DOMWrapper, mount } from '@vue/test-utils';
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
 import { Diff, Ruler } from '@lucide/vue';
@@ -7,6 +7,12 @@ import { createMockGoalRecord } from '@memoflow/contracts/mocks';
 import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../../locales/en-US';
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
+
 import GoalRecordDialog from './GoalRecordDialog.vue';
 
 const goalActions = vi.hoisted(() => ({
@@ -84,6 +90,8 @@ async function openDialog() {
 describe('GoalRecordDialog submission lifecycle', () => {
   afterEach(() => {
     goalActions.createGoalRecord.mockReset();
+    confirmMock.mockReset();
+    confirmMock.mockResolvedValue(true);
     goalActions.method = 'Sum';
     document.body.innerHTML = '';
   });
@@ -314,6 +322,8 @@ describe('GoalRecordDialog live preview and keyboard', () => {
     });
     expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
     await amount.trigger('keydown', { key: 'Escape' });
+    await flushPromises();
+    expect(confirmMock).toHaveBeenCalledOnce();
     expect(document.querySelector('#change-amount')).toBeNull();
     wrapper.vm.openDialog('goal-1', 'kr-1');
     await nextTick();
@@ -322,43 +332,85 @@ describe('GoalRecordDialog live preview and keyboard', () => {
       (button) => button.textContent?.trim() === 'Cancel',
     );
     await new DOMWrapper(cancel!).trigger('click');
+    await flushPromises();
+    expect(confirmMock).toHaveBeenCalledTimes(2);
     expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 });
 
 describe('Goal record correction', () => {
-  afterEach(() => { goalActions.updateGoalRecord.mockReset(); goalActions.createGoalRecord.mockReset(); document.body.innerHTML = ''; });
-  it.each(['Manual', 'TaskUserMeasurement'] as const)('corrects %s via Goal update only and retains a failed draft', async authorship => {
-    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
-    const record = createMockGoalRecord({ id: 'record-1' as never, value: 3, comment: 'original', authorship,
-      source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'occurrence-1' } });
-    const provenance = { source: record.source, authorship: record.authorship };
-    wrapper.vm.openDialog('goal-1', 'kr-1', record);
-    await nextTick();
-    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('3');
-    await new DOMWrapper(document.querySelector('#change-amount')!).setValue('-2');
-    await new DOMWrapper(document.querySelector('#record-note')!).setValue('corrected');
-    goalActions.updateGoalRecord.mockResolvedValueOnce(null);
-    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
-    await nextTick(); await nextTick();
-    expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('-2');
-    expect(wrapper.emitted('saved')).toBeUndefined();
-    goalActions.updateGoalRecord.mockResolvedValueOnce({ ...record, value: -2, comment: 'corrected' });
-    await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger('click');
-    await nextTick(); await nextTick();
-    expect(goalActions.updateGoalRecord).toHaveBeenLastCalledWith('goal-1', 'kr-1', 'record-1', { value: -2, note: 'corrected' });
-    expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
-    expect(wrapper.emitted('saved')).toEqual([[]]);
-    expect({ source: record.source, authorship: record.authorship }).toEqual(provenance);
-    wrapper.unmount();
+  afterEach(() => {
+    goalActions.updateGoalRecord.mockReset();
+    goalActions.createGoalRecord.mockReset();
+    document.body.innerHTML = '';
   });
+  it.each(['Manual', 'TaskUserMeasurement'] as const)(
+    'corrects %s via Goal update only and retains a failed draft',
+    async (authorship) => {
+      const wrapper = mount(GoalRecordDialog, {
+        attachTo: document.body,
+        global: { plugins: [i18n] },
+      });
+      const record = createMockGoalRecord({
+        id: 'record-1' as never,
+        value: 3,
+        comment: 'original',
+        authorship,
+        source: authorship === 'Manual' ? null : { type: 'TASK_INSTANCE', id: 'occurrence-1' },
+      });
+      const provenance = { source: record.source, authorship: record.authorship };
+      wrapper.vm.openDialog('goal-1', 'kr-1', record);
+      await nextTick();
+      expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('3');
+      await new DOMWrapper(document.querySelector('#change-amount')!).setValue('-2');
+      await new DOMWrapper(document.querySelector('#record-note')!).setValue('corrected');
+      goalActions.updateGoalRecord.mockResolvedValueOnce(null);
+      await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger(
+        'click',
+      );
+      await nextTick();
+      await nextTick();
+      expect(document.querySelector<HTMLInputElement>('#change-amount')?.value).toBe('-2');
+      expect(wrapper.emitted('saved')).toBeUndefined();
+      goalActions.updateGoalRecord.mockResolvedValueOnce({
+        ...record,
+        value: -2,
+        comment: 'corrected',
+      });
+      await new DOMWrapper(document.querySelector('[data-testid="save-goal-record"]')!).trigger(
+        'click',
+      );
+      await nextTick();
+      await nextTick();
+      expect(goalActions.updateGoalRecord).toHaveBeenLastCalledWith('goal-1', 'kr-1', 'record-1', {
+        value: -2,
+        note: 'corrected',
+      });
+      expect(goalActions.createGoalRecord).not.toHaveBeenCalled();
+      expect(wrapper.emitted('saved')).toEqual([[]]);
+      expect({ source: record.source, authorship: record.authorship }).toEqual(provenance);
+      wrapper.unmount();
+    },
+  );
   it('renders TaskAutomatic read-only and offers no delete', async () => {
-    const wrapper = mount(GoalRecordDialog, { attachTo: document.body, global: { plugins: [i18n] } });
-    wrapper.vm.openDialog('goal-1', 'kr-1', createMockGoalRecord({ authorship: 'TaskAutomatic', source: { type: 'TASK_INSTANCE', id: 'occurrence-1' } }));
+    const wrapper = mount(GoalRecordDialog, {
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    wrapper.vm.openDialog(
+      'goal-1',
+      'kr-1',
+      createMockGoalRecord({
+        authorship: 'TaskAutomatic',
+        source: { type: 'TASK_INSTANCE', id: 'occurrence-1' },
+      }),
+    );
     await nextTick();
     expect(document.querySelector<HTMLInputElement>('#change-amount')?.disabled).toBe(true);
-    expect(document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled).toBe(true);
+    expect(
+      document.querySelector<HTMLButtonElement>('[data-testid="save-goal-record"]')?.disabled,
+    ).toBe(true);
     await new DOMWrapper(document.querySelector('#goal-record-form')!).trigger('submit');
     expect(goalActions.updateGoalRecord).not.toHaveBeenCalled();
     expect(goalActions.createGoalRecord).not.toHaveBeenCalled();

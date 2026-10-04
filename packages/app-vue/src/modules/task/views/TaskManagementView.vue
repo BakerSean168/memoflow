@@ -75,17 +75,13 @@
               @delete="remove(template)"
             />
           </div>
-          <div
+          <AppEmptyState
             v-else
-            class="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed px-6 text-center"
-            data-testid="task-plans-empty-state"
-          >
-            <ListChecks class="mb-3 h-8 w-8 text-muted-foreground" />
-            <h2 class="font-semibold">{{ t('task.management.emptyPlans') }}</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              {{ t('task.management.emptyPlansDescription') }}
-            </p>
-          </div>
+            :icon="ListChecks"
+            :title="t('task.management.emptyPlans')"
+            :description="t('task.management.emptyPlansDescription')"
+            testid="task-plans-empty-state"
+          />
           <div
             v-if="planTotal > 100 || planPage > 1"
             class="mt-4 flex items-center justify-end gap-3"
@@ -147,37 +143,13 @@
               </div>
             </section>
           </div>
-          <div
+          <AppEmptyState
             v-else
-            class="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed px-6 text-center"
-            data-testid="task-occurrences-empty-state"
-          >
-            <CalendarCheck2 class="mb-3 h-8 w-8 text-muted-foreground" />
-            <h2 class="font-semibold">{{ t('task.management.emptyToday') }}</h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              {{ t('task.management.emptyOccurrenceDescription') }}
-            </p>
-          </div>
-
-          <div
-            class="mt-4 flex items-center justify-between gap-3 border-t border-[hsl(var(--border-subtle))] pt-3"
-          >
-            <p class="text-xs text-muted-foreground">
-              {{ t('task.management.futureInSchedule') }}
-            </p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              class="shrink-0"
-              data-testid="task-open-schedule"
-              @click="openSchedule"
-            >
-              <CalendarDays class="mr-1.5 h-4 w-4" />
-              {{ t('task.management.viewSchedule') }}
-              <ArrowRight class="ml-1 h-3.5 w-3.5" />
-            </Button>
-          </div>
+            :icon="CalendarCheck2"
+            :title="t('task.management.emptyToday')"
+            :description="t('task.management.emptyOccurrenceDescription')"
+            testid="task-occurrences-empty-state"
+          />
         </template>
       </div>
     </main>
@@ -237,15 +209,7 @@ import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
-import {
-  ArrowRight,
-  CalendarCheck2,
-  CalendarDays,
-  CircleAlert,
-  ListChecks,
-  Loader2,
-  RefreshCw,
-} from '@lucide/vue';
+import { CalendarCheck2, CircleAlert, ListChecks, Loader2, RefreshCw } from '@lucide/vue';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
@@ -258,6 +222,7 @@ import type { TaskPlanStateFilter, TaskPlanViewModel, TaskSurface } from '../com
 import { useTaskStore } from '../stores/task-store';
 import { useTaskToday } from '../composables/useTaskToday';
 import TaskCompletionMeasurementDialog from '../components/dialogs/TaskCompletionMeasurementDialog.vue';
+import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
 import { useTaskNativeSurfaceRegistration } from '../../../layouts/shell/useTaskNativeSurface';
@@ -585,10 +550,6 @@ function openBoundTaskCreateDialog(goalId: string, keyResultId?: string | null) 
 function openTaskDetail(id: string) {
   selectedOccurrence.value = null;
   void router.push({ name: 'task-detail', params: { id } });
-}
-
-function openSchedule() {
-  void router.push({ name: 'ScheduleCalendar' });
 }
 
 function clearGoalScope() {

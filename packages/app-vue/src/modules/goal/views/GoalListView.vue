@@ -51,13 +51,7 @@
             testid="goals-empty-state"
             @action="openCreate"
           />
-          <p
-            v-else
-            class="py-16 text-center text-sm text-muted-foreground"
-            data-testid="goals-view-empty"
-          >
-            {{ t('goal.list.viewEmpty') }}
-          </p>
+          <AppEmptyState v-else :title="t('goal.list.viewEmpty')" testid="goals-view-empty" />
         </template>
       </div>
     </ScrollArea>

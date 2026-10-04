@@ -3,7 +3,7 @@
     :open="visible"
     @update:open="
       (open) => {
-        if (!isSubmitting) visible = open;
+        if (!open) requestClose();
       }
     "
   >
@@ -29,6 +29,7 @@
         :editing="!!record"
         :disabled="isSubmitting || !editable"
         @validity-change="isValid = $event"
+        @dirty-change="isDirty = $event"
         @submit="handleSave"
         @cancel="handleCancel"
       />
@@ -58,6 +59,7 @@ import { useI18n } from 'vue-i18n';
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 import GoalRecordComposerSurface from '../GoalRecordComposerSurface.vue';
 import { useGoal } from '../../composables/useGoal';
 const { createGoalRecord, updateGoalRecord } = useGoal();
@@ -70,6 +72,7 @@ const record = ref<GoalRecordClientDTO | null>(null);
 const session = ref(0);
 const isSubmitting = ref(false);
 const isValid = ref(false);
+const isDirty = ref(false);
 const submitError = ref('');
 const composer = ref<InstanceType<typeof GoalRecordComposerSurface> | null>(null);
 const editable = computed(
@@ -101,8 +104,18 @@ async function handleSave(intent: { value: number; note: string }) {
     isSubmitting.value = false;
   }
 }
+function closeNow() {
+  visible.value = false;
+}
+
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: isSubmitting,
+  onClose: closeNow,
+});
+
 function handleCancel() {
-  if (!isSubmitting.value) visible.value = false;
+  void requestClose();
 }
 function openDialog(nextGoalId: string, nextKeyResultId: string, nextRecord?: GoalRecordClientDTO) {
   if (isSubmitting.value) return;
@@ -111,6 +124,7 @@ function openDialog(nextGoalId: string, nextKeyResultId: string, nextRecord?: Go
   record.value = nextRecord ?? null;
   submitError.value = '';
   isValid.value = false;
+  isDirty.value = false;
   session.value++;
   visible.value = true;
 }

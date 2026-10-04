@@ -58,6 +58,7 @@ export default {
     searchPlaceholder: '搜索会话…',
     noMatches: '没有匹配的会话',
     clearSearch: '清空会话搜索',
+    navigation: '会话导航',
     resize: '调整会话侧栏宽度',
   },
   home: {

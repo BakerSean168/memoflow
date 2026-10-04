@@ -597,13 +597,15 @@
               </div>
             </article>
           </div>
-          <div v-else class="rounded-xl border border-dashed p-8 text-center">
-            <p class="font-medium">{{ t('goal.detail.noKrTitle') }}</p>
-            <p class="mt-1 text-sm text-muted-foreground">{{ t('goal.detail.noKrDescription') }}</p>
-            <Button class="mt-4" size="sm" @click="openCreateKr">{{
-              t('goal.detail.addKR')
-            }}</Button>
-          </div>
+          <AppEmptyState
+            v-else
+            :icon="Target"
+            :title="t('goal.detail.noKrTitle')"
+            :description="t('goal.detail.noKrDescription')"
+            :action-label="t('goal.detail.addKR')"
+            density="inline"
+            @action="openCreateKr"
+          />
         </section>
 
         <section
@@ -726,6 +728,7 @@ import {
   NotebookText,
   Plus,
   Tag,
+  Target,
   Trash2,
 } from '@lucide/vue';
 import {
@@ -765,6 +768,7 @@ import {
 } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { addYmdDays } from '@memoflow/time';
+import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import {
   ProductAutoTextarea,

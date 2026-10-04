@@ -34,6 +34,7 @@ export { default as ProductDatePicker } from './ProductDatePicker.vue';
 export { default as ProductDateTimePicker } from './ProductDateTimePicker.vue';
 export { default as ProductTimeframePicker } from './ProductTimeframePicker.vue';
 export { default as ResponsiveSegmentedFilter } from './ResponsiveSegmentedFilter.vue';
+export { default as ProductSingleSelectFilter } from './ProductSingleSelectFilter.vue';
 export { default as ResponsivePrimaryAction } from './ResponsivePrimaryAction.vue';
 export type { ResponsiveSegmentedFilterOption } from './responsive-segmented-filter.types';
 export { default as ProductTimePicker } from './ProductTimePicker.vue';

@@ -4,7 +4,7 @@ import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import type { GoalSystemView } from '@memoflow/contracts/goal';
-import { LabelFilterPopover } from '../../../shared/components';
+import { LabelFilterPopover, ProductSingleSelectFilter } from '../../../shared/components';
 import GoalPageToolbar from './GoalPageToolbar.vue';
 
 const i18n = createI18n({
@@ -16,6 +16,7 @@ const i18n = createI18n({
       goal: {
         systemFolders: { active: 'Active' },
         list: {
+          systemView: 'Goal view',
           labels: 'Labels',
           searchLabels: 'Search labels',
           noLabels: 'No labels',
@@ -66,6 +67,10 @@ describe('GoalPageToolbar (GOAL-5101)', () => {
     expect(wrapper.findComponent({ name: 'ProductSurfaceHeader' }).exists()).toBe(true);
     expect(wrapper.findAll('[data-primary-action="create-goal"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-testid="create-goal-entry"]')).toHaveLength(1);
+    const systemViewFilter = wrapper.findComponent(ProductSingleSelectFilter);
+    expect(systemViewFilter.exists()).toBe(true);
+    expect(systemViewFilter.props('modelValue')).toBe('active');
+    expect(systemViewFilter.props('options')).toHaveLength(3);
     expect(wrapper.findComponent(LabelFilterPopover).exists()).toBe(true);
 
     expect(wrapper.find('[data-testid="goal-search-input"]').exists()).toBe(false);

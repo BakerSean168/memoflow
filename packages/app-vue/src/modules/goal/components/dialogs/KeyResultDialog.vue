@@ -60,6 +60,7 @@ import {
 } from '@memoflow/contracts/goal';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 import GoalKeyResultCardEditor from '../GoalKeyResultCardEditor.vue';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
@@ -88,6 +89,7 @@ const goalId = ref('');
 const keyResultId = ref<string>();
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
+const draftBaseline = ref('');
 const currentFollowsInitial = ref(true);
 
 const draft = reactive({
@@ -101,6 +103,12 @@ const draft = reactive({
   unit: '',
   weight: 3,
 });
+
+function snapshotDraft(): string {
+  return JSON.stringify(draft);
+}
+
+const isDirty = computed(() => open.value && snapshotDraft() !== draftBaseline.value);
 
 const canSave = computed(
   () =>
@@ -141,11 +149,23 @@ function reset(): void {
   isSubmitting.value = false;
 }
 
+function closeNow(): void {
+  open.value = false;
+  submitError.value = null;
+}
+
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: isSubmitting,
+  onClose: closeNow,
+});
+
 function openForCreateKeyResult(id: string): void {
   reset();
   goalId.value = id;
   keyResultId.value = undefined;
   editing.value = false;
+  draftBaseline.value = snapshotDraft();
   open.value = true;
 }
 
@@ -164,13 +184,16 @@ function openForUpdateKeyResult(id: string, keyResult: KeyResultClientDTO): void
   draft.unit = keyResult.progress.unit ?? '';
   draft.weight = keyResult.weight;
   currentFollowsInitial.value = false;
+  draftBaseline.value = snapshotDraft();
   open.value = true;
 }
 
 function setOpen(value: boolean): void {
-  if (!value && isSubmitting.value) return;
-  open.value = value;
-  if (!value) submitError.value = null;
+  if (value) {
+    open.value = true;
+    return;
+  }
+  void requestClose();
 }
 
 function validateMeasurement(): boolean {

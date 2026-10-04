@@ -3,5 +3,6 @@ export interface ResponsiveSegmentedFilterOption {
   readonly label: string;
   readonly count?: number;
   readonly countTestId?: string;
+  readonly itemTestId?: string;
   readonly disabled?: boolean;
 }

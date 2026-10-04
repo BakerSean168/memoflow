@@ -95,6 +95,7 @@ import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogDraftStore } from '../../../../layouts/shell/dialog-draft-store';
+import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 
 const { t } = useI18n();
 const dialogDraftStore = useDialogDraftStore();
@@ -216,6 +217,12 @@ const mode = computed(() => props.mode);
 const submitting = ref(false);
 const editingBlocked = ref(false);
 const saving = computed(() => props.saving || submitting.value || editingBlocked.value);
+const isDirty = computed(
+  () =>
+    visible.value &&
+    draftBaseline.value !== null &&
+    JSON.stringify(localTemplate.value) !== draftBaseline.value,
+);
 const { resolveNames } = useLabelCatalog();
 let submitCoordinator: (() => Promise<void>) | null = null;
 let cancelCoordinator: (() => Promise<void>) | null = null;
@@ -271,7 +278,7 @@ watch(
     } else if (currentDraftKey.value) {
       dialogDraftStore.clear(currentDraftKey.value);
     }
-    emit('dirty-change', serialized !== draftBaseline.value);
+    emit('dirty-change', isDirty.value);
   },
   { deep: true },
 );
@@ -315,17 +322,22 @@ watch(
   },
 );
 
-const setVisible = (value: boolean) => {
-  if (!value && saving.value) return;
-  if (!value && cancelCoordinator) {
-    void cancelCoordinator();
+async function closeNow(): Promise<void> {
+  if (cancelCoordinator) {
+    await cancelCoordinator();
     return;
   }
-  if (!value) {
-    clearDraft();
-    retireSession();
-  }
-  emit('update:modelValue', value);
+  cancelOwner();
+}
+
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: saving,
+  onClose: closeNow,
+});
+
+const setVisible = (value: boolean) => {
+  if (!value) void requestClose();
 };
 
 const handleTemplateUpdate = (value: TaskPlanViewModel) => {
@@ -338,12 +350,7 @@ const handleValidationUpdate = (validation: { isValid: boolean }) => {
 };
 
 const handleCancel = () => {
-  if (saving.value) return;
-  if (cancelCoordinator) {
-    void cancelCoordinator();
-    return;
-  }
-  cancelOwner();
+  void requestClose();
 };
 
 function cancelOwner() {

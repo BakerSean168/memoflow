@@ -273,7 +273,7 @@
       </form>
 
       <template #footer>
-        <Button type="button" variant="ghost" :disabled="busy" @click="handleClose">
+        <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">
           {{ t('common.cancel') }}
         </Button>
         <Button
@@ -350,6 +350,7 @@ import {
   ProductDialogShell,
   ProductPropertyChip,
 } from '../../../shared/components';
+import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
 import { formatProductDateTime, getProductTime } from '../../../shared/utils/product-time';
 
@@ -391,6 +392,7 @@ const endPickerOpen = ref(false);
 const activeProperty = ref<ScheduleProperty | null>(null);
 const isEditing = ref(false);
 const newAttendee = ref('');
+const formBaseline = ref('');
 
 function defaultTimedRangeFields(): {
   startDate: string;
@@ -419,6 +421,17 @@ const formData = reactive({
   attendees: [] as string[],
   autoDetectConflicts: true,
 });
+
+function snapshotForm(): string {
+  return JSON.stringify({
+    ...formData,
+    attendees: [...formData.attendees],
+  });
+}
+
+const isDirty = computed(
+  () => props.modelValue && formBaseline.value !== '' && snapshotForm() !== formBaseline.value,
+);
 
 const startDateModel = computed<Ymd | null>({
   get: () => (formData.startDate ? requireYmd(formData.startDate) : null),
@@ -595,15 +608,21 @@ function resetForm(): void {
   endPickerOpen.value = false;
 }
 
-function handleClose(): void {
-  if (busy.value) return;
+function closeNow(): void {
   emit('update:modelValue', false);
   resetForm();
+  formBaseline.value = '';
   submitError.value = '';
 }
 
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy,
+  onClose: closeNow,
+});
+
 function handleVisibleChange(value: boolean): void {
-  if (!value) handleClose();
+  if (!value) void requestClose();
 }
 
 function addAttendee(): void {
@@ -698,6 +717,7 @@ watch(
       formData.endDate = String(time.input.dateValue(schedule.range.end));
       formData.endTime = String(time.input.timeValue(schedule.range.end));
     }
+    if (props.modelValue) formBaseline.value = snapshotForm();
   },
   { immediate: true },
 );
@@ -708,11 +728,15 @@ watch(
     if (!value) return;
 
     submitError.value = '';
-    if (props.schedule) return;
+    if (props.schedule) {
+      formBaseline.value = snapshotForm();
+      return;
+    }
 
     isEditing.value = false;
     resetForm();
     if (props.initialRange) seedInitialRange(props.initialRange);
+    formBaseline.value = snapshotForm();
   },
   { immediate: true },
 );

@@ -17,8 +17,8 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain(':data-testid="`task-occurrence-group-${group.key}`"');
     expect(source).toContain("key: 'overdue' as const");
     expect(source).toContain("key: 'today' as const");
-    expect(source).toContain('data-testid="task-open-schedule"');
-    expect(source).toContain("name: 'ScheduleCalendar'");
+    expect(source).not.toContain('data-testid="task-open-schedule"');
+    expect(source).not.toContain("name: 'ScheduleCalendar'");
     expect(source).not.toContain("'upcoming'");
     expect(source).not.toContain('emptyUpcoming');
     expect(source).not.toContain('task-plan-card');
@@ -32,7 +32,7 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain('<TaskPageToolbar');
     expect(source).not.toContain('<ModuleHeader');
     for (const selector of [
-      'task-surface-trigger',
+      'test-id="task-surface"',
       'task-status-filter',
       'task-plan-state-filter',
       'task-label-filter',
@@ -43,6 +43,7 @@ describe('TaskManagementView occurrence-first surface', () => {
     }
     expect(toolbarSource).toContain('data-primary-action="create-task"');
     expect(toolbarSource).toContain('<ResponsivePrimaryAction');
+    expect(toolbarSource).toContain('<ProductSingleSelectFilter');
     expect(toolbarSource).toContain('<LabelFilterPopover');
     expect(toolbarSource).not.toContain('task-goal-filter');
     expect(toolbarSource).not.toContain('goalFilter');

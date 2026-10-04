@@ -1,10 +1,18 @@
-import { DOMWrapper, mount } from '@vue/test-utils';
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../locales/en-US';
+
+const confirmMock = vi.hoisted(() => vi.fn(async () => true));
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();
+  return { ...actual, useConfirm: confirmMock };
+});
+
+import { Dialog } from '@memoflow/ui-vue-shadcn';
 import CreateScheduleDialog from './CreateScheduleDialog.vue';
 
 const i18n = createI18n({
@@ -28,6 +36,8 @@ afterAll(() => {
 
 describe('CreateScheduleDialog submission lifecycle', () => {
   beforeEach(() => {
+    confirmMock.mockReset();
+    confirmMock.mockResolvedValue(true);
     // Freeze the clock at mid-day UTC so nowDateStr()/nowTimeStr()/
     // oneHourLaterTimeStr() can never straddle a date/TZ boundary, keeping
     // startTimestamp < endTimestamp deterministic regardless of when CI runs.
@@ -177,6 +187,90 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     expect(title.element.value).toBe('Release review');
     expect(document.querySelector('[role="alert"]')?.textContent).toContain('still here');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
+  }, 20_000);
+
+  it('closes a clean draft without confirmation', async () => {
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
+      (button) => button.textContent?.trim() === 'Cancel',
+    );
+    expect(cancel).toBeDefined();
+    await new DOMWrapper(cancel!).trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).not.toHaveBeenCalled();
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+    wrapper.unmount();
+  }, 20_000);
+
+  it('guards both cancel and dialog dismissal when the draft is dirty', async () => {
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    await new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    ).setValue('Unsaved schedule');
+    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
+      (button) => button.textContent?.trim() === 'Cancel',
+    );
+    await new DOMWrapper(cancel!).trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+    wrapper.unmount();
+
+    confirmMock.mockClear();
+    const dismissedWrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    await new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    ).setValue('Unsaved schedule again');
+    dismissedWrapper.findComponent(Dialog).vm.$emit('update:open', false);
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(dismissedWrapper.emitted('update:modelValue')).toEqual([[false]]);
+    dismissedWrapper.unmount();
+  }, 20_000);
+
+  it('keeps a dirty draft open when discard confirmation is rejected', async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const title = new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    );
+    await title.setValue('Keep this schedule');
+    const cancel = [...document.querySelectorAll<HTMLButtonElement>('button')].find(
+      (button) => button.textContent?.trim() === 'Cancel',
+    );
+    await new DOMWrapper(cancel!).trigger('click');
+    await flushPromises();
+
+    expect(confirmMock).toHaveBeenCalledOnce();
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    expect(title.element.value).toBe('Keep this schedule');
     wrapper.unmount();
   }, 20_000);
 

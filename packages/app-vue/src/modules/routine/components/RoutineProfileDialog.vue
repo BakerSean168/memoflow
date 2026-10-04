@@ -1,5 +1,5 @@
 <template>
-  <Dialog :open="open" @update:open="emit('update:open', $event)">
+  <Dialog :open="open" @update:open="handleOpenChange">
     <ProductDialogShell
       :open="open"
       test-id="routine-profile-dialog"
@@ -71,12 +71,7 @@
       </form>
 
       <template #footer>
-        <Button
-          type="button"
-          variant="ghost"
-          :disabled="saving"
-          @click="emit('update:open', false)"
-        >
+        <Button type="button" variant="ghost" :disabled="saving" @click="requestClose()">
           {{ t('routine.form.cancel') }}
         </Button>
         <Button
@@ -94,12 +89,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { RoutineProfileDto } from '@memoflow/contracts/routine';
 import { ProductAutoTextarea, ProductDialogShell } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
+import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
 
 const props = withDefaults(
   defineProps<{
@@ -118,8 +114,20 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const name = ref('');
 const description = ref('');
+const baseline = ref('');
 const nameLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
+
+function snapshot(): string {
+  return JSON.stringify({ name: name.value, description: description.value });
+}
+
+const isDirty = computed(() => props.open && snapshot() !== baseline.value);
+const { requestClose } = useDialogCloseGuard({
+  dirty: isDirty,
+  busy: () => props.saving,
+  onClose: () => emit('update:open', false),
+});
 
 watch(
   () => [props.open, props.profile?.id, props.profile?.version],
@@ -129,9 +137,18 @@ watch(
     description.value = props.profile?.description ?? '';
     nameLimitFeedback.hide();
     descriptionLimitFeedback.hide();
+    baseline.value = snapshot();
   },
   { immediate: true },
 );
+
+function handleOpenChange(value: boolean): void {
+  if (value) {
+    emit('update:open', true);
+    return;
+  }
+  void requestClose();
+}
 
 function submit(): void {
   const normalized = name.value.trim();

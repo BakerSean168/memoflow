@@ -15,6 +15,7 @@ import {
   workspaceChromeBudget,
   shouldCollapsePanelWidth,
   shouldCollapseSidebarWidth,
+  resolveSidebarPresentation,
   shouldAutoCollapseSidebar,
 } from './panel-geometry';
 
@@ -142,12 +143,16 @@ describe('computePanelGeometry', () => {
   });
 });
 
-describe('shouldAutoCollapseSidebar', () => {
-  it('releases sidebar space only for an effectively narrow viewport', () => {
-    expect(shouldAutoCollapseSidebar(853)).toBe(true);
+describe('responsive sidebar presentation', () => {
+  it('switches narrow viewports to overlay without changing the docked preference', () => {
+    expect(resolveSidebarPresentation(853)).toBe('overlay');
+    expect(resolveSidebarPresentation(959)).toBe('overlay');
+    expect(resolveSidebarPresentation(960)).toBe('docked');
+    expect(resolveSidebarPresentation(1024)).toBe('docked');
+
+    // Compatibility: geometry still treats overlay navigation as zero occupied width.
     expect(shouldAutoCollapseSidebar(959)).toBe(true);
     expect(shouldAutoCollapseSidebar(960)).toBe(false);
-    expect(shouldAutoCollapseSidebar(1024)).toBe(false);
   });
 });
 

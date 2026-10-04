@@ -110,6 +110,11 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain("intent: 'deeplink'");
   });
 
+  it('aligns the chat title bar with the business-panel tab strip height', () => {
+    expect(source).toContain('class="flex h-9 shrink-0 items-center border-b');
+    expect(source).not.toContain('class="flex h-11 shrink-0 items-center border-b');
+  });
+
   it('keeps workflow intent visible without turning the conversation canvas into a dashboard', () => {
     expect(source).toContain('data-testid="ai-active-intent"');
     expect(source).toContain("toolMode !== 'chat'");
