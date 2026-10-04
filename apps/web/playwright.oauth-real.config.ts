@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
-import { getRealOAuthHostDevOrigin } from './playwright.server';
+import { getRealOAuthPlaywrightBaseURL } from './playwright.server';
 
-const hostDevOrigin = getRealOAuthHostDevOrigin();
+const hostDevOrigin = getRealOAuthPlaywrightBaseURL();
 
 /**
  * Real-provider GitHub OAuth acceptance.

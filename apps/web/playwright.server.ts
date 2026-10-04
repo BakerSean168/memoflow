@@ -197,6 +197,19 @@ export function getRealOAuthHostDevOrigin(): string {
   return origin;
 }
 
+/**
+ * Playwright config modules are also loaded by the test inventory collector.
+ * Discovery must be side-effect free and must not require machine credentials
+ * or a live host-dev ingress. Actual real-provider execution stays fail-closed
+ * through getRealOAuthHostDevOrigin().
+ */
+export function getRealOAuthPlaywrightBaseURL(): string {
+  if (process.env.TEST_INVENTORY_LIST === '1') {
+    return 'https://real-oauth-inventory.invalid';
+  }
+  return getRealOAuthHostDevOrigin();
+}
+
 export function createPowerSyncTestServer() {
   const port = process.env.TEST_POWERSYNC_PORT ?? '58082';
 

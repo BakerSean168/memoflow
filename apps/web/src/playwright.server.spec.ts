@@ -182,4 +182,19 @@ describe('playwright.server', () => {
       'Real OAuth acceptance requires the HTTPS host-dev origin',
     );
   });
+
+  it('keeps Playwright inventory discovery side-effect free without weakening real OAuth execution', async () => {
+    process.env.TEST_INVENTORY_LIST = '1';
+    process.env.MEMOFLOW_WEB_URL = 'http://127.0.0.1:4173';
+    process.env.E2E_WEB_BASE_URL = 'http://127.0.0.1:4173';
+    delete process.env.E2E_REAL_OAUTH_WEB_ORIGIN;
+
+    const { getRealOAuthPlaywrightBaseURL, getRealOAuthHostDevOrigin } =
+      await import('../playwright.server');
+
+    expect(getRealOAuthPlaywrightBaseURL()).toBe('https://real-oauth-inventory.invalid');
+    expect(() => getRealOAuthHostDevOrigin()).toThrow(
+      'Real OAuth acceptance requires the HTTPS host-dev origin',
+    );
+  });
 });
