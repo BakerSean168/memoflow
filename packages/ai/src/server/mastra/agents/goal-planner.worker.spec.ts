@@ -440,7 +440,7 @@ describe('GoalPlannerWorker bounded external research', () => {
     });
     expect(readGoalPlannerResearchEvidence(requestContext)).toHaveLength(3);
     const initialPrompt = String(generate.mock.calls[0]?.[0] ?? '');
-    expect(initialPrompt).toContain('bounded research phase may still run first');
+    expect(initialPrompt).toContain('bounded research phase MUST run first');
     expect(initialPrompt).toContain('needs_research is mandatory');
     expect(initialPrompt).toContain('do not substitute model memory');
     const initialOptions = generate.mock.calls[0]?.[1] as {
@@ -448,6 +448,12 @@ describe('GoalPlannerWorker bounded external research', () => {
     };
     expect(String(initialOptions.structuredOutput?.instructions ?? '')).toContain(
       'needs_research has requests',
+    );
+    expect(String(initialOptions.structuredOutput?.instructions ?? '')).toContain(
+      'status MUST be needs_research before any draft_ready response',
+    );
+    expect(String(initialOptions.structuredOutput?.instructions ?? '')).toContain(
+      'forceDraft suppresses clarification only',
     );
     const finalPrompt = String(generate.mock.calls[1]?.[0] ?? '');
     expect(finalPrompt).toContain('external_untrusted');

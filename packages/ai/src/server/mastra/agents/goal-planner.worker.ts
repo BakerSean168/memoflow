@@ -209,6 +209,7 @@ function goalPlanningStructuredOutputInstructions(allowResearch: boolean): strin
     ...(allowResearch
       ? [
           'needs_research has requests: 1-3 objects { query, intent }, where intent is exactly requirements, timeline, or resources. It has no candidateDraft.',
+          'If the user explicitly requires verification of current or official public facts, or a material plan branch/date depends on live or time-sensitive public facts not already grounded in canonical external evidence, status MUST be needs_research before any draft_ready response. Never substitute model memory for that verification. forceDraft suppresses clarification only and does not suppress required research.',
         ]
       : []),
     'draft_ready has candidateDraft with goal, keyResults, tasks, knowledge, rationale, warnings.',
@@ -568,7 +569,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       researchAvailable
         ? `Goal Research product policy is enabled for ${GOAL_RESEARCH_POLICY.scope.join(', ')} and the selected provider has an explicit hosted-search contract. If the plan materially depends on current public facts that are not already grounded in the canonical context, return needs_research with 1-${GOAL_RESEARCH_POLICY.maxRequestsPerPlan} focused requests. If the user explicitly requests verification of current or official public facts and the canonical external evidence is absent or insufficient, needs_research is mandatory; do not substitute model memory. Otherwise return the normal Goal planning decision.`
         : 'External research is unavailable for this invocation by product policy or provider capability. Return the normal Goal planning decision without waiting for web evidence.',
-      'Follow the mode, forceDraft, revision instruction and clarification controls in the workflow section of the canonical context envelope. Ask only material user-information blockers. When forceDraft is true, do not return needs_clarification; if needs_research is available and current public facts are materially required, that bounded research phase may still run first, then return draft_ready using safe assumptions and record remaining uncertainty in warnings. Regenerate substantively and revise precisely while preserving valid draft parts.',
+      'Follow the mode, forceDraft, revision instruction and clarification controls in the workflow section of the canonical context envelope. Ask only material user-information blockers. When forceDraft is true, do not return needs_clarification; if needs_research is available and current public facts are materially required, the bounded research phase MUST run first rather than guessing from model memory, then return draft_ready using grounded evidence plus safe assumptions and record remaining uncertainty in warnings. Regenerate substantively and revise precisely while preserving valid draft parts.',
       aiContextInstruction(contextEnvelope),
     ].join('\n\n');
 
