@@ -3383,6 +3383,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/provider-web-research.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6088,6 +6098,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/ai-goal-research.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -11790,7 +11808,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 89
+      "fileCount": 90
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12330,7 +12348,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 89
+      "fileCount": 90
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -12358,7 +12376,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 92
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12678,6 +12696,7 @@
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/provider-web-research.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible-model-catalog.gateway.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible.gateway.spec.ts",
@@ -13054,7 +13073,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1129,
+    "unit": 1131,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

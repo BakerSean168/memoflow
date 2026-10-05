@@ -1929,6 +1929,8 @@ long task count in browser perf test
 
 **Dependencies:** Phase 2/4 stable。
 
+**2026-10-05 implementation complete:** AIC-5001 adopts [ADR-115](../../architecture/adr/ADR-115-goal-planner-bounded-external-research-evidence.md). Goal planning now uses a bounded two-pass research decision rather than depending on model tool-calling: normal goals remain one-pass; only research-sensitive goals may request up to three `requirements` / `timeline` / `resources` queries, after which the same Planner must produce its final typed decision. The read-only `IAIWebResearchPort` isolates OpenRouter server Web Search, OpenAI Responses `web_search`, and Gemini Interactions `google_search`; unsupported/custom providers and 429/network failures degrade without blocking Goal creation. Successful evidence is `external_untrusted / external`, bounded and citation-bearing, persisted only in durable workflow state, replayed across clarification/restart, projected as source links in supporting AI context, and never promoted into Goal/KR owner truth. HTTP(S)-only citation contracts reject executable/credential-bearing URLs.
+
 ---
 
 # 9. Dependency order
@@ -2567,9 +2569,10 @@ No Release/Production action is part of AIC-3001 or this AIC-3002 slice.
 
 ## Core convergence closure evidence (2026-10-05; AIC-1001 through AIC-4002)
 
-The non-optional AI interaction convergence scope is code-complete in the current
-worktree through AIC-4002. AIC-5001 remains the explicitly optional Web Research
-follow-up from Phase 5 and is not part of this core closure.
+The non-optional AI interaction convergence scope was code-complete through
+AIC-4002 at this core-closure checkpoint. AIC-5001 was intentionally excluded from
+that core merge as the optional Phase 5 Web Research follow-up; it is now completed
+separately by the AIC-5001 implementation recorded above and ADR-115.
 
 - Goal, Task and Knowledge clarification/recovery now converge on the Chat timeline,
   main Composer and owner-native business surfaces. The shell-owned

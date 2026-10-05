@@ -94,6 +94,51 @@
         </div>
       </div>
 
+      <div
+        v-if="goalResearchEvidence.length"
+        class="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4"
+        data-testid="goal-workflow-research-evidence"
+      >
+        <div class="space-y-1">
+          <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {{ t('aiAssistant.chatPage.workflow.goalResearchTitle') }}
+          </p>
+          <p class="text-xs leading-5 text-muted-foreground">
+            {{ t('aiAssistant.chatPage.workflow.goalResearchExternalHint') }}
+          </p>
+        </div>
+        <div
+          v-for="(evidence, evidenceIndex) in goalResearchEvidence"
+          :key="evidence.intent + ':' + evidence.query + ':' + evidenceIndex"
+          class="space-y-2 rounded-xl border border-border/50 bg-background/70 p-3"
+        >
+          <div class="flex flex-wrap items-center gap-2">
+            <span
+              class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
+            >
+              {{ t('aiAssistant.chatPage.workflow.goalResearchIntent.' + evidence.intent) }}
+            </span>
+            <p class="text-xs text-muted-foreground">{{ evidence.query }}</p>
+          </div>
+          <p class="line-clamp-4 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+            {{ evidence.summary }}
+          </p>
+          <div class="flex flex-wrap gap-x-3 gap-y-1">
+            <a
+              v-for="source in evidence.sources"
+              :key="source.url"
+              :href="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="max-w-full truncate text-xs text-primary underline-offset-4 hover:underline"
+              data-testid="goal-research-source"
+            >
+              {{ source.title }}
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div v-if="goalReviewDraft" class="space-y-2">
         <p data-testid="goal-native-review-hint" class="text-sm text-muted-foreground">
           {{
@@ -389,6 +434,14 @@ type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number]
 const goalReviewDraft = computed(() => {
   const suspension = props.goalWorkflowRun?.suspension;
   return suspension?.type === 'goal_draft_review' ? suspension.draft : null;
+});
+
+const goalResearchEvidence = computed(() => {
+  const suspension = props.goalWorkflowRun?.suspension;
+  if (suspension?.type !== 'goal_draft_review' && suspension?.type !== 'clarification_required') {
+    return [];
+  }
+  return suspension.researchEvidence ?? [];
 });
 
 const goalRecovery = computed(() => {

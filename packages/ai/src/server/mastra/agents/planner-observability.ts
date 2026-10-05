@@ -22,6 +22,16 @@ export function rememberResolvedPlannerModel(
   requestContext.setRaw(RESOLVED_MODEL_ID, model.modelId);
 }
 
+/** Provider/model actually selected by the planner resolver for this invocation. */
+export function resolvedPlannerModel(requestContext: PlannerRequestContext): {
+  providerId?: string;
+  modelId?: string;
+} {
+  const providerId = stringValue(requestContext.getRaw(RESOLVED_PROVIDER_ID));
+  const modelId = stringValue(requestContext.getRaw(RESOLVED_MODEL_ID));
+  return { ...(providerId ? { providerId } : {}), ...(modelId ? { modelId } : {}) };
+}
+
 function stringValue(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
@@ -92,7 +102,8 @@ export async function recordPlannerExecution(
   const providerId = stringValue(input.requestContext.getRaw(RESOLVED_PROVIDER_ID));
   const modelId = stringValue(input.requestContext.getRaw(RESOLVED_MODEL_ID));
   const runId = stringValue(input.requestContext.getRaw('workflowRunId'));
-  const costEstimate = modelId && input.usage ? estimateAIExecutionCost(modelId, input.usage) : undefined;
+  const costEstimate =
+    modelId && input.usage ? estimateAIExecutionCost(modelId, input.usage) : undefined;
   const operationByTask = {
     MASTRA_GOAL_PLANNER: 'workflow.goal.plan',
     MASTRA_TASK_PLANNER: 'workflow.task.plan',

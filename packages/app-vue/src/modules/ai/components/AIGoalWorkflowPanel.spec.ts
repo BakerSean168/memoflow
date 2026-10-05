@@ -21,6 +21,13 @@ const i18n = createI18n({
             goalClarificationHint: 'Needs clarification',
             goalClarificationAnswerPlaceholder: 'Answer here',
             goalDraftTitle: 'Goal Draft',
+            goalResearchTitle: 'External Research Evidence',
+            goalResearchExternalHint: 'External evidence is advisory.',
+            goalResearchIntent: {
+              requirements: 'Requirements',
+              timeline: 'Timeline',
+              resources: 'Resources',
+            },
             goalNativeReviewHint: 'Review the Goal in its owner surface.',
             goalOwnerSubmittedHint: 'Goal owner submission completed.',
             openGoalNativeReview: 'Open Goal Review',
@@ -200,6 +207,21 @@ function reviewRun(): GoalWorkflowRun {
       draft,
       warnings: draft.warnings,
       revision: draft.revision,
+      researchEvidence: [
+        {
+          query: 'Peking University 2027 admissions timeline',
+          intent: 'timeline',
+          summary: 'The official admissions page publishes the application milestones.',
+          trust: 'external_untrusted',
+          provenance: 'external',
+          sources: [
+            {
+              title: 'Peking University admissions',
+              url: 'https://admission.pku.edu.cn/official',
+            },
+          ],
+        },
+      ],
     },
     createdAt: 1,
     updatedAt: 2,
@@ -252,6 +274,10 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-workflow-panel"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="goal-workflow-revision"]').text()).toBe('rev 2');
     expect(wrapper.find('[data-testid="goal-workflow-warnings"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="goal-workflow-research-evidence"]').exists()).toBe(true);
+    const researchSource = wrapper.get('[data-testid="goal-research-source"]');
+    expect(researchSource.text()).toBe('Peking University admissions');
+    expect(researchSource.attributes('href')).toBe('https://admission.pku.edu.cn/official');
     expect(wrapper.text()).toContain('Ship durable goal workflow');
     expect(wrapper.text()).toContain('Pass the reference journey');
     expect(wrapper.text()).toContain('Review the generated schedule before approval.');

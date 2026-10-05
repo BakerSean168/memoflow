@@ -9,11 +9,17 @@ import {
   GoalPlanDraftContentSchema,
   GoalPlanDraftSchema,
   GoalPlanExecutionReceiptSchema,
+  GoalResearchEvidenceSchema,
   type GoalPlanDraft,
+  type GoalResearchEvidence,
   type GoalPlanningDecision,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { GoalPlannerMode, GoalPlannerPort } from '../agents/goal-planner.worker';
+import {
+  readGoalPlannerResearchEvidence,
+  type GoalPlannerMode,
+  type GoalPlannerPort,
+} from '../agents/goal-planner.worker';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';
 
 export const GOAL_CREATE_WORKFLOW_ID = 'goal-create';
@@ -29,6 +35,7 @@ export const GoalCreateWorkflowStateSchema = z
     planningMode: z.enum(['initial', 'revise', 'regenerate']),
     revisionInstruction: z.string().optional(),
     targetRevision: z.number().int().positive(),
+    researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).default([]),
     draft: GoalPlanDraftSchema.optional(),
     priorReceipt: GoalPlanExecutionReceiptSchema.optional(),
   })
@@ -51,6 +58,7 @@ export function initialGoalCreateWorkflowState(
     pendingQuestions: [],
     planningMode: 'initial',
     targetRevision: 1,
+    researchEvidence: [],
   });
 }
 
@@ -91,6 +99,18 @@ function applyStructuredDraftPatch(
   const merged = mergeStructuredPatch(content, patch);
   const parsed = GoalPlanDraftContentSchema.parse(merged);
   return GoalPlanDraftSchema.parse({ ...parsed, revision: draft.revision + 1 });
+}
+
+function mergeGoalResearchEvidence(
+  existing: readonly GoalResearchEvidence[],
+  incoming: readonly GoalResearchEvidence[],
+): GoalResearchEvidence[] {
+  const merged = new Map<string, GoalResearchEvidence>();
+  for (const evidence of [...existing, ...incoming]) {
+    const parsed = GoalResearchEvidenceSchema.parse(evidence);
+    merged.set(`${parsed.intent}:${parsed.query.trim().toLowerCase()}`, parsed);
+  }
+  return [...merged.values()].slice(-8);
 }
 
 function currentExecutionContext(
@@ -161,6 +181,9 @@ export function createGoalCreateWorkflow(input: {
           draft,
           warnings: draft.warnings,
           revision: draft.revision,
+          ...(current.researchEvidence.length > 0
+            ? { researchEvidence: current.researchEvidence }
+            : {}),
           ownerCreate: {
             goalId: goalWorkflowEntityId({
               workflowRunId: runId,
@@ -207,6 +230,9 @@ export function createGoalCreateWorkflow(input: {
             type: 'clarification_required' as const,
             questions: decision.questions,
             round: current.clarification.rounds.length + 1,
+            ...(current.researchEvidence.length > 0
+              ? { researchEvidence: current.researchEvidence }
+              : {}),
             ...(candidateDraft ? { candidateDraft } : {}),
           });
         }
@@ -238,11 +264,20 @@ export function createGoalCreateWorkflow(input: {
             clarification: current.clarification,
             mode: options.mode,
             currentDraft: current.draft,
+            researchEvidence: current.researchEvidence,
             instruction: options.instruction,
             forceDraft: options.forceDraft,
           },
           requestContext,
         );
+        const newResearchEvidence = readGoalPlannerResearchEvidence(requestContext);
+        if (newResearchEvidence.length > 0) {
+          const researchEvidence = mergeGoalResearchEvidence(
+            current.researchEvidence,
+            newResearchEvidence,
+          );
+          await persist({ ...current, researchEvidence });
+        }
         return handlePlanningDecision(decision, options.targetRevision);
       };
 
@@ -310,6 +345,9 @@ export function createGoalCreateWorkflow(input: {
             questions: current.pendingQuestions,
             round: current.clarification.rounds.length + 1,
             candidateDraft: reconciledDraft,
+            ...(current.researchEvidence.length > 0
+              ? { researchEvidence: current.researchEvidence }
+              : {}),
           });
         }
         if (resumeData.type !== 'answer') {

@@ -6,7 +6,12 @@ import { join } from 'node:path';
 import { Mastra } from '@mastra/core/mastra';
 import { RequestContext } from '@mastra/core/request-context';
 import { LibSQLStore } from '@mastra/libsql';
-import { GoalPlanDraftContentSchema, type GoalPlanningDecision } from '@memoflow/contracts/ai';
+import {
+  GoalPlanDraftContentSchema,
+  GoalResearchEvidenceSchema,
+  type GoalPlanningDecision,
+  type GoalResearchEvidence,
+} from '@memoflow/contracts/ai';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -552,5 +557,137 @@ describe('ADR-052 goal.create durable Workflow', () => {
     expect(mutations.createTaskPlan.mock.calls[1]?.[1]).toMatchObject({
       requestId: 'request-retry',
     });
+  });
+  it('deduplicates durable research evidence by normalized intent and query across planning rounds', async () => {
+    const firstEvidence = GoalResearchEvidenceSchema.parse({
+      query: ' Official Deadline ',
+      intent: 'timeline',
+      summary: 'First grounded answer.',
+      sources: [{ title: 'Official', url: 'https://example.edu/deadline' }],
+      trust: 'external_untrusted',
+      provenance: 'external',
+    });
+    const updatedEvidence = GoalResearchEvidenceSchema.parse({
+      query: 'official deadline',
+      intent: 'timeline',
+      summary: 'Updated grounded answer.',
+      sources: [{ title: 'Official', url: 'https://example.edu/deadline-new' }],
+      trust: 'external_untrusted',
+      provenance: 'external',
+    });
+    let call = 0;
+    const plan = vi.fn(async (_request: GoalPlannerRequest, requestContext: RequestContext) => {
+      call += 1;
+      requestContext.setRaw('goalPlannerResearchEvidence', [
+        call === 1 ? firstEvidence : updatedEvidence,
+      ]);
+      if (call === 1) {
+        return {
+          status: 'needs_clarification',
+          reason: 'Need a user-owned constraint.',
+          questions: ['How many hours per week?'],
+        } as const;
+      }
+      return {
+        status: 'draft_ready',
+        reason: 'Ready.',
+        candidateDraft: draftContent,
+      } as const;
+    });
+    const { buildWorkflow } = await harness({ plan });
+    const runId = 'workflow-research-normalized-dedupe';
+    const firstRun = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    await firstRun.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('research-normalize-start'),
+    });
+    const restored = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const reviewed = await restored.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['7 hours'] },
+      requestContext: mastraRequestContext('research-normalize-answer'),
+    });
+
+    expect(stepSuspendPayload(reviewed)).toMatchObject({
+      type: 'goal_draft_review',
+      researchEvidence: [updatedEvidence],
+    });
+  });
+
+  it('persists external research evidence across clarification restart without promoting it into owner draft truth', async () => {
+    const evidence: GoalResearchEvidence = {
+      query: 'Official JLPT N1 2026 application dates',
+      intent: 'timeline',
+      summary: 'The official page publishes the current registration window.',
+      sources: [{ title: 'JLPT official registration', url: 'https://www.jlpt.jp/e/application/' }],
+      trust: 'external_untrusted',
+      provenance: 'external',
+    };
+    let call = 0;
+    const plan = vi.fn(
+      async (
+        request: GoalPlannerRequest,
+        requestContext: RequestContext,
+      ): Promise<GoalPlanningDecision> => {
+        call += 1;
+        if (call === 1) {
+          requestContext.setRaw('goalPlannerResearchEvidence', [evidence]);
+          return {
+            status: 'needs_clarification',
+            reason: 'Weekly capacity is still user-owned information.',
+            questions: ['How many hours can you study each week?'],
+          };
+        }
+        expect(request.researchEvidence).toEqual([evidence]);
+        return {
+          status: 'draft_ready',
+          reason: 'Ready after clarification.',
+          candidateDraft: draftContent,
+        };
+      },
+    );
+    const { buildWorkflow } = await harness({ plan });
+    const runId = 'workflow-research-evidence-restart';
+    const firstRun = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const first = await firstRun.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('research-start'),
+    });
+
+    expect(stepSuspendPayload(first)).toMatchObject({
+      type: 'clarification_required',
+      researchEvidence: [evidence],
+    });
+
+    const restored = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const reviewed = await restored.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['7 hours'] },
+      requestContext: mastraRequestContext('research-answer'),
+    });
+
+    expect(plan).toHaveBeenCalledTimes(2);
+    expect(stepSuspendPayload(reviewed)).toMatchObject({
+      type: 'goal_draft_review',
+      draft: { goal: { name: 'Pass JLPT N1' } },
+      researchEvidence: [evidence],
+    });
+    expect((stepSuspendPayload(reviewed) as { draft: unknown }).draft).not.toHaveProperty(
+      'researchEvidence',
+    );
   });
 });

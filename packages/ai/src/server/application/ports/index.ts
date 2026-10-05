@@ -84,6 +84,12 @@ export type {
 } from './knowledge-query.port';
 export type { IKnowledgeSourcePort } from './knowledge-source.port';
 export type {
+  AIWebResearchCapabilityInput,
+  AIWebResearchInput,
+  AIWebResearchResult,
+  IAIWebResearchPort,
+} from './web-research.port';
+export type {
   AISelectedEntityContextProjection,
   AISelectedEntityContextReadInput,
   IAISelectedEntityContextReadPort,

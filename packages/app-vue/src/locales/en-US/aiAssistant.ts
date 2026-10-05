@@ -215,6 +215,14 @@ export default {
       openGoalNativeReview: 'Review Goal',
       goalNativeReviewHint: 'Review Goal and Key Results in the native Goal form.',
       goalDraftTitle: 'Goal Draft',
+      goalResearchTitle: 'External Research Evidence',
+      goalResearchExternalHint:
+        'Public web evidence informs planning only; it never overrides your input or Goal owner facts.',
+      goalResearchIntent: {
+        requirements: 'Requirements',
+        timeline: 'Timeline',
+        resources: 'Resources',
+      },
       noteCreatedTitle: 'Knowledge Note Created',
       noteTopicFallback: 'Create a knowledge note from this conversation',
       tools: {

@@ -131,6 +131,7 @@ updated: 2026-10-03T10:30:00+09:00
 | [ADR-112](./ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md) | Owner Native Surface Orchestration + Quick Surface Reuse | 已采纳（target-design，待实施） | 2026-09-29 |
 | [ADR-113](./ADR-113-retire-product-governance-runtime-keep-engineering-governance.md) | Retire Product Governance Runtime, Keep Engineering Governance | 已采纳并实施（GOV-7903） | 2026-09-29 |
 | [ADR-114](./ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) | Desktop Update Domain、Runtime Boundary 与 Installation Ownership | 已采纳并实施（Windows / Linux；macOS 延后） | 2026-09-30 |
+| [ADR-115](./ADR-115-goal-planner-bounded-external-research-evidence.md) | Goal Planner Bounded External Research Evidence | 已采纳并实施（AIC-5001） | 2026-10-05 |
 
 ## 维护规则
 

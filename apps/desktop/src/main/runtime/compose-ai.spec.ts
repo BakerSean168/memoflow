@@ -21,6 +21,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     MastraModelResolver: vi.fn(function MastraModelResolverMock() {
       return { tag: 'desktop-mastra-model-resolver' };
     }),
+    ProviderWebResearchAdapter: vi.fn(function ProviderWebResearchAdapterMock(...args: unknown[]) {
+      return { tag: 'desktop-web-research', args };
+    }),
     MastraAIRuntime: vi.fn(function MastraAIRuntimeMock(input: unknown) {
       return { tag: 'desktop-mastra-runtime', input };
     }),
@@ -81,6 +84,7 @@ import {
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  ProviderWebResearchAdapter,
 } from '@memoflow/ai';
 import { createAIElectronModule } from '@memoflow/ai/electron';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
@@ -167,6 +171,10 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
     );
+    expect(ProviderWebResearchAdapter).toHaveBeenCalledWith(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
+    );
     expect(ConversationShellSource).toHaveBeenCalledWith(repositorySet.conversationRepository);
     expect(DesktopGoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
@@ -202,6 +210,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       knowledgeSourcePort,
       executionRecordPort: repositorySet.executionRecordPort,
       usageReadPort: repositorySet.executionRecordPort,
+      webResearchPort: vi.mocked(ProviderWebResearchAdapter).mock.results[0].value,
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,

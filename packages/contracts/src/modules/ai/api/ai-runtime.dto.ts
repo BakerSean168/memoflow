@@ -6,6 +6,7 @@ import {
   GoalPlanExecutionFailureSchema,
   GoalPlanExecutionReceiptSchema,
 } from './ai-goal-create-workflow.dto';
+import { GoalResearchEvidenceSchema } from './ai-goal-research.dto';
 import {
   TaskCreateClientInputSchema,
   TaskPlanDraftSchema,
@@ -372,12 +373,14 @@ export const AIWorkflowSuspensionSchema = z
       questions: z.array(z.string().min(1)).min(1).max(3),
       round: z.number().int().positive().optional(),
       candidateDraft: GoalPlanDraftSchema.optional(),
+      researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
     }),
     z.object({
       type: z.literal('goal_draft_review'),
       draft: GoalPlanDraftSchema,
       warnings: z.array(z.string()).default([]),
       revision: z.number().int().positive(),
+      researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
       ownerCreate: z
         .object({
           goalId: z.string().min(1),

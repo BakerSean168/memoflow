@@ -27,6 +27,7 @@ import {
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  ProviderWebResearchAdapter,
   type IAIActivityReadPort,
   type IAITaskDashboardReadPort,
   type MastraStorageConfig,
@@ -156,6 +157,10 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     taskPlanMutationPort,
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
     knowledgeSourcePort,
+    webResearchPort: new ProviderWebResearchAdapter(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
+    ),
     executionRecordPort: repositorySet.executionRecordPort,
     usageReadPort: repositorySet.executionRecordPort,
     routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
