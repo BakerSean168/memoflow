@@ -121,7 +121,11 @@ async function seedAiLocalState(
  * Wait for model readiness, drive input via fill+input event, and assert SSE completes
  * so hasWorkflowUserMessages/chatLoading unlock Start Agent / knowledge actions.
  */
-async function sendComposerMessage(page: Page, message: string): Promise<void> {
+async function sendComposerMessage(
+  page: Page,
+  message: string,
+  transport: 'assistant' | 'goal-workflow' = 'assistant',
+): Promise<void> {
   const composer = page.getByTestId('ai-chat-composer');
   await expect(composer).toBeEnabled({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
@@ -140,15 +144,17 @@ async function sendComposerMessage(page: Page, message: string): Promise<void> {
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
 
-  const sseResponse = page.waitForResponse(
+  const expectedPath =
+    transport === 'goal-workflow' ? '/ai/runtime/workflow/start' : '/ai/runtime/assistant/sse';
+  const sendResponse = page.waitForResponse(
     (response) =>
-      response.url().includes('/ai/runtime/assistant/sse') &&
+      response.url().includes(expectedPath) &&
       response.request().method() === 'POST' &&
       response.status() === 200,
     { timeout: TIMEOUT_CONFIG.NAVIGATION },
   );
   await sendButton.click();
-  await sseResponse;
+  await sendResponse;
 
   // Composer clears after a successful Mastra open-chat turn starts.
   await expect(composer).toHaveValue('', {
@@ -248,19 +254,19 @@ test.describe('AI Goal Workflow', () => {
       'Ask my knowledge base how knowledge answers stay grounded in citations.',
     );
 
-    // Workflow output lives in the mutually exclusive right-side surface on mobile.
-    // The header badge signals that context is available; switch back to focus to inspect it.
-    await panelToggle.click();
-    await expect(shell).toHaveAttribute('data-shell-state', 'focus');
-    await expect(page.getByTestId('business-panel')).toBeVisible();
-
-    const workflowTab = page.getByTestId('business-panel-workflow');
-    await expect(workflowTab).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await workflowTab.click();
-
+    // Workflow diagnostics now stay inside the AI conversation on mobile instead of
+    // reopening the retired BusinessPanel.workflow surface.
+    const contextPanel = page.getByTestId('ai-context-panel');
+    await expect(contextPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
+
+    // The diagnostic sheet remains explicitly user-controlled after automatic projection.
+    await page.getByTestId('ai-context-panel-close').click();
+    await expect(contextPanel).toBeHidden();
+    await page.getByTestId('ai-context-panel-toggle').click();
+    await expect(contextPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
   });
 
   test('[P0] restores a pending Goal Agent approval run after refresh', async ({ page }) => {
@@ -310,15 +316,14 @@ test.describe('AI Goal Workflow', () => {
     await sendComposerMessage(
       page,
       'Create a structured AI workflow goal through the Agent runtime and execute the approved plan.',
+      'goal-workflow',
     );
 
     // Unified composer intent detection starts goal.create automatically. ADR-052:
     // goal.create renders in the durable Workflow panel, not a
     // legacy goal-agent-panel.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
-    await expect(workflowPanel).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
     expect(ownerGoalId).toBeTruthy();
@@ -344,8 +349,14 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
 
-    // Native Goal creation returns to Goals; select Workflow to inspect recovery.
-    await page.getByTestId('business-panel-workflow').click();
+    // Native Goal creation returns to Goals. Open Chat-local diagnostics explicitly
+    // to inspect recovery; the shell-owned Workflow surface is retired.
+    const contextToggle = page.getByTestId('ai-desktop-context-panel-toggle');
+    await expect(contextToggle).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await contextToggle.click();
+    await expect(page.getByTestId('ai-context-panel')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
 
     // Controlled executor: the first approved execution is partial, so the
     // durable runtime suspends with a recovery_required suspension.
@@ -364,6 +375,14 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
     expect(telemetry.goalAgentApprovalResumeCount).toBe(1);
     expect(telemetry.goalAgentExecuteRequestCount).toBe(1);
+
+    // Recovery controls live in Chat. Close the optional diagnostics panel before
+    // acting so the primary-path assertion does not depend on the secondary workbench
+    // geometry or pointer stacking.
+    await page.getByTestId('ai-context-panel-close').click();
+    await expect(page.getByTestId('ai-context-panel')).toBeHidden({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
 
     const retryButton = page.getByTestId('goal-agent-retry-execution');
     await expect(retryButton).toBeEnabled({
@@ -592,14 +611,19 @@ test.describe('AI Goal Workflow', () => {
     await sendComposerMessage(
       page,
       'Create a structured AI workflow goal through the Agent runtime and cancel before approving execution.',
+      'goal-workflow',
     );
 
     const workflowPanel = page.getByTestId('goal-workflow-panel');
-    await expect(workflowPanel).toBeVisible({
+    // AIC-2101/3003 demote workflow diagnostics from the default Goal path.
+    // The durable run is suspended, but the optional context panel stays closed
+    // until the user explicitly asks for diagnostics.
+    await expect(workflowPanel).toBeHidden({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(workflowPanel).toContainText(/suspended/i);
-    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
+    // The owner-native review is already open; its secondary reopen control lives
+    // inside the intentionally hidden diagnostics panel.
+    await expect(page.getByTestId('goal-open-native-review')).toBeHidden();
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
@@ -613,11 +637,13 @@ test.describe('AI Goal Workflow', () => {
     await expect(nativeReview).toBeHidden();
     await page.getByTestId('goal-agent-cancel-run').click();
 
-    await expect(workflowPanel).toContainText(/cancelled/i, {
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
+    // Cancellation is confirmed by durable runtime telemetry below. Keep diagnostics
+    // closed so the primary Goal path remains owner-native and uncluttered.
+    await expect(workflowPanel).toBeHidden({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
     expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');

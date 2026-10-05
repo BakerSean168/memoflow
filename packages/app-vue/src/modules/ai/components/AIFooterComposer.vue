@@ -131,9 +131,9 @@
           ref="composerTextarea"
           :value="modelValue"
           rows="1"
-          class="block min-h-[32px] w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0 disabled:cursor-wait"
+          class="block min-h-[32px] w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0"
           :style="{ maxHeight: `${textareaMaxPx}px` }"
-          :disabled="loading"
+          :disabled="!canType"
           :placeholder="t('aiAssistant.dialogs.chat.messagePlaceholder')"
           :aria-label="t('aiAssistant.dialogs.chat.messagePlaceholder')"
           data-testid="ai-chat-composer"
@@ -465,6 +465,7 @@ const mentionSuggestions = computed(() => {
   return ranked.slice(0, 6);
 });
 
+const canType = computed(() => true);
 const canSubmit = computed(
   () =>
     !props.loading &&

@@ -72,6 +72,52 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(viewComposable).not.toContain('resumeAgentRun');
   });
 
+  it('dispatches explicit Goal creation directly to the durable workflow before the generic Assistant path', () => {
+    const goalDispatch = source.indexOf("inferredMode === 'goal-create'");
+    const prepareTurn = source.indexOf('await prepareWorkflowTurn()', goalDispatch);
+    const startGoal = source.indexOf('await startGoalAgentRun(workflowTurn.content)', prepareTurn);
+    const directReturn = source.indexOf('return;', startGoal);
+    const assistantDispatch = source.indexOf('await handleSendChatBase()', directReturn);
+    expect(goalDispatch).toBeGreaterThan(0);
+    expect(prepareTurn).toBeGreaterThan(goalDispatch);
+    expect(startGoal).toBeGreaterThan(prepareTurn);
+    expect(directReturn).toBeGreaterThan(startGoal);
+    expect(assistantDispatch).toBeGreaterThan(directReturn);
+    expect(source).toContain("if (started === false) toolMode.value = 'chat'");
+  });
+
+  it('routes an active Goal clarification reply through the workflow before generic Assistant dispatch', () => {
+    const clarificationRoute = source.indexOf('if (goalAgentWaitingForClarification.value)');
+    const prepareTurn = source.indexOf('await prepareWorkflowTurn()', clarificationRoute);
+    const resume = source.indexOf(
+      'await submitGoalClarificationResponse(prepared.content)',
+      prepareTurn,
+    );
+    const directReturn = source.indexOf('return;', resume);
+    const assistantDispatch = source.indexOf('await handleSendChatBase()', directReturn);
+    expect(clarificationRoute).toBeGreaterThan(0);
+    expect(prepareTurn).toBeGreaterThan(clarificationRoute);
+    expect(resume).toBeGreaterThan(prepareTurn);
+    expect(directReturn).toBeGreaterThan(resume);
+    expect(assistantDispatch).toBeGreaterThan(directReturn);
+  });
+
+  it('routes Goal review revision turns through the durable workflow before generic Assistant dispatch', () => {
+    const reviewRoute = source.indexOf('if (goalAgentWaitingForApproval.value)');
+    const prepareTurn = source.indexOf('await prepareWorkflowTurn()', reviewRoute);
+    const revise = source.indexOf(
+      'await submitGoalRevisionResponse(prepared.content)',
+      prepareTurn,
+    );
+    const directReturn = source.indexOf('return;', revise);
+    const assistantDispatch = source.indexOf('await handleSendChatBase()', directReturn);
+    expect(reviewRoute).toBeGreaterThan(0);
+    expect(prepareTurn).toBeGreaterThan(reviewRoute);
+    expect(revise).toBeGreaterThan(prepareTurn);
+    expect(directReturn).toBeGreaterThan(revise);
+    expect(assistantDispatch).toBeGreaterThan(directReturn);
+  });
+
   it('auto-routes knowledge queries from the unified composer instead of exposing a manual QA trigger', () => {
     expect(viewComposable).toContain('useAIKnowledgeQaWorkflow');
     expect(source).toContain('inferWorkflowMode(chatMessage.value)');
@@ -88,7 +134,12 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@cancel="cancelTaskAgentRun"');
     expect(source).toContain('@retry="retryTaskAgentExecution"');
     expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
-    expect(source).toContain('@submit-clarification="submitKnowledgeClarification"');
+    expect(source).toContain('taskAgentWaitingForClarification.value');
+    expect(source).toContain('submitTaskClarificationResponse(prepared.content)');
+    expect(source).toContain('knowledgeCaptureWaitingForClarification.value');
+    expect(source).toContain('submitKnowledgeClarificationResponse(prepared.content)');
+    expect(source).not.toContain('@submit-clarification="submitKnowledgeClarification"');
+    expect(source).not.toContain('@submit-clarification="submitTaskClarification"');
     expect(source).toContain('@cancel="cancelKnowledgeCaptureRun"');
     expect(source).toContain('@retry="retryKnowledgeCaptureExecution"');
     expect(taskPanel).toContain('data-testid="task-agent-confirm-run"');
@@ -122,11 +173,20 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('max-w-[52rem]');
   });
 
-  it('keeps the retained workflow surface as non-owner context/status composition', () => {
-    expect(source).toContain('shellStore?.setWorkflowAvailable(available, itemCount)');
-    expect(source).toContain("requestContextPanel('automatic')");
-    expect(source).toContain('shellStore.closeWorkflowSurface()');
-    expect(source).toContain('SHELL_WORKFLOW_MOUNT_KEY');
+  it('keeps Goal owner-first while retaining workflow context as an explicit secondary surface', () => {
+    expect(source).not.toContain('setWorkflowAvailable(');
+    expect(source).toContain(
+      "if (available && !wasAvailable && mode !== 'goal-create') requestContextPanel('automatic');",
+    );
+    expect(source).toContain(
+      "if (hasWorkflowContext.value && toolMode.value !== 'goal-create') requestContextPanel('explicit');",
+    );
+    expect(source).toContain("if (workflow !== 'goal-create') return;");
+    expect(source).toContain("requestContextPanel('explicit')");
+    expect(source).toContain('data-testid="ai-context-panel-toggle"');
+    expect(source).toContain('data-testid="ai-desktop-context-panel-toggle"');
+    expect(source).not.toContain('closeWorkflowSurface()');
+    expect(source).toContain('<Teleport to="body" :disabled="true">');
     expect(source).toContain('<AIContextPanel');
     expect(source).toContain('<AIGoalWorkflowPanel');
     expect(source).toContain('<AITaskWorkflowPanel');

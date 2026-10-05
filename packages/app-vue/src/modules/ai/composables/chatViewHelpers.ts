@@ -92,8 +92,7 @@ export function getWorkflowStatusText(
     if (params.goalWorkflowStage === 'result') {
       if (params.goalExecutionSummary?.status === 'partial')
         return formatExecutionOutcome('partial');
-      if (params.goalExecutionSummary?.status === 'failed')
-        return formatExecutionOutcome('failed');
+      if (params.goalExecutionSummary?.status === 'failed') return formatExecutionOutcome('failed');
       return t('aiAssistant.dialogs.automation.executionRecorded');
     }
     if (params.goalWorkflowStage === 'clarification')
@@ -109,7 +108,8 @@ export function getWorkflowStatusText(
         ? t('aiAssistant.chatPage.workflow.goalClarificationHint')
         : t('aiAssistant.chatPage.workflow.taskAwaitingApprovalHint');
     }
-    if (params.taskWorkflowRun?.status === 'completed') return t('aiAssistant.dialogs.automation.executionRecorded');
+    if (params.taskWorkflowRun?.status === 'completed')
+      return t('aiAssistant.dialogs.automation.executionRecorded');
     return t('aiAssistant.chatPage.workflow.taskCollectingHint');
   }
   if (params.toolMode === 'knowledge-capture') {
@@ -119,7 +119,8 @@ export function getWorkflowStatusText(
         ? t('aiAssistant.chatPage.workflow.goalClarificationHint')
         : t('aiAssistant.chatPage.workflow.noteDraftReadyHint');
     }
-    if (params.knowledgeCaptureRun?.status === 'completed') return t('aiAssistant.dialogs.automation.executionRecorded');
+    if (params.knowledgeCaptureRun?.status === 'completed')
+      return t('aiAssistant.dialogs.automation.executionRecorded');
     return t('aiAssistant.chatPage.workflow.knowledgeCaptureCollectingHint');
   }
   if (params.toolMode === 'knowledge-qa') {
@@ -153,9 +154,7 @@ export interface ChatViewInitContext {
 }
 
 /** Adjusts the composer textarea height based on content. */
-export function adjustComposerHeight(
-  getComposerTextarea: () => HTMLTextAreaElement | null,
-): void {
+export function adjustComposerHeight(getComposerTextarea: () => HTMLTextAreaElement | null): void {
   const textarea = getComposerTextarea();
   if (!textarea) return;
   const styles = window.getComputedStyle(textarea);
@@ -194,8 +193,8 @@ export async function maybeRenameConversation(
 /** Lifecycle hook bindings for the chat view. */
 export interface ChatViewLifecycleContext {
   chatMessage: { value: string };
-  chatTimeline: { value: Array<{ id: string; content: string }> };
-  scrollMessagesToBottom: () => void;
+  chatTimeline: { value: Array<{ id: string; content: string; status?: string }> };
+  scrollMessagesToBottom: (options?: { streaming?: boolean; force?: boolean }) => void;
   abortActiveStream: () => void;
   adjustComposerHeight: () => void;
 }
@@ -214,8 +213,11 @@ export function bindChatViewLifecycle(
     () => hooks.nextTick(() => ctx.adjustComposerHeight()),
   );
   hooks.watch(
-    () => ctx.chatTimeline.value.map((item) => `${item.id}:${item.content.length}`).join('|'),
-    () => ctx.scrollMessagesToBottom(),
+    () =>
+      ctx.chatTimeline.value
+        .map((item) => `${item.id}:${item.content.length}:${item.status ?? ''}`)
+        .join('|'),
+    () => ctx.scrollMessagesToBottom({ streaming: true }),
   );
   hooks.onBeforeUnmount(() => ctx.abortActiveStream());
 }
@@ -223,8 +225,7 @@ export function bindChatViewLifecycle(
 /** Runs the onMounted initialization sequence. */
 export async function initializeChatView(ctx: ChatViewInitContext): Promise<void> {
   ctx.resetChatSession('chat', ctx.getDefaultConversationName);
-  ctx.lastActiveConversationId.value =
-    localStorage.getItem('ai:last-conversation-id') || '';
+  ctx.lastActiveConversationId.value = localStorage.getItem('ai:last-conversation-id') || '';
 
   try {
     try {
@@ -237,9 +238,7 @@ export async function initializeChatView(ctx: ChatViewInitContext): Promise<void
     await ctx.loadConversationList();
 
     const preferredConversation =
-      ctx.conversationList.value.find(
-        (item) => item.id === ctx.lastActiveConversationId.value,
-      ) ||
+      ctx.conversationList.value.find((item) => item.id === ctx.lastActiveConversationId.value) ||
       ctx.conversationList.value[0] ||
       null;
 

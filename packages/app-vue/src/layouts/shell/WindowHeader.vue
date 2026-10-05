@@ -56,8 +56,6 @@ const props = defineProps<{
   sidebarCollapsed: boolean;
   /** 右侧面板是否打开（独立于业务 Tab 和左侧栏）。 */
   rightPanelOpen: boolean;
-  /** 工作流等待用户查看时显示在右侧面板 Toggle 上。 */
-  workflowAttentionCount?: number;
   /** 是否桌面环境（渲染窗控 + 拖拽区）。 */
   isDesktop?: boolean;
   /** macOS：原生交通灯占左上角——左侧留位、不渲染自绘窗控。 */
@@ -211,13 +209,6 @@ const utilityCapsules = computed(() =>
       >
         <PanelRightClose v-if="rightPanelOpen" class="h-4 w-4" />
         <PanelRight v-else class="h-4 w-4" />
-        <span
-          v-if="(workflowAttentionCount ?? 0) > 0"
-          class="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 text-center text-[9px] font-semibold leading-4 text-primary-foreground"
-          data-testid="shell-workflow-attention-badge"
-        >
-          {{ workflowAttentionCount }}
-        </span>
       </button>
 
       <div v-if="isDesktop && !isMac" class="flex items-center gap-1">

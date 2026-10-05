@@ -71,7 +71,6 @@ import {
 import {
   SHELL_COMPOSER_DENSITY_KEY,
   SHELL_COMPOSER_MOUNT_KEY,
-  SHELL_WORKFLOW_MOUNT_KEY,
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   LOGOUT_HANDLER_KEY,
   MODULE_CAPSULES_KEY,
@@ -92,8 +91,6 @@ const {
   panelWidth,
   rightPanelOpen,
   panelSurface,
-  workflowAvailable,
-  workflowAttentionCount,
 } = storeToRefs(store);
 
 provide(DialogDraftScopeKey, activeTabId);
@@ -215,7 +212,6 @@ const aiRef = ref<InstanceType<typeof AIChatView> | null>(null);
 
 // ── Global Composer host (§8)：壳拥有布局，AIChatView Teleport 真实输入 ──
 const shellComposerMount = shallowRef<HTMLElement | null>(null);
-const shellWorkflowMount = shallowRef<HTMLElement | null>(null);
 const shellComposerDensity = ref<ComposerDensity>('comfortable');
 const composerHeight = ref(0);
 const workspaceMainRef = ref<HTMLElement | null>(null);
@@ -226,7 +222,6 @@ const isSidebarResizing = ref(false);
 const isPanelResizing = ref(false);
 provide(SHELL_COMPOSER_MOUNT_KEY, shellComposerMount);
 provide(SHELL_COMPOSER_DENSITY_KEY, shellComposerDensity);
-provide(SHELL_WORKFLOW_MOUNT_KEY, shellWorkflowMount);
 
 const composerMode = computed(() => (shellState.value === 'focus' ? 'floating' : 'inline'));
 const composerHostWidth = computed(() =>
@@ -835,7 +830,6 @@ function panelCacheKey(
       :mode="isSettingsScene ? 'settings' : 'workspace'"
       :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : headerSidebarCollapsed"
       :right-panel-open="rightPanelOpen"
-      :workflow-attention-count="workflowAttentionCount"
       :is-desktop="isDesktop"
       :is-mac="isMac"
       :window-controls="windowControls.windowControlsState"
@@ -1014,13 +1008,9 @@ function panelCacheKey(
               :active-tab-id="activeTabId"
               :layout="layout"
               :panel-surface="panelSurface"
-              :workflow-available="workflowAvailable"
-              :workflow-attention-count="workflowAttentionCount"
               @activate-tab="(id: string) => void sync.activateTab(id)"
               @close-tab="(id: string) => void sync.closeTab(id)"
               @show-home="() => void sync.goHome()"
-              @show-workflow="store.requestWorkflowSurface('explicit')"
-              @close-workflow="store.closeWorkflowSurface()"
               @toggle-focus="handleToggleWorkspaceFocus"
             >
               <template #home>
@@ -1041,14 +1031,6 @@ function panelCacheKey(
                   </KeepAlive>
                 </router-view>
               </PanelErrorBoundary>
-
-              <template #workflow>
-                <div
-                  ref="shellWorkflowMount"
-                  class="h-full min-h-0"
-                  data-testid="shell-workflow-surface"
-                />
-              </template>
             </BusinessPanel>
           </div>
 

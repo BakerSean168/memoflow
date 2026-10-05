@@ -65,6 +65,8 @@ const AI_WORKFLOW_CONTEXT_FILES = new Set([
 ]);
 export const AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN =
   /\b(?:GoalDialog|TaskPlanDialog|KnowledgeCaptureReviewDialog|createConfirmedKnowledgeNote|createPlanSafe|createGoalSafe)\b/;
+export const AI_RETIRED_SHELL_WORKFLOW_SURFACE_PATTERN =
+  /\b(?:SHELL_WORKFLOW_MOUNT_KEY|requestWorkflowSurface|closeWorkflowSurface|setWorkflowAvailable|workflowAttentionCount|workflowAvailable|shellWorkflowMount)\b|shell-workflow-surface|business-panel-workflow|<slot name=["']workflow["']\s*\/>/;
 
 export const TASK_LEGACY_CLASSIFICATION_PATTERN =
   /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
@@ -203,6 +205,15 @@ export function findCoreVnextArchitectureLockViolations(files) {
         content,
         AI_WORKFLOW_CONTEXT_OWNER_MUTATION_PATTERN,
         'ai-workflow-context-owner-leakage',
+      );
+    }
+    if (relPath.startsWith('packages/app-vue/src/')) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        AI_RETIRED_SHELL_WORKFLOW_SURFACE_PATTERN,
+        'ai-retired-shell-workflow-surface',
       );
     }
     if (startsWithAny(relPath, FEATURE_ROOTS)) {
@@ -480,27 +491,8 @@ export function findCoreVnextArchitectureLockViolations(files) {
     }
   }
 
-  // PVC-AI-8131 retains workflow as a non-owner context/status surface until clarification,
-  // recovery, supporting overlays, attention deferral and diagnostics have another canonical host.
-  requireTokens(
-    violations,
-    fileMap,
-    'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
-    ["panelSurface === 'workflow'", '<slot name="workflow" />', 'workflowAttentionCount'],
-    'ai-workflow-context-surface-missing',
-  );
-  requireTokens(
-    violations,
-    fileMap,
-    'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
-    [
-      'requestWorkflowSurface',
-      "this.surfaceStatus !== 'clean'",
-      'this.workflowAttentionCount',
-      'closeWorkflowSurface',
-    ],
-    'ai-workflow-context-surface-missing',
-  );
+  // AIC-3003 retires the shell-owned workflow surface after Chat/native replacements land.
+  // Diagnostic detail remains explicitly user-controlled inside the AI conversation surface.
   requireTokens(
     violations,
     fileMap,
@@ -510,9 +502,10 @@ export function findCoreVnextArchitectureLockViolations(files) {
       '<AIGoalWorkflowPanel',
       '<AITaskWorkflowPanel',
       '<AIKnowledgeCapturePanel',
-      'requestWorkflowSurface(intent)',
+      'data-testid="ai-desktop-context-panel-toggle"',
+      'data-testid="ai-context-panel-toggle"',
     ],
-    'ai-workflow-context-surface-missing',
+    'ai-workflow-diagnostics-missing',
   );
 
   // ADR-069 / GOAL-7205 positive locks: persistence must continue accepting Goal-only links,
@@ -600,9 +593,11 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'ai-owned-business-editor':
       'AI-owned Goal/Task editors and visibility controls are retired; use owner-native sessions (ADR-112 / PVC-AI-8121)',
     'ai-workflow-context-owner-leakage':
-      'The retained workflow surface is context/status only; owner forms and direct owner mutations belong to native business surfaces (PVC-AI-8131)',
-    'ai-workflow-context-surface-missing':
-      'PVC-AI-8131 retains the workflow context surface until clarification/recovery/attention/diagnostics have canonical replacements',
+      'AI workflow diagnostics are context/status only; owner forms and direct owner mutations belong to native business surfaces (AIC-3003)',
+    'ai-retired-shell-workflow-surface':
+      'The shell-owned BusinessPanel workflow surface is retired; keep workflow details inside the explicit AI conversation diagnostics view (AIC-3003)',
+    'ai-workflow-diagnostics-missing':
+      'AI workflow diagnostics must remain explicitly reachable from the conversation on desktop and mobile after shell workflow-surface retirement (AIC-3003)',
     'ai-retired-goal-task-draft':
       'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification':

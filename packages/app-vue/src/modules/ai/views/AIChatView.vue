@@ -82,6 +82,26 @@
           </div>
           <div class="flex items-center gap-2">
             <AIRuntimeUsageBadge :usage="lastRuntimeUsage" />
+            <Button
+              v-if="hasWorkflowContext"
+              variant="ghost"
+              size="icon"
+              class="hidden h-8 w-8 md:inline-flex"
+              :aria-label="
+                contextPanelOpen
+                  ? t('aiAssistant.chatPage.workbench.hide')
+                  : t('aiAssistant.chatPage.workbench.show')
+              "
+              :title="
+                contextPanelOpen
+                  ? t('aiAssistant.chatPage.workbench.hide')
+                  : t('aiAssistant.chatPage.workbench.show')
+              "
+              data-testid="ai-desktop-context-panel-toggle"
+              @click="toggleContextPanel"
+            >
+              <PanelRightOpen class="h-4 w-4" />
+            </Button>
             <div class="flex items-center gap-1 md:hidden">
               <Button
                 variant="ghost"
@@ -139,6 +159,7 @@
         @configure-ai="openAISettings"
         @create-goal="openGoalWithoutAI"
         @quick-task="openQuickTaskWithoutAI"
+        @tool-decision="decideToolApproval"
       />
 
       <div v-show="!composerOnly" class="px-4 @md/ai:px-6">
@@ -146,25 +167,52 @@
           <AIWorkflowActionBar
             :tool-mode="toolMode"
             :workflow-status-text="workflowStatusText"
-            :goal-clarification="goalClarification"
             :automated-goal-id="automatedGoalId"
+            :created-supporting-tasks="createdSupportingTasks"
+            :created-supporting-knowledge="createdSupportingKnowledge"
             :goal-agent-resuming="goalAgentResuming"
             :goal-owner-submitted="goalOwnerSubmitted"
             :goal-owner-attempt-pending="goalOwnerAttemptPending"
-            :can-resume-goal-agent-clarification="canResumeGoalAgentClarification"
             :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
             :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
+            :can-accept-goal-partial-execution="canAcceptGoalPartialExecution"
+            :can-cancel-remaining-goal-execution="canCancelRemainingGoalExecution"
             :goal-agent-waiting-for-clarification="goalAgentWaitingForClarification"
             :goal-agent-waiting-for-approval="goalAgentWaitingForApproval"
             :goal-agent-waiting-for-execution="goalAgentWaitingForExecution"
             :knowledge-answer="knowledgeAnswer"
             :linked-goal-id="linkedGoalId"
-            :submit-goal-agent-clarification="submitGoalAgentClarification"
+            :task-agent-resuming="taskAgentResuming"
+            :task-owner-attempt-pending="taskOwnerAttemptPending"
+            :task-owner-submitted="taskOwnerSubmitted"
+            :task-agent-waiting-for-clarification="taskAgentWaitingForClarification"
+            :task-agent-waiting-for-approval="taskAgentWaitingForApproval"
+            :can-retry-task-agent-execution="canRetryTaskAgentExecution"
+            :can-accept-task-partial-execution="canAcceptTaskPartialExecution"
+            :can-cancel-remaining-task-execution="canCancelRemainingTaskExecution"
+            :knowledge-capture-resuming="knowledgeCaptureResuming"
+            :knowledge-capture-waiting-for-clarification="knowledgeCaptureWaitingForClarification"
+            :knowledge-capture-waiting-for-approval="knowledgeCaptureWaitingForApproval"
+            :can-retry-knowledge-capture-execution="canRetryKnowledgeCaptureExecution"
+            :can-cancel-remaining-knowledge-capture-execution="
+              canCancelRemainingKnowledgeCaptureExecution
+            "
             :confirm-goal-agent-run="confirmGoalAgentRun"
             :cancel-goal-agent-run="cancelGoalAgentRun"
             :continue-goal-agent-execution="continueGoalAgentExecution"
             :retry-goal-agent-execution="retryGoalAgentExecution"
+            :accept-partial-goal-execution="acceptPartialGoalExecution"
+            :cancel-remaining-goal-execution="cancelRemainingGoalExecution"
             :open-automated-goal="openAutomatedGoal"
+            :open-created-supporting-task="openCreatedSupportingTask"
+            :open-created-supporting-knowledge="openCreatedSupportingKnowledge"
+            :cancel-task-agent-run="cancelTaskAgentRun"
+            :retry-task-agent-execution="retryTaskAgentExecution"
+            :accept-partial-task-execution="acceptPartialTaskExecution"
+            :cancel-remaining-task-execution="cancelRemainingTaskExecution"
+            :cancel-knowledge-capture-run="cancelKnowledgeCaptureRun"
+            :retry-knowledge-capture-execution="retryKnowledgeCaptureExecution"
+            :cancel-remaining-knowledge-capture-execution="cancelRemainingKnowledgeCaptureExecution"
             :exit-tool-mode="exitToolMode"
           />
         </div>
@@ -196,12 +244,11 @@
       </Teleport>
     </section>
 
-    <Teleport :to="shellWorkflowMount ?? 'body'" :disabled="!shellWorkflowMount">
+    <Teleport to="body" :disabled="true">
       <AIContextPanel
         v-show="!composerOnly"
         :has-workflow-context="hasWorkflowContext"
         :open="contextPanelOpen"
-        :embedded="Boolean(shellWorkflowMount)"
         :tool-label="currentToolLabel"
         @close="closeContextPanel"
       >
@@ -209,23 +256,14 @@
           :tool-mode="toolMode"
           :goal-clarification="goalClarification"
           :goal-workflow-run="goalWorkflowRun"
-          :clarification-answers="clarificationAnswers"
           :editable-goal="editableGoal"
           :editable-key-results="editableKeyResults"
           :editable-tasks="editableTasks"
           :editable-knowledge="editableKnowledge"
           :goal-owner-submitted="goalOwnerSubmitted"
-          :supporting-editing-blocked="
-            goalAgentResuming || creatingGoal || goalOwnerSubmitted || goalOwnerAttemptPending
-          "
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
-          @update:clarification-answers="handleClarificationAnswersUpdate"
           @open-native-review="openGoalNativeReview"
-          @remove-task="removeTaskDraft"
-          @update-task="updateTaskDraft"
-          @remove-knowledge="removeKnowledgeDraft"
-          @update-knowledge="updateKnowledgeDraft"
           @open-knowledge-citation="openKnowledgeCitation"
         />
         <AITaskWorkflowPanel
@@ -234,10 +272,6 @@
           :busy="taskAgentResuming"
           :owner-attempt-pending="taskOwnerAttemptPending"
           :owner-submitted="taskOwnerSubmitted"
-          :clarification-answers="taskClarificationAnswers"
-          :can-submit-clarification="canSubmitTaskClarification"
-          @submit-clarification="submitTaskClarification"
-          @update-clarification-answer="(index, value) => (taskClarificationAnswers[index] = value)"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
@@ -247,12 +281,6 @@
           :tool-mode="toolMode"
           :knowledge-capture-run="knowledgeCaptureRun"
           :busy="knowledgeCaptureResuming"
-          :clarification-answers="knowledgeClarificationAnswers"
-          :can-submit-clarification="canSubmitKnowledgeClarification"
-          @submit-clarification="submitKnowledgeClarification"
-          @update-clarification-answer="
-            (index, value) => (knowledgeClarificationAnswers[index] = value)
-          "
           @cancel="cancelKnowledgeCaptureRun"
           @retry="retryKnowledgeCaptureExecution"
           @open-native-review="openKnowledgeNativeReview"
@@ -270,7 +298,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
@@ -285,11 +313,7 @@ import AIWorkflowActionBar from '../components/AIWorkflowActionBar.vue';
 import AIContextPanel from '../components/AIContextPanel.vue';
 import AIRuntimeUsageBadge from '../components/AIRuntimeUsageBadge.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
-import {
-  SHELL_COMPOSER_DENSITY_KEY,
-  SHELL_COMPOSER_MOUNT_KEY,
-  SHELL_WORKFLOW_MOUNT_KEY,
-} from '../../../di/keys';
+import { SHELL_COMPOSER_DENSITY_KEY, SHELL_COMPOSER_MOUNT_KEY } from '../../../di/keys';
 import type { ComposerDensity } from '../../../layouts/shell/panel-geometry';
 import { useAIChatView } from '../composables/useAIChatView';
 import { inferWorkflowMode } from '../composables/workflowIntent';
@@ -309,10 +333,8 @@ withDefaults(
 
 const shellComposerMountRef = inject(SHELL_COMPOSER_MOUNT_KEY, null);
 const shellComposerDensityRef = inject(SHELL_COMPOSER_DENSITY_KEY, null);
-const shellWorkflowMountRef = inject(SHELL_WORKFLOW_MOUNT_KEY, null);
 const shellComposerMount = computed(() => shellComposerMountRef?.value ?? null);
-const shellWorkflowMount = computed(() => shellWorkflowMountRef?.value ?? null);
-const shellStore = shellWorkflowMountRef ? useAppShellStore() : null;
+const shellStore = shellComposerMountRef ? useAppShellStore() : null;
 const composerDensity = computed<ComposerDensity>(
   () => shellComposerDensityRef?.value ?? 'comfortable',
 );
@@ -376,8 +398,10 @@ const {
   deleteConversation,
   loadConversationList,
   startNewConversation: startNewConversationBase,
+  prepareWorkflowTurn,
   handleSendChat: handleSendChatBase,
   stopGenerating,
+  decideToolApproval,
 } = session;
 
 const { selectedModelKey, modelGroups, canSendMessage, selectModel } = model;
@@ -385,34 +409,36 @@ const { selectedModelKey, modelGroups, canSendMessage, selectModel } = model;
 const {
   goalClarification,
   goalWorkflowRun,
-  clarificationAnswers,
   goalOwnerSubmitted,
   goalOwnerAttemptPending,
   goalAgentResuming,
-  creatingGoal,
   editableGoal,
   editableKeyResults,
   editableTasks,
   editableKnowledge,
-  canResumeGoalAgentClarification,
   canContinueGoalAgentExecution,
   canRetryGoalAgentExecution,
+  canAcceptGoalPartialExecution,
+  canCancelRemainingGoalExecution,
   automatedGoalId,
+  createdSupportingTasks,
+  createdSupportingKnowledge,
   goalAgentWaitingForClarification,
   goalAgentWaitingForApproval,
   goalAgentWaitingForExecution,
   startGoalAgentRun,
-  submitGoalAgentClarification,
+  submitGoalClarificationResponse,
+  submitGoalRevisionResponse,
   confirmGoalAgentRun,
   cancelGoalAgentRun,
   continueGoalAgentExecution,
   retryGoalAgentExecution,
+  acceptPartialGoalExecution,
+  cancelRemainingGoalExecution,
   openAutomatedGoal,
+  openCreatedSupportingTask,
+  openCreatedSupportingKnowledge,
   openGoalNativeReview,
-  removeTaskDraft,
-  updateTaskDraft,
-  removeKnowledgeDraft,
-  updateKnowledgeDraft,
 } = goalWorkflow;
 
 const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
@@ -423,9 +449,12 @@ const {
   taskAgentResuming,
   taskOwnerAttemptPending,
   taskOwnerSubmitted,
-  clarificationAnswers: taskClarificationAnswers,
-  canSubmitTaskClarification,
-  submitTaskClarification,
+  taskAgentWaitingForClarification,
+  taskAgentWaitingForApproval,
+  canRetryTaskAgentExecution,
+  canAcceptTaskPartialExecution,
+  canCancelRemainingTaskExecution,
+  submitTaskClarificationResponse,
   openTaskNativeReview,
   linkedGoalId,
   setLinkedGoalId,
@@ -433,17 +462,22 @@ const {
   cancelTaskAgentRun,
   confirmTaskAgentRun,
   retryTaskAgentExecution,
+  acceptPartialTaskExecution,
+  cancelRemainingTaskExecution,
 } = taskWorkflow;
 
 const {
   knowledgeCaptureRun,
   knowledgeCaptureResuming,
-  clarificationAnswers: knowledgeClarificationAnswers,
-  canSubmitKnowledgeClarification,
-  submitKnowledgeClarification,
+  knowledgeCaptureWaitingForClarification,
+  knowledgeCaptureWaitingForApproval,
+  canRetryKnowledgeCaptureExecution,
+  canCancelRemainingKnowledgeCaptureExecution,
+  submitKnowledgeClarificationResponse,
   startKnowledgeCaptureRun,
   cancelKnowledgeCaptureRun,
   retryKnowledgeCaptureExecution,
+  cancelRemainingKnowledgeCaptureExecution,
   openKnowledgeNativeReview,
 } = knowledgeCaptureWorkflow;
 
@@ -469,18 +503,18 @@ const hasWorkflowArtifact = computed(() => {
   return false;
 });
 const hasWorkflowContext = computed(() => toolMode.value !== 'chat' || hasWorkflowArtifact.value);
-const workflowSurfaceItemCount = computed(() => (hasWorkflowArtifact.value ? 1 : 0));
 
 function requestContextPanel(intent: 'automatic' | 'explicit') {
   contextPanelOpen.value = true;
-  shellStore?.requestWorkflowSurface(intent);
+  void intent;
 }
 
 watch(
-  [hasWorkflowContext, workflowSurfaceItemCount],
-  ([available, itemCount], [wasAvailable]) => {
-    shellStore?.setWorkflowAvailable(available, itemCount);
-    if (available && !wasAvailable) requestContextPanel('automatic');
+  [hasWorkflowContext, toolMode],
+  ([available, mode], [wasAvailable]) => {
+    // Goal creation is owner-first: keep the native Goal surface primary and
+    // expose the retained workflow context only when the user asks for it.
+    if (available && !wasAvailable && mode !== 'goal-create') requestContextPanel('automatic');
   },
   { immediate: true },
 );
@@ -555,6 +589,34 @@ async function handleComposerSend() {
     toolMode.value = inferredMode;
   }
 
+  if (goalAgentWaitingForClarification.value) {
+    const prepared = await prepareWorkflowTurn();
+    if (!prepared) return;
+    await submitGoalClarificationResponse(prepared.content);
+    return;
+  }
+
+  if (goalAgentWaitingForApproval.value) {
+    const prepared = await prepareWorkflowTurn();
+    if (!prepared) return;
+    await submitGoalRevisionResponse(prepared.content);
+    return;
+  }
+
+  if (taskAgentWaitingForClarification.value) {
+    const prepared = await prepareWorkflowTurn();
+    if (!prepared) return;
+    await submitTaskClarificationResponse(prepared.content);
+    return;
+  }
+
+  if (knowledgeCaptureWaitingForClarification.value) {
+    const prepared = await prepareWorkflowTurn();
+    if (!prepared) return;
+    await submitKnowledgeClarificationResponse(prepared.content);
+    return;
+  }
+
   if (inferredMode === 'task-create') {
     const selectedGoal = composerContextEntities.value.find(
       (entity) => entity.entityType === 'goal',
@@ -562,27 +624,28 @@ async function handleComposerSend() {
     setLinkedGoalId(selectedGoal?.id ?? null);
   }
 
+  if (!workflowInProgress.value && inferredMode === 'goal-create') {
+    const workflowTurn = await prepareWorkflowTurn();
+    if (!workflowTurn) return;
+    const started = await startGoalAgentRun(workflowTurn.content);
+    if (started === false) toolMode.value = 'chat';
+    return;
+  }
+
   await handleSendChatBase();
 
   if (inferredMode === 'goal-create') await startGoalAgentRun();
-  else if (inferredMode === 'task-create') await startTaskAgentRun();
+  if (inferredMode === 'task-create') await startTaskAgentRun();
   else if (inferredMode === 'knowledge-capture') await startKnowledgeCaptureRun();
   else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
 }
 
 function toggleContextPanel() {
-  if (shellStore) {
-    if (shellStore.panelSurface === 'workflow' && shellStore.rightPanelOpen) {
-      shellStore.closeWorkflowSurface();
-    } else requestContextPanel('explicit');
-    return;
-  }
   contextPanelOpen.value = !contextPanelOpen.value;
 }
 
 function closeContextPanel() {
-  if (shellStore) shellStore.closeWorkflowSurface();
-  else contextPanelOpen.value = false;
+  contextPanelOpen.value = false;
 }
 function openMobileSidebar() {
   mobileSidebarOpen.value = true;
@@ -601,7 +664,7 @@ function startNewConversationFromMobile() {
 }
 async function selectConversation(item: ConversationSummary) {
   await selectConversationBase(item);
-  if (hasWorkflowContext.value) requestContextPanel('explicit');
+  if (hasWorkflowContext.value && toolMode.value !== 'goal-create') requestContextPanel('explicit');
 }
 async function selectConversationFromMobile(item: ConversationSummary) {
   closeMobileSidebar();
@@ -628,15 +691,10 @@ function openGoalWithoutAI() {
 function openQuickTaskWithoutAI() {
   void router.push('/tasks?dialog=quick-task');
 }
-function handleClarificationAnswersUpdate(answers: string[]) {
-  clarificationAnswers.value = answers;
-}
-
 onMounted(() => {
   const viewport = messagePanelRef.value?.viewport;
   if (viewport) messagesViewport.value = viewport;
 });
-onBeforeUnmount(() => shellStore?.setWorkflowAvailable(false));
 
 defineExpose({
   conversationList,

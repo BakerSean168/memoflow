@@ -60,7 +60,14 @@ type MastraOpenChatCapture = {
   deleteRequests: Array<Record<string, unknown>>;
 };
 
-async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCapture> {
+type MastraOpenChatMockOptions = {
+  streamDeltaCount?: number;
+};
+
+async function installMastraOpenChatMocks(
+  page: Page,
+  options: MastraOpenChatMockOptions = {},
+): Promise<MastraOpenChatCapture> {
   const capture: MastraOpenChatCapture = {
     messageCommands: [],
     historyRequests: [],
@@ -74,19 +81,16 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
       await route.continue();
       return;
     }
-    await fulfillJson(
-      route,
-      {
-        ...createDefaultUserPreferenceProfile(),
-        presentation: { theme: 'light', language: 'en-US' },
-        regional: {
-          timeZone: 'Asia/Shanghai',
-          dateStyle: 'medium',
-          timeStyle: '24h',
-          weekStartsOn: 1,
-        },
+    await fulfillJson(route, {
+      ...createDefaultUserPreferenceProfile(),
+      presentation: { theme: 'light', language: 'en-US' },
+      regional: {
+        timeZone: 'Asia/Shanghai',
+        dateStyle: 'medium',
+        timeStyle: '24h',
+        weekStartsOn: 1,
       },
-    );
+    });
   });
 
   await page.route('**/api/v1/ai/providers', async (route) => {
@@ -197,7 +201,12 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
       content,
       createdAt: now,
     };
-    const assistantContent = `Mastra live reply ${turn}.`;
+    const streamDeltaCount = Math.max(1, options.streamDeltaCount ?? 1);
+    const streamDeltas =
+      streamDeltaCount === 1
+        ? [`Mastra live reply ${turn}.`]
+        : Array.from({ length: streamDeltaCount }, (_, index) => `delta-${index + 1} `);
+    const assistantContent = streamDeltas.join('');
     const authoritativeContent = `Mastra authoritative reply ${turn}.`;
     const assistantMessage: RuntimeMessage = {
       id: `assistant-e2e-mastra-${turn}`,
@@ -210,6 +219,15 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
     hasConversation = true;
 
     const base = { runId, conversationId, createdAt: now };
+    const deltaEvents = streamDeltas.map((delta, index) => ({
+      ...base,
+      eventId: `${runId}:${index + 2}`,
+      sequence: index + 2,
+      type: 'assistant.message.delta',
+      data: { content: delta },
+    }));
+    const usageSequence = streamDeltas.length + 2;
+    const completedSequence = usageSequence + 1;
     await fulfillRuntimeSse(route, [
       {
         ...base,
@@ -218,24 +236,18 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
         type: 'assistant.run.started',
         data: { providerId, modelId },
       },
+      ...deltaEvents,
       {
         ...base,
-        eventId: `${runId}:2`,
-        sequence: 2,
-        type: 'assistant.message.delta',
-        data: { content: assistantContent },
-      },
-      {
-        ...base,
-        eventId: `${runId}:3`,
-        sequence: 3,
+        eventId: `${runId}:${usageSequence}`,
+        sequence: usageSequence,
         type: 'assistant.usage.updated',
         data: { promptTokens: 12, completionTokens: 5, totalTokens: 17 },
       },
       {
         ...base,
-        eventId: `${runId}:4`,
-        sequence: 4,
+        eventId: `${runId}:${completedSequence}`,
+        sequence: completedSequence,
         type: 'assistant.run.completed',
         data: { content: assistantContent, assistantMessageId: assistantMessage.id },
       },
@@ -245,12 +257,15 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
   return capture;
 }
 
-async function bootstrapMastraOpenChat(page: Page): Promise<MastraOpenChatCapture> {
+async function bootstrapMastraOpenChat(
+  page: Page,
+  options: MastraOpenChatMockOptions = {},
+): Promise<MastraOpenChatCapture> {
   await registerAndLogin(page, {
     email: generateTestEmail(),
     password: e2ePassword,
   });
-  const capture = await installMastraOpenChatMocks(page);
+  const capture = await installMastraOpenChatMocks(page, options);
   await page.goto(WEB_CONFIG.getFullUrl('/'), {
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUT_CONFIG.NAVIGATION,
@@ -319,6 +334,87 @@ test.describe('AI Mastra open-chat product cutover', () => {
       'Mastra authoritative reply 1.',
     );
     expect(capture.historyRequests).toHaveLength(0);
+  });
+
+  test('[P1] bounds streaming render updates and browser long tasks for a large delta burst', async ({
+    page,
+    context,
+  }) => {
+    const capture = await bootstrapMastraOpenChat(page, { streamDeltaCount: 80 });
+    const composer = page.getByTestId('ai-chat-composer');
+    await expect(composer).toBeEnabled({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(page.getByTestId('ai-chat-empty-models')).toHaveCount(0, {
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await composer.fill('Measure streaming responsiveness.');
+    await expect(page.getByTestId('ai-chat-send-message')).toBeEnabled({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    const client = await context.newCDPSession(page);
+    await client.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+
+    try {
+      const metrics = await page.evaluate(async () => {
+        const host = document.querySelector<HTMLElement>('[data-testid="ai-message-panel"]');
+        const send = document.querySelector<HTMLButtonElement>(
+          '[data-testid="ai-chat-send-message"]',
+        );
+        if (!host || !send) throw new Error('AI streaming performance surface is unavailable');
+
+        let mutationBatches = 0;
+        let longTaskCount = 0;
+        let longTaskDurationMs = 0;
+        const mutationObserver = new MutationObserver(() => {
+          mutationBatches += 1;
+        });
+        mutationObserver.observe(host, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+
+        const performanceObserver = PerformanceObserver.supportedEntryTypes.includes('longtask')
+          ? new PerformanceObserver((list) => {
+              for (const entry of list.getEntries()) {
+                longTaskCount += 1;
+                longTaskDurationMs += entry.duration;
+              }
+            })
+          : null;
+        performanceObserver?.observe({ entryTypes: ['longtask'] });
+
+        send.click();
+        const deadline = performance.now() + 10_000;
+        while (performance.now() < deadline) {
+          const complete =
+            host.textContent?.includes('delta-80') &&
+            !document.querySelector('[data-testid="ai-chat-stop-generating"]');
+          if (complete) break;
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        }
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+        mutationObserver.disconnect();
+        for (const entry of performanceObserver?.takeRecords() ?? []) {
+          longTaskCount += 1;
+          longTaskDurationMs += entry.duration;
+        }
+        performanceObserver?.disconnect();
+        return { mutationBatches, longTaskCount, longTaskDurationMs };
+      });
+
+      expect(capture.messageCommands).toHaveLength(1);
+      // AIC-4002 baseline under 4x CPU throttle for this 80-delta burst was
+      // 2 mutation batches / 2 long tasks. Keep bounded headroom without
+      // turning host-specific wall-clock duration into a brittle contract.
+      expect(metrics.mutationBatches).toBeLessThanOrEqual(8);
+      expect(metrics.longTaskCount).toBeLessThanOrEqual(4);
+      expect(metrics.longTaskDurationMs).toBeGreaterThanOrEqual(0);
+      await composer.fill('Composer remains interactive.');
+      await expect(composer).toHaveValue('Composer remains interactive.');
+    } finally {
+      await client.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+    }
   });
 
   test('[P0] reload restores the authoritative Mastra transcript instead of legacy persisted history', async ({

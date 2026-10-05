@@ -2,6 +2,8 @@ import {
   applyMemoFlowSessionToolPolicy,
   MEMOFLOW_PRODUCT_TOOL_POLICY,
 } from '../tools/product-tool-policy';
+import { RequestContext } from '@mastra/core/request-context';
+import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -20,6 +22,7 @@ import { AIContextAssembler } from '../context';
 import { MastraModelResolver } from '../models';
 import { createAIProviderSecretVaultStub } from '../../../testing/ai-test-support';
 import type { GoalPlanMutationPort } from '../workflows';
+import type { AIExecutionRecordInput } from '../../application/ports';
 import { MastraAIRuntime } from './mastra-ai.runtime';
 
 const TEST_USER_TIME_CONTEXT_PORT = {
@@ -141,6 +144,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
   const createConfirmedKnowledgeNote = vi.fn(async (request) =>
     ok({ noteId: request.knowledgeDocumentId }),
   );
+  const recordExecution = vi.fn(async (_record: AIExecutionRecordInput) => {});
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -148,14 +152,16 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     totalTokens: 250,
     estimatedCost: 0.000075,
   }));
+  const createRoutine = vi.fn(async () => ({ routineId: 'created-routine' }));
+  const modelResolver = new MastraModelResolver(
+    {} as never,
+    createAIProviderSecretVaultStub(),
+    vi.fn() as unknown as typeof fetch,
+  );
   const runtime = new MastraAIRuntime({
     storage,
-    modelResolver: new MastraModelResolver(
-      {} as never,
-      createAIProviderSecretVaultStub(),
-      vi.fn() as unknown as typeof fetch,
-    ),
-    conversationShellSource: { loadShell: vi.fn(async () => null) },
+    modelResolver,
+    conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
       readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
@@ -171,7 +177,8 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
       getNoteById: vi.fn(async () => null),
     },
     usageReadPort: { summarizeUsage },
-    routineCommandPort: {} as never,
+    executionRecordPort: { record: recordExecution },
+    routineCommandPort: { createRoutine } as never,
     plannerReadPort: {} as never,
     notificationReadPort: {} as never,
     selectedEntityContextReadPort: {
@@ -196,8 +203,526 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     candidateDraft: knowledgeDraft,
   });
   resources.push({ runtime, file });
-  return { runtime, file, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
+  return {
+    runtime,
+    file,
+    mutations,
+    createTaskPlan,
+    createConfirmedKnowledgeNote,
+    summarizeUsage,
+    recordExecution,
+    modelResolver,
+    createRoutine,
+  };
 }
+
+describe('MastraAIRuntime Assistant approval protocol', () => {
+  async function parkedTurn() {
+    const { runtime, modelResolver } = await createRuntime();
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
+      providerId: 'p',
+      providerName: 'p',
+      modelId: 'test',
+      model: 'openai/test',
+      capabilities: {},
+    } as never);
+    await runtime.init();
+    const session = await runtime.controller.createSession({
+      id: 'conversation:approval-chat',
+      ownerId: 'identity-a',
+      resourceId: 'identity-a',
+      threadId: 'approval-chat',
+    });
+    // Feed actual installed native gate engine; provider execution alone is stubbed.
+    const approve = vi.spyOn(session, 'approveToolCall').mockResolvedValue();
+    const decline = vi.spyOn(session, 'declineToolCall').mockResolvedValue();
+    const nativeEvents: string[] = [];
+    session.subscribe((event) => {
+      nativeEvents.push(event.type);
+    });
+    vi.spyOn(session, 'sendMessage').mockImplementation(async () => {
+      session.run.setRunId({ runId: 'native-turn' });
+      const fullStream = (async function* () {
+        yield {
+          type: 'tool-call-approval',
+          runId: 'native-turn',
+          payload: {
+            toolCallId: 'call-1',
+            toolName: 'routine_create',
+            args: { secret: 'PRIVATE_ARGS' },
+          },
+        };
+        yield { type: 'finish', runId: 'native-turn', payload: {} };
+      })();
+      await session.runEngine.processStream({ fullStream } as never, new RequestContext());
+    });
+    const events: AssistantRuntimeEvent[] = [];
+    const finished = (async () => {
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'identity-a',
+        conversationId: 'approval-chat',
+        content: 'do it',
+        context: context('identity-a', 'turn'),
+      }))
+        events.push(event);
+    })();
+    await vi.waitFor(() =>
+      expect(events.some((event) => event.type === 'assistant.approval.required')).toBe(true),
+    );
+    const command = {
+      type: 'tool_approval' as const,
+      conversationId: 'approval-chat',
+      runId: 'native-turn',
+      toolCallId: 'call-1',
+      decision: 'approve' as const,
+    };
+    return { runtime, session, approve, decline, events, finished, command, nativeEvents };
+  }
+
+  it.each(['approve', 'decline', 'cancel', 'read'] as const)(
+    'runs actual AgentController + Agent tool approval %s lifecycle',
+    async (decision) => {
+      const { runtime, modelResolver, createRoutine, recordExecution } = await createRuntime();
+      vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+      let calls = 0;
+      const model = {
+        specificationVersion: 'v2',
+        provider: 'test',
+        modelId: 'approval-test',
+        supportedUrls: {},
+        doStream: async () => {
+          const chunks =
+            calls++ === 0
+              ? [
+                  { type: 'stream-start', warnings: [] },
+                  {
+                    type: 'tool-call',
+                    toolCallId: 'real-call',
+                    toolName: decision === 'read' ? 'knowledge_search' : 'routine_create',
+                    input: JSON.stringify(
+                      decision === 'read'
+                        ? { query: 'PRIVATE_QUERY' }
+                        : {
+                            name: 'Private routine',
+                            trigger: {
+                              type: 'Elapsed',
+                              timingOwner: 'local-runtime',
+                              durationMs: 60000,
+                            },
+                          },
+                    ),
+                  },
+                  {
+                    type: 'finish',
+                    finishReason: 'tool-calls',
+                    usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+                  },
+                ]
+              : [
+                  { type: 'stream-start', warnings: [] },
+                  { type: 'text-start', id: 'text' },
+                  { type: 'text-delta', id: 'text', delta: 'Finished' },
+                  { type: 'text-end', id: 'text' },
+                  {
+                    type: 'finish',
+                    finishReason: 'stop',
+                    usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+                  },
+                ];
+          return {
+            stream: new ReadableStream({
+              start(controller) {
+                for (const chunk of chunks) controller.enqueue(chunk);
+                controller.close();
+              },
+            }),
+          };
+        },
+      };
+      vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
+        providerId: 'p',
+        providerName: 'test',
+        modelId: 'approval-test',
+        model,
+        capabilities: {},
+      } as never);
+      const turnContext = context('identity-a', 'native-turn');
+      const decisionContext = context('identity-a', 'native-decision');
+      const events: AssistantRuntimeEvent[] = [];
+      const finished = (async () => {
+        for await (const event of runtime.dispatchMessage({
+          identityId: 'identity-a',
+          conversationId: `real-${decision}`,
+          content: 'create',
+          context: turnContext,
+        }))
+          events.push(event);
+      })();
+      if (decision === 'read') {
+        await finished;
+        expect(events.some((event) => event.type === 'assistant.approval.required')).toBe(false);
+        expect(events).toContainEqual(
+          expect.objectContaining({
+            type: 'assistant.activity',
+            data: {
+              activityType: 'tool',
+              toolCallId: 'real-call',
+              toolName: 'knowledge_search',
+              category: 'read',
+              risk: 'low',
+              state: 'running',
+            },
+          }),
+        );
+        expect(
+          JSON.stringify(events.filter((event) => event.type === 'assistant.activity')),
+        ).not.toContain('PRIVATE_QUERY');
+        expect(events.at(-1)?.type).toBe('assistant.run.completed');
+        const records = recordExecution.mock.calls.map(([record]) => record);
+        expect(records.map((record) => record.operation)).toEqual(
+          expect.arrayContaining([
+            'assistant.phase.transport',
+            'assistant.phase.first_activity',
+            'assistant.phase.provider_inference',
+            'assistant.phase.tool',
+            'assistant.phase.first_token',
+            'assistant.turn',
+          ]),
+        );
+        expect(records.every((record) => !('prompt' in record) && !('result' in record))).toBe(
+          true,
+        );
+        return;
+      }
+      await vi.waitFor(
+        () =>
+          expect(events.some((event) => event.type === 'assistant.approval.required')).toBe(true),
+        { timeout: 10000 },
+      );
+      const required = events.find((event) => event.type === 'assistant.approval.required')!;
+      expect(createRoutine).not.toHaveBeenCalled();
+      if (decision === 'cancel')
+        expect(runtime.cancelRun({ identityId: 'identity-a', runId: required.runId })).toBe(true);
+      else
+        expect(
+          runtime.decideToolApproval({
+            context: decisionContext,
+            command: {
+              type: 'tool_approval',
+              conversationId: required.conversationId,
+              runId: required.runId,
+              toolCallId: 'real-call',
+              decision,
+            },
+          }),
+        ).toBe(true);
+      await finished;
+      expect(createRoutine).toHaveBeenCalledTimes(decision === 'approve' ? 1 : 0);
+      if (decision === 'approve')
+        expect(createRoutine.mock.calls[0][0]).toMatchObject({ context: turnContext });
+      expect(events.at(-1)?.type).toBe(
+        decision === 'cancel' ? 'assistant.run.cancelled' : 'assistant.run.completed',
+      );
+      expect(new Set(events.map((event) => event.runId)).size).toBe(1);
+      expect(events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
+      const records = recordExecution.mock.calls.map(([record]) => record);
+      expect(records.map((record) => record.operation)).toContain('assistant.phase.approval_wait');
+      expect(records.map((record) => record.operation)).toContain('assistant.turn');
+      const approvalRecord = records.find(
+        (record) => record.operation === 'assistant.phase.approval_wait',
+      );
+      expect(approvalRecord).toMatchObject({
+        outcome:
+          decision === 'approve' ? 'succeeded' : decision === 'decline' ? 'cancelled' : 'cancelled',
+        ...(decision === 'cancel' ? { errorCategory: 'aborted' } : {}),
+      });
+      expect(records.find((record) => record.operation === 'assistant.turn')).toMatchObject({
+        outcome: decision === 'cancel' ? 'cancelled' : 'succeeded',
+      });
+      expect(records.every((record) => !('prompt' in record) && !('result' in record))).toBe(true);
+      expect(
+        JSON.stringify(
+          events.filter(
+            (event) =>
+              event.type === 'assistant.activity' || event.type.startsWith('assistant.approval.'),
+          ),
+        ),
+      ).not.toContain('Private routine');
+    },
+  );
+
+  it('fails closed for unknown/stale/foreign/wrong bindings and consumes concurrent decisions once', async () => {
+    const turn = await parkedTurn();
+    for (const command of [
+      { ...turn.command, runId: 'unknown' },
+      { ...turn.command, conversationId: 'other' },
+      { ...turn.command, toolCallId: 'other' },
+    ]) {
+      expect(
+        turn.runtime.decideToolApproval({ context: context('identity-a', 'decision'), command }),
+      ).toBe(false);
+    }
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('foreign', 'decision'),
+        command: turn.command,
+      }),
+    ).toBe(false);
+    const executionContext = context('identity-a', 'decision');
+    const results = await Promise.all(
+      [0, 1].map(async () =>
+        turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
+      ),
+    );
+    expect(results).toEqual([true, false]);
+    await turn.finished;
+    expect(turn.approve).toHaveBeenCalledTimes(1);
+    expect(turn.approve.mock.calls[0][0].requestContext?.getRaw('executionContext')).toEqual(
+      executionContext,
+    );
+    expect(turn.decline).not.toHaveBeenCalled();
+    expect(
+      turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
+    ).toBe(false);
+    expect(turn.events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
+    expect(turn.events.at(-1)?.type).toBe('assistant.run.completed');
+    expect(JSON.stringify(turn.events)).not.toContain('PRIVATE_ARGS');
+    expect(turn.events.map((event) => event.sequence)).toEqual(
+      turn.events.map((_, index) => index + 1),
+    );
+  });
+
+  it('rejects native no-op and successor-run decisions without operating another gate', async () => {
+    const turn = await parkedTurn();
+    const noOp = vi.spyOn(turn.session, 'respondToToolApproval').mockImplementationOnce(() => {});
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('identity-a', 'noop'),
+        command: turn.command,
+      }),
+    ).toBe(false);
+    expect(turn.session.approval.isArmed()).toBe(true);
+    noOp.mockRestore();
+    turn.session.run.setRunId({ runId: 'successor' });
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('identity-a', 'stale'),
+        command: turn.command,
+      }),
+    ).toBe(false);
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(false);
+    expect(turn.session.approval.isArmed()).toBe(true);
+    turn.session.emit({ type: 'agent_start' });
+    await turn.finished;
+    expect(turn.events.at(-1)?.type).toBe('assistant.run.failed');
+    // Test cleanup only: restore original binding so the real producer can finish.
+    turn.session.run.setRunId({ runId: 'native-turn' });
+    turn.session.abortRun();
+  });
+
+  it('filters foreign thread activity and rejects overlapping product turns instead of queueing', async () => {
+    const turn = await parkedTurn();
+    const count = turn.events.length;
+    turn.session.emit({
+      type: 'tool_start',
+      threadId: 'foreign',
+      toolName: 'knowledge_search',
+      toolCallId: 'foreign',
+      args: 'PRIVATE',
+    });
+    await Promise.resolve();
+    expect(turn.events).toHaveLength(count);
+    const second = turn.runtime.dispatchMessage({
+      identityId: 'identity-a',
+      conversationId: 'approval-chat',
+      content: 'next',
+    });
+    await expect(second.next()).rejects.toThrow('active turn');
+    turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' });
+    await turn.finished;
+  });
+
+  it('does not start a native turn when the dispatch signal is already aborted', async () => {
+    const { runtime, modelResolver } = await createRuntime();
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
+      providerId: 'p',
+      providerName: 'test',
+      modelId: 'pre-aborted',
+      model: 'openai/test',
+      capabilities: {},
+    } as never);
+    await runtime.init();
+    const session = await runtime.controller.createSession({
+      id: 'conversation:pre-aborted',
+      ownerId: 'identity-a',
+      resourceId: 'identity-a',
+      threadId: 'pre-aborted',
+    });
+    const sendMessage = vi.spyOn(session, 'sendMessage');
+    const controller = new AbortController();
+    controller.abort();
+    const events: AssistantRuntimeEvent[] = [];
+
+    for await (const event of runtime.dispatchMessage({
+      identityId: 'identity-a',
+      conversationId: 'pre-aborted',
+      content: 'do not start',
+      context: context('identity-a', 'pre-aborted'),
+      signal: controller.signal,
+    })) {
+      events.push(event);
+    }
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(events.map((event) => event.type)).toEqual(['assistant.run.cancelled']);
+    expect(events[0]).toMatchObject({
+      conversationId: 'pre-aborted',
+      data: { reason: 'aborted' },
+    });
+  });
+
+  it('replays Stop when aborted after sendMessage starts but before native agent_start', async () => {
+    const { runtime, modelResolver } = await createRuntime();
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    vi.spyOn(modelResolver, 'resolve').mockResolvedValue({
+      providerId: 'p',
+      providerName: 'test',
+      modelId: 'delayed-start',
+      model: 'openai/test',
+      capabilities: {},
+    } as never);
+    await runtime.init();
+    const session = await runtime.controller.createSession({
+      id: 'conversation:delayed-start',
+      ownerId: 'identity-a',
+      resourceId: 'identity-a',
+      threadId: 'delayed-start',
+    });
+    const nativeAbort = vi.spyOn(session, 'abortRun');
+    let enteredSend!: () => void;
+    let releaseStart!: () => void;
+    const sendEntered = new Promise<void>((resolve) => {
+      enteredSend = resolve;
+    });
+    const startGate = new Promise<void>((resolve) => {
+      releaseStart = resolve;
+    });
+    vi.spyOn(session, 'sendMessage').mockImplementation(async () => {
+      enteredSend();
+      await startGate;
+      session.run.nextOperation();
+      session.run.ensureAbortController();
+      session.run.setRunId({ runId: 'native-delayed-start' });
+      session.emit({ type: 'agent_start' });
+      if (session.run.isAbortRequested()) {
+        session.emit({ type: 'agent_end', reason: 'aborted' });
+        session.run.reset();
+      }
+    });
+    const controller = new AbortController();
+    const events: AssistantRuntimeEvent[] = [];
+    const finished = (async () => {
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'identity-a',
+        conversationId: 'delayed-start',
+        content: 'start slowly',
+        context: context('identity-a', 'delayed-start'),
+        signal: controller.signal,
+      })) {
+        events.push(event);
+      }
+    })();
+
+    await sendEntered;
+    controller.abort();
+    expect(nativeAbort).not.toHaveBeenCalled();
+    releaseStart();
+    await finished;
+
+    expect(nativeAbort).toHaveBeenCalledTimes(1);
+    expect(events.map((event) => event.type)).toEqual([
+      'assistant.run.started',
+      'assistant.run.cancelled',
+    ]);
+    expect(new Set(events.map((event) => event.runId))).toEqual(new Set(['native-delayed-start']));
+    expect(runtime.cancelRun({ identityId: 'identity-a', runId: 'native-delayed-start' })).toBe(
+      false,
+    );
+
+    // The completed dispatch removed its AbortSignal listener and active-run reservation,
+    // so a later native run in the same session cannot be killed by the stale turn.
+    session.run.ensureAbortController();
+    session.run.setRunId({ runId: 'successor' });
+    const abortCalls = nativeAbort.mock.calls.length;
+    controller.abort();
+    expect(nativeAbort).toHaveBeenCalledTimes(abortCalls);
+    session.run.reset();
+  });
+
+  it('approve-first then immediate Stop never claims execution and native cancellation wins before resume', async () => {
+    const turn = await parkedTurn();
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('identity-a', 'approve'),
+        command: turn.command,
+      }),
+    ).toBe(true);
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
+    await turn.finished;
+    expect(turn.approve).not.toHaveBeenCalled();
+    expect(turn.decline).toHaveBeenCalledTimes(1);
+    expect(turn.events.at(-1)?.type).toBe('assistant.run.cancelled');
+    expect(turn.events).toContainEqual(
+      expect.objectContaining({
+        type: 'assistant.approval.resolved',
+        data: { toolCallId: 'call-1', resolution: 'approved' },
+      }),
+    );
+  });
+
+  it('declines through the actual parked native gate, never executing', async () => {
+    const turn = await parkedTurn();
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('identity-a', 'decline'),
+        command: { ...turn.command, decision: 'decline' },
+      }),
+    ).toBe(true);
+    await turn.finished;
+    expect(turn.approve).not.toHaveBeenCalled();
+    expect(turn.decline).toHaveBeenCalledTimes(1);
+    expect(turn.events).toContainEqual(
+      expect.objectContaining({
+        type: 'assistant.approval.resolved',
+        data: { toolCallId: 'call-1', resolution: 'declined' },
+      }),
+    );
+  });
+
+  it('Stop releases a real native approval wait and cancel-first rejects approval', async () => {
+    const turn = await parkedTurn();
+    expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
+    expect(
+      turn.runtime.decideToolApproval({
+        context: context('identity-a', 'late'),
+        command: turn.command,
+      }),
+    ).toBe(false);
+    await turn.finished;
+    expect(turn.session.approval.isArmed()).toBe(false);
+    expect(turn.approve).not.toHaveBeenCalled();
+    expect(turn.decline).toHaveBeenCalledTimes(1);
+    expect(turn.events.at(-1)?.type).toBe('assistant.run.cancelled');
+    expect(turn.events).toContainEqual(
+      expect.objectContaining({
+        type: 'assistant.approval.resolved',
+        data: { toolCallId: 'call-1', resolution: 'cancelled' },
+      }),
+    );
+  });
+});
 
 describe('MastraAIRuntime Assistant tool policy', () => {
   it('installs the manifest on real controller sessions despite permissive persisted state', async () => {
@@ -261,6 +786,162 @@ describe('MastraAIRuntime Assistant tool policy', () => {
 });
 
 describe('MastraAIRuntime goal.create product projection', () => {
+  it('persists the explicit workflow user turn in canonical Mastra history without running Assistant', async () => {
+    const { runtime } = await createRuntime();
+    const dispatch = vi.spyOn(runtime, 'dispatchMessage');
+
+    const started = await runtime.start({
+      context: context('identity-turn', 'request-turn'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-turn',
+        input: { idea: 'User: Create a focused study goal' },
+        workflowTurn: 'Create a focused study goal',
+      },
+    });
+
+    expect(started.kind).toBe('goal.create');
+    expect(dispatch).not.toHaveBeenCalled();
+    await expect(
+      runtime.listMessages({ identityId: 'identity-turn', conversationId: 'conversation-turn' }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Create a focused study goal' }],
+    });
+  });
+
+  it('persists a main-Composer clarification response before resuming the Goal workflow', async () => {
+    const { runtime } = await createRuntime();
+    vi.mocked(runtime.goalPlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'The target is still ambiguous.',
+        questions: ['Which target school?'],
+        candidateDraft: draft,
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The target is now concrete enough to review.',
+        candidateDraft: draft,
+      });
+
+    const started = await runtime.start({
+      context: context('identity-clarification-turn', 'request-clarification-start'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-clarification-turn',
+        input: { idea: 'Prepare for graduate school' },
+      },
+    });
+    expect(started.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which target school?'],
+    });
+
+    await runtime.resume({
+      context: context('identity-clarification-turn', 'request-clarification-answer'),
+      request: {
+        runId: started.runId,
+        command: { type: 'answer', answers: ['Kyoto University'] },
+        workflowTurn: 'Kyoto University',
+      },
+    });
+
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-clarification-turn',
+        conversationId: 'conversation-clarification-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Kyoto University' }],
+    });
+  });
+
+  it('persists Task and Knowledge main-Composer clarification turns before workflow resume', async () => {
+    const { runtime } = await createRuntime();
+
+    vi.mocked(runtime.taskPlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'Two details are still needed.',
+        questions: ['When should it run?', 'How often should it repeat?'],
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The Task can now be reviewed.',
+        candidateDraft: taskDraft,
+      });
+    const task = await runtime.start({
+      context: context('identity-task-turn', 'request-task-start'),
+      request: {
+        kind: 'task.create',
+        conversationId: 'conversation-task-turn',
+        input: { idea: 'Create a recurring report Task' },
+        locale: 'en-US',
+      },
+    });
+    expect(task.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['When should it run?', 'How often should it repeat?'],
+    });
+    await runtime.resume({
+      context: context('identity-task-turn', 'request-task-answer'),
+      request: {
+        runId: task.runId,
+        command: { type: 'answer', answers: ['Every Monday morning'] },
+        workflowTurn: 'Every Monday morning',
+      },
+    });
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-task-turn',
+        conversationId: 'conversation-task-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Every Monday morning' }],
+    });
+
+    vi.mocked(runtime.knowledgeCapturePlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'The note topic needs one more detail.',
+        questions: ['Which topic?', 'Which angle matters most?'],
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The note can now be reviewed.',
+        candidateDraft: knowledgeDraft,
+      });
+    const knowledge = await runtime.start({
+      context: context('identity-knowledge-turn', 'request-knowledge-start'),
+      request: {
+        kind: 'knowledge.capture',
+        conversationId: 'conversation-knowledge-turn',
+        input: { topic: 'Capture a durable workflow note' },
+        locale: 'en-US',
+      },
+    });
+    expect(knowledge.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which topic?', 'Which angle matters most?'],
+    });
+    await runtime.resume({
+      context: context('identity-knowledge-turn', 'request-knowledge-answer'),
+      request: {
+        runId: knowledge.runId,
+        command: { type: 'answer', answers: ['Durability and recovery semantics'] },
+        workflowTurn: 'Durability and recovery semantics',
+      },
+    });
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-knowledge-turn',
+        conversationId: 'conversation-knowledge-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Durability and recovery semantics' }],
+    });
+  });
+
   it('owns start/get/list/resume and short-circuits a second approve after terminal completion', async () => {
     const { runtime, mutations, summarizeUsage } = await createRuntime();
     const identityId = 'identity-a';
@@ -671,8 +1352,10 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       request: { runId: started.runId, command: { type: 'approve' } },
     });
     expect(recovery.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
+    expect(recovery.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const restored = await runtime.get({ identityId, runId: started.runId });
     expect(restored?.suspension).toMatchObject({ type: 'recovery_required' });
+    expect(restored?.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const completed = await runtime.resume({
       context: context(identityId, 'retry-host'),
       request: { runId: started.runId, command: { type: 'retry' } },

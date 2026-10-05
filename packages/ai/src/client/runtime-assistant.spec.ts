@@ -278,3 +278,39 @@ describe('AssistantRuntimeIpcClient', () => {
     });
   });
 });
+
+describe('Assistant tool approval transport parity', () => {
+  const approval = {
+    type: 'tool_approval' as const,
+    conversationId: 'c',
+    runId: 'r',
+    toolCallId: 't',
+    decision: 'decline' as const,
+  };
+  it('validates HTTP approval request and acknowledgement', async () => {
+    const post = vi.fn(async () => ok({ accepted: true }));
+    const client = new AssistantRuntimeHttpClient(httpStub({ post }));
+    expect(await client.decideToolApproval(approval)).toBe(true);
+    expect(post).toHaveBeenCalledWith('/ai/runtime/assistant/approval', approval);
+    await expect(
+      client.decideToolApproval({ ...approval, identityId: 'foreign' } as never),
+    ).rejects.toThrow();
+    post.mockResolvedValueOnce(ok({ accepted: 'yes' }) as never);
+    await expect(client.decideToolApproval(approval)).rejects.toMatchObject({
+      code: 'AI_RUNTIME_PROTOCOL_ERROR',
+    });
+  });
+  it('validates equivalent IPC request and acknowledgement', async () => {
+    const invoke = vi.fn(async () => ok({ accepted: false }));
+    const client = new AssistantRuntimeIpcClient({ invoke } as never);
+    expect(await client.decideToolApproval(approval)).toBe(false);
+    expect(invoke).toHaveBeenCalledWith('ai:runtime:assistant:approval', approval);
+    await expect(
+      client.decideToolApproval({ ...approval, decision: 'always_allow_category' } as never),
+    ).rejects.toThrow();
+    invoke.mockResolvedValueOnce(ok({ accepted: false, raw: 'private' }) as never);
+    await expect(client.decideToolApproval(approval)).rejects.toMatchObject({
+      code: 'AI_RUNTIME_PROTOCOL_ERROR',
+    });
+  });
+});

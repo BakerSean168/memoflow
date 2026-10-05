@@ -26,7 +26,6 @@ import {
   Minimize2,
   Repeat2,
   Target,
-  Workflow,
   X,
 } from '@lucide/vue';
 import type { Component } from 'vue';
@@ -39,16 +38,12 @@ const props = defineProps<{
   activeTabId: string | null;
   layout: ShellLayout;
   panelSurface: PanelSurface;
-  workflowAvailable?: boolean;
-  workflowAttentionCount?: number;
 }>();
 
 const emit = defineEmits<{
   (e: 'activate-tab', id: string): void;
   (e: 'close-tab', id: string): void;
   (e: 'show-home'): void;
-  (e: 'show-workflow'): void;
-  (e: 'close-workflow'): void;
   (e: 'toggle-focus'): void;
 }>();
 
@@ -87,11 +82,7 @@ const moduleIcons: Record<ShellModule, Component> = {
 const isFocused = computed(() => props.layout === 'focus');
 
 const tabDensity = computed<BusinessTabDensity>(() =>
-  resolveBusinessTabDensity(
-    panelContentWidth.value ?? 720,
-    props.tabs.length,
-    Boolean(props.workflowAvailable),
-  ),
+  resolveBusinessTabDensity(panelContentWidth.value ?? 720, props.tabs.length),
 );
 
 function isActiveTab(tab: BusinessTab): boolean {
@@ -245,56 +236,6 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
             </button>
           </div>
         </div>
-
-        <div
-          v-if="workflowAvailable"
-          class="business-workbench-tab group relative flex h-9 shrink-0 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[background-color,color,box-shadow] duration-150"
-          :class="[
-            panelSurface === 'workflow'
-              ? 'business-workbench-tab--active text-foreground'
-              : 'business-workbench-tab--inactive text-[hsl(var(--foreground-muted))]',
-            tabDensity === 'comfortable'
-              ? 'max-w-36'
-              : tabDensity === 'compact'
-                ? 'max-w-24'
-                : panelSurface === 'workflow'
-                  ? 'w-[4.5rem]'
-                  : 'w-9',
-          ]"
-        >
-          <button
-            type="button"
-            class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
-            :class="
-              tabDensity === 'icon' && panelSurface !== 'workflow' ? 'justify-center px-0' : 'pr-9'
-            "
-            data-testid="business-panel-workflow"
-            :aria-current="panelSurface === 'workflow' ? 'page' : undefined"
-            :title="t('shell.panel.workflow')"
-            :aria-label="t('shell.panel.workflow')"
-            @click="emit('show-workflow')"
-          >
-            <Workflow class="h-3.5 w-3.5 shrink-0 transition-opacity duration-150" />
-            <span v-if="tabDensity !== 'icon'" class="truncate">{{
-              t('shell.panel.workflow')
-            }}</span>
-            <span
-              v-if="(workflowAttentionCount ?? 0) > 0 && tabDensity !== 'icon'"
-              class="rounded-full bg-primary/15 px-1.5 text-[9px] font-semibold text-primary"
-            >
-              {{ workflowAttentionCount }}
-            </span>
-          </button>
-          <button
-            type="button"
-            class="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground group-hover:opacity-70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
-            :class="tabDensity === 'icon' && panelSurface !== 'workflow' ? 'hidden' : ''"
-            :aria-label="t('shell.panel.closeWorkflow')"
-            @click.stop="emit('close-workflow')"
-          >
-            <X class="h-3 w-3" />
-          </button>
-        </div>
       </div>
 
       <!-- 面板级控制 -->
@@ -329,13 +270,6 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
         data-surface-scroll-root="business"
       >
         <slot />
-      </div>
-      <div
-        v-show="panelSurface === 'workflow'"
-        class="h-full overflow-hidden"
-        data-surface-scroll-root="workflow"
-      >
-        <slot name="workflow" />
       </div>
     </div>
   </section>

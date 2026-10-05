@@ -3,7 +3,6 @@ import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import AIGoalWorkflowPanel from './AIGoalWorkflowPanel.vue';
-import { Input, Select } from '@memoflow/ui-vue-shadcn';
 
 type PanelProps = InstanceType<typeof AIGoalWorkflowPanel>['$props'];
 type GoalWorkflowRun = Extract<AIWorkflowRunView, { kind: 'goal.create' }>;
@@ -22,6 +21,9 @@ const i18n = createI18n({
             goalClarificationHint: 'Needs clarification',
             goalClarificationAnswerPlaceholder: 'Answer here',
             goalDraftTitle: 'Goal Draft',
+            goalNativeReviewHint: 'Review the Goal in its owner surface.',
+            goalOwnerSubmittedHint: 'Goal owner submission completed.',
+            openGoalNativeReview: 'Open Goal Review',
             noteCreatedTitle: 'Knowledge Note Created',
             openCreatedNote: 'Open Note',
             startAnotherNote: 'New Note Chat',
@@ -75,6 +77,9 @@ const i18n = createI18n({
         },
         goalDraft: {
           keyResults: 'Key Results',
+          tasks: 'Tasks',
+          knowledge: 'Knowledge',
+          allDay: 'All day',
           importance: 'Importance',
           selectImportance: 'Select importance',
           taskPlans: 'Task Templates',
@@ -206,7 +211,6 @@ function createPanelProps(overrides: Partial<PanelProps> = {}): PanelProps {
     toolMode: 'goal-create',
     goalClarification: null,
     goalWorkflowRun: reviewRun(),
-    clarificationAnswers: [],
     editableGoal: {
       name: draft.goal.name,
       summary: draft.goal.summary,
@@ -254,16 +258,30 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-agent-panel"]').exists()).toBe(false);
   });
 
+  it('keeps clarification display-only because answers are owned by the main Composer', () => {
+    const wrapper = mountPanel({
+      goalClarification: {
+        needsClarification: true,
+        questions: [{ question: 'Which target school?', context: null }],
+        rationale: 'One detail is still needed.',
+      },
+    });
+
+    expect(wrapper.get('[data-testid="goal-clarification-panel"]').text()).toContain(
+      'Which target school?',
+    );
+    expect(wrapper.find('[data-testid^="goal-clarification-answer-"]').exists()).toBe(false);
+    expect(wrapper.emitted('update:clarificationAnswers')).toBeUndefined();
+  });
+
   it('renders canonical Task schedule and both Knowledge create/linkExisting review entries', () => {
     const wrapper = mountPanel({});
 
     expect(wrapper.find('[data-testid="goal-workflow-draft-editor"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="goal-native-review-hint"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="goal-workflow-supporting-drafts-editor"]').exists()).toBe(
-      true,
-    );
-    expect(wrapper.find('[data-testid="goal-workflow-task-editor"]').exists()).toBe(true);
-    expect(wrapper.findAll('[data-testid="goal-workflow-knowledge-editor"]')).toHaveLength(2);
+    expect(wrapper.find('[data-testid="goal-workflow-supporting-proposals"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="goal-workflow-task-proposal"]').exists()).toBe(true);
+    expect(wrapper.findAll('[data-testid="goal-workflow-knowledge-proposal"]')).toHaveLength(2);
     expect(wrapper.text()).not.toContain('task:regression-gate');
     expect(wrapper.text()).toContain('Daily ×1');
     expect(wrapper.text()).not.toContain('note:goal-brief');
@@ -376,19 +394,12 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.text()).toContain('Grounded Note');
     expect(wrapper.find('[data-testid="goal-workflow-panel"]').exists()).toBe(false);
   });
-  it('disables supporting controls and suppresses late input events during confirmation', async () => {
-    const wrapper = mountPanel({ supportingEditingBlocked: true });
-    const task = wrapper.find('[data-testid="goal-workflow-task-editor"]');
-    expect(task.find('button').attributes('disabled')).toBeDefined();
-    expect(task.find('input').attributes('disabled')).toBeDefined();
-    expect(task.find('textarea').attributes('disabled')).toBeDefined();
-    expect(task.findComponent(Select).props('disabled')).toBe(true);
-    task.findComponent(Input).vm.$emit('update:modelValue', 'Late task edit');
-    const note = wrapper.find('[data-testid="goal-workflow-knowledge-editor"]');
-    expect(note.find('button').attributes('disabled')).toBeDefined();
-    expect(note.find('input').attributes('disabled')).toBeDefined();
-    note.findComponent(Input).vm.$emit('update:modelValue', 'Late note edit');
-    await wrapper.vm.$nextTick();
+  it('renders supporting proposals as display-only workflow context', () => {
+    const wrapper = mountPanel();
+    const supporting = wrapper.get('[data-testid="goal-workflow-supporting-proposals"]');
+    expect(supporting.findAll('input')).toHaveLength(0);
+    expect(supporting.findAll('textarea')).toHaveLength(0);
+    expect(supporting.findAll('button')).toHaveLength(0);
     expect(wrapper.emitted('update-task')).toBeUndefined();
     expect(wrapper.emitted('update-knowledge')).toBeUndefined();
   });

@@ -129,7 +129,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       {
         status: 'needs_clarification',
         reason: 'The cadence matters.',
-        questions: ['How often should this task repeat?'],
+        questions: ['When should this task run?', 'How often should this task repeat?'],
       },
       {
         status: 'draft_ready',
@@ -154,7 +154,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
     expect(first.status).toBe('suspended');
     expect(stepSuspendPayload(first)).toEqual({
       type: 'clarification_required',
-      questions: ['How often should this task repeat?'],
+      questions: ['When should this task run?', 'How often should this task repeat?'],
       round: 1,
     });
 
@@ -173,6 +173,13 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       draft: { revision: 1, task: { title: 'Prepare weekly report' } },
     });
     expect(plan).toHaveBeenCalledTimes(2);
+    expect(plan.mock.calls[1]?.[0].clarification.rounds).toEqual([
+      {
+        round: 1,
+        questions: ['When should this task run?', 'How often should this task repeat?'],
+        answers: ['weekly'],
+      },
+    ]);
 
     const workflow3 = buildWorkflow();
     const run3 = await workflow3.createRun({ runId, resourceId: workflowInput.identityId });
@@ -223,6 +230,10 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
     expect(stepSuspendPayload(recovery)).toMatchObject({
       type: 'recovery_required',
       retryable: true,
+      receipt: {
+        kind: 'task.create',
+        receipt: { status: 'failed', retryable: true },
+      },
     });
     const restarted = await buildWorkflow().createRun({
       runId,

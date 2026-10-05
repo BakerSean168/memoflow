@@ -31,9 +31,8 @@ const SIDEBAR_DEFAULT = 260;
 // 面板绝对像素上下限由 panel-geometry 动态计算；此处仅保留偏好默认值种子。
 
 export type ShellLayout = 'split' | 'focus';
-export type PanelSurface = 'home' | 'business' | 'workflow';
+export type PanelSurface = 'home' | 'business';
 export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
-export type WorkflowSurfaceRequest = 'opened' | 'deferred' | 'unavailable';
 
 /**
  * 布局来源（诊断修订 §4.2）：
@@ -96,11 +95,7 @@ interface AppShellState {
   activeTabId: string | null;
   rightPanelOpen: boolean;
   panelSurface: PanelSurface;
-  returnPanelSurface: Exclude<PanelSurface, 'workflow'> | null;
   surfaceStatus: PanelSurfaceStatus;
-  workflowAvailable: boolean;
-  workflowItemCount: number;
-  workflowAttentionCount: number;
   layout: ShellLayout;
   layoutReason: ShellLayoutReason;
   /** 用户显式 focus/split 偏好，按 AI conversation id 持久化。 */
@@ -156,11 +151,7 @@ export const useAppShellStore = defineStore('app-shell', {
     activeTabId: null,
     rightPanelOpen: true,
     panelSurface: 'home',
-    returnPanelSurface: null,
     surfaceStatus: 'clean',
-    workflowAvailable: false,
-    workflowItemCount: 0,
-    workflowAttentionCount: 0,
     layout: 'split',
     layoutReason: 'default',
     conversationLayoutPreferences: {},
@@ -217,7 +208,6 @@ export const useAppShellStore = defineStore('app-shell', {
         this.activeTabId = existing.id;
         this.rightPanelOpen = true;
         this.panelSurface = 'business';
-        this.returnPanelSurface = null;
         return { tabId: existing.id, evictionCandidateId: null };
       }
 
@@ -241,7 +231,6 @@ export const useAppShellStore = defineStore('app-shell', {
       this.activeTabId = tab.id;
       this.rightPanelOpen = true;
       this.panelSurface = 'business';
-      this.returnPanelSurface = null;
 
       return { tabId: tab.id, evictionCandidateId: null };
     },
@@ -254,7 +243,6 @@ export const useAppShellStore = defineStore('app-shell', {
       this.activeTabId = tabId;
       this.rightPanelOpen = true;
       this.panelSurface = 'business';
-      this.returnPanelSurface = null;
     },
 
     /**
@@ -272,7 +260,6 @@ export const useAppShellStore = defineStore('app-shell', {
       if (this.tabs.length === 0) {
         this.activeTabId = null;
         this.panelSurface = 'home';
-        this.returnPanelSurface = null;
         this.rightPanelOpen = true;
         this.surfaceStatus = 'clean';
         return null;
@@ -284,7 +271,6 @@ export const useAppShellStore = defineStore('app-shell', {
           neighbor.lastActiveAt = Date.now();
           this.activeTabId = neighbor.id;
           this.panelSurface = 'business';
-          this.returnPanelSurface = null;
           return neighbor.route;
         }
       }
@@ -296,7 +282,6 @@ export const useAppShellStore = defineStore('app-shell', {
       this.tabs = [];
       this.activeTabId = null;
       this.panelSurface = 'home';
-      this.returnPanelSurface = null;
       this.surfaceStatus = 'clean';
     },
 
@@ -313,7 +298,6 @@ export const useAppShellStore = defineStore('app-shell', {
     showHome(): void {
       this.rightPanelOpen = true;
       this.panelSurface = 'home';
-      this.returnPanelSurface = null;
       this.surfaceStatus = 'clean';
     },
 
@@ -332,47 +316,6 @@ export const useAppShellStore = defineStore('app-shell', {
     /** 离开设置场景后清除 origin（返回恢复动作或浏览器导航触发）。 */
     clearSettingsOrigin(): void {
       this.settingsOrigin = null;
-    },
-
-    setWorkflowAvailable(available: boolean, itemCount = 0): void {
-      this.workflowAvailable = available;
-      this.workflowItemCount = available ? Math.max(0, Math.floor(itemCount)) : 0;
-      if (available) return;
-
-      this.workflowAttentionCount = 0;
-      if (this.panelSurface === 'workflow') {
-        this.closeWorkflowSurface();
-      }
-    },
-
-    /**
-     * 工作流自动切换只允许发生在已打开且 clean 的右侧面板。
-     * 用户点击通知/工作流入口属于 explicit，可重新打开面板；业务 view 仍保活。
-     */
-    requestWorkflowSurface(intent: 'automatic' | 'explicit'): WorkflowSurfaceRequest {
-      if (!this.workflowAvailable) return 'unavailable';
-
-      if (intent === 'automatic' && (!this.rightPanelOpen || this.surfaceStatus !== 'clean')) {
-        this.workflowAttentionCount = Math.max(1, this.workflowItemCount);
-        return 'deferred';
-      }
-
-      if (this.panelSurface !== 'workflow') {
-        this.returnPanelSurface = this.panelSurface;
-      }
-      this.rightPanelOpen = true;
-      this.panelSurface = 'workflow';
-      this.workflowAttentionCount = 0;
-      return 'opened';
-    },
-
-    closeWorkflowSurface(): void {
-      const fallback = this.activeTabId ? 'business' : 'home';
-      this.panelSurface = this.returnPanelSurface ?? fallback;
-      if (this.panelSurface === 'business' && !this.activeTabId) {
-        this.panelSurface = 'home';
-      }
-      this.returnPanelSurface = null;
     },
 
     /**
@@ -410,9 +353,8 @@ export const useAppShellStore = defineStore('app-shell', {
       }
 
       // 工作流内容由 AI 会话恢复后重新声明，不能盲信历史 surface。
-      if (this.panelSurface === 'workflow') {
+      if ((this.panelSurface as string) === 'workflow') {
         this.panelSurface = this.activeTabId ? 'business' : 'home';
-        this.returnPanelSurface = null;
       }
     },
 
@@ -423,7 +365,6 @@ export const useAppShellStore = defineStore('app-shell', {
         tab.route = route;
         this.rightPanelOpen = true;
         this.panelSurface = 'business';
-        this.returnPanelSurface = null;
       }
     },
 

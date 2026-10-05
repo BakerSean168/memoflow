@@ -402,7 +402,7 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     wrapper.unmount();
   });
 
-  it('restores the workflow origin surface after returning from settings (review P1)', async () => {
+  it('restores the business origin surface after returning from settings (review P1)', async () => {
     const fixture = await mountRouterSync('/goals/g-1');
     fixture.store.openTab({
       module: 'goal',
@@ -411,18 +411,14 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
       intent: 'deeplink',
     });
     const wrapper = fixture.mount();
-    // mount 时 restoreStartupRoute 会按业务路由重置 surface；
-    // 真实进入设置→返回场景 workspace 常驻不重挂，这里在 mount 后设 workflow。
-    fixture.store.setWorkflowAvailable(true);
-    fixture.store.requestWorkflowSurface('explicit');
 
     await fixture.router.push('/settings');
-    expect(fixture.store.settingsOrigin?.panelSurface).toBe('workflow');
+    expect(fixture.store.settingsOrigin?.panelSurface).toBe('business');
 
     await fixture.actions().returnFromSettings();
 
     expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-1');
-    expect(fixture.store.panelSurface).toBe('workflow');
+    expect(fixture.store.panelSurface).toBe('business');
     wrapper.unmount();
   });
 });

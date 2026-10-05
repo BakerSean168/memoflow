@@ -13,6 +13,39 @@ import {
 } from './ai-runtime.dto';
 
 describe('AI vNext runtime contracts', () => {
+  it('accepts only bound approve/decline commands and safe typed approval events', () => {
+    const command = {
+      type: 'tool_approval',
+      conversationId: 'c',
+      runId: 'r',
+      toolCallId: 't',
+      decision: 'approve',
+    };
+    expect(AssistantRuntimeClientCommandSchema.safeParse(command).success).toBe(true);
+    for (const extra of [
+      { identityId: 'foreign' },
+      { decision: 'always_allow_category' },
+      { args: { secret: 'secret' } },
+    ]) {
+      expect(AssistantRuntimeClientCommandSchema.safeParse({ ...command, ...extra }).success).toBe(
+        false,
+      );
+    }
+    const event = {
+      eventId: 'r:1',
+      runId: 'r',
+      conversationId: 'c',
+      sequence: 1,
+      createdAt: 0,
+      type: 'assistant.approval.required',
+      data: { toolCallId: 't', toolName: 'routine_create', category: 'edit', risk: 'high' },
+    };
+    expect(AssistantRuntimeEventSchema.safeParse(event).success).toBe(true);
+    expect(
+      AssistantRuntimeEventSchema.safeParse({ ...event, data: { ...event.data, args: 'private' } })
+        .success,
+    ).toBe(false);
+  });
   it('rejects client identity injection for assistant commands', () => {
     const result = AssistantRuntimeClientCommandSchema.safeParse({
       type: 'message',
@@ -205,6 +238,7 @@ describe('AI vNext runtime contracts', () => {
       AIWorkflowResumeClientRequestSchema.safeParse({
         runId: 'workflow-1',
         command: { type: 'revise_natural_language', instruction: 'make it smaller' },
+        workflowTurn: 'Please make it smaller',
       }).success,
     ).toBe(true);
   });
@@ -232,6 +266,31 @@ describe('AI vNext runtime contracts', () => {
     ]) {
       expect(result.success).toBe(false);
     }
+  });
+
+  it('accepts a revisioned Goal candidate draft on clarification suspension', () => {
+    const parsed = AIWorkflowRunViewSchema.parse({
+      runId: 'workflow-partial-goal',
+      kind: 'goal.create',
+      conversationId: 'conversation-1',
+      status: 'suspended',
+      suspension: {
+        type: 'clarification_required',
+        questions: ['Which target?'],
+        round: 1,
+        candidateDraft: {
+          revision: 1,
+          goal: { draftRef: 'goal', name: 'Study goal', status: 'Planned' },
+        },
+      },
+      createdAt: 1,
+      updatedAt: 2,
+    });
+
+    expect(parsed.suspension).toMatchObject({
+      type: 'clarification_required',
+      candidateDraft: { revision: 1, goal: { name: 'Study goal' } },
+    });
   });
 
   it('projects only product workflow state and not framework snapshots', () => {
@@ -328,6 +387,25 @@ describe('AI vNext runtime contracts', () => {
             retryable: true,
           },
         ],
+        receipt: {
+          kind: 'task.create',
+          receipt: {
+            workflowRunId: 'task-recovery-1',
+            revision: 2,
+            status: 'partial',
+            referenceMap: { 'task:recovery': 'TaskId_recovery' },
+            failures: [
+              {
+                operation: 'task_plan',
+                draftRef: 'task:recovery',
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'internal persistence detail',
+                retryable: true,
+              },
+            ],
+            retryable: true,
+          },
+        },
       },
       createdAt: 1,
       updatedAt: 2,
@@ -338,6 +416,10 @@ describe('AI vNext runtime contracts', () => {
     if (parsed.suspension?.type === 'recovery_required') {
       expect(parsed.suspension.failures[0]?.operation).toBe('task_plan');
       expect(parsed.suspension.failures[0]?.draftRef).toBe('task:recovery');
+      expect(parsed.suspension.receipt).toMatchObject({
+        kind: 'task.create',
+        receipt: { status: 'partial', referenceMap: { 'task:recovery': 'TaskId_recovery' } },
+      });
     }
   });
 

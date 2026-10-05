@@ -52,7 +52,66 @@
               <MemoFlowAiIcon class="h-3.5 w-3.5" />
             </div>
             <div class="group/message min-w-0 flex-1 pt-0.5">
-              <AIMessageContent v-if="item.content.trim()" :content="item.content" />
+              <p
+                v-if="item.toolActivity"
+                role="status"
+                class="mb-2 text-xs text-muted-foreground"
+                data-testid="ai-tool-activity"
+              >
+                {{ t(`aiAssistant.chatPage.tools.capabilities.${item.toolActivity.toolName}`) }}
+              </p>
+              <section
+                v-for="approval in item.approvals ?? []"
+                :key="`${approval.runId}:${approval.toolCallId}`"
+                class="mb-3 min-w-0 rounded-xl border border-border p-3"
+                data-testid="ai-tool-approval"
+                :aria-label="t('aiAssistant.chatPage.tools.approvalTitle')"
+              >
+                <p class="break-words text-sm font-medium">
+                  {{ t(`aiAssistant.chatPage.tools.capabilities.${approval.toolName}`) }}
+                </p>
+                <p class="mt-1 text-xs text-muted-foreground" role="status">
+                  {{ t(`aiAssistant.chatPage.tools.${approval.status}`) }}
+                </p>
+                <p v-if="approval.status === 'pending'" class="mt-1 text-xs text-muted-foreground">
+                  {{ t('aiAssistant.chatPage.tools.impact') }}
+                </p>
+                <p
+                  v-if="approval.errorMessage"
+                  role="alert"
+                  class="mt-2 break-words text-xs text-destructive"
+                >
+                  {{ approval.errorMessage }}
+                </p>
+                <div
+                  v-if="approval.status === 'pending' || approval.status === 'sending'"
+                  class="mt-3 flex flex-wrap gap-2"
+                >
+                  <button
+                    type="button"
+                    class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+                    :disabled="approval.status !== 'pending'"
+                    data-testid="ai-tool-approve"
+                    @click="$emit('tool-decision', approval, 'approve')"
+                  >
+                    {{ t('aiAssistant.chatPage.tools.approve') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-md border border-border px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+                    :disabled="approval.status !== 'pending'"
+                    data-testid="ai-tool-decline"
+                    @click="$emit('tool-decision', approval, 'decline')"
+                  >
+                    {{ t('aiAssistant.chatPage.tools.decline') }}
+                  </button>
+                </div>
+              </section>
+              <AIMessageContent
+                v-if="item.content.trim()"
+                :content="item.content"
+                :generating="item.status === 'generating'"
+              />
               <p v-else class="text-sm leading-7 text-muted-foreground">
                 {{ typingPlaceholder(item) }}
               </p>
@@ -260,7 +319,12 @@ import {
 import { useI18n } from 'vue-i18n';
 import AIMessageContent from './AIMessageContent.vue';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
-import { getToolLocaleKey, type ChatItem, type WorkflowMode } from '../composables/types';
+import {
+  getToolLocaleKey,
+  type ChatItem,
+  type ChatToolApproval,
+  type WorkflowMode,
+} from '../composables/types';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import { useAIFormatters } from '../composables/useAIFormatters';
 
@@ -284,6 +348,7 @@ defineEmits<{
   'configure-ai': [];
   'create-goal': [];
   'quick-task': [];
+  'tool-decision': [approval: ChatToolApproval, decision: 'approve' | 'decline'];
 }>();
 
 const shortcutEntries = [

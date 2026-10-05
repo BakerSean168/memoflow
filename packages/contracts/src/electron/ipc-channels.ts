@@ -146,6 +146,7 @@ export const AIChannels = {
   CONVERSATION_DELETE: 'ai:chat:conversation:delete',
   /** AI vNext canonical Mastra Assistant stream start/cancel. */
   RUNTIME_ASSISTANT_START: 'ai:runtime:assistant:start',
+  RUNTIME_ASSISTANT_APPROVAL: 'ai:runtime:assistant:approval',
   RUNTIME_ASSISTANT_CANCEL: 'ai:runtime:assistant:cancel',
   RUNTIME_ASSISTANT_HISTORY: 'ai:runtime:assistant:history',
   RUNTIME_ASSISTANT_DELETE: 'ai:runtime:assistant:delete',

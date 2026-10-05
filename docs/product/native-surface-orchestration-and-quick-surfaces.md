@@ -302,40 +302,31 @@ Owner UI
 
 内部 identity 不进入普通用户表单和 normal workflow review UI。
 
-### 6.5 AI-owned product editor 目标退休
+### 6.5 AI-owned product editor 与 workflow workbench 已退休
 
-AIGoalDraftEditor、AITaskDraftEditor 与 AI-only Goal/Task form 已由 PVC-AI-8121 退休；BusinessPanel workflow surface 的后续评估属于 AI-8131。
+AIGoalDraftEditor、AITaskDraftEditor 与 AI-only Goal/Task form 已由 PVC-AI-8121 退休。AIC-3003 又在 clarification、recovery、supporting-resource handoff 和 diagnostics 都迁出 shell workflow surface 后，物理删除了 `BusinessPanel.workflow` 及其 Teleport / attention / restore 状态。
 
-保留 conversation、planning、clarification、workflow checkpoint、approval/recovery、execution record、diagnostic details 和 owner mutation/read ports。
+保留的是 conversation、planning、durable workflow checkpoint、approval/recovery、execution record、diagnostic details 和 owner mutation/read ports；这些能力不再要求一个独立大型 workflow workbench。
 
-## 7. BusinessPanel workflow surface
+## 7. AI workflow context / diagnostics
 
-当前 Shell 有：
-
-```text
-PanelSurface = home | business | workflow
-```
-
-AI workflow 通过 Teleport 把 context/status panel 挂到 workflow surface；业务编辑已经由 native owner surface 承担。
-
-PVC-AI-8131 在 native parity 完成后重新审查了 retirement gate，结论是 **保留 workflow surface**。它不再是第二套业务 editor，而是当前唯一完整承载以下 workflow context 的宿主：
-
-- Goal / Task / Knowledge clarification；
-- recovery / retry / cancel / result 与 revision / warning diagnostics；
-- AI-8101 明确保留的 Goal supporting Task / Knowledge overlays；
-- shell dirty / busy 自动切换保护与 hidden-panel attention；
-- restart / restore 后重新声明 workflow availability；
-- mobile workflow context 入口。
-
-因此当前职责边界是：
+当前 Shell 只有：
 
 ```text
-AI planning / messages        -> conversation
-product editing / review      -> business owner native surface
-workflow context / diagnostics -> BusinessPanel.workflow
+PanelSurface = home | business
 ```
 
-`workflow` surface 被锁定为 **non-owner context/status surface**：不得 import GoalDialog、TaskPlanDialog、KnowledgeCaptureReviewDialog，也不得直接调用 owner mutation/persistence。未来只有在 clarification/recovery/supporting overlays/attention/diagnostics 全部获得 canonical replacement 后，才可以重新提出 retirement。
+职责边界是：
+
+```text
+AI planning / messages         -> conversation
+clarification / recovery       -> Chat + main Composer / Chat actions
+product editing / review       -> business owner native surface
+supporting resource handoff    -> native Task / Knowledge routes
+workflow context / diagnostics -> explicit AIChatView secondary details
+```
+
+AIC-2101 先停止 Goal workflow 自动抢占右侧；AIC-3001/AIC-3002 再把 Task/Knowledge clarification、recovery 与 supporting-resource handoff 迁到 Chat/native owner path；AIC-3003 最后删除 shell-owned workflow chrome 和状态机。可选 diagnostics 仍可由桌面或移动端用户显式打开，但它只展示 context/status，不得 import owner dialog、直接调用 owner mutation/persistence，或重新成为 owner editing surface。
 
 ## 8. 组件复用原则
 
@@ -414,7 +405,7 @@ AI Surface Orchestrator
 
 Phase E
 retire AI-owned Goal/Task editors
-then evaluate workflow surface retirement
+workflow surface retirement (completed by AIC-3003)
 
 Parallel closure track
 GOV-7903 Product Governance destructive retirement

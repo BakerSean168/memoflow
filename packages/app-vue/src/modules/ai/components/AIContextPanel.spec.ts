@@ -26,4 +26,15 @@ describe('AIContextPanel', () => {
     expect(wrapper.text()).toContain('Workbench');
     expect(wrapper.text()).toContain('Goal planning');
   });
+
+  it('keeps secondary workflow details hidden until explicitly opened', () => {
+    const wrapper = mount(AIContextPanel, {
+      props: { hasWorkflowContext: true, open: false, toolLabel: 'Goal planning' },
+      global: { plugins: [i18n] },
+    });
+    expect(wrapper.get('[data-testid="ai-context-panel"]').classes()).toContain('hidden');
+    expect(wrapper.get('[data-testid="ai-context-panel-close"]').classes()).not.toContain(
+      'md:hidden',
+    );
+  });
 });

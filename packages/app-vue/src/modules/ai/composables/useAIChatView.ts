@@ -224,6 +224,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     selectedModel: modelSelection.selectedModel,
     chatConversationId: chatSession.chatConversationId,
     chatLoading: chatSession.chatLoading,
+    chatTimeline: chatSession.chatTimeline,
     hasWorkflowUserMessages: chatSession.hasWorkflowUserMessages,
     buildConversationTranscript: chatSession.buildConversationTranscript,
     scrollMessagesToBottom: chatSession.scrollMessagesToBottom,
@@ -236,6 +237,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     selectedModel: modelSelection.selectedModel,
     chatConversationId: chatSession.chatConversationId,
     chatLoading: chatSession.chatLoading,
+    chatTimeline: chatSession.chatTimeline,
     hasWorkflowUserMessages: chatSession.hasWorkflowUserMessages,
     buildConversationTranscript: chatSession.buildConversationTranscript,
     scrollMessagesToBottom: chatSession.scrollMessagesToBottom,
@@ -572,6 +574,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         ),
       loadConversationList: loadWorkspaceLists,
       startNewConversation,
+      prepareWorkflowTurn: () =>
+        chatSession.prepareWorkflowTurn(
+          service,
+          currentConversationLabel.value,
+          adjustComposerHeight,
+        ),
       handleSendChat: () =>
         chatSession.handleSendChat(
           service,
@@ -580,6 +588,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           adjustComposerHeight,
         ),
       stopGenerating: () => chatSession.stopGenerating(),
+      decideToolApproval: chatSession.decideToolApproval,
     },
     model: {
       selectedModelKey: modelSelection.selectedModelKey,

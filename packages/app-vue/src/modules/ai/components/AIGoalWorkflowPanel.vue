@@ -27,14 +27,6 @@
           <p v-if="item.context" class="mt-2 text-sm leading-6 text-muted-foreground">
             {{ item.context }}
           </p>
-          <textarea
-            :value="clarificationAnswers[index]"
-            rows="2"
-            class="mt-3 block w-full resize-none rounded-xl border bg-background px-3 py-2 text-sm leading-6 shadow-none outline-none placeholder:text-muted-foreground focus-visible:ring-0"
-            :placeholder="t('aiAssistant.chatPage.workflow.goalClarificationAnswerPlaceholder')"
-            :data-testid="`goal-clarification-answer-${index}`"
-            @input="updateClarificationAnswer(index, ($event.target as HTMLTextAreaElement).value)"
-          />
         </div>
       </div>
     </div>
@@ -122,162 +114,74 @@
           {{ t('aiAssistant.chatPage.workflow.openGoalNativeReview') }}
         </Button>
       </div>
-      <template v-if="goalReviewDraft && !goalOwnerSubmitted">
-        <div
-          class="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4"
-          data-testid="goal-workflow-supporting-drafts-editor"
-        >
-          <div class="space-y-3">
-            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.tasks') }}
-            </p>
-            <div v-if="editableTasks.length" class="space-y-3">
-              <div
-                v-for="(item, index) in editableTasks"
-                :key="item.draftRef"
-                class="space-y-3 rounded-xl border border-border/50 bg-background/70 p-3"
-                data-testid="goal-workflow-task-editor"
+      <div
+        v-if="
+          goalReviewDraft &&
+          !goalOwnerSubmitted &&
+          (editableTasks.length > 0 || editableKnowledge.length > 0)
+        "
+        class="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4"
+        data-testid="goal-workflow-supporting-proposals"
+      >
+        <div v-if="editableTasks.length" class="space-y-3">
+          <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            {{ t('aiAssistant.goalDraft.tasks') }}
+          </p>
+          <div
+            v-for="item in editableTasks"
+            :key="item.draftRef"
+            class="space-y-2 rounded-xl border border-border/50 bg-background/70 p-3"
+            data-testid="goal-workflow-task-proposal"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
+              <span
+                class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
               >
-                <div class="flex items-center justify-between gap-3">
-                  <Button
-                    :disabled="supportingEditingBlocked"
-                    variant="outline"
-                    size="sm"
-                    @click="!supportingEditingBlocked && $emit('remove-task', index)"
-                  >
-                    {{ t('aiAssistant.goalDraft.removeTask') }}
-                  </Button>
-                </div>
-                <Input
-                  :disabled="supportingEditingBlocked"
-                  :model-value="item.title"
-                  :placeholder="t('aiAssistant.goalDraft.taskName')"
-                  @update:model-value="updateTask(index, { title: String($event ?? '') })"
-                />
-                <Textarea
-                  :disabled="supportingEditingBlocked"
-                  class="min-h-20"
-                  :model-value="item.description ?? ''"
-                  :placeholder="t('aiAssistant.goalDraft.taskDescription')"
-                  @update:model-value="
-                    updateTask(index, { description: String($event ?? '') || null })
-                  "
-                />
-                <div class="grid gap-3 @sm/ai:grid-cols-2">
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.importance') }}
-                    </p>
-                    <Select
-                      :disabled="supportingEditingBlocked"
-                      :model-value="item.importance"
-                      @update:model-value="
-                        updateTask(index, {
-                          importance: $event as EditableGoalTask['importance'],
-                        })
-                      "
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="option in importanceOptions"
-                          :key="option.value"
-                          :value="option.value"
-                        >
-                          {{ option.label }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div class="rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">
-                    <p class="text-[10px] uppercase tracking-[0.16em]">
-                      {{ t('aiAssistant.goalDraft.schedule') }}
-                    </p>
-                    <p class="mt-1 text-foreground">{{ formatTaskSchedule(item) }}</p>
-                  </div>
-                </div>
-              </div>
+                {{ item.importance }}
+              </span>
             </div>
-            <p v-else class="text-sm leading-6 text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.noTasks') }}
+            <p v-if="item.description" class="text-sm leading-6 text-muted-foreground">
+              {{ item.description }}
             </p>
-          </div>
-
-          <div class="space-y-3">
-            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.knowledge') }}
-            </p>
-            <div v-if="editableKnowledge.length" class="space-y-3">
-              <div
-                v-for="(item, index) in editableKnowledge"
-                :key="item.draftRef"
-                class="space-y-3 rounded-xl border border-border/50 bg-background/70 p-3"
-                data-testid="goal-workflow-knowledge-editor"
-              >
-                <div class="flex items-center justify-between gap-3">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span
-                      class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
-                    >
-                      {{ item.mode }}
-                    </span>
-                  </div>
-                  <Button
-                    :disabled="supportingEditingBlocked"
-                    variant="outline"
-                    size="sm"
-                    @click="!supportingEditingBlocked && $emit('remove-knowledge', index)"
-                  >
-                    Remove
-                  </Button>
-                </div>
-
-                <template v-if="item.mode === 'create'">
-                  <Input
-                    :disabled="supportingEditingBlocked"
-                    :model-value="item.title"
-                    @update:model-value="
-                      updateKnowledgeCreate(index, { title: String($event ?? '') })
-                    "
-                  />
-                  <Input
-                    :disabled="supportingEditingBlocked"
-                    :model-value="item.targetSubpath"
-                    @update:model-value="
-                      updateKnowledgeCreate(index, { targetSubpath: String($event ?? '') })
-                    "
-                  />
-                  <Textarea
-                    :disabled="supportingEditingBlocked"
-                    class="min-h-32"
-                    :model-value="item.markdown"
-                    @update:model-value="
-                      updateKnowledgeCreate(index, { markdown: String($event ?? '') })
-                    "
-                  />
-                  <div
-                    v-if="item.sourceRefs.length"
-                    class="space-y-1 text-xs text-muted-foreground"
-                  >
-                    <p class="font-medium text-foreground">
-                      {{ t('aiAssistant.goalDraft.sources') }}
-                    </p>
-                    <p v-for="source in item.sourceRefs" :key="source" class="break-all">
-                      {{ source }}
-                    </p>
-                  </div>
-                </template>
-                <template v-else>
-                  <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
-                </template>
-              </div>
-            </div>
-            <p v-else class="text-sm leading-6 text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.noKnowledge') }}
-            </p>
+            <p class="text-xs text-muted-foreground">{{ formatTaskSchedule(item) }}</p>
           </div>
         </div>
-      </template>
+
+        <div v-if="editableKnowledge.length" class="space-y-3">
+          <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            {{ t('aiAssistant.goalDraft.knowledge') }}
+          </p>
+          <div
+            v-for="item in editableKnowledge"
+            :key="item.draftRef"
+            class="space-y-2 rounded-xl border border-border/50 bg-background/70 p-3"
+            data-testid="goal-workflow-knowledge-proposal"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
+              <span
+                class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
+              >
+                {{ item.mode }}
+              </span>
+            </div>
+            <template v-if="item.mode === 'create'">
+              <p class="break-all text-xs text-muted-foreground">{{ item.targetSubpath }}</p>
+              <p class="line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+                {{ item.markdown }}
+              </p>
+              <p
+                v-for="source in item.sourceRefs"
+                :key="source"
+                class="break-all text-xs text-muted-foreground"
+              >
+                {{ source }}
+              </p>
+            </template>
+          </div>
+        </div>
+      </div>
 
       <div v-if="goalRecovery" class="space-y-3" data-testid="goal-workflow-recovery">
         <div class="flex items-center gap-2">
@@ -446,16 +350,7 @@
 import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  Button,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
 import type {
@@ -472,24 +367,17 @@ const props = defineProps<{
   toolMode: WorkflowMode;
   goalClarification: GoalClarificationView | null;
   goalWorkflowRun: Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null;
-  clarificationAnswers: string[];
   editableGoal: EditableGoal;
   editableKeyResults: EditableKeyResult[];
   editableTasks: EditableGoalTask[];
   editableKnowledge: EditableGoalKnowledge[];
   goalOwnerSubmitted?: boolean;
-  supportingEditingBlocked?: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
   formatExecutionOutcome: (status: 'success' | 'partial' | 'failed') => string;
 }>();
 
-const emit = defineEmits<{
-  'update:clarificationAnswers': [answers: string[]];
+defineEmits<{
   'open-native-review': [];
-  'remove-task': [index: number];
-  'update-task': [payload: { index: number; value: EditableGoalTask }];
-  'remove-knowledge': [index: number];
-  'update-knowledge': [payload: { index: number; value: EditableGoalKnowledge }];
   'open-knowledge-citation': [documentRef: KnowledgeRelatedNote['documentRef']];
 }>();
 
@@ -497,14 +385,6 @@ const { t } = useI18n();
 const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
   getAIWorkflowFailureMessage(failure, t);
 type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number];
-
-const importanceOptions = computed(() => [
-  { value: 'Vital', label: t('aiAssistant.goalDraft.importanceLevels.vital') },
-  { value: 'Important', label: t('aiAssistant.goalDraft.importanceLevels.important') },
-  { value: 'Moderate', label: t('aiAssistant.goalDraft.importanceLevels.moderate') },
-  { value: 'Minor', label: t('aiAssistant.goalDraft.importanceLevels.minor') },
-  { value: 'Trivial', label: t('aiAssistant.goalDraft.importanceLevels.trivial') },
-]);
 
 const goalReviewDraft = computed(() => {
   const suspension = props.goalWorkflowRun?.suspension;
@@ -515,29 +395,6 @@ const goalRecovery = computed(() => {
   const suspension = props.goalWorkflowRun?.suspension;
   return suspension?.type === 'recovery_required' ? suspension : null;
 });
-
-function updateClarificationAnswer(index: number, value: string) {
-  const next = [...props.clarificationAnswers];
-  next[index] = value;
-  emit('update:clarificationAnswers', next);
-}
-
-function updateTask(index: number, patch: Partial<EditableGoalTask>) {
-  if (props.supportingEditingBlocked) return;
-  const current = props.editableTasks[index];
-  if (!current) return;
-  emit('update-task', { index, value: { ...current, ...patch } });
-}
-
-function updateKnowledgeCreate(
-  index: number,
-  patch: Partial<Extract<EditableGoalKnowledge, { mode: 'create' }>>,
-) {
-  if (props.supportingEditingBlocked) return;
-  const current = props.editableKnowledge[index];
-  if (!current || current.mode !== 'create') return;
-  emit('update-knowledge', { index, value: { ...current, ...patch } });
-}
 
 function formatTaskSchedule(task: EditableGoalTask): string {
   const schedule = task.schedule;

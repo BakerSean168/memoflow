@@ -264,6 +264,7 @@ export function createKnowledgeCaptureWorkflow(input: {
           message: 'The approved knowledge-note draft could not be saved.',
           retryable: receipt.retryable,
           failures: receipt.failures,
+          receipt: { kind: 'knowledge.capture' as const, receipt },
         });
       };
 
@@ -287,10 +288,7 @@ export function createKnowledgeCaptureWorkflow(input: {
         if (resumeData.type !== 'answer') {
           throw new Error('knowledge.capture clarification requires an answer command');
         }
-        if (
-          current.pendingQuestions.length === 0 ||
-          current.pendingQuestions.length !== resumeData.answers.length
-        ) {
+        if (current.pendingQuestions.length === 0 || resumeData.answers.length === 0) {
           throw new Error(
             'knowledge.capture clarification answer count does not match pending questions',
           );

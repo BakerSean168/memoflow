@@ -63,6 +63,7 @@ export class AIExecutionRecordPrismaAdapter implements IAIExecutionRecordPort, I
     const rows = await this.prisma.aiExecutionRecord.findMany({
       where: {
         identityId: input.identityId,
+        NOT: { operation: { startsWith: 'assistant.phase.' } },
         ...(input.conversationId ? { conversationId: input.conversationId } : {}),
         ...(input.runId ? { runId: input.runId } : {}),
       },

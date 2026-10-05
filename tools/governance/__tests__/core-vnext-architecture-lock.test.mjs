@@ -29,25 +29,27 @@ const canonicalWorkflowContextFiles = [
   {
     relPath: 'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
     content: `
-      const active = panelSurface === 'workflow';
-      const attention = workflowAttentionCount;
-      const slot = '<slot name="workflow" />';
+      const active = panelSurface === 'business';
+      const slot = '<slot name="business" />';
     `,
   },
   {
     relPath: 'packages/app-vue/src/layouts/shell/useAppShellStore.ts',
     content: `
-      function requestWorkflowSurface() {
-        if (this.surfaceStatus !== 'clean') this.workflowAttentionCount = 1;
-      }
-      function closeWorkflowSurface() {}
+      function requestBusinessSurface() {}
+      function closeBusinessSurface() {}
     `,
   },
   {
     relPath: 'packages/app-vue/src/modules/ai/views/AIChatView.vue',
     content: `
-      <AIContextPanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/><AIKnowledgeCapturePanel/></AIContextPanel>
-      requestWorkflowSurface(intent);
+      <AIContextPanel>
+        <AIGoalWorkflowPanel/>
+        <AITaskWorkflowPanel/>
+        <AIKnowledgeCapturePanel/>
+      </AIContextPanel>
+      <button data-testid="ai-desktop-context-panel-toggle"></button>
+      <button data-testid="ai-context-panel-toggle"></button>
     `,
   },
 ];
@@ -334,9 +336,9 @@ describe('HARD-7102 core vNext architecture lock', () => {
   });
 });
 
-describe('AI workflow context retention boundary', () => {
+describe('AI workflow diagnostics boundary', () => {
   it.each(['GoalDialog', 'TaskPlanDialog', 'KnowledgeCaptureReviewDialog', 'createPlanSafe'])(
-    'rejects owner form or mutation symbol %s inside the retained workflow context',
+    'rejects owner form or mutation symbol %s inside AI workflow diagnostics',
     (symbol) => {
       const { violations } = scan({
         relPath: 'packages/app-vue/src/modules/ai/components/AIContextPanel.vue',
@@ -348,10 +350,14 @@ describe('AI workflow context retention boundary', () => {
     },
   );
 
-  it('requires the retained workflow slot, attention guard, and context composition', () => {
+  it('requires explicit desktop and mobile conversation diagnostics after shell workflow retirement', () => {
     const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
-      file.relPath === 'packages/app-vue/src/layouts/shell/BusinessPanel.vue'
-        ? { ...file, content: 'workflowAttentionCount' }
+      file.relPath === 'packages/app-vue/src/modules/ai/views/AIChatView.vue'
+        ? {
+            ...file,
+            content:
+              '<AIContextPanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/><AIKnowledgeCapturePanel/></AIContextPanel>',
+          }
         : file,
     );
     const { violations } = findCoreVnextArchitectureLockViolations([
@@ -359,9 +365,20 @@ describe('AI workflow context retention boundary', () => {
       ...canonicalTaskGoalFiles,
       ...brokenWorkflowFiles,
     ]);
-    expect(violations.some(({ kind }) => kind === 'ai-workflow-context-surface-missing')).toBe(
-      true,
-    );
+    expect(violations.some(({ kind }) => kind === 'ai-workflow-diagnostics-missing')).toBe(true);
+  });
+
+  it.each([
+    'requestWorkflowSurface',
+    'workflowAttentionCount',
+    'shell-workflow-surface',
+    '<slot name="workflow" />',
+  ])('rejects retired shell workflow surface token %s', (token) => {
+    const { violations } = scan({
+      relPath: 'packages/app-vue/src/layouts/shell/BusinessPanel.vue',
+      content: token,
+    });
+    expect(violations.some(({ kind }) => kind === 'ai-retired-shell-workflow-surface')).toBe(true);
   });
 });
 

@@ -4,9 +4,9 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { computed, defineComponent, h, inject, nextTick, onMounted, ref, Teleport } from 'vue';
+import { defineComponent, h, nextTick, onMounted, ref } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DESKTOP_UPDATE_SERVICE_KEY, SHELL_WORKFLOW_MOUNT_KEY } from '../../di/keys';
+import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
 import { ok } from '@memoflow/contracts/result';
 import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
@@ -71,24 +71,13 @@ const activeChatConversationId = ref<string | null>(null);
 const AIChatViewStub = defineComponent({
   name: 'AIChatView',
   setup(_props, { expose }) {
-    const workflowMount = inject(SHELL_WORKFLOW_MOUNT_KEY)!;
-    const target = computed(() => workflowMount.value);
     expose({
       conversationList: [],
       conversationListLoading: false,
       chatConversationId: activeChatConversationId,
     });
 
-    return () =>
-      h('div', { 'data-testid': 'ai-chat-view' }, [
-        target.value
-          ? h(
-              Teleport,
-              { to: target.value },
-              h('div', { 'data-testid': 'workflow-teleport-probe' }, 'Workflow'),
-            )
-          : null,
-      ]);
+    return () => h('div', { 'data-testid': 'ai-chat-view' });
   },
 });
 
@@ -289,12 +278,11 @@ describe('AppShell right-panel integration', () => {
     expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 
-  it('mounts Home by default and teleports AI workflow content into the canonical panel', async () => {
+  it('mounts Home by default without a shell-owned workflow surface', async () => {
     const { wrapper } = await mountShell();
 
     expect(wrapper.get('[data-testid="today-overview-panel"]').exists()).toBe(true);
-    const workflowSurface = wrapper.get('[data-testid="shell-workflow-surface"]');
-    expect(workflowSurface.find('[data-testid="workflow-teleport-probe"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="shell-workflow-surface"]').exists()).toBe(false);
     wrapper.unmount();
   });
 

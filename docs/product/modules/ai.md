@@ -60,12 +60,11 @@ AI 对业务 UI 使用 typed semantic action，而不是 DOM selector/click/type
 
 **2026-10-02 PVC-AI-8121:** `AIGoalDraftEditor` / `AITaskDraftEditor` 及其 visibility state 已删除。
 Goal/KR 使用 GoalDialog，完整 Task 使用 TaskPlanDialog，Knowledge 使用 Repository
-KnowledgeCaptureReviewDialog。Goal native Save 负责确认编排；shell 只保留 owner submit 后的
-approval retry / ambiguous-attempt recovery、cancel、clarification 与状态。
-Goal workflow 的 supporting Task/Knowledge overlay 仍按 run/revision 恢复；不保存 Goal/KR 表单。
-Task panel 的 confirm 委托同一个 native owner submit coordinator，保留 receipt/retry 语义。
+KnowledgeCaptureReviewDialog。Owner native Save/confirm 继续负责 canonical mutation；Chat 负责
+clarification、status、cancel、retry/recovery 与 owner-submit 后的 ambiguous-attempt handling。
+Goal supporting Task/Knowledge 资源通过 durable run/revision 恢复，并从 Chat handoff 到对应 native owner route；不保存 AI-owned Goal/KR/Task 表单。
 
-**2026-10-02 PVC-AI-8131:** `BusinessPanel.workflow` 经 native parity 后评估为继续保留，但职责已收缩为 non-owner workflow context/status。Goal/Task/Knowledge clarification、recovery/retry、Goal supporting overlays、revision/result diagnostics 与 shell dirty/busy/attention 仍没有等价宿主；owner business editing 则全部留在 GoalDialog、TaskPlanDialog、Repository Knowledge review。Governance 禁止 workflow context 引入 owner form 或直接 owner mutation。
+**2026-10-05 AIC-3003 current state:** The earlier PVC-AI-8131 retention decision has been superseded after the replacement gates closed. The shell-owned `BusinessPanel.workflow` surface, workflow teleport mount, attention/deferred-open state, and workflow restore path are retired. Shell surfaces are now Home or Business only. Goal/Task/Knowledge clarification and recovery live in Chat, owner editing remains in the native owner surfaces, supporting Task/Knowledge resources hand off to their native routes, and optional workflow diagnostics remain explicitly reachable inside the AI conversation on desktop and mobile as Chat-local secondary details. Governance blocks both the retired shell workflow surface and AI-owned business-editor leakage from returning.
 
 ### Assistant transcript / tool permission truth (Batch A, 2026-10-04)
 

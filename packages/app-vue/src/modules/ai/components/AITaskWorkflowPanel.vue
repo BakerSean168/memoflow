@@ -35,31 +35,13 @@
       class="space-y-3"
       data-testid="task-workflow-clarification"
     >
-      <label
+      <p
         v-for="(question, index) in taskWorkflowRun.suspension.questions"
         :key="index"
-        class="block space-y-2 text-sm"
+        class="text-sm leading-6 text-muted-foreground"
       >
-        <span>{{ question }}</span>
-        <textarea
-          :value="clarificationAnswers?.[index] ?? ''"
-          :disabled="busy"
-          class="w-full rounded-md border bg-background p-2"
-          @input="
-            $emit(
-              'update-clarification-answer',
-              index,
-              ($event.target as HTMLTextAreaElement).value,
-            )
-          "
-        />
-      </label>
-      <Button
-        :disabled="busy || !canSubmitClarification"
-        data-testid="task-submit-clarification"
-        @click="$emit('submit-clarification')"
-        >{{ t('aiAssistant.dialogs.automation.confirm') }}</Button
-      >
+        {{ index + 1 }}. {{ question }}
+      </p>
       <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
         t('common.cancel')
       }}</Button>
@@ -154,16 +136,12 @@ const props = defineProps<{
   busy?: boolean;
   ownerAttemptPending?: boolean;
   ownerSubmitted?: boolean;
-  clarificationAnswers?: string[];
-  canSubmitClarification?: boolean;
 }>();
 defineEmits<{
   confirm: [];
-  'submit-clarification': [];
   cancel: [];
   retry: [];
   'open-native-review': [];
-  'update-clarification-answer': [index: number, value: string];
 }>();
 const reviewDraft = computed(() =>
   props.taskWorkflowRun?.suspension?.type === 'task_draft_review'

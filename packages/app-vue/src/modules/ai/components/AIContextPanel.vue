@@ -28,7 +28,7 @@ const { t } = useI18n();
         ? 'flex h-full w-full'
         : [
             'fixed inset-x-0 bottom-0 z-40 max-h-[72vh] border-t shadow-xl md:static md:z-auto md:max-h-none md:w-96 md:shrink-0 md:border-l md:border-t-0 md:shadow-none',
-            open ? 'flex' : 'hidden md:flex',
+            open ? 'flex' : 'hidden',
           ]
     "
     data-testid="ai-context-panel"
@@ -44,7 +44,7 @@ const { t } = useI18n();
         variant="ghost"
         size="icon"
         :aria-label="t('aiAssistant.chatPage.workbench.hide')"
-        :class="embedded ? 'h-8 w-8' : 'h-8 w-8 md:hidden'"
+        class="h-8 w-8"
         :title="t('aiAssistant.chatPage.workbench.hide')"
         data-testid="ai-context-panel-close"
         @click="$emit('close')"

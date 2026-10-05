@@ -1511,6 +1511,16 @@ packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts
 
 ## AIC-1102 — Expose typed tool activity and approval events
 
+### Batch B protocol freeze (2026-10-04, parent approved before source implementation)
+
+- Installed `@mastra/core` 1.70.0 after frozen install. Verified `node_modules/@mastra/core/dist/agent-controller/types.d.ts:580-679`, `session.d.ts:1270-1346,1520-1542`, and actual `agent-controller-BUMUZlT3.js:629-686,2208-2278,3815-3856,3928-3940,4472-4533`.
+- Existing `assistant.activity` carries bounded static tool identity/category/risk and quiet status; only decision state adds `assistant.approval.required/resolved`. Never forward native arguments, results, titles, errors, provider payload, prompts or secrets.
+- Strict `tool_approval` command binds conversation/run/toolCall and only approve/decline. Authenticated host ExecutionContext owns identity; Batch A manifest remains sole permission truth. Public acceptance means native gate consumed, not owner write executed.
+- Validate active owner/conversation/public turn/native binding/armed gate and abort state; synchronously claim and call `respondToToolApproval`, confirming consumption with no intervening await. Duplicate/concurrent/stale/unknown fail closed. Never call low-level approve/decline directly or grant permission.
+- Actual AgentController + Agent integration confirms the owner tool retains the original trusted turn ExecutionContext; the approval boundary receives the latest authenticated decision context. Parent approved this native behavior: identity must remain exact, latest requestId propagation is not required. No native-context override or dependency patch.
+- Public originating-turn binding remains stable across native approval resume. Filter native thread events and fence successor sessions. Cancel-first rejects decisions; approve-first may be cancelled before execution, with no rollback promise for started writes. Terminal and Stop settle visible parked gates; unexpected native suspension is not successful completion.
+- SSE projection is authoritative over late approval transport replies. Errors remain retryable without resurrecting settled cards. Editable next-message composer never queues submission; send remains unavailable during an ordinary run and Stop remains independent. Native user history and live-turn retention remain protected.
+
 **Goal:** Assistant runtime 能告诉 UI 正在使用什么能力、是否等待用户决定。
 
 **Why now:** F-004/F-011。
@@ -1850,6 +1860,8 @@ packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts
 
 **Dependencies:** AIC-3001/3002 + shell replacement evidence。
 
+**2026-10-05 implementation complete:** all AIC-3003 replacement gates are closed and the shell-owned `BusinessPanel.workflow` path is physically retired. `PanelSurface` is now `home | business`; the workflow tab/chrome, Teleport mount, automatic/deferred attention state, restore/reopen path, and shell injection key are removed. A legacy persisted `'workflow'` value is migrated fail-safe to the active Business surface or Home. Optional Goal/Task/Knowledge diagnostics remain explicitly user-controlled inside `AIChatView` on desktop and mobile. Governance now fails if retired shell-workflow symbols/testids/slot contracts reappear, while the existing owner-leakage lock still prevents diagnostic panels from becoming business editors.
+
 ---
 
 ## AIC-4001 — Batch streaming deltas and stop token-level full rerender
@@ -1869,6 +1881,8 @@ packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts
 7. manual scroll up suspends auto-follow。
 
 **Acceptance:** CPU throttling 下 input/focus/stop 响应稳定。
+
+**2026-10-05 implementation complete:** streaming text now accumulates in a non-reactive buffer and flushes at a bounded 48 ms cadence; generating Markdown rendering is throttled to 120 ms with immediate terminal safe render. Stream-driven scrolling is non-smooth, only follows while the viewport stays within 96 px of the bottom, and therefore respects manual scroll-up. Focused AI UI regression passes 5 files / 57 tests, App Vue typecheck passes, and the uncached full App Vue suite passes 274 files / 1737 tests. AIC-4002 has since been implemented as the observability/performance closure for this phase.
 
 **Dependencies:** P0 runtime correctness可并行后合入。
 
@@ -1896,6 +1910,8 @@ long task count in browser perf test
 不得把 raw prompt/tool sensitive payload 写进 telemetry。
 
 **Acceptance:** 再出现 120s turn 时，能够明确回答它在 provider、tool、approval、transport 哪个阶段。
+
+**2026-10-05 implementation complete:** bounded `AIExecutionRecord` facts now record total Assistant turn latency plus `transport`, `first_activity`, `first_token`, `provider_inference`, `tool`, and `approval_wait` phases with sanitized outcome/error categories. Phase facts contain correlation/provider/model/timing metadata only; raw prompt, tool arguments and tool results are not persisted. Usage aggregation explicitly excludes `assistant.phase.*` records so observability does not inflate execution/token/cost summaries. Browser acceptance drives an 80-delta stream under 4x CPU throttling, measures mutation batches and Long Tasks, freezes bounded headroom from the observed baseline, and verifies the Composer remains editable. Cancellation/failure paths settle open provider/tool/approval phases with explicit terminal outcomes.
 
 **Dependencies:** AIC-1102。
 
@@ -2378,3 +2394,207 @@ Red/green, installed Mastra precedence and exact command/log evidence are record
 in the managed Batch A artifacts (`history.md`, `live-turn.md`, `tool-policy.md`,
 `validation.md`), not in a second runtime store. Live provider/GCP validation
 remains outstanding; later plan batches remain unimplemented.
+
+## Batch B implementation evidence (2026-10-05; bounded scope)
+
+AIC-1102, AIC-1103 and AIC-1201 are implemented on the Batch B branch; this is **not**
+overall plan completion or Goal-workflow convergence. No AIC-2001+ Goal
+routing/clarification/native-draft, Task/Knowledge migration, workflow-surface
+retirement, streaming-performance or Release/Production work is included.
+
+- Assistant runtime now exposes bounded typed tool activity and approval lifecycle
+  events plus a strict approve/decline command. HTTP and Electron decision paths derive
+  identity from authenticated host context; conversation/run/toolCall binding,
+  native-run ownership, stale/duplicate/concurrent decision rejection, unknown-tool
+  fail-close and cancel settlement stay runtime-owned. Batch A product-tool policy
+  remains the single permission truth.
+- Chat projects read/tool activity quietly and renders high-impact write approval
+  inline with retryable transport-error/stale states; stream events remain authoritative
+  over late acknowledgements. Stop/cancel settles parked UI state. Tool activity teardown
+  is call-id aware, and old stream finalizers are conversation/draft scoped so they
+  cannot clear a successor conversation's state.
+- The composer textarea remains editable while the current turn streams, executes tools
+  or waits for approval. Send remains unavailable for the active turn and Stop remains
+  independently reachable; no queued follow-up submission was introduced.
+
+Validation evidence: focused approval/activity/composer tests 40 passed; uncached
+`ai:test` 463/463 and final uncached `app-vue:test` 1718/1718 passed.
+`contracts:test` reached 548 passing tests with one confirmed pre-existing baseline
+failure in `product-module-index-paths.surface.spec.ts`:
+`docs/product/module-index/goal-files.md` on `origin/main` also references the
+missing `apps/web/e2e/goal/goal-keyresult.spec.ts`. Contracts/AI/App Vue typechecks
+passed, test inventory and full governance passed, changed-file ESLint/Prettier and
+`git diff --check` passed. No browser E2E requiring destructive local DB setup was
+introduced; exact-head GitHub CI remains the integration authority. No
+Release/Production action was taken.
+
+## Goal vertical-slice implementation evidence (2026-10-05; AIC-2001–2005)
+
+The Goal reference slice is implemented in the current convergence worktree. This is
+**not** overall plan completion: AIC-2101 is only partially started and Task/Knowledge
+migration, final workflow-surface retirement and later performance work remain open.
+
+- Explicit Goal intent dispatches directly to the durable Goal workflow; the generic
+  Assistant no longer runs first. The canonical raw user turn is persisted through
+  the Mastra workflow runtime.
+- Active Goal clarification is answered from the main Composer. A safe partial
+  candidateDraft projects into the native Goal owner surface while clarification
+  remains suspended.
+- Native Goal/KR edits made during clarification are reconciled through the existing
+  structured-edit/revision pipeline before the clarification answer invokes the
+  planner. KR draftRef identity is preserved through local projection, and
+  in-flight/revision mismatches fail closed.
+- Final owner submit stays owner-native: the live draft is flushed to the durable
+  workflow revision, native requestSubmit performs validation/create, and workflow
+  approve happens only after canonical owner creation is proven. Lost owner/approve
+  responses reuse deterministic Goal/KR identities and cannot create a second Goal.
+
+Focused post-format evidence: Goal workflow/runtime 30/30 tests passed; Goal UI/view
+52/52 tests passed. Uncached ai:test passed 468/468 and final uncached app-vue:test
+passed 1723/1723 across 274 files. AI, App Vue and Contracts typechecks pass. The
+current contracts:test has 549 passing tests plus the same pre-existing
+product-module-index-paths.surface.spec.ts baseline failure for the missing
+apps/web/e2e/goal/goal-keyresult.spec.ts. Test inventory passed at 1294 files and full
+governance passed on an uncontended rerun; an earlier governance-tools timeout was
+resource contention while full suites were running concurrently, not an assertion
+failure. Changed-file ESLint/Prettier and git diff --check pass. No Release/Production
+action is part of this batch.
+
+## AIC-2101 implementation evidence (2026-10-05; Goal workbench demotion)
+
+AIC-2101 is implemented in the current convergence worktree. This closes the
+Goal-specific default-workbench retention gates without deleting the shared
+`BusinessPanel.workflow` surface needed by later Task/Knowledge migration.
+
+- Goal create and restore are owner-first. Declaring Goal workflow availability no
+  longer issues an automatic workflow-surface request, and selecting a restored Goal
+  conversation likewise does not switch the right side away from the native Goal
+  owner surface. Therefore dirty/busy/hidden workflow attention cannot steal focus
+  during Goal editing.
+- Goal clarification is projected into Chat and answered from the main Composer.
+  Goal status, cancel, retry/recovery and owner-submit retry controls remain in the
+  Chat action surface; the retained context panel is no longer required for the
+  primary Goal journey.
+- Desktop/narrow/mobile users keep the same Chat status/recovery controls. The
+  existing context toggle remains an explicit secondary-details affordance, and the
+  explicit `?workflow=goal-create` deep link may still request it.
+- Goal supporting Task/Knowledge proposals remain secondary workflow details until
+  AIC-3001/AIC-3002. Task/Knowledge automatic workflow behavior is intentionally
+  unchanged in AIC-2101.
+- The Goal workflow panel no longer owns clarification input: it may display durable
+  questions/details but has no answer textarea or clarification submit contract.
+
+AI-8131 gate update after AIC-2101:
+
+| Retention responsibility                          | State after AIC-2101           | Replacement / remaining owner                                      |
+| ------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------ |
+| Goal business editing                             | Closed                         | GoalDialog / native Goal edit session                              |
+| Goal clarification                                | Closed                         | Chat timeline + main Composer                                      |
+| Goal status / cancel / retry / recovery           | Closed for normal Goal path    | Chat workflow action surface                                       |
+| Goal dirty/busy/hidden attention                  | Closed for automatic Goal path | Goal never auto-requests the workflow surface                      |
+| Goal mobile status/recovery                       | Closed                         | Same Chat action surface; explicit context toggle remains optional |
+| Goal restart/restore default surface              | Closed                         | restored run reprojects Chat/native owner state without auto-open  |
+| Goal supporting Task/Knowledge overlays           | Open                           | AIC-3002                                                           |
+| Task clarification/recovery                       | Open                           | AIC-3001                                                           |
+| Knowledge clarification/recovery                  | Open                           | AIC-3001                                                           |
+| Cross-workflow diagnostics / final shared surface | Open                           | AIC-3003 after migration evidence                                  |
+
+The physical shared workflow surface therefore remains transitional, not a Goal
+primary-path dependency. No Release/Production action is part of this ticket.
+
+## AIC-3001 implementation evidence (2026-10-05; Task / Knowledge clarification)
+
+AIC-3001 is implemented in the current convergence worktree. Its deliberately bounded
+scope is clarification routing only; Task/Knowledge recovery retirement remains a
+separate retention gate for final workflow-surface removal.
+
+- Task and Knowledge clarification questions are projected into the Chat timeline and
+  their dedicated workflow panels are display-only. The panels no longer own answer
+  textareas or clarification-submit contracts.
+- The main Composer has routing priority while either workflow is suspended for
+  clarification. One natural-language user turn is resumed through the matching
+  durable workflow with the same raw `workflowTurn`; generic Assistant dispatch does
+  not run first.
+- A single free-form Composer response may answer a multi-question clarification
+  round. The backend preserves the pending question set plus the raw answer round
+  rather than requiring a fragile frontend positional answer mapping.
+- Restore continues through the canonical workflow run projection, so pending Task or
+  Knowledge questions are re-projected from durable suspension state.
+
+Focused evidence before AIC-3002 work: Task/Knowledge UI clarification tests and
+Task/Knowledge workflow/runtime tests pass, and AI/App Vue typechecks pass. Full-suite
+validation is rerun after the current convergence batch before closure.
+
+## AIC-3002 implementation evidence (2026-10-05; complete)
+
+The implementation decision is now frozen on the first option: **Chat proposal/status
+summary + native-owner handoff**, not a sequential AI-owned Task/Knowledge editor.
+
+The first bounded convergence step is implemented:
+
+- Goal supporting Task/Knowledge proposals are projected into Chat as revision-scoped,
+  deduplicated assistant context without exposing internal draft refs.
+- While Goal is at `goal_draft_review`, a normal main-Composer turn is routed to the
+  durable Goal workflow as `revise_natural_language` with the raw `workflowTurn`.
+  Existing live Goal/KR structured edits are flushed through the revision pipeline
+  before that re-plan.
+- The retained secondary Goal workflow context no longer exposes Task/Knowledge
+  business inputs, selects, textareas or remove buttons. It is display-only proposal
+  detail, preserving schedule/source context while owner mutation contracts remain
+  unchanged.
+- Recovery now exposes the durable execution receipt while suspended, preserving partial owner identities across restart.
+- Chat provides retry, partial-settlement where supported, and remaining-work cancellation; partial supporting resources hand off to native Task/Knowledge routes. AIC-3002 is therefore complete and AIC-3003 is unblocked.
+
+AI-8131 retention update after AIC-3001 and the current AIC-3002 slice:
+
+| Retention responsibility                                | Current state                  | Replacement / remaining owner                                                           |
+| ------------------------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------- |
+| Goal business editing                                   | Closed                         | GoalDialog / native Goal edit session                                                   |
+| Goal clarification                                      | Closed                         | Chat timeline + main Composer                                                           |
+| Goal status / cancel / retry / recovery                 | Closed for normal Goal path    | Chat workflow action surface                                                            |
+| Goal dirty/busy/hidden attention                        | Closed for automatic Goal path | Goal never auto-requests the workflow surface                                           |
+| Goal mobile status/recovery                             | Closed                         | Same Chat action surface; explicit context toggle remains optional                      |
+| Goal restart/restore default surface                    | Closed                         | restored run reprojects Chat/native owner state without auto-open                       |
+| Task clarification                                      | Closed                         | Chat timeline + main Composer -> durable task.create resume                             |
+| Knowledge clarification                                 | Closed                         | Chat timeline + main Composer -> durable knowledge.capture resume                       |
+| Task recovery/status outside Chat                       | Closed                         | Chat retry/accept-partial/cancel-remaining + durable recovery receipt                   |
+| Knowledge recovery/status outside Chat                  | Closed                         | Chat retry/cancel-remaining + durable recovery receipt                                  |
+| Goal supporting Task/Knowledge editable overlay         | Closed                         | Chat revision path + display-only proposal context                                      |
+| Supporting Task/Knowledge native owner handoff/recovery | Closed                         | persisted referenceMap remains visible during recovery and opens native owner routes    |
+| Cross-workflow diagnostics / final shared surface       | Closed                         | `BusinessPanel.workflow` deleted; explicit Chat-local desktop/mobile diagnostics remain |
+
+No Release/Production action is part of AIC-3001 or this AIC-3002 slice.
+
+## Core convergence closure evidence (2026-10-05; AIC-1001 through AIC-4002)
+
+The non-optional AI interaction convergence scope is code-complete in the current
+worktree through AIC-4002. AIC-5001 remains the explicitly optional Web Research
+follow-up from Phase 5 and is not part of this core closure.
+
+- Goal, Task and Knowledge clarification/recovery now converge on the Chat timeline,
+  main Composer and owner-native business surfaces. The shell-owned
+  `BusinessPanel.workflow` surface is retired; desktop/mobile diagnostic detail
+  remains explicitly user-controlled inside the AI conversation.
+- The architecture lock rejects retired shell-workflow contracts and still rejects
+  AI-owned Goal/Task/Knowledge business editors or direct owner mutation from
+  diagnostic context.
+- Assistant phase observability records only bounded correlation/provider/model,
+  phase, timing, outcome and safe error-category facts. Raw prompts, tool arguments
+  and tool results are not persisted by the phase recorder, and
+  `assistant.phase.*` records are excluded from both Prisma and PowerSync usage
+  aggregation.
+- A clean local AI-workspace Playwright acceptance run passed 13/13 tests in 5.9m,
+  including the Goal workflow P0 path. Generated tracked Playwright report artifacts
+  were restored to HEAD after the run; only real E2E source changes remain.
+- Final uncached local package gates passed: `ai:test` 89 files / 470 tests,
+  `app-vue:test` 274 files / 1737 tests, and `contracts:test` 91 files / 550 tests.
+  Contracts, AI and App Vue typechecks all passed. Test inventory passed with 1294
+  files, full governance passed (including the core-vNext architecture lock),
+  changed-file ESLint and Prettier checks passed, and `git diff --check` passed.
+
+No P0/P1 implementation blocker remains in the locally validated core scope. The
+remaining closure gates are delivery/integration evidence: commit the current
+worktree, push the existing branch, obtain exact-head GitHub CI/review evidence, and
+complete the planned staging real-browser acceptance. Those gates must not be
+misrepresented as complete by this local evidence. No Release or Production action
+was taken.

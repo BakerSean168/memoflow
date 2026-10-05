@@ -45,20 +45,17 @@ const StatefulBusinessContent = defineComponent({
   },
 });
 
-function mountPanel(panelSurface: 'home' | 'business' | 'workflow' = 'home') {
+function mountPanel(panelSurface: 'home' | 'business' = 'home') {
   return mount(BusinessPanel, {
     props: {
       tabs,
       activeTabId: 'tab-goal-1',
       layout: 'split',
       panelSurface,
-      workflowAvailable: true,
-      workflowAttentionCount: 2,
     },
     slots: {
       home: '<div data-testid="home-surface">Home</div>',
       default: StatefulBusinessContent,
-      workflow: '<div data-testid="workflow-surface">Workflow</div>',
     },
     global: { plugins: [i18n] },
   });
@@ -66,9 +63,9 @@ function mountPanel(panelSurface: 'home' | 'business' | 'workflow' = 'home') {
 
 describe('BusinessPanel tab density', () => {
   it('degrades labels before allowing the eight-tab strip to overflow', () => {
-    expect(resolveBusinessTabDensity(960, 4, false)).toBe('comfortable');
-    expect(resolveBusinessTabDensity(520, 4, true)).toBe('compact');
-    expect(resolveBusinessTabDensity(520, 8, true)).toBe('icon');
+    expect(resolveBusinessTabDensity(960, 4)).toBe('comfortable');
+    expect(resolveBusinessTabDensity(480, 4)).toBe('compact');
+    expect(resolveBusinessTabDensity(520, 8)).toBe('icon');
   });
 });
 
@@ -88,28 +85,23 @@ describe('BusinessPanel surfaces', () => {
     expect(tabs).toHaveLength(1);
   });
 
-  it('keeps business content mounted while Home and workflow are active', async () => {
+  it('keeps business content mounted while Home is active', async () => {
     const wrapper = mountPanel('business');
     const businessElement = wrapper.get('[data-testid="business-draft"]').element;
 
     await wrapper.setProps({ panelSurface: 'home' });
     expect(wrapper.get('[data-testid="business-draft"]').element).toBe(businessElement);
-
-    await wrapper.setProps({ panelSurface: 'workflow' });
-    expect(wrapper.get('[data-testid="business-draft"]').element).toBe(businessElement);
-    expect(wrapper.get('[data-testid="workflow-surface"]').exists()).toBe(true);
   });
 
-  it('exposes distinct workflow, Home, and focus commands without a redundant panel close', async () => {
-    const wrapper = mountPanel('workflow');
+  it('exposes Home and focus commands without workflow chrome or a redundant panel close', async () => {
+    const wrapper = mountPanel('business');
 
     await wrapper.get('[data-testid="business-panel-home"]').trigger('click');
-    await wrapper.get('[data-testid="business-panel-workflow"]').trigger('click');
     await wrapper.get('[data-testid="business-panel-focus-toggle"]').trigger('click');
 
     expect(wrapper.emitted('show-home')).toHaveLength(1);
-    expect(wrapper.emitted('show-workflow')).toHaveLength(1);
     expect(wrapper.emitted('toggle-focus')).toHaveLength(1);
+    expect(wrapper.find('[data-testid="business-panel-workflow"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="business-panel-close"]').exists()).toBe(false);
   });
 
@@ -220,13 +212,12 @@ describe('BusinessPanel surfaces', () => {
       slots: {
         home: '<div data-scroll-host="home-probe">Home</div>',
         default: '<div data-scroll-host="business-probe">Business</div>',
-        workflow: '<div data-scroll-host="workflow-probe">Workflow</div>',
       },
       global: { plugins: [i18n] },
     });
 
     // 每个 surface wrapper 只负责尺寸与裁剪；主滚动由内部唯一 data-scroll-host 承担。
-    for (const name of ['home', 'business', 'workflow']) {
+    for (const name of ['home', 'business']) {
       const root = wrapper.get(`[data-surface-scroll-root="${name}"]`);
       expect(root.classes()).toContain('overflow-hidden');
       expect(root.findAll('[data-scroll-host]')).toHaveLength(1);
@@ -235,7 +226,7 @@ describe('BusinessPanel surfaces', () => {
 });
 
 describe('BusinessPanel narrow keyboard contract', () => {
-  it('keeps eight tabs and workflow named and keyboard reachable at a measured 520px', async () => {
+  it('keeps eight tabs named and keyboard reachable at a measured 520px', async () => {
     let resize: ResizeObserverCallback | undefined;
     vi.stubGlobal(
       'ResizeObserver',
@@ -259,7 +250,6 @@ describe('BusinessPanel narrow keyboard contract', () => {
         activeTabId: 'tab-0',
         layout: 'split',
         panelSurface: 'home',
-        workflowAvailable: true,
       },
       global: { plugins: [i18n] },
     });
@@ -273,19 +263,11 @@ describe('BusinessPanel narrow keyboard contract', () => {
         expect(tab.attributes('aria-label')).toBe(`Goal ${index}`);
         expect(tab.element.tagName).toBe('BUTTON');
       }
-      expect(wrapper.get('[data-testid="business-panel-workflow"]').attributes('aria-label')).toBe(
-        'Workflow',
-      );
       await tabButtons[0].trigger('keydown', { key: 'End' });
       expect(wrapper.emitted('activate-tab')).toEqual([['tab-7']]);
       expect(document.activeElement).toBe(tabButtons[7].element);
       await tabButtons[7].trigger('keydown', { key: 'ArrowRight' });
       expect(document.activeElement).toBe(tabButtons[0].element);
-      await wrapper.setProps({ panelSurface: 'workflow' });
-      const closeWorkflow = wrapper.get('[aria-label="Close workflow"]');
-      expect(closeWorkflow.classes()).not.toContain('hidden');
-      await closeWorkflow.trigger('click');
-      expect(wrapper.emitted('close-workflow')).toHaveLength(1);
       for (const root of wrapper.findAll('[data-surface-scroll-root]')) {
         expect(root.classes()).toContain('overflow-hidden');
       }

@@ -96,10 +96,7 @@ test('post-vNext chat header aligns with the business tab strip', async ({ page 
   expect(chatHeader).not.toBeNull();
   expect(businessTabs).not.toBeNull();
   expect(chatHeader!.height).toBeCloseTo(businessTabs!.height, 0);
-  expect(chatHeader!.y + chatHeader!.height).toBeCloseTo(
-    businessTabs!.y + businessTabs!.height,
-    0,
-  );
+  expect(chatHeader!.y + chatHeader!.height).toBeCloseTo(businessTabs!.y + businessTabs!.height, 0);
 });
 
 test('UI-9002 narrow shell target, keyboard and scroll ownership', async ({ page }) => {
@@ -129,15 +126,19 @@ test('UI-9002 narrow shell target, keyboard and scroll ownership', async ({ page
   expect((await tab.boundingBox())!.height).toBeGreaterThanOrEqual(36);
   const geometry = await panel.evaluate((element) => ({
     overflows: element.scrollWidth > element.clientWidth,
-    roots: [...element.querySelectorAll('[data-surface-scroll-root]')].map(
-      (root) => getComputedStyle(root).overflowY,
-    ),
+    roots: [...element.querySelectorAll<HTMLElement>('[data-surface-scroll-root]')].map((root) => ({
+      name: root.dataset.surfaceScrollRoot,
+      overflowY: getComputedStyle(root).overflowY,
+    })),
   }));
   expect(geometry.overflows).toBe(false);
   await expect(panel.locator('[data-surface-scroll-root=business] [data-scroll-host]')).toHaveCount(
     1,
   );
-  expect(geometry.roots).toEqual(['hidden', 'hidden', 'hidden']);
+  expect(geometry.roots).toEqual([
+    { name: 'home', overflowY: 'hidden' },
+    { name: 'business', overflowY: 'hidden' },
+  ]);
   expect(
     await panel
       .getByTestId('business-panel-tab-strip')

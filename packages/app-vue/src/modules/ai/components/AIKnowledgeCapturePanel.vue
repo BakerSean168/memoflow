@@ -34,32 +34,13 @@
       class="space-y-3"
       data-testid="knowledge-capture-clarification"
     >
-      <label
+      <p
         v-for="(question, index) in knowledgeCaptureRun.suspension.questions"
         :key="index"
-        class="block space-y-2 text-sm"
+        class="text-sm leading-6 text-muted-foreground"
       >
-        <span>{{ question }}</span>
-        <textarea
-          :value="clarificationAnswers?.[index] ?? ''"
-          :disabled="busy"
-          class="w-full rounded-md border bg-background p-2"
-          @input="
-            $emit(
-              'update-clarification-answer',
-              index,
-              ($event.target as HTMLTextAreaElement).value,
-            )
-          "
-        />
-      </label>
-      <Button
-        :disabled="busy || !canSubmitClarification"
-        data-testid="knowledge-capture-submit-clarification"
-        @click="$emit('submit-clarification')"
-      >
-        {{ t('aiAssistant.dialogs.automation.confirm') }}
-      </Button>
+        {{ index + 1 }}. {{ question }}
+      </p>
       <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
         t('common.cancel')
       }}</Button>
@@ -156,16 +137,12 @@ const props = defineProps<{
   toolMode: WorkflowMode;
   knowledgeCaptureRun: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }> | null;
   busy?: boolean;
-  clarificationAnswers?: string[];
-  canSubmitClarification?: boolean;
 }>();
 
 defineEmits<{
   cancel: [];
   retry: [];
-  'submit-clarification': [];
   'open-native-review': [];
-  'update-clarification-answer': [index: number, value: string];
 }>();
 
 const reviewDraft = computed(() =>

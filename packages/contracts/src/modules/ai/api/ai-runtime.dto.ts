@@ -84,8 +84,47 @@ export const AssistantRuntimeSelectedEntitySchema = z
   .strict();
 export type AssistantRuntimeSelectedEntity = z.infer<typeof AssistantRuntimeSelectedEntitySchema>;
 
+export const AssistantToolNameSchema = z.enum([
+  'knowledge_search',
+  'workspace_overview',
+  'planner_today_summary',
+  'planner_conflicts',
+  'planner_upcoming_tasks',
+  'notification_unread_summary',
+  'routine_create',
+  'routine_set_profile_active',
+  'routine_set_temporary_override',
+  'routine_clear_temporary_override',
+  'routine_start_protocol',
+  'notification_execute_action',
+  'routine_pause_protocol',
+  'routine_resume_protocol',
+  'routine_end_protocol',
+]);
+export type AssistantToolName = z.infer<typeof AssistantToolNameSchema>;
+const AssistantToolShape = {
+  toolCallId: z.string().min(1).max(512),
+  toolName: AssistantToolNameSchema,
+  category: z.enum(['read', 'edit', 'execute']),
+  risk: z.enum(['low', 'high']),
+};
+export const AssistantRuntimeApprovalCommandSchema = z
+  .object({
+    type: z.literal('tool_approval'),
+    conversationId: z.string().min(1).max(512),
+    runId: z.string().min(1).max(512),
+    toolCallId: z.string().min(1).max(512),
+    decision: z.enum(['approve', 'decline']),
+    identityId: z.never().optional(),
+  })
+  .strict();
+export type AssistantRuntimeApprovalCommand = z.infer<typeof AssistantRuntimeApprovalCommandSchema>;
+export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boolean() }).strict();
+export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
+
 export const AssistantRuntimeClientCommandSchema = z
   .discriminatedUnion('type', [
+    AssistantRuntimeApprovalCommandSchema,
     z
       .object({
         type: z.literal('message'),
@@ -211,11 +250,38 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
   z.object({
     ...RuntimeEventBaseShape,
     type: z.literal('assistant.activity'),
-    data: z.object({
-      activityType: z.string().min(1),
-      message: z.string().optional(),
-    }),
+    data: z.union([
+      z
+        .object({
+          activityType: z.literal('tool'),
+          ...AssistantToolShape,
+          state: z.enum(['running', 'completed', 'failed', 'denied']),
+        })
+        .strict(),
+      z
+        .object({ activityType: z.literal('generating'), message: z.string().max(240).optional() })
+        .strict(),
+    ]),
   }),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.approval.required'),
+      data: z.object({ ...AssistantToolShape }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.approval.resolved'),
+      data: z
+        .object({
+          toolCallId: AssistantToolShape.toolCallId,
+          resolution: z.enum(['approved', 'declined', 'cancelled', 'failed']),
+        })
+        .strict(),
+    })
+    .strict(),
   z.object({
     ...RuntimeEventBaseShape,
     type: z.literal('assistant.usage.updated'),
@@ -277,12 +343,35 @@ export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation'
 ]);
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;
 
+export const AIWorkflowRecoveryReceiptSchema = z.discriminatedUnion('kind', [
+  z
+    .object({
+      kind: z.literal('goal.create'),
+      receipt: GoalPlanExecutionReceiptSchema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal('task.create'),
+      receipt: TaskPlanExecutionReceiptSchema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal('knowledge.capture'),
+      receipt: KnowledgeCaptureExecutionReceiptSchema,
+    })
+    .strict(),
+]);
+export type AIWorkflowRecoveryReceipt = z.infer<typeof AIWorkflowRecoveryReceiptSchema>;
+
 export const AIWorkflowSuspensionSchema = z
   .discriminatedUnion('type', [
     z.object({
       type: z.literal('clarification_required'),
       questions: z.array(z.string().min(1)).min(1).max(3),
       round: z.number().int().positive().optional(),
+      candidateDraft: GoalPlanDraftSchema.optional(),
     }),
     z.object({
       type: z.literal('goal_draft_review'),
@@ -319,6 +408,9 @@ export const AIWorkflowSuspensionSchema = z
       message: z.string().min(1),
       retryable: z.boolean(),
       failures: z.array(AIWorkflowExecutionFailureSchema).default([]),
+      // Optional for backward-compatible restore of snapshots created before
+      // recovery receipts were projected into the public run view.
+      receipt: AIWorkflowRecoveryReceiptSchema.optional(),
     }),
   ])
   .superRefine((suspension, ctx) => {
@@ -383,6 +475,7 @@ export const AIWorkflowStartClientRequestSchema = z.discriminatedUnion('kind', [
       ...WorkflowStartBaseShape,
       kind: z.literal('goal.create'),
       input: GoalCreateClientInputSchema,
+      workflowTurn: z.string().trim().min(1).max(200000).optional(),
     })
     .strict(),
   z
@@ -406,6 +499,7 @@ export const AIWorkflowResumeClientRequestSchema = z
   .object({
     runId: z.string().min(1),
     command: AIWorkflowResumeCommandSchema,
+    workflowTurn: z.string().trim().min(1).max(200000).optional(),
     identityId: z.never().optional(),
   })
   .strict();

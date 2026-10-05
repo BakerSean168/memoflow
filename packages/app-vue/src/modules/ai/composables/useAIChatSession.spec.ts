@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,6 +24,10 @@ const i18n = createI18n({
       aiAssistant: {
         chatPage: {
           context: { tooMany: 'Too many context items' },
+          tools: {
+            stale: 'This decision is stale or already settled.',
+            transportError: 'Could not send the decision. Try again.',
+          },
           attachments: {
             tooMany: 'Too many attachments',
             tooLarge: 'Too large',
@@ -113,12 +117,14 @@ function createRuntimeStub(): AssistantRuntimeClient & {
   deleteConversation: ReturnType<typeof vi.fn>;
   streamMessage: ReturnType<typeof vi.fn>;
   cancelRun: ReturnType<typeof vi.fn>;
+  decideToolApproval: ReturnType<typeof vi.fn>;
 } {
   return {
     listMessages: vi.fn(async () => persistedHistory()),
     deleteConversation: vi.fn(async () => true),
     streamMessage: vi.fn(async () => {}),
     cancelRun: vi.fn(async () => true),
+    decideToolApproval: vi.fn(async () => true),
   } as never;
 }
 
@@ -222,6 +228,23 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(service.dispatchAssistant).not.toHaveBeenCalled();
     expect(runtime.listMessages).not.toHaveBeenCalled();
     expect(usageRuntime.get).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+  });
+
+  it('prepares an explicit workflow turn without invoking the generic Assistant runtime', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    composable.chatMessage.value = 'Create a study goal';
+
+    const prepared = await composable.prepareWorkflowTurn(service as never, 'New chat', () => {});
+
+    expect(prepared).toEqual({ conversationId: 'conv-1', content: 'Create a study goal' });
+    expect(service.createConversation).toHaveBeenCalledWith({ name: 'New chat' });
+    expect(runtime.streamMessage).not.toHaveBeenCalled();
+    expect(composable.chatTimeline.value).toMatchObject([
+      { role: 'user', content: 'Create a study goal', status: 'success' },
+    ]);
+    expect(composable.chatMessage.value).toBe('');
   });
 
   it('normalizes supported attachment media types and rejects unsupported files before transport', async () => {
@@ -509,6 +532,86 @@ describe('useAIChatSession Mastra-native open chat', () => {
     ]);
   });
 
+  it('batches rapid stream deltas and flushes the terminal assistant message immediately', async () => {
+    vi.useFakeTimers();
+    try {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      const composable = mountComposable(service, runtime);
+      let onEvent: ((event: AssistantRuntimeEvent) => void) | undefined;
+      let finish: (() => void) | undefined;
+      runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+        onEvent = handlers.onEvent;
+        onEvent?.(event(1, 'assistant.run.started', {}));
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      });
+      composable.chatMessage.value = 'hello';
+
+      const pending = composable.handleSendChat(service as never, MODEL, 'New chat', () => {});
+      await nextTick();
+      await Promise.resolve();
+      await nextTick();
+      expect(onEvent).toBeTypeOf('function');
+
+      onEvent?.(event(2, 'assistant.message.delta', { content: 'A' }));
+      onEvent?.(event(3, 'assistant.message.delta', { content: 'B' }));
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('');
+
+      await vi.advanceTimersByTimeAsync(47);
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('');
+      await vi.advanceTimersByTimeAsync(1);
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('AB');
+
+      onEvent?.(event(4, 'assistant.message.delta', { content: 'C' }));
+      onEvent?.(
+        event(5, 'assistant.run.completed', {
+          content: 'ABC final',
+          assistantMessageId: 'assistant-final',
+        }),
+      );
+      expect(composable.chatTimeline.value.at(-1)).toMatchObject({
+        id: 'assistant-final',
+        content: 'ABC final',
+        status: 'success',
+      });
+
+      finish?.();
+      await pending;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('auto-follows streaming output only near the bottom and never smooth-scrolls it', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    const scrollTo = vi.fn();
+    const viewport = {
+      scrollHeight: 1_000,
+      scrollTop: 850,
+      clientHeight: 100,
+      scrollTo,
+    } as unknown as HTMLElement;
+    composable.messagesViewport.value = viewport;
+
+    composable.scrollMessagesToBottom({ streaming: true });
+    await nextTick();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'auto' });
+
+    scrollTo.mockClear();
+    Object.defineProperty(viewport, 'scrollTop', { configurable: true, value: 500 });
+    composable.scrollMessagesToBottom({ streaming: true });
+    await nextTick();
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    composable.scrollMessagesToBottom();
+    await nextTick();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
+  });
+
   it('loads conversation history and durable usage from their canonical runtime clients', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
@@ -582,5 +685,255 @@ describe('useAIChatSession Mastra-native open chat', () => {
     ]);
     expect(composable.hasWorkflowUserMessages.value).toBe(true);
     expect(runtime.listMessages).not.toHaveBeenCalled();
+  });
+});
+
+describe('Assistant inline approval projection', () => {
+  it('keeps read activity quiet, prevents duplicates, retries failure, and ignores late errors after authoritative resolution', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    let onEvent!: (event: AssistantRuntimeEvent) => void;
+    let finish!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      onEvent = handlers.onEvent;
+      onEvent(event(1, 'assistant.run.started', {}));
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    });
+    session.chatMessage.value = 'hello';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(onEvent).toBeDefined());
+    onEvent(
+      event(2, 'assistant.activity', {
+        activityType: 'tool',
+        toolCallId: 'read',
+        toolName: 'knowledge_search',
+        category: 'read',
+        risk: 'low',
+        state: 'running',
+      }),
+    );
+    const item = session.chatTimeline.value.at(-1)!;
+    expect(item.toolActivity?.toolName).toBe('knowledge_search');
+    expect(item.approvals ?? []).toHaveLength(0);
+    onEvent(
+      event(3, 'assistant.approval.required', {
+        toolCallId: 'write',
+        toolName: 'routine_create',
+        category: 'edit',
+        risk: 'high',
+      }),
+    );
+    const approval = item.approvals![0];
+    runtime.decideToolApproval.mockRejectedValueOnce(new Error('private transport detail'));
+    await session.decideToolApproval(approval, 'approve');
+    expect(approval.status).toBe('pending');
+    expect(approval.errorMessage).toBeTruthy();
+    expect(approval.errorMessage).not.toContain('private');
+    let reject!: (error: unknown) => void;
+    runtime.decideToolApproval.mockImplementationOnce(
+      () =>
+        new Promise((_resolve, fail) => {
+          reject = fail;
+        }),
+    );
+    const retry = session.decideToolApproval(approval, 'approve');
+    await session.decideToolApproval(approval, 'decline');
+    expect(runtime.decideToolApproval).toHaveBeenCalledTimes(2);
+    onEvent(
+      event(4, 'assistant.approval.resolved', { toolCallId: 'write', resolution: 'approved' }),
+    );
+    reject(new Error('late error'));
+    await retry;
+    expect(approval.status).toBe('approved');
+    expect(approval.errorMessage).toBeUndefined();
+    session.chatMessage.value = 'next message';
+    onEvent(event(5, 'assistant.run.completed', { content: 'done' }));
+    finish();
+    await sending;
+    expect(session.chatMessage.value).toBe('next message');
+    expect(runtime.streamMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the newest concurrent tool activity visible when an older tool settles', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    let onEvent!: (event: AssistantRuntimeEvent) => void;
+    let finish!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      onEvent = handlers.onEvent;
+      onEvent(event(1, 'assistant.run.started', {}));
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    });
+    session.chatMessage.value = 'hello';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(onEvent).toBeDefined());
+
+    onEvent(
+      event(2, 'assistant.activity', {
+        activityType: 'tool',
+        toolCallId: 'read-a',
+        toolName: 'knowledge_search',
+        category: 'read',
+        risk: 'low',
+        state: 'running',
+      }),
+    );
+    onEvent(
+      event(3, 'assistant.activity', {
+        activityType: 'tool',
+        toolCallId: 'read-b',
+        toolName: 'workspace_overview',
+        category: 'read',
+        risk: 'low',
+        state: 'running',
+      }),
+    );
+    const item = session.chatTimeline.value.at(-1)!;
+    expect(item.toolActivity?.toolCallId).toBe('read-b');
+
+    onEvent(
+      event(4, 'assistant.activity', {
+        activityType: 'tool',
+        toolCallId: 'read-a',
+        toolName: 'knowledge_search',
+        category: 'read',
+        risk: 'low',
+        state: 'completed',
+      }),
+    );
+    expect(item.toolActivity?.toolCallId).toBe('read-b');
+
+    onEvent(
+      event(5, 'assistant.activity', {
+        activityType: 'tool',
+        toolCallId: 'read-b',
+        toolName: 'workspace_overview',
+        category: 'read',
+        risk: 'low',
+        state: 'completed',
+      }),
+    );
+    expect(item.toolActivity).toBeUndefined();
+
+    onEvent(event(6, 'assistant.run.completed', { content: 'done' }));
+    finish();
+    await sending;
+  });
+
+  it('does not let an old stream finalizer settle tool state in a newly selected conversation', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    let onEvent!: (event: AssistantRuntimeEvent) => void;
+    let finish!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      onEvent = handlers.onEvent;
+      onEvent(event(1, 'assistant.run.started', {}));
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    });
+    session.chatMessage.value = 'hello';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(onEvent).toBeDefined());
+
+    onEvent(
+      event(2, 'assistant.approval.required', {
+        toolCallId: 'old-write',
+        toolName: 'routine_create',
+        category: 'edit',
+        risk: 'high',
+      }),
+    );
+    runtime.listMessages.mockResolvedValueOnce({ conversationId: 'conv-2', messages: [] });
+    await session.selectConversation(
+      { id: 'conv-2', name: 'Other' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+
+    session.chatTimeline.value = [
+      {
+        id: 'new-assistant',
+        role: 'assistant',
+        content: '',
+        status: 'generating',
+        toolActivity: {
+          activityType: 'tool',
+          toolCallId: 'new-read',
+          toolName: 'knowledge_search',
+          category: 'read',
+          risk: 'low',
+          state: 'running',
+        },
+        approvals: [
+          {
+            toolCallId: 'new-write',
+            toolName: 'routine_create',
+            category: 'edit',
+            risk: 'high',
+            conversationId: 'conv-2',
+            runId: 'run-2',
+            status: 'pending',
+          },
+        ],
+      },
+    ];
+
+    finish();
+    await sending;
+
+    expect(session.chatConversationId.value).toBe('conv-2');
+    expect(session.chatTimeline.value[0]?.toolActivity?.toolCallId).toBe('new-read');
+    expect(session.chatTimeline.value[0]?.approvals?.[0]?.status).toBe('pending');
+  });
+
+  it('Stop cancels the visible gate and a late acknowledgement cannot resurrect it', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    let onEvent!: (event: AssistantRuntimeEvent) => void;
+    let finish!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      onEvent = handlers.onEvent;
+      onEvent(event(1, 'assistant.run.started', {}));
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    });
+    session.chatMessage.value = 'hello';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(onEvent).toBeDefined());
+    onEvent(
+      event(2, 'assistant.approval.required', {
+        toolCallId: 'write',
+        toolName: 'routine_create',
+        category: 'edit',
+        risk: 'high',
+      }),
+    );
+    const approval = session.chatTimeline.value.at(-1)!.approvals![0];
+    let accept!: (accepted: boolean) => void;
+    runtime.decideToolApproval.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          accept = resolve;
+        }),
+    );
+    const deciding = session.decideToolApproval(approval, 'approve');
+    session.stopGenerating();
+    expect(approval.status).toBe('cancelled');
+    accept(true);
+    await deciding;
+    expect(approval.status).toBe('cancelled');
+    finish();
+    await sending;
   });
 });

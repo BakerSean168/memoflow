@@ -37,6 +37,10 @@ function createMemoryHarness() {
       messages.clear();
     }),
     recall: vi.fn(async () => ({ messages: [...messages.values()] })),
+    saveMessages: vi.fn(async ({ messages: next }: { messages: MastraDBMessage[] }) => {
+      for (const message of next) messages.set(message.id, message);
+    }),
+    settled: vi.fn(async () => {}),
   };
   return {
     memory,
@@ -180,6 +184,26 @@ describe('AssistantHistoryService', () => {
       attachments: [{ mediaType: 'image/png', filename: 'screen.png' }],
     });
     expect(JSON.stringify(result)).not.toContain('data:image/png');
+  });
+
+  it('persists a workflow user turn into Mastra memory before it is projected', async () => {
+    const harness = createMemoryHarness();
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+
+    const messageId = await service.appendUserTurn({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+      content: 'Create a focused study goal',
+    });
+
+    expect(messageId).toMatch(/^workflow-user-/);
+    expect(harness.memory.saveMessages).toHaveBeenCalledTimes(1);
+    expect(harness.memory.settled).toHaveBeenCalledTimes(1);
+    await expect(
+      service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }),
+    ).resolves.toMatchObject({
+      messages: [{ id: messageId, role: 'user', content: 'Create a focused study goal' }],
+    });
   });
 
   it('projects native user signals with stable sorting and redacted attachments', async () => {

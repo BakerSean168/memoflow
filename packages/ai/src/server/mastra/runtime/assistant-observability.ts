@@ -11,9 +11,10 @@ export interface AssistantUsageSnapshot {
 }
 
 export type AssistantTurnOutcome =
-  | 'assistant.run.completed'
-  | 'assistant.run.failed'
-  | 'assistant.run.cancelled';
+  'assistant.run.completed' | 'assistant.run.failed' | 'assistant.run.cancelled';
+
+export type AssistantExecutionPhase =
+  'transport' | 'first_activity' | 'first_token' | 'provider_inference' | 'tool' | 'approval_wait';
 
 export function projectAssistantUsage(
   modelId: string,
@@ -23,6 +24,43 @@ export function projectAssistantUsage(
   return {
     ...usage,
     ...(estimatedCost !== undefined ? { estimatedCost } : {}),
+  };
+}
+
+export function createAssistantPhaseExecutionRecord(input: {
+  readonly identityId: string;
+  readonly context?: Pick<ExecutionContext, 'requestId' | 'traceId'>;
+  readonly conversationId: string;
+  readonly model: Pick<ResolvedAIModel, 'providerId' | 'modelId'>;
+  readonly runId: string;
+  readonly phase: AssistantExecutionPhase;
+  readonly processingMs: number;
+  readonly outcome?: AIExecutionRecordInput['outcome'];
+  readonly errorCategory?: string;
+}): AIExecutionRecordInput {
+  const outcome = input.outcome ?? 'succeeded';
+  return {
+    identityId: input.identityId,
+    operation: `assistant.phase.${input.phase}`,
+    outcome,
+    conversationId: input.conversationId,
+    runId: input.runId,
+    ...(input.context?.requestId ? { requestId: input.context.requestId } : {}),
+    ...(input.context?.traceId ? { traceId: input.context.traceId } : {}),
+    providerConnectionId: String(input.model.providerId),
+    modelId: input.model.modelId,
+    ...(outcome === 'failed'
+      ? {
+          errorCategory: input.errorCategory ?? 'assistant_phase_failed',
+          safeError: 'AI runtime phase failed',
+        }
+      : outcome === 'cancelled'
+        ? {
+            errorCategory: input.errorCategory ?? 'aborted',
+            safeError: 'aborted',
+          }
+        : {}),
+    latencyMs: Math.max(0, input.processingMs),
   };
 }
 
@@ -56,7 +94,7 @@ export function createAssistantExecutionRecord(input: {
     modelId: input.model.modelId,
     ...(!completed
       ? {
-          errorCategory: cancelled ? 'aborted' : input.runtimeErrorCode ?? 'MASTRA_RUNTIME_ERROR',
+          errorCategory: cancelled ? 'aborted' : (input.runtimeErrorCode ?? 'MASTRA_RUNTIME_ERROR'),
           safeError: cancelled ? 'aborted' : 'AI runtime request failed',
         }
       : {}),

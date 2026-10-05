@@ -1,4 +1,4 @@
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, shallowRef } from 'vue';
 import type {
   AIRuntimeUsage,
   AssistantRuntimeEvent,
@@ -11,6 +11,7 @@ import { toast } from 'vue-sonner';
 import type {
   AIChatService,
   ChatItem,
+  ChatToolApproval,
   ChatModelOption,
   ComposerAttachment,
   ComposerContextEntity,
@@ -26,6 +27,8 @@ const MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES = 1_200_000;
 const MAX_COMPOSER_CONTEXT_ENTITIES = 12;
 const COMPOSER_IMAGE_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const COMPOSER_DOCUMENT_MEDIA_TYPES = new Set(['text/plain', 'text/markdown', 'application/pdf']);
+const STREAM_DELTA_FLUSH_MS = 48;
+const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
 type DeleteConversationId = Parameters<AIChatService['deleteConversation']>[0];
 type RuntimeSelectableEntityType = AssistantRuntimeSelectedEntity['entityType'];
 
@@ -66,12 +69,15 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   const lastActiveConversationId = ref('');
   const messagesViewport = ref<HTMLElement | null>(null);
   const composerTextarea = ref<HTMLTextAreaElement | null>(null);
-  const activeStreamAbortController = ref<AbortController | null>(null);
+  const activeStreamAbortController = shallowRef<AbortController | null>(null);
   const activeRuntimeRunId = ref<string | null>(null);
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
   const composerAttachments = ref<ComposerAttachment[]>([]);
   const composerContextEntities = ref<ComposerContextEntity[]>([]);
   const suppressedSurfaceContextKey = ref<string | null>(null);
+  let pendingStreamDelta = '';
+  let pendingStreamAssistantId: string | null = null;
+  let pendingStreamFlushTimer: ReturnType<typeof setTimeout> | null = null;
 
   const hasWorkflowMessages = computed(() =>
     chatTimeline.value.some((item) => item.content.trim().length > 0),
@@ -295,7 +301,100 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     );
   }
 
+  function settleVisibleApprovals(
+    resolution: 'cancelled' | 'failed',
+    scope?: { conversationId?: string; assistantDraftId?: string },
+  ) {
+    if (scope?.conversationId && chatConversationId.value !== scope.conversationId) return;
+    const items = scope?.assistantDraftId
+      ? chatTimeline.value.filter((item) => item.id === scope.assistantDraftId)
+      : chatTimeline.value;
+    for (const item of items) {
+      if (item.toolActivity) delete item.toolActivity;
+      for (const approval of item.approvals ?? []) {
+        if (approval.status === 'pending' || approval.status === 'sending') {
+          approval.status = resolution;
+          approval.errorMessage = undefined;
+        }
+      }
+    }
+  }
+
+  async function decideToolApproval(approval: ChatToolApproval, decision: 'approve' | 'decline') {
+    if (
+      approval.status !== 'pending' ||
+      approval.runId !== activeRuntimeRunId.value ||
+      approval.conversationId !== chatConversationId.value ||
+      !chatLoading.value
+    )
+      return;
+    approval.status = 'sending';
+    approval.errorMessage = undefined;
+    const stillWaiting = () =>
+      approval.status === 'sending' &&
+      approval.runId === activeRuntimeRunId.value &&
+      approval.conversationId === chatConversationId.value &&
+      chatLoading.value;
+    try {
+      const accepted = await options.runtime.decideToolApproval({
+        type: 'tool_approval',
+        conversationId: approval.conversationId,
+        runId: approval.runId,
+        toolCallId: approval.toolCallId,
+        decision,
+      });
+      // The event stream, not an acknowledgement, owns resolution.
+      if (!accepted && stillWaiting()) {
+        approval.status = 'stale';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.stale');
+      }
+    } catch {
+      if (stillWaiting()) {
+        approval.status = 'pending';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+      }
+    }
+  }
+
+  function clearPendingStreamFlushTimer() {
+    if (pendingStreamFlushTimer === null) return;
+    clearTimeout(pendingStreamFlushTimer);
+    pendingStreamFlushTimer = null;
+  }
+
+  function flushPendingStreamDelta(assistantDraftId?: string) {
+    if (!pendingStreamDelta || !pendingStreamAssistantId) {
+      clearPendingStreamFlushTimer();
+      return;
+    }
+    if (assistantDraftId && pendingStreamAssistantId !== assistantDraftId) return;
+    const target = chatTimeline.value.find((item) => item.id === pendingStreamAssistantId);
+    if (target) {
+      target.content += pendingStreamDelta;
+      target.status = 'generating';
+      target.errorMessage = undefined;
+    }
+    pendingStreamDelta = '';
+    pendingStreamAssistantId = null;
+    clearPendingStreamFlushTimer();
+  }
+
+  function bufferStreamDelta(assistantDraftId: string, content: string) {
+    if (!content) return;
+    if (pendingStreamAssistantId && pendingStreamAssistantId !== assistantDraftId) {
+      flushPendingStreamDelta();
+    }
+    pendingStreamAssistantId = assistantDraftId;
+    pendingStreamDelta += content;
+    if (pendingStreamFlushTimer !== null) return;
+    pendingStreamFlushTimer = setTimeout(() => {
+      flushPendingStreamDelta(assistantDraftId);
+    }, STREAM_DELTA_FLUSH_MS);
+  }
+
   function abortActiveStream() {
+    flushPendingStreamDelta();
+    settleVisibleApprovals('cancelled');
     if (!activeStreamAbortController.value) return;
     activeStreamAbortController.value.abort();
     activeStreamAbortController.value = null;
@@ -450,6 +549,38 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     return String(conversation.id);
   }
 
+  async function prepareWorkflowTurn(
+    loadService: AIChatService,
+    conversationName: string,
+    adjustComposerHeight: () => void,
+  ): Promise<{ conversationId: string; content: string } | null> {
+    if (chatLoading.value) return null;
+    const pendingContent = chatMessage.value.trim();
+    if (!pendingContent) return null;
+    try {
+      const conversationId = await ensureConversationCreated(loadService, conversationName);
+      const pendingAttachments = composerAttachments.value.map((attachment) => ({
+        mediaType: attachment.mediaType,
+        ...(attachment.filename ? { filename: attachment.filename } : {}),
+      }));
+      chatTimeline.value.push({
+        id: `workflow-user-draft-${Date.now()}`,
+        role: 'user',
+        content: pendingContent,
+        ...(pendingAttachments.length ? { attachments: pendingAttachments } : {}),
+        status: 'success',
+      });
+      chatMessage.value = '';
+      clearComposerTurnState();
+      await nextTick();
+      adjustComposerHeight();
+      return { conversationId, content: pendingContent };
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.sendFailed'));
+      return null;
+    }
+  }
+
   function resetChatSession(mode: string = 'chat', getDefaultName: (m: string) => string) {
     chatConversationId.value = '';
     chatTimeline.value = [];
@@ -467,17 +598,56 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   function applyRuntimeEvent(event: AssistantRuntimeEvent, assistantDraftId: string) {
+    if (event.conversationId !== chatConversationId.value) return;
+    if (activeRuntimeRunId.value && event.runId !== activeRuntimeRunId.value) return;
+    const item = chatTimeline.value.find((candidate) => candidate.id === assistantDraftId);
+    if (!item) return;
+    if (event.type === 'assistant.activity') {
+      if (event.data.activityType === 'tool') {
+        if (event.data.state === 'running') item.toolActivity = event.data;
+        else if (item.toolActivity?.toolCallId === event.data.toolCallId) delete item.toolActivity;
+      }
+      return;
+    }
+    if (event.type === 'assistant.approval.required') {
+      if (item.toolActivity) delete item.toolActivity;
+      item.approvals ??= [];
+      if (!item.approvals.some((approval) => approval.toolCallId === event.data.toolCallId))
+        item.approvals.push({
+          ...event.data,
+          conversationId: event.conversationId,
+          runId: event.runId,
+          status: 'pending',
+        });
+      return;
+    }
+    if (event.type === 'assistant.approval.resolved') {
+      const approval = item.approvals?.find(
+        (candidate) => candidate.toolCallId === event.data.toolCallId,
+      );
+      if (approval) {
+        approval.status = event.data.resolution;
+        approval.errorMessage = undefined;
+      }
+      return;
+    }
+    if (
+      event.type === 'assistant.run.completed' ||
+      event.type === 'assistant.run.failed' ||
+      event.type === 'assistant.run.cancelled'
+    ) {
+      flushPendingStreamDelta(assistantDraftId);
+      settleVisibleApprovals(event.type === 'assistant.run.cancelled' ? 'cancelled' : 'failed', {
+        conversationId: event.conversationId,
+        assistantDraftId,
+      });
+    }
     if (event.type === 'assistant.run.started') {
       activeRuntimeRunId.value = event.runId;
       return;
     }
     if (event.type === 'assistant.message.delta') {
-      const target = chatTimeline.value.find((item) => item.id === assistantDraftId);
-      if (target) {
-        target.content += event.data.content;
-        target.status = 'generating';
-        target.errorMessage = undefined;
-      }
+      bufferStreamDelta(assistantDraftId, event.data.content);
       return;
     }
     if (event.type === 'assistant.usage.updated') {
@@ -579,7 +749,13 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
           selectedEntities: pendingEntities,
         },
         {
-          onEvent: (event) => applyRuntimeEvent(event, assistantDraftId),
+          onEvent: (event) => {
+            if (
+              activeStreamAbortController.value === streamController &&
+              !streamController?.signal.aborted
+            )
+              applyRuntimeEvent(event, assistantDraftId);
+          },
         },
         streamController.signal,
       );
@@ -588,6 +764,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       // Explicit conversation reload/reselect remains authoritative.
       await refreshRuntimeUsage(conversationId);
     } catch (error) {
+      flushPendingStreamDelta(assistantDraftId);
       const assistantDraft = chatTimeline.value.find((item) => item.id === assistantDraftId);
       const userDraft = chatTimeline.value.find((item) => item.id === userDraftId);
       if (isAbortLikeError(error)) {
@@ -606,6 +783,12 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         toast.error(errorMessage);
       }
     } finally {
+      if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
+      if (assistantDraftId)
+        settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {
+          conversationId,
+          assistantDraftId,
+        });
       if (activeStreamAbortController.value === streamController) {
         activeStreamAbortController.value = null;
       }
@@ -614,11 +797,21 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     }
   }
 
-  function scrollMessagesToBottom() {
+  function scrollMessagesToBottom(options?: { streaming?: boolean; force?: boolean }) {
     nextTick(() => {
       const viewport = messagesViewport.value;
       if (!viewport) return;
-      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      if (
+        options?.streaming &&
+        !options.force &&
+        distanceFromBottom > STREAM_AUTO_FOLLOW_THRESHOLD_PX
+      )
+        return;
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior: options?.streaming ? 'auto' : 'smooth',
+      });
     });
   }
 
@@ -642,6 +835,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     hasWorkflowUserMessages,
     abortActiveStream,
     stopGenerating,
+    decideToolApproval,
     updateLastActiveConversation,
     clearLastActiveConversation,
     buildConversationTranscript,
@@ -650,6 +844,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     selectConversation,
     deleteConversation,
     ensureConversationCreated,
+    prepareWorkflowTurn,
     resetChatSession,
     startNewConversation,
     handleSendChat,
