@@ -39,6 +39,7 @@ import type {
   IAIPlannerReadPort,
   IAINotificationReadPort,
   IAISelectedEntityContextReadPort,
+  IAIWebResearchPort,
   IAnalyticsReadPort,
 } from '../../application/ports';
 import {
@@ -120,6 +121,8 @@ export interface MastraAIRuntimeDependencies {
   readonly knowledgeCaptureMutationPort: KnowledgeCaptureMutationPort;
   /** Existing Knowledge read owner reused by GoalPlan V2 for search/reuse evidence. */
   readonly knowledgeSourcePort: import('../../application/ports').IKnowledgeSourcePort;
+  /** Read-only provider-backed public web research used only by Goal planning. */
+  readonly webResearchPort?: IAIWebResearchPort;
   /** Canonical runtime observability sink; host-owned and persistence-agnostic. */
   readonly executionRecordPort?: IAIExecutionRecordPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
@@ -186,6 +189,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       deps.knowledgeSourcePort,
       deps.executionRecordPort,
       deps.contextAssembler,
+      deps.webResearchPort,
     );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,

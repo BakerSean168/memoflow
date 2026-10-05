@@ -1,12 +1,17 @@
 import { RequestContext } from '@mastra/core/request-context';
 import { describe, expect, it, vi } from 'vitest';
-import type { IKnowledgeSourcePort } from '../../application/ports';
+import type { IAIWebResearchPort, IKnowledgeSourcePort } from '../../application/ports';
 import {
   AIContextAssembler,
   AI_CONTEXT_ENVELOPE_KEY,
   AI_CONTEXT_TIME_CONTEXT_KEY,
 } from '../context';
-import { GoalPlannerWorker, type GoalPlannerRequest } from './goal-planner.worker';
+import {
+  GoalPlannerWorker,
+  readGoalPlannerResearchEvidence,
+  type GoalPlannerRequest,
+} from './goal-planner.worker';
+import { rememberResolvedPlannerModel } from './planner-observability';
 
 const contextAssembler = new AIContextAssembler({
   getUserTimeContext: vi.fn(async () => ({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 })),
@@ -114,5 +119,276 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
     expect(prompt).toContain('Canonical MemoFlow context envelope');
     expect(prompt).toContain('"sections"');
     expect(prompt).not.toContain('Knowledge evidence JSON');
+  });
+});
+
+describe('GoalPlannerWorker bounded external research', () => {
+  const knowledge: IKnowledgeSourcePort = {
+    listRelevantNotes: vi.fn(async () => []),
+    listIndexableNotes: vi.fn(async () => []),
+    getNoteById: vi.fn(async () => null),
+  };
+
+  it('runs at most three requested searches before producing the final typed decision', async () => {
+    const search = vi.fn<IAIWebResearchPort['search']>(async (input) => ({
+      status: 'grounded',
+      evidence: {
+        query: input.query,
+        intent: input.intent,
+        summary: 'Official requirements and dates.',
+        sources: [{ title: 'Official admissions', url: 'https://example.edu/admissions' }],
+        trust: 'external_untrusted',
+        provenance: 'external',
+      },
+    }));
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      search,
+    });
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_research',
+          reason: 'Current official requirements affect the plan.',
+          requests: [
+            { query: 'Official eligibility', intent: 'requirements' },
+            { query: 'Official application dates', intent: 'timeline' },
+            { query: 'Official syllabus', intent: 'resources' },
+          ],
+        },
+      } as never)
+      .mockResolvedValueOnce({ object: decision() } as never);
+    const requestContext = new RequestContext();
+    requestContext.setRaw('providerId', 'provider-requested');
+    requestContext.setRaw('modelId', 'model-requested');
+    rememberResolvedPlannerModel(requestContext, {
+      providerId: 'provider-resolved',
+      providerName: 'Resolved provider',
+      modelId: 'model-resolved',
+    });
+
+    await expect(worker.plan(request(), requestContext)).resolves.toEqual(decision());
+
+    expect(generate).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenCalledTimes(3);
+    expect(search).toHaveBeenNthCalledWith(1, {
+      identityId: 'identity-1',
+      providerId: 'provider-resolved',
+      modelId: 'model-resolved',
+      query: 'Official eligibility',
+      intent: 'requirements',
+      maxSources: 6,
+    });
+    expect(readGoalPlannerResearchEvidence(requestContext)).toHaveLength(3);
+    const finalPrompt = String(generate.mock.calls[1]?.[0] ?? '');
+    expect(finalPrompt).toContain('external_untrusted');
+    expect(finalPrompt).toContain('Do not request another research round');
+  });
+
+  it('starts independent bounded searches concurrently instead of serializing provider latency', async () => {
+    const releases = new Map<string, () => void>();
+    const started: string[] = [];
+    const search = vi.fn<IAIWebResearchPort['search']>((input) => {
+      started.push(input.query);
+      return new Promise((resolve) => {
+        releases.set(input.query, () =>
+          resolve({
+            status: 'grounded',
+            evidence: {
+              query: input.query,
+              intent: input.intent,
+              summary: `Grounded ${input.query}`,
+              sources: [{ title: 'Official', url: `https://example.edu/${started.length}` }],
+              trust: 'external_untrusted',
+              provenance: 'external',
+            },
+          }),
+        );
+      });
+    });
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      search,
+    });
+    vi.spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_research',
+          reason: 'Three independent public facts are material.',
+          requests: [
+            { query: 'Requirement A', intent: 'requirements' },
+            { query: 'Deadline B', intent: 'timeline' },
+            { query: 'Resource C', intent: 'resources' },
+          ],
+        },
+      } as never)
+      .mockResolvedValueOnce({ object: decision() } as never);
+
+    const planning = worker.plan(request(), new RequestContext());
+    await vi.waitFor(() => expect(started).toHaveLength(3));
+    expect(started).toEqual(['Requirement A', 'Deadline B', 'Resource C']);
+    for (const release of releases.values()) release();
+
+    await expect(planning).resolves.toEqual(decision());
+    expect(search).toHaveBeenCalledTimes(3);
+  });
+
+  it('deduplicates repeated research requests within the same bounded research phase', async () => {
+    const search = vi.fn<IAIWebResearchPort['search']>(async (input) => ({
+      status: 'grounded',
+      evidence: {
+        query: input.query,
+        intent: input.intent,
+        summary: 'Official answer.',
+        sources: [{ title: 'Official', url: 'https://example.edu/official' }],
+        trust: 'external_untrusted',
+        provenance: 'external',
+      },
+    }));
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      search,
+    });
+    vi.spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_research',
+          reason: 'One current rule is needed.',
+          requests: [
+            { query: 'Official rule', intent: 'requirements' },
+            { query: 'Official rule', intent: 'requirements' },
+          ],
+        },
+      } as never)
+      .mockResolvedValueOnce({ object: decision() } as never);
+
+    await worker.plan(request(), new RequestContext());
+
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('aggregates token usage across research-sensitive two-pass planning', async () => {
+    const record = vi.fn(async () => undefined);
+    const search = vi.fn<IAIWebResearchPort['search']>(async (input) => ({
+      status: 'grounded',
+      evidence: {
+        query: input.query,
+        intent: input.intent,
+        summary: 'Official timeline.',
+        sources: [{ title: 'Official', url: 'https://example.edu/timeline' }],
+        trust: 'external_untrusted',
+        provenance: 'external',
+      },
+    }));
+    const worker = new GoalPlannerWorker({} as never, knowledge, { record }, contextAssembler, {
+      search,
+    });
+    vi.spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_research',
+          reason: 'Current dates matter.',
+          requests: [{ query: 'Official dates', intent: 'timeline' }],
+        },
+        usage: { inputTokens: 10, outputTokens: 2, totalTokens: 12 },
+      } as never)
+      .mockResolvedValueOnce({
+        object: decision(),
+        usage: { inputTokens: 20, outputTokens: 3, totalTokens: 23 },
+      } as never);
+    const requestContext = new RequestContext();
+    requestContext.setRaw('executionContext', {
+      identityId: 'identity-1',
+      requestId: 'request-1',
+      traceId: 'trace-1',
+      startedAt: 1,
+      source: 'http',
+    });
+
+    await worker.plan(request(), requestContext);
+
+    expect(record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: 'workflow.goal.plan',
+        outcome: 'succeeded',
+        tokenUsage: { promptTokens: 30, completionTokens: 5, totalTokens: 35 },
+      }),
+    );
+  });
+
+  it('rejects an oversized research batch before any provider egress', async () => {
+    const search = vi.fn<IAIWebResearchPort['search']>();
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      search,
+    });
+    vi.spyOn(worker.agent, 'generate').mockResolvedValue({
+      object: {
+        status: 'needs_research',
+        reason: 'Too many searches.',
+        requests: [1, 2, 3, 4].map((index) => ({
+          query: 'Query ' + index,
+          intent: 'requirements',
+        })),
+      },
+    } as never);
+
+    await expect(worker.plan(request(), new RequestContext())).rejects.toBeDefined();
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it('continues to a final plan when external research is unavailable', async () => {
+    const search = vi.fn<IAIWebResearchPort['search']>(async () => ({
+      status: 'unavailable',
+      reason: 'rate_limited',
+    }));
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      search,
+    });
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_research',
+          reason: 'A current deadline would improve the plan.',
+          requests: [{ query: 'Official deadline', intent: 'timeline' }],
+        },
+      } as never)
+      .mockResolvedValueOnce({ object: decision() } as never);
+
+    const requestContext = new RequestContext();
+    await expect(worker.plan(request(), requestContext)).resolves.toEqual(decision());
+    expect(generate).toHaveBeenCalledTimes(2);
+    expect(readGoalPlannerResearchEvidence(requestContext)).toEqual([]);
+    const finalPrompt = String(generate.mock.calls[1]?.[0] ?? '');
+    expect(finalPrompt).toContain('rate_limited');
+    expect(finalPrompt).toContain('warnings');
+  });
+
+  it('replays durable web evidence through the canonical external context without promoting trust', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValue({ object: decision() } as never);
+    const researchEvidence = [
+      {
+        query: 'Peking University admissions timeline',
+        intent: 'timeline' as const,
+        summary: 'The official page lists current application milestones.',
+        sources: [
+          {
+            title: 'Peking University admissions',
+            url: 'https://admission.pku.edu.cn/official',
+          },
+        ],
+        trust: 'external_untrusted' as const,
+        provenance: 'external' as const,
+      },
+    ];
+
+    await worker.plan({ ...request(), researchEvidence }, new RequestContext());
+
+    const prompt = String(generate.mock.calls[0]?.[0] ?? '');
+    expect(prompt).toContain('\"category\":\"external\"');
+    expect(prompt).toContain('\"trust\":\"external_untrusted\"');
+    expect(prompt).toContain('\"kind\":\"external\"');
+    expect(prompt).toContain('https://admission.pku.edu.cn/official');
   });
 });

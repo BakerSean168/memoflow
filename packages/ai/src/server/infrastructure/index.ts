@@ -68,3 +68,4 @@ export {
 export { OpenAICompatibleChatExecutionAdapter } from './adapters/openai-compatible-chat-execution.adapter';
 export { OpenAICompatibleGateway } from './gateways/openai-compatible.gateway';
 export { OpenAICompatibleModelCatalogGateway } from './gateways/openai-compatible-model-catalog.gateway';
+export { ProviderWebResearchAdapter } from './adapters/provider-web-research.adapter';

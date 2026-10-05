@@ -197,6 +197,13 @@ export default {
       openGoalNativeReview: '审核目标',
       goalNativeReviewHint: '请在目标原生表单中审核目标与关键结果。',
       goalDraftTitle: '目标草稿',
+      goalResearchTitle: '外部研究证据',
+      goalResearchExternalHint: '这些公开网页资料仅作为规划证据，不会覆盖你的输入或目标事实。',
+      goalResearchIntent: {
+        requirements: '要求',
+        timeline: '时间节点',
+        resources: '资料',
+      },
       noteCreatedTitle: '知识笔记已创建',
       noteTopicFallback: '根据本次对话整理一篇知识笔记',
       tools: {
