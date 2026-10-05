@@ -206,7 +206,6 @@ export default {
       keepCompletedChanges: 'Keep completed changes',
       cancelRemaining: 'Cancel remaining',
       startAnotherNote: 'New Note Chat',
-      exitTool: 'End current flow',
       ungroundedHint:
         'The answer is not sufficiently grounded in your note evidence, so note creation is disabled. Add sources or rephrase the question.',
       goalClarificationTitle: 'Goal Clarification',
@@ -408,7 +407,6 @@ export default {
       executionResult: 'Execution Result',
       executionSummaryText: '{status}: {executed} executed, {skipped} skipped, {failed} failed.',
       awaitingConfirmation: 'awaiting confirmation',
-      executionRecorded: 'execution recorded',
       recoveryTitle: 'Recovery',
       recoveryRetryReady:
         'You can retry execution after fixing the failed action inputs or runtime issue.',

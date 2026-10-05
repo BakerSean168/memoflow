@@ -68,6 +68,25 @@ describe('AI public failure projection', () => {
     expect(JSON.stringify(toAITransportFailure(error, fallback))).not.toContain(secret);
   });
 
+  it('maps raw provider 429 failures without leaking provider diagnostics', () => {
+    const secret = 'provider-private-response';
+    const failure = toAIPublicFailure(
+      {
+        name: 'AI_APICallError',
+        statusCode: 429,
+        responseBody: secret,
+        requestBodyValues: { apiKey: secret },
+      },
+      fallback,
+    );
+
+    expect(failure).toEqual({
+      code: 'RATE_LIMITED',
+      message: 'AI provider rate limit exceeded',
+    });
+    expect(JSON.stringify(failure)).not.toContain(secret);
+  });
+
   it('keeps AI execution category mapping stable and secret-safe', () => {
     const secret = 'provider-runtime-secret';
     expect(

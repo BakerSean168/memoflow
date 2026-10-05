@@ -4,7 +4,7 @@
  * Extracted from useAIChatView.ts to reduce composable size.
  */
 
-import type { AIChatService, WorkflowMode, GoalWorkflowStage } from './types';
+import type { AIChatService } from './types';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { unwrap } from '@memoflow/contracts/result';
@@ -57,81 +57,6 @@ export async function loadAuthoritativeWorkflowRun(
     );
   }
   return run;
-}
-
-/** Parameters for workflowStatusText computation. */
-export interface WorkflowStatusParams {
-  toolMode: WorkflowMode;
-  goalDraftLoading: boolean;
-  goalWorkflowStage: GoalWorkflowStage;
-  automationLoading: boolean;
-  automationExecuting: boolean;
-  goalExecutionSummary: { status: string } | null;
-  knowledgeQueryLoading: boolean;
-  knowledgeAnswer: { evidenceStatus: 'grounded' | 'insufficient' } | null;
-  taskAgentLoading?: boolean;
-  taskWorkflowRun?: { status: string; suspension?: { type: string } | null } | null;
-  knowledgeCaptureLoading?: boolean;
-  knowledgeCaptureRun?: { status: string; suspension?: { type: string } | null } | null;
-}
-
-/** Computes the workflow status text for the chat view. */
-export function getWorkflowStatusText(
-  params: WorkflowStatusParams,
-  t: (key: string, args?: Record<string, unknown>) => string,
-  formatExecutionOutcome: (status: 'success' | 'partial' | 'failed') => string,
-): string {
-  if (params.toolMode === 'goal-create') {
-    if (params.goalDraftLoading) return t('aiAssistant.dialogs.generateGoal.generating');
-    if (params.goalWorkflowStage === 'plan' || params.automationLoading)
-      return t('aiAssistant.dialogs.automation.planning');
-    if (params.goalWorkflowStage === 'execute' || params.automationExecuting)
-      return t('aiAssistant.dialogs.automation.executing');
-    if (params.goalWorkflowStage === 'confirm')
-      return t('aiAssistant.dialogs.automation.awaitingConfirmation');
-    if (params.goalWorkflowStage === 'result') {
-      if (params.goalExecutionSummary?.status === 'partial')
-        return formatExecutionOutcome('partial');
-      if (params.goalExecutionSummary?.status === 'failed') return formatExecutionOutcome('failed');
-      return t('aiAssistant.dialogs.automation.executionRecorded');
-    }
-    if (params.goalWorkflowStage === 'clarification')
-      return t('aiAssistant.chatPage.workflow.goalClarificationHint');
-    if (params.goalWorkflowStage === 'draft')
-      return t('aiAssistant.chatPage.workflow.goalDraftReadyHint');
-    return t('aiAssistant.chatPage.workflow.goalCollectingHint');
-  }
-  if (params.toolMode === 'task-create') {
-    if (params.taskAgentLoading) return t('aiAssistant.dialogs.agent.starting');
-    if (params.taskWorkflowRun?.status === 'suspended') {
-      return params.taskWorkflowRun.suspension?.type === 'clarification_required'
-        ? t('aiAssistant.chatPage.workflow.goalClarificationHint')
-        : t('aiAssistant.chatPage.workflow.taskAwaitingApprovalHint');
-    }
-    if (params.taskWorkflowRun?.status === 'completed')
-      return t('aiAssistant.dialogs.automation.executionRecorded');
-    return t('aiAssistant.chatPage.workflow.taskCollectingHint');
-  }
-  if (params.toolMode === 'knowledge-capture') {
-    if (params.knowledgeCaptureLoading) return t('aiAssistant.dialogs.agent.starting');
-    if (params.knowledgeCaptureRun?.status === 'suspended') {
-      return params.knowledgeCaptureRun.suspension?.type === 'clarification_required'
-        ? t('aiAssistant.chatPage.workflow.goalClarificationHint')
-        : t('aiAssistant.chatPage.workflow.noteDraftReadyHint');
-    }
-    if (params.knowledgeCaptureRun?.status === 'completed')
-      return t('aiAssistant.dialogs.automation.executionRecorded');
-    return t('aiAssistant.chatPage.workflow.knowledgeCaptureCollectingHint');
-  }
-  if (params.toolMode === 'knowledge-qa') {
-    if (params.knowledgeQueryLoading) return t('aiAssistant.dialogs.knowledge.searching');
-    if (params.knowledgeAnswer?.evidenceStatus === 'grounded')
-      return t('aiAssistant.dialogs.knowledge.grounded');
-    if (params.knowledgeAnswer?.evidenceStatus === 'insufficient')
-      return t('aiAssistant.dialogs.knowledge.insufficientEvidence');
-    return t('aiAssistant.chatPage.workflow.knowledgeQaCollectingHint');
-  }
-  return '';
 }
 
 /** Parameters for the onMounted initialization. */

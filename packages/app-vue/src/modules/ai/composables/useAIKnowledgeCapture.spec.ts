@@ -24,6 +24,7 @@ const i18n = createI18n({
   fallbackWarn: false,
   messages: {
     'en-US': {
+      errors: { RATE_LIMITED: 'Rate limited' },
       aiAssistant: { errors: { workflowExecutionFailed: 'Failed' } },
     },
   },
@@ -94,6 +95,14 @@ function terminal() {
       failures: [],
       retryable: false,
     },
+  });
+}
+
+function failed() {
+  return run({
+    status: 'failed',
+    updatedAt: 10,
+    failure: { code: 'RATE_LIMITED', message: 'AI provider rate limit exceeded' },
   });
 }
 
@@ -172,6 +181,7 @@ function setup(start = review()) {
     selectedModel: ref(MODEL),
     chatConversationId: ref('conv-1'),
     chatLoading: ref(false),
+    chatTimeline: ref([]),
     hasWorkflowUserMessages: ref(true),
     buildConversationTranscript: () => 'capture knowledge',
     scrollMessagesToBottom: vi.fn(),
@@ -283,6 +293,34 @@ describe('useAIKnowledgeCapture native Repository orchestration', () => {
       command: { type: 'answer', answers: ['Durability and recovery semantics'] },
       workflowTurn: 'Durability and recovery semantics',
     });
+  });
+
+  it('projects a terminal provider failure after clarification and returns false', async () => {
+    const clarificationRun = run({
+      status: 'suspended',
+      suspension: { type: 'clarification_required', questions: ['Which topic?'] },
+    });
+    const { vm, runtime, options } = setup(clarificationRun);
+    runtime.resume.mockResolvedValueOnce(failed());
+
+    await vm.startKnowledgeCaptureRun();
+    await expect(vm.submitKnowledgeClarificationResponse('Durability')).resolves.toBe(false);
+    expect(options.chatTimeline?.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'knowledge-capture-workflow-failure-run-1',
+          content: 'Rate limited',
+          status: 'error',
+        }),
+      ]),
+    );
+
+    await vm.projectRun(failed(), false);
+    expect(
+      options.chatTimeline?.value.filter(
+        (item) => item.id === 'knowledge-capture-workflow-failure-run-1',
+      ),
+    ).toHaveLength(1);
   });
 
   it('projects clarification, review, and recovery stages without creating a second editor', async () => {

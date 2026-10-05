@@ -20,10 +20,6 @@ describe('AIChatView Mastra-native workbench', () => {
     resolve(__dirname, '../components/AIConversationSidebar.vue'),
     'utf8',
   );
-  const actionBar = readFileSync(
-    resolve(__dirname, '../components/AIWorkflowActionBar.vue'),
-    'utf8',
-  );
   const goalPanel = readFileSync(
     resolve(__dirname, '../components/AIGoalWorkflowPanel.vue'),
     'utf8',
@@ -98,6 +94,7 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(clarificationRoute).toBeGreaterThan(0);
     expect(prepareTurn).toBeGreaterThan(clarificationRoute);
     expect(resume).toBeGreaterThan(prepareTurn);
+    expect(source).toContain("if (!resumed) toolMode.value = 'chat'");
     expect(directReturn).toBeGreaterThan(resume);
     expect(assistantDispatch).toBeGreaterThan(directReturn);
   });
@@ -125,7 +122,7 @@ describe('AIChatView Mastra-native workbench', () => {
       "else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation()",
     );
     expect(source).toContain(':knowledge-answer="knowledgeAnswer"');
-    expect(actionBar).not.toContain('data-testid="knowledge-qa-ask"');
+    expect(source).not.toContain('data-testid="knowledge-qa-ask"');
     expect(goalPanel).toContain('data-testid="knowledge-answer-panel"');
   });
 
@@ -133,16 +130,23 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@confirm="confirmTaskAgentRun"');
     expect(source).toContain('@cancel="cancelTaskAgentRun"');
     expect(source).toContain('@retry="retryTaskAgentExecution"');
+    expect(source).toContain('@accept-partial="acceptPartialTaskExecution"');
+    expect(source).toContain('@cancel-remaining="cancelRemainingTaskExecution"');
     expect(source).toContain('@open-native-review="openKnowledgeNativeReview"');
     expect(source).toContain('taskAgentWaitingForClarification.value');
     expect(source).toContain('submitTaskClarificationResponse(prepared.content)');
     expect(source).toContain('knowledgeCaptureWaitingForClarification.value');
     expect(source).toContain('submitKnowledgeClarificationResponse(prepared.content)');
+    expect(source.match(/if \(!resumed\) toolMode\.value = 'chat'/g)).toHaveLength(4);
     expect(source).not.toContain('@submit-clarification="submitKnowledgeClarification"');
     expect(source).not.toContain('@submit-clarification="submitTaskClarification"');
     expect(source).toContain('@cancel="cancelKnowledgeCaptureRun"');
     expect(source).toContain('@retry="retryKnowledgeCaptureExecution"');
+    expect(source).toContain('@cancel-remaining="cancelRemainingKnowledgeCaptureExecution"');
     expect(taskPanel).toContain('data-testid="task-agent-confirm-run"');
+    expect(taskPanel).toContain('data-testid="task-agent-accept-partial"');
+    expect(taskPanel).toContain('data-testid="task-agent-cancel-remaining"');
+    expect(capturePanel).toContain('data-testid="knowledge-capture-agent-cancel-remaining"');
     expect(capturePanel).toContain('data-testid="knowledge-capture-open-native-review"');
     expect(capturePanel).not.toContain('data-testid="knowledge-capture-agent-confirm-run"');
   });
@@ -170,7 +174,6 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('data-testid="ai-active-intent"');
     expect(source).toContain("toolMode !== 'chat'");
     expect(source).toContain('currentToolLabel');
-    expect(source).toContain('max-w-[52rem]');
   });
 
   it('keeps Goal owner-first while retaining workflow context as an explicit secondary surface', () => {
@@ -214,6 +217,12 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).not.toContain('ai-chat-tool-menu-trigger');
   });
 
+  it('does not render the retired Composer-top workflow action bar', () => {
+    expect(source).not.toContain('AIWorkflowActionBar');
+    expect(source).not.toContain('workflow-status-text');
+    expect(goalPanel).toContain('data-testid="goal-agent-retry-execution"');
+  });
+
   it('owns one composer mount path with shell teleport and local disabled fallback', () => {
     expect(source.match(/<AIFooterComposer/g)).toHaveLength(1);
     expect(source).toContain(
@@ -236,14 +245,13 @@ describe('AIChatView Mastra-native workbench', () => {
 
   it('auto-routes knowledge.capture and does not expose workflow-start controls in product UI', () => {
     expect(source).toContain('knowledgeCaptureWorkflow');
-    expect(source).toContain(
-      "else if (inferredMode === 'knowledge-capture') await startKnowledgeCaptureRun()",
-    );
-    expect(actionBar).not.toContain('knowledge-capture-agent-start-run');
-    expect(actionBar).not.toContain('task-agent-start-run');
-    expect(actionBar).not.toContain('goal-agent-start-run');
+    expect(source).toContain("else if (inferredMode === 'knowledge-capture') {");
+    expect(source).toContain('const started = await startKnowledgeCaptureRun()');
+    expect(source).toContain("if (!started) toolMode.value = 'chat'");
+    expect(source).not.toContain('knowledge-capture-agent-start-run');
+    expect(source).not.toContain('task-agent-start-run');
+    expect(source).not.toContain('goal-agent-start-run');
     expect(source).not.toContain('knowledge-generate');
-    expect(actionBar).not.toContain('knowledge-generate');
   });
   it('restores durable Goal/supporting state before independently attempting native projection', () => {
     const projection = viewComposable.indexOf('await goalWorkflow.projectRun(run, false)');
@@ -256,6 +264,9 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(projection).toBeGreaterThan(0);
     expect(overlay).toBeGreaterThan(projection);
     expect(opening).toBeGreaterThan(overlay);
+    expect(viewComposable).toContain("run.status === 'failed' || run.status === 'cancelled'");
+    expect(viewComposable).toContain('persistence.clearWorkflowState(conversationId)');
+    expect(viewComposable).toContain("toolMode.value = 'chat'");
     expect(viewComposable).toContain('error instanceof AIWorkflowRestoreError &&');
   });
   it('persists authoritative Task pointer before recoverable native opening and wires native actions', () => {
@@ -291,7 +302,6 @@ describe('AIChatView Mastra-native workbench', () => {
     ]) {
       expect(source).not.toContain(symbol);
       expect(viewComposable).not.toContain(symbol);
-      expect(actionBar).not.toContain(symbol);
     }
     expect(source).toContain('@open-native-review="openGoalNativeReview"');
     expect(source).toContain('@open-native-review="openTaskNativeReview"');

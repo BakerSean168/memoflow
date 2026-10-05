@@ -25,7 +25,6 @@ import { surfaceDescriptorToContextEntity, type AIActiveSurfaceDescriptor } from
 import {
   adjustComposerHeight as createAdjustComposerHeight,
   bindChatViewLifecycle,
-  getWorkflowStatusText,
   initializeChatView,
   AIWorkflowRestoreError,
   loadAuthoritativeWorkflowRun,
@@ -288,6 +287,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           await knowledgeCaptureWorkflow.projectRun(run, false);
           break;
       }
+      if (run.status === 'failed' || run.status === 'cancelled') {
+        persistence.clearWorkflowState(conversationId);
+        toolMode.value = 'chat';
+        return;
+      }
       persistence.applyEditorOverlay(persisted.editorOverlay, run);
       // Rebase or discard any stale overlay against the runtime revision.
       persistence.persistWorkflowState(conversationId);
@@ -409,26 +413,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       ? t('aiAssistant.chatPage.workflow.tools.chat')
       : t(`aiAssistant.chatPage.workflow.tools.${getToolLocaleKey(toolMode.value)}`),
   );
-  const workflowStatusText = computed(() =>
-    getWorkflowStatusText(
-      {
-        toolMode: toolMode.value,
-        goalDraftLoading: goalWorkflow.goalDraftLoading.value,
-        goalWorkflowStage: goalWorkflow.goalWorkflowStage.value,
-        automationLoading: goalWorkflow.automationLoading.value,
-        automationExecuting: goalWorkflow.automationExecuting.value,
-        goalExecutionSummary: goalWorkflow.goalExecutionSummary.value,
-        knowledgeQueryLoading: knowledgeQaWorkflow.knowledgeQueryLoading.value,
-        knowledgeAnswer: knowledgeQaWorkflow.knowledgeAnswer.value,
-        taskAgentLoading: taskWorkflow.taskAgentLoading.value,
-        taskWorkflowRun: taskWorkflow.taskWorkflowRun.value,
-        knowledgeCaptureLoading: knowledgeCaptureWorkflow.knowledgeCaptureLoading.value,
-        knowledgeCaptureRun: knowledgeCaptureWorkflow.knowledgeCaptureRun.value,
-      },
-      t,
-      formatters.formatExecutionOutcome,
-    ),
-  );
 
   const canSendMessage = computed(
     () =>
@@ -436,15 +420,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       !chatSession.chatLoading.value &&
       modelSelection.selectedModel.value !== null,
   );
-  const canRunWorkflowActions = computed(
-    () =>
-      modelSelection.selectedModel.value !== null &&
-      !chatSession.chatLoading.value &&
-      !knowledgeQaWorkflow.knowledgeQueryLoading.value &&
-      !taskWorkflow.taskAgentLoading.value &&
-      !knowledgeCaptureWorkflow.knowledgeCaptureLoading.value,
-  );
-
   function canLeaveTaskReview(): boolean {
     if (toolMode.value !== 'task-create') return true;
     if (taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value) {
@@ -605,8 +580,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       toolMode,
       currentConversationLabel,
       currentToolLabel,
-      workflowStatusText,
-      canRunWorkflowActions,
       exitToolMode,
       openSettings: () => void router.push('/settings'),
     },

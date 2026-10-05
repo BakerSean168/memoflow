@@ -559,11 +559,20 @@ export const AIRuntimeUsageSummarySchema = AIRuntimeUsageSchema.extend({
 });
 export type AIRuntimeUsageSummary = z.infer<typeof AIRuntimeUsageSummarySchema>;
 
+export const AIWorkflowTerminalFailureSchema = z
+  .object({
+    code: z.string().min(1),
+    message: z.string().min(1),
+  })
+  .strict();
+export type AIWorkflowTerminalFailure = z.infer<typeof AIWorkflowTerminalFailureSchema>;
+
 const WorkflowRunViewBaseShape = {
   runId: z.string().min(1),
   conversationId: z.string().min(1),
   status: AIWorkflowStatusSchema,
   suspension: AIWorkflowSuspensionSchema.optional(),
+  failure: AIWorkflowTerminalFailureSchema.optional(),
   usage: AIRuntimeUsageSchema.optional(),
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),

@@ -4125,14 +4125,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/ai/components/AIWorkflowActionBar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12355,7 +12347,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 274
+      "fileCount": 273
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13073,7 +13065,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1131,
+    "unit": 1130,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

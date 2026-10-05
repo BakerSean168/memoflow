@@ -293,6 +293,26 @@ describe('AI vNext runtime contracts', () => {
     });
   });
 
+  it('accepts a secret-safe terminal workflow failure projection', () => {
+    const parsed = AIWorkflowRunViewSchema.parse({
+      runId: 'workflow-rate-limited',
+      kind: 'goal.create',
+      conversationId: 'conversation-1',
+      status: 'failed',
+      failure: {
+        code: 'RATE_LIMITED',
+        message: 'AI provider rate limit exceeded',
+      },
+      createdAt: 1,
+      updatedAt: 2,
+    });
+
+    expect(parsed).toMatchObject({
+      status: 'failed',
+      failure: { code: 'RATE_LIMITED' },
+    });
+  });
+
   it('projects only product workflow state and not framework snapshots', () => {
     const parsed = AIWorkflowRunViewSchema.parse({
       runId: 'workflow-1',

@@ -354,6 +354,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     let status: AIWorkflowRunView['status'];
     let suspension: AIWorkflowRunView['suspension'];
+    let failure: AIWorkflowRunView['failure'];
     let result: Extract<AIWorkflowRunView, { kind: 'goal.create' }>['result'];
 
     if (lowLevelStatus === 'suspended') {
@@ -368,6 +369,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
       status = 'failed';
+      failure = publicRuntimeError(snapshot.error);
     } else if (
       lowLevelStatus === 'success' ||
       lowLevelStatus === 'bailed' ||
@@ -391,6 +393,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       conversationId: workflowInput.conversationId,
       status,
       ...(suspension ? { suspension } : {}),
+      ...(failure ? { failure } : {}),
       ...(result ? { result } : {}),
       createdAt: new Date(row.createdAt).getTime(),
       updatedAt: new Date(row.updatedAt).getTime(),
@@ -432,6 +435,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     let status: AIWorkflowRunView['status'];
     let suspension: AIWorkflowRunView['suspension'];
+    let failure: AIWorkflowRunView['failure'];
     let result: Extract<AIWorkflowRunView, { kind: 'task.create' }>['result'];
 
     if (lowLevelStatus === 'suspended') {
@@ -446,6 +450,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
       status = 'failed';
+      failure = publicRuntimeError(snapshot.error);
     } else if (
       lowLevelStatus === 'success' ||
       lowLevelStatus === 'bailed' ||
@@ -469,6 +474,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       conversationId: workflowInput.conversationId,
       status,
       ...(suspension ? { suspension } : {}),
+      ...(failure ? { failure } : {}),
       ...(result ? { result } : {}),
       createdAt: new Date(row.createdAt).getTime(),
       updatedAt: new Date(row.updatedAt).getTime(),
@@ -510,6 +516,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     let status: AIWorkflowRunView['status'];
     let suspension: AIWorkflowRunView['suspension'];
+    let failure: AIWorkflowRunView['failure'];
     let result: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>['result'];
 
     if (lowLevelStatus === 'suspended') {
@@ -527,6 +534,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
       status = 'failed';
+      failure = publicRuntimeError(snapshot.error);
     } else if (
       lowLevelStatus === 'success' ||
       lowLevelStatus === 'bailed' ||
@@ -550,6 +558,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       conversationId: workflowInput.conversationId,
       status,
       ...(suspension ? { suspension } : {}),
+      ...(failure ? { failure } : {}),
       ...(result ? { result } : {}),
       createdAt: new Date(row.createdAt).getTime(),
       updatedAt: new Date(row.updatedAt).getTime(),

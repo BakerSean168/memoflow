@@ -99,6 +99,7 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       common: { unknown: 'Unknown', operationFailed: 'Operation failed' },
+      errors: { RATE_LIMITED: 'Rate limited' },
       aiAssistant: {
         chatPage: { workflow: { goalClarificationTitle: 'Goal Clarification' } },
         goalDraft: { tasks: 'Tasks', knowledge: 'Knowledge' },
@@ -278,6 +279,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       suspension: { type: 'clarification_required', questions: ['Budget?'], round: 1 },
     });
     runtime.start.mockResolvedValue(suspended);
+    runtime.resume.mockResolvedValue(makeGoalRun({ status: 'running', updatedAt: 2 }));
     const options = makeOptions(runtime);
     const wrapper = mountComposable(options);
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
@@ -296,6 +298,54 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       command: { type: 'answer', answers: ['About 1000, with flexibility'] },
       workflowTurn: 'About 1000, with flexibility',
     });
+  });
+
+  it('projects a terminal provider failure into Chat and stops clarification flow', async () => {
+    const runtime = createRuntimeStub();
+    runtime.start.mockResolvedValue(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: { type: 'clarification_required', questions: ['Target?'], round: 1 },
+      }),
+    );
+    runtime.resume.mockResolvedValue(
+      makeGoalRun({
+        status: 'failed',
+        failure: { code: 'RATE_LIMITED', message: 'AI provider rate limit exceeded' },
+        updatedAt: 2,
+      }),
+    );
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+
+    await vm.startGoalAgentRun();
+    await expect(vm.submitGoalClarificationResponse('Peking University')).resolves.toBe(false);
+
+    expect(options.chatTimeline.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'goal-workflow-failure-run-1',
+          role: 'assistant',
+          content: 'Rate limited',
+          status: 'error',
+          errorMessage: 'Rate limited',
+        }),
+      ]),
+    );
+    expect(toastMocks.error).toHaveBeenCalledWith('Rate limited');
+
+    await vm.projectRun(
+      makeGoalRun({
+        status: 'failed',
+        failure: { code: 'RATE_LIMITED', message: 'AI provider rate limit exceeded' },
+        updatedAt: 2,
+      }),
+      false,
+    );
+    expect(
+      options.chatTimeline.value.filter((item) => item.id === 'goal-workflow-failure-run-1'),
+    ).toHaveLength(1);
   });
 
   it('projects supporting Task and Knowledge proposals into Chat and routes review revisions through the durable workflow', async () => {

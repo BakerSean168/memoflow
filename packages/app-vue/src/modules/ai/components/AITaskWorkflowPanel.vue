@@ -77,14 +77,35 @@
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}
       </p>
-      <Button
-        v-if="taskWorkflowRun.suspension.retryable"
-        variant="outline"
-        :disabled="busy"
-        data-testid="task-agent-retry-execution"
-        @click="$emit('retry')"
-        >{{ t('aiAssistant.dialogs.agent.retry') }}</Button
-      >
+      <div class="flex flex-wrap gap-2">
+        <Button
+          v-if="canRetryExecution"
+          variant="outline"
+          :disabled="busy"
+          data-testid="task-agent-retry-execution"
+          @click="$emit('retry')"
+        >
+          {{ t('aiAssistant.dialogs.agent.retry') }}
+        </Button>
+        <Button
+          v-if="canAcceptPartialExecution"
+          variant="outline"
+          :disabled="busy"
+          data-testid="task-agent-accept-partial"
+          @click="$emit('accept-partial')"
+        >
+          {{ t('aiAssistant.chatPage.workflow.keepCompletedChanges') }}
+        </Button>
+        <Button
+          v-if="canCancelRemainingExecution"
+          variant="ghost"
+          :disabled="busy"
+          data-testid="task-agent-cancel-remaining"
+          @click="$emit('cancel-remaining')"
+        >
+          {{ t('aiAssistant.chatPage.workflow.cancelRemaining') }}
+        </Button>
+      </div>
     </div>
     <div
       v-if="taskWorkflowRun.status === 'completed' && taskWorkflowRun.result"
@@ -136,11 +157,16 @@ const props = defineProps<{
   busy?: boolean;
   ownerAttemptPending?: boolean;
   ownerSubmitted?: boolean;
+  canRetryExecution?: boolean;
+  canAcceptPartialExecution?: boolean;
+  canCancelRemainingExecution?: boolean;
 }>();
 defineEmits<{
   confirm: [];
   cancel: [];
   retry: [];
+  'accept-partial': [];
+  'cancel-remaining': [];
   'open-native-review': [];
 }>();
 const reviewDraft = computed(() =>

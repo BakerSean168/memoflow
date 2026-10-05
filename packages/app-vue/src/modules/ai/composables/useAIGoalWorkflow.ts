@@ -27,7 +27,7 @@ import {
   type GoalClarificationView,
   type UseAIGoalWorkflowOptions,
 } from './types';
-import { getAIErrorMessage } from './error';
+import { getAIErrorMessage, getAIWorkflowTerminalFailureMessage } from './error';
 
 /**
  * ADR-112 Goal native review over the ADR-052 durable Workflow.
@@ -386,6 +386,29 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     if (content)
       options.chatTimeline.value.push({ id, role: 'assistant', content, status: 'success' });
   }
+
+  function workflowFailureMessage(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): string {
+    return getAIWorkflowTerminalFailureMessage(run.failure, t);
+  }
+
+  function projectFailureToTimeline(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): void {
+    if (run.status !== 'failed') return;
+    const id = `goal-workflow-failure-${run.runId}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    const message = workflowFailureMessage(run);
+    options.chatTimeline.value.push({
+      id,
+      role: 'assistant',
+      content: message,
+      status: 'error',
+      errorMessage: message,
+    });
+  }
+
   function projectRun(run: AIWorkflowRunView | null, projectNative = true): Promise<void> {
     if (!run || run.kind !== 'goal.create') {
       goalWorkflowRun.value = null;
@@ -435,6 +458,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     ) {
       goalWorkflowStage.value = 'result';
       goalClarification.value = null;
+      if (run.status === 'failed') projectFailureToTimeline(run);
     } else {
       goalWorkflowStage.value = 'plan';
       goalClarification.value = null;
@@ -697,6 +721,10 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
       await projectRun(run);
+      if (run.kind === 'goal.create' && run.status === 'failed') {
+        toast.error(workflowFailureMessage(run));
+        return false;
+      }
       const draft =
         run.kind === 'goal.create' && run.suspension?.type === 'goal_draft_review'
           ? run.suspension.draft
@@ -728,13 +756,16 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         run = (await flushStructuredEdits()) ?? run;
       }
       if (run.suspension?.type !== 'clarification_required') return false;
-      await projectRun(
-        await options.workflowRuntime.resume({
-          runId: run.runId,
-          command: { type: 'answer', answers: [normalized] },
-          workflowTurn: normalized,
-        }),
-      );
+      const next = await options.workflowRuntime.resume({
+        runId: run.runId,
+        command: { type: 'answer', answers: [normalized] },
+        workflowTurn: normalized,
+      });
+      await projectRun(next);
+      if (next.kind === 'goal.create' && next.status === 'failed') {
+        toast.error(workflowFailureMessage(next));
+        return false;
+      }
       return true;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
@@ -754,13 +785,16 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       await nativeProjection;
       run = (await flushStructuredEdits()) ?? run;
       if (run.suspension?.type !== 'goal_draft_review') return false;
-      await projectRun(
-        await options.workflowRuntime.resume({
-          runId: run.runId,
-          command: { type: 'revise_natural_language', instruction: normalized },
-          workflowTurn: normalized,
-        }),
-      );
+      const next = await options.workflowRuntime.resume({
+        runId: run.runId,
+        command: { type: 'revise_natural_language', instruction: normalized },
+        workflowTurn: normalized,
+      });
+      await projectRun(next);
+      if (next.kind === 'goal.create' && next.status === 'failed') {
+        toast.error(workflowFailureMessage(next));
+        return false;
+      }
       return true;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));

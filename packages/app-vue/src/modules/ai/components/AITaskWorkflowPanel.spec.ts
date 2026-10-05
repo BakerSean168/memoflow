@@ -12,7 +12,13 @@ const i18n = createI18n({
       common: { cancel: 'Cancel', edit: 'Edit' },
       aiAssistant: {
         errors: { workflowExecutionFailed: 'Execution failed' },
-        chatPage: { workflow: { taskAwaitingApprovalHint: 'Review task' } },
+        chatPage: {
+          workflow: {
+            taskAwaitingApprovalHint: 'Review task',
+            keepCompletedChanges: 'Keep completed changes',
+            cancelRemaining: 'Cancel remaining',
+          },
+        },
         goalDraft: {
           allDay: 'All day',
           importance: 'Importance',
@@ -86,11 +92,14 @@ describe('AITaskWorkflowPanel', () => {
     expect(wrapper.text()).not.toContain('ITaskPlanId_550e8400-e29b-41d4-a716-446655440001');
     expect(wrapper.find('[data-testid=task-open-native-review]').exists()).toBe(true);
   });
-  it('redacts raw task execution failure messages', () => {
+  it('redacts raw task execution failure messages and retains recovery actions', async () => {
     const wrapper = mount(AITaskWorkflowPanel, {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
+        canRetryExecution: true,
+        canAcceptPartialExecution: true,
+        canCancelRemainingExecution: true,
         taskWorkflowRun: {
           runId: 'run-recovery',
           conversationId: 'conv-1',
@@ -119,6 +128,12 @@ describe('AITaskWorkflowPanel', () => {
     expect(wrapper.text()).toContain('Fix the issue and retry.');
     expect(wrapper.text()).toContain('Execution failed (SERVICE_UNAVAILABLE)');
     expect(wrapper.text()).not.toContain('secret-internal-host');
+    await wrapper.get('[data-testid="task-agent-retry-execution"]').trigger('click');
+    await wrapper.get('[data-testid="task-agent-accept-partial"]').trigger('click');
+    await wrapper.get('[data-testid="task-agent-cancel-remaining"]').trigger('click');
+    expect(wrapper.emitted('retry')).toHaveLength(1);
+    expect(wrapper.emitted('accept-partial')).toHaveLength(1);
+    expect(wrapper.emitted('cancel-remaining')).toHaveLength(1);
   });
   it('keeps clarification display-only because the main Composer owns the answer', () => {
     const wrapper = mount(AITaskWorkflowPanel, {

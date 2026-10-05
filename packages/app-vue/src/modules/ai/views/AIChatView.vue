@@ -162,62 +162,6 @@
         @tool-decision="decideToolApproval"
       />
 
-      <div v-show="!composerOnly" class="px-4 @md/ai:px-6">
-        <div class="mx-auto w-full max-w-[52rem]">
-          <AIWorkflowActionBar
-            :tool-mode="toolMode"
-            :workflow-status-text="workflowStatusText"
-            :automated-goal-id="automatedGoalId"
-            :created-supporting-tasks="createdSupportingTasks"
-            :created-supporting-knowledge="createdSupportingKnowledge"
-            :goal-agent-resuming="goalAgentResuming"
-            :goal-owner-submitted="goalOwnerSubmitted"
-            :goal-owner-attempt-pending="goalOwnerAttemptPending"
-            :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
-            :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
-            :can-accept-goal-partial-execution="canAcceptGoalPartialExecution"
-            :can-cancel-remaining-goal-execution="canCancelRemainingGoalExecution"
-            :goal-agent-waiting-for-clarification="goalAgentWaitingForClarification"
-            :goal-agent-waiting-for-approval="goalAgentWaitingForApproval"
-            :goal-agent-waiting-for-execution="goalAgentWaitingForExecution"
-            :knowledge-answer="knowledgeAnswer"
-            :linked-goal-id="linkedGoalId"
-            :task-agent-resuming="taskAgentResuming"
-            :task-owner-attempt-pending="taskOwnerAttemptPending"
-            :task-owner-submitted="taskOwnerSubmitted"
-            :task-agent-waiting-for-clarification="taskAgentWaitingForClarification"
-            :task-agent-waiting-for-approval="taskAgentWaitingForApproval"
-            :can-retry-task-agent-execution="canRetryTaskAgentExecution"
-            :can-accept-task-partial-execution="canAcceptTaskPartialExecution"
-            :can-cancel-remaining-task-execution="canCancelRemainingTaskExecution"
-            :knowledge-capture-resuming="knowledgeCaptureResuming"
-            :knowledge-capture-waiting-for-clarification="knowledgeCaptureWaitingForClarification"
-            :knowledge-capture-waiting-for-approval="knowledgeCaptureWaitingForApproval"
-            :can-retry-knowledge-capture-execution="canRetryKnowledgeCaptureExecution"
-            :can-cancel-remaining-knowledge-capture-execution="
-              canCancelRemainingKnowledgeCaptureExecution
-            "
-            :confirm-goal-agent-run="confirmGoalAgentRun"
-            :cancel-goal-agent-run="cancelGoalAgentRun"
-            :continue-goal-agent-execution="continueGoalAgentExecution"
-            :retry-goal-agent-execution="retryGoalAgentExecution"
-            :accept-partial-goal-execution="acceptPartialGoalExecution"
-            :cancel-remaining-goal-execution="cancelRemainingGoalExecution"
-            :open-automated-goal="openAutomatedGoal"
-            :open-created-supporting-task="openCreatedSupportingTask"
-            :open-created-supporting-knowledge="openCreatedSupportingKnowledge"
-            :cancel-task-agent-run="cancelTaskAgentRun"
-            :retry-task-agent-execution="retryTaskAgentExecution"
-            :accept-partial-task-execution="acceptPartialTaskExecution"
-            :cancel-remaining-task-execution="cancelRemainingTaskExecution"
-            :cancel-knowledge-capture-run="cancelKnowledgeCaptureRun"
-            :retry-knowledge-capture-execution="retryKnowledgeCaptureExecution"
-            :cancel-remaining-knowledge-capture-execution="cancelRemainingKnowledgeCaptureExecution"
-            :exit-tool-mode="exitToolMode"
-          />
-        </div>
-      </div>
-
       <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
         <AIFooterComposer
           ref="composerRef"
@@ -261,10 +205,17 @@
           :editable-tasks="editableTasks"
           :editable-knowledge="editableKnowledge"
           :goal-owner-submitted="goalOwnerSubmitted"
+          :busy="goalAgentResuming"
+          :can-retry-execution="canRetryGoalAgentExecution"
+          :can-accept-partial-execution="canAcceptGoalPartialExecution"
+          :can-cancel-remaining-execution="canCancelRemainingGoalExecution"
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
           @open-native-review="openGoalNativeReview"
           @open-knowledge-citation="openKnowledgeCitation"
+          @retry="retryGoalAgentExecution"
+          @accept-partial="acceptPartialGoalExecution"
+          @cancel-remaining="cancelRemainingGoalExecution"
         />
         <AITaskWorkflowPanel
           :tool-mode="toolMode"
@@ -272,17 +223,25 @@
           :busy="taskAgentResuming"
           :owner-attempt-pending="taskOwnerAttemptPending"
           :owner-submitted="taskOwnerSubmitted"
+          :can-retry-execution="canRetryTaskAgentExecution"
+          :can-accept-partial-execution="canAcceptTaskPartialExecution"
+          :can-cancel-remaining-execution="canCancelRemainingTaskExecution"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
+          @accept-partial="acceptPartialTaskExecution"
+          @cancel-remaining="cancelRemainingTaskExecution"
           @open-native-review="openTaskNativeReview"
         />
         <AIKnowledgeCapturePanel
           :tool-mode="toolMode"
           :knowledge-capture-run="knowledgeCaptureRun"
           :busy="knowledgeCaptureResuming"
+          :can-retry-execution="canRetryKnowledgeCaptureExecution"
+          :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
           @cancel="cancelKnowledgeCaptureRun"
           @retry="retryKnowledgeCaptureExecution"
+          @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
           @open-native-review="openKnowledgeNativeReview"
         />
         <div
@@ -309,7 +268,6 @@ import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
 import AIKnowledgeCapturePanel from '../components/AIKnowledgeCapturePanel.vue';
-import AIWorkflowActionBar from '../components/AIWorkflowActionBar.vue';
 import AIContextPanel from '../components/AIContextPanel.vue';
 import AIRuntimeUsageBadge from '../components/AIRuntimeUsageBadge.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
@@ -410,34 +368,23 @@ const {
   goalClarification,
   goalWorkflowRun,
   goalOwnerSubmitted,
-  goalOwnerAttemptPending,
   goalAgentResuming,
   editableGoal,
   editableKeyResults,
   editableTasks,
   editableKnowledge,
-  canContinueGoalAgentExecution,
   canRetryGoalAgentExecution,
   canAcceptGoalPartialExecution,
   canCancelRemainingGoalExecution,
   automatedGoalId,
-  createdSupportingTasks,
-  createdSupportingKnowledge,
   goalAgentWaitingForClarification,
   goalAgentWaitingForApproval,
-  goalAgentWaitingForExecution,
   startGoalAgentRun,
   submitGoalClarificationResponse,
   submitGoalRevisionResponse,
-  confirmGoalAgentRun,
-  cancelGoalAgentRun,
-  continueGoalAgentExecution,
   retryGoalAgentExecution,
   acceptPartialGoalExecution,
   cancelRemainingGoalExecution,
-  openAutomatedGoal,
-  openCreatedSupportingTask,
-  openCreatedSupportingKnowledge,
   openGoalNativeReview,
 } = goalWorkflow;
 
@@ -450,13 +397,11 @@ const {
   taskOwnerAttemptPending,
   taskOwnerSubmitted,
   taskAgentWaitingForClarification,
-  taskAgentWaitingForApproval,
   canRetryTaskAgentExecution,
   canAcceptTaskPartialExecution,
   canCancelRemainingTaskExecution,
   submitTaskClarificationResponse,
   openTaskNativeReview,
-  linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
   cancelTaskAgentRun,
@@ -470,7 +415,6 @@ const {
   knowledgeCaptureRun,
   knowledgeCaptureResuming,
   knowledgeCaptureWaitingForClarification,
-  knowledgeCaptureWaitingForApproval,
   canRetryKnowledgeCaptureExecution,
   canCancelRemainingKnowledgeCaptureExecution,
   submitKnowledgeClarificationResponse,
@@ -482,14 +426,7 @@ const {
 } = knowledgeCaptureWorkflow;
 
 const { formatExecutionOutcome } = formatters;
-const {
-  toolMode,
-  currentConversationLabel,
-  currentToolLabel,
-  workflowStatusText,
-  exitToolMode,
-  openSettings,
-} = common;
+const { toolMode, currentConversationLabel, currentToolLabel, exitToolMode, openSettings } = common;
 
 const contextPanelOpen = ref(false);
 const mobileSidebarOpen = ref(false);
@@ -592,28 +529,32 @@ async function handleComposerSend() {
   if (goalAgentWaitingForClarification.value) {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
-    await submitGoalClarificationResponse(prepared.content);
+    const resumed = await submitGoalClarificationResponse(prepared.content);
+    if (!resumed) toolMode.value = 'chat';
     return;
   }
 
   if (goalAgentWaitingForApproval.value) {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
-    await submitGoalRevisionResponse(prepared.content);
+    const resumed = await submitGoalRevisionResponse(prepared.content);
+    if (!resumed) toolMode.value = 'chat';
     return;
   }
 
   if (taskAgentWaitingForClarification.value) {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
-    await submitTaskClarificationResponse(prepared.content);
+    const resumed = await submitTaskClarificationResponse(prepared.content);
+    if (!resumed) toolMode.value = 'chat';
     return;
   }
 
   if (knowledgeCaptureWaitingForClarification.value) {
     const prepared = await prepareWorkflowTurn();
     if (!prepared) return;
-    await submitKnowledgeClarificationResponse(prepared.content);
+    const resumed = await submitKnowledgeClarificationResponse(prepared.content);
+    if (!resumed) toolMode.value = 'chat';
     return;
   }
 
@@ -635,9 +576,13 @@ async function handleComposerSend() {
   await handleSendChatBase();
 
   if (inferredMode === 'goal-create') await startGoalAgentRun();
-  if (inferredMode === 'task-create') await startTaskAgentRun();
-  else if (inferredMode === 'knowledge-capture') await startKnowledgeCaptureRun();
-  else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
+  if (inferredMode === 'task-create') {
+    const started = await startTaskAgentRun();
+    if (!started) toolMode.value = 'chat';
+  } else if (inferredMode === 'knowledge-capture') {
+    const started = await startKnowledgeCaptureRun();
+    if (!started) toolMode.value = 'chat';
+  } else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
 }
 
 function toggleContextPanel() {

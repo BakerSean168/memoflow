@@ -12,7 +12,12 @@ const i18n = createI18n({
       repository: { capture: { openReview: 'Open Knowledge review' } },
       aiAssistant: {
         errors: { workflowExecutionFailed: 'Execution failed' },
-        chatPage: { workflow: { knowledgeCaptureAwaitingApprovalHint: 'Review note' } },
+        chatPage: {
+          workflow: {
+            knowledgeCaptureAwaitingApprovalHint: 'Review note',
+            cancelRemaining: 'Cancel remaining',
+          },
+        },
         dialogs: {
           agent: { retry: 'Retry' },
           automation: { recoveryRetryReady: 'Fix the issue and retry.' },
@@ -63,11 +68,13 @@ describe('AIKnowledgeCapturePanel', () => {
     expect(wrapper.emitted('open-native-review')).toHaveLength(1);
   });
 
-  it('redacts raw knowledge persistence failure messages', () => {
+  it('redacts raw knowledge persistence failure messages and retains recovery actions', async () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'knowledge-capture',
+        canRetryExecution: true,
+        canCancelRemainingExecution: true,
         knowledgeCaptureRun: {
           runId: 'run-recovery',
           conversationId: 'conv-1',
@@ -95,6 +102,10 @@ describe('AIKnowledgeCapturePanel', () => {
     expect(wrapper.text()).toContain('Fix the issue and retry.');
     expect(wrapper.text()).toContain('Execution failed (WRITE_FAILED)');
     expect(wrapper.text()).not.toContain('internal-secret');
+    await wrapper.get('[data-testid="knowledge-capture-agent-retry-execution"]').trigger('click');
+    await wrapper.get('[data-testid="knowledge-capture-agent-cancel-remaining"]').trigger('click');
+    expect(wrapper.emitted('retry')).toHaveLength(1);
+    expect(wrapper.emitted('cancel-remaining')).toHaveLength(1);
   });
   it('keeps clarification display-only because the main Composer owns the answer', () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {

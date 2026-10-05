@@ -58,6 +58,12 @@ export function toAIPublicFailure(
     );
   }
 
+  const providerStatus = readProviderStatusCode(error);
+  if (providerStatus === 429) {
+    const code: AIPublicFailureCode = 'RATE_LIMITED';
+    return createPublicFailure(code, safeAIPublicMessage(code), undefined);
+  }
+
   const structured = extractStructuredResultError(error);
   if (structured && isAIPublicFailureCode(structured.code)) {
     const code = structured.code;
@@ -65,6 +71,12 @@ export function toAIPublicFailure(
   }
 
   return createPublicFailure(options.fallbackCode, options.fallbackMessage, structured?.context);
+}
+
+function readProviderStatusCode(error: unknown): number | undefined {
+  if (typeof error !== 'object' || error === null || Array.isArray(error)) return undefined;
+  const statusCode = (error as { statusCode?: unknown }).statusCode;
+  return typeof statusCode === 'number' && Number.isInteger(statusCode) ? statusCode : undefined;
 }
 
 function createPublicFailure(code: string, message: string, context: unknown): AIPublicFailure {
