@@ -257,6 +257,76 @@ describe('GoalPlannerWorker bounded external research', () => {
     });
   });
 
+  it('does not silently unwrap a Task day wrapper that contains extra data', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'draft_ready',
+          reason: 'Ready.',
+          candidateDraft: {
+            goal: { draftRef: 'goal', name: 'Submit application' },
+            tasks: [
+              {
+                draftRef: 'task:submit',
+                title: 'Submit application',
+                schedule: {
+                  kind: 'OneTime',
+                  date: {
+                    kind: 'day',
+                    date: '2026-10-20',
+                    source: 'unexpected-provider-field',
+                  },
+                  timing: { kind: 'AllDay' },
+                },
+                goalRef: 'goal',
+              },
+            ],
+          },
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        object: {
+          status: 'draft_ready',
+          reason: 'Ready.',
+          candidateDraft: {
+            goal: { draftRef: 'goal', name: 'Submit application' },
+            tasks: [
+              {
+                draftRef: 'task:submit',
+                title: 'Submit application',
+                schedule: {
+                  kind: 'OneTime',
+                  date: '2026-10-20',
+                  timing: { kind: 'AllDay' },
+                },
+                goalRef: 'goal',
+              },
+            ],
+          },
+        },
+      } as never);
+
+    const result = await worker.plan(request(), new RequestContext());
+
+    expect(generate).toHaveBeenCalledTimes(2);
+    expect(String(generate.mock.calls[1]?.[0] ?? '')).toContain('candidateDraft.tasks.0.schedule');
+    expect(result).toMatchObject({
+      status: 'draft_ready',
+      candidateDraft: {
+        tasks: [
+          {
+            schedule: {
+              kind: 'OneTime',
+              date: '2026-10-20',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('stops after one typed repair when the second response is still invalid', async () => {
     const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
     const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({
@@ -371,6 +441,8 @@ describe('GoalPlannerWorker bounded external research', () => {
     expect(readGoalPlannerResearchEvidence(requestContext)).toHaveLength(3);
     const initialPrompt = String(generate.mock.calls[0]?.[0] ?? '');
     expect(initialPrompt).toContain('bounded research phase may still run first');
+    expect(initialPrompt).toContain('needs_research is mandatory');
+    expect(initialPrompt).toContain('do not substitute model memory');
     const initialOptions = generate.mock.calls[0]?.[1] as {
       structuredOutput?: { instructions?: unknown };
     };

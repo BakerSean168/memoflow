@@ -96,7 +96,7 @@ GoalResearchPolicy
 
 当前产品策略默认开启以上三个受限意图，不为每次 Goal 创建增加联网确认弹窗。未来若产品需要关闭或缩小 Research 范围，应修改产品策略，而不是移除 composition root 中的 port。
 
-技术能力由 `IAIWebResearchPort.supports(...)` 独立判定。只有产品策略允许且当前实际 ProviderConnection 拥有明确 hosted-search contract 时，Planner 第一轮 schema 才暴露 `needs_research`。因此不支持搜索的 Provider 保持原本 one-pass planning，不会先请求 Research 再降级。
+技术能力由 `IAIWebResearchPort.supports(...)` 独立判定。只有产品策略允许且当前实际 ProviderConnection 拥有明确 hosted-search contract 时，Planner 第一轮 schema 才暴露 `needs_research`。因此不支持搜索的 Provider 保持原本 one-pass planning，不会先请求 Research 再降级。若用户明确要求核验当前或官方公开事实，且 canonical external evidence 缺失或不足，则支持搜索的 Planner 必须先返回 `needs_research`，不能用模型记忆替代这次核验。
 
 当前支持的 hosted-search contract：
 
