@@ -44,9 +44,9 @@ export type GoalNativeEditSession = OwnerNativeEditSession<
   GoalNativeSubmitContext,
   GoalClientDTO | null
 > & {
-  /** Native Save/Enter delegates to this coordinator; semantic submit still runs owner validation. */
+  /** Native Save/Enter and user dismissal delegate to workflow coordinators; semantic owner validation remains native. */
   setEditingBlocked(blocked: boolean): void;
-  coordinateSubmit(coordinator: () => Promise<void>): void;
+  coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
 };
 
 export interface GoalNativeSubmitContext {

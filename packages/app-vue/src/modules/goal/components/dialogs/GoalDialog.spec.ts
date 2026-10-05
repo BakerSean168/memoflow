@@ -861,7 +861,8 @@ describe('Goal owner native edit session (PVC-AI-8001)', () => {
     await nextTick();
     const session = nativeSession(wrapper);
     const coordinator = vi.fn(async () => {});
-    session.coordinateSubmit(coordinator);
+    const cancelCoordinator = vi.fn(async () => {});
+    session.coordinateSubmit(coordinator, cancelCoordinator);
     session.patch({
       name: 'Native review',
       keyResults: [

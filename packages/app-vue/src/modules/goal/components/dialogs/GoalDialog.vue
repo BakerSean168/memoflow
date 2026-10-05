@@ -345,6 +345,7 @@ const nameInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
 const summaryInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
 const descriptionInput = ref<{ $el: HTMLTextAreaElement } | null>(null);
 let submitCoordinator: (() => Promise<void>) | null = null;
+let cancelCoordinator: (() => Promise<void>) | null = null;
 let invalidateSession: (() => void) | null = null;
 
 // Only JSON value fields enter this owner contract; detach inbound and outbound values.
@@ -458,10 +459,11 @@ function publishSession(): void {
       const inputs = { name: nameInput, summary: summaryInput, description: descriptionInput };
       inputs[field].value?.$el.focus();
     },
-    coordinateSubmit(coordinator) {
+    coordinateSubmit(submit, cancel) {
       assertEditable();
       if (props.mode !== 'create') throw new Error('Submission coordination requires create mode');
-      submitCoordinator = coordinator;
+      submitCoordinator = submit;
+      cancelCoordinator = cancel;
     },
     async requestSubmit(context) {
       assertEditable();
@@ -550,6 +552,7 @@ function reset(): void {
   descriptionLimitFeedback.hide();
   krEditorOpen.value = false;
   submitCoordinator = null;
+  cancelCoordinator = null;
   editingBlocked.value = false;
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
@@ -571,7 +574,13 @@ watch(draft, () => emit('dirty-change', isDirty.value), { deep: true });
 const { requestClose } = useDialogCloseGuard({
   dirty: isDirty,
   busy: isBusy,
-  onClose: () => publishOpen(false),
+  onClose: async () => {
+    if (cancelCoordinator) {
+      await cancelCoordinator();
+      return;
+    }
+    publishOpen(false);
+  },
 });
 
 function setOpen(value: boolean): void {

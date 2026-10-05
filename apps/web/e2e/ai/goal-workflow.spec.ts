@@ -376,14 +376,8 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.goalAgentApprovalResumeCount).toBe(1);
     expect(telemetry.goalAgentExecuteRequestCount).toBe(1);
 
-    // Recovery controls live in Chat. Close the optional diagnostics panel before
-    // acting so the primary-path assertion does not depend on the secondary workbench
-    // geometry or pointer stacking.
-    await page.getByTestId('ai-context-panel-close').click();
-    await expect(page.getByTestId('ai-context-panel')).toBeHidden({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-
+    // Recovery controls now live only in the optional Chat context panel; the retired
+    // Composer-top action bar no longer duplicates them.
     const retryButton = page.getByTestId('goal-agent-retry-execution');
     await expect(retryButton).toBeEnabled({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
@@ -622,20 +616,22 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     // The owner-native review is already open; its secondary reopen control lives
-    // inside the intentionally hidden diagnostics panel.
+    // inside the intentionally hidden diagnostics panel. The retired Composer-top
+    // action bar exposes no parallel cancel path.
     await expect(page.getByTestId('goal-open-native-review')).toBeHidden();
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
-    await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
+    await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
 
-    // Native Goal review is modal owner UI; close it before acting on workflow context controls.
+    // Native Goal review is the owner UI. Confirming its user cancel coordinates the
+    // durable workflow cancel directly; no second hidden-panel cancellation is needed.
     const nativeReview = page.getByTestId('goal-dialog');
     await expect(nativeReview).toBeVisible();
     await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
     await page.getByTestId('global-confirm-confirm').click();
     await expect(nativeReview).toBeHidden();
-    await page.getByTestId('goal-agent-cancel-run').click();
+    await expect.poll(() => telemetry.goalAgentCancelCount).toBe(1);
 
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);

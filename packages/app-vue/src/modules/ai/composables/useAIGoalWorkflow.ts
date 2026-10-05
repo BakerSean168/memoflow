@@ -109,6 +109,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     const ownerIds = projection.ownerCreate?.keyResultIds ?? {};
     session.coordinateSubmit(
       projection.mode === 'review' ? () => confirmGoalAgentRun() : async () => undefined,
+      () => cancelGoalAgentRun(),
     );
     const draft = projection.draft;
     const projectedKeyResultIds = draft.keyResults.map((item) => {
