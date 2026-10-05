@@ -189,6 +189,47 @@ describe('ProviderWebResearchAdapter', () => {
     expect(body.store).toBe(false);
   });
 
+  it('drops non-public citations while preserving grounded public evidence', async () => {
+    const fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  content: 'Grounded summary',
+                  annotations: [
+                    { url_citation: { url: 'http://127.0.0.1/private', title: 'Local' } },
+                    { url_citation: { url: 'https://example.edu/official', title: 'Official' } },
+                  ],
+                },
+              },
+            ],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        ),
+    );
+    const provider = createAIProviderConfigServerDTO({
+      providerDefinitionId: 'openrouter',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      defaultModel: 'openai/gpt-5.6',
+    });
+    const adapter = new ProviderWebResearchAdapter(
+      createAIProviderConfigRepositoryStub({ findDefaultByIdentityId: async () => provider }),
+      createAIProviderSecretVaultStub(),
+      fetch as never,
+    );
+
+    const result = await adapter.search(input);
+
+    expect(result).toMatchObject({
+      status: 'grounded',
+      evidence: {
+        sources: [{ url: 'https://example.edu/official', title: 'Official' }],
+      },
+    });
+  });
+
   it('fails closed for providers without a hosted web-search contract', async () => {
     const provider = createAIProviderConfigServerDTO({
       providerDefinitionId: 'deepseek',

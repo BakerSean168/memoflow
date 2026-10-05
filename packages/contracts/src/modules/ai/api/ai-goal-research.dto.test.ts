@@ -20,6 +20,12 @@ describe('Goal external research evidence contract', () => {
       'javascript:alert(1)',
       'data:text/html,hello',
       'https://user:secret@example.edu/private',
+      'http://localhost/admin',
+      'https://127.0.0.1/private',
+      'https://10.0.0.8/internal',
+      'https://169.254.169.254/latest/meta-data',
+      'https://[::1]/private',
+      'https://metadata.google.internal/computeMetadata/v1/',
     ]) {
       expect(GoalResearchSourceSchema.safeParse({ title: 'Unsafe', url }).success).toBe(false);
     }

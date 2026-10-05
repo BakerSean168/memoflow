@@ -25,6 +25,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     MastraModelResolver: vi.fn(function MastraModelResolverMock() {
       return { tag: 'mastra-model-resolver' };
     }),
+    ProviderWebResearchAdapter: vi.fn(function ProviderWebResearchAdapterMock(...args: unknown[]) {
+      return { tag: 'web-research', args };
+    }),
     MastraAIRuntime: vi.fn(function MastraAIRuntimeMock(input: unknown) {
       return { tag: 'mastra-runtime', input };
     }),
@@ -98,6 +101,7 @@ import {
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  ProviderWebResearchAdapter,
 } from '@memoflow/ai';
 import { createAIApiModule } from '@memoflow/ai/api';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
@@ -188,6 +192,10 @@ describe('API composeAI Mastra-only ownership', () => {
       repositories.providerConfigRepository,
       repositories.providerSecretVault,
     );
+    expect(ProviderWebResearchAdapter).toHaveBeenCalledWith(
+      repositories.providerConfigRepository,
+      repositories.providerSecretVault,
+    );
     expect(ConversationShellSource).toHaveBeenCalledWith(repositories.conversationRepository);
     const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(GoalPlanMutationAdapter).toHaveBeenCalledWith(
@@ -225,6 +233,7 @@ describe('API composeAI Mastra-only ownership', () => {
       knowledgeSourcePort: vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
       executionRecordPort: repositories.executionRecordPort,
       usageReadPort: repositories.executionRecordPort,
+      webResearchPort: vi.mocked(ProviderWebResearchAdapter).mock.results[0].value,
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,

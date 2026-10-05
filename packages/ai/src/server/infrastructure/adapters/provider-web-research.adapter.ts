@@ -1,5 +1,6 @@
 import {
   GoalResearchEvidenceSchema,
+  GoalResearchSourceSchema,
   type GoalResearchIntent,
   type GoalResearchSource,
 } from '@memoflow/contracts/ai';
@@ -59,11 +60,12 @@ function source(
   const normalizedUrl = parsed.toString();
   if (normalizedUrl.length > 2000) return null;
   const title = bounded(text(titleValue), 300) ?? parsed.hostname ?? url;
-  return {
+  const candidate = GoalResearchSourceSchema.safeParse({
     title,
     url: normalizedUrl,
     ...(bounded(text(snippetValue), 1200) ? { snippet: bounded(text(snippetValue), 1200) } : {}),
-  };
+  });
+  return candidate.success ? candidate.data : null;
 }
 
 function dedupeSources(values: readonly (GoalResearchSource | null)[], limit: number) {
