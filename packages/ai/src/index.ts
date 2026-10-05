@@ -101,6 +101,7 @@ export type {
   AIModelCatalogSnapshotInput,
   IKnowledgeSourcePort,
   IAIWebResearchPort,
+  AIWebResearchCapabilityInput,
   AIWebResearchInput,
   AIWebResearchResult,
   IAISelectedEntityContextReadPort,

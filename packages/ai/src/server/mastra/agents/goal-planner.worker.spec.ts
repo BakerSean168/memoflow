@@ -123,11 +123,194 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
 });
 
 describe('GoalPlannerWorker bounded external research', () => {
+  const supportedResearchPort = (search: IAIWebResearchPort['search']): IAIWebResearchPort => ({
+    supports: vi.fn(async () => true),
+    search,
+  });
+
   const knowledge: IKnowledgeSourcePort = {
     listRelevantNotes: vi.fn(async () => []),
     listIndexableNotes: vi.fn(async () => []),
     getNoteById: vi.fn(async () => null),
   };
+
+  it('repairs one invalid structured response and then enforces the canonical schema', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'needs_clarification',
+          reason: 'Need one material constraint.',
+          questions: [],
+        },
+      } as never)
+      .mockResolvedValueOnce({ object: decision() } as never);
+
+    await expect(worker.plan(request(), new RequestContext())).resolves.toEqual(decision());
+
+    expect(generate).toHaveBeenCalledTimes(2);
+    const firstOptions = generate.mock.calls[0]?.[1] as {
+      structuredOutput?: {
+        jsonPromptInjection?: unknown;
+        instructions?: unknown;
+        errorStrategy?: unknown;
+      };
+    };
+    expect(firstOptions.structuredOutput).toMatchObject({
+      jsonPromptInjection: 'system',
+      errorStrategy: 'warn',
+    });
+    expect(String(firstOptions.structuredOutput?.instructions ?? '')).toContain(
+      'Task dates are bare strings',
+    );
+    const repairPrompt = String(generate.mock.calls[1]?.[0] ?? '');
+    expect(repairPrompt).toContain('failed MemoFlow canonical validation');
+    expect(repairPrompt).toContain('questions');
+    expect(repairPrompt).toContain('Key Results use title (never name)');
+    const repairOptions = generate.mock.calls[1]?.[1] as {
+      structuredOutput?: {
+        jsonPromptInjection?: unknown;
+        instructions?: unknown;
+        errorStrategy?: unknown;
+      };
+    };
+    expect(repairOptions.structuredOutput).toMatchObject({
+      jsonPromptInjection: 'system',
+      errorStrategy: 'warn',
+    });
+    expect(String(repairOptions.structuredOutput?.instructions ?? '')).not.toContain(
+      'needs_research has requests',
+    );
+  });
+
+  it('losslessly unwraps GoalTimeframe-style day wrappers in Task YMD fields', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({
+      object: {
+        status: 'draft_ready',
+        reason: 'Ready.',
+        candidateDraft: {
+          goal: { draftRef: 'goal', name: 'Submit application' },
+          tasks: [
+            {
+              draftRef: 'task:submit',
+              title: 'Submit application',
+              schedule: {
+                kind: 'OneTime',
+                date: { kind: 'day', date: '2026-10-20' },
+                timing: { kind: 'AllDay' },
+              },
+              goalRef: 'goal',
+            },
+            {
+              draftRef: 'task:review-weekly',
+              title: 'Review weekly',
+              schedule: {
+                kind: 'Recurring',
+                startDate: { kind: 'day', date: '2026-09-01' },
+                timing: { kind: 'AllDay' },
+                recurrence: {
+                  frequency: 'Weekly',
+                  interval: 1,
+                  byWeekday: [1],
+                  end: {
+                    kind: 'Until',
+                    date: { kind: 'day', date: '2026-10-20' },
+                  },
+                },
+              },
+              goalRef: 'goal',
+            },
+          ],
+        },
+      },
+    } as never);
+
+    const result = await worker.plan(request(), new RequestContext());
+
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      status: 'draft_ready',
+      candidateDraft: {
+        tasks: [
+          {
+            schedule: {
+              kind: 'OneTime',
+              date: '2026-10-20',
+            },
+          },
+          {
+            schedule: {
+              kind: 'Recurring',
+              startDate: '2026-09-01',
+              recurrence: {
+                end: {
+                  kind: 'Until',
+                  date: '2026-10-20',
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('stops after one typed repair when the second response is still invalid', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({
+      object: {
+        status: 'needs_clarification',
+        reason: 'Still invalid.',
+        questions: [],
+      },
+    } as never);
+
+    await expect(worker.plan(request(), new RequestContext())).rejects.toBeDefined();
+    expect(generate).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps unsupported providers on the one-pass planner schema', async () => {
+    const supports = vi.fn<IAIWebResearchPort['supports']>(async () => false);
+    const search = vi.fn<IAIWebResearchPort['search']>();
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
+      supports,
+      search,
+    });
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValue({ object: decision() } as never);
+    const baseRequest = request();
+    const plannerRequest: GoalPlannerRequest = {
+      ...baseRequest,
+      input: {
+        ...baseRequest.input,
+        providerId: 'provider-deepseek',
+        modelId: 'deepseek-chat',
+      },
+    };
+
+    await expect(worker.plan(plannerRequest, new RequestContext())).resolves.toEqual(decision());
+
+    expect(supports).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      providerId: 'provider-deepseek',
+      modelId: 'deepseek-chat',
+    });
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(search).not.toHaveBeenCalled();
+    const options = generate.mock.calls[0]?.[1] as {
+      structuredOutput?: { schema?: { safeParse(value: unknown): { success: boolean } } };
+    };
+    expect(
+      options.structuredOutput?.schema?.safeParse({
+        status: 'needs_research',
+        reason: 'Should not be exposed.',
+        requests: [{ query: 'Current deadline', intent: 'timeline' }],
+      }).success,
+    ).toBe(false);
+  });
 
   it('runs at most three requested searches before producing the final typed decision', async () => {
     const search = vi.fn<IAIWebResearchPort['search']>(async (input) => ({
@@ -141,9 +324,13 @@ describe('GoalPlannerWorker bounded external research', () => {
         provenance: 'external',
       },
     }));
-    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      undefined,
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     const generate = vi
       .spyOn(worker.agent, 'generate')
       .mockResolvedValueOnce({
@@ -167,7 +354,9 @@ describe('GoalPlannerWorker bounded external research', () => {
       modelId: 'model-resolved',
     });
 
-    await expect(worker.plan(request(), requestContext)).resolves.toEqual(decision());
+    await expect(worker.plan({ ...request(), forceDraft: true }, requestContext)).resolves.toEqual(
+      decision(),
+    );
 
     expect(generate).toHaveBeenCalledTimes(2);
     expect(search).toHaveBeenCalledTimes(3);
@@ -180,9 +369,23 @@ describe('GoalPlannerWorker bounded external research', () => {
       maxSources: 6,
     });
     expect(readGoalPlannerResearchEvidence(requestContext)).toHaveLength(3);
+    const initialPrompt = String(generate.mock.calls[0]?.[0] ?? '');
+    expect(initialPrompt).toContain('bounded research phase may still run first');
+    const initialOptions = generate.mock.calls[0]?.[1] as {
+      structuredOutput?: { instructions?: unknown };
+    };
+    expect(String(initialOptions.structuredOutput?.instructions ?? '')).toContain(
+      'needs_research has requests',
+    );
     const finalPrompt = String(generate.mock.calls[1]?.[0] ?? '');
     expect(finalPrompt).toContain('external_untrusted');
     expect(finalPrompt).toContain('Do not request another research round');
+    const finalOptions = generate.mock.calls[1]?.[1] as {
+      structuredOutput?: { instructions?: unknown };
+    };
+    expect(String(finalOptions.structuredOutput?.instructions ?? '')).not.toContain(
+      'needs_research has requests',
+    );
   });
 
   it('starts independent bounded searches concurrently instead of serializing provider latency', async () => {
@@ -206,9 +409,13 @@ describe('GoalPlannerWorker bounded external research', () => {
         );
       });
     });
-    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      undefined,
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     vi.spyOn(worker.agent, 'generate')
       .mockResolvedValueOnce({
         object: {
@@ -244,9 +451,13 @@ describe('GoalPlannerWorker bounded external research', () => {
         provenance: 'external',
       },
     }));
-    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      undefined,
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     vi.spyOn(worker.agent, 'generate')
       .mockResolvedValueOnce({
         object: {
@@ -278,9 +489,13 @@ describe('GoalPlannerWorker bounded external research', () => {
         provenance: 'external',
       },
     }));
-    const worker = new GoalPlannerWorker({} as never, knowledge, { record }, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      { record },
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     vi.spyOn(worker.agent, 'generate')
       .mockResolvedValueOnce({
         object: {
@@ -316,9 +531,13 @@ describe('GoalPlannerWorker bounded external research', () => {
 
   it('rejects an oversized research batch before any provider egress', async () => {
     const search = vi.fn<IAIWebResearchPort['search']>();
-    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      undefined,
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     vi.spyOn(worker.agent, 'generate').mockResolvedValue({
       object: {
         status: 'needs_research',
@@ -339,9 +558,13 @@ describe('GoalPlannerWorker bounded external research', () => {
       status: 'unavailable',
       reason: 'rate_limited',
     }));
-    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler, {
-      search,
-    });
+    const worker = new GoalPlannerWorker(
+      {} as never,
+      knowledge,
+      undefined,
+      contextAssembler,
+      supportedResearchPort(search),
+    );
     const generate = vi
       .spyOn(worker.agent, 'generate')
       .mockResolvedValueOnce({

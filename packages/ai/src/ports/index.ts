@@ -10,6 +10,7 @@ export type {
   AIActivityItem,
   IKnowledgeSourcePort,
   IAIWebResearchPort,
+  AIWebResearchCapabilityInput,
   AIWebResearchInput,
   AIWebResearchResult,
   IAISelectedEntityContextReadPort,

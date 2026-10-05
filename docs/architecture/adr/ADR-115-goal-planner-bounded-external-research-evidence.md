@@ -82,19 +82,69 @@ needs_research
 
 通用自我提升、生产力建议、日常习惯等不应触发搜索。
 
-### 4. Provider adapter 只使用明确支持的 hosted-search contract
+### 4. Research availability 由产品策略与 Provider capability 双重决定
 
-当前支持：
+Goal Research 的允许范围是显式产品策略，而不是通过“是否注入了 Research Port”隐式表达：
+
+```text
+GoalResearchPolicy
+  enabled = true
+  scope   = requirements | timeline | resources
+  maxRequestsPerPlan  = 3
+  maxSourcesPerRequest = 6
+```
+
+当前产品策略默认开启以上三个受限意图，不为每次 Goal 创建增加联网确认弹窗。未来若产品需要关闭或缩小 Research 范围，应修改产品策略，而不是移除 composition root 中的 port。
+
+技术能力由 `IAIWebResearchPort.supports(...)` 独立判定。只有产品策略允许且当前实际 ProviderConnection 拥有明确 hosted-search contract 时，Planner 第一轮 schema 才暴露 `needs_research`。因此不支持搜索的 Provider 保持原本 one-pass planning，不会先请求 Research 再降级。
+
+当前支持的 hosted-search contract：
 
 - OpenRouter：`openrouter:web_search` server tool；
 - OpenAI：Responses API `web_search`；
 - Gemini：Interactions API `google_search`。
 
-DeepSeek/custom OpenAI-compatible 等没有明确 hosted-search contract 的连接 fail closed 为 `provider_unsupported`，不猜测私有扩展，也不静默切换到另一条付费 ProviderConnection。
+DeepSeek/custom OpenAI-compatible/LiteLLM 等没有明确 hosted-search contract 的连接 fail closed，不猜测私有扩展，也不静默切换到另一条付费 ProviderConnection。
 
-后续新增搜索厂商或 provider-native adapter 时，只实现 `IAIWebResearchPort`，Goal workflow 不改变。
+后续新增搜索厂商或 provider-native adapter 时，只扩展 `IAIWebResearchPort` capability/adapter contract，Goal workflow 不改变。
 
-### 5. External evidence 有独立 trust/provenance，永不升级为 owner truth
+### 5. Goal Plan structured output 以应用侧 canonical schema 为最终边界
+
+GoalPlanDraft 的 canonical Zod contract 包含 transform、custom refinement 和多层 union。真实 Gemini 2.5 smoke 证明，将完整 contract 直接下发为 provider-native `response_format/json_schema` 会因 schema state complexity 被拒绝；同时部分 Zod custom/transform 在通用 JSON Schema 投影中会退化，不能把 provider-native schema 当成 owner contract。
+
+因此 Goal Planner 使用：
+
+```text
+compact provider wire instructions
+        ↓
+prompt-injected JSON generation
+        ↓
+lossless wire canonicalization
+        ↓
+canonical Zod validation
+        ↓
+最多一次 typed repair
+        ↓
+canonical Zod validation
+```
+
+canonicalization 只能处理**无语义歧义**的 wire-shape 差异。目前唯一允许的是将模型偶发生成的 GoalTimeframe-style day wrapper：
+
+```json
+{ "kind": "day", "date": "2026-10-20" }
+```
+
+在 Task `schedule.date/startDate/Until.end.date` 位置解包为 canonical YMD：
+
+```json
+"2026-10-20"
+```
+
+它不会推断日期、重写计划、修复业务值，也不会放松最终 Zod gate。其它 contract 偏差最多触发一次重新生成；第二次仍不合法则失败，避免无限 repair loop。
+
+compact instructions 还避免每轮把大型 JSON Schema 完整注入 prompt，降低 token/latency，同时保持 Provider 与 MemoFlow owner contract 解耦。
+
+### 6. External evidence 有独立 trust/provenance，永不升级为 owner truth
 
 Canonical research evidence 必须满足：
 
@@ -114,7 +164,7 @@ workflow/system invariant
 
 Web 页面中的文本永远是 data，不是 instruction。它不能修改 tool availability、approval、identity、owner authority 或覆盖用户明确输入。
 
-### 6. Evidence 有硬预算
+### 7. Evidence 有硬预算
 
 - 每个 planner invocation：最多 3 个 research request；独立 request 并发执行，避免把三个 20 秒 provider timeout 串成约 60 秒 wall-clock；
 - 每个 request：最多 6 个 sources；OpenRouter 同时设置 `max_results` / `max_total_results` 到该 source budget；
@@ -123,19 +173,19 @@ Web 页面中的文本永远是 data，不是 instruction。它不能修改 tool
 - external context section：单组 768-token budget，并受全局 AI context budget 继续裁剪；
 - provider request：20 秒 timeout。
 
-### 7. Research failure 不阻塞 Goal workflow
+### 8. Research failure 不阻塞 Goal workflow
 
 `429`、provider unavailable、unsupported、无引用、网络错误等都投影为 bounded unavailable reason。Planner 随后必须继续使用用户/owner facts 生成安全草稿，并在影响实质规划时写 warning。
 
 Research 失败不得把 Goal workflow 挂起为 recovery，也不得要求用户处理隐藏 approval。
 
-### 8. Research evidence 属于 workflow durable state，不属于 Goal aggregate
+### 9. Research evidence 属于 workflow durable state，不属于 Goal aggregate
 
 成功 evidence 会进入 Goal workflow state，并在 clarification/revise/restart 后继续可用。它可以随 suspension 投影到 supporting context UI 展示来源，但不会写进 Goal/KR owner fields。
 
 如果 Planner 提议创建一篇 Knowledge note，并实际使用了外部研究，允许把明确引用过的 URL 写入该 note 的 `sourceRefs`；不得持久化 raw provider/tool payload。
 
-### 9. 用户必须能看到来源
+### 10. 用户必须能看到来源
 
 Goal supporting context 显示：
 
@@ -176,6 +226,11 @@ Goal supporting context 显示：
 ## Acceptance
 
 - generic Goal path 不触发 Research；
+- Research permission 由显式 Goal Research product policy 表达，不能用 port presence 代替；
+- unsupported provider 不暴露 `needs_research` schema，并保持 one-pass planning；
+- Goal Plan provider wire 使用 compact instructions，最终仍由 canonical Zod contract 验收；
+- wire canonicalization 只允许无损 Task YMD day-wrapper 解包，不推断业务值；
+- structured-output validation 最多触发一次 typed repair，第二次失败即终止；
 - research-sensitive path 最多 3 个 request，并在同一 planner invocation 内最多一次 research phase；
 - OpenRouter/OpenAI/Gemini adapter 返回 bounded citations；
 - 429/unsupported/network failure 后仍能返回最终 Goal planning decision；

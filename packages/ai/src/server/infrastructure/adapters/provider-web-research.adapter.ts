@@ -6,6 +6,7 @@ import {
 } from '@memoflow/contracts/ai';
 import type { IAIProviderConfigRepository } from '../../domain';
 import type {
+  AIWebResearchCapabilityInput,
   AIWebResearchInput,
   AIWebResearchResult,
   IAIProviderSecretVault,
@@ -23,6 +24,11 @@ import { ProviderSafeFetch, type ProviderFetch } from '../security/provider-safe
 
 const RESEARCH_TIMEOUT_MS = 20_000;
 const MAX_SUMMARY_CHARS = 6_000;
+const HOSTED_SEARCH_PROVIDER_DEFINITION_IDS = new Set(['openrouter', 'openai', 'gemini']);
+
+function providerSupportsHostedSearch(providerDefinitionId: string): boolean {
+  return HOSTED_SEARCH_PROVIDER_DEFINITION_IDS.has(providerDefinitionId);
+}
 
 function record(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -206,6 +212,19 @@ export class ProviderWebResearchAdapter implements IAIWebResearchPort {
     private readonly injectedProviderFetch?: ProviderFetch,
   ) {}
 
+  async supports(input: AIWebResearchCapabilityInput): Promise<boolean> {
+    try {
+      const provider = await resolveActiveProviderConfig(
+        this.providers,
+        input.identityId,
+        input.providerId,
+      );
+      return providerSupportsHostedSearch(provider.providerDefinitionId);
+    } catch {
+      return false;
+    }
+  }
+
   async search(input: AIWebResearchInput): Promise<AIWebResearchResult> {
     const ownedSafeFetch = this.injectedProviderFetch ? undefined : new ProviderSafeFetch();
     const providerFetch = this.injectedProviderFetch ?? ownedSafeFetch!.fetch;
@@ -215,11 +234,7 @@ export class ProviderWebResearchAdapter implements IAIWebResearchPort {
         input.identityId,
         input.providerId,
       );
-      if (
-        provider.providerDefinitionId !== 'openrouter' &&
-        provider.providerDefinitionId !== 'openai' &&
-        provider.providerDefinitionId !== 'gemini'
-      ) {
+      if (!providerSupportsHostedSearch(provider.providerDefinitionId)) {
         return { status: 'unavailable', reason: 'provider_unsupported' };
       }
       const modelId = normalizeOpenAICompatibleModelId(

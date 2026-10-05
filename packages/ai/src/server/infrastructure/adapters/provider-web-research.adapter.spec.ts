@@ -21,6 +21,40 @@ const input = {
 };
 
 describe('ProviderWebResearchAdapter', () => {
+  it('reports hosted-search support from the selected provider contract without provider egress', async () => {
+    const supported = createAIProviderConfigServerDTO({
+      id: 'provider-supported',
+      providerDefinitionId: 'gemini',
+      defaultModel: 'gemini-2.5-flash',
+    });
+    const unsupported = createAIProviderConfigServerDTO({
+      id: 'provider-unsupported',
+      providerDefinitionId: 'deepseek',
+      defaultModel: 'deepseek-chat',
+    });
+    const repository = createAIProviderConfigRepositoryStub({
+      findByIdForIdentity: async (_identityId, providerId) =>
+        providerId === 'provider-supported' ? supported : unsupported,
+    });
+    const resolveCredential = vi.fn(async () => {
+      throw new Error('supports() must not resolve credentials');
+    });
+    const secretVault = createAIProviderSecretVaultStub({
+      resolve: resolveCredential,
+    });
+    const fetch = vi.fn();
+    const adapter = new ProviderWebResearchAdapter(repository, secretVault, fetch as never);
+
+    await expect(
+      adapter.supports({ identityId: 'identity-1', providerId: 'provider-supported' }),
+    ).resolves.toBe(true);
+    await expect(
+      adapter.supports({ identityId: 'identity-1', providerId: 'provider-unsupported' }),
+    ).resolves.toBe(false);
+    expect(fetch).not.toHaveBeenCalled();
+    expect(resolveCredential).not.toHaveBeenCalled();
+  });
+
   it('uses OpenRouter server-side web search and projects URL citations', async () => {
     const provider = createAIProviderConfigServerDTO({
       providerDefinitionId: 'openrouter',
