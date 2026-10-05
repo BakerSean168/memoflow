@@ -106,10 +106,6 @@ export const SHELL_COMPOSER_MOUNT_KEY: InjectionKey<ShallowRef<HTMLElement | nul
 export const SHELL_COMPOSER_DENSITY_KEY: InjectionKey<Ref<'comfortable' | 'compact' | 'icon'>> =
   Symbol('ShellComposerDensity');
 
-/** Shell-owned workflow surface teleport mount. */
-export const SHELL_WORKFLOW_MOUNT_KEY: InjectionKey<ShallowRef<HTMLElement | null>> =
-  Symbol('ShellWorkflowMount');
-
 /**
  * Host-provided Assistant surface tag (ADR-035 / plan §4.2).
  * Web provides `'web'`, Desktop renderer provides `'desktop'`; shared

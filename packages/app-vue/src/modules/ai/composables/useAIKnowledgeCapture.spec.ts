@@ -255,8 +255,38 @@ describe('useAIKnowledgeCapture native Repository orchestration', () => {
     });
   });
 
+  it('projects clarification into Chat and resumes from one canonical Composer turn', async () => {
+    const clarificationRun = run({
+      status: 'suspended',
+      suspension: {
+        type: 'clarification_required',
+        questions: ['Which topic?', 'Which angle matters most?'],
+      },
+    });
+    const { vm, runtime, options } = setup(clarificationRun);
+    options.chatTimeline = ref([]);
+    runtime.resume.mockResolvedValueOnce(review());
+
+    await vm.startKnowledgeCaptureRun();
+
+    expect(options.chatTimeline.value).toEqual([
+      expect.objectContaining({
+        role: 'assistant',
+        content: '1. Which topic?\n2. Which angle matters most?',
+      }),
+    ]);
+    await expect(
+      vm.submitKnowledgeClarificationResponse('Durability and recovery semantics'),
+    ).resolves.toBe(true);
+    expect(runtime.resume).toHaveBeenCalledWith({
+      runId: 'run-1',
+      command: { type: 'answer', answers: ['Durability and recovery semantics'] },
+      workflowTurn: 'Durability and recovery semantics',
+    });
+  });
+
   it('projects clarification, review, and recovery stages without creating a second editor', async () => {
-    const { vm, session } = setup(
+    const { vm, session, runtime } = setup(
       run({
         status: 'suspended',
         suspension: { type: 'clarification_required', questions: ['Which source?'] },
@@ -295,6 +325,15 @@ describe('useAIKnowledgeCapture native Repository orchestration', () => {
     expect(vm.knowledgeCaptureExecutionRecovery.value?.suggestions.join(' ')).not.toContain(
       'write failed',
     );
+    expect(vm.knowledgeCaptureWaitingForExecution.value).toBe(true);
+    expect(vm.canCancelRemainingKnowledgeCaptureExecution.value).toBe(true);
+
+    runtime.resume.mockResolvedValueOnce(run({ status: 'cancelled', updatedAt: 4 }));
+    await vm.cancelRemainingKnowledgeCaptureExecution();
+    expect(runtime.resume).toHaveBeenLastCalledWith({
+      runId: 'run-1',
+      command: { type: 'cancel_remaining' },
+    });
   });
 
   it('reconciles owner-selected source and manual native edits before workflow approval', async () => {

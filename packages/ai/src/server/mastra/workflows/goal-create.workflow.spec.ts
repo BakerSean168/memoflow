@@ -206,6 +206,127 @@ describe('ADR-052 goal.create durable Workflow', () => {
       });
     }
   });
+  it('persists a candidate draft across clarification suspension and restore', async () => {
+    const decisions: GoalPlanningDecision[] = [
+      {
+        status: 'needs_clarification',
+        reason: 'More detail is needed.',
+        questions: ['Which target?'],
+        candidateDraft: draftContent,
+      },
+      {
+        status: 'needs_clarification',
+        reason: 'One more detail is needed.',
+        questions: ['What score are you targeting?'],
+      },
+    ];
+    const planner: GoalPlannerPort = { plan: vi.fn(async () => decisions.shift()!) };
+    const { buildWorkflow } = await harness(planner);
+    const runId = 'workflow-partial-draft';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    const first = await run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('partial-start'),
+    });
+    expect(stepSuspendPayload(first)).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which target?'],
+      candidateDraft: { revision: 1, goal: { name: 'Pass JLPT N1' } },
+    });
+
+    const restored = await buildWorkflow().createRun({
+      runId,
+      resourceId: workflowInput.identityId,
+    });
+    const second = await restored.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['Kyoto University'] },
+      requestContext: mastraRequestContext('partial-answer'),
+    });
+    expect(stepSuspendPayload(second)).toMatchObject({
+      type: 'clarification_required',
+      questions: ['What score are you targeting?'],
+      candidateDraft: { revision: 1, goal: { name: 'Pass JLPT N1' } },
+    });
+  });
+
+  it('reconciles structured native edits during clarification before the next planner call', async () => {
+    const decisions: GoalPlanningDecision[] = [
+      {
+        status: 'needs_clarification',
+        reason: 'The target school is still missing.',
+        questions: ['Which target school?'],
+        candidateDraft: draftContent,
+      },
+      {
+        status: 'draft_ready',
+        reason: 'The edited draft is ready after clarification.',
+        candidateDraft: {
+          ...draftContent,
+          goal: { ...draftContent.goal, name: 'Manual JLPT N1 goal' },
+          keyResults: [{ ...draftContent.keyResults[0]!, title: 'Manual mock exam target' }],
+        },
+      },
+    ];
+    const plan = vi.fn(async (_request: GoalPlannerRequest): Promise<GoalPlanningDecision> =>
+      decisions.shift()!,
+    );
+    const planner: GoalPlannerPort = { plan };
+    const { buildWorkflow } = await harness(planner);
+    const runId = 'workflow-clarification-native-edit';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+
+    const first = await run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('clarification-edit-start'),
+    });
+    expect(stepSuspendPayload(first)).toMatchObject({
+      type: 'clarification_required',
+      candidateDraft: { revision: 1, goal: { name: 'Pass JLPT N1' } },
+    });
+
+    const reconciled = await run.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: {
+        type: 'edit_structured',
+        patch: {
+          goal: { name: 'Manual JLPT N1 goal' },
+          keyResults: [{ ...draftContent.keyResults[0]!, title: 'Manual mock exam target' }],
+        },
+      },
+      requestContext: mastraRequestContext('clarification-edit-save'),
+    });
+    expect(stepSuspendPayload(reconciled)).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which target school?'],
+      round: 1,
+      candidateDraft: {
+        revision: 2,
+        goal: { name: 'Manual JLPT N1 goal' },
+        keyResults: [{ draftRef: 'kr:mock-exams', title: 'Manual mock exam target' }],
+      },
+    });
+
+    const answered = await run.resume({
+      step: GOAL_CREATE_LIFECYCLE_STEP_ID,
+      resumeData: { type: 'answer', answers: ['Kyoto University'] },
+      requestContext: mastraRequestContext('clarification-edit-answer'),
+    });
+    expect(plan).toHaveBeenCalledTimes(2);
+    expect(plan.mock.calls[1]?.[0].currentDraft).toMatchObject({
+      revision: 2,
+      goal: { name: 'Manual JLPT N1 goal' },
+      keyResults: [{ draftRef: 'kr:mock-exams', title: 'Manual mock exam target' }],
+    });
+    expect(stepSuspendPayload(answered)).toMatchObject({
+      type: 'goal_draft_review',
+      revision: 2,
+      draft: { revision: 2, goal: { name: 'Manual JLPT N1 goal' } },
+    });
+  });
+
   it('survives restart across clarification, draft review, structured edit and approve', async () => {
     const decisions: GoalPlanningDecision[] = [
       {
@@ -261,6 +382,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
         round: 1,
         questions: ['How many hours can you study each week?'],
         answers: ['7 hours'],
+        response: '7 hours',
       },
     ]);
 
@@ -397,6 +519,14 @@ describe('ADR-052 goal.create durable Workflow', () => {
       type: 'recovery_required',
       retryable: true,
       failures: [{ operation: 'task_create', draftRef: 'task:daily-study', retryable: true }],
+      receipt: {
+        kind: 'goal.create',
+        receipt: {
+          status: 'partial',
+          referenceMap: { goal: expect.any(String) },
+          retryable: true,
+        },
+      },
     });
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
     expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);

@@ -154,6 +154,7 @@ function setup(start = review()) {
     selectedModel: ref({ providerId: 'p', modelId: 'm' }),
     chatConversationId: ref('conv-1'),
     chatLoading: ref(false),
+    chatTimeline: ref([]),
     hasWorkflowUserMessages: ref(true),
     buildConversationTranscript: () => 'make task',
     scrollMessagesToBottom: vi.fn(),
@@ -302,6 +303,86 @@ describe('useAITaskWorkflow native owner orchestration', () => {
     expect(session.readDraftState().draft.title).toBe('New revision');
     await vm.openTaskNativeReview();
     expect(mocks.getPlan).toHaveBeenCalledTimes(2);
+  });
+
+  it('projects clarification into Chat and resumes from one canonical Composer turn', async () => {
+    const clarificationRun = AIWorkflowRunViewSchema.parse({
+      runId: 'run-1',
+      conversationId: 'conv-1',
+      kind: 'task.create',
+      status: 'suspended',
+      createdAt: 1,
+      updatedAt: 2,
+      suspension: {
+        type: 'clarification_required',
+        questions: ['When should it run?', 'How often should it repeat?'],
+      },
+    });
+    const { vm, runtime, options } = setup(clarificationRun);
+    runtime.resume.mockResolvedValueOnce(review());
+
+    await vm.startTaskAgentRun();
+
+    expect(options.chatTimeline.value).toEqual([
+      expect.objectContaining({
+        role: 'assistant',
+        content: '1. When should it run?\n2. How often should it repeat?',
+      }),
+    ]);
+    await expect(vm.submitTaskClarificationResponse('Every Monday morning')).resolves.toBe(true);
+    expect(runtime.resume).toHaveBeenCalledWith({
+      runId: 'run-1',
+      command: { type: 'answer', answers: ['Every Monday morning'] },
+      workflowTurn: 'Every Monday morning',
+    });
+  });
+
+  it('settles a partial recovery through explicit recovery commands from Chat', async () => {
+    const recovery = AIWorkflowRunViewSchema.parse({
+      runId: 'run-1',
+      conversationId: 'conv-1',
+      kind: 'task.create',
+      status: 'suspended',
+      createdAt: 1,
+      updatedAt: 3,
+      suspension: {
+        type: 'recovery_required',
+        message: 'Task persistence needs recovery.',
+        retryable: true,
+        failures: [],
+      },
+      result: {
+        workflowRunId: 'run-1',
+        revision: 1,
+        status: 'partial',
+        referenceMap: {
+          'task:write-it': 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001',
+        },
+        failures: [],
+        retryable: true,
+      },
+    });
+    const { vm, runtime } = setup(recovery);
+    await vm.startTaskAgentRun();
+
+    expect(vm.taskAgentWaitingForExecution.value).toBe(true);
+    expect(vm.canAcceptTaskPartialExecution.value).toBe(true);
+    expect(vm.canCancelRemainingTaskExecution.value).toBe(true);
+
+    runtime.resume.mockResolvedValueOnce(terminal());
+    await vm.acceptPartialTaskExecution();
+    expect(runtime.resume).toHaveBeenLastCalledWith({
+      runId: 'run-1',
+      command: { type: 'accept_partial' },
+    });
+
+    await vm.projectRun(recovery, false);
+    runtime.resume.mockResolvedValueOnce(terminal('cancelled'));
+    await vm.cancelRemainingTaskExecution();
+    expect(runtime.resume).toHaveBeenLastCalledWith({
+      runId: 'run-1',
+      command: { type: 'cancel_remaining' },
+    });
   });
 
   it('starts a client-safe run and projects full native fields without owner persistence', async () => {

@@ -254,6 +254,7 @@ export function createTaskCreateWorkflow(input: {
               : 'The approved task plan could not be applied.',
           retryable: receipt.retryable,
           failures: receipt.failures,
+          receipt: { kind: 'task.create' as const, receipt },
         });
       };
 
@@ -277,10 +278,7 @@ export function createTaskCreateWorkflow(input: {
         if (resumeData.type !== 'answer') {
           throw new Error('task.create clarification requires an answer command');
         }
-        if (
-          current.pendingQuestions.length === 0 ||
-          current.pendingQuestions.length !== resumeData.answers.length
-        ) {
+        if (current.pendingQuestions.length === 0 || resumeData.answers.length === 0) {
           throw new Error(
             'task.create clarification answer count does not match pending questions',
           );

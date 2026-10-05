@@ -54,7 +54,7 @@ describe('Task native surface host', () => {
     const unregister = host.register('/tasks?dialog=task-plan', session);
     expect(await host.openCreate()).toBe(session);
     expect(host.locate()).toBe(session);
-    store.panelSurface = 'workflow';
+    store.panelSurface = 'home';
     expect(host.locate()).toBeNull();
     expect(await host.openCreate()).toBe(session);
     unregister();

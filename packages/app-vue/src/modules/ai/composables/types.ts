@@ -31,6 +31,7 @@ export interface UseAITaskWorkflowOptions {
   selectedModel: Ref<ChatModelOption | null>;
   chatConversationId: Ref<string>;
   chatLoading: Ref<boolean>;
+  chatTimeline: Ref<ChatItem[]>;
   hasWorkflowUserMessages: Ref<boolean>;
   buildConversationTranscript: () => string;
   scrollMessagesToBottom: () => void;
@@ -43,6 +44,7 @@ export interface UseAIKnowledgeCaptureOptions {
   selectedModel: Ref<ChatModelOption | null>;
   chatConversationId: Ref<string>;
   chatLoading: Ref<boolean>;
+  chatTimeline?: Ref<ChatItem[]>;
   hasWorkflowUserMessages: Ref<boolean>;
   buildConversationTranscript: () => string;
   scrollMessagesToBottom: () => void;

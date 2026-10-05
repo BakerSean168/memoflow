@@ -191,16 +191,23 @@ export function createGoalCreateWorkflow(input: {
           if (current.clarification.rounds.length >= MAX_CLARIFICATION_ROUNDS) {
             throw new Error('AI_GOAL_CLARIFICATION_LIMIT_EXCEEDED');
           }
+          const candidateDraft = decision.candidateDraft
+            ? GoalPlanDraftSchema.parse({ ...decision.candidateDraft, revision: targetRevision })
+            : current.draft?.revision === targetRevision
+              ? current.draft
+              : undefined;
           await persist({
             ...current,
             phase: 'clarification',
             pendingQuestions: decision.questions,
             targetRevision,
+            draft: candidateDraft,
           });
           return await suspend({
             type: 'clarification_required' as const,
             questions: decision.questions,
             round: current.clarification.rounds.length + 1,
+            ...(candidateDraft ? { candidateDraft } : {}),
           });
         }
 
@@ -268,6 +275,7 @@ export function createGoalCreateWorkflow(input: {
               : 'The approved goal plan could not be applied.',
           retryable: receipt.retryable,
           failures: receipt.failures,
+          receipt: { kind: 'goal.create' as const, receipt },
         });
       };
 
@@ -288,17 +296,31 @@ export function createGoalCreateWorkflow(input: {
       }
 
       if (current.phase === 'clarification') {
+        if (resumeData.type === 'edit_structured') {
+          if (!current.draft)
+            throw new Error('goal.create clarification has no draft to reconcile');
+          const reconciledDraft = applyStructuredDraftPatch(current.draft, resumeData.patch);
+          await persist({
+            ...current,
+            draft: reconciledDraft,
+            targetRevision: reconciledDraft.revision,
+          });
+          return await suspend({
+            type: 'clarification_required' as const,
+            questions: current.pendingQuestions,
+            round: current.clarification.rounds.length + 1,
+            candidateDraft: reconciledDraft,
+          });
+        }
         if (resumeData.type !== 'answer') {
           throw new Error('goal.create clarification requires an answer command');
         }
-        if (
-          current.pendingQuestions.length === 0 ||
-          current.pendingQuestions.length !== resumeData.answers.length
-        ) {
+        if (current.pendingQuestions.length === 0 || resumeData.answers.length === 0) {
           throw new Error(
             'goal.create clarification answer count does not match pending questions',
           );
         }
+        const response = resumeData.answers.join('\n').trim();
         const nextClarification = GoalClarificationStateSchema.parse({
           rounds: [
             ...current.clarification.rounds,
@@ -306,6 +328,7 @@ export function createGoalCreateWorkflow(input: {
               round: current.clarification.rounds.length + 1,
               questions: current.pendingQuestions,
               answers: resumeData.answers,
+              response,
             },
           ],
         });

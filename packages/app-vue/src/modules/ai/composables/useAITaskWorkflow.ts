@@ -174,7 +174,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
 
   const taskWorkflowRun = ref<Extract<AIWorkflowRunView, { kind: 'task.create' }> | null>(null);
   const taskWorkflowStage = ref<TaskWorkflowStage>('collect');
-  const clarificationAnswers = ref<string[]>([]);
   const linkedGoalId = ref<string | null>(null);
   const editableTask = ref<TaskPlanTask | null>(null);
   const taskAgentLoading = ref(false);
@@ -189,12 +188,26 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     editableTask.value = TaskPlanTaskSchema.parse(draft.task);
   }
 
+  function projectClarificationToTimeline(
+    run: Extract<AIWorkflowRunView, { kind: 'task.create' }>,
+  ): void {
+    const suspension = run.suspension;
+    if (suspension?.type !== 'clarification_required') return;
+    const id = `task-clarification-${run.runId}-${suspension.round ?? 1}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    const content = suspension.questions
+      .map((question, index) =>
+        suspension.questions.length === 1 ? question : `${index + 1}. ${question}`,
+      )
+      .join('\n');
+    options.chatTimeline.value.push({ id, role: 'assistant', content, status: 'success' });
+  }
+
   async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
     if (!run || run.kind !== 'task.create') {
       retireNativeReview();
       taskWorkflowRun.value = null;
       taskWorkflowStage.value = 'collect';
-      clarificationAnswers.value = [];
       editableTask.value = null;
       return;
     }
@@ -202,7 +215,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     const suspension = run.suspension;
     if (run.status === 'suspended' && suspension?.type === 'clarification_required') {
       taskWorkflowStage.value = 'clarification';
-      clarificationAnswers.value = suspension.questions.map(() => '');
+      projectClarificationToTimeline(run);
     } else if (run.status === 'suspended' && suspension?.type === 'task_draft_review') {
       taskWorkflowStage.value = 'confirm';
       linkedGoalId.value = suspension.draft.task.goalBinding?.goalId ?? null;
@@ -211,10 +224,8 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       taskWorkflowStage.value = 'execute';
     else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       taskWorkflowStage.value = 'result';
-      clarificationAnswers.value = [];
     } else {
       taskWorkflowStage.value = 'plan';
-      clarificationAnswers.value = [];
     }
     options.scrollMessagesToBottom();
     if (openNative && run.suspension?.type === 'task_draft_review') {
@@ -240,19 +251,27 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       taskWorkflowRun.value?.status === 'suspended' &&
       taskWorkflowRun.value.suspension?.type === 'task_draft_review',
   );
-  const canSubmitTaskClarification = computed(
+  const taskAgentWaitingForExecution = computed(
     () =>
-      taskWorkflowRun.value?.suspension?.type === 'clarification_required' &&
-      taskWorkflowRun.value.suspension.questions.every((_, i) =>
-        Boolean(clarificationAnswers.value[i]?.trim()),
-      ),
+      taskWorkflowRun.value?.status === 'suspended' &&
+      taskWorkflowRun.value.suspension?.type === 'recovery_required',
   );
   const canRetryTaskAgentExecution = computed(
     () =>
-      taskWorkflowRun.value?.status === 'suspended' &&
-      taskWorkflowRun.value.suspension?.type === 'recovery_required' &&
+      taskAgentWaitingForExecution.value &&
+      taskWorkflowRun.value?.suspension?.type === 'recovery_required' &&
       taskWorkflowRun.value.suspension.retryable &&
       !taskAgentResuming.value,
+  );
+  const canAcceptTaskPartialExecution = computed(
+    () =>
+      taskAgentWaitingForExecution.value &&
+      taskWorkflowRun.value?.result?.status === 'partial' &&
+      Object.keys(taskWorkflowRun.value.result.referenceMap).length > 0 &&
+      !taskAgentResuming.value,
+  );
+  const canCancelRemainingTaskExecution = computed(
+    () => taskAgentWaitingForExecution.value && !taskAgentResuming.value,
   );
   const canRunTaskAgent = computed(
     () =>
@@ -460,9 +479,34 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       }
     }
   }
-  const submitTaskClarification = () =>
-    resume({ type: 'answer', answers: clarificationAnswers.value.map((answer) => answer.trim()) });
+  async function submitTaskClarificationResponse(response: string): Promise<boolean> {
+    const run = taskWorkflowRun.value;
+    const normalized = response.trim();
+    if (!run || !taskAgentWaitingForClarification.value || taskAgentResuming.value || !normalized)
+      return false;
+    taskAgentResuming.value = true;
+    try {
+      const next = await options.workflowRuntime.resume({
+        runId: run.runId,
+        command: { type: 'answer', answers: [normalized] },
+        workflowTurn: normalized,
+      });
+      await projectRun(next);
+      if (next.kind === 'task.create' && next.status === 'completed' && next.result) {
+        const createdTaskPlanId = Object.values(next.result.referenceMap)[0];
+        if (createdTaskPlanId) await options.openCreatedTask?.(createdTaskPlanId);
+      }
+      return true;
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      return false;
+    } finally {
+      taskAgentResuming.value = false;
+    }
+  }
   const retryTaskAgentExecution = () => resume({ type: 'retry' });
+  const acceptPartialTaskExecution = () => resume({ type: 'accept_partial' });
+  const cancelRemainingTaskExecution = () => resume({ type: 'cancel_remaining' });
   async function reviseTaskAgentRun() {
     if (taskAgentResuming.value || submitted || pendingOwnerAttempt) return;
     taskAgentResuming.value = true;
@@ -521,7 +565,6 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     retireNativeReview();
     taskWorkflowRun.value = null;
     taskWorkflowStage.value = 'collect';
-    clarificationAnswers.value = [];
     linkedGoalId.value = null;
     editableTask.value = null;
     taskAgentLoading.value = false;
@@ -533,16 +576,17 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     taskOwnerSubmitted,
     openTaskNativeReview,
     taskWorkflowStage,
-    clarificationAnswers,
     linkedGoalId,
     editableTask,
     taskAgentLoading,
     taskAgentResuming,
     canRunTaskAgent,
-    canSubmitTaskClarification,
     taskAgentWaitingForApproval,
     taskAgentWaitingForClarification,
+    taskAgentWaitingForExecution,
     canRetryTaskAgentExecution,
+    canAcceptTaskPartialExecution,
+    canCancelRemainingTaskExecution,
     taskExecutionSummary,
     taskExecutionRecovery,
     reviewDraft,
@@ -551,8 +595,10 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     completeTaskAgentRun,
     reviseTaskAgentRun,
     retryTaskAgentExecution,
+    acceptPartialTaskExecution,
+    cancelRemainingTaskExecution,
     confirmTaskAgentRun,
-    submitTaskClarification,
+    submitTaskClarificationResponse,
     updateTaskDraft,
     syncTaskWorkflowRun,
     resetTaskWorkflowLocalState,

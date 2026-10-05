@@ -67,17 +67,11 @@ export async function returnFromSettingsScene(
 
   if (origin.panelSurface === 'home') {
     store.showHome();
-  } else if (origin.panelSurface === 'workflow' && !store.workflowAvailable && !store.activeTab) {
-    store.showHome();
   }
 
   const target = store.panelSurface === 'home' ? '/' : (store.activeTab?.route ?? '/');
   if (currentFullPath !== target) {
     await router.replace(target).catch(() => {});
-  }
-
-  if (origin.panelSurface === 'workflow' && store.workflowAvailable) {
-    store.requestWorkflowSurface('explicit');
   }
 }
 

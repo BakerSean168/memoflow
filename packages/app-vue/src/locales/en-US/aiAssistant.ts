@@ -201,6 +201,10 @@ export default {
       createGoalDirectly: 'Create Goal',
       createKnowledgeNote: 'Create Knowledge Note',
       openCreatedNote: 'Open Note',
+      openSupportingTask: 'Open Task: {title}',
+      openSupportingKnowledge: 'Open Note: {title}',
+      keepCompletedChanges: 'Keep completed changes',
+      cancelRemaining: 'Cancel remaining',
       startAnotherNote: 'New Note Chat',
       exitTool: 'End current flow',
       ungroundedHint:

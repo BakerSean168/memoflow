@@ -120,7 +120,7 @@ describe('AITaskWorkflowPanel', () => {
     expect(wrapper.text()).toContain('Execution failed (SERVICE_UNAVAILABLE)');
     expect(wrapper.text()).not.toContain('secret-internal-host');
   });
-  it('preserves clarification inputs and disables submission while busy', async () => {
+  it('keeps clarification display-only because the main Composer owns the answer', () => {
     const wrapper = mount(AITaskWorkflowPanel, {
       global: { plugins: [i18n] },
       props: {
@@ -134,19 +134,13 @@ describe('AITaskWorkflowPanel', () => {
           updatedAt: 1,
           suspension: { type: 'clarification_required', questions: ['When?'] },
         }),
-        clarificationAnswers: ['Tomorrow'],
-        canSubmitClarification: true,
       },
     });
-    await wrapper.get('textarea').setValue('Today');
-    expect(wrapper.emitted('update-clarification-answer')).toEqual([[0, 'Today']]);
-    await wrapper.get('[data-testid=task-submit-clarification]').trigger('click');
-    expect(wrapper.emitted('submit-clarification')).toHaveLength(1);
-    await wrapper.setProps({ busy: true });
-    expect(wrapper.get('textarea').attributes('disabled')).toBeDefined();
-    expect(
-      wrapper.get('[data-testid=task-submit-clarification]').attributes('disabled'),
-    ).toBeDefined();
+    expect(wrapper.get('[data-testid=task-workflow-clarification]').text()).toContain('When?');
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    expect(wrapper.find('[data-testid=task-submit-clarification]').exists()).toBe(false);
+    expect(wrapper.emitted('update-clarification-answer')).toBeUndefined();
+    expect(wrapper.emitted('submit-clarification')).toBeUndefined();
   });
   it('never renders raw canonical result IDs', () => {
     const id = 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440001';

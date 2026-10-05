@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -228,6 +228,23 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(service.dispatchAssistant).not.toHaveBeenCalled();
     expect(runtime.listMessages).not.toHaveBeenCalled();
     expect(usageRuntime.get).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+  });
+
+  it('prepares an explicit workflow turn without invoking the generic Assistant runtime', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    composable.chatMessage.value = 'Create a study goal';
+
+    const prepared = await composable.prepareWorkflowTurn(service as never, 'New chat', () => {});
+
+    expect(prepared).toEqual({ conversationId: 'conv-1', content: 'Create a study goal' });
+    expect(service.createConversation).toHaveBeenCalledWith({ name: 'New chat' });
+    expect(runtime.streamMessage).not.toHaveBeenCalled();
+    expect(composable.chatTimeline.value).toMatchObject([
+      { role: 'user', content: 'Create a study goal', status: 'success' },
+    ]);
+    expect(composable.chatMessage.value).toBe('');
   });
 
   it('normalizes supported attachment media types and rejects unsupported files before transport', async () => {
@@ -513,6 +530,86 @@ describe('useAIChatSession Mastra-native open chat', () => {
         status: 'success',
       },
     ]);
+  });
+
+  it('batches rapid stream deltas and flushes the terminal assistant message immediately', async () => {
+    vi.useFakeTimers();
+    try {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      const composable = mountComposable(service, runtime);
+      let onEvent: ((event: AssistantRuntimeEvent) => void) | undefined;
+      let finish: (() => void) | undefined;
+      runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+        onEvent = handlers.onEvent;
+        onEvent?.(event(1, 'assistant.run.started', {}));
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      });
+      composable.chatMessage.value = 'hello';
+
+      const pending = composable.handleSendChat(service as never, MODEL, 'New chat', () => {});
+      await nextTick();
+      await Promise.resolve();
+      await nextTick();
+      expect(onEvent).toBeTypeOf('function');
+
+      onEvent?.(event(2, 'assistant.message.delta', { content: 'A' }));
+      onEvent?.(event(3, 'assistant.message.delta', { content: 'B' }));
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('');
+
+      await vi.advanceTimersByTimeAsync(47);
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('');
+      await vi.advanceTimersByTimeAsync(1);
+      expect(composable.chatTimeline.value.at(-1)?.content).toBe('AB');
+
+      onEvent?.(event(4, 'assistant.message.delta', { content: 'C' }));
+      onEvent?.(
+        event(5, 'assistant.run.completed', {
+          content: 'ABC final',
+          assistantMessageId: 'assistant-final',
+        }),
+      );
+      expect(composable.chatTimeline.value.at(-1)).toMatchObject({
+        id: 'assistant-final',
+        content: 'ABC final',
+        status: 'success',
+      });
+
+      finish?.();
+      await pending;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('auto-follows streaming output only near the bottom and never smooth-scrolls it', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime);
+    const scrollTo = vi.fn();
+    const viewport = {
+      scrollHeight: 1_000,
+      scrollTop: 850,
+      clientHeight: 100,
+      scrollTo,
+    } as unknown as HTMLElement;
+    composable.messagesViewport.value = viewport;
+
+    composable.scrollMessagesToBottom({ streaming: true });
+    await nextTick();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'auto' });
+
+    scrollTo.mockClear();
+    Object.defineProperty(viewport, 'scrollTop', { configurable: true, value: 500 });
+    composable.scrollMessagesToBottom({ streaming: true });
+    await nextTick();
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    composable.scrollMessagesToBottom();
+    await nextTick();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
   });
 
   it('loads conversation history and durable usage from their canonical runtime clients', async () => {

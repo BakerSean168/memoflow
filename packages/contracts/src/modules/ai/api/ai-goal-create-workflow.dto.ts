@@ -237,6 +237,7 @@ export const GoalClarificationRoundSchema = z
     round: z.number().int().positive().max(3),
     questions: z.array(z.string().min(1)).min(1).max(3),
     answers: z.array(z.string().min(1)).min(1).max(3),
+    response: z.string().trim().min(1).max(200000).optional(),
   })
   .strict();
 export type GoalClarificationRound = z.infer<typeof GoalClarificationRoundSchema>;

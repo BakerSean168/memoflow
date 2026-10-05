@@ -80,6 +80,7 @@ import {
 import { AsyncEventQueue } from './async-event-queue';
 import {
   createAssistantExecutionRecord,
+  createAssistantPhaseExecutionRecord,
   projectAssistantUsage,
   type AssistantUsageSnapshot,
 } from './assistant-observability';
@@ -356,6 +357,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
       if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
       suspension = parsed.data;
+      if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'goal.create') {
+        result = suspension.receipt.receipt;
+      }
     } else if (lowLevelStatus === 'canceled') {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
@@ -431,6 +435,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
       if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
       suspension = parsed.data;
+      if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'task.create') {
+        result = suspension.receipt.receipt;
+      }
     } else if (lowLevelStatus === 'canceled') {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
@@ -506,6 +513,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
       if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
       suspension = parsed.data;
+      if (
+        suspension.type === 'recovery_required' &&
+        suspension.receipt?.kind === 'knowledge.capture'
+      ) {
+        result = suspension.receipt.receipt;
+      }
     } else if (lowLevelStatus === 'canceled') {
       status = 'cancelled';
     } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
@@ -564,6 +577,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const workflowInput = this.workflowInputFromRequest(input);
     if (input.request.kind === 'goal.create') {
       const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
+      const workflowTurn = input.request.workflowTurn;
+      if (workflowTurn)
+        await this.history.appendUserTurn({
+          ...input.request,
+          ...input.context,
+          content: workflowTurn,
+        });
       const run = await this.goalCreateWorkflow.createRun({
         resourceId: input.context.identityId,
       });
@@ -672,6 +692,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       before.kind !== 'knowledge.capture'
     ) {
       throw new Error('AI_WORKFLOW_KIND_UNSUPPORTED');
+    }
+    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
+      await this.history.appendUserTurn({
+        identityId: input.context.identityId,
+        conversationId: before.conversationId,
+        content: input.request.workflowTurn,
+      });
     }
 
     const store = await this.workflowStore();
@@ -1033,6 +1060,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     let lastRuntimeError: { code: string; message: string } | undefined;
     let lastUsage: AssistantUsageSnapshot | undefined;
     const observabilityWrites: Promise<void>[] = [];
+    let firstActivityAt: number | undefined;
+    let firstTokenAt: number | undefined;
+    let transportRecorded = false;
+    let providerSegmentStartedAt: number | undefined;
+    const toolStartedAt = new Map<string, number>();
+    const approvalStartedAt = new Map<string, number>();
     let settled = false;
     let stopping = false;
     const bindingGeneration = session.run.bindingGeneration();
@@ -1052,6 +1085,63 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const ownsNativeRun = () => ownsTurn() && session.getCurrentRunId() === nativeRunId;
 
     const currentRunId = (): string => runId || fallbackRunId;
+
+    const recordPhase = (
+      phase: Parameters<typeof createAssistantPhaseExecutionRecord>[0]['phase'],
+      processingMs: number,
+      outcome: 'succeeded' | 'failed' | 'cancelled' = 'succeeded',
+      errorCategory?: string,
+    ): void => {
+      if (!this.deps.executionRecordPort) return;
+      observabilityWrites.push(
+        this.deps.executionRecordPort.record(
+          createAssistantPhaseExecutionRecord({
+            identityId: input.identityId,
+            conversationId: input.conversationId,
+            model: resolvedModel,
+            runId: currentRunId(),
+            phase,
+            processingMs,
+            outcome,
+            ...(input.context ? { context: input.context } : {}),
+            ...(errorCategory ? { errorCategory } : {}),
+          }),
+        ),
+      );
+    };
+
+    const finishProviderSegment = (
+      now = Date.now(),
+      outcome: 'succeeded' | 'failed' | 'cancelled' = 'succeeded',
+      errorCategory?: string,
+    ): void => {
+      if (providerSegmentStartedAt === undefined) return;
+      recordPhase('provider_inference', now - providerSegmentStartedAt, outcome, errorCategory);
+      providerSegmentStartedAt = undefined;
+    };
+
+    const recordFirstActivity = (now: number): void => {
+      if (firstActivityAt !== undefined) return;
+      firstActivityAt = now;
+      recordPhase('first_activity', now - startedAt);
+    };
+
+    const recordTransport = (
+      now: number,
+      outcome: 'succeeded' | 'failed' | 'cancelled' = 'succeeded',
+      errorCategory?: string,
+    ): void => {
+      if (transportRecorded) return;
+      transportRecorded = true;
+      recordPhase('transport', now - startedAt, outcome, errorCategory);
+    };
+
+    const recordFirstToken = (now = Date.now()): void => {
+      finishProviderSegment(now);
+      if (firstTokenAt !== undefined) return;
+      firstTokenAt = now;
+      recordPhase('first_token', now - startedAt);
+    };
 
     const emit = <T extends AssistantRuntimeEvent['type']>(
       type: T,
@@ -1074,6 +1164,35 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       type: 'assistant.run.completed' | 'assistant.run.failed' | 'assistant.run.cancelled',
     ): void => {
       if (settled) return;
+      const now = Date.now();
+      const phaseOutcome =
+        type === 'assistant.run.completed'
+          ? ('succeeded' as const)
+          : type === 'assistant.run.cancelled'
+            ? ('cancelled' as const)
+            : ('failed' as const);
+      const phaseErrorCategory =
+        type === 'assistant.run.cancelled' ? 'aborted' : lastRuntimeError?.code;
+      recordTransport(now, phaseOutcome, phaseErrorCategory);
+      finishProviderSegment(now, phaseOutcome, phaseErrorCategory);
+      for (const [toolCallId, phaseStartedAt] of toolStartedAt) {
+        recordPhase(
+          'tool',
+          now - phaseStartedAt,
+          type === 'assistant.run.completed' ? 'failed' : phaseOutcome,
+          type === 'assistant.run.completed' ? 'tool_phase_incomplete' : phaseErrorCategory,
+        );
+        toolStartedAt.delete(toolCallId);
+      }
+      for (const [toolCallId, phaseStartedAt] of approvalStartedAt) {
+        recordPhase(
+          'approval_wait',
+          now - phaseStartedAt,
+          type === 'assistant.run.completed' ? 'failed' : phaseOutcome,
+          type === 'assistant.run.completed' ? 'approval_phase_incomplete' : phaseErrorCategory,
+        );
+        approvalStartedAt.delete(toolCallId);
+      }
       for (const toolCallId of pending) {
         emit('assistant.approval.resolved', {
           toolCallId,
@@ -1105,7 +1224,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
               outcome: type,
               ...(lastUsage ? { usage: lastUsage } : {}),
               ...(lastRuntimeError?.code ? { runtimeErrorCode: lastRuntimeError.code } : {}),
-              processingMs: Date.now() - startedAt,
+              processingMs: now - startedAt,
             }),
           ),
         );
@@ -1158,6 +1277,17 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         pending.add(command.toolCallId);
         return false;
       }
+      const approvalStarted = approvalStartedAt.get(command.toolCallId);
+      if (approvalStarted !== undefined) {
+        const now = Date.now();
+        recordPhase(
+          'approval_wait',
+          now - approvalStarted,
+          command.decision === 'approve' ? 'succeeded' : 'cancelled',
+          command.decision === 'approve' ? undefined : 'approval_declined',
+        );
+        approvalStartedAt.delete(command.toolCallId);
+      }
       emit('assistant.approval.resolved', {
         toolCallId: command.toolCallId,
         resolution: command.decision === 'approve' ? 'approved' : 'declined',
@@ -1193,6 +1323,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         runId = nextNativeRunId ?? fallbackRunId;
         this.activeRuns.delete(fallbackRunId);
         this.activeRuns.set(runId, activeRun);
+        const now = Date.now();
+        recordTransport(now);
+        recordFirstActivity(now);
+        providerSegmentStartedAt = now;
         emit('assistant.run.started', {
           modelId: resolvedModel.modelId,
           providerId: resolvedModel.providerId,
@@ -1214,6 +1348,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         }
         const category = policy.category;
         if (category !== 'read' && category !== 'edit' && category !== 'execute') return;
+        const now = Date.now();
+        recordFirstActivity(now);
+        finishProviderSegment(now);
         const tool = {
           toolCallId: event.toolCallId,
           toolName: name.data,
@@ -1226,12 +1363,33 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
             abort();
             return;
           }
+          if (!approvalStartedAt.has(event.toolCallId))
+            approvalStartedAt.set(event.toolCallId, now);
           pending.add(event.toolCallId);
           emit('assistant.approval.required', tool);
-        } else emit('assistant.activity', { activityType: 'tool', ...tool, state: 'running' });
+        } else {
+          const approvalStarted = approvalStartedAt.get(event.toolCallId);
+          if (approvalStarted !== undefined) {
+            recordPhase('approval_wait', now - approvalStarted);
+            approvalStartedAt.delete(event.toolCallId);
+          }
+          if (!toolStartedAt.has(event.toolCallId)) toolStartedAt.set(event.toolCallId, now);
+          emit('assistant.activity', { activityType: 'tool', ...tool, state: 'running' });
+        }
         return;
       }
       if (event.type === 'tool_end') {
+        const now = Date.now();
+        const toolStarted = toolStartedAt.get(event.toolCallId);
+        if (toolStarted !== undefined) {
+          recordPhase(
+            'tool',
+            now - toolStarted,
+            event.isError ? 'failed' : event.denied ? 'cancelled' : 'succeeded',
+            event.isError ? 'tool_failed' : event.denied ? 'tool_denied' : undefined,
+          );
+          toolStartedAt.delete(event.toolCallId);
+        }
         const tool = tools.get(event.toolCallId);
         if (tool)
           emit('assistant.activity', {
@@ -1240,18 +1398,21 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
             state: event.denied ? 'denied' : event.isError ? 'failed' : 'completed',
           });
         tools.delete(event.toolCallId);
+        providerSegmentStartedAt = now;
         return;
       }
       if (event.type === 'message_start' && event.message.role === 'assistant') {
         assistantMessageId = event.message.id;
         lastText = messageText(event);
         if (lastText) {
+          recordFirstToken();
           emit('assistant.message.delta', { content: lastText });
         }
         return;
       }
       if (event.type === 'message_update' && event.id === assistantMessageId) {
         if (event.event.type === 'text-delta') {
+          recordFirstToken();
           lastText += event.event.delta;
           emit('assistant.message.delta', { content: event.event.delta });
         }

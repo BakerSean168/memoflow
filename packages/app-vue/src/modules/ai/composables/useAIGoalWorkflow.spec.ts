@@ -101,6 +101,7 @@ const i18n = createI18n({
       common: { unknown: 'Unknown', operationFailed: 'Operation failed' },
       aiAssistant: {
         chatPage: { workflow: { goalClarificationTitle: 'Goal Clarification' } },
+        goalDraft: { tasks: 'Tasks', knowledge: 'Knowledge' },
         goalAutomation: { executionSuccess: 'Goal created' },
         errors: { workflowExecutionFailed: 'Failed' },
       },
@@ -259,12 +260,13 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const wrapper = mountComposable(options);
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
 
-    await vm.startGoalAgentRun();
+    await expect(vm.startGoalAgentRun('Create a study goal')).resolves.toBe(true);
 
     expect(runtime.start).toHaveBeenCalledTimes(1);
     const startRequest = runtime.start.mock.calls[0][0];
     expect(startRequest.kind).toBe('goal.create');
     expect(startRequest.input).toEqual({ idea: 'plan a goal' });
+    expect(startRequest.workflowTurn).toBe('Create a study goal');
     // Client request must not carry identityId — the host injects it.
     expect(startRequest).not.toHaveProperty('identityId');
   });
@@ -282,13 +284,199 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
 
     await vm.startGoalAgentRun();
     expect(vm.goalWorkflowStage).toBe('clarification');
+    expect(options.chatTimeline.value).toMatchObject([
+      { id: 'goal-clarification-run-1-1', role: 'assistant', content: 'Budget?' },
+    ]);
 
-    vm.clarificationAnswers = ['1000'];
-    await vm.submitGoalAgentClarification();
+    await expect(vm.submitGoalClarificationResponse('About 1000, with flexibility')).resolves.toBe(
+      true,
+    );
     expect(runtime.resume).toHaveBeenCalledWith({
       runId: 'run-1',
-      command: { type: 'answer', answers: ['1000'] },
+      command: { type: 'answer', answers: ['About 1000, with flexibility'] },
+      workflowTurn: 'About 1000, with flexibility',
     });
+  });
+
+  it('projects supporting Task and Knowledge proposals into Chat and routes review revisions through the durable workflow', async () => {
+    const runtime = createRuntimeStub();
+    const draft = GoalPlanDraftSchema.parse({
+      ...makeDraft(1),
+      tasks: [
+        {
+          draftRef: 'task:weekly-review',
+          goalRef: 'goal',
+          title: 'Weekly review',
+          description: 'Review progress every Friday.',
+          importance: 'Moderate',
+          labels: [],
+          schedule: { kind: 'OneTime', date: '2026-10-09', timing: { kind: 'AllDay' } },
+          reminderConfig: null,
+          keyResultRef: null,
+          contribution: null,
+        },
+      ],
+      knowledge: [
+        {
+          draftRef: 'note:review-guide',
+          mode: 'create',
+          title: 'Review guide',
+          markdown: '# Review guide',
+          targetSubpath: 'goals/review-guide.md',
+          sourceRefs: [],
+        },
+      ],
+    });
+    const revised = GoalPlanDraftSchema.parse({ ...draft, revision: 2 });
+    runtime.start.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(draft) }),
+    );
+    runtime.resume.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(revised) }),
+    );
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+
+    await vm.startGoalAgentRun();
+    expect(options.chatTimeline.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'goal-supporting-proposals-run-1-1',
+          role: 'assistant',
+          content: expect.stringContaining('Weekly review'),
+        }),
+      ]),
+    );
+    expect(options.chatTimeline.value[0]?.content).toContain('Review guide');
+    expect(options.chatTimeline.value[0]?.content).not.toContain('task:weekly-review');
+    expect(options.chatTimeline.value[0]?.content).not.toContain('note:review-guide');
+
+    await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(draft) }), false);
+    expect(
+      options.chatTimeline.value.filter((item) => item.id === 'goal-supporting-proposals-run-1-1'),
+    ).toHaveLength(1);
+
+    await expect(vm.submitGoalRevisionResponse('Make the supporting task recurring')).resolves.toBe(
+      true,
+    );
+    expect(runtime.resume).toHaveBeenCalledExactlyOnceWith({
+      runId: 'run-1',
+      command: {
+        type: 'revise_natural_language',
+        instruction: 'Make the supporting task recurring',
+      },
+      workflowTurn: 'Make the supporting task recurring',
+    });
+    expect(
+      options.chatTimeline.value.some((item) => item.id === 'goal-supporting-proposals-run-1-2'),
+    ).toBe(true);
+  });
+
+  it('projects a clarification candidate draft into the native Goal surface before review', async () => {
+    const runtime = createRuntimeStub();
+    const candidate = makeDraft(1);
+    runtime.start.mockResolvedValue(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: {
+          type: 'clarification_required',
+          questions: ['Which target school?'],
+          round: 1,
+          candidateDraft: candidate,
+        },
+      }),
+    );
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+
+    await vm.startGoalAgentRun();
+
+    expect(vm.goalWorkflowStage).toBe('clarification');
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    expect(native.readGoal).not.toHaveBeenCalled();
+    expect(native.state?.name).toBe('Deep work');
+    expect(native.state?.keyResults[0]?.title).toBe('Complete focus blocks');
+    expect(native.blocked).toBe(false);
+
+    runtime.resume.mockResolvedValue(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: review(candidate),
+      }),
+    );
+    await vm.submitGoalClarificationResponse('Kyoto University');
+
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    expect(native.readGoal).toHaveBeenCalledWith('GoalId_revision-1');
+    expect(native.blocked).toBe(false);
+    expect(native.state?.keyResults[0]?.id).toBe('KeyResultId_revision-1-0');
+  });
+
+  it('reconciles native clarification edits before answering and preserves KR draft refs', async () => {
+    const runtime = createRuntimeStub();
+    const candidate = makeDraft(1);
+    const reconciled = GoalPlanDraftSchema.parse({
+      ...makeDraft(2),
+      goal: { ...makeDraft(2).goal, name: 'Manual deep work' },
+      keyResults: [{ ...makeDraft(2).keyResults[0]!, title: 'Manual focus blocks' }],
+    });
+    runtime.start.mockResolvedValue(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: {
+          type: 'clarification_required',
+          questions: ['Which target school?'],
+          round: 1,
+          candidateDraft: candidate,
+        },
+      }),
+    );
+    runtime.resume
+      .mockResolvedValueOnce(
+        makeGoalRun({
+          status: 'suspended',
+          suspension: {
+            type: 'clarification_required',
+            questions: ['Which target school?'],
+            round: 1,
+            candidateDraft: reconciled,
+          },
+        }),
+      )
+      .mockResolvedValueOnce(makeGoalRun({ status: 'suspended', suspension: review(reconciled) }));
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+
+    await vm.startGoalAgentRun();
+    native.state!.name = 'Manual deep work';
+    native.state!.keyResults[0]!.title = 'Manual focus blocks';
+
+    await expect(vm.submitGoalClarificationResponse('Kyoto University')).resolves.toBe(true);
+
+    expect(runtime.resume).toHaveBeenNthCalledWith(1, {
+      runId: 'run-1',
+      command: {
+        type: 'edit_structured',
+        patch: expect.objectContaining({
+          goal: expect.objectContaining({ name: 'Manual deep work' }),
+          keyResults: [
+            expect.objectContaining({
+              draftRef: 'kr:focus-blocks',
+              title: 'Manual focus blocks',
+            }),
+          ],
+        }),
+      },
+    });
+    expect(runtime.resume).toHaveBeenNthCalledWith(2, {
+      runId: 'run-1',
+      command: { type: 'answer', answers: ['Kyoto University'] },
+      workflowTurn: 'Kyoto University',
+    });
+    expect(native.state?.keyResults[0]?.id).toBe('KeyResultId_revision-2-0');
   });
 
   it('projects a goal_draft_review suspension and maps approve resume', async () => {
@@ -434,6 +622,93 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     await vm.confirmGoalAgentRun();
     await vm.openAutomatedGoal();
     expect(routerMocks.push).toHaveBeenCalledWith('/goals/goal-123');
+  });
+
+  it('exposes only persisted supporting identities for native owner navigation', async () => {
+    const runtime = createRuntimeStub();
+    const draft = GoalPlanDraftSchema.parse({
+      ...makeDraft(1),
+      tasks: [
+        {
+          draftRef: 'task:support',
+          goalRef: 'goal',
+          title: 'Weekly review',
+          description: null,
+          importance: 'Moderate',
+          labels: [],
+          schedule: { kind: 'OneTime', date: '2026-10-09', timing: { kind: 'AllDay' } },
+          reminderConfig: null,
+          keyResultRef: null,
+          contribution: null,
+        },
+      ],
+      knowledge: [
+        {
+          draftRef: 'note:support',
+          mode: 'create',
+          title: 'Review guide',
+          markdown: '# Review guide',
+          targetSubpath: 'goals/review-guide.md',
+          sourceRefs: [],
+        },
+      ],
+    });
+    runtime.start.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(draft) }),
+    );
+    const vm = mountComposable(makeOptions(runtime)).vm as unknown as ReturnType<
+      typeof useAIGoalWorkflow
+    >;
+    await vm.startGoalAgentRun();
+
+    const recovery = makeGoalRun({
+      status: 'suspended',
+      suspension: {
+        type: 'recovery_required',
+        message: 'Supporting mutations need recovery.',
+        retryable: true,
+        failures: [],
+      },
+      result: makeReceipt({
+        status: 'partial',
+        referenceMap: {
+          goal: 'goal-123',
+          'task:support': 'task-123',
+          'note:support': 'knowledge-123',
+        },
+        retryable: true,
+      }),
+    });
+    await vm.projectRun(recovery, false);
+
+    expect(vm.canAcceptGoalPartialExecution).toBe(true);
+    expect(vm.canCancelRemainingGoalExecution).toBe(true);
+    expect(vm.createdSupportingTasks).toEqual([{ id: 'task-123', title: 'Weekly review' }]);
+    expect(vm.createdSupportingKnowledge).toEqual([{ id: 'knowledge-123', title: 'Review guide' }]);
+    await vm.openCreatedSupportingTask('task-123');
+    await vm.openCreatedSupportingKnowledge('knowledge-123');
+    expect(routerMocks.push).toHaveBeenCalledWith('/tasks/task-123');
+    expect(routerMocks.push).toHaveBeenCalledWith({
+      name: 'repository',
+      query: { note: 'knowledge-123' },
+    });
+
+    runtime.resume.mockResolvedValue(
+      makeGoalRun({ status: 'completed', result: makeReceipt({ status: 'partial' }) }),
+    );
+    await vm.acceptPartialGoalExecution();
+    expect(runtime.resume).toHaveBeenLastCalledWith({
+      runId: 'run-1',
+      command: { type: 'accept_partial' },
+    });
+
+    await vm.projectRun(recovery, false);
+    runtime.resume.mockResolvedValue(makeGoalRun({ status: 'cancelled' }));
+    await vm.cancelRemainingGoalExecution();
+    expect(runtime.resume).toHaveBeenLastCalledWith({
+      runId: 'run-1',
+      command: { type: 'cancel_remaining' },
+    });
   });
 
   it('does not deep-link on a cancelled or partial run without a goal draftRef mapping', async () => {

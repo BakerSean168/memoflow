@@ -96,13 +96,11 @@ describe('AIKnowledgeCapturePanel', () => {
     expect(wrapper.text()).toContain('Execution failed (WRITE_FAILED)');
     expect(wrapper.text()).not.toContain('internal-secret');
   });
-  it('renders clarification answers and delegates submit without a business editor', async () => {
+  it('keeps clarification display-only because the main Composer owns the answer', () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'knowledge-capture',
-        clarificationAnswers: [''],
-        canSubmitClarification: false,
         knowledgeCaptureRun: {
           runId: 'clarify',
           conversationId: 'conv',
@@ -114,11 +112,15 @@ describe('AIKnowledgeCapturePanel', () => {
         },
       },
     });
-    await wrapper.get('textarea').setValue('Durability');
-    expect(wrapper.emitted('update-clarification-answer')).toEqual([[0, 'Durability']]);
-    await wrapper.setProps({ clarificationAnswers: ['Durability'], canSubmitClarification: true });
-    await wrapper.get('[data-testid="knowledge-capture-submit-clarification"]').trigger('click');
-    expect(wrapper.emitted('submit-clarification')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="knowledge-capture-clarification"]').text()).toContain(
+      'Which topic?',
+    );
+    expect(wrapper.find('textarea').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="knowledge-capture-submit-clarification"]').exists()).toBe(
+      false,
+    );
+    expect(wrapper.emitted('update-clarification-answer')).toBeUndefined();
+    expect(wrapper.emitted('submit-clarification')).toBeUndefined();
     expect(wrapper.text()).not.toContain('clarify');
     wrapper.unmount();
   });

@@ -1,12 +1,45 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 
-const props = defineProps<{
-  content: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    content: string;
+    generating?: boolean;
+  }>(),
+  { generating: false },
+);
 
-const rendered = computed(() => renderSafeMarkdown(props.content));
+const STREAM_MARKDOWN_RENDER_MS = 120;
+const rendered = ref(renderSafeMarkdown(props.content));
+let pendingContent = props.content;
+let renderTimer: ReturnType<typeof setTimeout> | null = null;
+
+function cancelRenderTimer() {
+  if (renderTimer === null) return;
+  clearTimeout(renderTimer);
+  renderTimer = null;
+}
+
+function renderPendingContent() {
+  cancelRenderTimer();
+  rendered.value = renderSafeMarkdown(pendingContent);
+}
+
+watch(
+  () => [props.content, props.generating] as const,
+  ([content, generating]) => {
+    pendingContent = content;
+    if (!generating) {
+      renderPendingContent();
+      return;
+    }
+    if (renderTimer !== null) return;
+    renderTimer = setTimeout(renderPendingContent, STREAM_MARKDOWN_RENDER_MS);
+  },
+);
+
+onBeforeUnmount(cancelRenderTimer);
 </script>
 
 <template>

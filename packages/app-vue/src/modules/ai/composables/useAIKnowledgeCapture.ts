@@ -32,7 +32,6 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     null,
   );
   const knowledgeCaptureStage = ref<KnowledgeCaptureWorkflowStage>('collect');
-  const clarificationAnswers = ref<string[]>([]);
   const knowledgeCaptureLoading = ref(false);
   const knowledgeCaptureResuming = ref(false);
 
@@ -116,12 +115,26 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     }
   }
 
+  function projectClarificationToTimeline(
+    run: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>,
+  ): void {
+    const suspension = run.suspension;
+    if (suspension?.type !== 'clarification_required') return;
+    const id = `knowledge-clarification-${run.runId}-${suspension.round ?? 1}`;
+    if ((options.chatTimeline?.value ?? []).some((item) => item.id === id)) return;
+    const content = suspension.questions
+      .map((question, index) =>
+        suspension.questions.length === 1 ? question : `${index + 1}. ${question}`,
+      )
+      .join('\n');
+    options.chatTimeline?.value.push({ id, role: 'assistant', content, status: 'success' });
+  }
+
   async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
     if (!run || run.kind !== 'knowledge.capture') {
       retireNativeReview();
       knowledgeCaptureRun.value = null;
       knowledgeCaptureStage.value = 'collect';
-      clarificationAnswers.value = [];
       return;
     }
 
@@ -129,21 +142,17 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     const suspension = run.suspension;
     if (run.status === 'suspended' && suspension?.type === 'clarification_required') {
       knowledgeCaptureStage.value = 'clarification';
-      clarificationAnswers.value = suspension.questions.map(() => '');
+      projectClarificationToTimeline(run);
     } else if (run.status === 'suspended' && suspension?.type === 'knowledge_draft_review') {
       knowledgeCaptureStage.value = 'confirm';
-      clarificationAnswers.value = [];
     } else if (run.status === 'suspended' && suspension?.type === 'recovery_required') {
       retireNativeReview();
       knowledgeCaptureStage.value = 'execute';
-      clarificationAnswers.value = [];
     } else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       knowledgeCaptureStage.value = 'result';
-      clarificationAnswers.value = [];
       retireNativeReview();
     } else {
       knowledgeCaptureStage.value = 'plan';
-      clarificationAnswers.value = [];
     }
 
     options.scrollMessagesToBottom();
@@ -172,22 +181,23 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
       knowledgeCaptureRun.value?.status === 'suspended' &&
       knowledgeCaptureRun.value.suspension?.type === 'knowledge_draft_review',
   );
-  const canSubmitKnowledgeClarification = computed(() => {
-    const suspension = knowledgeCaptureRun.value?.suspension;
-    if (suspension?.type !== 'clarification_required') return false;
-    return suspension.questions.every((_, index) =>
-      Boolean(clarificationAnswers.value[index]?.trim()),
-    );
-  });
+  const knowledgeCaptureWaitingForExecution = computed(
+    () =>
+      knowledgeCaptureRun.value?.status === 'suspended' &&
+      knowledgeCaptureRun.value.suspension?.type === 'recovery_required',
+  );
   const canRetryKnowledgeCaptureExecution = computed(() => {
     const suspension = knowledgeCaptureRun.value?.suspension;
     return (
-      knowledgeCaptureRun.value?.status === 'suspended' &&
+      knowledgeCaptureWaitingForExecution.value &&
       suspension?.type === 'recovery_required' &&
       suspension.retryable &&
       !knowledgeCaptureResuming.value
     );
   });
+  const canCancelRemainingKnowledgeCaptureExecution = computed(
+    () => knowledgeCaptureWaitingForExecution.value && !knowledgeCaptureResuming.value,
+  );
   const canRunKnowledgeCapture = computed(
     () =>
       Boolean(options.selectedModel.value) &&
@@ -347,9 +357,37 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     }
   }
 
-  const submitKnowledgeClarification = () =>
-    resume({ type: 'answer', answers: clarificationAnswers.value.map((answer) => answer.trim()) });
+  async function submitKnowledgeClarificationResponse(response: string): Promise<boolean> {
+    const run = knowledgeCaptureRun.value;
+    const normalized = response.trim();
+    if (
+      !run ||
+      !knowledgeCaptureWaitingForClarification.value ||
+      knowledgeCaptureResuming.value ||
+      !normalized
+    )
+      return false;
+    knowledgeCaptureResuming.value = true;
+    try {
+      const next = await options.workflowRuntime.resume({
+        runId: run.runId,
+        command: { type: 'answer', answers: [normalized] },
+        workflowTurn: normalized,
+      });
+      await projectRun(next);
+      if (next.kind === 'knowledge.capture' && next.status === 'completed' && next.result?.noteId) {
+        await options.openCreatedNote?.(next.result.noteId);
+      }
+      return true;
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      return false;
+    } finally {
+      knowledgeCaptureResuming.value = false;
+    }
+  }
   const retryKnowledgeCaptureExecution = () => resume({ type: 'retry' });
+  const cancelRemainingKnowledgeCaptureExecution = () => resume({ type: 'cancel_remaining' });
 
   async function cancelKnowledgeCaptureRun(): Promise<void> {
     const run = knowledgeCaptureRun.value;
@@ -376,7 +414,6 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     retireNativeReview();
     knowledgeCaptureRun.value = null;
     knowledgeCaptureStage.value = 'collect';
-    clarificationAnswers.value = [];
     knowledgeCaptureLoading.value = false;
     knowledgeCaptureResuming.value = false;
   }
@@ -384,14 +421,14 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
   return {
     knowledgeCaptureRun,
     knowledgeCaptureStage,
-    clarificationAnswers,
     knowledgeCaptureLoading,
     knowledgeCaptureResuming,
     canRunKnowledgeCapture,
-    canSubmitKnowledgeClarification,
     knowledgeCaptureWaitingForApproval,
     knowledgeCaptureWaitingForClarification,
+    knowledgeCaptureWaitingForExecution,
     canRetryKnowledgeCaptureExecution,
+    canCancelRemainingKnowledgeCaptureExecution,
     knowledgeCaptureExecutionSummary,
     knowledgeCaptureExecutionRecovery,
     reviewDraft,
@@ -399,8 +436,9 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     cancelKnowledgeCaptureRun,
     completeKnowledgeCaptureRun,
     retryKnowledgeCaptureExecution,
+    cancelRemainingKnowledgeCaptureExecution,
     confirmKnowledgeCaptureRun,
-    submitKnowledgeClarification,
+    submitKnowledgeClarificationResponse,
     syncKnowledgeCaptureRun,
     resetKnowledgeCaptureLocalState,
     projectRun,

@@ -22,6 +22,7 @@ import { AIContextAssembler } from '../context';
 import { MastraModelResolver } from '../models';
 import { createAIProviderSecretVaultStub } from '../../../testing/ai-test-support';
 import type { GoalPlanMutationPort } from '../workflows';
+import type { AIExecutionRecordInput } from '../../application/ports';
 import { MastraAIRuntime } from './mastra-ai.runtime';
 
 const TEST_USER_TIME_CONTEXT_PORT = {
@@ -143,6 +144,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
   const createConfirmedKnowledgeNote = vi.fn(async (request) =>
     ok({ noteId: request.knowledgeDocumentId }),
   );
+  const recordExecution = vi.fn(async (_record: AIExecutionRecordInput) => {});
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -159,7 +161,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
   const runtime = new MastraAIRuntime({
     storage,
     modelResolver,
-    conversationShellSource: { loadShell: vi.fn(async () => null) },
+    conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
       readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
@@ -175,6 +177,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
       getNoteById: vi.fn(async () => null),
     },
     usageReadPort: { summarizeUsage },
+    executionRecordPort: { record: recordExecution },
     routineCommandPort: { createRoutine } as never,
     plannerReadPort: {} as never,
     notificationReadPort: {} as never,
@@ -207,6 +210,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     createTaskPlan,
     createConfirmedKnowledgeNote,
     summarizeUsage,
+    recordExecution,
     modelResolver,
     createRoutine,
   };
@@ -279,7 +283,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
   it.each(['approve', 'decline', 'cancel', 'read'] as const)(
     'runs actual AgentController + Agent tool approval %s lifecycle',
     async (decision) => {
-      const { runtime, modelResolver, createRoutine } = await createRuntime();
+      const { runtime, modelResolver, createRoutine, recordExecution } = await createRuntime();
       vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
       let calls = 0;
       const model = {
@@ -375,6 +379,20 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
           JSON.stringify(events.filter((event) => event.type === 'assistant.activity')),
         ).not.toContain('PRIVATE_QUERY');
         expect(events.at(-1)?.type).toBe('assistant.run.completed');
+        const records = recordExecution.mock.calls.map(([record]) => record);
+        expect(records.map((record) => record.operation)).toEqual(
+          expect.arrayContaining([
+            'assistant.phase.transport',
+            'assistant.phase.first_activity',
+            'assistant.phase.provider_inference',
+            'assistant.phase.tool',
+            'assistant.phase.first_token',
+            'assistant.turn',
+          ]),
+        );
+        expect(records.every((record) => !('prompt' in record) && !('result' in record))).toBe(
+          true,
+        );
         return;
       }
       await vi.waitFor(
@@ -408,6 +426,21 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       );
       expect(new Set(events.map((event) => event.runId)).size).toBe(1);
       expect(events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
+      const records = recordExecution.mock.calls.map(([record]) => record);
+      expect(records.map((record) => record.operation)).toContain('assistant.phase.approval_wait');
+      expect(records.map((record) => record.operation)).toContain('assistant.turn');
+      const approvalRecord = records.find(
+        (record) => record.operation === 'assistant.phase.approval_wait',
+      );
+      expect(approvalRecord).toMatchObject({
+        outcome:
+          decision === 'approve' ? 'succeeded' : decision === 'decline' ? 'cancelled' : 'cancelled',
+        ...(decision === 'cancel' ? { errorCategory: 'aborted' } : {}),
+      });
+      expect(records.find((record) => record.operation === 'assistant.turn')).toMatchObject({
+        outcome: decision === 'cancel' ? 'cancelled' : 'succeeded',
+      });
+      expect(records.every((record) => !('prompt' in record) && !('result' in record))).toBe(true);
       expect(
         JSON.stringify(
           events.filter(
@@ -753,6 +786,162 @@ describe('MastraAIRuntime Assistant tool policy', () => {
 });
 
 describe('MastraAIRuntime goal.create product projection', () => {
+  it('persists the explicit workflow user turn in canonical Mastra history without running Assistant', async () => {
+    const { runtime } = await createRuntime();
+    const dispatch = vi.spyOn(runtime, 'dispatchMessage');
+
+    const started = await runtime.start({
+      context: context('identity-turn', 'request-turn'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-turn',
+        input: { idea: 'User: Create a focused study goal' },
+        workflowTurn: 'Create a focused study goal',
+      },
+    });
+
+    expect(started.kind).toBe('goal.create');
+    expect(dispatch).not.toHaveBeenCalled();
+    await expect(
+      runtime.listMessages({ identityId: 'identity-turn', conversationId: 'conversation-turn' }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Create a focused study goal' }],
+    });
+  });
+
+  it('persists a main-Composer clarification response before resuming the Goal workflow', async () => {
+    const { runtime } = await createRuntime();
+    vi.mocked(runtime.goalPlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'The target is still ambiguous.',
+        questions: ['Which target school?'],
+        candidateDraft: draft,
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The target is now concrete enough to review.',
+        candidateDraft: draft,
+      });
+
+    const started = await runtime.start({
+      context: context('identity-clarification-turn', 'request-clarification-start'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-clarification-turn',
+        input: { idea: 'Prepare for graduate school' },
+      },
+    });
+    expect(started.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which target school?'],
+    });
+
+    await runtime.resume({
+      context: context('identity-clarification-turn', 'request-clarification-answer'),
+      request: {
+        runId: started.runId,
+        command: { type: 'answer', answers: ['Kyoto University'] },
+        workflowTurn: 'Kyoto University',
+      },
+    });
+
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-clarification-turn',
+        conversationId: 'conversation-clarification-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Kyoto University' }],
+    });
+  });
+
+  it('persists Task and Knowledge main-Composer clarification turns before workflow resume', async () => {
+    const { runtime } = await createRuntime();
+
+    vi.mocked(runtime.taskPlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'Two details are still needed.',
+        questions: ['When should it run?', 'How often should it repeat?'],
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The Task can now be reviewed.',
+        candidateDraft: taskDraft,
+      });
+    const task = await runtime.start({
+      context: context('identity-task-turn', 'request-task-start'),
+      request: {
+        kind: 'task.create',
+        conversationId: 'conversation-task-turn',
+        input: { idea: 'Create a recurring report Task' },
+        locale: 'en-US',
+      },
+    });
+    expect(task.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['When should it run?', 'How often should it repeat?'],
+    });
+    await runtime.resume({
+      context: context('identity-task-turn', 'request-task-answer'),
+      request: {
+        runId: task.runId,
+        command: { type: 'answer', answers: ['Every Monday morning'] },
+        workflowTurn: 'Every Monday morning',
+      },
+    });
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-task-turn',
+        conversationId: 'conversation-task-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Every Monday morning' }],
+    });
+
+    vi.mocked(runtime.knowledgeCapturePlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'The note topic needs one more detail.',
+        questions: ['Which topic?', 'Which angle matters most?'],
+      })
+      .mockResolvedValueOnce({
+        status: 'draft_ready',
+        reason: 'The note can now be reviewed.',
+        candidateDraft: knowledgeDraft,
+      });
+    const knowledge = await runtime.start({
+      context: context('identity-knowledge-turn', 'request-knowledge-start'),
+      request: {
+        kind: 'knowledge.capture',
+        conversationId: 'conversation-knowledge-turn',
+        input: { topic: 'Capture a durable workflow note' },
+        locale: 'en-US',
+      },
+    });
+    expect(knowledge.suspension).toMatchObject({
+      type: 'clarification_required',
+      questions: ['Which topic?', 'Which angle matters most?'],
+    });
+    await runtime.resume({
+      context: context('identity-knowledge-turn', 'request-knowledge-answer'),
+      request: {
+        runId: knowledge.runId,
+        command: { type: 'answer', answers: ['Durability and recovery semantics'] },
+        workflowTurn: 'Durability and recovery semantics',
+      },
+    });
+    await expect(
+      runtime.listMessages({
+        identityId: 'identity-knowledge-turn',
+        conversationId: 'conversation-knowledge-turn',
+      }),
+    ).resolves.toMatchObject({
+      messages: [{ role: 'user', content: 'Durability and recovery semantics' }],
+    });
+  });
+
   it('owns start/get/list/resume and short-circuits a second approve after terminal completion', async () => {
     const { runtime, mutations, summarizeUsage } = await createRuntime();
     const identityId = 'identity-a';
@@ -1163,8 +1352,10 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       request: { runId: started.runId, command: { type: 'approve' } },
     });
     expect(recovery.suspension).toMatchObject({ type: 'recovery_required', retryable: true });
+    expect(recovery.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const restored = await runtime.get({ identityId, runId: started.runId });
     expect(restored?.suspension).toMatchObject({ type: 'recovery_required' });
+    expect(restored?.result).toMatchObject({ status: 'failed', revision: 2, retryable: true });
     const completed = await runtime.resume({
       context: context(identityId, 'retry-host'),
       request: { runId: started.runId, command: { type: 'retry' } },

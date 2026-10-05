@@ -70,7 +70,11 @@ describe('AIExecutionRecord indexed usage projection', () => {
     });
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { identityId: 'identity-1', conversationId: 'conversation-1' },
+        where: {
+          identityId: 'identity-1',
+          conversationId: 'conversation-1',
+          NOT: { operation: { startsWith: 'assistant.phase.' } },
+        },
       }),
     );
   });
@@ -80,14 +84,19 @@ describe('AIExecutionRecord indexed usage projection', () => {
     const getAll = vi.fn(async () => [
       { token_usage: JSON.stringify(recordInput.tokenUsage), estimated_cost_usd: 0.000027 },
     ]);
-    const adapter = new AIExecutionRecordPowerSyncAdapter({ execute, getAll } as unknown as IElectronDatabase);
+    const adapter = new AIExecutionRecordPowerSyncAdapter({
+      execute,
+      getAll,
+    } as unknown as IElectronDatabase);
 
     await adapter.record(recordInput);
     expect(execute.mock.calls[0]?.[0]).toContain('provider_connection_id, model_id');
     expect(execute.mock.calls[0]?.[1]).toContain('conversation-1');
     expect(execute.mock.calls[0]?.[1]).toContain('run-1');
 
-    await expect(adapter.summarizeUsage({ identityId: 'identity-1', runId: 'run-1' })).resolves.toEqual({
+    await expect(
+      adapter.summarizeUsage({ identityId: 'identity-1', runId: 'run-1' }),
+    ).resolves.toEqual({
       executionCount: 1,
       promptTokens: 100,
       completionTokens: 20,
@@ -95,6 +104,7 @@ describe('AIExecutionRecord indexed usage projection', () => {
       estimatedCost: 0.000027,
     });
     expect(getAll.mock.calls[0]?.[0]).toContain('identity_id = ?');
+    expect(getAll.mock.calls[0]?.[0]).toContain("operation NOT LIKE 'assistant.phase.%'");
     expect(getAll.mock.calls[0]?.[0]).toContain('run_id = ?');
     expect(getAll.mock.calls[0]?.[1]).toEqual(['identity-1', 'run-1']);
   });

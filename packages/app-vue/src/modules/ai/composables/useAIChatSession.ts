@@ -27,6 +27,8 @@ const MAX_COMPOSER_ATTACHMENT_TOTAL_BYTES = 1_200_000;
 const MAX_COMPOSER_CONTEXT_ENTITIES = 12;
 const COMPOSER_IMAGE_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const COMPOSER_DOCUMENT_MEDIA_TYPES = new Set(['text/plain', 'text/markdown', 'application/pdf']);
+const STREAM_DELTA_FLUSH_MS = 48;
+const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
 type DeleteConversationId = Parameters<AIChatService['deleteConversation']>[0];
 type RuntimeSelectableEntityType = AssistantRuntimeSelectedEntity['entityType'];
 
@@ -73,6 +75,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   const composerAttachments = ref<ComposerAttachment[]>([]);
   const composerContextEntities = ref<ComposerContextEntity[]>([]);
   const suppressedSurfaceContextKey = ref<string | null>(null);
+  let pendingStreamDelta = '';
+  let pendingStreamAssistantId: string | null = null;
+  let pendingStreamFlushTimer: ReturnType<typeof setTimeout> | null = null;
 
   const hasWorkflowMessages = computed(() =>
     chatTimeline.value.some((item) => item.content.trim().length > 0),
@@ -351,7 +356,44 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     }
   }
 
+  function clearPendingStreamFlushTimer() {
+    if (pendingStreamFlushTimer === null) return;
+    clearTimeout(pendingStreamFlushTimer);
+    pendingStreamFlushTimer = null;
+  }
+
+  function flushPendingStreamDelta(assistantDraftId?: string) {
+    if (!pendingStreamDelta || !pendingStreamAssistantId) {
+      clearPendingStreamFlushTimer();
+      return;
+    }
+    if (assistantDraftId && pendingStreamAssistantId !== assistantDraftId) return;
+    const target = chatTimeline.value.find((item) => item.id === pendingStreamAssistantId);
+    if (target) {
+      target.content += pendingStreamDelta;
+      target.status = 'generating';
+      target.errorMessage = undefined;
+    }
+    pendingStreamDelta = '';
+    pendingStreamAssistantId = null;
+    clearPendingStreamFlushTimer();
+  }
+
+  function bufferStreamDelta(assistantDraftId: string, content: string) {
+    if (!content) return;
+    if (pendingStreamAssistantId && pendingStreamAssistantId !== assistantDraftId) {
+      flushPendingStreamDelta();
+    }
+    pendingStreamAssistantId = assistantDraftId;
+    pendingStreamDelta += content;
+    if (pendingStreamFlushTimer !== null) return;
+    pendingStreamFlushTimer = setTimeout(() => {
+      flushPendingStreamDelta(assistantDraftId);
+    }, STREAM_DELTA_FLUSH_MS);
+  }
+
   function abortActiveStream() {
+    flushPendingStreamDelta();
     settleVisibleApprovals('cancelled');
     if (!activeStreamAbortController.value) return;
     activeStreamAbortController.value.abort();
@@ -507,6 +549,38 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     return String(conversation.id);
   }
 
+  async function prepareWorkflowTurn(
+    loadService: AIChatService,
+    conversationName: string,
+    adjustComposerHeight: () => void,
+  ): Promise<{ conversationId: string; content: string } | null> {
+    if (chatLoading.value) return null;
+    const pendingContent = chatMessage.value.trim();
+    if (!pendingContent) return null;
+    try {
+      const conversationId = await ensureConversationCreated(loadService, conversationName);
+      const pendingAttachments = composerAttachments.value.map((attachment) => ({
+        mediaType: attachment.mediaType,
+        ...(attachment.filename ? { filename: attachment.filename } : {}),
+      }));
+      chatTimeline.value.push({
+        id: `workflow-user-draft-${Date.now()}`,
+        role: 'user',
+        content: pendingContent,
+        ...(pendingAttachments.length ? { attachments: pendingAttachments } : {}),
+        status: 'success',
+      });
+      chatMessage.value = '';
+      clearComposerTurnState();
+      await nextTick();
+      adjustComposerHeight();
+      return { conversationId, content: pendingContent };
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.sendFailed'));
+      return null;
+    }
+  }
+
   function resetChatSession(mode: string = 'chat', getDefaultName: (m: string) => string) {
     chatConversationId.value = '';
     chatTimeline.value = [];
@@ -561,22 +635,19 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       event.type === 'assistant.run.completed' ||
       event.type === 'assistant.run.failed' ||
       event.type === 'assistant.run.cancelled'
-    )
+    ) {
+      flushPendingStreamDelta(assistantDraftId);
       settleVisibleApprovals(event.type === 'assistant.run.cancelled' ? 'cancelled' : 'failed', {
         conversationId: event.conversationId,
         assistantDraftId,
       });
+    }
     if (event.type === 'assistant.run.started') {
       activeRuntimeRunId.value = event.runId;
       return;
     }
     if (event.type === 'assistant.message.delta') {
-      const target = chatTimeline.value.find((item) => item.id === assistantDraftId);
-      if (target) {
-        target.content += event.data.content;
-        target.status = 'generating';
-        target.errorMessage = undefined;
-      }
+      bufferStreamDelta(assistantDraftId, event.data.content);
       return;
     }
     if (event.type === 'assistant.usage.updated') {
@@ -693,6 +764,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       // Explicit conversation reload/reselect remains authoritative.
       await refreshRuntimeUsage(conversationId);
     } catch (error) {
+      flushPendingStreamDelta(assistantDraftId);
       const assistantDraft = chatTimeline.value.find((item) => item.id === assistantDraftId);
       const userDraft = chatTimeline.value.find((item) => item.id === userDraftId);
       if (isAbortLikeError(error)) {
@@ -711,6 +783,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         toast.error(errorMessage);
       }
     } finally {
+      if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
       if (assistantDraftId)
         settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {
           conversationId,
@@ -724,11 +797,21 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     }
   }
 
-  function scrollMessagesToBottom() {
+  function scrollMessagesToBottom(options?: { streaming?: boolean; force?: boolean }) {
     nextTick(() => {
       const viewport = messagesViewport.value;
       if (!viewport) return;
-      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      if (
+        options?.streaming &&
+        !options.force &&
+        distanceFromBottom > STREAM_AUTO_FOLLOW_THRESHOLD_PX
+      )
+        return;
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior: options?.streaming ? 'auto' : 'smooth',
+      });
     });
   }
 
@@ -761,6 +844,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     selectConversation,
     deleteConversation,
     ensureConversationCreated,
+    prepareWorkflowTurn,
     resetChatSession,
     startNewConversation,
     handleSendChat,

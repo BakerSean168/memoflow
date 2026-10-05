@@ -71,7 +71,7 @@ export class AIExecutionRecordPowerSyncAdapter implements IAIExecutionRecordPort
   }
 
   async summarizeUsage(input: AIUsageQuery): Promise<AIUsageSummary> {
-    const clauses = ['identity_id = ?'];
+    const clauses = ['identity_id = ?', "operation NOT LIKE 'assistant.phase.%'"];
     const parameters: unknown[] = [input.identityId];
     if (input.conversationId) {
       clauses.push('conversation_id = ?');

@@ -1,4 +1,5 @@
-import type { MastraDBMessage } from '@mastra/core/agent';
+import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
+import { randomUUID } from 'node:crypto';
 import type { AssistantRuntimeHistoryView } from '@memoflow/contracts/ai';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
@@ -19,6 +20,8 @@ interface AssistantMemoryPort {
   }): Promise<ThreadView>;
   deleteThread(threadId: string): Promise<void>;
   recall(input: { threadId: string; perPage: false }): Promise<{ messages: MastraDBMessage[] }>;
+  saveMessages(input: { messages: MastraDBMessage[] }): Promise<unknown>;
+  settled(): Promise<void>;
 }
 
 export class AssistantConversationUnavailableError extends Error {
@@ -100,6 +103,27 @@ export class AssistantHistoryService {
     });
     this.openInFlight.set(key, pending);
     await pending;
+  }
+
+  async appendUserTurn(input: {
+    identityId: string;
+    conversationId: string;
+    content: string;
+  }): Promise<string> {
+    await this.ensureConversation(input);
+    const messageId = `workflow-user-${randomUUID()}`;
+    await this.memory.saveMessages({
+      messages: [
+        createSignal({
+          type: 'user',
+          id: messageId,
+          createdAt: new Date(),
+          contents: input.content,
+        }).toDBMessage({ threadId: input.conversationId, resourceId: input.identityId }),
+      ],
+    });
+    await this.memory.settled();
+    return messageId;
   }
 
   async listMessages(input: {

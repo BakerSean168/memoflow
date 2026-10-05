@@ -197,7 +197,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(store.panelSurface).toBe('business');
   });
 
-  it('auto-opens workflow only from an open clean surface and preserves the return surface', () => {
+  it('migrates a persisted legacy workflow surface back to the active business surface', () => {
     const store = useAppShellStore();
     const tab = store.openTab({
       module: 'goal',
@@ -205,40 +205,12 @@ describe('useAppShellStore (V2 shell tabs)', () => {
       title: 'Goals',
       intent: 'capsule',
     });
-    store.setWorkflowAvailable(true, 2);
 
-    store.setSurfaceStatus('dirty');
-    expect(store.requestWorkflowSurface('automatic')).toBe('deferred');
-    expect(store.panelSurface).toBe('business');
-    expect(store.workflowAttentionCount).toBe(2);
+    (store as unknown as { panelSurface: string }).panelSurface = 'workflow';
+    store.sanitizeLegacyTabs();
 
-    store.setSurfaceStatus('busy');
-    expect(store.requestWorkflowSurface('automatic')).toBe('deferred');
-    expect(store.panelSurface).toBe('business');
-
-    store.setSurfaceStatus('clean');
-    expect(store.requestWorkflowSurface('automatic')).toBe('opened');
-    expect(store.panelSurface).toBe('workflow');
-    expect(store.activeTabId).toBe(tab.tabId);
-    expect(store.workflowAttentionCount).toBe(0);
-
-    store.closeWorkflowSurface();
     expect(store.panelSurface).toBe('business');
     expect(store.activeTabId).toBe(tab.tabId);
-  });
-
-  it('defers workflow while user-hidden and lets an explicit workflow action reopen it', () => {
-    const store = useAppShellStore();
-    store.setWorkflowAvailable(true, 1);
-    store.closeRightPanel();
-
-    expect(store.requestWorkflowSurface('automatic')).toBe('deferred');
-    expect(store.rightPanelOpen).toBe(false);
-    expect(store.workflowAttentionCount).toBe(1);
-
-    expect(store.requestWorkflowSurface('explicit')).toBe('opened');
-    expect(store.rightPanelOpen).toBe(true);
-    expect(store.panelSurface).toBe('workflow');
   });
 
   it('toggleFocus records user layout reason and remembers it per AI conversation', () => {

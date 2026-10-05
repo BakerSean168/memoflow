@@ -107,7 +107,11 @@
                   </button>
                 </div>
               </section>
-              <AIMessageContent v-if="item.content.trim()" :content="item.content" />
+              <AIMessageContent
+                v-if="item.content.trim()"
+                :content="item.content"
+                :generating="item.status === 'generating'"
+              />
               <p v-else class="text-sm leading-7 text-muted-foreground">
                 {{ typingPlaceholder(item) }}
               </p>
