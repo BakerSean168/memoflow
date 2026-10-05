@@ -7,8 +7,8 @@ updated: 2026-10-05T12:20:00+08:00
 
 # ADR-115: Goal Planner Bounded External Research Evidence
 
-**状态：** 已采纳并实施（AIC-5001）  
-**日期：** 2026-10-05  
+**状态：** 已采纳并实施（AIC-5001）
+**日期：** 2026-10-05
 **关联：** ADR-050、ADR-052、ADR-098、ADR-099、ADR-112
 
 ## Context
