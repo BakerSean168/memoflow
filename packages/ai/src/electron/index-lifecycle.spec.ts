@@ -260,10 +260,12 @@ describe('createAIElectronModule lifecycle', () => {
 
   it('maps runtime provider failures to the same stable public code as HTTP', async () => {
     const workflowRuntime = {
-      start: vi.fn(async () => {
+      start: vi.fn(),
+      startDetached: vi.fn(async () => {
         throw new AIExecutionError('capability_unverified', 'provider=server-secret');
       }),
       resume: vi.fn(),
+      resumeDetached: vi.fn(),
       get: vi.fn(),
       list: vi.fn(),
       cancel: vi.fn(),

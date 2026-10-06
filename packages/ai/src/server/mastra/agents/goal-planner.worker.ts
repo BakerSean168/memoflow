@@ -135,60 +135,90 @@ function unwrapTaskYmdWireValue(value: unknown): unknown {
  */
 function normalizePlannerWireShape(value: unknown): unknown {
   if (!isRecord(value) || !isRecord(value.candidateDraft)) return value;
-  const tasks = value.candidateDraft.tasks;
-  if (!Array.isArray(tasks)) return value;
+  const { dueToClarification: _legacyClarificationHint, ...candidateDraft } = value.candidateDraft;
+  const tasks = candidateDraft.tasks;
+  const normalizedTasks = Array.isArray(tasks)
+    ? tasks.map((task) => {
+        if (!isRecord(task) || !isRecord(task.schedule)) return task;
+        const schedule = task.schedule;
 
-  const normalizedTasks = tasks.map((task) => {
-    if (!isRecord(task) || !isRecord(task.schedule)) return task;
-    const schedule = task.schedule;
+        if (schedule.kind === 'OneTime') {
+          return {
+            ...task,
+            schedule: {
+              ...schedule,
+              date: unwrapTaskYmdWireValue(schedule.date),
+            },
+          };
+        }
 
-    if (schedule.kind === 'OneTime') {
-      return {
-        ...task,
-        schedule: {
-          ...schedule,
-          date: unwrapTaskYmdWireValue(schedule.date),
-        },
-      };
-    }
+        if (schedule.kind === 'Recurring') {
+          const recurrence = isRecord(schedule.recurrence) ? schedule.recurrence : undefined;
+          const recurrenceEnd = recurrence && isRecord(recurrence.end) ? recurrence.end : undefined;
+          return {
+            ...task,
+            schedule: {
+              ...schedule,
+              startDate: unwrapTaskYmdWireValue(schedule.startDate),
+              ...(recurrence
+                ? {
+                    recurrence: {
+                      ...recurrence,
+                      ...(recurrenceEnd?.kind === 'Until'
+                        ? {
+                            end: {
+                              ...recurrenceEnd,
+                              date: unwrapTaskYmdWireValue(recurrenceEnd.date),
+                            },
+                          }
+                        : {}),
+                    },
+                  }
+                : {}),
+            },
+          };
+        }
 
-    if (schedule.kind === 'Recurring') {
-      const recurrence = isRecord(schedule.recurrence) ? schedule.recurrence : undefined;
-      const recurrenceEnd = recurrence && isRecord(recurrence.end) ? recurrence.end : undefined;
-      return {
-        ...task,
-        schedule: {
-          ...schedule,
-          startDate: unwrapTaskYmdWireValue(schedule.startDate),
-          ...(recurrence
-            ? {
-                recurrence: {
-                  ...recurrence,
-                  ...(recurrenceEnd?.kind === 'Until'
-                    ? {
-                        end: {
-                          ...recurrenceEnd,
-                          date: unwrapTaskYmdWireValue(recurrenceEnd.date),
-                        },
-                      }
-                    : {}),
-                },
-              }
-            : {}),
-        },
-      };
-    }
-
-    return task;
-  });
+        return task;
+      })
+    : tasks;
 
   return {
     ...value,
     candidateDraft: {
-      ...value.candidateDraft,
-      tasks: normalizedTasks,
+      ...candidateDraft,
+      ...(Array.isArray(tasks) ? { tasks: normalizedTasks } : {}),
     },
   };
+}
+
+function exactJsonText(value: string): string {
+  const trimmed = value.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  return fenced?.[1]?.trim() ?? trimmed;
+}
+
+/**
+ * Some OpenAI-compatible relays return valid JSON text while the AI SDK/Mastra
+ * structured-output object is unavailable after provider-side validation.
+ * Recover only an exact JSON document (or one whole fenced JSON block); never
+ * scrape prose or infer missing domain values.
+ */
+function structuredOutputCandidate(output: unknown): unknown {
+  if (!isRecord(output)) return undefined;
+  if (output.object !== undefined) return output.object;
+  const text =
+    typeof output.text === 'string'
+      ? output.text
+      : typeof output.outputText === 'string'
+        ? output.outputText
+        : undefined;
+  if (!text?.trim()) return undefined;
+  try {
+    return JSON.parse(exactJsonText(text));
+  } catch {
+    return undefined;
+  }
 }
 
 function summarizeValidationIssues(error: z.ZodError): string {
@@ -204,7 +234,7 @@ function goalPlanningStructuredOutputInstructions(allowResearch: boolean): strin
     allowResearch
       ? 'status is exactly draft_ready, needs_clarification, or needs_research.'
       : 'status is exactly draft_ready or needs_clarification. Never emit needs_research.',
-    'Every decision has reason (non-empty string).',
+    'Every decision has reason (non-empty string). Never omit reason.',
     'needs_clarification has questions: 1-3 non-empty strings; candidateDraft is optional.',
     ...(allowResearch
       ? [
@@ -212,7 +242,7 @@ function goalPlanningStructuredOutputInstructions(allowResearch: boolean): strin
           'If the user explicitly requires verification of current or official public facts, or a material plan branch/date depends on live or time-sensitive public facts not already grounded in canonical external evidence, status MUST be needs_research before any draft_ready response. Never substitute model memory for that verification. forceDraft suppresses clarification only and does not suppress required research.',
         ]
       : []),
-    'draft_ready has candidateDraft with goal, keyResults, tasks, knowledge, rationale, warnings.',
+    'draft_ready has candidateDraft with goal, keyResults, tasks, knowledge, rationale, warnings. candidateDraft contains only canonical fields; never emit dueToClarification or other helper metadata.',
     'candidateDraft.goal: { draftRef:"goal", name, optional summary/description/reminderConfig, status:"Planned"|"InProgress", optional start/target GoalTimeframe, labels:string[] }.',
     'GoalTimeframe is one of {kind:"day",date:"YYYY-MM-DD"}, {kind:"month",year,month}, {kind:"quarter",year,quarter}, {kind:"halfYear",year,half}, {kind:"year",year}.',
     'Each Key Result: { draftRef:"kr:<lowercase-ascii-slug>", title, optional description, aggregationMethod:"Sum"|"Average"|"Max"|"Min"|"Last", initialValue:number, optional currentValue:number, targetValue:number, optional target:GoalTimeframe|null, optional unit, weight:1..5 }. Use title, never name.',
@@ -339,13 +369,17 @@ export class GoalPlannerWorker implements GoalPlannerPort {
     });
     outputs.push(firstOutput);
 
-    const parsed = schema.safeParse(normalizePlannerWireShape(firstOutput.object));
+    const firstCandidate = normalizePlannerWireShape(structuredOutputCandidate(firstOutput));
+    const parsed = schema.safeParse(firstCandidate);
     if (parsed.success) return parsed.data;
 
     const repairPrompt = [
       prompt,
       'Your previous structured response failed MemoFlow canonical validation. Regenerate the complete decision once, correcting only contract-shape errors while preserving the intended plan.',
-      'Critical canonical invariants: Key Results use title (never name); draftRef is goal or kr:/task:/note: followed by a lowercase ASCII slug; aggregationMethod is exactly Sum, Average, Max, Min, or Last; Task OneTime schedule.date and Recurring schedule.startDate / Until end.date are bare YYYY-MM-DD strings, never GoalTimeframe objects; knowledge create targetSubpath is vault-relative and ends in .md; goalRef is exactly goal; every keyResultRef references a Key Result draftRef present in the same draft.',
+      'Critical canonical invariants: every decision includes non-empty reason; candidateDraft contains only canonical goal/keyResults/tasks/knowledge/rationale/warnings fields and never dueToClarification; Key Results use title (never name); draftRef is goal or kr:/task:/note: followed by a lowercase ASCII slug; aggregationMethod is exactly Sum, Average, Max, Min, or Last; Task OneTime schedule.date and Recurring schedule.startDate / Until end.date are bare YYYY-MM-DD strings, never GoalTimeframe objects; knowledge create targetSubpath is vault-relative and ends in .md; goalRef is exactly goal; every keyResultRef references a Key Result draftRef present in the same draft.',
+      ...(firstCandidate === undefined
+        ? []
+        : ['Previous candidate JSON:', JSON.stringify(firstCandidate)]),
       'Validation issues from the previous attempt:',
       summarizeValidationIssues(parsed.error),
     ].join('\n\n');
@@ -360,7 +394,8 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       },
     });
     outputs.push(repairOutput);
-    return schema.parse(normalizePlannerWireShape(repairOutput.object));
+    const repairCandidate = normalizePlannerWireShape(structuredOutputCandidate(repairOutput));
+    return schema.parse(repairCandidate);
   }
 
   private async loadKnowledgeEvidence(

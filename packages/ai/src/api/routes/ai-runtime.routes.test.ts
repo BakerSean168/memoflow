@@ -115,17 +115,37 @@ const workflowRun = {
 
 function workflowRuntimeStub() {
   const start = vi.fn(async () => workflowRun);
+  const startDetached = vi.fn(async () => ({
+    ...workflowRun,
+    status: 'running' as const,
+    suspension: undefined,
+  }));
   const resume = vi.fn(async () => workflowRun);
+  const resumeDetached = vi.fn(async () => ({
+    ...workflowRun,
+    status: 'running' as const,
+    suspension: undefined,
+  }));
   const get = vi.fn(async () => workflowRun);
   const list = vi.fn(async () => [workflowRun]);
   const cancel = vi.fn(async () => workflowRun);
   return {
     start,
+    startDetached,
     resume,
+    resumeDetached,
     get,
     list,
     cancel,
-    runtime: { start, resume, get, list, cancel } satisfies AIWorkflowRuntimePort,
+    runtime: {
+      start,
+      startDetached,
+      resume,
+      resumeDetached,
+      get,
+      list,
+      cancel,
+    } satisfies AIWorkflowRuntimePort,
   };
 }
 
@@ -349,7 +369,7 @@ describe('registerAIRuntimeRoutes', () => {
           conversationId: 'conversation-1',
           input: { idea: 'Run a 5K' },
         },
-        spy: workflow.start,
+        spy: workflow.startDetached,
         expected: {
           context: {
             identityId: 'identity-1',
@@ -378,7 +398,7 @@ describe('registerAIRuntimeRoutes', () => {
       {
         path: '/workflow/resume',
         body: { runId: 'workflow-1', command: { type: 'approve' } },
-        spy: workflow.resume,
+        spy: workflow.resumeDetached,
         expected: {
           context: {
             identityId: 'identity-1',
@@ -448,7 +468,7 @@ describe('registerAIRuntimeRoutes', () => {
     );
 
     expect(injectedRes.status).toHaveBeenCalledWith(400);
-    expect(workflow.start).not.toHaveBeenCalled();
+    expect(workflow.startDetached).not.toHaveBeenCalled();
 
     const unavailableRouter = registerAIRuntimeRoutes(assistant.runtime, { auth }, null);
     const unavailableStart = getRouteHandler(unavailableRouter, 'post', '/workflow/start');
@@ -463,7 +483,7 @@ describe('registerAIRuntimeRoutes', () => {
   it('maps provider runtime failures to the same stable public code as Desktop IPC', async () => {
     const assistant = runtimeStub();
     const workflow = workflowRuntimeStub();
-    workflow.start.mockRejectedValueOnce(
+    workflow.startDetached.mockRejectedValueOnce(
       new AIExecutionError('provider_unavailable', 'vault=server-secret'),
     );
     const router = registerAIRuntimeRoutes(assistant.runtime, { auth }, workflow.runtime);

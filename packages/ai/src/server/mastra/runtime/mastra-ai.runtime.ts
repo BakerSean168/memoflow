@@ -565,6 +565,23 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
   }
 
+  private runningWorkflowView(input: {
+    runId: string;
+    kind: AIWorkflowRunView['kind'];
+    conversationId: string;
+    createdAt?: number;
+  }): AIWorkflowRunView {
+    const now = Date.now();
+    return AIWorkflowRunViewSchema.parse({
+      runId: input.runId,
+      kind: input.kind,
+      conversationId: input.conversationId,
+      status: 'running',
+      createdAt: input.createdAt ?? now,
+      updatedAt: now,
+    });
+  }
+
   private async workflowStore() {
     const store = await this.deps.storage.getStore('workflows');
     if (!store) throw new Error('AI_WORKFLOW_STORAGE_UNAVAILABLE');
@@ -662,6 +679,74 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const persisted = await this.get({ identityId: input.context.identityId, runId: run.runId });
     if (!persisted) throw new Error('AI_WORKFLOW_SNAPSHOT_MISSING');
     return persisted;
+  }
+
+  async startDetached(input: {
+    context: ExecutionContext;
+    request: AIWorkflowStartClientRequest;
+  }): Promise<AIWorkflowRunView> {
+    await this.init();
+    const requestedKind: string = input.request.kind as string;
+    if (
+      requestedKind !== 'goal.create' &&
+      requestedKind !== 'task.create' &&
+      requestedKind !== 'knowledge.capture'
+    ) {
+      throw new Error(`AI_WORKFLOW_KIND_UNSUPPORTED:${requestedKind}`);
+    }
+
+    const workflowInput = this.workflowInputFromRequest(input);
+    if (input.request.kind === 'goal.create') {
+      const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
+      if (input.request.workflowTurn) {
+        await this.history.appendUserTurn({
+          ...input.request,
+          ...input.context,
+          content: input.request.workflowTurn,
+        });
+      }
+      const run = await this.goalCreateWorkflow.createRun({ resourceId: input.context.identityId });
+      await run.startAsync({
+        inputData: goalInput,
+        initialState: initialGoalCreateWorkflowState(goalInput),
+        requestContext: await this.workflowRequestContext(input.context, goalInput),
+      });
+      return this.runningWorkflowView({
+        runId: run.runId,
+        kind: 'goal.create',
+        conversationId: goalInput.conversationId,
+      });
+    }
+
+    if (input.request.kind === 'task.create') {
+      const taskInput = TaskCreateWorkflowInputSchema.parse(workflowInput);
+      const run = await this.taskCreateWorkflow.createRun({ resourceId: input.context.identityId });
+      await run.startAsync({
+        inputData: taskInput,
+        initialState: initialTaskCreateWorkflowState(taskInput),
+        requestContext: await this.workflowRequestContext(input.context, taskInput),
+      });
+      return this.runningWorkflowView({
+        runId: run.runId,
+        kind: 'task.create',
+        conversationId: taskInput.conversationId,
+      });
+    }
+
+    const knowledgeInput = KnowledgeCaptureWorkflowInputSchema.parse(workflowInput);
+    const run = await this.knowledgeCaptureWorkflow.createRun({
+      resourceId: input.context.identityId,
+    });
+    await run.startAsync({
+      inputData: knowledgeInput,
+      initialState: initialKnowledgeCaptureWorkflowState(knowledgeInput),
+      requestContext: await this.workflowRequestContext(input.context, knowledgeInput),
+    });
+    return this.runningWorkflowView({
+      runId: run.runId,
+      kind: 'knowledge.capture',
+      conversationId: knowledgeInput.conversationId,
+    });
   }
 
   private workflowInputFromRequest(input: {
@@ -765,6 +850,83 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (!persisted) throw new Error('AI_WORKFLOW_SNAPSHOT_MISSING');
     return persisted;
+  }
+
+  async resumeDetached(input: {
+    context: ExecutionContext;
+    request: AIWorkflowResumeClientRequest;
+  }): Promise<AIWorkflowRunView> {
+    await this.init();
+    const before = await this.get({
+      identityId: input.context.identityId,
+      runId: input.request.runId,
+    });
+    if (!before) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
+    if (
+      before.status === 'completed' ||
+      before.status === 'failed' ||
+      before.status === 'cancelled' ||
+      before.status === 'running'
+    ) {
+      return before;
+    }
+    if (
+      before.kind !== 'goal.create' &&
+      before.kind !== 'task.create' &&
+      before.kind !== 'knowledge.capture'
+    ) {
+      throw new Error('AI_WORKFLOW_KIND_UNSUPPORTED');
+    }
+    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
+      await this.history.appendUserTurn({
+        identityId: input.context.identityId,
+        conversationId: before.conversationId,
+        content: input.request.workflowTurn,
+      });
+    }
+
+    const store = await this.workflowStore();
+    const workflowName =
+      before.kind === 'goal.create'
+        ? GOAL_CREATE_WORKFLOW_ID
+        : before.kind === 'task.create'
+          ? TASK_CREATE_WORKFLOW_ID
+          : KNOWLEDGE_CAPTURE_WORKFLOW_ID;
+    const row = await store.getWorkflowRunById({
+      workflowName,
+      runId: input.request.runId,
+    });
+    if (!row || row.resourceId !== input.context.identityId) {
+      throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
+    }
+    const workflowInput = this.workflowInputFromSnapshot(workflowName, row.snapshot);
+    const workflow =
+      before.kind === 'goal.create'
+        ? this.goalCreateWorkflow
+        : before.kind === 'task.create'
+          ? this.taskCreateWorkflow
+          : this.knowledgeCaptureWorkflow;
+    const lifecycleStepId =
+      before.kind === 'goal.create'
+        ? GOAL_CREATE_LIFECYCLE_STEP_ID
+        : before.kind === 'task.create'
+          ? TASK_CREATE_LIFECYCLE_STEP_ID
+          : KNOWLEDGE_CAPTURE_LIFECYCLE_STEP_ID;
+    const run = await workflow.createRun({
+      runId: input.request.runId,
+      resourceId: input.context.identityId,
+    });
+    await run.resumeAsync({
+      step: lifecycleStepId,
+      resumeData: input.request.command,
+      requestContext: await this.workflowRequestContext(input.context, workflowInput),
+    });
+    return this.runningWorkflowView({
+      runId: before.runId,
+      kind: before.kind,
+      conversationId: before.conversationId,
+      createdAt: before.createdAt,
+    });
   }
 
   async summarizeUsage(input: {

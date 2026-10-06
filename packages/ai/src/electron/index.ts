@@ -596,7 +596,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             }
             try {
               const run = AIWorkflowRunViewSchema.parse(
-                await aiModule.workflowRuntime.start({
+                await aiModule.workflowRuntime.startDetached({
                   context: requestContext,
                   request: parsed.data,
                 }),
@@ -634,7 +634,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             }
             try {
               const run = AIWorkflowRunViewSchema.parse(
-                await aiModule.workflowRuntime.resume({
+                await aiModule.workflowRuntime.resumeDetached({
                   context: requestContext,
                   request: parsed.data,
                 }),

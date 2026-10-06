@@ -184,6 +184,74 @@ describe('GoalPlannerWorker bounded external research', () => {
     );
   });
 
+  it('recovers an exact JSON-text repair when an OpenAI-compatible relay omits Mastra object output', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const repaired = {
+      status: 'draft_ready' as const,
+      reason: 'The goal is concrete enough to review.',
+      candidateDraft: {
+        goal: { draftRef: 'goal' as const, name: 'Build a reading habit' },
+      },
+    };
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValueOnce({
+        object: {
+          status: 'draft_ready',
+          candidateDraft: {
+            goal: { draftRef: 'goal', name: 'Build a reading habit' },
+            dueToClarification: false,
+          },
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        object: undefined,
+        text: `\`\`\`json\n${JSON.stringify(repaired)}\n\`\`\``,
+      } as never);
+
+    await expect(worker.plan(request(), new RequestContext())).resolves.toMatchObject({
+      status: 'draft_ready',
+      reason: repaired.reason,
+      candidateDraft: {
+        goal: { draftRef: 'goal', name: 'Build a reading habit' },
+        keyResults: [],
+        tasks: [],
+        knowledge: [],
+      },
+    });
+
+    expect(generate).toHaveBeenCalledTimes(2);
+    const repairPrompt = String(generate.mock.calls[1]?.[0] ?? '');
+    expect(repairPrompt).toContain('Previous candidate JSON');
+    expect(repairPrompt).toContain('reason');
+    const previousCandidate =
+      repairPrompt
+        .split('Previous candidate JSON:')[1]
+        ?.split('Validation issues from the previous attempt:')[0] ?? '';
+    expect(previousCandidate).not.toContain('dueToClarification');
+  });
+
+  it('drops only the known non-canonical dueToClarification wire hint before strict validation', async () => {
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({
+      object: {
+        status: 'draft_ready',
+        reason: 'Ready for review.',
+        candidateDraft: {
+          goal: { draftRef: 'goal', name: 'Build a reading habit' },
+          dueToClarification: true,
+        },
+      },
+    } as never);
+
+    await expect(worker.plan(request(), new RequestContext())).resolves.toMatchObject({
+      status: 'draft_ready',
+      reason: 'Ready for review.',
+      candidateDraft: { goal: { draftRef: 'goal', name: 'Build a reading habit' } },
+    });
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
   it('losslessly unwraps GoalTimeframe-style day wrappers in Task YMD fields', async () => {
     const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
     const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({

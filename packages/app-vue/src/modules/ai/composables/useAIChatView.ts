@@ -7,6 +7,7 @@ import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
 } from '@memoflow/contracts/repository';
+import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
@@ -404,6 +405,95 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   );
 
   persistence.bindPersistenceWatcher(chatSession.chatConversationId);
+
+  function activeWorkflowRun(): AIWorkflowRunView | null {
+    if (toolMode.value === 'goal-create') return goalWorkflow.goalWorkflowRun.value;
+    if (toolMode.value === 'task-create') return taskWorkflow.taskWorkflowRun.value;
+    if (toolMode.value === 'knowledge-capture')
+      return knowledgeCaptureWorkflow.knowledgeCaptureRun.value;
+    return null;
+  }
+
+  async function projectAuthoritativeWorkflowRun(run: AIWorkflowRunView): Promise<void> {
+    switch (run.kind) {
+      case 'goal.create':
+        await goalWorkflow.projectRun(run);
+        if (run.suspension?.type === 'goal_draft_review') {
+          await maybeRenameCurrentConversation(run.suspension.draft.goal.name);
+        }
+        return;
+      case 'task.create':
+        await taskWorkflow.projectRun(run);
+        if (run.suspension?.type === 'task_draft_review') {
+          await maybeRenameCurrentConversation(run.suspension.draft.task.title);
+        }
+        return;
+      case 'knowledge.capture':
+        await knowledgeCaptureWorkflow.projectRun(run);
+        if (run.suspension?.type === 'knowledge_draft_review') {
+          await maybeRenameCurrentConversation(run.suspension.draft.title);
+        }
+    }
+  }
+
+  // start() returns the durable running pointer immediately so persistence can
+  // record runId before any slow model call finishes. While this view is
+  // mounted, reconcile that pointer through the authoritative runtime until the
+  // run reaches its next stable state. Network interruptions do not cancel the
+  // server-owned workflow; they only delay this projection.
+  watch(
+    activeWorkflowRun,
+    (run, _previous, onCleanup) => {
+      if (!run || run.status !== 'running') return;
+      let cancelled = false;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      let delayMs = 500;
+      let warned = false;
+      onCleanup(() => {
+        cancelled = true;
+        if (timer) clearTimeout(timer);
+      });
+
+      const backoff = () => {
+        delayMs = Math.min(Math.ceil(delayMs * 1.5), 2_000);
+      };
+      const schedule = () => {
+        if (cancelled) return;
+        timer = setTimeout(() => void poll(), delayMs);
+      };
+      const poll = async () => {
+        if (cancelled) return;
+        try {
+          const next = await workflowRuntime.get({ runId: run.runId });
+          if (cancelled) return;
+          if (!next || next.status === 'running') {
+            backoff();
+            schedule();
+            return;
+          }
+          if (next.conversationId !== run.conversationId) {
+            throw new AIWorkflowRestoreError(
+              'AI_WORKFLOW_CONVERSATION_MISMATCH',
+              `Workflow run ${run.runId} changed conversation identity`,
+            );
+          }
+          await projectAuthoritativeWorkflowRun(next);
+        } catch (error) {
+          if (cancelled) return;
+          // The persisted run pointer remains authoritative. Retry projection
+          // instead of turning a transient client/network failure into a workflow failure.
+          if (!warned) {
+            warned = true;
+            console.warn('[AIChatView] durable workflow reconciliation delayed', error);
+          }
+          backoff();
+          schedule();
+        }
+      };
+      schedule();
+    },
+    { flush: 'sync' },
+  );
 
   const currentConversationLabel = computed(
     () => chatSession.conversationTitle.value || getDefaultConversationName(toolMode.value),

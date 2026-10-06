@@ -297,6 +297,7 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
         if (!chatConversationId.value || suspendWorkflowPersistence.value) return;
         persistWorkflowState(chatConversationId.value);
       },
+      { flush: 'sync' },
     );
   }
 

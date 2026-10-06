@@ -342,7 +342,7 @@ export function registerAIRuntimeRoutes(
     }
     try {
       const run = AIWorkflowRunViewSchema.parse(
-        await workflowRuntime.start({
+        await workflowRuntime.startDetached({
           context: extractAiExpressExecutionContext(req),
           request: parsed.data,
         }),
@@ -379,7 +379,7 @@ export function registerAIRuntimeRoutes(
     }
     try {
       const run = AIWorkflowRunViewSchema.parse(
-        await workflowRuntime.resume({
+        await workflowRuntime.resumeDetached({
           context: extractAiExpressExecutionContext(req),
           request: parsed.data,
         }),
