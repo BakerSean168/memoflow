@@ -1,12 +1,20 @@
-import type { AIWorkflowExecutionFailure } from '@memoflow/contracts/ai';
+import type { AIWorkflowExecutionFailure, AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
 
-export function getAIErrorMessage(
-  error: unknown,
-  t: (key: string) => string,
-  fallbackKey: string,
-) {
+export function getAIErrorMessage(error: unknown, t: (key: string) => string, fallbackKey: string) {
   return translateResultError(error, t, { fallbackKey });
+}
+
+/** Stable UI text for a terminal workflow failure; raw provider details stay server-side. */
+export function getAIWorkflowTerminalFailureMessage(
+  failure: AIWorkflowTerminalFailure | undefined,
+  t: (key: string) => string,
+): string {
+  return getAIErrorMessage(
+    failure ?? { code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' },
+    t,
+    'aiAssistant.errors.workflowExecutionFailed',
+  );
 }
 
 /**

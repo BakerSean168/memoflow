@@ -18,7 +18,11 @@ import {
   type TaskPlanTask,
 } from '@memoflow/contracts/ai';
 import type { TaskWorkflowStage, UseAITaskWorkflowOptions } from './types';
-import { getAIErrorMessage, getAIWorkflowFailureMessage } from './error';
+import {
+  getAIErrorMessage,
+  getAIWorkflowFailureMessage,
+  getAIWorkflowTerminalFailureMessage,
+} from './error';
 
 /** Thin presentation projection for the durable task.create Mastra Workflow. */
 export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
@@ -203,6 +207,22 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     options.chatTimeline.value.push({ id, role: 'assistant', content, status: 'success' });
   }
 
+  function projectFailureToTimeline(
+    run: Extract<AIWorkflowRunView, { kind: 'task.create' }>,
+  ): void {
+    if (run.status !== 'failed') return;
+    const id = `task-workflow-failure-${run.runId}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    const message = getAIWorkflowTerminalFailureMessage(run.failure, t);
+    options.chatTimeline.value.push({
+      id,
+      role: 'assistant',
+      content: message,
+      status: 'error',
+      errorMessage: message,
+    });
+  }
+
   async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
     if (!run || run.kind !== 'task.create') {
       retireNativeReview();
@@ -224,6 +244,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
       taskWorkflowStage.value = 'execute';
     else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       taskWorkflowStage.value = 'result';
+      if (run.status === 'failed') projectFailureToTimeline(run);
     } else {
       taskWorkflowStage.value = 'plan';
     }
@@ -365,10 +386,10 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     return next.kind === 'task.create' ? next : null;
   }
 
-  async function startTaskAgentRun(): Promise<void> {
-    if (!canRunTaskAgent.value || !options.selectedModel.value) return;
+  async function startTaskAgentRun(): Promise<boolean> {
+    if (!canRunTaskAgent.value || !options.selectedModel.value) return false;
     const idea = options.buildConversationTranscript().trim();
-    if (!idea) return;
+    if (!idea) return false;
     taskAgentLoading.value = true;
     try {
       const goalId = linkedGoalId.value;
@@ -381,10 +402,16 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
       await projectRun(run);
+      if (run.kind === 'task.create' && run.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(run.failure, t));
+        return false;
+      }
       if (run.kind === 'task.create' && run.suspension?.type === 'task_draft_review')
         await options.maybeRenameCurrentConversation(run.suspension.draft.task.title);
+      return true;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      return false;
     } finally {
       taskAgentLoading.value = false;
     }
@@ -398,6 +425,10 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     try {
       const next = await options.workflowRuntime.resume({ runId: run.runId, command });
       await projectRun(next);
+      if (next.kind === 'task.create' && next.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(next.failure, t));
+        return;
+      }
       if (next.kind === 'task.create' && next.status === 'completed' && next.result) {
         const createdTaskPlanId = Object.values(next.result.referenceMap)[0];
         if (createdTaskPlanId) await options.openCreatedTask?.(createdTaskPlanId);
@@ -492,6 +523,10 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
         workflowTurn: normalized,
       });
       await projectRun(next);
+      if (next.kind === 'task.create' && next.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(next.failure, t));
+        return false;
+      }
       if (next.kind === 'task.create' && next.status === 'completed' && next.result) {
         const createdTaskPlanId = Object.values(next.result.referenceMap)[0];
         if (createdTaskPlanId) await options.openCreatedTask?.(createdTaskPlanId);

@@ -856,6 +856,50 @@ describe('MastraAIRuntime goal.create product projection', () => {
     });
   });
 
+  it('projects a provider quota failure after clarification as a secret-safe terminal run', async () => {
+    const { runtime } = await createRuntime();
+    vi.mocked(runtime.goalPlanner.plan)
+      .mockResolvedValueOnce({
+        status: 'needs_clarification',
+        reason: 'The target is still ambiguous.',
+        questions: ['Which target school?'],
+        candidateDraft: draft,
+      })
+      .mockRejectedValueOnce({
+        name: 'AI_APICallError',
+        statusCode: 429,
+        responseBody: 'PRIVATE_PROVIDER_DIAGNOSTICS',
+      });
+
+    const started = await runtime.start({
+      context: context('identity-rate-limit', 'request-rate-limit-start'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-rate-limit',
+        input: { idea: 'Prepare for graduate school' },
+      },
+    });
+
+    const failed = await runtime.resume({
+      context: context('identity-rate-limit', 'request-rate-limit-answer'),
+      request: {
+        runId: started.runId,
+        command: { type: 'answer', answers: ['Peking University'] },
+        workflowTurn: 'Peking University',
+      },
+    });
+
+    expect(failed).toMatchObject({
+      kind: 'goal.create',
+      status: 'failed',
+      failure: {
+        code: 'RATE_LIMITED',
+        message: 'AI provider rate limit exceeded',
+      },
+    });
+    expect(JSON.stringify(failed)).not.toContain('PRIVATE_PROVIDER_DIAGNOSTICS');
+  });
+
   it('persists Task and Knowledge main-Composer clarification turns before workflow resume', async () => {
     const { runtime } = await createRuntime();
 

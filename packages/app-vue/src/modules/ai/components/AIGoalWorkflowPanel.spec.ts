@@ -34,12 +34,15 @@ const i18n = createI18n({
             noteCreatedTitle: 'Knowledge Note Created',
             openCreatedNote: 'Open Note',
             startAnotherNote: 'New Note Chat',
+            keepCompletedChanges: 'Keep completed changes',
+            cancelRemaining: 'Cancel remaining',
           },
         },
         dialogs: {
           agent: {
             warnings: 'Warnings',
             events: 'Runtime Events',
+            retry: 'Retry',
             observability: 'Observability',
             tokenUsage: 'Token Usage',
             promptTokens: '{count} prompt',
@@ -324,7 +327,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('form').exists()).toBe(false);
   });
 
-  it('renders recovery directly from the durable Workflow suspension', () => {
+  it('renders recovery directly from the durable Workflow suspension', async () => {
     const run: GoalWorkflowRun = {
       runId: 'workflow-recovery',
       kind: 'goal.create',
@@ -347,13 +350,24 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
       createdAt: 1,
       updatedAt: 2,
     };
-    const wrapper = mountPanel({ goalWorkflowRun: run });
+    const wrapper = mountPanel({
+      goalWorkflowRun: run,
+      canRetryExecution: true,
+      canAcceptPartialExecution: true,
+      canCancelRemainingExecution: true,
+    });
 
     expect(wrapper.find('[data-testid="goal-workflow-recovery"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('SERVICE_UNAVAILABLE');
     expect(wrapper.text()).toContain('Execution failed (SERVICE_UNAVAILABLE)');
     expect(wrapper.text()).not.toContain('Knowledge relation unavailable');
     expect(wrapper.text()).toContain('retryable');
+    await wrapper.get('[data-testid="goal-agent-retry-execution"]').trigger('click');
+    await wrapper.get('[data-testid="goal-agent-accept-partial"]').trigger('click');
+    await wrapper.get('[data-testid="goal-agent-cancel-remaining"]').trigger('click');
+    expect(wrapper.emitted('retry')).toHaveLength(1);
+    expect(wrapper.emitted('accept-partial')).toHaveLength(1);
+    expect(wrapper.emitted('cancel-remaining')).toHaveLength(1);
   });
 
   it('renders the canonical execution receipt after completion', () => {

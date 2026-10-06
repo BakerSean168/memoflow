@@ -75,18 +75,26 @@
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}
       </p>
-      <Button
-        v-if="knowledgeCaptureRun.suspension.retryable"
-        variant="outline"
-        :disabled="busy"
-        data-testid="knowledge-capture-agent-retry-execution"
-        @click="$emit('retry')"
-      >
-        {{ t('aiAssistant.dialogs.agent.retry') }}
-      </Button>
-      <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
-        t('common.cancel')
-      }}</Button>
+      <div class="flex flex-wrap gap-2">
+        <Button
+          v-if="canRetryExecution"
+          variant="outline"
+          :disabled="busy"
+          data-testid="knowledge-capture-agent-retry-execution"
+          @click="$emit('retry')"
+        >
+          {{ t('aiAssistant.dialogs.agent.retry') }}
+        </Button>
+        <Button
+          v-if="canCancelRemainingExecution"
+          variant="ghost"
+          :disabled="busy"
+          data-testid="knowledge-capture-agent-cancel-remaining"
+          @click="$emit('cancel-remaining')"
+        >
+          {{ t('aiAssistant.chatPage.workflow.cancelRemaining') }}
+        </Button>
+      </div>
     </div>
 
     <div
@@ -137,11 +145,14 @@ const props = defineProps<{
   toolMode: WorkflowMode;
   knowledgeCaptureRun: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }> | null;
   busy?: boolean;
+  canRetryExecution?: boolean;
+  canCancelRemainingExecution?: boolean;
 }>();
 
 defineEmits<{
   cancel: [];
   retry: [];
+  'cancel-remaining': [];
   'open-native-review': [];
 }>();
 

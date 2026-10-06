@@ -249,6 +249,38 @@
             {{ publicFailureMessage(failure) }}
           </p>
         </div>
+        <div class="flex flex-wrap gap-2">
+          <Button
+            v-if="canRetryExecution"
+            variant="outline"
+            size="sm"
+            :disabled="busy"
+            data-testid="goal-agent-retry-execution"
+            @click="$emit('retry')"
+          >
+            {{ t('aiAssistant.dialogs.agent.retry') }}
+          </Button>
+          <Button
+            v-if="canAcceptPartialExecution"
+            variant="outline"
+            size="sm"
+            :disabled="busy"
+            data-testid="goal-agent-accept-partial"
+            @click="$emit('accept-partial')"
+          >
+            {{ t('aiAssistant.chatPage.workflow.keepCompletedChanges') }}
+          </Button>
+          <Button
+            v-if="canCancelRemainingExecution"
+            variant="ghost"
+            size="sm"
+            :disabled="busy"
+            data-testid="goal-agent-cancel-remaining"
+            @click="$emit('cancel-remaining')"
+          >
+            {{ t('aiAssistant.chatPage.workflow.cancelRemaining') }}
+          </Button>
+        </div>
       </div>
 
       <div v-if="goalWorkflowRun.result" class="space-y-3" data-testid="goal-workflow-result">
@@ -417,6 +449,10 @@ const props = defineProps<{
   editableTasks: EditableGoalTask[];
   editableKnowledge: EditableGoalKnowledge[];
   goalOwnerSubmitted?: boolean;
+  busy?: boolean;
+  canRetryExecution?: boolean;
+  canAcceptPartialExecution?: boolean;
+  canCancelRemainingExecution?: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
   formatExecutionOutcome: (status: 'success' | 'partial' | 'failed') => string;
 }>();
@@ -424,6 +460,9 @@ const props = defineProps<{
 defineEmits<{
   'open-native-review': [];
   'open-knowledge-citation': [documentRef: KnowledgeRelatedNote['documentRef']];
+  retry: [];
+  'accept-partial': [];
+  'cancel-remaining': [];
 }>();
 
 const { t } = useI18n();

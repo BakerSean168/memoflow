@@ -9,7 +9,11 @@ import type {
 } from '../../repository/composables/knowledgeCaptureNativeEditSession';
 import { nativeDraftFromKnowledgeDraft } from '../../repository/composables/knowledgeCaptureNativeEditSession';
 import type { KnowledgeCaptureWorkflowStage, UseAIKnowledgeCaptureOptions } from './types';
-import { getAIErrorMessage, getAIWorkflowFailureMessage } from './error';
+import {
+  getAIErrorMessage,
+  getAIWorkflowFailureMessage,
+  getAIWorkflowTerminalFailureMessage,
+} from './error';
 
 /**
  * Native Repository projection for the durable knowledge.capture Mastra Workflow.
@@ -130,6 +134,22 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     options.chatTimeline?.value.push({ id, role: 'assistant', content, status: 'success' });
   }
 
+  function projectFailureToTimeline(
+    run: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>,
+  ): void {
+    if (run.status !== 'failed' || !options.chatTimeline) return;
+    const id = `knowledge-capture-workflow-failure-${run.runId}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    const message = getAIWorkflowTerminalFailureMessage(run.failure, t);
+    options.chatTimeline.value.push({
+      id,
+      role: 'assistant',
+      content: message,
+      status: 'error',
+      errorMessage: message,
+    });
+  }
+
   async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
     if (!run || run.kind !== 'knowledge.capture') {
       retireNativeReview();
@@ -150,6 +170,7 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
       knowledgeCaptureStage.value = 'execute';
     } else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       knowledgeCaptureStage.value = 'result';
+      if (run.status === 'failed') projectFailureToTimeline(run);
       retireNativeReview();
     } else {
       knowledgeCaptureStage.value = 'plan';
@@ -264,10 +285,10 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     return next;
   }
 
-  async function startKnowledgeCaptureRun(): Promise<void> {
-    if (!canRunKnowledgeCapture.value || !options.selectedModel.value) return;
+  async function startKnowledgeCaptureRun(): Promise<boolean> {
+    if (!canRunKnowledgeCapture.value || !options.selectedModel.value) return false;
     const topic = options.buildConversationTranscript().trim();
-    if (!topic) return;
+    if (!topic) return false;
     knowledgeCaptureLoading.value = true;
     try {
       const run = await options.workflowRuntime.start({
@@ -279,11 +300,17 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
       await projectRun(run);
+      if (run.kind === 'knowledge.capture' && run.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(run.failure, t));
+        return false;
+      }
       if (run.kind === 'knowledge.capture' && run.suspension?.type === 'knowledge_draft_review') {
         await options.maybeRenameCurrentConversation(run.suspension.draft.title);
       }
+      return true;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      return false;
     } finally {
       knowledgeCaptureLoading.value = false;
     }
@@ -298,6 +325,10 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     try {
       const next = await options.workflowRuntime.resume({ runId: run.runId, command });
       await projectRun(next);
+      if (next.kind === 'knowledge.capture' && next.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(next.failure, t));
+        return;
+      }
       if (next.kind === 'knowledge.capture' && next.status === 'completed' && next.result?.noteId) {
         await options.openCreatedNote?.(next.result.noteId);
       }
@@ -375,6 +406,10 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
         workflowTurn: normalized,
       });
       await projectRun(next);
+      if (next.kind === 'knowledge.capture' && next.status === 'failed') {
+        toast.error(getAIWorkflowTerminalFailureMessage(next.failure, t));
+        return false;
+      }
       if (next.kind === 'knowledge.capture' && next.status === 'completed' && next.result?.noteId) {
         await options.openCreatedNote?.(next.result.noteId);
       }

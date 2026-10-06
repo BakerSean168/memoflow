@@ -30,7 +30,12 @@ const i18n = createI18n({
   locale: 'en-US',
   missingWarn: false,
   fallbackWarn: false,
-  messages: {},
+  messages: {
+    'en-US': {
+      errors: { RATE_LIMITED: 'Rate limited' },
+      aiAssistant: { errors: { workflowExecutionFailed: 'Failed' } },
+    },
+  },
 });
 const draft = TaskPlanDraftSchema.parse({
   revision: 1,
@@ -86,6 +91,17 @@ function terminal(status = 'completed') {
           },
         }
       : {}),
+  });
+}
+function failed() {
+  return AIWorkflowRunViewSchema.parse({
+    runId: 'run-1',
+    conversationId: 'conv-1',
+    kind: 'task.create',
+    status: 'failed',
+    failure: { code: 'RATE_LIMITED', message: 'AI provider rate limit exceeded' },
+    createdAt: 1,
+    updatedAt: 10,
   });
 }
 const wrappers: ReturnType<typeof mount>[] = [];
@@ -335,6 +351,37 @@ describe('useAITaskWorkflow native owner orchestration', () => {
       command: { type: 'answer', answers: ['Every Monday morning'] },
       workflowTurn: 'Every Monday morning',
     });
+  });
+
+  it('projects a terminal provider failure after clarification and returns false', async () => {
+    const clarificationRun = AIWorkflowRunViewSchema.parse({
+      runId: 'run-1',
+      conversationId: 'conv-1',
+      kind: 'task.create',
+      status: 'suspended',
+      createdAt: 1,
+      updatedAt: 2,
+      suspension: { type: 'clarification_required', questions: ['When should it run?'] },
+    });
+    const { vm, runtime, options } = setup(clarificationRun);
+    runtime.resume.mockResolvedValueOnce(failed());
+
+    await vm.startTaskAgentRun();
+    await expect(vm.submitTaskClarificationResponse('Every Monday')).resolves.toBe(false);
+    expect(options.chatTimeline.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'task-workflow-failure-run-1',
+          content: 'Rate limited',
+          status: 'error',
+        }),
+      ]),
+    );
+
+    await vm.projectRun(failed(), false);
+    expect(
+      options.chatTimeline.value.filter((item) => item.id === 'task-workflow-failure-run-1'),
+    ).toHaveLength(1);
   });
 
   it('settles a partial recovery through explicit recovery commands from Chat', async () => {
