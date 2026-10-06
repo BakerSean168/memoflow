@@ -16,7 +16,17 @@ export interface AIWorkflowRuntimePort {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
   }): Promise<AIWorkflowRunView>;
+  /** Transport-facing durable dispatch: persist/dispatch, then return a running acknowledgement. */
+  startDetached(input: {
+    context: ExecutionContext;
+    request: AIWorkflowStartClientRequest;
+  }): Promise<AIWorkflowRunView>;
   resume(input: {
+    context: ExecutionContext;
+    request: AIWorkflowResumeClientRequest;
+  }): Promise<AIWorkflowRunView>;
+  /** Transport-facing durable resume: dispatch the resume without keeping the request open. */
+  resumeDetached(input: {
     context: ExecutionContext;
     request: AIWorkflowResumeClientRequest;
   }): Promise<AIWorkflowRunView>;

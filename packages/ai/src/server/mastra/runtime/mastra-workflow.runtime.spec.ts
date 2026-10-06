@@ -786,6 +786,56 @@ describe('MastraAIRuntime Assistant tool policy', () => {
 });
 
 describe('MastraAIRuntime goal.create product projection', () => {
+  it('detaches transport start from slow planner execution while preserving the durable run', async () => {
+    const { runtime } = await createRuntime();
+    let releasePlanner!: () => void;
+    vi.mocked(runtime.goalPlanner.plan).mockImplementationOnce(async () => {
+      await new Promise<void>((resolve) => {
+        releasePlanner = resolve;
+      });
+      return {
+        status: 'draft_ready',
+        reason: 'The detached planner finished after the transport acknowledgement.',
+        candidateDraft: draft,
+      };
+    });
+
+    const acknowledgement = await runtime.startDetached({
+      context: context('identity-detached', 'request-detached'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-detached',
+        input: { idea: 'Create a durable slow-model goal' },
+      },
+    });
+
+    expect(acknowledgement).toMatchObject({
+      kind: 'goal.create',
+      conversationId: 'conversation-detached',
+      status: 'running',
+    });
+    await vi.waitFor(() => expect(runtime.goalPlanner.plan).toHaveBeenCalledTimes(1));
+
+    const inFlight = await runtime.get({
+      identityId: 'identity-detached',
+      runId: acknowledgement.runId,
+    });
+    expect(inFlight?.status).toBe('running');
+
+    releasePlanner();
+    await vi.waitFor(
+      async () => {
+        const settled = await runtime.get({
+          identityId: 'identity-detached',
+          runId: acknowledgement.runId,
+        });
+        expect(settled?.status).toBe('suspended');
+        expect(settled?.suspension?.type).toBe('goal_draft_review');
+      },
+      { timeout: 5_000 },
+    );
+  });
+
   it('persists the explicit workflow user turn in canonical Mastra history without running Assistant', async () => {
     const { runtime } = await createRuntime();
     const dispatch = vi.spyOn(runtime, 'dispatchMessage');

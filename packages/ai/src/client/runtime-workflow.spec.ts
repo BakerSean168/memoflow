@@ -65,6 +65,38 @@ describe('WorkflowRuntimeHttpClient', () => {
     expect(JSON.stringify(post.mock.calls)).not.toContain('identityId');
   });
 
+  it('returns a detached HTTP start pointer immediately without hidden polling', async () => {
+    const running = { ...run, status: 'running' as const, suspension: undefined };
+    const post = vi.fn().mockResolvedValue(ok(running));
+    const client = new WorkflowRuntimeHttpClient(httpStub({ post }), {
+      intervalMs: 0,
+      timeoutMs: 1_000,
+    });
+
+    await expect(client.start(startRequest)).resolves.toEqual(running);
+    expect(post.mock.calls.map(([url]) => url)).toEqual(['/ai/runtime/workflow/start']);
+  });
+
+  it('polls a detached HTTP resume until the durable run reaches a stable state', async () => {
+    const running = { ...run, status: 'running' as const, suspension: undefined };
+    const post = vi
+      .fn()
+      .mockResolvedValueOnce(ok(running))
+      .mockResolvedValueOnce(ok(running))
+      .mockResolvedValueOnce(ok(run));
+    const client = new WorkflowRuntimeHttpClient(httpStub({ post }), {
+      intervalMs: 0,
+      timeoutMs: 1_000,
+    });
+
+    await expect(client.resume(resumeRequest)).resolves.toEqual(run);
+    expect(post.mock.calls.map(([url]) => url)).toEqual([
+      '/ai/runtime/workflow/resume',
+      '/ai/runtime/workflow/get',
+      '/ai/runtime/workflow/get',
+    ]);
+  });
+
   it('rejects identity injection and malformed runtime projections', async () => {
     const client = new WorkflowRuntimeHttpClient(httpStub());
     await expect(
@@ -102,5 +134,30 @@ describe('WorkflowRuntimeIpcClient', () => {
       AIChannels.RUNTIME_WORKFLOW_CANCEL,
     ]);
     expect(JSON.stringify(invoke.mock.calls)).not.toContain('identityId');
+  });
+
+  it('returns detached IPC start immediately and polls only resume through get', async () => {
+    const running = { ...run, status: 'running' as const, suspension: undefined };
+    const invoke = vi.fn(async (channel: string) => {
+      if (channel === AIChannels.RUNTIME_WORKFLOW_START) return ok(running);
+      if (channel === AIChannels.RUNTIME_WORKFLOW_RESUME) return ok(running);
+      if (channel === AIChannels.RUNTIME_WORKFLOW_GET) return ok(run);
+      return ok(run);
+    });
+    const client = new WorkflowRuntimeIpcClient({ invoke } as never, {
+      intervalMs: 0,
+      timeoutMs: 1_000,
+    });
+
+    await expect(client.start(startRequest)).resolves.toEqual(running);
+    expect(invoke.mock.calls.map(([channel]) => channel)).toEqual([
+      AIChannels.RUNTIME_WORKFLOW_START,
+    ]);
+    await expect(client.resume(resumeRequest)).resolves.toEqual(run);
+    expect(invoke.mock.calls.map(([channel]) => channel)).toEqual([
+      AIChannels.RUNTIME_WORKFLOW_START,
+      AIChannels.RUNTIME_WORKFLOW_RESUME,
+      AIChannels.RUNTIME_WORKFLOW_GET,
+    ]);
   });
 });

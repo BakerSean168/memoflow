@@ -124,6 +124,20 @@ function setup() {
 describe('useAIWorkflowPersistence', () => {
   beforeEach(() => localStorage.clear());
 
+  it('persists a detached running pointer synchronously before slow execution settles', () => {
+    const { state, persistence } = setup();
+    const conversationId = ref('conversation-1');
+    persistence.bindPersistenceWatcher(conversationId);
+
+    state.toolMode.value = 'goal-create';
+    state.goalWorkflowStage.value = 'plan';
+    state.goalWorkflowRun.value = makeGoalRun({ runId: 'run-detached', status: 'running' });
+
+    expect(JSON.parse(localStorage.getItem(AI_WORKFLOW_STORAGE_KEY) ?? '{}')).toEqual({
+      'conversation-1': { activeRunId: 'run-detached' },
+    });
+  });
+
   it('persists only a run pointer and retires full v2 snapshots', () => {
     localStorage.setItem(
       'ai:conversation-workflow-map:v2',

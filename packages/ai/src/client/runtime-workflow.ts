@@ -18,6 +18,50 @@ import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { createResultClientError } from '../infrastructure-client/adapters/result-client-error';
 
+const DEFAULT_WORKFLOW_POLL_INTERVAL_MS = 500;
+const DEFAULT_WORKFLOW_POLL_TIMEOUT_MS = 180_000;
+
+type WorkflowRuntimePollingOptions = {
+  readonly intervalMs?: number;
+  readonly timeoutMs?: number;
+};
+
+function delay(ms: number): Promise<void> {
+  return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
+}
+
+function isTransientPollingFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const code = (error as { code?: unknown }).code;
+  return code === 'NETWORK_ERROR' || code === 'TIMEOUT' || code === 'SERVICE_UNAVAILABLE';
+}
+
+async function awaitStableWorkflowRun(
+  initial: AIWorkflowRunView,
+  load: (runId: string) => Promise<AIWorkflowRunView | null>,
+  options: WorkflowRuntimePollingOptions,
+): Promise<AIWorkflowRunView> {
+  if (initial.status !== 'running') return initial;
+  const intervalMs = options.intervalMs ?? DEFAULT_WORKFLOW_POLL_INTERVAL_MS;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_WORKFLOW_POLL_TIMEOUT_MS;
+  const deadline = Date.now() + Math.max(0, timeoutMs);
+  let current = initial;
+
+  while (current.status === 'running' && Date.now() < deadline) {
+    await delay(intervalMs);
+    try {
+      const next = await load(current.runId);
+      if (next) current = next;
+    } catch (error) {
+      if (!isTransientPollingFailure(error)) throw error;
+    }
+  }
+
+  // The durable run remains authoritative even when the client-side wait budget
+  // expires. Returning the running pointer lets UI persistence restore it later.
+  return current;
+}
+
 /** Canonical cross-host Workflow client. No Mastra private type crosses this seam. */
 export interface WorkflowRuntimeClient {
   start(request: AIWorkflowStartClientRequest): Promise<AIWorkflowRunView>;
@@ -52,7 +96,10 @@ function parseRuns(value: unknown): readonly AIWorkflowRunView[] {
 }
 
 export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
-  constructor(private readonly httpClient: IResultHttpClient) {}
+  constructor(
+    private readonly httpClient: IResultHttpClient,
+    private readonly polling: WorkflowRuntimePollingOptions = {},
+  ) {}
 
   async start(request: AIWorkflowStartClientRequest): Promise<AIWorkflowRunView> {
     const parsed = AIWorkflowStartClientRequestSchema.safeParse(request);
@@ -65,7 +112,11 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
     const parsed = AIWorkflowResumeClientRequestSchema.safeParse(request);
     if (!parsed.success) invalidRequest('resume');
     const result = await this.httpClient.post<unknown>('/ai/runtime/workflow/resume', parsed.data);
-    return parseRun(unwrapOrThrowError(result));
+    return awaitStableWorkflowRun(
+      parseRun(unwrapOrThrowError(result)),
+      (runId) => this.get({ runId }),
+      this.polling,
+    );
   }
 
   async get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null> {
@@ -91,7 +142,10 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
 }
 
 export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
-  constructor(private readonly ipcClient: IResultIpcClient) {}
+  constructor(
+    private readonly ipcClient: IResultIpcClient,
+    private readonly polling: WorkflowRuntimePollingOptions = {},
+  ) {}
 
   async start(request: AIWorkflowStartClientRequest): Promise<AIWorkflowRunView> {
     const parsed = AIWorkflowStartClientRequestSchema.safeParse(request);
@@ -110,7 +164,11 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
       AIChannels.RUNTIME_WORKFLOW_RESUME,
       parsed.data,
     );
-    return parseRun(unwrapOrThrowError(result));
+    return awaitStableWorkflowRun(
+      parseRun(unwrapOrThrowError(result)),
+      (runId) => this.get({ runId }),
+      this.polling,
+    );
   }
 
   async get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null> {
