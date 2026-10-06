@@ -38,7 +38,10 @@ test('staging promotion is freshness-gated and moves only coherent digest identi
   assert.match(workflow, /Recheck main HEAD immediately before staging mutation/u);
   assert.match(workflow, /git ls-remote/u);
   assert.match(workflow, /eligible=false/u);
-  assert.match(workflow, /imagetools create --prefer-index=false --tag "\$repo:staging-latest" "\$repo@\$digest"/u);
+  assert.match(
+    workflow,
+    /imagetools create --prefer-index=false --tag "\$repo:staging-latest" "\$repo@\$digest"/u,
+  );
   assert.match(workflow, /Verify coherent staging-latest digests/u);
   assert.doesNotMatch(workflow, /prod-latest/u);
   assert.doesNotMatch(workflow, /ssh /u);
@@ -47,10 +50,41 @@ test('staging promotion is freshness-gated and moves only coherent digest identi
 
 test('candidate workflow pins every third-party Action to an immutable commit', async () => {
   const workflow = await read('.github/workflows/candidate-publish.yml');
-  const uses = [...workflow.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gmu)].map((match) => match[1]);
+  const uses = [...workflow.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gmu)].map(
+    (match) => match[1],
+  );
   assert.ok(uses.length > 0);
   for (const action of uses) {
     if (action.startsWith('./')) continue;
     assert.match(action, /@[0-9a-f]{40}$/u, `un-pinned action: ${action}`);
+  }
+});
+
+test('China registry login is bounded-retry across delivery workflows', async () => {
+  const [action, candidate, production, release, mirrors] = await Promise.all([
+    read('.github/actions/registry-login/action.yml'),
+    read('.github/workflows/candidate-publish.yml'),
+    read('.github/workflows/deploy-production.yml'),
+    read('.github/workflows/publish-images.yml'),
+    read('.github/workflows/mirror-runtime-images.yml'),
+  ]);
+
+  const pinnedLoginAction = /uses: docker\/login-action@dbcb813823bdd20940b903addbd779551569679f/u;
+  assert.equal((action.match(new RegExp(pinnedLoginAction.source, 'gu')) ?? []).length, 3);
+  assert.match(action, /continue-on-error: true/u);
+  assert.match(action, /run: sleep 5/u);
+  assert.match(action, /run: sleep 15/u);
+  assert.match(action, /steps\.login-1\.outcome == 'failure'/u);
+  assert.match(action, /steps\.login-2\.outcome == 'failure'/u);
+
+  const workflows = [candidate, production, release, mirrors];
+  const retryUses = workflows.reduce(
+    (count, workflow) =>
+      count + (workflow.match(/uses: \.\/\.github\/actions\/registry-login/gu) ?? []).length,
+    0,
+  );
+  assert.equal(retryUses, 6);
+  for (const workflow of workflows) {
+    assert.doesNotMatch(workflow, /name: Login to ACR\s*\n\s*uses: docker\/login-action/u);
   }
 });

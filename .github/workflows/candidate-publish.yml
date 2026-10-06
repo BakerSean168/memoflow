@@ -143,8 +143,8 @@ jobs:
           node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-runtime-artifact-manifest.json packages/database/dist/runtime-scripts "$delivery_digest"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
-      - name: Login to ACR
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      - name: Login to ACR with bounded retry
+        uses: ./.github/actions/registry-login
         with:
           registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -314,8 +314,8 @@ jobs:
           path: reports/candidate
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
-      - name: Login to ACR
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      - name: Login to ACR with bounded retry
+        uses: ./.github/actions/registry-login
         with:
           registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -406,8 +406,8 @@ jobs:
           path: reports/candidate
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
-      - name: Login to ACR
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      - name: Login to ACR with bounded retry
+        uses: ./.github/actions/registry-login
         with:
           registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}

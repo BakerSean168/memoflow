@@ -1,0 +1,53 @@
+name: Login to registry with bounded retry
+description: Retry registry authentication to absorb transient remote auth/network failures without weakening credential checks.
+
+inputs:
+  registry:
+    description: Registry hostname.
+    required: true
+  username:
+    description: Registry username.
+    required: true
+  password:
+    description: Registry password or token.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - id: login-1
+      name: Login attempt 1
+      continue-on-error: true
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Back off after first failure
+      if: steps.login-1.outcome == 'failure'
+      shell: bash
+      run: sleep 5
+
+    - id: login-2
+      name: Login attempt 2
+      if: steps.login-1.outcome == 'failure'
+      continue-on-error: true
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Back off after second failure
+      if: steps.login-1.outcome == 'failure' && steps.login-2.outcome == 'failure'
+      shell: bash
+      run: sleep 15
+
+    - name: Login attempt 3
+      if: steps.login-1.outcome == 'failure' && steps.login-2.outcome == 'failure'
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
