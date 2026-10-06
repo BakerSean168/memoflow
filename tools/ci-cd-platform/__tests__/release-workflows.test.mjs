@@ -224,7 +224,10 @@ test('desktop packaging has one stable product identity and one native rebuild o
 test('release image promotion preserves the candidate top-level digest without OCI wrapper rebuilds', async () => {
   const workflow = await readRepoFile('.github/workflows/publish-images.yml');
 
-  assert.match(workflow, /docker buildx imagetools create --prefer-index=false/u);
+  assert.match(
+    workflow,
+    /registry-operation-retry\.sh docker buildx imagetools create --prefer-index=false/u,
+  );
   assert.match(workflow, /Manifest\.Digest/u);
   assert.doesNotMatch(workflow, /docker\/build-push-action/u);
   assert.doesNotMatch(workflow, /provenance:\s*(?:true|false)|sbom:\s*(?:true|false)/u);
@@ -261,7 +264,10 @@ test('release image publication carbon-copies one exact candidate to China ACR a
   assert.match(workflow, /name: Login to GHCR/u);
   assert.match(workflow, /Preflight immutable candidate and release-tag collisions/u);
   assert.match(workflow, /Carbon-copy candidate digests to release tags/u);
-  assert.match(workflow, /docker buildx imagetools create --prefer-index=false/u);
+  assert.match(
+    workflow,
+    /registry-operation-retry\.sh docker buildx imagetools create --prefer-index=false/u,
+  );
   assert.match(workflow, /Verify release tags preserve candidate digests/u);
   assert.doesNotMatch(workflow, /docker\/build-push-action/u);
   assert.doesNotMatch(workflow, /ci-build-artifacts/u);
