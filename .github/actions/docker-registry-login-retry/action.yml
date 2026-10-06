@@ -1,0 +1,32 @@
+name: Docker registry login with transient retry
+description: Retry transient registry transport failures while failing authentication errors immediately.
+inputs:
+  registry:
+    description: Registry hostname.
+    required: true
+  username:
+    description: Registry username.
+    required: true
+  password:
+    description: Registry password or token.
+    required: true
+  max_attempts:
+    description: Maximum login attempts, including the initial attempt.
+    required: false
+    default: '3'
+  initial_delay_seconds:
+    description: Delay before the second attempt. Later delays use bounded exponential backoff.
+    required: false
+    default: '5'
+runs:
+  using: composite
+  steps:
+    - name: Login with transient retry
+      shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        USERNAME: ${{ inputs.username }}
+        PASSWORD: ${{ inputs.password }}
+        MAX_ATTEMPTS: ${{ inputs.max_attempts }}
+        INITIAL_DELAY_SECONDS: ${{ inputs.initial_delay_seconds }}
+      run: bash "$GITHUB_ACTION_PATH/login.sh"

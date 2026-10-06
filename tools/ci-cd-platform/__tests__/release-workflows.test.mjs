@@ -627,3 +627,22 @@ test('Linux release uses actual AppImage plus installed Debian proofs and gates 
   assert.match(runner, /server.closeAllConnections\(\)/u);
   assert.match(release, /uses: \.\/\.github\/workflows\/desktop-update-e2e.yml/u);
 });
+
+test('all China registry delivery lanes share transient-only ACR login retry', async () => {
+  const workflows = await Promise.all([
+    readRepoFile('.github/workflows/publish-images.yml'),
+    readRepoFile('.github/workflows/deploy-production.yml'),
+    readRepoFile('.github/workflows/mirror-runtime-images.yml'),
+  ]);
+
+  for (const workflow of workflows) {
+    const acrBlocks = [...workflow.matchAll(/- name: Login to ACR[\s\S]*?(?=\n\s+- name:)/gmu)].map(
+      (match) => match[0],
+    );
+    assert.ok(acrBlocks.length > 0);
+    for (const block of acrBlocks) {
+      assert.match(block, /uses: \.\/\.github\/actions\/docker-registry-login-retry/u);
+      assert.doesNotMatch(block, /docker\/login-action/u);
+    }
+  }
+});
