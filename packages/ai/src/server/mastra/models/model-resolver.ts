@@ -48,8 +48,8 @@ const DEFAULT_CAPABILITY_EVIDENCE_TTL_MS = 24 * 60 * 60 * 1000;
 /**
  * Production default evidence for the exact known models in the product-owned
  * ProviderDefinition catalog. It deliberately returns no evidence for custom
- * or unknown ids; those models need an injected provider/runtime verification
- * port before capabilities beyond chat can be used.
+ * or unknown ids; eligible models attempt unknown capabilities optimistically
+ * without treating the absence of evidence as verification.
  */
 const DEFAULT_CAPABILITY_SNAPSHOT_PORT: IAIModelCapabilitySnapshotPort = {
   getSnapshot: async (input) => {
@@ -98,7 +98,7 @@ function createDefaultModelCatalog(providerFetch: ProviderFetch): IAIModelCatalo
 function defaultCapabilities(modelListed: boolean): AIModelCapabilityMap {
   return {
     // A model returned by the provider's model endpoint is executable chat
-    // inventory. Other capabilities still require explicit evidence.
+    // inventory. Other capabilities remain unknown and are attempted optimistically.
     chat: modelListed ? 'verified' : 'unknown',
     streaming: 'unknown',
     structuredOutput: 'unknown',
@@ -189,12 +189,6 @@ function assertRequiredCapabilities(
       throw new AIExecutionError(
         'capability_unsupported',
         `AI model ${modelId} does not support required capability ${capability}`,
-      );
-    }
-    if (state !== 'verified') {
-      throw new AIExecutionError(
-        'capability_unverified',
-        `AI model ${modelId} has no verified capability ${capability}`,
       );
     }
   }
@@ -322,7 +316,7 @@ export class MastraModelResolver {
         credentialRef: provider.credentialRef,
         credential,
       }),
-      supportsStructuredOutputs: capabilities.structuredOutput === 'verified',
+      supportsStructuredOutputs: capabilities.structuredOutput !== 'unsupported',
     });
 
     return {

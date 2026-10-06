@@ -14,6 +14,7 @@ import {
   createAIProviderSecretVaultStub,
 } from '../../../testing/ai-test-support';
 import { MastraModelResolver } from './model-resolver';
+import { normalizeOpenAICompatibleModelId } from '../../shared/openai-compatible-normalize';
 
 const inertFetch = vi.fn(async () => {
   throw new Error('network must not run in resolver tests');
@@ -257,7 +258,7 @@ describe('MastraModelResolver', () => {
     });
   });
 
-  it('keeps an unknown custom model fail-closed without injected verification evidence', async () => {
+  it('attempts unknown custom model capabilities optimistically without promoting them', async () => {
     const { resolver } = createResolver({
       provider: createAIProviderConfigServerDTO({
         providerDefinitionId: 'custom',
@@ -266,12 +267,44 @@ describe('MastraModelResolver', () => {
       modelIds: ['custom-model'],
     });
 
-    await expect(
-      resolver.resolve({
-        identityId: 'identity-1',
-        executionRequirement: { chat: 'required', streaming: 'required' },
-      }),
-    ).rejects.toMatchObject({ category: 'capability_unverified' });
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      executionRequirement: { chat: 'required', streaming: 'required' },
+    });
+    expect(resolved.capabilities).toEqual(verifiedChatOnly);
+  });
+
+  it('preserves a catalog-listed supplier-qualified model id with unknown required capabilities', async () => {
+    const modelId = 'kunyou-free/deepseek-v4.1-flash';
+    expect(normalizeOpenAICompatibleModelId(modelId)).toBe(modelId);
+    const { resolver } = createResolver({ modelIds: [modelId] });
+
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      modelId,
+      executionRequirement: {
+        chat: 'required',
+        streaming: 'required',
+        structuredOutput: 'required',
+        toolCalling: 'required',
+        vision: 'required',
+      },
+    });
+
+    expect(resolved.modelId).toBe(modelId);
+    expect(resolved.model).toMatchObject({ modelId, config: { supportsStructuredOutputs: true } });
+    expect(resolved.capabilities).toEqual(verifiedChatOnly);
+  });
+
+  it('disables structured output only for explicit unsupported evidence when not required', async () => {
+    const { resolver } = createResolver({
+      capabilities: capabilitySnapshot({ ...verifiedChatOnly, structuredOutput: 'unsupported' }),
+    });
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      modelId: 'model-override',
+    });
+    expect(resolved.model).toMatchObject({ config: { supportsStructuredOutputs: false } });
   });
 
   it('rejects structured output when Goal planner evidence marks it unsupported', async () => {
@@ -308,17 +341,16 @@ describe('MastraModelResolver', () => {
     ).rejects.toMatchObject({ category: 'capability_unsupported' });
   });
 
-  it('fails closed on unknown required capabilities and permits a fresh manual runtime probe', async () => {
+  it('attempts unknown required capabilities and permits a fresh manual runtime probe', async () => {
     const unknown = createResolver({
       provider: createAIProviderConfigServerDTO({ defaultModel: 'model-override' }),
       capabilities: capabilitySnapshot(verifiedChatOnly),
     });
-    await expect(
-      unknown.resolver.resolve({
-        identityId: 'identity-1',
-        executionRequirement: { chat: 'required', streaming: 'required' },
-      }),
-    ).rejects.toMatchObject({ category: 'capability_unverified' });
+    const optimistic = await unknown.resolver.resolve({
+      identityId: 'identity-1',
+      executionRequirement: { chat: 'required', streaming: 'required' },
+    });
+    expect(optimistic.capabilities).toEqual(verifiedChatOnly);
 
     const manuallyVerified = createResolver({
       modelIds: [],
@@ -354,12 +386,11 @@ describe('MastraModelResolver', () => {
       now: () => 100,
     });
 
-    await expect(
-      resolver.resolve({
-        identityId: 'identity-1',
-        executionRequirement: { chat: 'required', streaming: 'required' },
-      }),
-    ).rejects.toMatchObject({ category: 'capability_unverified' });
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      executionRequirement: { chat: 'required', streaming: 'required' },
+    });
+    expect(resolved.capabilities).toEqual(verifiedChatOnly);
   });
 
   it('refreshes an expired catalog snapshot instead of reusing it', async () => {
