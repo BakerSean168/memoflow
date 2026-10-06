@@ -219,16 +219,16 @@ jobs:
             china_repo="$(jq -r ".docker.images.$component.distributions.china.repository" "$release")"
             global_repo="$(jq -r ".docker.images.$component.distributions.global.repository" "$release")"
             test "$china_repo" = "$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-$component"
-            test "$(docker buildx imagetools inspect "$china_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
-            test "$(docker buildx imagetools inspect "$global_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
+            test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
+            test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
           done
           global_namespace="${GITHUB_REPOSITORY_OWNER,,}"
           for component in postgres redis powersync caddy; do
             expected="$(jq -r ".runtime.$component.digest" "$production")"
             china_repo="$(jq -r ".runtime.$component.repository" "$production")"
             global_repo="ghcr.io/$global_namespace/memoflow-$component"
-            test "$(docker buildx imagetools inspect "$china_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
-            test "$(docker buildx imagetools inspect "$global_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
+            test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
+            test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
           done
 
       - name: Recheck release remains Published immediately before mutation
@@ -286,12 +286,12 @@ jobs:
           set -euo pipefail
           china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-production-runtime:$IMMUTABLE_TAG"
           global_ref="ghcr.io/$GLOBAL_NAMESPACE/memoflow-production-runtime:$IMMUTABLE_TAG"
-          china_digest="$(docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
-          global_digest="$(docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
+          china_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
+          global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
           if [[ -n "$china_digest" || -n "$global_digest" ]]; then
             [[ -n "$china_digest" && -n "$global_digest" ]] || { echo 'immutable production control artifact exists in only one registry' >&2; exit 1; }
             test "$china_digest" = "$global_digest"
-            docker pull "$china_ref" >/dev/null
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
             test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$CONTROL_PLANE_SHA"
             test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "io.memoflow.release.revision"}}')" = "$RELEASE_SHA"
             test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "io.memoflow.production-set.digest"}}')" = "$PRODUCTION_SET_DIGEST"
@@ -343,9 +343,9 @@ jobs:
           china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-production-runtime:$IMMUTABLE_TAG"
           global_ref="ghcr.io/$GLOBAL_NAMESPACE/memoflow-production-runtime:$IMMUTABLE_TAG"
           [[ "$control_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          test "$(docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
-          test "$(docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
-          docker pull "$china_ref" >/dev/null
+          test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
+          test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
           test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$CONTROL_PLANE_SHA"
           test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "io.memoflow.release.revision"}}')" = "$RELEASE_SHA"
           test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "io.memoflow.production-set.digest"}}')" = "$PRODUCTION_SET_DIGEST"
@@ -364,8 +364,8 @@ jobs:
           for repo in \
             "$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-production-runtime" \
             "ghcr.io/$global_namespace/memoflow-production-runtime"; do
-            docker buildx imagetools create --prefer-index=false --tag "$repo:production-selected" "$repo@$CONTROL_DIGEST"
-            test "$(docker buildx imagetools inspect "$repo:production-selected" --format '{{.Manifest.Digest}}')" = "$CONTROL_DIGEST"
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools create --prefer-index=false --tag "$repo:production-selected" "$repo@$CONTROL_DIGEST"
+            test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:production-selected" --format '{{.Manifest.Digest}}')" = "$CONTROL_DIGEST"
           done
 
       - name: Write production selection receipt

@@ -178,3 +178,101 @@ esac
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('registry mutation retry recovers transient remote failures without hiding permanent failures', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'memoflow-registry-operation-'));
+  const fakeCommand = join(root, 'fake-registry-command');
+  const countFile = join(root, 'count');
+  const retryScript = fileURLToPath(
+    new URL('../../../tools/ci-cd-platform/registry-operation-retry.sh', import.meta.url),
+  );
+
+  try {
+    await writeFile(
+      fakeCommand,
+      `#!/usr/bin/env bash
+set -euo pipefail
+count=0
+if [[ -f "$FAKE_COUNT_FILE" ]]; then count="$(cat "$FAKE_COUNT_FILE")"; fi
+count=$((count + 1))
+printf '%s' "$count" > "$FAKE_COUNT_FILE"
+case "$FAKE_MODE" in
+  transient-then-success)
+    if (( count >= 2 )); then printf 'sha256:recovered\\n'; exit 0; fi
+    echo 'partial-output-that-must-not-escape'
+    echo 'failed to authorize: read: connection reset by peer' >&2
+    exit 1
+    ;;
+  transient-always)
+    echo 'net/http: TLS handshake timeout' >&2
+    exit 1
+    ;;
+  auth)
+    echo 'unauthorized: authentication required' >&2
+    exit 1
+    ;;
+  unknown)
+    echo 'manifest schema is invalid' >&2
+    exit 1
+    ;;
+esac
+`,
+      'utf8',
+    );
+    await chmod(fakeCommand, 0o755);
+
+    const run = async (mode) => {
+      await rm(countFile, { force: true });
+      const result = spawnSync('bash', [retryScript, fakeCommand], {
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          FAKE_COUNT_FILE: countFile,
+          FAKE_MODE: mode,
+          REGISTRY_RETRY_MAX_ATTEMPTS: '3',
+          REGISTRY_RETRY_INITIAL_DELAY_SECONDS: '0',
+        },
+      });
+      return {
+        ...result,
+        attempts: Number(await readFile(countFile, 'utf8')),
+      };
+    };
+
+    const recovered = await run('transient-then-success');
+    assert.equal(recovered.status, 0);
+    assert.equal(recovered.attempts, 2);
+    assert.equal(recovered.stdout.trim(), 'sha256:recovered');
+
+    const auth = await run('auth');
+    assert.equal(auth.status, 1);
+    assert.equal(auth.attempts, 1);
+    assert.match(auth.stderr, /non-retryable authentication\/authorization error/u);
+
+    const unknown = await run('unknown');
+    assert.equal(unknown.status, 1);
+    assert.equal(unknown.attempts, 1);
+    assert.match(unknown.stderr, /non-retryable error/u);
+
+    const exhausted = await run('transient-always');
+    assert.equal(exhausted.status, 1);
+    assert.equal(exhausted.attempts, 3);
+    assert.match(exhausted.stderr, /exhausted 3 attempts/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('candidate staging mutation and verification use transient registry operation retry', async () => {
+  const workflow = await read('.github/workflows/candidate-publish.yml');
+  const promote = workflow.slice(
+    workflow.indexOf('Promote complete candidate set to staging-latest in both registries'),
+    workflow.indexOf('Verify coherent staging-latest digests'),
+  );
+  const verify = workflow.slice(workflow.indexOf('Verify coherent staging-latest digests'));
+  assert.match(
+    promote,
+    /registry-operation-retry\.sh docker buildx imagetools create --prefer-index=false/u,
+  );
+  assert.match(verify, /registry-operation-retry\.sh docker buildx imagetools inspect/u);
+});

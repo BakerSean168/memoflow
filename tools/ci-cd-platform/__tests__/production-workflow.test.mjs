@@ -104,6 +104,8 @@ test('production selector verifies release and runtime digest parity before cont
   assert.match(verify, /imagetools inspect/u);
   assert.match(verify, /postgres redis powersync caddy/u);
   assert.match(mutate, /memoflow-production-runtime/u);
+  assert.match(mutate, /registry-operation-retry\.sh docker buildx imagetools create/u);
+  assert.match(mutate, /registry-operation-retry\.sh docker buildx imagetools inspect/u);
   assert.ok(
     workflow.indexOf('Verify immutable release and runtime digests before selection') <
       workflow.indexOf('Move the single coherent production-selected control pointer'),

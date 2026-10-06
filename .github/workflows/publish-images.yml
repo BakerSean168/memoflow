@@ -218,9 +218,9 @@ jobs:
             expected="$(node -p "require('./$manifest').images.$component.digest")"
             for distribution in china global; do
               repo="$(node -p "require('./$manifest').images.$component.distributions.$distribution.repository")"
-              test "$(docker buildx imagetools inspect "$repo:$candidate_tag" --format '{{.Manifest.Digest}}')" = "$expected"
+              test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$candidate_tag" --format '{{.Manifest.Digest}}')" = "$expected"
               for target_tag in "$RELEASE_TAG" "$RELEASE_IMMUTABLE_TAG"; do
-                existing="$(docker buildx imagetools inspect "$repo:$target_tag" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
+                existing="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$target_tag" --format '{{.Manifest.Digest}}' 2>/dev/null || true)"
                 if [[ -n "$existing" && "$existing" != "$expected" ]]; then
                   echo "$repo:$target_tag already points to $existing, expected $expected" >&2
                   exit 1
@@ -241,7 +241,7 @@ jobs:
             expected="$(node -p "require('./$manifest').images.$component.digest")"
             for distribution in china global; do
               repo="$(node -p "require('./$manifest').images.$component.distributions.$distribution.repository")"
-              docker buildx imagetools create --prefer-index=false \
+              bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools create --prefer-index=false \
                 --tag "$repo:$RELEASE_TAG" \
                 --tag "$repo:$RELEASE_IMMUTABLE_TAG" \
                 "$repo@$expected"
@@ -260,8 +260,8 @@ jobs:
             expected="$(node -p "require('./$manifest').images.$component.digest")"
             for distribution in china global; do
               repo="$(node -p "require('./$manifest').images.$component.distributions.$distribution.repository")"
-              test "$(docker buildx imagetools inspect "$repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
-              test "$(docker buildx imagetools inspect "$repo:$RELEASE_IMMUTABLE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
+              test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
+              test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$RELEASE_IMMUTABLE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
             done
           done
 

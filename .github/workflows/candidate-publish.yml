@@ -169,16 +169,16 @@ jobs:
           china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/$IMAGE:$TAG"
           global_ref="ghcr.io/$global_namespace/$IMAGE:$TAG"
           china_exists=false; global_exists=false
-          china_json="$(docker buildx imagetools inspect "$china_ref" 2>/dev/null || true)"
-          global_json="$(docker buildx imagetools inspect "$global_ref" 2>/dev/null || true)"
+          china_json="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" 2>/dev/null || true)"
+          global_json="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" 2>/dev/null || true)"
           [[ -z "$china_json" ]] || china_exists=true
           [[ -z "$global_json" ]] || global_exists=true
           test "$china_exists" = "$global_exists" || { echo 'immutable candidate exists in only one registry' >&2; exit 1; }
           if $china_exists; then
-            china_digest="$(docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
-            global_digest="$(docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
+            china_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
+            global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
             test "$china_digest" = "$global_digest"
-            docker pull "$china_ref" >/dev/null
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
             revision="$(docker image inspect "$china_ref" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
             test "$revision" = "${{ needs.resolve.outputs.revision }}"
             echo 'reuse=true' >> "$GITHUB_OUTPUT"
@@ -225,11 +225,11 @@ jobs:
           global_repo="ghcr.io/$global_namespace/$IMAGE"
           expected="${REUSED_DIGEST:-$BUILD_DIGEST}"
           [[ "$expected" =~ ^sha256:[0-9a-f]{64}$ ]]
-          china_digest="$(docker buildx imagetools inspect "$china_repo:$TAG" --format '{{.Manifest.Digest}}')"
-          global_digest="$(docker buildx imagetools inspect "$global_repo:$TAG" --format '{{.Manifest.Digest}}')"
+          china_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_repo:$TAG" --format '{{.Manifest.Digest}}')"
+          global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo:$TAG" --format '{{.Manifest.Digest}}')"
           test "$china_digest" = "$expected"
           test "$global_digest" = "$expected"
-          docker pull "$china_repo:$TAG" >/dev/null
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_repo:$TAG" >/dev/null
           test "$(docker image inspect "$china_repo:$TAG" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${{ needs.resolve.outputs.revision }}"
           echo "digest=$expected" >> "$GITHUB_OUTPUT"
           mkdir -p reports/candidate/components
@@ -338,14 +338,14 @@ jobs:
           china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-staging-runtime:$TAG"
           global_ref="ghcr.io/${{ needs.resolve.outputs.global_namespace }}/memoflow-staging-runtime:$TAG"
           china_exists=false; global_exists=false
-          docker buildx imagetools inspect "$china_ref" >/dev/null 2>&1 && china_exists=true || true
-          docker buildx imagetools inspect "$global_ref" >/dev/null 2>&1 && global_exists=true || true
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" >/dev/null 2>&1 && china_exists=true || true
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" >/dev/null 2>&1 && global_exists=true || true
           test "$china_exists" = "$global_exists" || { echo 'runtime artifact exists in only one registry' >&2; exit 1; }
           if $china_exists; then
-            china_digest="$(docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
-            global_digest="$(docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
+            china_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
+            global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
             test "$china_digest" = "$global_digest"
-            docker pull "$china_ref" >/dev/null
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
             test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels \"org.opencontainers.image.revision\"}}')" = "${{ needs.resolve.outputs.revision }}"
             echo 'reuse=true' >> "$GITHUB_OUTPUT"
             echo "digest=$china_digest" >> "$GITHUB_OUTPUT"
@@ -383,8 +383,8 @@ jobs:
           global_namespace="${{ needs.resolve.outputs.global_namespace }}"
           china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-staging-runtime:$TAG"
           global_ref="ghcr.io/$global_namespace/memoflow-staging-runtime:$TAG"
-          china_digest="$(docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
-          global_digest="$(docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
+          china_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')"
+          global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
           test "$china_digest" = "$EXPECTED"
           test "$global_digest" = "$EXPECTED"
           echo "digest=$EXPECTED" >> "$GITHUB_OUTPUT"
@@ -446,14 +446,14 @@ jobs:
             for distribution in china global; do
               repo="$(node -p "require('./$manifest').images.$component.distributions.$distribution.repository")"
               digest="$(node -p "require('./$manifest').images.$component.digest")"
-              docker buildx imagetools create --prefer-index=false --tag "$repo:staging-latest" "$repo@$digest"
+              bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools create --prefer-index=false --tag "$repo:staging-latest" "$repo@$digest"
             done
           done
           global_namespace="${{ needs.resolve.outputs.global_namespace }}"
           china_runtime="$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-staging-runtime"
           global_runtime="ghcr.io/$global_namespace/memoflow-staging-runtime"
-          docker buildx imagetools create --prefer-index=false --tag "$china_runtime:staging-latest" "$china_runtime@$RUNTIME_DIGEST"
-          docker buildx imagetools create --prefer-index=false --tag "$global_runtime:staging-latest" "$global_runtime@$RUNTIME_DIGEST"
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools create --prefer-index=false --tag "$china_runtime:staging-latest" "$china_runtime@$RUNTIME_DIGEST"
+          bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools create --prefer-index=false --tag "$global_runtime:staging-latest" "$global_runtime@$RUNTIME_DIGEST"
       - name: Verify coherent staging-latest digests
         if: steps.freshness.outputs.eligible == 'true'
         env:
@@ -468,11 +468,11 @@ jobs:
             expected="$(node -p "require('./$manifest').images.$component.digest")"
             for distribution in china global; do
               repo="$(node -p "require('./$manifest').images.$component.distributions.$distribution.repository")"
-              actual="$(docker buildx imagetools inspect "$repo:staging-latest" --format '{{.Manifest.Digest}}')"
+              actual="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:staging-latest" --format '{{.Manifest.Digest}}')"
               test "$actual" = "$expected"
             done
           done
           global_namespace="${{ needs.resolve.outputs.global_namespace }}"
-          test "$(docker buildx imagetools inspect "$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-staging-runtime:staging-latest" --format '{{.Manifest.Digest}}')" = "$RUNTIME_DIGEST"
-          test "$(docker buildx imagetools inspect "ghcr.io/$global_namespace/memoflow-staging-runtime:staging-latest" --format '{{.Manifest.Digest}}')" = "$RUNTIME_DIGEST"
+          test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-staging-runtime:staging-latest" --format '{{.Manifest.Digest}}')" = "$RUNTIME_DIGEST"
+          test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "ghcr.io/$global_namespace/memoflow-staging-runtime:staging-latest" --format '{{.Manifest.Digest}}')" = "$RUNTIME_DIGEST"
           echo "STAGING_CHANNEL=PASS revision=${{ needs.resolve.outputs.revision }}" >> "$GITHUB_STEP_SUMMARY"
