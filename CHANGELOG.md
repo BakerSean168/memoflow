@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.1](https://github.com/BakerSean168/memoflow/compare/v0.15.0...v0.15.1) (2026-10-07)
+
+This corrective release includes the 0.15 milestone, including External Agent OAuth,
+six read-only MCP tools for Goals and Tasks, and Goal lifecycle integration.
+See the [full changes since v0.14.1](https://github.com/BakerSean168/memoflow/compare/v0.14.1...v0.15.1).
+The v0.15.0 release remained an unpublished Draft after Desktop acceptance failed;
+this version repairs packaged startup and Windows archive verification.
+macOS packages remain unsigned-pilot trial builds.
+
+
+### Bug Fixes
+
+* **desktop:** restore packaged startup and release verification ([#423](https://github.com/BakerSean168/memoflow/issues/423)) ([9888a52](https://github.com/BakerSean168/memoflow/commit/9888a52bde2fa7c50b8267c9288ad7cc1c1ed01c))
+
 ## [0.15.0](https://github.com/BakerSean168/memoflow/compare/v0.14.1...v0.15.0) (2026-10-07)
 
 
