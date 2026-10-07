@@ -445,12 +445,24 @@ jobs:
       - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts
         shell: bash
+        timeout-minutes: 5
         run: |
           set -euo pipefail
           # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
           # Browser caching does not provision host fonts; every shard needs this prerequisite.
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8
+          # Avoid the runner mirror list repeatedly retrying an unreachable Azure mirror.
+          fonts_sources="$RUNNER_TEMP/visual-fonts.list"
+          printf '%s\n' 'deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe' > "$fonts_sources"
+          apt_options=(
+            -o "Dir::Etc::sourcelist=$fonts_sources"
+            -o 'Dir::Etc::sourceparts=-'
+            -o 'Acquire::Retries=2'
+            -o 'Acquire::http::Timeout=30'
+            -o 'Acquire::https::Timeout=30'
+            -o 'APT::Update::Error-Mode=any'
+          )
+          sudo apt-get "${apt_options[@]}" update
+          sudo apt-get "${apt_options[@]}" install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8
           fc-cache -f
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fonts-wqy-zenhei
           font_family=$(fc-match -f '%{family}' 'Inter:lang=zh-cn')
