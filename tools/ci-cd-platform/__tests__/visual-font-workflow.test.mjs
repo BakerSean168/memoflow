@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 
 const workflow = readFileSync(
@@ -25,19 +27,26 @@ function runPreflight({
   fail = '',
 } = {}) {
   assert.ok(script, 'font prerequisite must have an executable script');
+  const runnerTemp = mkdtempSync(join(tmpdir(), 'memoflow-visual-fonts-'));
   // Execute the actual workflow script without installing packages or changing host fonts.
-  return spawnSync('bash', ['-s'], {
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      FONT_TEST_FAMILY: family,
-      FONT_TEST_ENGLISH_FAMILY: englishFamily,
-      FONT_TEST_FAIL: fail,
-    },
-    input: `
+  try {
+    const result = spawnSync('bash', ['-s'], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        RUNNER_TEMP: runnerTemp,
+        FONT_TEST_FAMILY: family,
+        FONT_TEST_ENGLISH_FAMILY: englishFamily,
+        FONT_TEST_FAIL: fail,
+      },
+      input: `
       sudo() {
         echo "sudo $*" >&2
-        [[ "$FONT_TEST_FAIL" != "$*" ]]
+        for argument in "$@"; do
+          case "$argument" in
+            update|install) [[ "$FONT_TEST_FAIL" != "$argument" ]] || return 1 ;;
+          esac
+        done
       }
       fc-cache() {
         echo "fc-cache $*" >&2
@@ -68,7 +77,16 @@ function runPreflight({
       }
       ${workflowScript}
     `,
-  });
+    });
+    const sourcePath = join(runnerTemp, 'visual-fonts.list');
+    return {
+      ...result,
+      stderr: result.stderr.replaceAll(runnerTemp, '<runner-temp>'),
+      fontsSource: existsSync(sourcePath) ? readFileSync(sourcePath, 'utf8') : null,
+    };
+  } finally {
+    rmSync(runnerTemp, { recursive: true, force: true });
+  }
 }
 
 test('every Web Flow shard provisions Noble fonts before functional and visual browser tests', () => {
@@ -76,11 +94,12 @@ test('every Web Flow shard provisions Noble fonts before functional and visual b
   assert.match(shard, /shard: \['1\/4', '2\/4', '3\/4', '4\/4'\]/u);
   assert.ok(fontStep, 'font prerequisite must exist in the matrix job');
   assert.match(fontStep, /shell: bash/u);
+  assert.match(fontStep, /timeout-minutes: 5/u);
   assert.doesNotMatch(fontStep, /(?:if:|continue-on-error:)/u);
   assert.match(script, /set -euo pipefail/u);
   assert.match(
     script,
-    /sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817\+repack1-3 fonts-wqy-zenhei=0\.9\.45-8/u,
+    /sudo apt-get .*install --yes --no-install-recommends fonts-noto-cjk=1:20230817\+repack1-3 fonts-wqy-zenhei=0\.9\.45-8/u,
   );
   const provisionIndex = shard.indexOf('- name: Provision visual regression fonts');
   assert.ok(shard.indexOf('playwright install chromium') < provisionIndex);
@@ -92,9 +111,25 @@ test('every Web Flow shard provisions Noble fonts before functional and visual b
 test('font preflight provisions both pinned packages before checking both CJK fallbacks', () => {
   const result = runPreflight();
   assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(result.stderr.trim().split('\n'), [
-    'sudo apt-get update',
-    'sudo apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8',
+  const commands = result.stderr.trim().split('\n');
+  assert.match(commands[0], /^sudo apt-get .* update$/u);
+  assert.match(
+    commands[1],
+    / install --yes --no-install-recommends fonts-noto-cjk=1:20230817\+repack1-3 fonts-wqy-zenhei=0\.9\.45-8$/u,
+  );
+  for (const command of commands.slice(0, 2)) {
+    assert.match(command, /-o Dir::Etc::sourcelist=<runner-temp>\/visual-fonts\.list/u);
+    assert.match(command, /-o Dir::Etc::sourceparts=-/u);
+    assert.match(command, /-o Acquire::Retries=2/u);
+    assert.match(command, /-o Acquire::http::Timeout=30/u);
+    assert.match(command, /-o Acquire::https::Timeout=30/u);
+    assert.match(command, /-o APT::Update::Error-Mode=any/u);
+  }
+  assert.equal(
+    result.fontsSource,
+    'deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe\n',
+  );
+  assert.deepEqual(commands.slice(2), [
     'fc-cache -f',
     'dpkg-query -W -f=${Package} ${Version}\\n fonts-noto-cjk fonts-wqy-zenhei',
     'fc-match -f %{family} Inter:lang=zh-cn',
@@ -147,14 +182,7 @@ test('font preflight fails closed on missing glyph coverage or either wrong fall
 });
 
 test('font preflight fails closed on provisioning, cache, or fontconfig command errors', () => {
-  for (const fail of [
-    'apt-get update',
-    'apt-get install --yes --no-install-recommends fonts-noto-cjk=1:20230817+repack1-3 fonts-wqy-zenhei=0.9.45-8',
-    'cache',
-    'query',
-    'match-zh',
-    'match-en',
-  ]) {
+  for (const fail of ['update', 'install', 'cache', 'query', 'match-zh', 'match-en']) {
     const result = runPreflight({ fail });
     assert.notEqual(result.status, 0, `unexpected acceptance of ${fail} failure`);
     assert.doesNotMatch(result.stdout, /Inter:lang=en:charset=4e00 ->/u);
