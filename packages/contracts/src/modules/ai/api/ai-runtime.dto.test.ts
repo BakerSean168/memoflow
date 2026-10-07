@@ -13,6 +13,79 @@ import {
 } from './ai-runtime.dto';
 
 describe('AI vNext runtime contracts', () => {
+  it.each(['goal.create', 'task.create', 'knowledge.capture'] as const)(
+    'binds recovery receipts and failure operations to %s',
+    (kind) => {
+      const view = {
+        runId: 'r',
+        conversationId: 'c',
+        kind,
+        status: 'suspended',
+        createdAt: 1,
+        updatedAt: 2,
+      };
+      const receipt = { workflowRunId: 'r', revision: 1, status: 'success', retryable: false };
+      const operations = {
+        'goal.create': 'goal_create',
+        'task.create': 'task_plan',
+        'knowledge.capture': 'knowledge_note',
+      };
+      for (const candidate of ['goal.create', 'task.create', 'knowledge.capture'] as const) {
+        const base = { type: 'recovery_required', message: 'Retry', retryable: true };
+        expect(
+          AIWorkflowRunViewSchema.safeParse({
+            ...view,
+            suspension: {
+              ...base,
+              receipt: { kind: candidate, receipt },
+            },
+          }).success,
+        ).toBe(candidate === kind);
+        expect(
+          AIWorkflowRunViewSchema.safeParse({
+            ...view,
+            suspension: {
+              ...base,
+              failures: [
+                {
+                  operation: operations[candidate],
+                  ...(candidate === 'knowledge.capture'
+                    ? {}
+                    : { draftRef: candidate === 'task.create' ? 'task:one' : 'goal' }),
+                  code: 'FAILED',
+                  message: 'Retry',
+                  retryable: true,
+                },
+              ],
+            },
+          }).success,
+        ).toBe(candidate === kind);
+      }
+    },
+  );
+
+  it('rejects a Goal review on a Task or Knowledge run', () => {
+    const suspension = {
+      type: 'goal_draft_review',
+      revision: 1,
+      draft: { revision: 1, goal: { draftRef: 'goal', name: 'Goal', status: 'Planned' } },
+      ownerCreate: { goalId: 'goal-id', keyResultIds: {} },
+    };
+    for (const kind of ['goal.create', 'task.create', 'knowledge.capture']) {
+      expect(
+        AIWorkflowRunViewSchema.safeParse({
+          runId: 'r',
+          conversationId: 'c',
+          kind,
+          status: 'suspended',
+          suspension,
+          createdAt: 1,
+          updatedAt: 2,
+        }).success,
+      ).toBe(kind === 'goal.create');
+    }
+  });
+
   it('accepts only bound approve/decline commands and safe typed approval events', () => {
     const command = {
       type: 'tool_approval',

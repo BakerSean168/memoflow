@@ -8,6 +8,9 @@ export default {
   providerSummaryEmpty: 'No AI provider configured yet.',
   providerSummaryConfigured: '{count} provider(s) configured.',
   errors: {
+    workflowRunUnavailable: 'This workflow is unavailable or has expired.',
+    workflowReadUnavailable: 'Workflow updates are unavailable. Reopen the conversation to retry.',
+
     workflowExecutionFailed: 'Workflow execution failed',
   },
   chatPage: {

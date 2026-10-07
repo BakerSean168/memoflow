@@ -480,6 +480,34 @@ describe('registerAIRuntimeRoutes', () => {
     expect(unavailableRes.status).toHaveBeenCalledWith(503);
   });
 
+  it('preserves unsupported workflow state codes while redacting diagnostics', async () => {
+    const assistant = runtimeStub();
+    const workflow = workflowRuntimeStub();
+    workflow.startDetached.mockRejectedValueOnce({
+      code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+      message: 'secret native status details',
+    });
+    const router = registerAIRuntimeRoutes(assistant.runtime, { auth }, workflow.runtime);
+    const { res } = response();
+    await getRouteHandler(
+      router,
+      'post',
+      '/workflow/start',
+    )(
+      request({ kind: 'goal.create', conversationId: 'c', input: { idea: 'Plan' } }) as never,
+      res as never,
+    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: {
+          code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+          message: 'AI workflow state is unsupported',
+        },
+      }),
+    );
+  });
+
   it('maps provider runtime failures to the same stable public code as Desktop IPC', async () => {
     const assistant = runtimeStub();
     const workflow = workflowRuntimeStub();

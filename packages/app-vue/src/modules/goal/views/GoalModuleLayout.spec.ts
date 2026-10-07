@@ -27,6 +27,8 @@ import {
 } from '../../../layouts/shell/useGoalNativeSurface';
 import { useShellRouterSync } from '../../../layouts/shell/useShellRouterSync';
 import { useAppShellStore, MAX_BUSINESS_TABS } from '../../../layouts/shell/useAppShellStore';
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
+import { canLeaveAIWorkflowReview } from '../../ai/composables/chatViewHelpers';
 
 const goalMocks = vi.hoisted(() => ({
   createGoal: vi.fn(),
@@ -280,7 +282,7 @@ describe('GoalModuleLayout', () => {
     expect(goalMocks.fetchGoals).toHaveBeenCalled();
   });
 
-  it('publishes the goal dialog draft status to the shell', async () => {
+  it('publishes goal dialog status and preserves review on declined or busy departure', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
@@ -301,11 +303,33 @@ describe('GoalModuleLayout', () => {
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
     await nextTick();
+    await vi.waitFor(() => expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true));
     expect(shell.surfaceStatus).toBe('clean');
 
     wrapper.findComponent(GoalDialogStub).vm.$emit('dirty-change', true);
     await nextTick();
     expect(shell.surfaceStatus).toBe('dirty');
+    shell.openTab({
+      module: 'goal',
+      route: router.currentRoute.value.fullPath,
+      title: 'Review',
+      intent: 'deeplink',
+    });
+    const originalConfirm = window.confirm;
+    const confirm = vi.fn(() => false);
+    window.confirm = confirm;
+    const leave = () =>
+      canLeaveAIWorkflowReview(
+        'goal-create',
+        { goal: false, task: false, knowledge: false },
+        () => canLeaveBusinessSurface((key) => key),
+        vi.fn(),
+      );
+    const reviewRoute = router.currentRoute.value.fullPath;
+    expect(leave()).toBe(false);
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(router.currentRoute.value.fullPath).toBe(reviewRoute);
+    expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true);
 
     wrapper.findComponent(GoalDialogStub).vm.$emit('dirty-change', false);
     await nextTick();
@@ -313,6 +337,11 @@ describe('GoalModuleLayout', () => {
     wrapper.findComponent(GoalDialogStub).vm.$emit('busy-change', true);
     await nextTick();
     expect(shell.surfaceStatus).toBe('busy');
+    expect(leave()).toBe(false);
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(router.currentRoute.value.fullPath).toBe(reviewRoute);
+    expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true);
+    window.confirm = originalConfirm;
     wrapper.findComponent(GoalDialogStub).vm.$emit('busy-change', false);
     await nextTick();
     expect(shell.surfaceStatus).toBe('clean');

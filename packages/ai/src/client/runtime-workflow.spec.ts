@@ -161,3 +161,35 @@ describe('WorkflowRuntimeIpcClient', () => {
     ]);
   });
 });
+
+describe('unsupported workflow snapshot transport parity', () => {
+  it.each(['goal.create', 'task.create', 'knowledge.capture'] as const)(
+    'preserves failed %s snapshots over HTTP and IPC without polling',
+    async (kind) => {
+      const failed = {
+        runId: 'r',
+        conversationId: 'c',
+        kind,
+        status: 'failed',
+        createdAt: 1,
+        updatedAt: 2,
+        failure: {
+          code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+          message: 'AI workflow state is unsupported',
+        },
+      };
+      const post = vi.fn().mockResolvedValue(ok(failed));
+      const invoke = vi.fn().mockResolvedValue(ok(failed));
+      const http = new WorkflowRuntimeHttpClient(httpStub({ post }));
+      const ipc = new WorkflowRuntimeIpcClient({ invoke } as never);
+      for (const client of [http, ipc]) {
+        await expect(client.get({ runId: 'r' })).resolves.toEqual(failed);
+        await expect(client.resume({ runId: 'r', command: { type: 'retry' } })).resolves.toEqual(
+          failed,
+        );
+      }
+      expect(post).toHaveBeenCalledTimes(2);
+      expect(invoke).toHaveBeenCalledTimes(2);
+    },
+  );
+});
