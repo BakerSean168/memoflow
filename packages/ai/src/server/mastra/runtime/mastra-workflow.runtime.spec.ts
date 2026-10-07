@@ -3,7 +3,7 @@ import {
   MEMOFLOW_PRODUCT_TOOL_POLICY,
 } from '../tools/product-tool-policy';
 import { RequestContext } from '@mastra/core/request-context';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AIWorkflowStartClientRequest, AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -782,6 +782,217 @@ describe('MastraAIRuntime Assistant tool policy', () => {
     for (const name of ['unknown', '__proto__', 'constructor', 'toString']) {
       expect(session.resolveToolApproval(name)).toBe('deny');
     }
+  });
+});
+
+const workflowRequests = [
+  { kind: 'goal.create', conversationId: 'durable-goal', input: { idea: 'Plan a durable goal' } },
+  { kind: 'task.create', conversationId: 'durable-task', input: { idea: 'Plan a durable task' } },
+  {
+    kind: 'knowledge.capture',
+    conversationId: 'durable-knowledge',
+    input: { topic: 'Capture durable workflow notes' },
+  },
+] satisfies AIWorkflowStartClientRequest[];
+
+describe.each(workflowRequests)('MastraAIRuntime $kind durable boundary', (request) => {
+  it('acknowledges detached work before completion and does not redispatch a running resume', async () => {
+    const { runtime } = await createRuntime();
+    const planner =
+      request.kind === 'goal.create'
+        ? runtime.goalPlanner
+        : request.kind === 'task.create'
+          ? runtime.taskPlanner
+          : runtime.knowledgeCapturePlanner;
+    const plan = vi.mocked(planner.plan);
+    const originalPlan = plan.getMockImplementation()!;
+    let release!: () => void;
+    let barrier = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    plan.mockImplementation(async (...args) => {
+      await barrier;
+      return originalPlan(...args);
+    });
+    const identityId = 'detached-owner';
+    const started = await runtime.startDetached({
+      context: context(identityId, 'detached-start'),
+      request,
+    });
+    try {
+      expect(started).toMatchObject({ kind: request.kind, status: 'running' });
+      await vi.waitFor(() => expect(plan).toHaveBeenCalledTimes(1));
+      expect(await runtime.get({ identityId, runId: started.runId })).toMatchObject({
+        status: 'running',
+      });
+    } finally {
+      release();
+    }
+    await vi.waitFor(
+      async () => {
+        expect(await runtime.get({ identityId, runId: started.runId })).toMatchObject({
+          status: 'suspended',
+        });
+      },
+      { timeout: 5_000 },
+    );
+
+    barrier = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const resumed = await runtime.resumeDetached({
+      context: context(identityId, 'detached-resume'),
+      request: { runId: started.runId, command: { type: 'regenerate' } },
+    });
+    try {
+      expect(resumed).toMatchObject({
+        runId: started.runId,
+        kind: request.kind,
+        status: 'running',
+      });
+      await vi.waitFor(() => expect(plan).toHaveBeenCalledTimes(2));
+      const duplicate = await runtime.resumeDetached({
+        context: context(identityId, 'duplicate-resume'),
+        request: {
+          runId: started.runId,
+          command: { type: 'answer', answers: ['Do not dispatch while running'] },
+          workflowTurn: 'This replay must not enter history',
+        },
+      });
+      expect(duplicate.status).toBe('running');
+      expect(plan).toHaveBeenCalledTimes(2);
+      expect(
+        await runtime.listMessages({ identityId, conversationId: request.conversationId }),
+      ).toMatchObject({ messages: [] });
+      expect(plan.mock.calls[1]?.[1]?.getRaw('executionContext')).toMatchObject({
+        identityId,
+        requestId: 'detached-resume',
+      });
+    } finally {
+      release();
+    }
+    await vi.waitFor(
+      async () => {
+        expect(await runtime.get({ identityId, runId: started.runId })).toMatchObject({
+          status: 'suspended',
+        });
+      },
+      { timeout: 5_000 },
+    );
+  });
+
+  it('rejects foreign access before usage/history/mutations and replays cancellation after restart', async () => {
+    const first = await createRuntime();
+    const identityId = 'durable-owner';
+    const started = await first.runtime.start({
+      context: context(identityId, 'start'),
+      request: {
+        ...request,
+        providerId: 'persisted-provider',
+        modelId: 'persisted-model',
+        locale: 'en-US',
+      },
+    });
+    first.summarizeUsage.mockClear();
+    const foreign = { identityId: 'foreign-owner', runId: started.runId };
+    expect(await first.runtime.get(foreign)).toBeNull();
+    expect(await first.runtime.cancel(foreign)).toBeNull();
+    expect(await first.runtime.list({ identityId: foreign.identityId })).toEqual([]);
+    for (const resume of ['resume', 'resumeDetached'] as const) {
+      await expect(
+        first.runtime[resume]({
+          context: context(foreign.identityId, 'foreign-resume'),
+          request: {
+            runId: started.runId,
+            command: { type: 'answer', answers: ['Unauthorized'] },
+            workflowTurn: 'Unauthorized history write',
+          },
+        }),
+      ).rejects.toThrow('AI_WORKFLOW_RUN_NOT_FOUND');
+    }
+    expect(first.summarizeUsage).not.toHaveBeenCalled();
+    expect(
+      await first.runtime.listMessages({ identityId, conversationId: request.conversationId }),
+    ).toMatchObject({ messages: [] });
+    await first.runtime.dispose();
+    const restored = await createRuntime(first.file);
+    expect(await restored.runtime.get({ identityId, runId: started.runId })).toEqual(started);
+    const planner =
+      request.kind === 'goal.create'
+        ? restored.runtime.goalPlanner
+        : request.kind === 'task.create'
+          ? restored.runtime.taskPlanner
+          : restored.runtime.knowledgeCapturePlanner;
+    expect(
+      await restored.runtime.resumeDetached({
+        context: context(identityId, 'restart-resume'),
+        request: { runId: started.runId, command: { type: 'regenerate' } },
+      }),
+    ).toMatchObject({ status: 'running' });
+    await vi.waitFor(
+      async () => {
+        expect(vi.mocked(planner.plan)).toHaveBeenCalledTimes(1);
+        expect(await restored.runtime.get({ identityId, runId: started.runId })).toMatchObject({
+          status: 'suspended',
+          suspension: { revision: 2 },
+        });
+      },
+      { timeout: 5_000 },
+    );
+    const restoredContext = vi.mocked(planner.plan).mock.calls[0]?.[1];
+    expect(restoredContext?.getRaw('providerId')).toBe('persisted-provider');
+    expect(restoredContext?.getRaw('modelId')).toBe('persisted-model');
+    expect(restoredContext?.getRaw('locale')).toBe('en-US');
+    expect(restoredContext?.getRaw('executionContext')).toMatchObject({
+      identityId,
+      requestId: 'restart-resume',
+    });
+    const cancelled = await restored.runtime.cancel({ identityId, runId: started.runId });
+    expect(cancelled).toMatchObject({ kind: request.kind, status: 'cancelled' });
+    for (const resume of ['resume', 'resumeDetached'] as const) {
+      expect(
+        await restored.runtime[resume]({
+          context: context(identityId, 'terminal-replay'),
+          request: { runId: started.runId, command: { type: 'approve' } },
+        }),
+      ).toEqual(cancelled);
+    }
+    expect(await restored.runtime.cancel({ identityId, runId: started.runId })).toEqual(cancelled);
+    for (const fixture of [first, restored]) {
+      expect(fixture.mutations.createGoal).not.toHaveBeenCalled();
+      expect(fixture.createTaskPlan).not.toHaveBeenCalled();
+      expect(fixture.createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    }
+  });
+});
+
+describe('MastraAIRuntime workflow queries', () => {
+  it('orders all workflow kinds by last update and enriches only the requested conversation', async () => {
+    const { runtime, summarizeUsage } = await createRuntime();
+    const identityId = 'query-owner';
+    const runs = [];
+    for (const request of workflowRequests) {
+      runs.push(await runtime.start({ context: context(identityId, 'query-start'), request }));
+    }
+    const [goal, task, knowledge] = runs;
+    expect((await runtime.list({ identityId })).map((run) => run.runId)).toEqual([
+      knowledge!.runId,
+      task!.runId,
+      goal!.runId,
+    ]);
+    summarizeUsage.mockClear();
+    const filtered = await runtime.list({ identityId, conversationId: task!.conversationId });
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0]).toMatchObject({ runId: task!.runId, usage: { totalTokens: 250 } });
+    expect(summarizeUsage).toHaveBeenCalledExactlyOnceWith({ identityId, runId: task!.runId });
+    summarizeUsage.mockResolvedValueOnce({
+      executionCount: 0,
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+      estimatedCost: 0,
+    });
+    expect((await runtime.get({ identityId, runId: task!.runId }))?.usage).toBeUndefined();
   });
 });
 
