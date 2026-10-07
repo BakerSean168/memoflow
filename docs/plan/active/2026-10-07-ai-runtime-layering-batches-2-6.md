@@ -62,9 +62,23 @@ updated: 2026-10-07T00:00:00
 
 - [x] 确认 #419 已合并、创建干净独立 worktree。
 - [x] 记录剩余范围、架构和行为决策。
-- [ ] Batch 2。
-- [ ] Batch 3。
-- [ ] Batch 4。
-- [ ] Batch 5。
-- [ ] Batch 6。
+- [x] Batch 2 实现；最终全量 gate 见下文。
+- [x] Batch 3 实现；最终全量 gate 见下文。
+- [x] Batch 4 实现；最终全量 gate 见下文。
+- [x] Batch 5 实现；最终全量 gate 见下文。
+- [x] Batch 6 实现；最终全量 gate 见下文。
 - [ ] 全量验收、review、CI 和 main 合并。
+
+### 实施结果（最终 gate 前）
+
+- Batch 2：`AssistantTurnSession` 整体保留同步 reservation、native binding、审批与取消；`AssistantTurnObservability` 负责 phase 和终态记录。facade 保留双重 busy 检查与基础设施装配。真实 controller / observability / projection 106 项通过。
+- Batch 3：每个 owner 的 suspension schema 独立引用自己的 recovery failure/receipt，Goal/Task 的原有 refinement 放在 review schema 上复用。未知、空或 paused status 显式 failed；running/pending/waiting 仍可轮询。新增用例先确认红灯，再收紧实现。
+- Batch 4：Goal draft mapping、timeline projection 和完整 native coordinator 分层；Task/Knowledge 各自 coordinator。Goal/Task 的 owner probe、revision freeze 与 approve-only retry 不变。3 owner + leave guard + polling + View 111 项通过。
+- Polling 细化：null 终止并删除已失效 pointer；runId/kind/conversation 任一不符立即停止；连续 5 次读取或投影失败停止自动重试，保留最后投影和 durable pointer，并提示重新打开会话。成功的 running 读取清零失败计数；页面切换后忽略未完成请求的响应。
+- Batch 5：`useAIComposerContext`、`useAssistantStream`、`useConversationProjection` 各自持有对应状态；`useAIChatSession` 继续作为公开 facade。既有 20 项 chat 行为测试通过，app-vue typecheck 通过。
+- Batch 6：DTO 拆为 assistant-runtime、assistant-events、workflow-runtime、runtime-usage，公共 barrel 保留；共享 event envelope 为内部模块。product tool 输入与可信 context 解码独立。Goal provider wire normalization、JSON 提取和单次 repair 在 `goal-planner-output.ts`，research 编排仍与 planner 内聚。planner/tools 24 项通过。
+- 全量检查首轮发现 usage surface lock 仍读取旧物理 DTO 文件；已改为检查新 canonical schema/event 文件，保留原有唯一 schema 的架构约束。
+
+### 最终验收记录
+
+待填：affected checks、prod-like Docker、独立 review、PR head CI 与 merge SHA。

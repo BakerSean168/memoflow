@@ -47,7 +47,9 @@ describe('Mastra vNext architecture lock', () => {
   });
 
   it('uses the canonical vNext assistant event contract at the runtime boundary without serializing credentials or raw provider errors', () => {
-    const runtime = readFileSync(join(ROOT, 'runtime/mastra-ai.runtime.ts'), 'utf8');
+    const runtime = productionTypeScriptFiles(join(ROOT, 'runtime'))
+      .map((file) => readFileSync(file, 'utf8'))
+      .join('\n');
     expect(runtime).toContain('AssistantRuntimeEvent');
     expect(runtime).toContain('assistant.run.started');
     expect(runtime).toContain('assistant.message.delta');
@@ -60,7 +62,9 @@ describe('Mastra vNext architecture lock', () => {
   });
 
   it('keeps Mastra runtime failure projection independent from server transport', () => {
-    const runtime = readFileSync(join(ROOT, 'runtime/mastra-ai.runtime.ts'), 'utf8');
+    const runtime = productionTypeScriptFiles(join(ROOT, 'runtime'))
+      .map((file) => readFileSync(file, 'utf8'))
+      .join('\n');
 
     expect(runtime).toContain("from '../../../shared/ai-public-failure'");
     expect(runtime).not.toMatch(/from\s+['"][^'"]*transport(?:\/[^'"]*)?['"]/);

@@ -28,7 +28,9 @@ import { describe, expect, it } from 'vitest';
       expect(responseSchemas).toContain('data: z.array(AIConversationClientDTOSchema)');
       expect(responseSchemas).not.toContain('MessageListResSchema');
       expect(responseSchemas).not.toContain('MessageClientDTOSchema');
-      expect(dto).toContain('export type ConversationListRes = z.infer<typeof ConversationListResSchema>');
+      expect(dto).toContain(
+        'export type ConversationListRes = z.infer<typeof ConversationListResSchema>',
+      );
       expect(dto).not.toContain('SendMessageSchema');
       expect(dto).not.toContain('MessageListRes');
     });
@@ -47,10 +49,15 @@ import { describe, expect, it } from 'vitest';
   describe('ai conversation client dto is shell-only', () => {
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const aggregate = readFileSync(resolve(apiDir, '../aggregates/ai-conversation-client.ts'), 'utf8');
+    const aggregate = readFileSync(
+      resolve(apiDir, '../aggregates/ai-conversation-client.ts'),
+      'utf8',
+    );
 
     it('owns AIConversationClientDTO as z.infer of the shell schema', () => {
-      expect(aggregate).toContain('export type AIConversationClientDTO = z.infer<typeof AIConversationClientDTOSchema>');
+      expect(aggregate).toContain(
+        'export type AIConversationClientDTO = z.infer<typeof AIConversationClientDTOSchema>',
+      );
       expect(aggregate).not.toMatch(/export interface AIConversationClientDTO/);
       expect(responseSchemas).toContain('identityId: brandedId<IdentityId>()');
       expect(responseSchemas).not.toContain('messages:');
@@ -582,7 +589,13 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const vo = readFileSync(resolve(apiDir, '../value-objects/token-usage.ts'), 'utf8');
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const runtimeDto = readFileSync(resolve(apiDir, 'ai-runtime.dto.ts'), 'utf8');
+    const runtimeDto = [
+      'runtime-usage.dto.ts',
+      'assistant-events.dto.ts',
+      'workflow-runtime.dto.ts',
+    ]
+      .map((file) => readFileSync(resolve(apiDir, file), 'utf8'))
+      .join('\n');
 
     it('exports TokenUsageSchema as sole token-usage shape from VO module', () => {
       expect(vo).toContain('Residual 727');
