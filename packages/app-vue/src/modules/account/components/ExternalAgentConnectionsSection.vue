@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue';
-import type { OAuthConnection, ScopedPatSummary } from '@memoflow/contracts/agent-gateway';
+import { useI18n } from 'vue-i18n';
+import type {
+  OAuthConnection,
+  ScopedPatSummary,
+  ExternalAgentFailureCode,
+} from '@memoflow/contracts/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '../../../di/keys';
@@ -9,10 +14,11 @@ import { formatProductDateTime } from '../../../shared/utils/product-time';
 const injected = inject(EXTERNAL_AGENT_SERVICE_KEY);
 if (!injected) throw new Error('External agent service is required');
 const service = injected;
+const { t } = useI18n();
 const visible = ref(true);
 const oauthEnabled = ref(false);
 const busy = ref(false);
-const error = ref('');
+const error = ref<ExternalAgentFailureCode>();
 const connections = ref<OAuthConnection[]>([]);
 const pats = ref<ScopedPatSummary[]>([]);
 const name = ref('');
@@ -27,22 +33,22 @@ const status = (row: OAuthConnection | ScopedPatSummary) =>
 
 async function load() {
   busy.value = true;
-  error.value = '';
+  error.value = undefined;
   try {
     const capabilities = await service.capabilities();
     if (!capabilities.ok) {
-      if (capabilities.error.code === 'HTTP_404') visible.value = false;
-      else error.value = capabilities.error.message;
+      if (capabilities.error.code === 'SERVICE_DISABLED') visible.value = false;
+      else error.value = capabilities.error.code;
       return;
     }
     oauthEnabled.value = capabilities.data.oauth;
     const patList = await service.listPats();
     if (patList.ok) pats.value = patList.data;
-    else error.value = patList.error.message;
+    else error.value = patList.error.code;
     if (oauthEnabled.value) {
       const oauthList = await service.listConnections();
       if (oauthList.ok) connections.value = oauthList.data;
-      else error.value = oauthList.error.message;
+      else error.value = oauthList.error.code;
     }
   } finally {
     busy.value = false;
@@ -51,7 +57,7 @@ async function load() {
 async function createPat() {
   if (!name.value.trim() || (!goals.value && !tasks.value)) return;
   busy.value = true;
-  error.value = '';
+  error.value = undefined;
   secret.value = '';
   try {
     const result = await service.createPat({
@@ -63,7 +69,7 @@ async function createPat() {
       ],
     });
     if (!result.ok) {
-      error.value = result.error.message;
+      error.value = result.error.code;
       return;
     }
     secret.value = result.data.secret;
@@ -75,12 +81,12 @@ async function createPat() {
 }
 async function revoke(id: string, type: 'oauth' | 'pat') {
   busy.value = true;
-  error.value = '';
+  error.value = undefined;
   secret.value = '';
   try {
     const result = await (type === 'oauth' ? service.revokeConnection(id) : service.revokePat(id));
     if (!result.ok) {
-      error.value = result.error.message;
+      error.value = result.error.code;
       return;
     }
     await load();
@@ -105,7 +111,8 @@ onMounted(load);
       </p>
     </header>
     <p v-if="error" role="alert" class="text-sm text-destructive">
-      {{ error }} <Button variant="ghost" :disabled="busy" @click="load">重试</Button>
+      {{ t(`errors.${error}`) }}
+      <Button variant="ghost" :disabled="busy" @click="load">重试</Button>
     </p>
     <div v-if="oauthEnabled" class="space-y-3">
       <h3 class="font-medium">OAuth 应用</h3>

@@ -1,18 +1,19 @@
+import { createTool } from '@mastra/core/tools';
+import { z } from 'zod';
+import type {
+  IAINotificationReadPort,
+  IAIPlannerReadPort,
+  IAIRoutineCommandPort,
+  IAnalyticsReadPort,
+  IKnowledgeSourcePort,
+} from '../../application/ports';
+import { executionContext, identityId } from './product-tool-context';
+import { RoutineTriggerSchema, windowSchema } from './product-tool-inputs';
 import {
   MEMOFLOW_PRODUCT_TOOL_POLICY,
   assertMemoFlowToolClassification,
 } from './product-tool-policy';
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
-import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type {
-  IAIRoutineCommandPort,
-  IAIPlannerReadPort,
-  IAINotificationReadPort,
-  IAnalyticsReadPort,
-  IKnowledgeSourcePort,
-} from '../../application/ports';
+export { RoutineTriggerSchema } from './product-tool-inputs';
 
 export interface MemoFlowProductToolDependencies {
   readonly routineCommandPort?: IAIRoutineCommandPort;
@@ -22,121 +23,10 @@ export interface MemoFlowProductToolDependencies {
   readonly knowledgeSourcePort?: IKnowledgeSourcePort;
 }
 
-function executionContext(requestContext: { getRaw(key: string): unknown }): ExecutionContext {
-  const raw = requestContext.getRaw('executionContext');
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    throw new Error('MemoFlow product command requires canonical executionContext');
-  }
-  const context = raw as Record<string, unknown>;
-  const identityId = typeof context.identityId === 'string' ? context.identityId.trim() : '';
-  const requestId = typeof context.requestId === 'string' ? context.requestId.trim() : '';
-  const traceId = typeof context.traceId === 'string' ? context.traceId.trim() : '';
-  const startedAt = context.startedAt;
-  const source = context.source;
-  if (
-    !identityId ||
-    !requestId ||
-    !traceId ||
-    typeof startedAt !== 'number' ||
-    !Number.isFinite(startedAt) ||
-    (source !== 'http' && source !== 'ipc' && source !== 'system')
-  ) {
-    throw new Error('MemoFlow product command requires canonical executionContext');
-  }
-  return { identityId, requestId, traceId, startedAt, source };
-}
-
-function identityId(requestContext: { getRaw(key: string): unknown }): string {
-  const value = requestContext.getRaw('identityId');
-  if (typeof value !== 'string' || !value.trim()) {
-    throw new Error('MemoFlow product read requires authenticated identityId');
-  }
-  return value;
-}
-
 function requirePort<T>(port: T | undefined, name: string): T {
   if (!port) throw new Error(`${name} is unavailable on this host`);
   return port;
 }
-
-const instantSchema = z.number().int().nonnegative();
-const hmSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
-const weekdaySchema = z.union([
-  z.literal(0),
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-  z.literal(5),
-  z.literal(6),
-]);
-const routineTriggerRecurrenceSchema = z
-  .strictObject({
-    startDate: YmdSchema,
-    frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
-    interval: z.number().int().positive().default(1),
-    byWeekday: z.array(weekdaySchema).default([]),
-    count: z.number().int().positive().nullable().default(null),
-    until: instantSchema.nullable().default(null),
-  })
-  .superRefine((value, ctx) => {
-    if (value.frequency === 'weekly' && value.byWeekday.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['byWeekday'],
-        message: 'Weekly WallClock recurrence requires at least one weekday',
-      });
-    }
-  });
-
-export const RoutineTriggerSchema = z.discriminatedUnion('type', [
-  z.strictObject({
-    type: z.literal('WallClock'),
-    timingOwner: z.literal('scheduler'),
-    localTime: hmSchema,
-    timeZone: TimeZoneIdSchema,
-    recurrence: routineTriggerRecurrenceSchema,
-  }),
-  z.strictObject({
-    type: z.literal('Elapsed'),
-    timingOwner: z.literal('local-runtime'),
-    durationMs: z.number().finite().positive(),
-    anchor: z
-      .enum(['routine-activation', 'profile-activation', 'last-satisfied'])
-      .default('last-satisfied'),
-  }),
-  z.strictObject({
-    type: z.literal('ActiveUsage'),
-    timingOwner: z.literal('local-runtime'),
-    requiredActiveMs: z.number().finite().positive(),
-    anchor: z.enum(['profile-activation', 'last-satisfied']).default('last-satisfied'),
-    naturalBreakCredit: z
-      .strictObject({
-        idleDurationMs: z.number().finite().positive(),
-        effect: z.literal('satisfy-and-reset').default('satisfy-and-reset'),
-      })
-      .nullable()
-      .default(null),
-    protocolBreakCredit: z
-      .strictObject({
-        kind: z.enum(['Stand', 'Eye', 'Movement']),
-        minimumBreakMs: z.number().finite().positive(),
-      })
-      .nullable()
-      .default(null),
-  }),
-]);
-
-const windowSchema = z.strictObject({
-  range: z
-    .strictObject({
-      start: instantSchema,
-      end: instantSchema,
-    })
-    .refine((value) => value.end > value.start, {
-      message: 'Planner range end must be greater than start',
-    }),
-});
 
 export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies) {
   const routineCreate = createTool({

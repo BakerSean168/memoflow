@@ -1,3 +1,7 @@
+import { createPinia, setActivePinia, type Pinia } from 'pinia';
+import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
+import { canLeaveAIWorkflowReview } from '../../ai/composables/chatViewHelpers';
 import { KeepAlive, defineComponent, h, ref } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -38,11 +42,14 @@ const openDialog = defineComponent({
     return () => (props.open ? h('div', slots.default?.()) : null);
   },
 });
-function setup(options: KnowledgeCaptureSourceOption[] = [option]) {
+function setup(options: KnowledgeCaptureSourceOption[] = [option], pinia: Pinia = createPinia()) {
   const wrapper = mount(KnowledgeCaptureReviewDialog, {
     props: { open: true, sourceOptions: options },
     global: {
-      plugins: [createI18n({ legacy: false, locale: 'en', messages: {}, missingWarn: false })],
+      plugins: [
+        pinia,
+        createI18n({ legacy: false, locale: 'en', messages: {}, missingWarn: false }),
+      ],
       stubs: { Dialog: openDialog, ProductDialogShell: passthrough },
     },
   });
@@ -54,6 +61,45 @@ beforeEach(() => {
   host.register.mockReturnValue(host.unregister);
 });
 describe('Repository native Knowledge review', () => {
+  it('preserves the actual native draft when conversation departure is declined or busy', async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    const shell = useAppShellStore();
+    shell.openTab({
+      module: 'repository',
+      route: '/repository?dialog=knowledge-capture',
+      title: 'Review',
+      intent: 'deeplink',
+    });
+    const { wrapper, session } = setup([option], pinia);
+    session.projectDraft(proposal);
+    session.patch({ title: 'Unsaved native edit' });
+    await flushPromises();
+    expect(shell.surfaceStatus).toBe('dirty');
+    const before = session.readDraftState().draft;
+    const originalConfirm = window.confirm;
+    const confirm = vi.fn(() => false);
+    window.confirm = confirm;
+    const leave = () =>
+      canLeaveAIWorkflowReview(
+        'knowledge-capture',
+        { goal: false, task: false, knowledge: false },
+        () => canLeaveBusinessSurface((key) => key),
+        vi.fn(),
+      );
+    expect(leave()).toBe(false);
+    expect(session.readDraftState().draft).toEqual(before);
+    expect(wrapper.emitted('update:open')).toBeUndefined();
+    session.setEditingBlocked(true);
+    await flushPromises();
+    expect(shell.surfaceStatus).toBe('busy');
+    expect(leave()).toBe(false);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(session.readDraftState().draft).toEqual(before);
+    window.confirm = originalConfirm;
+    wrapper.unmount();
+  });
+
   it('projects a default source, returns detached validated edits, and never persists', async () => {
     const { wrapper, session } = setup();
     session.projectDraft(proposal);

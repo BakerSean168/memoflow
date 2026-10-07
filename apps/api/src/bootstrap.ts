@@ -74,8 +74,10 @@ export class ApiBootstrapper {
     private readonly testEmailLinks?: Pick<CloudAuthEmailLinkCapture, 'findLatest'>,
     trace: HttpRequestTrace = NOOP_HTTP_REQUEST_TRACE,
     private readonly authCapabilities: PublicAuthCapabilities = NO_PUBLIC_AUTH_CAPABILITIES,
+    trustProxyHops: 0 | 1 = 0,
   ) {
     this.app = express();
+    this.app.set('trust proxy', trustProxyHops);
     this.rootRouter = Router();
     this.db = db;
     // Per-instance recorder: no global singleton leaks between tests.

@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # MemoFlow External Agent Gateway
 
-**状态：已授权实施；协议/provider 基线已验证，Goal/Task 的 PAT 六个只读工具已通过真实数据库与官方 SDK 验证；六工具最终 prod-like 验收通过。OAuth 与真实 OAuth journey 按用户本次交付范围明确延期。** 目标是让 Codex、Claude Code 在用户授权后查询并管理 MemoFlow，调用真实 owner application，同时保留内部 Assistant/native UI 的既有流程。
+**状态：已授权实施；协议/provider 基线已验证，Goal/Task 的 PAT 六个只读工具已通过真实数据库与官方 SDK 验证；六工具最终 prod-like 验收通过。OAuth consent、连接管理与刷新撤销已完成本地验收，纳入 v0.15.0；生产交付证据在发布后补齐。** 目标是让 Codex、Claude Code 在用户授权后查询并管理 MemoFlow，调用真实 owner application，同时保留内部 Assistant/native UI 的既有流程。
 
 先读 [仓库核验](../analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](../analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./adr/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./adr/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./adr/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](../plan/active/2026-10-07-external-agent-gateway.md) 为准；[术语表](../../CONTEXT.md) 只定义概念。
 
@@ -22,7 +22,7 @@ updated: 2026-10-07T00:00:00Z
 
 ## 2. 责任与包落点
 
-下列新路径均为建议落点，当前不存在的包不表示已经创建。
+下列包及 API host 已实现 R1/PAT/OAuth；写入、assisted workflow 与后续能力仍按里程碑规划。
 
 | 所在位置                                                | 责任                                                                  | 不承担                                           |
 | ------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
@@ -160,3 +160,10 @@ Elapsed/ActiveUsage/专注 protocol 需要设备本地执行，暂不通过 Host
 - EAG-10：实施时 workflow public seam、Tasks/MRTR 客户端支持与 headless review 能力；本轮已有 runtime 提取文档已归档。
 
 这些是已指定切片的技术验证任务，不是要求现在先解决全部问题才能交付只读 Gateway。若验证改变 ADR 的关键选择，更新对应 ADR 后继续，不能以文档中的建议冒充已验证 API。
+
+
+## 生产边界
+
+生产 API 不发布宿主端口，只信任一个内部代理 hop（`API_TRUST_PROXY_HOPS=1`）。Caddy 仅信任 Cloudflare 公布网段的 `CF-Connecting-IP`，将解析后的地址覆盖为单一 `X-Forwarded-For`；直连 origin 的伪造 forwarding header 无效。其他宿主默认不信任代理。
+
+Caddy access log 删除 URI、Referer 与 Location，Nginx access log 只记录不含查询的路径。授权 query、code、token 不作为日志字段。Cloudflare 网段变更时须更新 Caddy 配置并验证；不以信任任意代理替代。

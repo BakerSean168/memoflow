@@ -16,7 +16,6 @@ describe('envSchema LOCAL_VALIDATION', () => {
     expect(envSchema.parse({ ...required, LOCAL_VALIDATION: '0' }).LOCAL_VALIDATION).toBe(false);
   });
 
-
   it('fails production preflight before serving Provider settings when the encryption key is missing', () => {
     expect(() =>
       envSchema.parse({
@@ -207,7 +206,7 @@ describe('envSchema AI Provider private endpoint allowlist', () => {
     ).toBe('localhost:11434,10.0.0.5:8443,[fd00::1]:9443');
   });
 
-  it.each(['localhost', 'https://localhost:11434', 'localhost:11434/path']) (
+  it.each(['localhost', 'https://localhost:11434', 'localhost:11434/path'])(
     'rejects malformed allowlist entry %s',
     (value) => {
       expect(() =>
@@ -259,5 +258,21 @@ describe('envSchema OpenTelemetry (Phase 6 opt-in)', () => {
       OTEL_TRACING_ENABLED: '1',
       OTEL_SERVICE_NAME: 'memoflow-api',
     });
+  });
+});
+
+describe('external agent production environment', () => {
+  const required = { JWT_SECRET: 'fixture-secret-at-least-thirty-two-characters' };
+  it('uses the default client allowlist for empty compose passthrough', () => {
+    expect(envSchema.parse({ ...required, EAG_OAUTH_CLIENT_IDS: '' }).EAG_OAUTH_CLIENT_IDS).toEqual(
+      envSchema.parse(required).EAG_OAUTH_CLIENT_IDS,
+    );
+  });
+  it('trusts no proxy by default and only accepts one explicitly controlled hop', () => {
+    expect(envSchema.parse(required).API_TRUST_PROXY_HOPS).toBe(0);
+    expect(envSchema.parse({ ...required, API_TRUST_PROXY_HOPS: '1' }).API_TRUST_PROXY_HOPS).toBe(
+      1,
+    );
+    expect(() => envSchema.parse({ ...required, API_TRUST_PROXY_HOPS: '2' })).toThrow();
   });
 });

@@ -1,7 +1,75 @@
+import { createPinia, setActivePinia } from 'pinia';
+import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
+import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 import { describe, expect, it, vi } from 'vitest';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
+import { canLeaveAIWorkflowReview } from './chatViewHelpers';
+
+describe('workflow conversation departure', () => {
+  it.each([
+    { mode: 'goal-create', module: 'goal', route: '/goals?dialog=goal' },
+    { mode: 'task-create', module: 'task', route: '/tasks?dialog=task' },
+    {
+      mode: 'knowledge-capture',
+      module: 'repository',
+      route: '/repository?dialog=knowledge-capture',
+    },
+  ] as const)(
+    'integrates $mode with the real shell dirty/busy protocol',
+    ({ mode, module, route }) => {
+      setActivePinia(createPinia());
+      const shell = useAppShellStore();
+      shell.openTab({ module, route, title: 'Review', intent: 'deeplink' });
+      const tabId = shell.activeTabId;
+      const originalConfirm = window.confirm;
+      const confirm = vi.fn(() => false);
+      window.confirm = confirm;
+      const activity = { goal: false, task: false, knowledge: false };
+      const leave = () =>
+        canLeaveAIWorkflowReview(
+          mode,
+          activity,
+          () => canLeaveBusinessSurface((key) => key),
+          vi.fn(),
+        );
+      shell.setSurfaceStatus('dirty');
+      expect(leave()).toBe(false);
+      expect(confirm).toHaveBeenCalledOnce();
+      expect(shell.activeTabId).toBe(tabId);
+      expect(shell.surfaceStatus).toBe('dirty');
+      confirm.mockReturnValue(true);
+      expect(leave()).toBe(true);
+      // Approval permits only this departure; the owner's draft remains dirty.
+      expect(shell.surfaceStatus).toBe('dirty');
+      shell.setSurfaceStatus('busy');
+      expect(leave()).toBe(false);
+      expect(shell.activeTabId).toBe(tabId);
+      window.confirm = originalConfirm;
+    },
+  );
+
+  it.each(['goal-create', 'task-create', 'knowledge-capture'] as const)(
+    'protects %s busy and dirty native review',
+    (mode) => {
+      const leaveSurface = vi.fn().mockReturnValue(false);
+      const notifyBusy = vi.fn();
+      const activity = { goal: false, task: false, knowledge: false };
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      expect(leaveSurface).toHaveBeenCalledOnce();
+      leaveSurface.mockClear();
+      activity[mode === 'goal-create' ? 'goal' : mode === 'task-create' ? 'task' : 'knowledge'] =
+        true;
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      expect(notifyBusy).toHaveBeenCalledOnce();
+      expect(leaveSurface).not.toHaveBeenCalled();
+      activity.goal = activity.task = activity.knowledge = false;
+      leaveSurface.mockReturnValue(true);
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(true);
+    },
+  );
+});
 
 function makeRun(conversationId = 'conversation-1'): AIWorkflowRunView {
   return {

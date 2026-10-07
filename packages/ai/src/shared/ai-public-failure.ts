@@ -19,6 +19,7 @@ export const AI_PUBLIC_FAILURE_CODES = [
   'AI_RUNTIME_TRANSPORT_ERROR',
   'AI_RUNTIME_ERROR',
   'AI_WORKFLOW_RUNTIME_ERROR',
+  'AI_WORKFLOW_STATUS_UNSUPPORTED',
 ] as const;
 
 export type AIPublicFailureCode = (typeof AI_PUBLIC_FAILURE_CODES)[number];
@@ -167,6 +168,8 @@ function safeAIPublicMessage(code: AIPublicFailureCode): string {
     case 'AI_RUNTIME_TRANSPORT_ERROR':
     case 'AI_RUNTIME_ERROR':
       return 'AI runtime request failed';
+    case 'AI_WORKFLOW_STATUS_UNSUPPORTED':
+      return 'AI workflow state is unsupported';
     case 'AI_WORKFLOW_RUNTIME_ERROR':
       return 'Workflow failed';
   }

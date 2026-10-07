@@ -93,16 +93,33 @@ export const ExternalAgentConsentSchema = z.object({
 export type ScopedPatSummary = z.infer<typeof ScopedPatSummarySchema>;
 export type OAuthConnection = z.infer<typeof OAuthConnectionSchema>;
 export type ExternalAgentConsent = z.infer<typeof ExternalAgentConsentSchema>;
+/** Finite public outcomes; transport/provider diagnostics never become UI state. */
+export type ExternalAgentFailureCode =
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'CONSENT_INVALID'
+  | 'VALIDATION_ERROR'
+  | 'SERVICE_DISABLED'
+  | 'RATE_LIMITED'
+  | 'SERVICE_UNAVAILABLE'
+  | 'INVALID_RESPONSE'
+  | 'NETWORK_ERROR';
+export interface ExternalAgentFailure {
+  readonly code: ExternalAgentFailureCode;
+}
+export type ExternalAgentResult<T> = Result<T, ExternalAgentFailure>;
 /** First-party account controls; external credentials cannot call these methods. */
 export interface ExternalAgentClientPort {
-  capabilities(): Promise<Result<{ oauth: boolean }>>;
-  consentRequest(oauthQuery: string): Promise<Result<ExternalAgentConsent>>;
-  decideConsent(oauthQuery: string, accept: boolean): Promise<Result<{ url: string }>>;
-  listConnections(): Promise<Result<OAuthConnection[]>>;
-  revokeConnection(id: string): Promise<Result<void>>;
-  listPats(): Promise<Result<ScopedPatSummary[]>>;
-  createPat(input: CreateScopedPatInput): Promise<Result<ScopedPatSummary & { secret: string }>>;
-  revokePat(id: string): Promise<Result<void>>;
+  capabilities(): Promise<ExternalAgentResult<{ oauth: boolean }>>;
+  consentRequest(oauthQuery: string): Promise<ExternalAgentResult<ExternalAgentConsent>>;
+  decideConsent(oauthQuery: string, accept: boolean): Promise<ExternalAgentResult<{ url: string }>>;
+  listConnections(): Promise<ExternalAgentResult<OAuthConnection[]>>;
+  revokeConnection(id: string): Promise<ExternalAgentResult<void>>;
+  listPats(): Promise<ExternalAgentResult<ScopedPatSummary[]>>;
+  createPat(
+    input: CreateScopedPatInput,
+  ): Promise<ExternalAgentResult<ScopedPatSummary & { secret: string }>>;
+  revokePat(id: string): Promise<ExternalAgentResult<void>>;
 }
 export const GatewayFailureCodeSchema = z.enum([
   'NOT_FOUND',

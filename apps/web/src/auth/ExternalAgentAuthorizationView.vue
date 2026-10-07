@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
-import type { ExternalAgentConsent } from '@memoflow/contracts/agent-gateway';
+import type {
+  ExternalAgentConsent,
+  ExternalAgentFailureCode,
+} from '@memoflow/contracts/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { APP_DISPLAY_NAME, logo128 } from '@memoflow/assets';
 import { useAuthService } from './service';
@@ -12,11 +16,23 @@ const agents = inject(EXTERNAL_AGENT_SERVICE_KEY);
 if (!agents) throw new Error('External agent service is required');
 const service = agents;
 const auth = useAuthService();
+const { t } = useI18n();
 // Keep the provider-signed query intact. It is never saved in browser storage.
 const oauthQuery = window.location.search.slice(1);
 const loginUrl = `/auth?${new URLSearchParams({ returnTo: `/auth/external-agent?${oauthQuery}` })}`;
 const state = ref<'loading' | 'login' | 'consent' | 'error' | 'leaving'>('loading');
-const error = ref('');
+const error = ref<ExternalAgentFailureCode | 'EMAIL_VERIFICATION_REQUIRED' | 'SIGN_IN_FAILED'>(
+  'SERVICE_UNAVAILABLE',
+);
+const retryable = computed(() =>
+  [
+    'NETWORK_ERROR',
+    'SERVICE_UNAVAILABLE',
+    'RATE_LIMITED',
+    'INVALID_RESPONSE',
+    'SIGN_IN_FAILED',
+  ].includes(error.value),
+);
 const email = ref('');
 const consent = ref<ExternalAgentConsent>();
 const github = ref(false);
@@ -25,7 +41,7 @@ async function load() {
   state.value = 'loading';
   const session = await auth.getSession();
   if (!session.ok) {
-    error.value = session.error.message;
+    error.value = 'SERVICE_UNAVAILABLE';
     state.value = 'error';
     return;
   }
@@ -34,14 +50,14 @@ async function load() {
     return;
   }
   if (!session.data.account.emailVerified) {
-    error.value = '请先验证 MemoFlow 邮箱，再重新发起连接。';
+    error.value = 'EMAIL_VERIFICATION_REQUIRED';
     state.value = 'error';
     return;
   }
   email.value = session.data.account.email;
   const result = await service.consentRequest(oauthQuery);
   if (!result.ok) {
-    error.value = '授权请求已过期或无效，请返回客户端重新连接。';
+    error.value = result.error.code;
     state.value = 'error';
     return;
   }
@@ -52,7 +68,7 @@ async function decide(accept: boolean) {
   state.value = 'leaving';
   const result = await service.decideConsent(oauthQuery, accept);
   if (!result.ok) {
-    error.value = result.error.message;
+    error.value = result.error.code;
     state.value = 'error';
     return;
   }
@@ -62,7 +78,7 @@ async function githubLogin() {
   state.value = 'loading';
   const result = await startGithubPopupSignIn(auth);
   if (result.kind === 'failed') {
-    error.value = result.error.message;
+    error.value = 'SIGN_IN_FAILED';
     state.value = 'error';
     return;
   }
@@ -123,8 +139,12 @@ onMounted(async () => {
         </div>
       </div>
       <div v-else role="alert" class="space-y-3 text-sm text-red-200">
-        <p>{{ error }}</p>
-        <Button variant="outline" @click="load">重试</Button>
+        <p>{{ t(`errors.${error}`) }}</p>
+        <Button v-if="error === 'UNAUTHORIZED'" as-child variant="outline"
+          ><a :href="loginUrl">重新登录</a></Button
+        >
+        <Button v-else-if="retryable" variant="outline" @click="load">重试</Button>
+        <p v-else>请返回外部客户端，重新发起连接。</p>
       </div>
     </section>
   </main>

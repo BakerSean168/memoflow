@@ -56,9 +56,13 @@ export const envSchema = z
       .default('0')
       .transform((value) => value === '1'),
     EAG_OAUTH_CLIENT_IDS: z
-      .string()
-      .default(
-        'https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata',
+      .preprocess(
+        emptyStringToUndefined,
+        z
+          .string()
+          .default(
+            'https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata',
+          ),
       )
       .transform((value) =>
         value
@@ -77,6 +81,11 @@ export const envSchema = z
           .min(1),
       ),
     EAG_CURSOR_SECRET: z.preprocess(emptyStringToUndefined, z.string().min(32).optional()),
+
+    API_TRUST_PROXY_HOPS: z
+      .enum(['0', '1'])
+      .default('0')
+      .transform((value) => (value === '1' ? 1 : 0)),
 
     API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
 

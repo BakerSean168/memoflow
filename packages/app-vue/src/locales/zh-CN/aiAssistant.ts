@@ -7,6 +7,9 @@ export default {
   providerSummaryEmpty: '当前还没有配置 AI 提供方。',
   providerSummaryConfigured: '已配置 {count} 个 AI 提供方。',
   errors: {
+    workflowRunUnavailable: '此工作流已不可用或已过期。',
+    workflowReadUnavailable: '暂时无法读取工作流进度，请重新打开会话重试。',
+
     workflowExecutionFailed: '工作流执行失败',
   },
   chatPage: {

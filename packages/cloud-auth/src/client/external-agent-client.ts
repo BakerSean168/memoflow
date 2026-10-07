@@ -5,8 +5,10 @@ import {
   ScopedPatSummarySchema,
   CreateScopedPatSchema,
   type ExternalAgentClientPort,
+  type ExternalAgentResult,
+  type ExternalAgentFailureCode,
 } from '@memoflow/contracts/agent-gateway';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/contracts/result';
 
 /** Cookie-authenticated account controls with validated wire responses. */
 export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentClientPort {
@@ -16,7 +18,7 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
     schema: z.ZodType<T>,
     method = 'GET',
     body?: unknown,
-  ): Promise<Result<T>> {
+  ): Promise<ExternalAgentResult<T>> {
     try {
       const response = await fetch(`${origin}${path}`, {
         method,
@@ -25,18 +27,34 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
         headers: body === undefined ? undefined : { 'content-type': 'application/json' },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
-      if (!response.ok)
-        return fail({
-          code: `HTTP_${response.status}`,
-          message: '无法处理连接请求，请重新登录或重试。',
-        });
-      const payload: unknown = response.status === 204 ? undefined : await response.json();
-      const parsed = schema.safeParse(payload);
-      return parsed.success
-        ? ok(parsed.data)
-        : fail({ code: 'INVALID_RESPONSE', message: '连接服务响应无效。' });
+      if (!response.ok) {
+        const code: ExternalAgentFailureCode =
+          response.status === 401
+            ? 'UNAUTHORIZED'
+            : response.status === 403
+              ? 'FORBIDDEN'
+              : response.status === 404
+                ? 'SERVICE_DISABLED'
+                : response.status === 429
+                  ? 'RATE_LIMITED'
+                  : response.status >= 500
+                    ? 'SERVICE_UNAVAILABLE'
+                    : response.status === 400
+                      ? path.includes('consent')
+                        ? 'CONSENT_INVALID'
+                        : 'VALIDATION_ERROR'
+                      : 'INVALID_RESPONSE';
+        return fail({ code });
+      }
+      try {
+        const payload: unknown = response.status === 204 ? undefined : await response.json();
+        const parsed = schema.safeParse(payload);
+        return parsed.success ? ok(parsed.data) : fail({ code: 'INVALID_RESPONSE' });
+      } catch {
+        return fail({ code: 'INVALID_RESPONSE' });
+      }
     } catch {
-      return fail({ code: 'NETWORK_ERROR', message: '无法连接服务器，请稍后重试。' });
+      return fail({ code: 'NETWORK_ERROR' });
     }
   }
   const root = '/api/v1/agent-connections';

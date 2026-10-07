@@ -285,12 +285,14 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@open-native-review="openTaskNativeReview"');
     expect(taskPanel).not.toContain('AITaskDraftEditor');
   });
-  it('guards Task conversation departure during owner/revision work and uses canonical dirty leave checks', () => {
+  it('guards owner conversation departure during owner/revision work and uses canonical dirty leave checks', () => {
     expect(viewComposable).toContain(
       'taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value',
     );
-    expect(viewComposable).toContain('return canLeaveBusinessSurface(t)');
-    expect(viewComposable.match(/if \(!canLeaveTaskReview\(\)\) return/g)).toHaveLength(3);
+    expect(viewComposable).toContain('canLeaveBusinessSurface(t)');
+    expect(viewComposable).toContain('goalWorkflow.goalOwnerAttemptPending.value');
+    expect(viewComposable).toContain('knowledgeCaptureWorkflow.knowledgeCaptureResuming.value');
+    expect(viewComposable.match(/if \(!canLeaveWorkflowReview\(\)\) return/g)).toHaveLength(3);
   });
   it('routes all normal reviews to native owners without retired editor wiring', () => {
     for (const symbol of [

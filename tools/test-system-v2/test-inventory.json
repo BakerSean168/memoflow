@@ -4247,6 +4247,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4320,6 +4328,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5983,6 +5999,14 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/assets/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/client/external-agent-client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -11579,6 +11603,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/production-oauth-compose.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/production-watcher.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12346,7 +12378,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "memoflow:test:governance",
@@ -12521,7 +12553,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 273
+      "fileCount": 275
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12535,7 +12567,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "packages/contracts/vitest.config.ts",
@@ -13246,14 +13278,14 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1144,
+    "unit": 1147,
     "integration": 39,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
     "e2e": 46,
     "perf": 2,
-    "governance": 64
+    "governance": 65
   },
   "e2eGovernance": {
     "version": 2,

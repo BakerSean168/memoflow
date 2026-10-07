@@ -92,7 +92,7 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           return;
         }
         try {
-          if (!(await options.admission.consumeIp(req.socket.remoteAddress ?? 'unknown'))) {
+          if (!(await options.admission.consumeIp(req.ip ?? req.socket.remoteAddress ?? 'unknown'))) {
             deny(429, 'RATE_LIMITED');
             return;
           }

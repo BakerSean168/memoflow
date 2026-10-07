@@ -208,6 +208,40 @@ describe('external-agent OAuth durable lifecycle', () => {
     expect((await refresh(f.auth, tokens[0].refresh_token!)).status).toBe(400);
   });
 
+  it.each([false, true])(
+    'leaves no usable authority when refresh and revoke race (overlap=%s)',
+    async (overlap) => {
+      const f = await fixture();
+      const issued = await authorize(f);
+      const principal = await f.auth.externalAgents!.authenticate(`Bearer ${issued.access_token}`);
+      expect(principal).not.toBeNull();
+      const observed = [issued];
+      if (overlap) {
+        const response = await refresh(runtime(), issued.refresh_token!);
+        expect(response.status).toBe(200);
+        observed.push({ ...TokenSchema.parse(await response.json()), exchange: issued.exchange });
+      }
+      const [left, right] = await Promise.all([
+        refresh(runtime(), issued.refresh_token!),
+        refresh(runtime(), observed.at(-1)!.refresh_token!),
+        f.auth.externalAgents!.revoke(f.userId, principal!.credentialId),
+      ]);
+      for (const response of [left, right]) {
+        expect([200, 400]).toContain(response.status);
+        if (response.status === 200)
+          observed.push({ ...TokenSchema.parse(await response.json()), exchange: issued.exchange });
+      }
+      // Revocation has committed: even successful in-flight rotations carry no authority.
+      const restarted = runtime();
+      for (const token of observed) {
+        expect(
+          await restarted.externalAgents!.authenticate(`Bearer ${token.access_token}`),
+        ).toBeNull();
+        expect((await refresh(restarted, token.refresh_token!)).status).toBe(400);
+      }
+    },
+  );
+
   it('applies consent scope reduction and account closure to existing access and refresh tokens', async () => {
     const f = await fixture();
     const issued = await authorize(f);

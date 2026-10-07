@@ -8,7 +8,14 @@ import { describe, expect, it } from 'vitest';
  * but default chat must never re-enter AssistantFacade/DirectTurn/Pi profiles.
  */
 describe('useAIChatSession Mastra-native open chat surface', () => {
-  const session = readFileSync(resolve(__dirname, 'useAIChatSession.ts'), 'utf8');
+  const session = [
+    'useAIChatSession.ts',
+    'useAssistantStream.ts',
+    'useConversationProjection.ts',
+    'useAIComposerContext.ts',
+  ]
+    .map((file) => readFileSync(resolve(__dirname, file), 'utf8'))
+    .join('\n');
   const types = readFileSync(resolve(__dirname, 'types.ts'), 'utf8');
   const composer = readFileSync(resolve(__dirname, '../components/AIFooterComposer.vue'), 'utf8');
   const chatView = readFileSync(resolve(__dirname, '../views/AIChatView.vue'), 'utf8');

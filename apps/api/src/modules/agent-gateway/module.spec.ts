@@ -13,8 +13,9 @@ afterEach(async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
-async function fixture(oauthEnabled = false) {
+async function fixture(oauthEnabled = false, trustProxyHops = 0) {
   const app = express();
+  app.set('trust proxy', trustProxyHops);
   app.use(createRequestContextMiddleware());
   app.use(express.json({ limit: '256kb' }));
   const server = app.listen(0, '127.0.0.1');
@@ -31,6 +32,7 @@ async function fixture(oauthEnabled = false) {
     consumeReadQuota: vi.fn().mockResolvedValue(true),
   };
   const audit = vi.fn();
+  const consumeIp = vi.fn().mockResolvedValue(true);
   const oauth = {
     list: vi.fn().mockResolvedValue([]),
     revoke: vi.fn().mockResolvedValue(undefined),
@@ -41,7 +43,7 @@ async function fixture(oauthEnabled = false) {
     admission: {
       start: async () => {},
       destroy: async () => {},
-      consumeIp: async () => true,
+      consumeIp,
       consumeOwner: async () => true,
     },
     enabled: true,
@@ -71,7 +73,7 @@ async function fixture(oauthEnabled = false) {
     },
   } as never);
   app.use('/api/v1', router);
-  return { base, pats, oauth, audit };
+  return { base, pats, oauth, audit, consumeIp };
 }
 describe('Gateway API host admission', () => {
   it('requires a first-party session, trusted Origin and strict input to mint a PAT', async () => {
@@ -183,4 +185,25 @@ describe('Gateway API host admission', () => {
       '/.well-known/oauth-protected-resource/mcp',
     );
   });
+});
+
+it('isolates proxy clients and ignores spoofed left-hand forwarded addresses', async () => {
+  const f = await fixture(false, 1);
+  for (const ip of ['198.51.100.1', '198.51.100.2']) {
+    await fetch(`${f.base}/mcp`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': `203.0.113.99, ${ip}` },
+      body: '{}',
+    });
+  }
+  expect(f.consumeIp.mock.calls).toEqual([['198.51.100.1'], ['198.51.100.2']]);
+});
+it('ignores client-supplied forwarding headers without trusted proxy configuration', async () => {
+  const f = await fixture();
+  await fetch(`${f.base}/mcp`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.99' },
+    body: '{}',
+  });
+  expect(f.consumeIp).toHaveBeenCalledWith('127.0.0.1');
 });
