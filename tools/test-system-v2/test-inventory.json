@@ -4159,6 +4159,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12365,7 +12373,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 274
+      "fileCount": 275
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13084,7 +13092,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1132,
+    "unit": 1133,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

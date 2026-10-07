@@ -106,6 +106,7 @@ export const ResultCodeToHttpStatus: Record<string, number> = {
   AI_RUNTIME_TRANSPORT_ERROR: 503,
   AI_RUNTIME_ERROR: 500,
   AI_WORKFLOW_RUNTIME_ERROR: 500,
+  AI_WORKFLOW_STATUS_UNSUPPORTED: 500,
 
   // 业务错误（映射为 400）
   [ResultCode.BUSINESS_ERROR]: 400,

@@ -41,25 +41,19 @@ export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation'
 ]);
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;
 
+const GoalWorkflowRecoveryReceiptSchema = z
+  .object({ kind: z.literal('goal.create'), receipt: GoalPlanExecutionReceiptSchema })
+  .strict();
+const TaskWorkflowRecoveryReceiptSchema = z
+  .object({ kind: z.literal('task.create'), receipt: TaskPlanExecutionReceiptSchema })
+  .strict();
+const KnowledgeWorkflowRecoveryReceiptSchema = z
+  .object({ kind: z.literal('knowledge.capture'), receipt: KnowledgeCaptureExecutionReceiptSchema })
+  .strict();
 export const AIWorkflowRecoveryReceiptSchema = z.discriminatedUnion('kind', [
-  z
-    .object({
-      kind: z.literal('goal.create'),
-      receipt: GoalPlanExecutionReceiptSchema,
-    })
-    .strict(),
-  z
-    .object({
-      kind: z.literal('task.create'),
-      receipt: TaskPlanExecutionReceiptSchema,
-    })
-    .strict(),
-  z
-    .object({
-      kind: z.literal('knowledge.capture'),
-      receipt: KnowledgeCaptureExecutionReceiptSchema,
-    })
-    .strict(),
+  GoalWorkflowRecoveryReceiptSchema,
+  TaskWorkflowRecoveryReceiptSchema,
+  KnowledgeWorkflowRecoveryReceiptSchema,
 ]);
 export type AIWorkflowRecoveryReceipt = z.infer<typeof AIWorkflowRecoveryReceiptSchema>;
 
@@ -157,7 +151,7 @@ export const GoalWorkflowSuspensionSchema = z.discriminatedUnion('type', [
   GoalWorkflowDraftReviewSchema,
   WorkflowRecoveryBaseSchema.extend({
     failures: z.array(GoalPlanExecutionFailureSchema).default([]),
-    receipt: AIWorkflowRecoveryReceiptSchema.options[0].optional(),
+    receipt: GoalWorkflowRecoveryReceiptSchema.optional(),
   }),
 ]);
 
@@ -166,7 +160,7 @@ export const TaskWorkflowSuspensionSchema = z.discriminatedUnion('type', [
   TaskWorkflowDraftReviewSchema,
   WorkflowRecoveryBaseSchema.extend({
     failures: z.array(TaskPlanExecutionFailureSchema).default([]),
-    receipt: AIWorkflowRecoveryReceiptSchema.options[1].optional(),
+    receipt: TaskWorkflowRecoveryReceiptSchema.optional(),
   }),
 ]);
 
@@ -175,7 +169,7 @@ export const KnowledgeWorkflowSuspensionSchema = z.discriminatedUnion('type', [
   KnowledgeWorkflowDraftReviewSchema,
   WorkflowRecoveryBaseSchema.extend({
     failures: z.array(KnowledgeCaptureExecutionFailureSchema).default([]),
-    receipt: AIWorkflowRecoveryReceiptSchema.options[2].optional(),
+    receipt: KnowledgeWorkflowRecoveryReceiptSchema.optional(),
   }),
 ]);
 

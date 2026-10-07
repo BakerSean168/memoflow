@@ -74,10 +74,18 @@ updated: 2026-10-07T00:00:00
 - Batch 2：`AssistantTurnSession` 整体保留同步 reservation、native binding、审批与取消；`AssistantTurnObservability` 负责 phase 和终态记录。facade 保留双重 busy 检查与基础设施装配。真实 controller / observability / projection 106 项通过。
 - Batch 3：每个 owner 的 suspension schema 独立引用自己的 recovery failure/receipt，Goal/Task 的原有 refinement 放在 review schema 上复用。未知、空或 paused status 显式 failed；running/pending/waiting 仍可轮询。新增用例先确认红灯，再收紧实现。
 - Batch 4：Goal draft mapping、timeline projection 和完整 native coordinator 分层；Task/Knowledge 各自 coordinator。Goal/Task 的 owner probe、revision freeze 与 approve-only retry 不变。3 owner + leave guard + polling + View 111 项通过。
-- Polling 细化：null 终止并删除已失效 pointer；runId/kind/conversation 任一不符立即停止；连续 5 次读取或投影失败停止自动重试，保留最后投影和 durable pointer，并提示重新打开会话。成功的 running 读取清零失败计数；页面切换后忽略未完成请求的响应。
+- Polling 细化：null 终止并删除已失效 pointer；runId/kind/conversation 任一不符立即停止；连续 5 次读取失败停止自动重试，保留最后投影和 durable pointer，并提示重新打开会话。成功的 running 读取清零失败计数；页面切换后忽略未完成请求的响应。
 - Batch 5：`useAIComposerContext`、`useAssistantStream`、`useConversationProjection` 各自持有对应状态；`useAIChatSession` 继续作为公开 facade。既有 20 项 chat 行为测试通过，app-vue typecheck 通过。
 - Batch 6：DTO 拆为 assistant-runtime、assistant-events、workflow-runtime、runtime-usage，公共 barrel 保留；共享 event envelope 为内部模块。product tool 输入与可信 context 解码独立。Goal provider wire normalization、JSON 提取和单次 repair 在 `goal-planner-output.ts`，research 编排仍与 planner 内聚。planner/tools 24 项通过。
 - 全量检查首轮发现 usage surface lock 仍读取旧物理 DTO 文件；已改为检查新 canonical schema/event 文件，保留原有唯一 schema 的架构约束。
+
+### 独立审查收敛
+
+- Standards：补齐 `AI_WORKFLOW_STATUS_UNSUPPORTED` 的 canonical safe message、HTTP 错误码映射和中英文 UI 提示；正常 failed run 仍是 HTTP 200 query 结果。三 owner HTTP/IPC 测试和真实 i18n 测试验证 public code 保留、内部诊断不外泄。
+- Standards：owner recovery receipt 改为命名 schema 引用，消除依赖 union options 位置的隐式耦合。
+- Spec：读取失败的有界重试只承诺 runtime read，不宣称会重试同步改变 watched run 后的 native projection failure；后者沿用原有行为。
+- Spec：在真实 shell leave protocol、Goal module 状态发布和真实 Knowledge editor 上补充 dirty/busy 拒绝离开覆盖；确认拒绝后 draft/dialog/route 保留。
+- 原有架构 surface tests 更新到新 canonical 文件边界，继续断言唯一 runtime/schema 与宿主 dispatch contract。
 
 ### 最终验收记录
 
