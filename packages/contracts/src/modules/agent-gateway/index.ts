@@ -93,20 +93,8 @@ export const ExternalAgentConsentSchema = z.object({
 export type ScopedPatSummary = z.infer<typeof ScopedPatSummarySchema>;
 export type OAuthConnection = z.infer<typeof OAuthConnectionSchema>;
 export type ExternalAgentConsent = z.infer<typeof ExternalAgentConsentSchema>;
-/** Finite public outcomes; transport/provider diagnostics never become UI state. */
-export type ExternalAgentFailureCode =
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'CONSENT_INVALID'
-  | 'VALIDATION_ERROR'
-  | 'SERVICE_DISABLED'
-  | 'RATE_LIMITED'
-  | 'SERVICE_UNAVAILABLE'
-  | 'INVALID_RESPONSE'
-  | 'NETWORK_ERROR';
-export interface ExternalAgentFailure {
-  readonly code: ExternalAgentFailureCode;
-}
+export * from './failure';
+import type { ExternalAgentFailure } from './failure';
 export type ExternalAgentResult<T> = Result<T, ExternalAgentFailure>;
 /** First-party account controls; external credentials cannot call these methods. */
 export interface ExternalAgentClientPort {

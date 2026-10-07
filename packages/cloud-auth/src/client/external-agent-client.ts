@@ -4,6 +4,7 @@ import {
   OAuthConnectionSchema,
   ScopedPatSummarySchema,
   CreateScopedPatSchema,
+  externalAgentFailure,
   type ExternalAgentClientPort,
   type ExternalAgentResult,
   type ExternalAgentFailureCode,
@@ -30,31 +31,33 @@ export function createExternalAgentHttpClient(baseUrl: string): ExternalAgentCli
       if (!response.ok) {
         const code: ExternalAgentFailureCode =
           response.status === 401
-            ? 'UNAUTHORIZED'
+            ? 'EAG_UNAUTHORIZED'
             : response.status === 403
-              ? 'FORBIDDEN'
+              ? 'EAG_FORBIDDEN'
               : response.status === 404
-                ? 'SERVICE_DISABLED'
+                ? 'EAG_SERVICE_DISABLED'
                 : response.status === 429
-                  ? 'RATE_LIMITED'
+                  ? 'EAG_RATE_LIMITED'
                   : response.status >= 500
-                    ? 'SERVICE_UNAVAILABLE'
+                    ? 'EAG_SERVICE_UNAVAILABLE'
                     : response.status === 400
                       ? path.includes('consent')
-                        ? 'CONSENT_INVALID'
-                        : 'VALIDATION_ERROR'
-                      : 'INVALID_RESPONSE';
-        return fail({ code });
+                        ? 'EAG_CONSENT_INVALID'
+                        : 'EAG_VALIDATION_ERROR'
+                      : 'EAG_INVALID_RESPONSE';
+        return fail(externalAgentFailure(code));
       }
       try {
         const payload: unknown = response.status === 204 ? undefined : await response.json();
         const parsed = schema.safeParse(payload);
-        return parsed.success ? ok(parsed.data) : fail({ code: 'INVALID_RESPONSE' });
+        return parsed.success
+          ? ok(parsed.data)
+          : fail(externalAgentFailure('EAG_INVALID_RESPONSE'));
       } catch {
-        return fail({ code: 'INVALID_RESPONSE' });
+        return fail(externalAgentFailure('EAG_INVALID_RESPONSE'));
       }
     } catch {
-      return fail({ code: 'NETWORK_ERROR' });
+      return fail(externalAgentFailure('EAG_NETWORK_ERROR'));
     }
   }
   const root = '/api/v1/agent-connections';

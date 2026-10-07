@@ -1,8 +1,13 @@
 export default {
-  CONSENT_INVALID: '授权请求已过期或无效，请返回客户端重新连接。',
-  SERVICE_DISABLED: '外部应用连接尚未启用。',
-  INVALID_RESPONSE: '连接服务响应无效，请稍后重试。',
-  NETWORK_ERROR: '无法连接服务器，请检查网络后重试。',
+  EAG_SERVICE_UNAVAILABLE: '服务暂不可用，请稍后再试',
+  EAG_RATE_LIMITED: '请求过于频繁，请稍后再试',
+  EAG_VALIDATION_ERROR: '提交信息不合法，请检查后重试',
+  EAG_FORBIDDEN: '你没有权限执行此操作',
+  EAG_UNAUTHORIZED: '当前登录状态无效，请重新登录',
+  EAG_CONSENT_INVALID: '授权请求已过期或无效，请返回客户端重新连接。',
+  EAG_SERVICE_DISABLED: '外部应用连接尚未启用。',
+  EAG_INVALID_RESPONSE: '连接服务响应无效，请稍后重试。',
+  EAG_NETWORK_ERROR: '无法连接服务器，请检查网络后重试。',
   SIGN_IN_FAILED: '登录未完成，请重试。',
 
   AI_WORKFLOW_STATUS_UNSUPPORTED: '此工作流状态已不受支持，请重新创建工作流。',

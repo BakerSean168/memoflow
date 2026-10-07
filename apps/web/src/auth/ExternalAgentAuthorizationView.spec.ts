@@ -27,7 +27,7 @@ function fixture(loggedIn = true) {
         resource: 'https://memo.example.test/mcp',
       }),
     ),
-    decideConsent: vi.fn().mockResolvedValue(fail({ code: 'CONSENT_INVALID' })),
+    decideConsent: vi.fn().mockResolvedValue(fail({ code: 'EAG_CONSENT_INVALID' })),
   };
   const wrapper = mount(ExternalAgentAuthorizationView, {
     global: {
@@ -72,7 +72,7 @@ describe('external agent consent', () => {
   });
   it('does not render an approval button for an invalid or expired signed request', async () => {
     const f = fixture();
-    f.service.consentRequest.mockResolvedValue(fail({ code: 'CONSENT_INVALID' }));
+    f.service.consentRequest.mockResolvedValue(fail({ code: 'EAG_CONSENT_INVALID' }));
     await flushPromises();
     expect(f.wrapper.find('[data-testid="oauth-consent-allow"]').exists()).toBe(false);
     expect(f.wrapper.get('[role="alert"]').text()).toContain('已过期或无效');
@@ -81,10 +81,10 @@ describe('external agent consent', () => {
 
 it('offers retry for transient failures and sign-in for an expired session', async () => {
   const f = fixture();
-  f.service.consentRequest.mockResolvedValue(fail({ code: 'NETWORK_ERROR' }));
+  f.service.consentRequest.mockResolvedValue(fail({ code: 'EAG_NETWORK_ERROR' }));
   await flushPromises();
   expect(f.wrapper.get('[role="alert"]').text()).toContain('重试');
-  f.service.consentRequest.mockResolvedValue(fail({ code: 'UNAUTHORIZED' }));
+  f.service.consentRequest.mockResolvedValue(fail({ code: 'EAG_UNAUTHORIZED' }));
   await f.wrapper.get('[role="alert"] button').trigger('click');
   await flushPromises();
   expect(f.wrapper.get('[role="alert"] a').attributes('href')).toContain('/auth?');

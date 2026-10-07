@@ -22,14 +22,14 @@ const oauthQuery = window.location.search.slice(1);
 const loginUrl = `/auth?${new URLSearchParams({ returnTo: `/auth/external-agent?${oauthQuery}` })}`;
 const state = ref<'loading' | 'login' | 'consent' | 'error' | 'leaving'>('loading');
 const error = ref<ExternalAgentFailureCode | 'EMAIL_VERIFICATION_REQUIRED' | 'SIGN_IN_FAILED'>(
-  'SERVICE_UNAVAILABLE',
+  'EAG_SERVICE_UNAVAILABLE',
 );
 const retryable = computed(() =>
   [
-    'NETWORK_ERROR',
-    'SERVICE_UNAVAILABLE',
-    'RATE_LIMITED',
-    'INVALID_RESPONSE',
+    'EAG_NETWORK_ERROR',
+    'EAG_SERVICE_UNAVAILABLE',
+    'EAG_RATE_LIMITED',
+    'EAG_INVALID_RESPONSE',
     'SIGN_IN_FAILED',
   ].includes(error.value),
 );
@@ -41,7 +41,7 @@ async function load() {
   state.value = 'loading';
   const session = await auth.getSession();
   if (!session.ok) {
-    error.value = 'SERVICE_UNAVAILABLE';
+    error.value = 'EAG_SERVICE_UNAVAILABLE';
     state.value = 'error';
     return;
   }
@@ -140,7 +140,7 @@ onMounted(async () => {
       </div>
       <div v-else role="alert" class="space-y-3 text-sm text-red-200">
         <p>{{ t(`errors.${error}`) }}</p>
-        <Button v-if="error === 'UNAUTHORIZED'" as-child variant="outline"
+        <Button v-if="error === 'EAG_UNAUTHORIZED'" as-child variant="outline"
           ><a :href="loginUrl">重新登录</a></Button
         >
         <Button v-else-if="retryable" variant="outline" @click="load">重试</Button>

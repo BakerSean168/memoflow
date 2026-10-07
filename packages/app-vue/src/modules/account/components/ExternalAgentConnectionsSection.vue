@@ -37,7 +37,7 @@ async function load() {
   try {
     const capabilities = await service.capabilities();
     if (!capabilities.ok) {
-      if (capabilities.error.code === 'SERVICE_DISABLED') visible.value = false;
+      if (capabilities.error.code === 'EAG_SERVICE_DISABLED') visible.value = false;
       else error.value = capabilities.error.code;
       return;
     }
