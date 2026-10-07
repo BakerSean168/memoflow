@@ -11,7 +11,7 @@
  * - GoalReview V2 persists reflection + immutable systemContext directly
  */
 
-import { Prisma, type PrismaClient } from '@memoflow/database';
+import { Prisma, type PrismaClient } from '@memoflow/database/prisma';
 import {
   GoalLabelOwnershipError,
   GoalVersionConflictError,
