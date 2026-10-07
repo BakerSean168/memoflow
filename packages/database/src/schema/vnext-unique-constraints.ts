@@ -18,6 +18,7 @@ const EMPTY_TABLE_ADDABLE_TEXT_COLUMNS = new Set([
   'scheduling_key',
   'occurrence_key',
   'plan_id',
+  'knowledge_space_id',
   'knowledge_document_id',
 ]);
 

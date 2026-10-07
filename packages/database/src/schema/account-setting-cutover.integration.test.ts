@@ -152,16 +152,19 @@ it('bounds lock waiting and rolls back earlier schema changes', async () => {
   }
 });
 
-it('prepares the missing AI Knowledge key only for an empty legacy table', async () => {
-  await db.query(
-    'CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY, knowledge_space_id TEXT)',
-  );
-  await prepareVnextUniqueConstraints(db);
-  await db.query("INSERT INTO ai_knowledge_index_entries VALUES ('a','space','doc')");
-  await expect(
-    db.query("INSERT INTO ai_knowledge_index_entries VALUES ('b','space','doc')"),
-  ).rejects.toThrow(/duplicate key/);
-});
+it.each(['', ', knowledge_space_id TEXT'])(
+  'prepares missing AI Knowledge keys on an empty legacy table (%s)',
+  async (existingColumns) => {
+    await db.query(
+      `CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY${existingColumns})`,
+    );
+    await prepareVnextUniqueConstraints(db);
+    await db.query("INSERT INTO ai_knowledge_index_entries VALUES ('a','space','doc')");
+    await expect(
+      db.query("INSERT INTO ai_knowledge_index_entries VALUES ('b','space','doc')"),
+    ).rejects.toThrow(/duplicate key/);
+  },
+);
 
 it('rejects duplicate AI Knowledge keys before creating the unique index', async () => {
   await db.query(`CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY, knowledge_space_id TEXT, knowledge_document_id TEXT);
@@ -173,14 +176,16 @@ it('rejects duplicate AI Knowledge keys before creating the unique index', async
   ).toBe(2);
 });
 
-it('refuses to invent AI Knowledge identity for a populated legacy index', async () => {
-  await db.query(
-    "CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY, knowledge_space_id TEXT); INSERT INTO ai_knowledge_index_entries VALUES ('a','space')",
-  );
-  await expect(prepareVnextUniqueConstraints(db)).rejects.toThrow(
-    /contains 1 row.*semantic backfill/,
-  );
-  expect((await db.query('SELECT * FROM ai_knowledge_index_entries')).rows).toEqual([
-    { id: 'a', knowledge_space_id: 'space' },
-  ]);
-});
+it.each(['', ', knowledge_space_id TEXT'])(
+  'refuses to invent AI Knowledge identity for a populated legacy index (%s)',
+  async (existingColumns) => {
+    await db.query(
+      `CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY${existingColumns}); INSERT INTO ai_knowledge_index_entries (id) VALUES ('a')`,
+    );
+    const before = (await db.query('SELECT * FROM ai_knowledge_index_entries')).rows;
+    await expect(prepareVnextUniqueConstraints(db)).rejects.toThrow(
+      /contains 1 row.*semantic backfill/,
+    );
+    expect((await db.query('SELECT * FROM ai_knowledge_index_entries')).rows).toEqual(before);
+  },
+);
