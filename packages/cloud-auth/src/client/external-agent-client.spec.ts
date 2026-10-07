@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createExternalAgentHttpClient } from './external-agent-client';
+import {
+  ExternalAgentFailureSchema,
+  externalAgentFailure,
+} from '@memoflow/contracts/agent-gateway';
 
 afterEach(() => vi.unstubAllGlobals());
 describe('external agent management failure contract', () => {
@@ -40,8 +44,6 @@ describe('external agent management failure contract', () => {
 });
 
 it('rejects diagnostic or credential fields in public failure details', async () => {
-  const { ExternalAgentFailureSchema, externalAgentFailure } =
-    await import('@memoflow/contracts/agent-gateway');
   const failure = externalAgentFailure('EAG_NETWORK_ERROR');
   expect(failure.category).toBe('unavailable');
   expect(failure.retryHint).toEqual({ kind: 'transient' });

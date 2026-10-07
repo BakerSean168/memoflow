@@ -127,6 +127,7 @@ export type GoalScheduleProjectionEventMap = Pick<
   GoalEventMap,
   | 'goal:created'
   | 'goal:updated'
+  | 'goal:status-changed'
   | 'goal:schedule-time-changed'
   | 'goal:reminder-config-changed'
   | 'goal:completed'
@@ -137,6 +138,7 @@ export type GoalScheduleProjectionEventMap = Pick<
 export const goalScheduleProjectionEventNames = [
   'goal:created',
   'goal:updated',
+  'goal:status-changed',
   'goal:schedule-time-changed',
   'goal:reminder-config-changed',
   'goal:completed',
@@ -235,6 +237,8 @@ export function createGoalScheduleProjectionEventHandlers(
   return {
     'goal:created': async (event) => handlers.upsertGoal(event.goal.id, String(event.identityId)),
     'goal:updated': async (event) => handlers.upsertGoal(event.goal.id, String(event.identityId)),
+    'goal:status-changed': async (event) =>
+      handlers.upsertGoal(event.goal.id, String(event.identityId)),
     'goal:schedule-time-changed': async (event) =>
       handlers.upsertGoal(event.goal.id, String(event.identityId)),
     'goal:reminder-config-changed': async (event) =>

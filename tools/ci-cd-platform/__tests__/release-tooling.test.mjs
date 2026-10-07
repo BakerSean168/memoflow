@@ -771,8 +771,10 @@ fs.writeFileSync(process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH,
         const result = await new Promise((resolve) =>
           execFile(
             process.execPath,
-            [runner, base, feed, '1.2.3', report, runtime, '2'],
-            { env: { ...process.env, RUNNER_TEST_CASE: scenario }, timeout: 10_000 },
+            // Process startup may be delayed by other full-workspace test workers.
+            // Keep the timeout scenario short; allow real synthetic handoffs to finish.
+            [runner, base, feed, '1.2.3', report, runtime, scenario === 'timeout' ? '2' : '10'],
+            { env: { ...process.env, RUNNER_TEST_CASE: scenario }, timeout: 20_000 },
             (error, stdout, stderr) => resolve({ error, stdout, stderr }),
           ),
         );

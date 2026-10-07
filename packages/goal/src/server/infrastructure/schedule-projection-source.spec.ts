@@ -386,6 +386,7 @@ describe('createGoalScheduleProjectionSource', () => {
   it('event name list covers every projection handler key', () => {
     expect(goalScheduleProjectionEventNames).toContain('goal:created');
     expect(goalScheduleProjectionEventNames).toContain('goal:updated');
+    expect(goalScheduleProjectionEventNames).toContain('goal:status-changed');
     expect(goalScheduleProjectionEventNames).toContain('goal:schedule-time-changed');
     expect(goalScheduleProjectionEventNames).toContain('goal:reminder-config-changed');
     expect(goalScheduleProjectionEventNames).toContain('goal:completed');

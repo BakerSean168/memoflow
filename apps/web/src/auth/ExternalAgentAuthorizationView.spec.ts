@@ -1,7 +1,6 @@
 import { mount, flushPromises } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createI18n } from 'vue-i18n';
-import errors from '../../../../packages/app-vue/src/locales/zh-CN/errors';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createI18nPlugin, loadLocaleMessages } from '@memoflow/app-vue/plugins/i18n';
 import { ok, fail } from '@memoflow/contracts/result';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import { AUTH_WEB_SERVICE_KEY } from './service';
@@ -9,6 +8,10 @@ import ExternalAgentAuthorizationView from './ExternalAgentAuthorizationView.vue
 
 vi.mock('./capabilities', () => ({ loadWebAuthCapabilities: async () => ({ github: true }) }));
 vi.mock('./github-popup-sign-in', () => ({ startGithubPopupSignIn: vi.fn() }));
+let messages: Awaited<ReturnType<typeof loadLocaleMessages>>;
+beforeAll(async () => {
+  messages = await loadLocaleMessages('zh-CN');
+});
 function fixture(loggedIn = true) {
   const auth = {
     getSession: vi
@@ -31,7 +34,7 @@ function fixture(loggedIn = true) {
   };
   const wrapper = mount(ExternalAgentAuthorizationView, {
     global: {
-      plugins: [createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': { errors } } })],
+      plugins: [createI18nPlugin('zh-CN', messages)],
       provide: {
         [AUTH_WEB_SERVICE_KEY as symbol]: auth,
         [EXTERNAL_AGENT_SERVICE_KEY as symbol]: service,

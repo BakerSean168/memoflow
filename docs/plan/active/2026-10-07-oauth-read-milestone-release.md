@@ -28,3 +28,10 @@ The owner approved including OAuth and the six read tools in the next v0.15.0 re
 ## Initial evidence
 
 Base: `b74b3c5a035f4931cf3c6432002d5122b8c84f36`; read implementation: `5d4515f7a98a3763175635062b048120bd70628b`. The only textual integration conflict is generated `tools/test-system-v2/test-inventory.json`. Canonical production Compose currently omits EAG environment values; enabling them only in its host env would not reach the API.
+
+
+## Historical branch parity retained
+
+Review of `core-vnext/w3-goal-scheduling` found one valid change absent from the canonical runtime: Goal activation, reopening and abandonment emit `goal:status-changed`, without `goal:updated`. Restore that event mapping and lifecycle subscription using the current owner projection. The regression verifies reminder removal/restoration and unsubscribe behavior; the old Goal payload/model and retired scheduler paths are not reintroduced.
+
+Final validation also replaces test-only cross-project relative/dynamic imports with public static entrypoints. The synthetic AppImage handoff test keeps its explicit timeout scenario at two seconds, while allowing ten seconds for process startup in successful and invariant-failure scenarios under full-suite load.
