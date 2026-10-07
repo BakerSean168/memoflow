@@ -1,6 +1,8 @@
 import {
   AIWorkflowRunViewSchema,
-  AIWorkflowSuspensionSchema,
+  GoalWorkflowSuspensionSchema,
+  TaskWorkflowSuspensionSchema,
+  KnowledgeWorkflowSuspensionSchema,
   type AIWorkflowRunView,
 } from '@memoflow/contracts/ai';
 import {
@@ -41,7 +43,7 @@ export function projectGoalCreateRun(
   if (row.resourceId !== identityId) return null;
   const snapshot = parseWorkflowSnapshot(row.snapshot);
   const workflowInput = goalCreateInputFromSnapshot(snapshot);
-  const lowLevelStatus = String(snapshot.status ?? 'running');
+  const lowLevelStatus = snapshot.status;
   const context = snapshot.context as Record<string, unknown>;
   const lifecycle = context[GOAL_CREATE_LIFECYCLE_STEP_ID];
   const lifecycleRecord =
@@ -56,7 +58,7 @@ export function projectGoalCreateRun(
 
   if (lowLevelStatus === 'suspended') {
     status = 'suspended';
-    const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
+    const parsed = GoalWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     suspension = parsed.data;
     if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'goal.create') {
@@ -80,8 +82,18 @@ export function projectGoalCreateRun(
       status = 'completed';
       result = parsed.data.receipt;
     }
-  } else {
+  } else if (
+    lowLevelStatus === 'running' ||
+    lowLevelStatus === 'pending' ||
+    lowLevelStatus === 'waiting'
+  ) {
     status = 'running';
+  } else {
+    status = 'failed';
+    failure = {
+      code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+      message: 'AI workflow state is unsupported',
+    };
   }
 
   return AIWorkflowRunViewSchema.parse({
@@ -110,7 +122,7 @@ export function projectTaskCreateRun(
   if (row.resourceId !== identityId) return null;
   const snapshot = parseWorkflowSnapshot(row.snapshot);
   const workflowInput = taskCreateInputFromSnapshot(snapshot);
-  const lowLevelStatus = String(snapshot.status ?? 'running');
+  const lowLevelStatus = snapshot.status;
   const context = snapshot.context as Record<string, unknown>;
   const lifecycle = context[TASK_CREATE_LIFECYCLE_STEP_ID];
   const lifecycleRecord =
@@ -125,7 +137,7 @@ export function projectTaskCreateRun(
 
   if (lowLevelStatus === 'suspended') {
     status = 'suspended';
-    const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
+    const parsed = TaskWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     suspension = parsed.data;
     if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'task.create') {
@@ -149,8 +161,18 @@ export function projectTaskCreateRun(
       status = 'completed';
       result = parsed.data.receipt;
     }
-  } else {
+  } else if (
+    lowLevelStatus === 'running' ||
+    lowLevelStatus === 'pending' ||
+    lowLevelStatus === 'waiting'
+  ) {
     status = 'running';
+  } else {
+    status = 'failed';
+    failure = {
+      code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+      message: 'AI workflow state is unsupported',
+    };
   }
 
   return AIWorkflowRunViewSchema.parse({
@@ -179,7 +201,7 @@ export function projectKnowledgeCaptureRun(
   if (row.resourceId !== identityId) return null;
   const snapshot = parseWorkflowSnapshot(row.snapshot);
   const workflowInput = knowledgeCaptureInputFromSnapshot(snapshot);
-  const lowLevelStatus = String(snapshot.status ?? 'running');
+  const lowLevelStatus = snapshot.status;
   const context = snapshot.context as Record<string, unknown>;
   const lifecycle = context[KNOWLEDGE_CAPTURE_LIFECYCLE_STEP_ID];
   const lifecycleRecord =
@@ -194,7 +216,7 @@ export function projectKnowledgeCaptureRun(
 
   if (lowLevelStatus === 'suspended') {
     status = 'suspended';
-    const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
+    const parsed = KnowledgeWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     suspension = parsed.data;
     if (
@@ -221,8 +243,18 @@ export function projectKnowledgeCaptureRun(
       status = 'completed';
       result = parsed.data.receipt;
     }
-  } else {
+  } else if (
+    lowLevelStatus === 'running' ||
+    lowLevelStatus === 'pending' ||
+    lowLevelStatus === 'waiting'
+  ) {
     status = 'running';
+  } else {
+    status = 'failed';
+    failure = {
+      code: 'AI_WORKFLOW_STATUS_UNSUPPORTED',
+      message: 'AI workflow state is unsupported',
+    };
   }
 
   return AIWorkflowRunViewSchema.parse({

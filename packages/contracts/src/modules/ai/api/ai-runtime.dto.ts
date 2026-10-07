@@ -366,68 +366,27 @@ export const AIWorkflowRecoveryReceiptSchema = z.discriminatedUnion('kind', [
 ]);
 export type AIWorkflowRecoveryReceipt = z.infer<typeof AIWorkflowRecoveryReceiptSchema>;
 
-export const AIWorkflowSuspensionSchema = z
-  .discriminatedUnion('type', [
-    z.object({
-      type: z.literal('clarification_required'),
-      questions: z.array(z.string().min(1)).min(1).max(3),
-      round: z.number().int().positive().optional(),
-      candidateDraft: GoalPlanDraftSchema.optional(),
-      researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
-    }),
-    z.object({
-      type: z.literal('goal_draft_review'),
-      draft: GoalPlanDraftSchema,
-      warnings: z.array(z.string()).default([]),
-      revision: z.number().int().positive(),
-      researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
-      ownerCreate: z
-        .object({
-          goalId: z.string().min(1),
-          keyResultIds: z.record(z.string().regex(/^kr:/), z.string().min(1)),
-        })
-        .strict(),
-    }),
-    z.object({
-      type: z.literal('knowledge_draft_review'),
-      draft: KnowledgeDraftSchema,
-      warnings: z.array(z.string()).default([]),
-      revision: z.number().int().positive(),
-    }),
-    z.object({
-      type: z.literal('task_draft_review'),
-      ownerCreate: z
-        .object({
-          taskId: CreateTaskPlanSchema.shape.id.unwrap(),
-          draftRef: TaskPlanDraftSchema.shape.task.shape.draftRef,
-        })
-        .strict(),
-      draft: TaskPlanDraftSchema,
-      warnings: z.array(z.string()).default([]),
-      revision: z.number().int().positive(),
-    }),
-    z.object({
-      type: z.literal('recovery_required'),
-      message: z.string().min(1),
-      retryable: z.boolean(),
-      failures: z.array(AIWorkflowExecutionFailureSchema).default([]),
-      // Optional for backward-compatible restore of snapshots created before
-      // recovery receipts were projected into the public run view.
-      receipt: AIWorkflowRecoveryReceiptSchema.optional(),
-    }),
-  ])
-  .superRefine((suspension, ctx) => {
-    if (
-      suspension.type === 'task_draft_review' &&
-      (suspension.revision !== suspension.draft.revision ||
-        suspension.ownerCreate.draftRef !== suspension.draft.task.draftRef)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Task owner identity hints must match the current review revision and draftRef',
-      });
-    }
-    if (suspension.type !== 'goal_draft_review') return;
+const AIWorkflowClarificationSchema = z.object({
+  type: z.literal('clarification_required'),
+  questions: z.array(z.string().min(1)).min(1).max(3),
+  round: z.number().int().positive().optional(),
+  candidateDraft: GoalPlanDraftSchema.optional(),
+  researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
+});
+
+const GoalWorkflowDraftReviewSchema = z.object({
+  type: z.literal('goal_draft_review'),
+  draft: GoalPlanDraftSchema,
+  warnings: z.array(z.string()).default([]),
+  revision: z.number().int().positive(),
+  researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).optional(),
+  ownerCreate: z
+    .object({
+      goalId: z.string().min(1),
+      keyResultIds: z.record(z.string().regex(/^kr:/), z.string().min(1)),
+    })
+    .strict(),
+}).superRefine((suspension, ctx) => {
     const refs = suspension.draft.keyResults.map((item) => item.draftRef);
     const ids = suspension.ownerCreate.keyResultIds;
     if (
@@ -442,7 +401,87 @@ export const AIWorkflowSuspensionSchema = z
           'Goal owner identity hints must cover exactly the current review revision and Key Results',
       });
     }
-  });
+
+});
+
+const KnowledgeWorkflowDraftReviewSchema = z.object({
+  type: z.literal('knowledge_draft_review'),
+  draft: KnowledgeDraftSchema,
+  warnings: z.array(z.string()).default([]),
+  revision: z.number().int().positive(),
+});
+
+const TaskWorkflowDraftReviewSchema = z.object({
+  type: z.literal('task_draft_review'),
+  ownerCreate: z
+    .object({
+      taskId: CreateTaskPlanSchema.shape.id.unwrap(),
+      draftRef: TaskPlanDraftSchema.shape.task.shape.draftRef,
+    })
+    .strict(),
+  draft: TaskPlanDraftSchema,
+  warnings: z.array(z.string()).default([]),
+  revision: z.number().int().positive(),
+}).superRefine((suspension, ctx) => {
+    if (
+      (suspension.revision !== suspension.draft.revision ||
+        suspension.ownerCreate.draftRef !== suspension.draft.task.draftRef)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Task owner identity hints must match the current review revision and draftRef',
+      });
+    }
+
+});
+
+const WorkflowRecoveryBaseSchema = z.object({
+  type: z.literal('recovery_required'),
+  message: z.string().min(1),
+  retryable: z.boolean(),
+  failures: z.array(AIWorkflowExecutionFailureSchema).default([]),
+  // Optional for backward-compatible restore of snapshots created before
+  // recovery receipts were projected into the public run view.
+  receipt: AIWorkflowRecoveryReceiptSchema.optional(),
+});
+
+export const AIWorkflowSuspensionSchema = z
+  .discriminatedUnion('type', [
+    AIWorkflowClarificationSchema,
+    GoalWorkflowDraftReviewSchema,
+    KnowledgeWorkflowDraftReviewSchema,
+    TaskWorkflowDraftReviewSchema,
+    WorkflowRecoveryBaseSchema,
+  ])
+;
+
+export const GoalWorkflowSuspensionSchema = z.discriminatedUnion('type', [
+    AIWorkflowClarificationSchema,
+    GoalWorkflowDraftReviewSchema,
+    WorkflowRecoveryBaseSchema.extend({
+      failures: z.array(GoalPlanExecutionFailureSchema).default([]),
+      receipt: AIWorkflowRecoveryReceiptSchema.options[0].optional(),
+    }),
+]);
+
+export const TaskWorkflowSuspensionSchema = z.discriminatedUnion('type', [
+    AIWorkflowClarificationSchema,
+    TaskWorkflowDraftReviewSchema,
+    WorkflowRecoveryBaseSchema.extend({
+      failures: z.array(TaskPlanExecutionFailureSchema).default([]),
+      receipt: AIWorkflowRecoveryReceiptSchema.options[1].optional(),
+    }),
+]);
+
+export const KnowledgeWorkflowSuspensionSchema = z.discriminatedUnion('type', [
+    AIWorkflowClarificationSchema,
+    KnowledgeWorkflowDraftReviewSchema,
+    WorkflowRecoveryBaseSchema.extend({
+      failures: z.array(KnowledgeCaptureExecutionFailureSchema).default([]),
+      receipt: AIWorkflowRecoveryReceiptSchema.options[2].optional(),
+    }),
+]);
+
 export type AIWorkflowSuspension = z.infer<typeof AIWorkflowSuspensionSchema>;
 
 export const AIWorkflowResumeCommandSchema = z.discriminatedUnion('type', [
@@ -571,7 +610,6 @@ const WorkflowRunViewBaseShape = {
   runId: z.string().min(1),
   conversationId: z.string().min(1),
   status: AIWorkflowStatusSchema,
-  suspension: AIWorkflowSuspensionSchema.optional(),
   failure: AIWorkflowTerminalFailureSchema.optional(),
   usage: AIRuntimeUsageSchema.optional(),
   createdAt: z.number().int().nonnegative(),
@@ -582,16 +620,19 @@ export const AIWorkflowRunViewSchema = z.discriminatedUnion('kind', [
   z.object({
     ...WorkflowRunViewBaseShape,
     kind: z.literal('goal.create'),
+    suspension: GoalWorkflowSuspensionSchema.optional(),
     result: GoalPlanExecutionReceiptSchema.optional(),
   }),
   z.object({
     ...WorkflowRunViewBaseShape,
     kind: z.literal('task.create'),
+    suspension: TaskWorkflowSuspensionSchema.optional(),
     result: TaskPlanExecutionReceiptSchema.optional(),
   }),
   z.object({
     ...WorkflowRunViewBaseShape,
     kind: z.literal('knowledge.capture'),
+    suspension: KnowledgeWorkflowSuspensionSchema.optional(),
     result: KnowledgeCaptureExecutionReceiptSchema.optional(),
   }),
 ]);

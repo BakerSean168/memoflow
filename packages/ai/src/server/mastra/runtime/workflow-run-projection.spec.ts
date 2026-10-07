@@ -82,9 +82,21 @@ describe.each(owners)('$kind durable snapshot projection', (owner) => {
     }
   });
 
-  it.each(['running', 'pending', 'future-status'])('keeps %s nonterminal', (status) => {
+  it.each(['running', 'pending', 'waiting'])('keeps %s nonterminal', (status) => {
     expect(owner.project(row(snapshot(status)), 'owner')?.status).toBe('running');
   });
+
+  it.each(['future-status', 'paused', undefined, null])(
+    'terminates unsupported status %s explicitly',
+    (status) => {
+      const view = owner.project(row({ ...snapshot('running'), status }), 'owner');
+      expect(view).toMatchObject({
+        status: 'failed',
+        failure: { code: 'AI_WORKFLOW_STATUS_UNSUPPORTED' },
+      });
+      expect(view).not.toHaveProperty('result');
+    },
+  );
 
   it.each(['success', 'bailed', 'skipped'])(
     'validates %s output and distinguishes cancellation',
@@ -141,12 +153,12 @@ describe.each(owners)('$kind durable snapshot projection', (owner) => {
     });
     const otherKind = owner.kind === 'goal.create' ? 'task.create' : 'goal.create';
     const foreign = { ...suspension, receipt: { kind: otherKind, receipt } };
-    expect(
+    expect(() =>
       owner.project(
         row({ ...base, context: { ...base.context, [owner.step]: { suspendPayload: foreign } } }),
         'owner',
       ),
-    ).not.toHaveProperty('result');
+    ).toThrow('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     expect(() => owner.project(row(base), 'owner')).toThrow('AI_WORKFLOW_SNAPSHOT_CORRUPT');
   });
 
