@@ -89,6 +89,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
     commands.push(
       {
         executable: process.execPath,
+        args: [resolve(runtimeScripts, 'prepare-account-setting-cutover.js')],
+        cwd: databaseRoot,
+        label: 'prepare Account and Setting canonical cutover',
+      },
+      {
+        executable: process.execPath,
         args: [resolve(runtimeScripts, 'prepare-goal-record-source-correlation.js')],
         cwd: databaseRoot,
         label: 'prepare goal-record source correlation',

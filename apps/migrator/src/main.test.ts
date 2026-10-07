@@ -33,6 +33,7 @@ describe('migrator interface', () => {
       'prepare pgvector',
       'retire legacy AI runtime state',
       'prepare Goal start timeframe semantics',
+      'prepare Account and Setting canonical cutover',
       'prepare goal-record source correlation',
       'backfill GoalRecord authorship',
       'prepare notification preference hierarchy',

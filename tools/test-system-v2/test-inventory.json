@@ -7011,6 +7011,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/account-setting-cutover.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/database/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/ai-provider-default-invariant.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12436,6 +12444,13 @@
       "fileCount": 7
     },
     {
+      "id": "packages/database/vitest.integration.config.ts",
+      "type": "primary",
+      "suite": "integration",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/goal/vitest.integration.config.ts",
       "type": "primary",
       "suite": "integration",
@@ -13301,7 +13316,7 @@
   "unexpected": [],
   "counts": {
     "unit": 1149,
-    "integration": 39,
+    "integration": 40,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,

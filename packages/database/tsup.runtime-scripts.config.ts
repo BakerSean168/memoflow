@@ -2,6 +2,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: [
+    'scripts/prepare-account-setting-cutover.ts',
     'scripts/prepare-ai-knowledge-index-pgvector.ts',
     'scripts/prepare-ai-vnext-runtime-state-retirement.ts',
     'scripts/prepare-goal-record-source-correlation.ts',
