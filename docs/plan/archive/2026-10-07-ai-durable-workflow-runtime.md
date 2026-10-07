@@ -1,5 +1,5 @@
 ---
-tags: [plan, active, ai, refactor]
+tags: [plan, archive, ai, refactor]
 description: AI runtime 职责分层评审与 Durable Workflow Runtime 提取方案
 created: 2026-10-07T00:00:00
 ---
@@ -103,4 +103,22 @@ PR 描述引用本方案及结果。以最终 head SHA 审查实际 diff 和 AC�
 
 ## 实施结果
 
-待实施及验证后回填；完成后按仓库规范移入 archive。
+已完成 Batch 1 实现与本地验证；实现提交 `291c19e7e902cc8d2cb60a5b26a0ecea77ef838a`。PR 的最终 head CI 与合并结果以关联 PR 为准。
+
+- `MastraAIRuntime`：1386 → 922 行；内部具体类 558 行。迁移 12 个方法，七个 facade 入口只负责初始化与委托。没有新增 runtime/store/lifecycle authority。
+- 新增 7 个行为用例。先在原 facade 上通过新增三类 characterization（runtime 33/33），迁移后 runtime + projection 88/88；随后补列表/usage 用例，最终 runtime 34/34。AI 全量初轮 91 文件、562/562；最终受影响项目全量检查覆盖新增查询用例。
+- `pnpm nx run ai:typecheck`、`ai:build` 通过；标准 helper 的 affected lint/typecheck/test 全部通过，覆盖 8 个受影响测试项目。`memoflow:governance-check`、`memoflow:docs-check`、`pnpm test:inventory:check`、格式与 diff 检查通过。
+- `VITEST_MAX_WORKERS=2 node tools/agent-skills/validate-local-deploy/scripts/run-validation.mjs --workspace /home/dev/projects/memoflow` 最终 `verdict=pass`、`readyForPr=true`。报告见本机 `reports/local-deploy-validation/latest.json` / `latest.md`（忽略的本地证据，不纳入源码）。API/Web/PowerSync 健康，端口与 listener 归属正确，API/Web 镜像及容器 revision 均匹配上述实现提交。
+- 首轮 affected test 中，未修改的 `GoalReviewSignals.spec.ts` 有一个 5 秒超时；单文件复验 6/6 通过，限制 Vitest 为 2 workers 后完整 helper 通过。未修改测试限时或前端实现。
+- 首轮 AI lint 包含任务开始前已有的两个未跟踪 operator 脚本，报跨包相对导入错误。脚本临时移到仓库外保存，以排除非交付内容；交付前按 SHA-256 核对恢复。源码既有 5 个 lint warnings 保持不变。
+- 新增测试开发时修正了 Knowledge fixture 应使用 topic 的输入，以及 detached 恢复必须等待新 revision 的断言。查询排序断言只依据持久化 updatedAt，不假设 native cancel 一定更新时间戳。这些均未造成生产行为变更。
+
+### Standards review
+
+独立只读 Standards reviewer 对 `ad8f4468…291c19e7` 无发现。实现符合 AGENT.md、架构归属、import 与 failure contract；12 个迁移方法仅改变依赖路径、初始化位置和格式。测试使用公开 facade 与真实 LibSQL，无 actionable test correctness/type-quality 问题；无非阻塞 smell 建议。
+
+### Spec review
+
+独立只读 Spec reviewer 对 `ad8f4468…291c19e7` 无发现：没有缺失/部分实现要求、范围扩张或错误实现。composition/lifecycle 留在 facade，七个入口初始化后委托；snapshot、contracts、exports、config 和依赖没有漂移。测试覆盖 detached/replay/ownership/restart/context/cancel/query；原测试覆盖 approve/recovery/history/Assistant。
+
+两轴 findings 均为 0。父 agent 对最终文档收尾与代码 diff 复核；DW-1～DW-9 均 delivered，证据如上。后续 Batch 2～6 仍是独立工作，不宣称已实施。

@@ -25,6 +25,8 @@ updated: 2026-09-22T16:42:00+08:00
 
 ## 本轮归档
 
+- [2026-10-07 AI Durable Workflow Runtime](./2026-10-07-ai-durable-workflow-runtime.md)：Batch 1 内部职责提取、三类 durable characterization、两轴审查与本地 prod-like 验证通过。
+
 | 日期       | 计划                                                                                                               | 结果                                                                                                                                                                                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-09-30 | [PVC-BASE-002 Interaction characterization pack](./2026-09-30-pvc-base-002-interaction-characterization.md) | Six-bullet behavior audit; Goal KR/Review router, Schedule inspect, Task quick/lifecycle, AI durable workflow coverage; no production changes; focused tests/typecheck/lint/governance/diff passed. |
