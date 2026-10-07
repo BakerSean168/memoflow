@@ -7249,6 +7249,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/import-safety.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10381,6 +10391,16 @@
       ]
     },
     {
+      "path": "packages/task/src/import-safety.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12027,7 +12047,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 103
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12097,7 +12117,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12602,7 +12622,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 103
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12700,7 +12720,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12963,6 +12983,7 @@
       "packages/goal/src/application-client/goal-client-port-facade-dual.surface.spec.ts",
       "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "packages/goal/src/electron/index.spec.ts",
+      "packages/goal/src/import-safety.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
@@ -13198,6 +13219,7 @@
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/electron/task-electron.surface.spec.ts",
+      "packages/task/src/import-safety.spec.ts",
       "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
       "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
@@ -13278,7 +13300,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1147,
+    "unit": 1149,
     "integration": 39,
     "smoke": 3,
     "boundary-ipc": 8,
