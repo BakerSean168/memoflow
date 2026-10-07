@@ -1,3 +1,9 @@
+import { workflowInputFromSnapshot } from './workflow-run-snapshot';
+import {
+  projectGoalCreateRun,
+  projectTaskCreateRun,
+  projectKnowledgeCaptureRun,
+} from './workflow-run-projection';
 import {
   applyMemoFlowSessionToolPolicy,
   memoFlowToolCategory,
@@ -18,7 +24,6 @@ import {
   AssistantToolNameSchema,
   type AssistantRuntimeApprovalCommand,
   AIWorkflowRunViewSchema,
-  AIWorkflowSuspensionSchema,
   GoalCreateWorkflowInputSchema,
   KnowledgeCaptureWorkflowInputSchema,
   TaskCreateWorkflowInputSchema,
@@ -59,21 +64,18 @@ import {
   ApplyGoalPlanService,
   GOAL_CREATE_LIFECYCLE_STEP_ID,
   GOAL_CREATE_WORKFLOW_ID,
-  GoalCreateWorkflowOutputSchema,
   createGoalCreateWorkflow,
   initialGoalCreateWorkflowState,
   type GoalPlanMutationPort,
   ApplyTaskPlanService,
   TASK_CREATE_LIFECYCLE_STEP_ID,
   TASK_CREATE_WORKFLOW_ID,
-  TaskCreateWorkflowOutputSchema,
   createTaskCreateWorkflow,
   initialTaskCreateWorkflowState,
   type TaskPlanMutationPort,
   ApplyKnowledgeNoteService,
   KNOWLEDGE_CAPTURE_LIFECYCLE_STEP_ID,
   KNOWLEDGE_CAPTURE_WORKFLOW_ID,
-  KnowledgeCaptureWorkflowOutputSchema,
   createKnowledgeCaptureWorkflow,
   initialKnowledgeCaptureWorkflowState,
   type KnowledgeCaptureMutationPort,
@@ -300,269 +302,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, context.identityId);
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
     return requestContext;
-  }
-
-  private parseWorkflowSnapshot(value: unknown): Record<string, unknown> {
-    const parsed =
-      typeof value === 'string'
-        ? (() => {
-            try {
-              return JSON.parse(value) as unknown;
-            } catch {
-              throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-            }
-          })()
-        : value;
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    }
-    return parsed as Record<string, unknown>;
-  }
-
-  private goalCreateInputFromSnapshot(snapshot: Record<string, unknown>) {
-    const context = snapshot.context;
-    if (!context || typeof context !== 'object' || Array.isArray(context)) {
-      throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    }
-    const parsed = GoalCreateWorkflowInputSchema.safeParse(
-      (context as Record<string, unknown>).input,
-    );
-    if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    return parsed.data;
-  }
-
-  private projectGoalCreateRun(
-    row: {
-      runId: string;
-      resourceId?: string;
-      snapshot: unknown;
-      createdAt: Date;
-      updatedAt: Date;
-    },
-    identityId: string,
-  ): AIWorkflowRunView | null {
-    if (row.resourceId !== identityId) return null;
-    const snapshot = this.parseWorkflowSnapshot(row.snapshot);
-    const workflowInput = this.goalCreateInputFromSnapshot(snapshot);
-    const lowLevelStatus = String(snapshot.status ?? 'running');
-    const context = snapshot.context as Record<string, unknown>;
-    const lifecycle = context[GOAL_CREATE_LIFECYCLE_STEP_ID];
-    const lifecycleRecord =
-      lifecycle && typeof lifecycle === 'object' && !Array.isArray(lifecycle)
-        ? (lifecycle as Record<string, unknown>)
-        : undefined;
-
-    let status: AIWorkflowRunView['status'];
-    let suspension: AIWorkflowRunView['suspension'];
-    let failure: AIWorkflowRunView['failure'];
-    let result: Extract<AIWorkflowRunView, { kind: 'goal.create' }>['result'];
-
-    if (lowLevelStatus === 'suspended') {
-      status = 'suspended';
-      const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      suspension = parsed.data;
-      if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'goal.create') {
-        result = suspension.receipt.receipt;
-      }
-    } else if (lowLevelStatus === 'canceled') {
-      status = 'cancelled';
-    } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
-      status = 'failed';
-      failure = publicRuntimeError(snapshot.error);
-    } else if (
-      lowLevelStatus === 'success' ||
-      lowLevelStatus === 'bailed' ||
-      lowLevelStatus === 'skipped'
-    ) {
-      const parsed = GoalCreateWorkflowOutputSchema.safeParse(snapshot.result);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      if (parsed.data.outcome === 'cancelled') {
-        status = 'cancelled';
-      } else {
-        status = 'completed';
-        result = parsed.data.receipt;
-      }
-    } else {
-      status = 'running';
-    }
-
-    return AIWorkflowRunViewSchema.parse({
-      runId: row.runId,
-      kind: 'goal.create',
-      conversationId: workflowInput.conversationId,
-      status,
-      ...(suspension ? { suspension } : {}),
-      ...(failure ? { failure } : {}),
-      ...(result ? { result } : {}),
-      createdAt: new Date(row.createdAt).getTime(),
-      updatedAt: new Date(row.updatedAt).getTime(),
-    });
-  }
-
-  private taskCreateInputFromSnapshot(snapshot: Record<string, unknown>) {
-    const context = snapshot.context;
-    if (!context || typeof context !== 'object' || Array.isArray(context)) {
-      throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    }
-    const parsed = TaskCreateWorkflowInputSchema.safeParse(
-      (context as Record<string, unknown>).input,
-    );
-    if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    return parsed.data;
-  }
-
-  private projectTaskCreateRun(
-    row: {
-      runId: string;
-      resourceId?: string;
-      snapshot: unknown;
-      createdAt: Date;
-      updatedAt: Date;
-    },
-    identityId: string,
-  ): AIWorkflowRunView | null {
-    if (row.resourceId !== identityId) return null;
-    const snapshot = this.parseWorkflowSnapshot(row.snapshot);
-    const workflowInput = this.taskCreateInputFromSnapshot(snapshot);
-    const lowLevelStatus = String(snapshot.status ?? 'running');
-    const context = snapshot.context as Record<string, unknown>;
-    const lifecycle = context[TASK_CREATE_LIFECYCLE_STEP_ID];
-    const lifecycleRecord =
-      lifecycle && typeof lifecycle === 'object' && !Array.isArray(lifecycle)
-        ? (lifecycle as Record<string, unknown>)
-        : undefined;
-
-    let status: AIWorkflowRunView['status'];
-    let suspension: AIWorkflowRunView['suspension'];
-    let failure: AIWorkflowRunView['failure'];
-    let result: Extract<AIWorkflowRunView, { kind: 'task.create' }>['result'];
-
-    if (lowLevelStatus === 'suspended') {
-      status = 'suspended';
-      const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      suspension = parsed.data;
-      if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'task.create') {
-        result = suspension.receipt.receipt;
-      }
-    } else if (lowLevelStatus === 'canceled') {
-      status = 'cancelled';
-    } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
-      status = 'failed';
-      failure = publicRuntimeError(snapshot.error);
-    } else if (
-      lowLevelStatus === 'success' ||
-      lowLevelStatus === 'bailed' ||
-      lowLevelStatus === 'skipped'
-    ) {
-      const parsed = TaskCreateWorkflowOutputSchema.safeParse(snapshot.result);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      if (parsed.data.outcome === 'cancelled') {
-        status = 'cancelled';
-      } else {
-        status = 'completed';
-        result = parsed.data.receipt;
-      }
-    } else {
-      status = 'running';
-    }
-
-    return AIWorkflowRunViewSchema.parse({
-      runId: row.runId,
-      kind: 'task.create',
-      conversationId: workflowInput.conversationId,
-      status,
-      ...(suspension ? { suspension } : {}),
-      ...(failure ? { failure } : {}),
-      ...(result ? { result } : {}),
-      createdAt: new Date(row.createdAt).getTime(),
-      updatedAt: new Date(row.updatedAt).getTime(),
-    });
-  }
-
-  private knowledgeCaptureInputFromSnapshot(snapshot: Record<string, unknown>) {
-    const context = snapshot.context;
-    if (!context || typeof context !== 'object' || Array.isArray(context)) {
-      throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    }
-    const parsed = KnowledgeCaptureWorkflowInputSchema.safeParse(
-      (context as Record<string, unknown>).input,
-    );
-    if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-    return parsed.data;
-  }
-
-  private projectKnowledgeCaptureRun(
-    row: {
-      runId: string;
-      resourceId?: string;
-      snapshot: unknown;
-      createdAt: Date;
-      updatedAt: Date;
-    },
-    identityId: string,
-  ): AIWorkflowRunView | null {
-    if (row.resourceId !== identityId) return null;
-    const snapshot = this.parseWorkflowSnapshot(row.snapshot);
-    const workflowInput = this.knowledgeCaptureInputFromSnapshot(snapshot);
-    const lowLevelStatus = String(snapshot.status ?? 'running');
-    const context = snapshot.context as Record<string, unknown>;
-    const lifecycle = context[KNOWLEDGE_CAPTURE_LIFECYCLE_STEP_ID];
-    const lifecycleRecord =
-      lifecycle && typeof lifecycle === 'object' && !Array.isArray(lifecycle)
-        ? (lifecycle as Record<string, unknown>)
-        : undefined;
-
-    let status: AIWorkflowRunView['status'];
-    let suspension: AIWorkflowRunView['suspension'];
-    let failure: AIWorkflowRunView['failure'];
-    let result: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>['result'];
-
-    if (lowLevelStatus === 'suspended') {
-      status = 'suspended';
-      const parsed = AIWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      suspension = parsed.data;
-      if (
-        suspension.type === 'recovery_required' &&
-        suspension.receipt?.kind === 'knowledge.capture'
-      ) {
-        result = suspension.receipt.receipt;
-      }
-    } else if (lowLevelStatus === 'canceled') {
-      status = 'cancelled';
-    } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
-      status = 'failed';
-      failure = publicRuntimeError(snapshot.error);
-    } else if (
-      lowLevelStatus === 'success' ||
-      lowLevelStatus === 'bailed' ||
-      lowLevelStatus === 'skipped'
-    ) {
-      const parsed = KnowledgeCaptureWorkflowOutputSchema.safeParse(snapshot.result);
-      if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
-      if (parsed.data.outcome === 'cancelled') {
-        status = 'cancelled';
-      } else {
-        status = 'completed';
-        result = parsed.data.receipt;
-      }
-    } else {
-      status = 'running';
-    }
-
-    return AIWorkflowRunViewSchema.parse({
-      runId: row.runId,
-      kind: 'knowledge.capture',
-      conversationId: workflowInput.conversationId,
-      status,
-      ...(suspension ? { suspension } : {}),
-      ...(failure ? { failure } : {}),
-      ...(result ? { result } : {}),
-      createdAt: new Date(row.createdAt).getTime(),
-      updatedAt: new Date(row.updatedAt).getTime(),
-    });
   }
 
   private runningWorkflowView(input: {
@@ -813,7 +552,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (!row || row.resourceId !== input.context.identityId) {
       throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     }
-    const workflowInput = this.workflowInputFromSnapshot(workflowName, row.snapshot);
+    const workflowInput = workflowInputFromSnapshot(workflowName, row.snapshot);
     const workflow =
       before.kind === 'goal.create'
         ? this.goalCreateWorkflow
@@ -899,7 +638,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (!row || row.resourceId !== input.context.identityId) {
       throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     }
-    const workflowInput = this.workflowInputFromSnapshot(workflowName, row.snapshot);
+    const workflowInput = workflowInputFromSnapshot(workflowName, row.snapshot);
     const workflow =
       before.kind === 'goal.create'
         ? this.goalCreateWorkflow
@@ -966,26 +705,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     };
   }
 
-  private workflowInputFromSnapshot(
-    workflowName: string,
-    rawSnapshot: unknown,
-  ):
-    | ReturnType<(typeof GoalCreateWorkflowInputSchema)['parse']>
-    | ReturnType<(typeof TaskCreateWorkflowInputSchema)['parse']>
-    | ReturnType<(typeof KnowledgeCaptureWorkflowInputSchema)['parse']> {
-    const snapshot = this.parseWorkflowSnapshot(rawSnapshot);
-    if (workflowName === GOAL_CREATE_WORKFLOW_ID) {
-      return this.goalCreateInputFromSnapshot(snapshot);
-    }
-    if (workflowName === TASK_CREATE_WORKFLOW_ID) {
-      return this.taskCreateInputFromSnapshot(snapshot);
-    }
-    if (workflowName === KNOWLEDGE_CAPTURE_WORKFLOW_ID) {
-      return this.knowledgeCaptureInputFromSnapshot(snapshot);
-    }
-    throw new Error('AI_WORKFLOW_KIND_UNSUPPORTED');
-  }
-
   async get(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null> {
     await this.init();
     const store = await this.workflowStore();
@@ -995,7 +714,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (goalRow) {
       return this.attachWorkflowUsage(
-        this.projectGoalCreateRun(goalRow, input.identityId),
+        projectGoalCreateRun(goalRow, input.identityId),
         input.identityId,
       );
     }
@@ -1005,7 +724,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (taskRow) {
       return this.attachWorkflowUsage(
-        this.projectTaskCreateRun(taskRow, input.identityId),
+        projectTaskCreateRun(taskRow, input.identityId),
         input.identityId,
       );
     }
@@ -1015,7 +734,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (knowledgeRow) {
       return this.attachWorkflowUsage(
-        this.projectKnowledgeCaptureRun(knowledgeRow, input.identityId),
+        projectKnowledgeCaptureRun(knowledgeRow, input.identityId),
         input.identityId,
       );
     }
@@ -1044,9 +763,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       perPage: false,
     });
     const views = [
-      ...goalRows.runs.map((row) => this.projectGoalCreateRun(row, input.identityId)),
-      ...taskRows.runs.map((row) => this.projectTaskCreateRun(row, input.identityId)),
-      ...knowledgeRows.runs.map((row) => this.projectKnowledgeCaptureRun(row, input.identityId)),
+      ...goalRows.runs.map((row) => projectGoalCreateRun(row, input.identityId)),
+      ...taskRows.runs.map((row) => projectTaskCreateRun(row, input.identityId)),
+      ...knowledgeRows.runs.map((row) => projectKnowledgeCaptureRun(row, input.identityId)),
     ]
       .filter((view): view is AIWorkflowRunView => view !== null)
       .filter((view) => !input.conversationId || view.conversationId === input.conversationId);

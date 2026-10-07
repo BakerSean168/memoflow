@@ -3583,6 +3583,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/tools/owner-contracts.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11800,7 +11810,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 91
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12340,7 +12350,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 91
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -12708,6 +12718,7 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "packages/ai/src/server/mastra/tools/owner-contracts.surface.spec.ts",
       "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
       "packages/ai/src/server/mastra/workflows/apply-goal-plan.service.spec.ts",
@@ -13065,7 +13076,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1130,
+    "unit": 1131,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
