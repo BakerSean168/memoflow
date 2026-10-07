@@ -139,6 +139,8 @@ services:
       LOCAL_VALIDATION: ${LOCAL_VALIDATION:-1}
       EAG_READ_PILOT_ENABLED: ${EAG_READ_PILOT_ENABLED:-0}
       EAG_TASK_READ_ENABLED: ${EAG_TASK_READ_ENABLED:-1}
+      EAG_OAUTH_ENABLED: ${EAG_OAUTH_ENABLED:-0}
+      EAG_OAUTH_CLIENT_IDS: ${EAG_OAUTH_CLIENT_IDS:-https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata}
       EAG_AUDIENCE: ${EAG_AUDIENCE:-}
       EAG_CURSOR_SECRET: ${EAG_CURSOR_SECRET:-}
       # Optional real SMTP (from .env.production.local). Default console when unset.

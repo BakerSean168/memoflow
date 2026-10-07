@@ -26,6 +26,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/external-agent-oauth.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/label-owner-lifecycle.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -2350,6 +2358,14 @@
     },
     {
       "path": "apps/web/src/auth/DeviceAuthorizationView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/web/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/web/src/auth/ExternalAgentAuthorizationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/web/vitest.config.ts"
@@ -6020,6 +6036,14 @@
     },
     {
       "path": "packages/cloud-auth/src/server/email-delivery.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/server/external-agent-oauth.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
@@ -12350,7 +12374,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -12469,7 +12493,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12511,7 +12535,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 11
     },
     {
       "id": "packages/contracts/vitest.config.ts",
@@ -13222,8 +13246,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1142,
-    "integration": 38,
+    "unit": 1144,
+    "integration": 39,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,

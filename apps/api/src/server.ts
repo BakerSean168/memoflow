@@ -162,6 +162,14 @@ async function bootstrap(): Promise<void> {
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
   const cloudAuth = createCloudAuth({
+    externalAgents: env.EAG_OAUTH_ENABLED
+      ? {
+          resource: env.EAG_AUDIENCE!,
+          webOrigin: env.MEMOFLOW_WEB_URL!,
+          allowedClientIds: env.EAG_OAUTH_CLIENT_IDS,
+          accountIsActive: createAccountPrismaActiveQuery(prisma),
+        }
+      : undefined,
     database: prisma,
     secret: jwtConfig.secret,
     baseUrl:
@@ -393,6 +401,7 @@ async function bootstrap(): Promise<void> {
     enabled: env.EAG_READ_PILOT_ENABLED,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
     cursorSecret: env.EAG_CURSOR_SECRET ?? '',
+    oauth: cloudAuth.externalAgents,
     trustedOrigins: getTrustedWebOrigins(getCorsOrigins(), env.MEMOFLOW_WEB_URL),
     pats: createScopedPatService({
       database: prisma,

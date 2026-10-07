@@ -2,8 +2,13 @@ import { z } from 'zod';
 import { CreateScopedPatSchema } from '@memoflow/contracts/agent-gateway';
 import type { PilotAdmission } from './pilot-admission';
 import { createReadGateway, toNodeHandler } from '@memoflow/agent-gateway/server';
-import type { GoalReadPort, TaskReadPort, GatewayAuditEvent, GatewayDiagnostic } from '@memoflow/agent-gateway';
-import type { createScopedPatService } from '@memoflow/cloud-auth/server';
+import type {
+  GoalReadPort,
+  TaskReadPort,
+  GatewayAuditEvent,
+  GatewayDiagnostic,
+} from '@memoflow/agent-gateway';
+import type { createScopedPatService, createCloudAuth } from '@memoflow/cloud-auth/server';
 import type { IApiModule } from '../../shared/contracts/api-module';
 import type { AuthenticatedRequest } from '../../shared/infrastructure/http/middlewares/auth-middleware';
 import type { RequestContextCarrierRequest } from '../../shared/infrastructure/http/middlewares/request-context.middleware';
@@ -15,6 +20,7 @@ interface Options {
   readonly cursorSecret: string;
   readonly trustedOrigins: readonly string[];
   readonly pats: ReturnType<typeof createScopedPatService>;
+  readonly oauth?: ReturnType<typeof createCloudAuth>['externalAgents'];
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
@@ -26,9 +32,22 @@ interface Options {
  * @returns A transport-only module handle; default-off pilots mount no routes.
  */
 export function composeAgentGatewayModule(options: Options): IApiModule {
+  const resourceMetadataUrl = options.oauth
+    ? new URL('/.well-known/oauth-protected-resource/mcp', options.audience).href
+    : undefined;
   const gateway = createReadGateway({
     ...options,
-    credentials: options.pats,
+    resourceMetadataUrl,
+    credentials: {
+      authenticate: (authorization, context) =>
+        /^Bearer mfp_/i.test(authorization ?? '')
+          ? options.pats.authenticate(authorization, context)
+          : (options.oauth?.authenticate(authorization) ?? Promise.resolve(null)),
+      consumeReadQuota: (id, type) =>
+        type === 'pat'
+          ? options.pats.consumeReadQuota(id)
+          : (options.oauth?.consumeReadQuota(id) ?? Promise.resolve(false)),
+    },
     consumeOwnerQuota: options.admission.consumeOwner,
   });
   return {
@@ -44,6 +63,9 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
         const context = (req as typeof req & RequestContextCarrierRequest).requestContext;
         const deny = (status: number, outcome: string) => {
           res.locals.externalAgentAuditHandled = true;
+          if (status === 401 && resourceMetadataUrl) {
+            res.setHeader('WWW-Authenticate', `Bearer resource_metadata="${resourceMetadataUrl}"`);
+          }
           if (status === 429 || status === 503) res.setHeader('Retry-After', '60');
           options.audit({
             version: '1',
@@ -91,10 +113,12 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
       });
       const path = '/agent-connections/pats';
       router.use(
-        path,
+        '/agent-connections',
         (req, res, next) => {
           res.locals.externalAgentAuditHandled = true;
           const started = Date.now();
+          // Express restores req.url as nested routers unwind; capture the lane now.
+          const oauthManagement = req.path.startsWith('/oauth');
           res.once('finish', () => {
             const context = (req as typeof req & RequestContextCarrierRequest).requestContext;
             options.audit({
@@ -108,8 +132,11 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
                 typeof res.locals.externalAgentCredentialId === 'string'
                   ? res.locals.externalAgentCredentialId
                   : undefined,
-              tool:
-                req.method === 'POST'
+              tool: oauthManagement
+                ? req.method === 'DELETE'
+                  ? 'oauth_revoke'
+                  : 'oauth_list'
+                : req.method === 'POST'
                   ? 'pat_create'
                   : req.method === 'DELETE'
                     ? 'pat_revoke'
@@ -153,6 +180,9 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
         res.locals.externalAgentCredentialId = result.id;
         res.status(201).json({ data: result });
       });
+      router.get('/agent-connections/capabilities', (_req, res) => {
+        res.json({ oauth: Boolean(options.oauth) });
+      });
       router.get(path, async (req, res) => {
         const identityId = (req as AuthenticatedRequest).user?.identityId;
         if (!identityId) {
@@ -186,6 +216,32 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
         );
         res.sendStatus(204);
       });
+      if (options.oauth) {
+        const oauth = options.oauth;
+        router.get('/agent-connections/oauth', async (req, res) => {
+          const identityId = (req as AuthenticatedRequest).user?.identityId;
+          if (!identityId) {
+            res.sendStatus(401);
+            return;
+          }
+          res.json({ data: await oauth.list(identityId) });
+        });
+        router.delete('/agent-connections/oauth/:id', async (req, res) => {
+          const id = z.uuid().safeParse(req.params.id);
+          if (!id.success) {
+            res.status(400).json({ error: 'INVALID_INPUT' });
+            return;
+          }
+          const identityId = (req as AuthenticatedRequest).user?.identityId;
+          if (!identityId) {
+            res.sendStatus(401);
+            return;
+          }
+          res.locals.externalAgentCredentialId = id.data;
+          await oauth.revoke(identityId, id.data);
+          res.sendStatus(204);
+        });
+      }
     },
     async destroy() {
       if (options.enabled) await options.admission.destroy();

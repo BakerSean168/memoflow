@@ -15,12 +15,19 @@ model CloudAuthUser {
   providerAccounts CloudAuthProviderAccount[]
   deviceCodes      CloudAuthDeviceCode[]
   externalAgentPats ExternalAgentPat[]
+  externalAgentConnections ExternalAgentConnection[]
+  oauthclients OauthClient[]
+  oauthrefreshtokens OauthRefreshToken[]
+  oauthaccesstokens OauthAccessToken[]
+  oauthconsents OauthConsent[]
   account          Account?
 
   @@map("cloud_auth_users")
 }
 
 model CloudAuthSession {
+  oauthrefreshtokens OauthRefreshToken[]
+  oauthaccesstokens OauthAccessToken[]
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
   token     String   @unique
@@ -109,4 +116,22 @@ model ExternalAgentPat {
 
   @@index([userId, createdAt])
   @@map("external_agent_pats")
+}
+
+// Product authorization lifecycle; provider consent and scopes remain authoritative.
+model ExternalAgentConnection {
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  clientId String @map("client_id")
+  resource String
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  revokedAt DateTime? @map("revoked_at")
+  rateWindow DateTime @default(now()) @map("rate_window")
+  rateCount Int @default(0) @map("rate_count")
+  user CloudAuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, clientId, resource])
+  @@map("external_agent_connections")
 }

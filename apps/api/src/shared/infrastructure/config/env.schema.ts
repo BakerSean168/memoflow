@@ -51,6 +51,31 @@ export const envSchema = z
       .default('1')
       .transform((value) => value === '1'),
     EAG_AUDIENCE: z.preprocess(emptyStringToUndefined, z.string().url().optional()),
+    EAG_OAUTH_ENABLED: z
+      .enum(['0', '1'])
+      .default('0')
+      .transform((value) => value === '1'),
+    EAG_OAUTH_CLIENT_IDS: z
+      .string()
+      .default(
+        'https://chatgpt.com/oauth/codex/client.json,https://claude.ai/oauth/claude-code-client-metadata',
+      )
+      .transform((value) =>
+        value
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean),
+      )
+      .pipe(
+        z
+          .array(
+            z.url().refine((value) => {
+              const url = new URL(value);
+              return url.protocol === 'https:' && !url.username && !url.password && !url.hash;
+            }, 'Expected an HTTPS CIMD URL'),
+          )
+          .min(1),
+      ),
     EAG_CURSOR_SECRET: z.preprocess(emptyStringToUndefined, z.string().min(32).optional()),
 
     API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -364,6 +389,43 @@ export const envSchema = z
       .describe('OTel service name for the API process (required when tracing is enabled)'),
   })
   .superRefine((env, context) => {
+    if (env.EAG_OAUTH_ENABLED) {
+      if (!env.EAG_READ_PILOT_ENABLED)
+        context.addIssue({
+          code: 'custom',
+          path: ['EAG_OAUTH_ENABLED'],
+          message: 'OAuth requires the read gateway',
+        });
+      for (const key of ['AUTH_BASE_URL', 'MEMOFLOW_WEB_URL'] as const) {
+        const value = env[key];
+        if (!value) {
+          context.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required for OAuth`,
+          });
+          continue;
+        }
+        const url = new URL(value);
+        const loopback =
+          url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+        if (
+          (url.protocol !== 'https:' && !loopback) ||
+          url.username ||
+          url.password ||
+          url.search ||
+          url.hash ||
+          (key === 'AUTH_BASE_URL' && url.pathname !== '/api/auth')
+        ) {
+          context.addIssue({
+            code: 'custom',
+            path: [key],
+            message:
+              'OAuth needs canonical HTTPS origins and an /api/auth issuer; loopback HTTP is allowed locally',
+          });
+        }
+      }
+    }
     if (env.EAG_READ_PILOT_ENABLED) {
       for (const key of ['EAG_AUDIENCE', 'EAG_CURSOR_SECRET'] as const) {
         if (!env[key])

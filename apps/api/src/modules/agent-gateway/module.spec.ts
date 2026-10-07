@@ -13,7 +13,7 @@ afterEach(async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
-async function fixture() {
+async function fixture(oauthEnabled = false) {
   const app = express();
   app.use(createRequestContextMiddleware());
   app.use(express.json({ limit: '256kb' }));
@@ -31,6 +31,12 @@ async function fixture() {
     consumeReadQuota: vi.fn().mockResolvedValue(true),
   };
   const audit = vi.fn();
+  const oauth = {
+    list: vi.fn().mockResolvedValue([]),
+    revoke: vi.fn().mockResolvedValue(undefined),
+    authenticate: vi.fn().mockResolvedValue(null),
+    consumeReadQuota: vi.fn().mockResolvedValue(true),
+  };
   const module = composeAgentGatewayModule({
     admission: {
       start: async () => {},
@@ -43,6 +49,7 @@ async function fixture() {
     cursorSecret: 'test-only-secret-'.repeat(3),
     trustedOrigins: ['https://memo.test'],
     pats,
+    oauth: oauthEnabled ? oauth : undefined,
     goals: { getGoal: vi.fn(), searchGoalPage: vi.fn() },
     audit,
   });
@@ -64,7 +71,7 @@ async function fixture() {
     },
   } as never);
   app.use('/api/v1', router);
-  return { base, pats, audit };
+  return { base, pats, oauth, audit };
 }
 describe('Gateway API host admission', () => {
   it('requires a first-party session, trusted Origin and strict input to mint a PAT', async () => {
@@ -113,10 +120,7 @@ describe('Gateway API host admission', () => {
     });
     expect(denied.status).toBe(401);
     expect(denied.headers.get('x-request-id')).toBeTruthy();
-    expect(f.pats.authenticate).toHaveBeenCalledWith(
-      'Bearer firstparty',
-      expect.objectContaining({ source: 'http' }),
-    );
+    expect(f.pats.authenticate).not.toHaveBeenCalled();
     const badHost = await new Promise<number | undefined>((resolve, reject) => {
       const req = httpRequest(
         `${f.base}/mcp`,
@@ -136,6 +140,47 @@ describe('Gateway API host admission', () => {
         scopeDecision: 'denied',
         requestId: expect.any(String),
       }),
+    );
+  });
+  it('protects OAuth management with the first-party lane and audits its credential type', async () => {
+    const f = await fixture(true);
+    const id = '00000000-0000-4000-8000-000000000001';
+    const url = `${f.base}/api/v1/agent-connections/oauth/${id}`;
+    expect(
+      (
+        await fetch(url, {
+          method: 'DELETE',
+          headers: { authorization: 'Bearer oauth', origin: 'https://memo.test' },
+        })
+      ).status,
+    ).toBe(401);
+    expect(
+      (await fetch(url, { method: 'DELETE', headers: { authorization: 'Bearer firstparty' } }))
+        .status,
+    ).toBe(403);
+    expect(f.oauth.revoke).not.toHaveBeenCalled();
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: { authorization: 'Bearer firstparty', origin: 'https://memo.test' },
+    });
+    expect(response.status).toBe(204);
+    expect(f.oauth.revoke).toHaveBeenCalledWith('owner-a', id);
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'oauth_revoke',
+        credentialId: id,
+        identityId: 'owner-a',
+        outcome: 'OK',
+      }),
+    );
+    const challenge = await fetch(`${f.base}/mcp`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
+    expect(challenge.status).toBe(401);
+    expect(challenge.headers.get('www-authenticate')).toContain(
+      '/.well-known/oauth-protected-resource/mcp',
     );
   });
 });

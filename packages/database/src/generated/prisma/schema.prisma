@@ -249,24 +249,31 @@ model CloudAuthUser {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  sessions          CloudAuthSession[]
-  providerAccounts  CloudAuthProviderAccount[]
-  deviceCodes       CloudAuthDeviceCode[]
-  externalAgentPats ExternalAgentPat[]
-  account           Account?
+  sessions                 CloudAuthSession[]
+  providerAccounts         CloudAuthProviderAccount[]
+  deviceCodes              CloudAuthDeviceCode[]
+  externalAgentPats        ExternalAgentPat[]
+  externalAgentConnections ExternalAgentConnection[]
+  oauthclients             OauthClient[]
+  oauthrefreshtokens       OauthRefreshToken[]
+  oauthaccesstokens        OauthAccessToken[]
+  oauthconsents            OauthConsent[]
+  account                  Account?
 
   @@map("cloud_auth_users")
 }
 
 model CloudAuthSession {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  token     String   @unique
-  expiresAt DateTime @map("expires_at")
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  oauthrefreshtokens OauthRefreshToken[]
+  oauthaccesstokens  OauthAccessToken[]
+  id                 String              @id @default(uuid())
+  userId             String              @map("user_id")
+  token              String              @unique
+  expiresAt          DateTime            @map("expires_at")
+  ipAddress          String?             @map("ip_address")
+  userAgent          String?             @map("user_agent")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
 
   user CloudAuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -347,6 +354,24 @@ model ExternalAgentPat {
 
   @@index([userId, createdAt])
   @@map("external_agent_pats")
+}
+
+// Product authorization lifecycle; provider consent and scopes remain authoritative.
+model ExternalAgentConnection {
+  id         String        @id @default(uuid())
+  userId     String        @map("user_id")
+  clientId   String        @map("client_id")
+  resource   String
+  createdAt  DateTime      @default(now()) @map("created_at")
+  expiresAt  DateTime      @map("expires_at")
+  lastUsedAt DateTime?     @map("last_used_at")
+  revokedAt  DateTime?     @map("revoked_at")
+  rateWindow DateTime      @default(now()) @map("rate_window")
+  rateCount  Int           @default(0) @map("rate_count")
+  user       CloudAuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, clientId, resource])
+  @@map("external_agent_connections")
 }
 
 // ==========================================
@@ -739,6 +764,194 @@ model NotificationDispatchOutbox {
   @@index([status])
   @@index([leaseExpiresAt])
   @@map("notification_dispatch_outbox")
+}
+
+// Generated from auth@1.7.6 and testing/oauth-schema.config.ts.
+// MemoFlow adds database UUID defaults and connection lookup/consent indexes.
+model Jwks {
+  id         String    @id @default(uuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime
+  expiresAt  DateTime?
+  alg        String?
+  crv        String?
+
+  @@map("jwks")
+}
+
+model OauthClient {
+  id                               String                @id @default(uuid())
+  clientId                         String
+  clientSecret                     String?
+  clientDiscoveryId                String?
+  disabled                         Boolean?              @default(false)
+  skipConsent                      Boolean?
+  enableEndSession                 Boolean?
+  subjectType                      String?
+  scopes                           String[]
+  clientCredentialsScopes          String[]              @default([])
+  userId                           String?
+  cloudauthuser                    CloudAuthUser?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt                        DateTime?
+  updatedAt                        DateTime?
+  name                             String?
+  uri                              String?
+  icon                             String?
+  contacts                         String[]
+  tos                              String?
+  policy                           String?
+  softwareId                       String?
+  softwareVersion                  String?
+  softwareStatement                String?
+  redirectUris                     String[]
+  postLogoutRedirectUris           String[]
+  backchannelLogoutUri             String?
+  backchannelLogoutSessionRequired Boolean?
+  tokenEndpointAuthMethod          String?
+  applicationType                  String?
+  jwks                             String?
+  jwksUri                          String?
+  grantTypes                       String[]
+  responseTypes                    String[]
+  requirePKCE                      Boolean?
+  dpopBoundAccessTokens            Boolean?              @default(false)
+  referenceId                      String?
+  metadata                         Json?
+  oauthclientresources             OauthClientResource[]
+  oauthrefreshtokens               OauthRefreshToken[]
+  oauthaccesstokens                OauthAccessToken[]
+  oauthconsents                    OauthConsent[]
+
+  @@unique([clientId])
+  @@index([userId])
+  @@map("oauthClient")
+}
+
+model OauthResource {
+  id                            String                @id @default(uuid())
+  identifier                    String
+  name                          String
+  accessTokenTtl                Int?
+  refreshTokenTtl               Int?
+  signingAlgorithm              String?
+  signingKeyId                  String?
+  allowedScopes                 String[]
+  customClaims                  Json?
+  dpopBoundAccessTokensRequired Boolean?              @default(false)
+  disabled                      Boolean?              @default(false)
+  createdAt                     DateTime?
+  updatedAt                     DateTime?
+  policyVersion                 Int?                  @default(1)
+  metadata                      Json?
+  oauthclientresources          OauthClientResource[]
+
+  @@unique([identifier])
+  @@map("oauthResource")
+}
+
+model OauthClientResource {
+  id            String        @id @default(uuid())
+  clientId      String
+  oauthclient   OauthClient   @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  resourceId    String
+  oauthresource OauthResource @relation(fields: [resourceId], references: [identifier], onDelete: Cascade)
+  metadata      Json?
+  createdAt     DateTime?
+
+  @@unique([clientId, resourceId], map: "oauthClientResource_clientId_resourceId_uidx")
+  @@index([clientId])
+  @@index([resourceId])
+  @@map("oauthClientResource")
+}
+
+model OauthRefreshToken {
+  id                      String             @id @default(uuid())
+  token                   String
+  clientId                String
+  oauthclient             OauthClient        @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  sessionId               String?
+  cloudauthsession        CloudAuthSession?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  userId                  String
+  cloudauthuser           CloudAuthUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referenceId             String?
+  authorizationCodeId     String?
+  resources               String[]
+  requestedUserInfoClaims String[]
+  expiresAt               DateTime
+  createdAt               DateTime
+  revoked                 DateTime?
+  rotatedAt               DateTime?
+  rotationReplayResponse  String?
+  rotationReplayExpiresAt DateTime?
+  authTime                DateTime?
+  confirmation            Json?
+  scopes                  String[]
+  oauthaccesstokens       OauthAccessToken[]
+
+  @@unique([token])
+  @@index([clientId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([authorizationCodeId])
+  @@index([referenceId])
+  @@map("oauthRefreshToken")
+}
+
+model OauthAccessToken {
+  id                      String             @id @default(uuid())
+  token                   String
+  clientId                String
+  oauthclient             OauthClient        @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  sessionId               String?
+  cloudauthsession        CloudAuthSession?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  userId                  String?
+  cloudauthuser           CloudAuthUser?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referenceId             String?
+  authorizationCodeId     String?
+  resources               String[]
+  requestedUserInfoClaims String[]
+  refreshId               String?
+  oauthrefreshtoken       OauthRefreshToken? @relation(fields: [refreshId], references: [id], onDelete: Cascade)
+  expiresAt               DateTime
+  createdAt               DateTime
+  revoked                 DateTime?
+  confirmation            Json?
+  scopes                  String[]
+
+  @@unique([token])
+  @@index([clientId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([authorizationCodeId])
+  @@index([refreshId])
+  @@map("oauthAccessToken")
+}
+
+model OauthConsent {
+  id                      String         @id @default(uuid())
+  clientId                String
+  oauthclient             OauthClient    @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  userId                  String?
+  cloudauthuser           CloudAuthUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referenceId             String?
+  resources               String[]
+  requestedUserInfoClaims String[]
+  scopes                  String[]
+  createdAt               DateTime
+  updatedAt               DateTime
+
+  @@unique([userId, clientId, referenceId])
+  @@index([clientId])
+  @@index([userId])
+  @@map("oauthConsent")
+}
+
+model OauthClientAssertion {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+
+  @@map("oauthClientAssertion")
 }
 
 // ==========================================

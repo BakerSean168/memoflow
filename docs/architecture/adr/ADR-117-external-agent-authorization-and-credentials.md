@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # ADR-117: External Agent Authorization 与 Credential 边界
 
-**状态：** 已采纳授权边界；Better Auth 1.7.6 MCP/CIMD/JWT fixture 及真实 CLI 授权发起已验证，scoped PAT 持久 authority、撤销/关闭/scope/expiry 和并发配额已实现并通过真实数据库测试；PAT 显式支持 goals:read/tasks:read，默认仅 goals:read；OAuth 持久授权与真实客户端 journey 按用户本次范围明确延期，尚未实现/验证。
+**状态：** 已采纳授权边界；PAT 六工具已实现并验证，checkpoint `320dd1ac994`。用户于 2026-10-07 批准继续 EAG-04/05 只读 OAuth；持久 OAuth 与完整客户端 journey 实施中，不能用 spike 发起证据宣称完成。
 **日期：** 2026-10-07
 **关联：** ADR-036、ADR-039、ADR-045、ADR-104、ADR-105、ADR-116、ADR-118
 
@@ -46,7 +46,20 @@ MCP access token 只被 MCP resource audience 接受；现有 REST session API �
 - 首批授权分别为 `goals:read`、`tasks:read`，写 scope 不隐含读 scope。后续按真实 owner 增加 `goals:write`、`tasks:write` 等。
 - 复合查询必须具备其全部数据 scope；不能授权后再依赖 UI 隐藏。业务派生影响及跨 owner scope 见架构规格，不能依赖 Agent 自报 risk。
 - 失效、撤销、账户关闭、scope 缩减都在每次请求入口生效，包括 `tools/list`、长任务查询和恢复。JWT 本地验签不能单独兑现即时撤销；首版增加在线 grant/account 状态检查，存储不可用则拒绝执行，避免跨请求授权缓存。
-- access token 使用短 TTL，refresh token 采用 provider 的 rotation/reuse detection；grant 撤销同时禁止 refresh。建议初始 TTL 为 10 分钟、PAT 默认 30 天且上限 90 天，属于产品配置提案，EAG-01 验证 provider 支持后固化。
+- access token TTL 600 秒，provider refresh rotation 的 overlap 显式为 30 秒；相同请求重试必须返回同一轮换结果。refresh TTL 最多 30 天，connection 授权总寿命最多 90 天且不随刷新延长。`offline_access` 明确授权，grant 撤销同时禁止 refresh 及 overlap 重试。当前只读 PAT 默认与上限均为 7 天。
+
+### Connection 与协议事实的关联
+
+Better Auth 是 consent/scopes/token 的真值源；Cloud Auth 的 `ExternalAgentConnection` 表示一次可撤销授权生命周期。刷新不改变 connection；撤销后重新授权创建新生命周期，旧 code、JWT、refresh 不能通过用户/client 的新 Active 连接复活。关联必须由服务器绑定并验证，不能依赖 client_name 或使用 sessionId、requestId、JWT jti 代替。
+
+Gateway 以 token scopes、当前 consent scopes、服务器允许 scopes 的交集授权，保留独立的 Active Account 与 owner 检查。签发/刷新与撤销的并发原子性由 provider 的宿主数据库集成保证，不能仅依赖 JWT 本地验证或进程内锁。锁定 1.7.6 的 refresh family 清理竞态与 overlap 路径纳入真实 PostgreSQL/重启测试。
+
+1.7.6 的 refresh family 清理粒度为 `(user, client)`。首版对 token、consent、RFC 7009 revoke 和产品连接撤销使用 PostgreSQL 全局 advisory transaction lock；provider Prisma adapter 加入同一事务。事务内 5 秒 statement/lock timeout、15 秒总上限，普通授权状态读取/额度事务为 5 秒。此锁限制授权变更吞吐，业务 read/owner 执行不占该锁；provider 支持 grant 粒度清理后再拆分。基础设施失败回滚轮换，协议 replay 拒绝保留 provider 的失效结果。
+
+连接管理撤销会删除该 connection 的 provider consent/access/refresh 记录并保留 revoked tombstone。标准 refresh-token revocation 同样结束产品连接。provider 对单独 JWT 的 RFC 7009 revoke 返回 `unsupported_token_type`；用户应撤销连接。没有 `offline_access` 的 JWT 不产生 refresh 记录，provider 不能通过 code replay 清理追踪该 JWT；其有效性仍受 600 秒 TTL 和在线 connection/consent/account 校验约束。
+
+CIMD 元数据有效不代表可信软件。首版采用配置的精确 CIMD URL 准入和官方受限网络 transport；预注册可作为指定客户端的兼容方式，DCR 关闭。scope 增加重新 consent，普通业务 read scopes 与 `offline_access` 的持续访问意义分别展示。
+
 - 撤销保证“撤销成功后开始的请求被拒绝”。已经被 owner 接受并提交的命令不回滚；尚未提交的长期工作按 ADR-118 在继续执行前重新检查授权。
 
 ### SSRF 和回跳地址不是普通配置字符串

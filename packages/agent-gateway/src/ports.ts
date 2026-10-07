@@ -37,7 +37,7 @@ export interface GoalReadPort {
 export interface GatewayPrincipal {
   readonly identityId: string;
   readonly credentialId: string;
-  readonly credentialType: 'pat';
+  readonly credentialType: 'pat' | 'oauth';
   readonly scopes: readonly string[];
 }
 export interface GatewayCredentialPort {
@@ -45,7 +45,7 @@ export interface GatewayCredentialPort {
     authorization: string | undefined,
     context?: RequestContext,
   ): Promise<GatewayPrincipal | null>;
-  consumeReadQuota(credentialId: string): Promise<boolean>;
+  consumeReadQuota(credentialId: string, credentialType: 'pat' | 'oauth'): Promise<boolean>;
 }
 export interface GatewayAuditEvent {
   readonly version: '1';
@@ -65,7 +65,9 @@ export interface GatewayAuditEvent {
     | 'transport'
     | 'pat_create'
     | 'pat_list'
-    | 'pat_revoke';
+    | 'pat_revoke'
+    | 'oauth_list'
+    | 'oauth_revoke';
   readonly outcome: string;
   readonly durationMs: number;
 }

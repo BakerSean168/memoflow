@@ -9,7 +9,8 @@
 
 import type { App } from 'vue';
 import type { ExecuteNotificationActionReq } from '@memoflow/contracts/notification';
-import { createCloudAuthHttpClient } from '@memoflow/cloud-auth';
+import { createCloudAuthHttpClient, createExternalAgentHttpClient } from '@memoflow/cloud-auth';
+import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import {
   ACCOUNT_SERVICE_KEY,
   AUTH_SERVICE_KEY,
@@ -123,6 +124,7 @@ const taskService = createLazyService(async () => {
 export function installAppServices(app: App): void {
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
+  app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));
   app.provide(GOAL_SERVICE_KEY, goalService);
   app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, goalKnowledgeService);
   app.provide(LABEL_SERVICE_KEY, labelService);

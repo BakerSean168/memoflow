@@ -55,6 +55,7 @@ export interface PublicAuthCapabilities {
 
 interface ApiCloudAuthRuntime extends CloudSessionCapability {
   readonly expressHandler: RequestHandler;
+  readonly externalAgents?: unknown;
 }
 
 const NO_PUBLIC_AUTH_CAPABILITIES: PublicAuthCapabilities = Object.freeze({ github: false });
@@ -129,6 +130,17 @@ export class ApiBootstrapper {
           });
         }
         app.all('/api/auth/*splat', this.cloudAuth.expressHandler);
+        if (this.cloudAuth.externalAgents) {
+          app.all(
+            [
+              '/.well-known/oauth-protected-resource',
+              '/.well-known/oauth-protected-resource/mcp',
+              '/.well-known/oauth-authorization-server/api/auth',
+              '/.well-known/openid-configuration/api/auth',
+            ],
+            this.cloudAuth.expressHandler,
+          );
+        }
       },
     });
 

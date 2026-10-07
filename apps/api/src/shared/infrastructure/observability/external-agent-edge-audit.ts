@@ -11,8 +11,8 @@ export function createExternalAgentEdgeAudit(
   audit: (event: GatewayAuditEvent) => void,
 ): RequestHandler {
   return (req, res, next) => {
-    const credentialPath = '/api/v1/agent-connections/pats';
-    const credential = req.path === credentialPath || req.path.startsWith(`${credentialPath}/`);
+    const credential = /^\/api\/v1\/agent-connections\/(pats|oauth)(\/|$)/.test(req.path);
+    const oauth = /^\/api\/v1\/agent-connections\/oauth(\/|$)/.test(req.path);
     if (req.path !== '/mcp' && !credential) {
       next();
       return;
@@ -30,13 +30,17 @@ export function createExternalAgentEdgeAudit(
           scopeDecision: 'denied',
           requestId: context.requestId,
           traceId: context.traceId,
-          tool: credential
-            ? req.method === 'POST'
-              ? 'pat_create'
-              : req.method === 'DELETE'
-                ? 'pat_revoke'
-                : 'pat_list'
-            : 'transport',
+          tool: oauth
+            ? req.method === 'DELETE'
+              ? 'oauth_revoke'
+              : 'oauth_list'
+            : credential
+              ? req.method === 'POST'
+                ? 'pat_create'
+                : req.method === 'DELETE'
+                  ? 'pat_revoke'
+                  : 'pat_list'
+              : 'transport',
           outcome: aborted ? 'ABORTED' : `HTTP_${res.statusCode}`,
           durationMs: Date.now() - context.startedAt,
         });

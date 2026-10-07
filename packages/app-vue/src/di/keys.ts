@@ -8,6 +8,7 @@
 
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
 import type { CloudAuthDesktopClientPort } from '@memoflow/contracts';
+import type { ExternalAgentClientPort } from '@memoflow/contracts/agent-gateway';
 import type {
   DesktopAccessSnapshot,
   DesktopNotificationPreference,
@@ -41,6 +42,8 @@ import type {
 // ── Domain Service Keys ──
 export const ACCOUNT_SERVICE_KEY: InjectionKey<IAccountService> = Symbol('AccountService');
 export const AUTH_SERVICE_KEY: InjectionKey<IAuthService> = Symbol('AuthService');
+export const EXTERNAL_AGENT_SERVICE_KEY: InjectionKey<ExternalAgentClientPort> =
+  Symbol('ExternalAgentService');
 export const DESKTOP_CLOUD_AUTH_SERVICE_KEY: InjectionKey<CloudAuthDesktopClientPort> =
   Symbol('DesktopCloudAuthService');
 export const GOAL_SERVICE_KEY: InjectionKey<IGoalService> = Symbol('GoalService');

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Result } from '../../result';
 import {
   TaskReadInstantSchema,
   TaskReadPlanSchema,
@@ -59,6 +60,50 @@ export const CreateScopedPatSchema = z.strictObject({
     .default(['goals:read']),
 });
 export type CreateScopedPatInput = z.input<typeof CreateScopedPatSchema>;
+
+const credentialDates = {
+  createdAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
+  revokedAt: z.iso.datetime().nullable(),
+};
+export const ScopedPatSummarySchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  prefix: z.string(),
+  audience: z.url(),
+  scopes: z.array(z.enum(['goals:read', 'tasks:read'])),
+  ...credentialDates,
+});
+export const OAuthConnectionSchema = z.object({
+  id: z.uuid(),
+  clientId: z.url(),
+  name: z.string(),
+  resource: z.url(),
+  scopes: z.array(z.string()),
+  lastUsedAt: z.iso.datetime().nullable(),
+  ...credentialDates,
+});
+export const ExternalAgentConsentSchema = z.object({
+  clientId: z.url(),
+  name: z.string(),
+  resource: z.url(),
+  lifetimeDays: z.literal(90),
+  scopes: z.array(z.enum(['goals:read', 'tasks:read', 'offline_access'])),
+});
+export type ScopedPatSummary = z.infer<typeof ScopedPatSummarySchema>;
+export type OAuthConnection = z.infer<typeof OAuthConnectionSchema>;
+export type ExternalAgentConsent = z.infer<typeof ExternalAgentConsentSchema>;
+/** First-party account controls; external credentials cannot call these methods. */
+export interface ExternalAgentClientPort {
+  capabilities(): Promise<Result<{ oauth: boolean }>>;
+  consentRequest(oauthQuery: string): Promise<Result<ExternalAgentConsent>>;
+  decideConsent(oauthQuery: string, accept: boolean): Promise<Result<{ url: string }>>;
+  listConnections(): Promise<Result<OAuthConnection[]>>;
+  revokeConnection(id: string): Promise<Result<void>>;
+  listPats(): Promise<Result<ScopedPatSummary[]>>;
+  createPat(input: CreateScopedPatInput): Promise<Result<ScopedPatSummary & { secret: string }>>;
+  revokePat(id: string): Promise<Result<void>>;
+}
 export const GatewayFailureCodeSchema = z.enum([
   'NOT_FOUND',
   'FORBIDDEN',

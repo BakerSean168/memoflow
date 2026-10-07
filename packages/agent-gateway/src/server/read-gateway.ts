@@ -30,6 +30,7 @@ interface Options {
   readonly trustedOrigins: readonly string[];
   readonly cursorSecret: string;
   readonly credentials: GatewayCredentialPort;
+  readonly resourceMetadataUrl?: string;
   readonly goals: GoalReadPort;
   readonly tasks?: TaskReadPort;
   readonly audit: (event: GatewayAuditEvent) => void;
@@ -229,14 +230,26 @@ export function createReadGateway(options: Options) {
             status,
             headers: {
               'Cache-Control': 'no-store',
+              ...(options.resourceMetadataUrl && (status === 401 || code === 'INSUFFICIENT_SCOPE')
+                ? {
+                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isReadToolName(tool) ? readToolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
+                  }
+                : {}),
               ...(status === 429 ? { 'Retry-After': '60' } : {}),
             },
           },
         );
       };
       function diagnose(cause: unknown) {
-        try { options.diagnose?.({ requestId: requestContext.requestId, traceId: requestContext.traceId, cause }); }
-        catch { /* Observer failure does not alter a safe public response. */ }
+        try {
+          options.diagnose?.({
+            requestId: requestContext.requestId,
+            traceId: requestContext.traceId,
+            cause,
+          });
+        } catch {
+          /* Observer failure does not alter a safe public response. */
+        }
       }
       try {
         if (!options.enabled) return reject(404, 'DISABLED');
@@ -258,7 +271,11 @@ export function createReadGateway(options: Options) {
           return reject(429, 'RATE_LIMITED');
         if (
           !(await within(
-            () => options.credentials.consumeReadQuota(principal.credentialId),
+            () =>
+              options.credentials.consumeReadQuota(
+                principal.credentialId,
+                principal.credentialType,
+              ),
             signal,
           ))
         )
