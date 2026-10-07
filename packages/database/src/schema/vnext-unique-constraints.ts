@@ -18,6 +18,8 @@ const EMPTY_TABLE_ADDABLE_TEXT_COLUMNS = new Set([
   'scheduling_key',
   'occurrence_key',
   'plan_id',
+  'knowledge_space_id',
+  'knowledge_document_id',
 ]);
 
 const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
@@ -51,6 +53,11 @@ const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
     table: 'task_plans',
     columns: ['id', 'identity_id'],
     indexName: 'task_plans_id_identity_id_key',
+  },
+  {
+    table: 'ai_knowledge_index_entries',
+    columns: ['knowledge_space_id', 'knowledge_document_id'],
+    indexName: 'ai_knowledge_index_entries_knowledge_space_id_knowledge_doc_key',
   },
 ] as const;
 

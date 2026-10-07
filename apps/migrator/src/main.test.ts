@@ -28,11 +28,17 @@ describe('migrator interface', () => {
 
   it('keeps schema reconciliation and smoke verification ordered', () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), 'memoflow-migrator-workspace-'));
-    const labels = createMigrationCommands(workspaceRoot).map((command) => command.label);
+    const commands = createMigrationCommands(workspaceRoot);
+    const labels = commands.map((command) => command.label);
+    expect(
+      commands.find((command) => command.label === 'prepare Account and Setting canonical cutover')
+        ?.timeoutMs,
+    ).toBe(60000);
     expect(labels).toEqual([
       'prepare pgvector',
       'retire legacy AI runtime state',
       'prepare Goal start timeframe semantics',
+      'prepare Account and Setting canonical cutover',
       'prepare goal-record source correlation',
       'backfill GoalRecord authorship',
       'prepare notification preference hierarchy',

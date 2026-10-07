@@ -11,6 +11,7 @@ const SHAPE_COLUMNS = new Map<string, string[]>([
   ['scheduled_invocations', ['identity_id', 'owner_type', 'owner_id', 'scheduling_key']],
   ['task_occurrences', ['plan_id', 'occurrence_key']],
   ['task_plans', ['id', 'identity_id']],
+  ['ai_knowledge_index_entries', ['knowledge_space_id', 'knowledge_document_id']],
 ]);
 
 function happyClient() {
@@ -38,16 +39,16 @@ function happyClient() {
 }
 
 describe('prepareVnextUniqueConstraints', () => {
-  it('creates the seven Prisma-canonical unique indexes only after duplicate checks', async () => {
+  it('creates the Prisma-canonical unique indexes only after duplicate checks', async () => {
     const fixture = happyClient();
 
     const report = await prepareVnextUniqueConstraints(fixture.client);
 
-    expect(report.created).toHaveLength(7);
+    expect(report.created).toHaveLength(8);
     expect(report.existing).toEqual([]);
     expect(report.addedEmptyTableColumns).toEqual([]);
     expect(report.skippedMissingTables).toEqual([]);
-    expect(fixture.created).toHaveLength(7);
+    expect(fixture.created).toHaveLength(8);
     expect(fixture.created).toContain(
       'CREATE UNIQUE INDEX "scheduled_invocations_owner_key_unique" ON "scheduled_invocations" ("identity_id", "owner_type", "owner_id", "scheduling_key")',
     );

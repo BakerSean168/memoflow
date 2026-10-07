@@ -8,6 +8,7 @@ type Command = {
   args: string[];
   cwd: string;
   label: string;
+  timeoutMs?: number;
 };
 
 export function resolveDatabaseUrl(env: NodeJS.ProcessEnv): string {
@@ -43,6 +44,7 @@ function run(command: Command): void {
     env: process.env,
     stdio: 'inherit',
     shell: process.platform === 'win32',
+    timeout: command.timeoutMs,
   });
   if (result.status !== 0) {
     throw new Error(`${command.label} failed with exit code ${result.status ?? 1}`);
@@ -87,6 +89,13 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
     });
   } else {
     commands.push(
+      {
+        executable: process.execPath,
+        args: [resolve(runtimeScripts, 'prepare-account-setting-cutover.js')],
+        cwd: databaseRoot,
+        label: 'prepare Account and Setting canonical cutover',
+        timeoutMs: 60000,
+      },
       {
         executable: process.execPath,
         args: [resolve(runtimeScripts, 'prepare-goal-record-source-correlation.js')],

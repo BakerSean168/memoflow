@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [Production schema cutover repair](./2026-10-07-production-schema-cutover-repair.md)：补齐生产快照预演暴露的旧字段退役与唯一索引准备，验证 v0.15.2 升级。
+
 - [Desktop release startup repair](./2026-10-07-desktop-release-startup-repair.md)：修复 v0.15.0 Desktop gate 暴露的 Prisma 单例加载和 Windows ASAR 路径问题，完成修正版发布。
 
 - [External Agent Gateway](./2026-10-07-external-agent-gateway.md)：ADR-116～118 已授权采纳；PAT 与 OAuth 共用六个只读工具；真实 PG、Codex/Claude、HTTPS 浏览器、刷新撤销与 prod-like 验证通过；公共 rollout、写入与后续工作项未完成。
