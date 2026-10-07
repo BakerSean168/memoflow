@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import { createVitestReportConfig } from '../../vitest.shared';
-import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
 
 export default defineConfig({
   test: {
@@ -9,7 +8,12 @@ export default defineConfig({
     root: import.meta.dirname,
     environment: 'node',
     include: ['src/**/*.integration.test.ts'],
-    env: createIntegrationTestEnv(),
+    env: {
+      NODE_ENV: 'test',
+      TEST_DATABASE_URL:
+        process.env.TEST_DATABASE_URL ??
+        'postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test',
+    },
     fileParallelism: false,
     maxWorkers: 1,
     testTimeout: 30000,
