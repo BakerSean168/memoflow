@@ -19,6 +19,8 @@ env:
   NODE_VERSION: '24'
   CI: 'true'
   NODE_ENV: test
+  # Coverage imports Prisma-backed adapters; tests replace persistence with fixtures.
+  DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
   PRISMA_HIDE_UPDATE_MESSAGE: 'true'
   DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
   GOVERNED_COVERAGE_PROJECTS: 'account,ai,app-vue,domain-shared,goal,notification,reminder,schedule,setting,task'
