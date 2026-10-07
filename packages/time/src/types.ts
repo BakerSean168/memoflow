@@ -31,7 +31,10 @@ export type UserTimeContext = TimeContext;
  * (for example Preferences); business owners depend only on this port.
  */
 export interface UserTimeContextPort {
-  getUserTimeContext(identityId: IdentityId | string): Promise<UserTimeContext>;
+  getUserTimeContext(
+    identityId: IdentityId | string,
+    budget?: { readonly deadlineAt: number; readonly signal: AbortSignal },
+  ): Promise<UserTimeContext>;
 }
 
 export interface TimeStyleEmpty {

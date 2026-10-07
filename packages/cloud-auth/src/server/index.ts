@@ -9,3 +9,5 @@ export type {
   CloudAuthEmailKind,
   CreateCloudAuthEmailDeliveryOptions,
 } from './email-delivery.js';
+export { createScopedPatService } from './scoped-pat.js';
+export type { VerifiedPatPrincipal } from './scoped-pat.js';

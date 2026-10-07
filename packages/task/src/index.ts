@@ -40,3 +40,5 @@ export {
   type TaskWorkspaceQueryServiceDependencies,
 } from './server';
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';
+
+export { createTaskPrismaReadQueries } from './server';

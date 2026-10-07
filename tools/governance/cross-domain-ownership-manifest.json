@@ -154,6 +154,25 @@
           "values": ["@memoflow/schedule"]
         }
       ]
+    },
+    {
+      "id": "agent-gateway-support",
+      "packagePath": "packages/agent-gateway",
+      "forbiddenProductionDependencies": [
+        "@memoflow/database",
+        "@memoflow/goal",
+        "@memoflow/task",
+        "@memoflow/ai",
+        "@memoflow/cloud-auth"
+      ],
+      "forbiddenProductionImports": [
+        "@memoflow/database",
+        "@memoflow/goal",
+        "@memoflow/task",
+        "@memoflow/ai",
+        "@memoflow/cloud-auth"
+      ],
+      "forbiddenConfigurationReferences": []
     }
   ],
   "retiredVocabulary": [

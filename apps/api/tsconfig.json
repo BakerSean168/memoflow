@@ -43,7 +43,11 @@
       "@memoflow/task": ["../../packages/task/src/index.ts"],
       "@memoflow/task/analytics": ["../../packages/task/src/analytics/index.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/src/ports/index.ts"],
-      "@memoflow/test-utils": ["../../packages/test-utils/src/index.ts"]
+      "@memoflow/test-utils": ["../../packages/test-utils/src/index.ts"],
+      "@memoflow/agent-gateway": ["../../packages/agent-gateway/src/index.ts"],
+      "@memoflow/agent-gateway/*": ["../../packages/agent-gateway/src/*/index.ts"],
+      "@memoflow/goal/*": ["../../packages/goal/src/*/index.ts"],
+      "@memoflow/task/*": ["../../packages/task/src/*/index.ts"]
     }
   },
   "include": ["src/**/*"],

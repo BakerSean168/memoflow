@@ -21,6 +21,7 @@ export default createTsupConfig({
     // 模块入口（完整模块导出）
     'src/modules/task/index.ts',
     'src/modules/goal/index.ts',
+    'src/modules/agent-gateway/index.ts',
     'src/modules/repository/index.ts',
     'src/modules/account/index.ts',
     'src/modules/schedule/index.ts',

@@ -252,6 +252,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
   const workspaceRoot = path.resolve(projectRoot, '../..');
   const commonWorkspacePackages = [
     'account',
+    'agent-gateway',
     'ai',
     'app-vue',
     'assets',

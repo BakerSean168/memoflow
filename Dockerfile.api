@@ -34,6 +34,7 @@ COPY apps/migrator/package.json ./apps/migrator/package.json
 COPY packages/account/package.json ./packages/account/package.json
 COPY packages/ai/package.json ./packages/ai/package.json
 COPY packages/cloud-auth/package.json ./packages/cloud-auth/package.json
+COPY packages/agent-gateway/package.json ./packages/agent-gateway/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/data-portability/package.json ./packages/data-portability/package.json
 COPY packages/database/package.json ./packages/database/package.json
@@ -72,6 +73,7 @@ COPY apps/migrator ./apps/migrator
 COPY packages/account ./packages/account
 COPY packages/ai ./packages/ai
 COPY packages/cloud-auth ./packages/cloud-auth
+COPY packages/agent-gateway ./packages/agent-gateway
 COPY packages/contracts ./packages/contracts
 COPY packages/data-portability ./packages/data-portability
 COPY packages/database ./packages/database

@@ -5,6 +5,9 @@
       "@memoflow/database": [
         "./packages/database/src/index.ts"
       ],
+      "@memoflow/database/environment": [
+        "./packages/database/src/load-workspace-env.ts"
+      ],
       "@memoflow/database/prisma": [
         "./packages/database/src/generated/prisma/client.js"
       ],
@@ -185,6 +188,12 @@
       "@memoflow/relation/*": [
         "./packages/relation/src/*/index.ts",
         "./packages/relation/src/*.ts"
+      ],
+      "@memoflow/agent-gateway": [
+        "./packages/agent-gateway/src/index.ts"
+      ],
+      "@memoflow/agent-gateway/*": [
+        "./packages/agent-gateway/src/*/index.ts"
       ]
     }
   }

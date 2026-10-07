@@ -1,6 +1,11 @@
+import { readFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
+  // Runtime packages must resolve through exports, sharing logger/auth singletons
+  // across preflight and server. Source aliases belong to typechecking only.
+  tsconfig: 'tsconfig.bundle.json',
   // Entry point. `main.ts` is the preflight entry that dynamically imports
   // `server.ts`; both are emitted as separate dist files so the dynamic import
   // stays a real runtime boundary (feature graph loads only after the logger
@@ -56,6 +61,11 @@ export default defineConfig({
 
   // Success message
   onSuccess: async () => {
-    console.log('✅ Build successful');
+    for (const file of ['dist/main.js', 'dist/server.js']) {
+      const artifact = await readFile(file, 'utf8');
+      assert.match(artifact, /from ["']@memoflow\/utils\/logger["']/);
+      assert.doesNotMatch(artifact, /loggerCache = new Map|var LoggerFactory/);
+    }
+    console.log('✅ Build successful; shared logger package boundary verified');
   },
 });

@@ -29,6 +29,7 @@ export {
   createAccountPowerSyncModule,
   createAccountPowerSyncRepositories,
   createAccountPrismaModule,
+  createAccountPrismaActiveQuery,
   createAccountPrismaRepositories,
   createAccountPrismaRepository,
   createCloudAccountProvisioner,

@@ -290,6 +290,21 @@ exports.Prisma.CloudAuthDeviceCodeScalarFieldEnum = {
   scope: 'scope'
 };
 
+exports.Prisma.ExternalAgentPatScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  prefix: 'prefix',
+  tokenDigest: 'tokenDigest',
+  audience: 'audience',
+  scopes: 'scopes',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  rateWindow: 'rateWindow',
+  rateCount: 'rateCount'
+};
+
 exports.Prisma.GoalScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1199,6 +1214,7 @@ exports.Prisma.ModelName = {
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',
   CloudAuthVerification: 'CloudAuthVerification',
   CloudAuthDeviceCode: 'CloudAuthDeviceCode',
+  ExternalAgentPat: 'ExternalAgentPat',
   Goal: 'Goal',
   KeyResult: 'KeyResult',
   GoalRecord: 'GoalRecord',

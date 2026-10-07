@@ -159,7 +159,7 @@ export async function waitForDatabase(timeoutMs = 30_000): Promise<void> {
 
 /**
  * Sync the Prisma schema to the test database.
- * Uses `prisma db push --skip-generate --accept-data-loss` for speed.
+ * Uses non-destructive `prisma db push`; incompatible schema changes fail for explicit review.
  *
  * Prisma 7 uses prisma.config.ts in packages/database/prisma/ which reads
  * DATABASE_URL from env. We pass the test DB URL via environment variable.
@@ -173,8 +173,8 @@ export function syncPrismaSchema(prismaDir?: string): void {
   const dir = prismaDir ?? resolve(root, 'packages/database/prisma');
   const prismaCli = resolve(root, 'node_modules/prisma/build/index.js');
 
-  // Prisma 7 removed --skip-generate; only --accept-data-loss remains
-  execFileSync(process.execPath, [prismaCli, 'db', 'push', '--accept-data-loss'], {
+  // Never silently accept data loss, including on the shared integration database.
+  execFileSync(process.execPath, [prismaCli, 'db', 'push'], {
     cwd: dir,
     stdio: 'inherit',
     env: {

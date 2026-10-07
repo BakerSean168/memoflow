@@ -32,13 +32,11 @@ export {
 } from './account.module';
 export type { AccountApplicationPort, AccountListOptions, AccountListResult } from '../application';
 export type { IAccountRepository, IAccountClosureOperationRepository } from '../domain';
-export type {
-  CloudAuthRevocationPort,
-  AccountClosureEventPublisher,
-} from '../application/ports';
+export type { CloudAuthRevocationPort, AccountClosureEventPublisher } from '../application/ports';
 export type { OperationAuditRepository } from '@memoflow/patterns/operations';
 export {
   createAccountPrismaModule,
+  createAccountPrismaActiveQuery,
   createAccountPrismaRepositories,
   createAccountPrismaRepository,
   type CreateAccountPrismaModuleOptions,

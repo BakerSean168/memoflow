@@ -76,6 +76,11 @@ export type CloudAuthVerification = $Result.DefaultSelection<Prisma.$CloudAuthVe
  */
 export type CloudAuthDeviceCode = $Result.DefaultSelection<Prisma.$CloudAuthDeviceCodePayload>
 /**
+ * Model ExternalAgentPat
+ *
+ */
+export type ExternalAgentPat = $Result.DefaultSelection<Prisma.$ExternalAgentPatPayload>
+/**
  * Model Goal
  *
  */
@@ -648,6 +653,16 @@ export class PrismaClient<
     * ```
     */
   get cloudAuthDeviceCode(): Prisma.CloudAuthDeviceCodeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.externalAgentPat`: Exposes CRUD operations for the **ExternalAgentPat** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExternalAgentPats
+    * const externalAgentPats = await prisma.externalAgentPat.findMany()
+    * ```
+    */
+  get externalAgentPat(): Prisma.ExternalAgentPatDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.goal`: Exposes CRUD operations for the **Goal** model.
@@ -1717,6 +1732,7 @@ export namespace Prisma {
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
     CloudAuthVerification: 'CloudAuthVerification',
     CloudAuthDeviceCode: 'CloudAuthDeviceCode',
+    ExternalAgentPat: 'ExternalAgentPat',
     Goal: 'Goal',
     KeyResult: 'KeyResult',
     GoalRecord: 'GoalRecord',
@@ -1793,7 +1809,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2682,6 +2698,80 @@ export namespace Prisma {
           count: {
             args: Prisma.CloudAuthDeviceCodeCountArgs<ExtArgs>
             result: $Utils.Optional<CloudAuthDeviceCodeCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExternalAgentPat: {
+        payload: Prisma.$ExternalAgentPatPayload<ExtArgs>
+        fields: Prisma.ExternalAgentPatFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExternalAgentPatFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          findFirst: {
+            args: Prisma.ExternalAgentPatFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExternalAgentPatFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          findMany: {
+            args: Prisma.ExternalAgentPatFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          create: {
+            args: Prisma.ExternalAgentPatCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          createMany: {
+            args: Prisma.ExternalAgentPatCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExternalAgentPatCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          delete: {
+            args: Prisma.ExternalAgentPatDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          update: {
+            args: Prisma.ExternalAgentPatUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExternalAgentPatDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExternalAgentPatUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExternalAgentPatUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          aggregate: {
+            args: Prisma.ExternalAgentPatAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExternalAgentPat>
+          }
+          groupBy: {
+            args: Prisma.ExternalAgentPatGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentPatGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExternalAgentPatCountArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentPatCountAggregateOutputType> | number
           }
         }
       }
@@ -7334,6 +7424,7 @@ export namespace Prisma {
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
     cloudAuthVerification?: CloudAuthVerificationOmit
     cloudAuthDeviceCode?: CloudAuthDeviceCodeOmit
+    externalAgentPat?: ExternalAgentPatOmit
     goal?: GoalOmit
     keyResult?: KeyResultOmit
     goalRecord?: GoalRecordOmit
@@ -7824,12 +7915,14 @@ export namespace Prisma {
     sessions: number
     providerAccounts: number
     deviceCodes: number
+    externalAgentPats: number
   }
 
   export type CloudAuthUserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | CloudAuthUserCountOutputTypeCountSessionsArgs
     providerAccounts?: boolean | CloudAuthUserCountOutputTypeCountProviderAccountsArgs
     deviceCodes?: boolean | CloudAuthUserCountOutputTypeCountDeviceCodesArgs
+    externalAgentPats?: boolean | CloudAuthUserCountOutputTypeCountExternalAgentPatsArgs
   }
 
   // Custom InputTypes
@@ -7862,6 +7955,13 @@ export namespace Prisma {
    */
   export type CloudAuthUserCountOutputTypeCountDeviceCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CloudAuthDeviceCodeWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountExternalAgentPatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentPatWhereInput
   }
 
 
@@ -17944,6 +18044,7 @@ export namespace Prisma {
     sessions?: boolean | CloudAuthUser$sessionsArgs<ExtArgs>
     providerAccounts?: boolean | CloudAuthUser$providerAccountsArgs<ExtArgs>
     deviceCodes?: boolean | CloudAuthUser$deviceCodesArgs<ExtArgs>
+    externalAgentPats?: boolean | CloudAuthUser$externalAgentPatsArgs<ExtArgs>
     account?: boolean | CloudAuthUser$accountArgs<ExtArgs>
     _count?: boolean | CloudAuthUserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cloudAuthUser"]>
@@ -17986,6 +18087,7 @@ export namespace Prisma {
     sessions?: boolean | CloudAuthUser$sessionsArgs<ExtArgs>
     providerAccounts?: boolean | CloudAuthUser$providerAccountsArgs<ExtArgs>
     deviceCodes?: boolean | CloudAuthUser$deviceCodesArgs<ExtArgs>
+    externalAgentPats?: boolean | CloudAuthUser$externalAgentPatsArgs<ExtArgs>
     account?: boolean | CloudAuthUser$accountArgs<ExtArgs>
     _count?: boolean | CloudAuthUserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -17998,6 +18100,7 @@ export namespace Prisma {
       sessions: Prisma.$CloudAuthSessionPayload<ExtArgs>[]
       providerAccounts: Prisma.$CloudAuthProviderAccountPayload<ExtArgs>[]
       deviceCodes: Prisma.$CloudAuthDeviceCodePayload<ExtArgs>[]
+      externalAgentPats: Prisma.$ExternalAgentPatPayload<ExtArgs>[]
       account: Prisma.$AccountPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -18406,6 +18509,7 @@ export namespace Prisma {
     sessions<T extends CloudAuthUser$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     providerAccounts<T extends CloudAuthUser$providerAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$providerAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthProviderAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     deviceCodes<T extends CloudAuthUser$deviceCodesArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$deviceCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthDeviceCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    externalAgentPats<T extends CloudAuthUser$externalAgentPatsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$externalAgentPatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     account<T extends CloudAuthUser$accountArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$accountArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -18906,6 +19010,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CloudAuthDeviceCodeScalarFieldEnum | CloudAuthDeviceCodeScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.externalAgentPats
+   */
+  export type CloudAuthUser$externalAgentPatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    where?: ExternalAgentPatWhereInput
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    cursor?: ExternalAgentPatWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
   }
 
   /**
@@ -23406,6 +23534,1190 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CloudAuthDeviceCodeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExternalAgentPat
+   */
+
+  export type AggregateExternalAgentPat = {
+    _count: ExternalAgentPatCountAggregateOutputType | null
+    _avg: ExternalAgentPatAvgAggregateOutputType | null
+    _sum: ExternalAgentPatSumAggregateOutputType | null
+    _min: ExternalAgentPatMinAggregateOutputType | null
+    _max: ExternalAgentPatMaxAggregateOutputType | null
+  }
+
+  export type ExternalAgentPatAvgAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatSumAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    prefix: string | null
+    tokenDigest: string | null
+    audience: string | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    prefix: string | null
+    tokenDigest: string | null
+    audience: string | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    prefix: number
+    tokenDigest: number
+    audience: number
+    scopes: number
+    expiresAt: number
+    revokedAt: number
+    createdAt: number
+    rateWindow: number
+    rateCount: number
+    _all: number
+  }
+
+
+  export type ExternalAgentPatAvgAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatSumAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    scopes?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+    _all?: true
+  }
+
+  export type ExternalAgentPatAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentPat to aggregate.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ExternalAgentPats
+    **/
+    _count?: true | ExternalAgentPatCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ExternalAgentPatAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ExternalAgentPatSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExternalAgentPatMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExternalAgentPatMaxAggregateInputType
+  }
+
+  export type GetExternalAgentPatAggregateType<T extends ExternalAgentPatAggregateArgs> = {
+        [P in keyof T & keyof AggregateExternalAgentPat]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExternalAgentPat[P]>
+      : GetScalarType<T[P], AggregateExternalAgentPat[P]>
+  }
+
+
+
+
+  export type ExternalAgentPatGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentPatWhereInput
+    orderBy?: ExternalAgentPatOrderByWithAggregationInput | ExternalAgentPatOrderByWithAggregationInput[]
+    by: ExternalAgentPatScalarFieldEnum[] | ExternalAgentPatScalarFieldEnum
+    having?: ExternalAgentPatScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExternalAgentPatCountAggregateInputType | true
+    _avg?: ExternalAgentPatAvgAggregateInputType
+    _sum?: ExternalAgentPatSumAggregateInputType
+    _min?: ExternalAgentPatMinAggregateInputType
+    _max?: ExternalAgentPatMaxAggregateInputType
+  }
+
+  export type ExternalAgentPatGroupByOutputType = {
+    id: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes: string[]
+    expiresAt: Date
+    revokedAt: Date | null
+    createdAt: Date
+    rateWindow: Date
+    rateCount: number
+    _count: ExternalAgentPatCountAggregateOutputType | null
+    _avg: ExternalAgentPatAvgAggregateOutputType | null
+    _sum: ExternalAgentPatSumAggregateOutputType | null
+    _min: ExternalAgentPatMinAggregateOutputType | null
+    _max: ExternalAgentPatMaxAggregateOutputType | null
+  }
+
+  type GetExternalAgentPatGroupByPayload<T extends ExternalAgentPatGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExternalAgentPatGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExternalAgentPatGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExternalAgentPatGroupByOutputType[P]>
+            : GetScalarType<T[P], ExternalAgentPatGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExternalAgentPatSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+  }
+
+  export type ExternalAgentPatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "prefix" | "tokenDigest" | "audience" | "scopes" | "expiresAt" | "revokedAt" | "createdAt" | "rateWindow" | "rateCount", ExtArgs["result"]["externalAgentPat"]>
+  export type ExternalAgentPatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentPatIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentPatIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+
+  export type $ExternalAgentPatPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExternalAgentPat"
+    objects: {
+      user: Prisma.$CloudAuthUserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      name: string
+      prefix: string
+      tokenDigest: string
+      audience: string
+      scopes: string[]
+      expiresAt: Date
+      revokedAt: Date | null
+      createdAt: Date
+      rateWindow: Date
+      rateCount: number
+    }, ExtArgs["result"]["externalAgentPat"]>
+    composites: {}
+  }
+
+  type ExternalAgentPatGetPayload<S extends boolean | null | undefined | ExternalAgentPatDefaultArgs> = $Result.GetResult<Prisma.$ExternalAgentPatPayload, S>
+
+  type ExternalAgentPatCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExternalAgentPatFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExternalAgentPatCountAggregateInputType | true
+    }
+
+  export interface ExternalAgentPatDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExternalAgentPat'], meta: { name: 'ExternalAgentPat' } }
+    /**
+     * Find zero or one ExternalAgentPat that matches the filter.
+     * @param {ExternalAgentPatFindUniqueArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExternalAgentPatFindUniqueArgs>(args: SelectSubset<T, ExternalAgentPatFindUniqueArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExternalAgentPat that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExternalAgentPatFindUniqueOrThrowArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExternalAgentPatFindUniqueOrThrowArgs>(args: SelectSubset<T, ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentPat that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindFirstArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExternalAgentPatFindFirstArgs>(args?: SelectSubset<T, ExternalAgentPatFindFirstArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentPat that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindFirstOrThrowArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExternalAgentPatFindFirstOrThrowArgs>(args?: SelectSubset<T, ExternalAgentPatFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExternalAgentPats that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExternalAgentPats
+     * const externalAgentPats = await prisma.externalAgentPat.findMany()
+     *
+     * // Get first 10 ExternalAgentPats
+     * const externalAgentPats = await prisma.externalAgentPat.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ExternalAgentPatFindManyArgs>(args?: SelectSubset<T, ExternalAgentPatFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExternalAgentPat.
+     * @param {ExternalAgentPatCreateArgs} args - Arguments to create a ExternalAgentPat.
+     * @example
+     * // Create one ExternalAgentPat
+     * const ExternalAgentPat = await prisma.externalAgentPat.create({
+     *   data: {
+     *     // ... data to create a ExternalAgentPat
+     *   }
+     * })
+     *
+     */
+    create<T extends ExternalAgentPatCreateArgs>(args: SelectSubset<T, ExternalAgentPatCreateArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExternalAgentPats.
+     * @param {ExternalAgentPatCreateManyArgs} args - Arguments to create many ExternalAgentPats.
+     * @example
+     * // Create many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ExternalAgentPatCreateManyArgs>(args?: SelectSubset<T, ExternalAgentPatCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExternalAgentPats and returns the data saved in the database.
+     * @param {ExternalAgentPatCreateManyAndReturnArgs} args - Arguments to create many ExternalAgentPats.
+     * @example
+     * // Create many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ExternalAgentPats and only return the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ExternalAgentPatCreateManyAndReturnArgs>(args?: SelectSubset<T, ExternalAgentPatCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExternalAgentPat.
+     * @param {ExternalAgentPatDeleteArgs} args - Arguments to delete one ExternalAgentPat.
+     * @example
+     * // Delete one ExternalAgentPat
+     * const ExternalAgentPat = await prisma.externalAgentPat.delete({
+     *   where: {
+     *     // ... filter to delete one ExternalAgentPat
+     *   }
+     * })
+     *
+     */
+    delete<T extends ExternalAgentPatDeleteArgs>(args: SelectSubset<T, ExternalAgentPatDeleteArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExternalAgentPat.
+     * @param {ExternalAgentPatUpdateArgs} args - Arguments to update one ExternalAgentPat.
+     * @example
+     * // Update one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ExternalAgentPatUpdateArgs>(args: SelectSubset<T, ExternalAgentPatUpdateArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExternalAgentPats.
+     * @param {ExternalAgentPatDeleteManyArgs} args - Arguments to filter ExternalAgentPats to delete.
+     * @example
+     * // Delete a few ExternalAgentPats
+     * const { count } = await prisma.externalAgentPat.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ExternalAgentPatDeleteManyArgs>(args?: SelectSubset<T, ExternalAgentPatDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentPats.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ExternalAgentPatUpdateManyArgs>(args: SelectSubset<T, ExternalAgentPatUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentPats and returns the data updated in the database.
+     * @param {ExternalAgentPatUpdateManyAndReturnArgs} args - Arguments to update many ExternalAgentPats.
+     * @example
+     * // Update many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ExternalAgentPats and only return the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ExternalAgentPatUpdateManyAndReturnArgs>(args: SelectSubset<T, ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExternalAgentPat.
+     * @param {ExternalAgentPatUpsertArgs} args - Arguments to update or create a ExternalAgentPat.
+     * @example
+     * // Update or create a ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.upsert({
+     *   create: {
+     *     // ... data to create a ExternalAgentPat
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExternalAgentPat we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExternalAgentPatUpsertArgs>(args: SelectSubset<T, ExternalAgentPatUpsertArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExternalAgentPats.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatCountArgs} args - Arguments to filter ExternalAgentPats to count.
+     * @example
+     * // Count the number of ExternalAgentPats
+     * const count = await prisma.externalAgentPat.count({
+     *   where: {
+     *     // ... the filter for the ExternalAgentPats we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExternalAgentPatCountArgs>(
+      args?: Subset<T, ExternalAgentPatCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExternalAgentPatCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExternalAgentPat.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExternalAgentPatAggregateArgs>(args: Subset<T, ExternalAgentPatAggregateArgs>): Prisma.PrismaPromise<GetExternalAgentPatAggregateType<T>>
+
+    /**
+     * Group by ExternalAgentPat.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ExternalAgentPatGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExternalAgentPatGroupByArgs['orderBy'] }
+        : { orderBy?: ExternalAgentPatGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExternalAgentPatGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExternalAgentPatGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExternalAgentPat model
+   */
+  readonly fields: ExternalAgentPatFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExternalAgentPat.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExternalAgentPatClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExternalAgentPat model
+   */
+  interface ExternalAgentPatFieldRefs {
+    readonly id: FieldRef<"ExternalAgentPat", 'String'>
+    readonly userId: FieldRef<"ExternalAgentPat", 'String'>
+    readonly name: FieldRef<"ExternalAgentPat", 'String'>
+    readonly prefix: FieldRef<"ExternalAgentPat", 'String'>
+    readonly tokenDigest: FieldRef<"ExternalAgentPat", 'String'>
+    readonly audience: FieldRef<"ExternalAgentPat", 'String'>
+    readonly scopes: FieldRef<"ExternalAgentPat", 'String[]'>
+    readonly expiresAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly revokedAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly createdAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly rateWindow: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly rateCount: FieldRef<"ExternalAgentPat", 'Int'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ExternalAgentPat findUnique
+   */
+  export type ExternalAgentPatFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat findUniqueOrThrow
+   */
+  export type ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat findFirst
+   */
+  export type ExternalAgentPatFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat findFirstOrThrow
+   */
+  export type ExternalAgentPatFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat findMany
+   */
+  export type ExternalAgentPatFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPats to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat create
+   */
+  export type ExternalAgentPatCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExternalAgentPat.
+     */
+    data: XOR<ExternalAgentPatCreateInput, ExternalAgentPatUncheckedCreateInput>
+  }
+
+  /**
+   * ExternalAgentPat createMany
+   */
+  export type ExternalAgentPatCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExternalAgentPats.
+     */
+    data: ExternalAgentPatCreateManyInput | ExternalAgentPatCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExternalAgentPat createManyAndReturn
+   */
+  export type ExternalAgentPatCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExternalAgentPats.
+     */
+    data: ExternalAgentPatCreateManyInput | ExternalAgentPatCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentPat update
+   */
+  export type ExternalAgentPatUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExternalAgentPat.
+     */
+    data: XOR<ExternalAgentPatUpdateInput, ExternalAgentPatUncheckedUpdateInput>
+    /**
+     * Choose, which ExternalAgentPat to update.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat updateMany
+   */
+  export type ExternalAgentPatUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExternalAgentPats.
+     */
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentPats to update
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentPat updateManyAndReturn
+   */
+  export type ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * The data used to update ExternalAgentPats.
+     */
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentPats to update
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentPat upsert
+   */
+  export type ExternalAgentPatUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExternalAgentPat to update in case it exists.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+    /**
+     * In case the ExternalAgentPat found by the `where` argument doesn't exist, create a new ExternalAgentPat with this data.
+     */
+    create: XOR<ExternalAgentPatCreateInput, ExternalAgentPatUncheckedCreateInput>
+    /**
+     * In case the ExternalAgentPat was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExternalAgentPatUpdateInput, ExternalAgentPatUncheckedUpdateInput>
+  }
+
+  /**
+   * ExternalAgentPat delete
+   */
+  export type ExternalAgentPatDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter which ExternalAgentPat to delete.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat deleteMany
+   */
+  export type ExternalAgentPatDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentPats to delete
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentPat without action
+   */
+  export type ExternalAgentPatDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
   }
 
 
@@ -95211,6 +96523,24 @@ export namespace Prisma {
   export type CloudAuthDeviceCodeScalarFieldEnum = (typeof CloudAuthDeviceCodeScalarFieldEnum)[keyof typeof CloudAuthDeviceCodeScalarFieldEnum]
 
 
+  export const ExternalAgentPatScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    prefix: 'prefix',
+    tokenDigest: 'tokenDigest',
+    audience: 'audience',
+    scopes: 'scopes',
+    expiresAt: 'expiresAt',
+    revokedAt: 'revokedAt',
+    createdAt: 'createdAt',
+    rateWindow: 'rateWindow',
+    rateCount: 'rateCount'
+  };
+
+  export type ExternalAgentPatScalarFieldEnum = (typeof ExternalAgentPatScalarFieldEnum)[keyof typeof ExternalAgentPatScalarFieldEnum]
+
+
   export const GoalScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -97209,6 +98539,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionListRelationFilter
     providerAccounts?: CloudAuthProviderAccountListRelationFilter
     deviceCodes?: CloudAuthDeviceCodeListRelationFilter
+    externalAgentPats?: ExternalAgentPatListRelationFilter
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
   }
 
@@ -97224,6 +98555,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionOrderByRelationAggregateInput
     providerAccounts?: CloudAuthProviderAccountOrderByRelationAggregateInput
     deviceCodes?: CloudAuthDeviceCodeOrderByRelationAggregateInput
+    externalAgentPats?: ExternalAgentPatOrderByRelationAggregateInput
     account?: AccountOrderByWithRelationInput
   }
 
@@ -97242,6 +98574,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionListRelationFilter
     providerAccounts?: CloudAuthProviderAccountListRelationFilter
     deviceCodes?: CloudAuthDeviceCodeListRelationFilter
+    externalAgentPats?: ExternalAgentPatListRelationFilter
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
   }, "id" | "email">
 
@@ -97576,6 +98909,98 @@ export namespace Prisma {
     pollingInterval?: IntNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | number | null
     clientId?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
     scope?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
+  }
+
+  export type ExternalAgentPatWhereInput = {
+    AND?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    OR?: ExternalAgentPatWhereInput[]
+    NOT?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    id?: StringFilter<"ExternalAgentPat"> | string
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }
+
+  export type ExternalAgentPatOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    user?: CloudAuthUserOrderByWithRelationInput
+  }
+
+  export type ExternalAgentPatWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tokenDigest?: string
+    AND?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    OR?: ExternalAgentPatWhereInput[]
+    NOT?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }, "id" | "tokenDigest">
+
+  export type ExternalAgentPatOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    _count?: ExternalAgentPatCountOrderByAggregateInput
+    _avg?: ExternalAgentPatAvgOrderByAggregateInput
+    _max?: ExternalAgentPatMaxOrderByAggregateInput
+    _min?: ExternalAgentPatMinOrderByAggregateInput
+    _sum?: ExternalAgentPatSumOrderByAggregateInput
+  }
+
+  export type ExternalAgentPatScalarWhereWithAggregatesInput = {
+    AND?: ExternalAgentPatScalarWhereWithAggregatesInput | ExternalAgentPatScalarWhereWithAggregatesInput[]
+    OR?: ExternalAgentPatScalarWhereWithAggregatesInput[]
+    NOT?: ExternalAgentPatScalarWhereWithAggregatesInput | ExternalAgentPatScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    userId?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    name?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    prefix?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    audience?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntWithAggregatesFilter<"ExternalAgentPat"> | number
   }
 
   export type GoalWhereInput = {
@@ -103980,6 +105405,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -103995,6 +105421,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -104010,6 +105437,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -104025,6 +105453,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -104399,6 +105828,110 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExternalAgentPatCreateInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+    user: CloudAuthUserCreateNestedOneWithoutExternalAgentPatsInput
+  }
+
+  export type ExternalAgentPatUncheckedCreateInput = {
+    id?: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+    user?: CloudAuthUserUpdateOneRequiredWithoutExternalAgentPatsNestedInput
+  }
+
+  export type ExternalAgentPatUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatCreateManyInput = {
+    id?: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
   }
 
   export type GoalCreateInput = {
@@ -111587,6 +113120,12 @@ export namespace Prisma {
     none?: CloudAuthDeviceCodeWhereInput
   }
 
+  export type ExternalAgentPatListRelationFilter = {
+    every?: ExternalAgentPatWhereInput
+    some?: ExternalAgentPatWhereInput
+    none?: ExternalAgentPatWhereInput
+  }
+
   export type AccountNullableScalarRelationFilter = {
     is?: AccountWhereInput | null
     isNot?: AccountWhereInput | null
@@ -111601,6 +113140,10 @@ export namespace Prisma {
   }
 
   export type CloudAuthDeviceCodeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExternalAgentPatOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -111800,6 +113343,65 @@ export namespace Prisma {
 
   export type CloudAuthDeviceCodeSumOrderByAggregateInput = {
     pollingInterval?: SortOrder
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type ExternalAgentPatCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatAvgOrderByAggregateInput = {
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatSumOrderByAggregateInput = {
+    rateCount?: SortOrder
   }
 
   export type KeyResultListRelationFilter = {
@@ -116938,6 +118540,13 @@ export namespace Prisma {
     connect?: CloudAuthDeviceCodeWhereUniqueInput | CloudAuthDeviceCodeWhereUniqueInput[]
   }
 
+  export type ExternalAgentPatCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+  }
+
   export type AccountCreateNestedOneWithoutCloudUserInput = {
     create?: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
     connectOrCreate?: AccountCreateOrConnectWithoutCloudUserInput
@@ -116963,6 +118572,13 @@ export namespace Prisma {
     connectOrCreate?: CloudAuthDeviceCodeCreateOrConnectWithoutUserInput | CloudAuthDeviceCodeCreateOrConnectWithoutUserInput[]
     createMany?: CloudAuthDeviceCodeCreateManyUserInputEnvelope
     connect?: CloudAuthDeviceCodeWhereUniqueInput | CloudAuthDeviceCodeWhereUniqueInput[]
+  }
+
+  export type ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
   }
 
   export type AccountUncheckedCreateNestedOneWithoutCloudUserInput = {
@@ -117011,6 +118627,20 @@ export namespace Prisma {
     update?: CloudAuthDeviceCodeUpdateWithWhereUniqueWithoutUserInput | CloudAuthDeviceCodeUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: CloudAuthDeviceCodeUpdateManyWithWhereWithoutUserInput | CloudAuthDeviceCodeUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: CloudAuthDeviceCodeScalarWhereInput | CloudAuthDeviceCodeScalarWhereInput[]
+  }
+
+  export type ExternalAgentPatUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput | ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    set?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    disconnect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    delete?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    update?: ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput | ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentPatUpdateManyWithWhereWithoutUserInput | ExternalAgentPatUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
   }
 
   export type AccountUpdateOneWithoutCloudUserNestedInput = {
@@ -117065,6 +118695,20 @@ export namespace Prisma {
     deleteMany?: CloudAuthDeviceCodeScalarWhereInput | CloudAuthDeviceCodeScalarWhereInput[]
   }
 
+  export type ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput | ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    set?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    disconnect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    delete?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    update?: ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput | ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentPatUpdateManyWithWhereWithoutUserInput | ExternalAgentPatUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateOneWithoutCloudUserNestedInput = {
     create?: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
     connectOrCreate?: AccountCreateOrConnectWithoutCloudUserInput
@@ -117117,6 +118761,29 @@ export namespace Prisma {
     delete?: CloudAuthUserWhereInput | boolean
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutDeviceCodesInput, CloudAuthUserUpdateWithoutDeviceCodesInput>, CloudAuthUserUncheckedUpdateWithoutDeviceCodesInput>
+  }
+
+  export type ExternalAgentPatCreatescopesInput = {
+    set: string[]
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutExternalAgentPatsInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type ExternalAgentPatUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CloudAuthUserUpdateOneRequiredWithoutExternalAgentPatsNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput
+    upsert?: CloudAuthUserUpsertWithoutExternalAgentPatsInput
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentPatsInput, CloudAuthUserUpdateWithoutExternalAgentPatsInput>, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
   }
 
   export type AccountCreateNestedOneWithoutGoalsInput = {
@@ -119951,6 +121618,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
   }
 
   export type CloudAuthUserUncheckedCreateWithoutAccountInput = {
@@ -119965,6 +121633,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type CloudAuthUserCreateOrConnectWithoutAccountInput = {
@@ -121527,6 +123196,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
   }
 
   export type CloudAuthUserUncheckedUpdateWithoutAccountInput = {
@@ -121541,6 +123211,7 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type GoalUpsertWithWhereUniqueWithoutAccountInput = {
@@ -124115,6 +125786,44 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ExternalAgentPatCreateWithoutUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatCreateOrConnectWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    create: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatCreateManyUserInputEnvelope = {
+    data: ExternalAgentPatCreateManyUserInput | ExternalAgentPatCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AccountCreateWithoutCloudUserInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -124307,6 +126016,40 @@ export namespace Prisma {
     scope?: StringNullableFilter<"CloudAuthDeviceCode"> | string | null
   }
 
+  export type ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    update: XOR<ExternalAgentPatUpdateWithoutUserInput, ExternalAgentPatUncheckedUpdateWithoutUserInput>
+    create: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    data: XOR<ExternalAgentPatUpdateWithoutUserInput, ExternalAgentPatUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatUpdateManyWithWhereWithoutUserInput = {
+    where: ExternalAgentPatScalarWhereInput
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ExternalAgentPatScalarWhereInput = {
+    AND?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+    OR?: ExternalAgentPatScalarWhereInput[]
+    NOT?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+    id?: StringFilter<"ExternalAgentPat"> | string
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+  }
+
   export type AccountUpsertWithoutCloudUserInput = {
     update: XOR<AccountUpdateWithoutCloudUserInput, AccountUncheckedUpdateWithoutCloudUserInput>
     create: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
@@ -124419,6 +126162,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124433,6 +126177,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124463,6 +126208,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124477,6 +126223,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124491,6 +126238,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124505,6 +126253,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124535,6 +126284,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124549,6 +126299,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124563,6 +126314,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124577,6 +126329,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124607,6 +126360,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124621,6 +126375,83 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserCreateWithoutExternalAgentPatsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+  }
+
+  export type CloudAuthUserUpsertWithoutExternalAgentPatsInput = {
+    update: XOR<CloudAuthUserUpdateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentPatsInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutExternalAgentPatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -138618,6 +140449,20 @@ export namespace Prisma {
     scope?: string | null
   }
 
+  export type ExternalAgentPatCreateManyUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
   export type CloudAuthSessionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
@@ -138727,6 +140572,48 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExternalAgentPatUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
   }
 
   export type KeyResultCreateManyGoalInput = {

@@ -24,14 +24,26 @@
 // 环境配置必须最先加载（包含 dotenv 加载逻辑）
 import {
   env,
+  getCorsOrigins,
   getJwtConfig,
   getGithubOAuthConfig,
   getGithubAppConfig,
 } from './shared/infrastructure/config/env.js';
+import { createScopedPatService } from '@memoflow/cloud-auth/server';
+import { createGoalPrismaPageQuery } from '@memoflow/goal';
+import { composeAgentGatewayModule } from './modules/agent-gateway/module';
+import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
+import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';
+import { createSettingPrismaTimeQuery } from '@memoflow/setting';
+import { createTaskPrismaReadQueries } from '@memoflow/task';
+import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
+import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
 import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
 import { createLogger } from '@memoflow/utils/logger';
+import { createAccountPrismaActiveQuery } from '@memoflow/account';
+import { createGatewayAudit, createGatewayDiagnostics } from './modules/agent-gateway/audit';
 import { createRuntimeOwnership } from '@memoflow/contracts/primitives';
 import { ApiBootstrapper } from './bootstrap';
 import type { TraceRuntime } from './shared/infrastructure/observability/trace-runtime';
@@ -272,7 +284,11 @@ async function bootstrap(): Promise<void> {
     userTimeContextPort: settingApiModule.userTimeContextPort,
     goalReadPort: {
       getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
-        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+        goalComposed.applicationPort.getKeyResultMeasurementContext(
+          goalId,
+          keyResultId,
+          identityId,
+        ),
     },
   });
   const taskDashboardUseCase = new GetTaskDashboardUseCase(
@@ -371,8 +387,28 @@ async function bootstrap(): Promise<void> {
     knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
+  const goalPageQuery = createGoalPrismaPageQuery(prisma);
+  const agentGatewayModule = composeAgentGatewayModule({
+    admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
+    enabled: env.EAG_READ_PILOT_ENABLED,
+    audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
+    cursorSecret: env.EAG_CURSOR_SECRET ?? '',
+    trustedOrigins: getTrustedWebOrigins(getCorsOrigins(), env.MEMOFLOW_WEB_URL),
+    pats: createScopedPatService({
+      database: prisma,
+      audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
+      accountIsActive: createAccountPrismaActiveQuery(prisma),
+    }),
+    goals: bindGoalReadPort(goalPageQuery),
+    tasks: env.EAG_TASK_READ_ENABLED
+      ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
+      : undefined,
+    audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
+    diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
+  });
   const app = await bootstrapper
     // === 核心：白名单注册 ===
+    .register(agentGatewayModule)
     .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(routineApiModule) // ✅ Routine vNext configuration transport

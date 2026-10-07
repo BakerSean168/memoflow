@@ -10,6 +10,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/agent-gateway.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/express-auth-closure.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -19,6 +27,14 @@
     },
     {
       "path": "apps/api/src/__tests__/integration/label-owner-lifecycle.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/__tests__/integration/scoped-pat.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "apps/api/vitest.integration.config.ts"
@@ -76,6 +92,34 @@
       "measurementCollectors": [
         "apps/api/vitest.config.ts"
       ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/audit.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/agent-gateway/pilot-admission.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
@@ -739,6 +783,16 @@
     },
     {
       "path": "apps/api/src/shared/infrastructure/middleware/error.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/observability/external-agent-edge-audit.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -2585,6 +2639,16 @@
       ]
     },
     {
+      "path": "packages/account/src/server/application/use-cases/queries/__tests__/is-account-active.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/server/domain/aggregates/__tests__/Account.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2781,6 +2845,14 @@
       "measurementCollectors": [
         "packages/account/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/agent-gateway/src/server/read-gateway.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/agent-gateway/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
@@ -5931,6 +6003,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/cloud-auth/src/server/eag-auth-spike.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/server/eag-protocol-spike.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/cloud-auth/src/server/email-delivery.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5948,6 +6036,14 @@
     },
     {
       "path": "packages/cloud-auth/src/server/public-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/server/scoped-pat.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
@@ -6508,6 +6604,14 @@
     },
     {
       "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/task/api/task-read-schema.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -7628,6 +7732,17 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/use-cases/queries/__tests__/search-goal-page.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/use-cases/queries/__tests__/search-goals.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7860,6 +7975,16 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -10884,6 +11009,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/task-page-reader.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/task/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/server/infrastructure/adapters/prisma/task-plan-prisma.repository.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -11796,14 +11929,14 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 76
     },
     {
       "id": "packages/account/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 29
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -11838,7 +11971,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 100
+      "fileCount": 102
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11852,7 +11985,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 34
+      "fileCount": 35
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -12217,7 +12350,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 7
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -12287,7 +12420,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 7
     },
     {
       "id": "packages/task/vitest.performance-experiment.config.ts",
@@ -12315,7 +12448,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 76
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -12343,7 +12476,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 29
+    },
+    {
+      "id": "packages/agent-gateway/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -12371,14 +12511,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 10
     },
     {
       "id": "packages/contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 93
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12406,7 +12546,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 100
+      "fileCount": 102
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12539,6 +12679,8 @@
     "coverage": [
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
+      "apps/api/src/modules/agent-gateway/audit.spec.ts",
+      "apps/api/src/modules/agent-gateway/module.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
@@ -12606,6 +12748,7 @@
       "apps/api/src/shared/infrastructure/load-workspace-env-keep-boundary.surface.spec.ts",
       "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
       "apps/api/src/shared/infrastructure/middleware/error.spec.ts",
+      "apps/api/src/shared/infrastructure/observability/external-agent-edge-audit.spec.ts",
       "apps/api/src/shared/infrastructure/observability/http-request-metrics.spec.ts",
       "apps/api/src/shared/infrastructure/observability/http-request-observation.spec.ts",
       "apps/api/src/shared/infrastructure/observability/opentelemetry-http-request-trace.spec.ts",
@@ -12623,6 +12766,7 @@
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/get-account-profile.test.ts",
+      "packages/account/src/server/application/use-cases/queries/__tests__/is-account-active.test.ts",
       "packages/account/src/server/domain/aggregates/__tests__/Account.test.ts",
       "packages/account/src/server/domain/value-objects/__tests__/account-profile.spec.ts",
       "packages/account/src/server/domain/value-objects/__tests__/account-settings-and-enums.spec.ts",
@@ -12812,6 +12956,7 @@
       "packages/goal/src/server/application/use-cases/queries/__tests__/list-goal-records.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/list-goal-reviews.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/list-goals.test.ts",
+      "packages/goal/src/server/application/use-cases/queries/__tests__/search-goal-page.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/search-goals.test.ts",
       "packages/goal/src/server/domain/aggregates/goal-domain-events.spec.ts",
       "packages/goal/src/server/domain/aggregates/goal-management.spec.ts",
@@ -12836,6 +12981,7 @@
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-schedule-projection.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/weight-snapshot-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-record-provenance.spec.ts",
@@ -13076,8 +13222,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1131,
-    "integration": 34,
+    "unit": 1142,
+    "integration": 38,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,

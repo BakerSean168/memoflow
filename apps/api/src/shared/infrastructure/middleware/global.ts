@@ -16,6 +16,8 @@
 
 import type { Express, Request } from 'express';
 import cors from 'cors';
+import { createLogger } from '@memoflow/utils/logger';
+import { createExternalAgentEdgeAudit } from '../observability/external-agent-edge-audit';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -68,6 +70,12 @@ export function applyGlobalMiddleware(
     }),
   );
 
+  if (env.EAG_READ_PILOT_ENABLED) {
+    const auditLogger = createLogger('ExternalAgentEdgeAudit');
+    auditLogger.setLevel('info');
+    app.use(createExternalAgentEdgeAudit((event) => auditLogger.info('External agent audit', { ...event })));
+  }
+
   // Security. Controlled HTTP local-validation origins (for example Tailscale
   // MagicDNS) are not potentially trustworthy in Chromium. COOP is inert there
   // and Chromium reports it as a console error, so disable only that header in
@@ -99,6 +107,9 @@ export function applyGlobalMiddleware(
         'X-Skip-Auth',
         'Cache-Control',
         'X-Request-Id',
+        'MCP-Protocol-Version',
+        'Mcp-Method',
+        'Mcp-Name',
         // W3C trace headers for the opt-in OpenTelemetry lane (never HMAC/internal).
         'traceparent',
         'tracestate',
@@ -110,6 +121,16 @@ export function applyGlobalMiddleware(
   );
 
   options.beforeBodyParsing?.(app);
+
+  // Hosted MCP has its own hard request budget, before the general API parser.
+  app.use(
+    '/mcp',
+    (req, _res, next) => {
+      req.setTimeout(30000);
+      next();
+    },
+    express.json({ limit: '256kb' }),
+  );
 
   // JSON body parsing (must be after CORS for preflight)
   app.use(

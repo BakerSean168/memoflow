@@ -42,6 +42,17 @@ export const envSchema = z
       .transform((value) => value === '1')
       .describe('Expose local-only validation controls such as captured email links'),
 
+    EAG_READ_PILOT_ENABLED: z
+      .enum(['0', '1'])
+      .default('0')
+      .transform((value) => value === '1'),
+    EAG_TASK_READ_ENABLED: z
+      .enum(['0', '1'])
+      .default('1')
+      .transform((value) => value === '1'),
+    EAG_AUDIENCE: z.preprocess(emptyStringToUndefined, z.string().url().optional()),
+    EAG_CURSOR_SECRET: z.preprocess(emptyStringToUndefined, z.string().min(32).optional()),
+
     API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
 
     API_HOST: z.string().default('localhost'),
@@ -195,32 +206,35 @@ export const envSchema = z
     AI_PROVIDER_PRIVATE_ENDPOINT_ALLOWLIST: z
       .preprocess(
         emptyStringToUndefined,
-        z.string().superRefine((value, context) => {
-          for (const raw of value.split(',')) {
-            const candidate = raw.trim();
-            if (!candidate) continue;
-            try {
-              const parsed = new URL(`https://${candidate}`);
-              if (
-                parsed.username ||
-                parsed.password ||
-                parsed.pathname !== '/' ||
-                parsed.search ||
-                parsed.hash ||
-                !parsed.port
-              ) {
-                throw new Error('not exact host:port');
+        z
+          .string()
+          .superRefine((value, context) => {
+            for (const raw of value.split(',')) {
+              const candidate = raw.trim();
+              if (!candidate) continue;
+              try {
+                const parsed = new URL(`https://${candidate}`);
+                if (
+                  parsed.username ||
+                  parsed.password ||
+                  parsed.pathname !== '/' ||
+                  parsed.search ||
+                  parsed.hash ||
+                  !parsed.port
+                ) {
+                  throw new Error('not exact host:port');
+                }
+              } catch {
+                context.addIssue({
+                  code: 'custom',
+                  message:
+                    'AI_PROVIDER_PRIVATE_ENDPOINT_ALLOWLIST must contain comma-separated exact host:port values',
+                });
+                return;
               }
-            } catch {
-              context.addIssue({
-                code: 'custom',
-                message:
-                  'AI_PROVIDER_PRIVATE_ENDPOINT_ALLOWLIST must contain comma-separated exact host:port values',
-              });
-              return;
             }
-          }
-        }).optional(),
+          })
+          .optional(),
       )
       .describe(
         'Deployment-approved private OpenAI-compatible endpoints, comma-separated exact host:port values',
@@ -350,6 +364,37 @@ export const envSchema = z
       .describe('OTel service name for the API process (required when tracing is enabled)'),
   })
   .superRefine((env, context) => {
+    if (env.EAG_READ_PILOT_ENABLED) {
+      for (const key of ['EAG_AUDIENCE', 'EAG_CURSOR_SECRET'] as const) {
+        if (!env[key])
+          context.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required for the read pilot`,
+          });
+      }
+      if (env.EAG_AUDIENCE) {
+        const url = new URL(env.EAG_AUDIENCE);
+        const loopback =
+          url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+        if (
+          (url.protocol !== 'https:' && !loopback) ||
+          url.pathname !== '/mcp' ||
+          url.search ||
+          url.hash ||
+          url.username ||
+          url.password
+        ) {
+          context.addIssue({
+            code: 'custom',
+            path: ['EAG_AUDIENCE'],
+            message:
+              'EAG_AUDIENCE must be a canonical HTTPS /mcp URL (loopback HTTP is allowed locally)',
+          });
+        }
+      }
+    }
+
     // Combinational guard: tracing enabled without an exporter/service is a
     // startup misconfiguration, not a runtime silent failure.
     if (env.OTEL_TRACING_ENABLED === '1') {

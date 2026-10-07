@@ -13,3 +13,5 @@ export * from './response-schemas';
 
 export * from './task-goal-context.dto';
 export * from './task-workspace.dto';
+
+export * from './read-page.dto';

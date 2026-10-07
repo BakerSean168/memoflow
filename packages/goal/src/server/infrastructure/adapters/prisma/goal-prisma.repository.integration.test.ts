@@ -1,3 +1,5 @@
+import { createGoalPrismaPageQuery } from '../../prisma';
+import { SearchGoalPageUseCase } from '../../../application/use-cases/queries/search-goal-page.use-case';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
@@ -66,6 +68,120 @@ describe('GoalPrismaRepository integration', () => {
 
   beforeEach(async () => {
     await cleanAll();
+  });
+
+  it('pages equal timestamps in the database without exposing another identity', async () => {
+    const identityA = IdentityId.generate();
+    const identityB = IdentityId.generate();
+    await seedAccount({ id: identityA });
+    await seedAccount({ id: identityB });
+    const db = await getPrisma();
+    const repository = new GoalPrismaRepository(db);
+    for (let index = 0; index < 3; index++) await repository.save(createIntegrationGoal(identityA));
+    await repository.save(createIntegrationGoal(identityB));
+    await db.goal.updateMany({
+      where: { identityId: String(identityA) },
+      data: { createdAt: new Date('2026-10-07T00:00:00Z'), name: 'Work_% literal' },
+    });
+    const query = new SearchGoalPageUseCase(repository);
+    const first = await query.execute(String(identityA), { query: 'work_%', limit: 2 });
+    expect(first.ok).toBe(true);
+    if (!first.ok) throw new Error('First page failed');
+    expect(first.data.items).toHaveLength(2);
+    expect(first.data.items.every((item) => item.identityId === String(identityA))).toBe(true);
+    expect(first.data.hasMore).toBe(true);
+    expect(first.data.next).not.toBeNull();
+    const second = await query.execute(String(identityA), {
+      query: 'work_%',
+      limit: 2,
+      after: first.data.next,
+    });
+    expect(second.ok).toBe(true);
+    if (!second.ok) throw new Error('Second page failed');
+    expect(second.data.items).toHaveLength(1);
+    expect(second.data.hasMore).toBe(false);
+    expect(new Set([...first.data.items, ...second.data.items].map((item) => item.id)).size).toBe(
+      3,
+    );
+    expect(
+      first.data.items.every((item) => item.reviews === null || item.reviews.length === 0),
+    ).toBe(true);
+  });
+
+  it('rejects oversized child collections and fields using owner database preflight', async () => {
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    const repository = new GoalPrismaRepository(prisma);
+    const goal = createIntegrationGoal(identityId);
+    await repository.save(goal);
+    await prisma.keyResult.createMany({
+      data: Array.from({ length: 100 }, (_, i) => ({
+        id: `IKeyResultId_00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+        identityId: String(identityId),
+        goalId: String(goal.id),
+        title: 'legacy child',
+        aggregationMethod: 'Last',
+        targetValue: 10,
+      })),
+    });
+    const query = createGoalPrismaPageQuery(prisma);
+    expect(await query.getGoal(String(identityId), String(goal.id))).toMatchObject({
+      ok: false,
+      error: { code: 'RESPONSE_TOO_LARGE' },
+    });
+    await prisma.keyResult.deleteMany({
+      where: { goalId: String(goal.id), title: 'legacy child' },
+    });
+    await prisma.keyResult.updateMany({
+      where: { goalId: String(goal.id) },
+      data: { title: 'x'.repeat(4097) },
+    });
+    expect(await query.getGoal(String(identityId), String(goal.id))).toMatchObject({
+      ok: false,
+      error: { code: 'RESPONSE_TOO_LARGE' },
+    });
+  });
+
+  it('cancels a lock-blocked hosted read in PostgreSQL and releases its query resources', async () => {
+    let unlock!: () => void;
+    let locked!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      locked = resolve;
+    });
+    const release = new Promise<void>((resolve) => {
+      unlock = resolve;
+    });
+    const holder = prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`LOCK TABLE goals IN ACCESS EXCLUSIVE MODE`;
+        locked();
+        await release;
+      },
+      { timeout: 5000 },
+    );
+    await ready;
+    try {
+      const result = await createGoalPrismaPageQuery(prisma).searchGoalPage(
+        'deadline-owner',
+        { limit: 1 },
+        {
+          deadlineAt: Date.now() + 150,
+          signal: new AbortController().signal,
+        },
+      );
+      expect(result).toMatchObject({ ok: false, error: { code: 'TIMEOUT' } });
+      const [active] = await prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid()
+          AND state = 'active' AND wait_event_type = 'Lock' AND query LIKE '%goals%'
+      `;
+      expect(Number(active.count)).toBe(0);
+    } finally {
+      unlock();
+      await holder;
+    }
+    expect(
+      await createGoalPrismaPageQuery(prisma).searchGoalPage('deadline-owner', { limit: 1 }),
+    ).toMatchObject({ ok: true, data: { items: [] } });
   });
 
   it('persists and reloads goal children, enum state, JSON config, and nullable fields', async () => {

@@ -19,6 +19,7 @@ export {
   createSettingModule,
   createSettingPowerSyncModule,
   createSettingPowerSyncRepositories,
+  createSettingPrismaTimeQuery,
   createSettingPrismaModule,
   createSettingPrismaRepositories,
   createSettingRuntimeContribution,
