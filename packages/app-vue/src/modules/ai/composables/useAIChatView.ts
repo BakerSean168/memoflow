@@ -1,3 +1,4 @@
+import { useAIWorkflowReconciliation } from './useAIWorkflowReconciliation';
 import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -24,6 +25,7 @@ import { useAIFormatters } from './useAIFormatters';
 import { getToolLocaleKey, normalizeWorkflowMode } from './types';
 import { surfaceDescriptorToContextEntity, type AIActiveSurfaceDescriptor } from './surfaceContext';
 import {
+  canLeaveAIWorkflowReview,
   adjustComposerHeight as createAdjustComposerHeight,
   bindChatViewLifecycle,
   initializeChatView,
@@ -436,64 +438,28 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     }
   }
 
-  // start() returns the durable running pointer immediately so persistence can
-  // record runId before any slow model call finishes. While this view is
-  // mounted, reconcile that pointer through the authoritative runtime until the
-  // run reaches its next stable state. Network interruptions do not cancel the
-  // server-owned workflow; they only delay this projection.
-  watch(
-    activeWorkflowRun,
-    (run, _previous, onCleanup) => {
-      if (!run || run.status !== 'running') return;
-      let cancelled = false;
-      let timer: ReturnType<typeof setTimeout> | null = null;
-      let delayMs = 500;
-      let warned = false;
-      onCleanup(() => {
-        cancelled = true;
-        if (timer) clearTimeout(timer);
-      });
-
-      const backoff = () => {
-        delayMs = Math.min(Math.ceil(delayMs * 1.5), 2_000);
-      };
-      const schedule = () => {
-        if (cancelled) return;
-        timer = setTimeout(() => void poll(), delayMs);
-      };
-      const poll = async () => {
-        if (cancelled) return;
-        try {
-          const next = await workflowRuntime.get({ runId: run.runId });
-          if (cancelled) return;
-          if (!next || next.status === 'running') {
-            backoff();
-            schedule();
-            return;
-          }
-          if (next.conversationId !== run.conversationId) {
-            throw new AIWorkflowRestoreError(
-              'AI_WORKFLOW_CONVERSATION_MISMATCH',
-              `Workflow run ${run.runId} changed conversation identity`,
-            );
-          }
-          await projectAuthoritativeWorkflowRun(next);
-        } catch (error) {
-          if (cancelled) return;
-          // The persisted run pointer remains authoritative. Retry projection
-          // instead of turning a transient client/network failure into a workflow failure.
-          if (!warned) {
-            warned = true;
-            console.warn('[AIChatView] durable workflow reconciliation delayed', error);
-          }
-          backoff();
-          schedule();
-        }
-      };
-      schedule();
+  useAIWorkflowReconciliation({
+    current: activeWorkflowRun,
+    get: (request) => workflowRuntime.get(request),
+    project: projectAuthoritativeWorkflowRun,
+    stopped: (run, reason) => {
+      // Clear only the local projection. Transient failure retains the durable
+      // pointer for an explicit restore; confirmed absence retires that pointer.
+      if (reason === 'missing') {
+        persistence.clearWorkflowState(run.conversationId);
+        if (run.kind === 'goal.create') void goalWorkflow.projectRun(null);
+        if (run.kind === 'task.create') void taskWorkflow.projectRun(null);
+        if (run.kind === 'knowledge.capture') void knowledgeCaptureWorkflow.projectRun(null);
+      }
+      toast.error(
+        t(
+          reason === 'missing'
+            ? 'aiAssistant.errors.workflowRunUnavailable'
+            : 'aiAssistant.errors.workflowReadUnavailable',
+        ),
+      );
     },
-    { flush: 'sync' },
-  );
+  });
 
   const currentConversationLabel = computed(
     () => chatSession.conversationTitle.value || getDefaultConversationName(toolMode.value),
@@ -510,17 +476,21 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       !chatSession.chatLoading.value &&
       modelSelection.selectedModel.value !== null,
   );
-  function canLeaveTaskReview(): boolean {
-    if (toolMode.value !== 'task-create') return true;
-    if (taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value) {
-      toast.info(t('shell.panel.busyTransitionHint'));
-      return false;
-    }
-    return canLeaveBusinessSurface(t);
+  function canLeaveWorkflowReview(): boolean {
+    return canLeaveAIWorkflowReview(
+      toolMode.value,
+      {
+        goal: goalWorkflow.goalAgentResuming.value || goalWorkflow.goalOwnerAttemptPending.value,
+        task: taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value,
+        knowledge: knowledgeCaptureWorkflow.knowledgeCaptureResuming.value,
+      },
+      () => canLeaveBusinessSurface(t),
+      () => toast.info(t('shell.panel.busyTransitionHint')),
+    );
   }
 
   async function selectConversation(item: ConversationSummary) {
-    if (!canLeaveTaskReview()) return;
+    if (!canLeaveWorkflowReview()) return;
     persistence.suspendWorkflowPersistence.value = true;
     try {
       await chatSession.selectConversation(
@@ -547,7 +517,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   }
 
   function startNewConversation(mode: WorkflowMode | string = 'chat') {
-    if (!canLeaveTaskReview()) return;
+    if (!canLeaveWorkflowReview()) return;
     const normalizedMode = normalizeWorkflowMode(mode);
     chatSession.startNewConversation(normalizedMode);
     resetWorkflowArtifacts();
@@ -556,7 +526,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   }
 
   function exitToolMode() {
-    if (!canLeaveTaskReview()) return;
+    if (!canLeaveWorkflowReview()) return;
     resetWorkflowArtifacts();
     toolMode.value = 'chat';
     if (!chatSession.chatConversationId.value && !chatSession.chatTimeline.value.length) {

@@ -10,6 +10,28 @@ import type { IWorkflowRuntimeService } from '../../../di/types';
 import { unwrap } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
 
+/** In-flight owner work blocks departure before consulting the native dirty guard. */
+export function canLeaveAIWorkflowReview(
+  mode: string,
+  activity: { goal: boolean; task: boolean; knowledge: boolean },
+  leaveSurface: () => boolean,
+  notifyBusy: () => void,
+): boolean {
+  const busy =
+    mode === 'goal-create'
+      ? activity.goal
+      : mode === 'task-create'
+        ? activity.task
+        : mode === 'knowledge-capture'
+          ? activity.knowledge
+          : false;
+  if (busy) {
+    notifyBusy();
+    return false;
+  }
+  return leaveSurface();
+}
+
 export type AIWorkflowRestoreErrorCode =
   | 'AI_WORKFLOW_RUNTIME_UNAVAILABLE'
   | 'AI_WORKFLOW_RUN_NOT_FOUND'

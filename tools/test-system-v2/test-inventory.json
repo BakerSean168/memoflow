@@ -4239,6 +4239,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12357,7 +12365,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 273
+      "fileCount": 274
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13076,7 +13084,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1131,
+    "unit": 1132,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

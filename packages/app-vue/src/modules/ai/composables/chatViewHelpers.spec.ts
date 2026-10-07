@@ -2,6 +2,29 @@ import { describe, expect, it, vi } from 'vitest';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
+import { canLeaveAIWorkflowReview } from './chatViewHelpers';
+
+describe('workflow conversation departure', () => {
+  it.each(['goal-create', 'task-create', 'knowledge-capture'] as const)(
+    'protects %s busy and dirty native review',
+    (mode) => {
+      const leaveSurface = vi.fn().mockReturnValue(false);
+      const notifyBusy = vi.fn();
+      const activity = { goal: false, task: false, knowledge: false };
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      expect(leaveSurface).toHaveBeenCalledOnce();
+      leaveSurface.mockClear();
+      activity[mode === 'goal-create' ? 'goal' : mode === 'task-create' ? 'task' : 'knowledge'] =
+        true;
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(false);
+      expect(notifyBusy).toHaveBeenCalledOnce();
+      expect(leaveSurface).not.toHaveBeenCalled();
+      activity.goal = activity.task = activity.knowledge = false;
+      leaveSurface.mockReturnValue(true);
+      expect(canLeaveAIWorkflowReview(mode, activity, leaveSurface, notifyBusy)).toBe(true);
+    },
+  );
+});
 
 function makeRun(conversationId = 'conversation-1'): AIWorkflowRunView {
   return {
