@@ -1,13 +1,15 @@
 ---
 tags:
   - plan
-  - active
+  - archive
 description: AI runtime、workflow contract 与 owner-native frontend 的 Batch 2–6 实施和验收
 created: 2026-10-07T00:00:00
 updated: 2026-10-07T00:00:00
 ---
 
 # AI Runtime Layering — Batch 2–6
+
+实施状态：全部 batch 的代码、独立复审与本地验收已完成，本文件归档为设计与实施记录。最终 PR head CI 与 main 合并证据由关联 PR 保存；只有最新 head 的完整 gate 通过才允许合并。
 
 ## 基线与授权
 
@@ -67,7 +69,8 @@ updated: 2026-10-07T00:00:00
 - [x] Batch 4 实现；最终全量 gate 见下文。
 - [x] Batch 5 实现；最终全量 gate 见下文。
 - [x] Batch 6 实现；最终全量 gate 见下文。
-- [ ] 全量验收、review、CI 和 main 合并。
+- [x] 全量本地验收与两轴独立 review。
+- PR 交付 gate：由关联 PR 跟踪最新 head CI 和 main merge，不能用本地通过代替 CI 通过。
 
 ### 实施结果（最终 gate 前）
 
@@ -89,4 +92,25 @@ updated: 2026-10-07T00:00:00
 
 ### 最终验收记录
 
-待填：affected checks、prod-like Docker、独立 review、PR head CI 与 merge SHA。
+- 验证代码提交：`a27ffd664f222d6d9b9f6c6b503b2bd87cc1de54`；本地报告生成时间：`2026-10-07T13:45:18.414Z`。
+- `validate-local-deploy` 正式结果为 **pass / readyForPr=true**：affected lint（35 projects）、typecheck（32 projects 及依赖）、test（32 projects 及依赖）、`docker:local:up` 全部通过；blocking issues 与 warnings 均为空。
+- 本地 Web/API/PowerSync/Postgres/Redis 健康；Web `20200`、API `20201` 的 listener 和 Docker published port 对应正确。Web/API 实际镜像 revision 与上述提交一致。
+- 首轮唯一失败为独立 worktree 的 Mobile TypeScript 依赖链接指向自身。修复未跟踪的依赖链接后，Mobile typecheck 和完整验证报告均通过；无需业务代码修改。
+- governance-check、docs-check、test inventory 与 diff 检查通过；归档提交只修改文档，并再次运行文档/治理 gate。
+- Standards 与 Spec 两轮只读审查均无剩余阻断项，前次 finding 的修正已在上述提交验证。
+- 可复核的机器/人类报告：本地 `reports/local-deploy-validation/latest.json` 与 `latest.md`。最终 PR head 会包含纯文档归档提交；代码差异等价性通过 `git diff --name-only a27ffd664f222d6d9b9f6c6b503b2bd87cc1de54 HEAD` 核对。PR 的完整 CI 仍按最终 head 重新判定。
+- 合并方式：一个 PR 交付 Batch 2–6；合并后核对 merge commit 被 `origin/main` 包含。相关 CI 与 merge SHA 以 PR 实时记录为准。
+
+### 关键验收矩阵
+
+| 边界                          | 证据入口                                                                                                                  | 核心断言                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Assistant turn                | `mastra-workflow.runtime.spec.ts`、`assistant-observability.spec.ts`                                                      | 同步 reservation、重绑定、审批授权、Stop replay、单次 terminal、telemetry 顺序                |
+| Workflow contract             | `ai-runtime.dto.test.ts`、`workflow-run-projection.spec.ts`                                                               | kind/review/receipt/failure owner 一致；未知 status 显式失败；corrupt snapshot 不伪造 running |
+| HTTP/IPC/public failure       | `ai-runtime.routes.test.ts`、`runtime-workflow.spec.ts`、`error.spec.ts`                                                  | failed run 保留公共 code；双语提示；不泄露内部诊断；终态停止轮询                              |
+| Owner recovery                | `useAIGoalWorkflow.spec.ts`、`useAITaskWorkflow.spec.ts`、`useAIKnowledgeCapture.spec.ts`                                 | owner probe、frozen revision、approve-only retry；Knowledge 不提前持久化                      |
+| Leave protocol                | `chatViewHelpers.spec.ts`、`GoalModuleLayout.spec.ts`、`KnowledgeCaptureReviewDialog.spec.ts`                             | 实际 shell 拒绝 dirty/busy 离开后保留 route/dialog/draft                                      |
+| Polling                       | `useAIWorkflowReconciliation.spec.ts`                                                                                     | null 停止、错误 pointer 拒绝、五次 read failure 停止、旧会话响应忽略                          |
+| Chat facade                   | `useAIChatSession.spec.ts`、`AIChatView.spec.ts`                                                                          | composer、stream、conversation 拆分后调用和生命周期保持                                       |
+| Public exports / architecture | `dual-registry.surface.spec.ts`、`mastra-vnext-architecture.surface.spec.ts`、`use-ai-chat-host-dispatch.surface.spec.ts` | 单一 schema/runtime authority；公开 facade 与 dispatch contract 保留                          |
+| Planner / tools               | `goal-planner.worker.spec.ts`、`planner-observability.spec.ts`、`product-tools.spec.ts`                                   | provider output 单次 repair、research/usage 与 tool policy 保持                               |
