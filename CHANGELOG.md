@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/BakerSean168/memoflow/compare/v0.15.0...v0.15.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* **desktop:** restore packaged startup and release verification ([#423](https://github.com/BakerSean168/memoflow/issues/423)) ([9888a52](https://github.com/BakerSean168/memoflow/commit/9888a52bde2fa7c50b8267c9288ad7cc1c1ed01c))
+
 ## [0.15.0](https://github.com/BakerSean168/memoflow/compare/v0.14.1...v0.15.0) (2026-10-07)
 
 
