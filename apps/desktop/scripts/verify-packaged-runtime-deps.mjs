@@ -265,7 +265,7 @@ for (const asarPath of packagedAsars) {
     'node_modules/is-stream/package.json',
   ].find((packagePath) => files.has(packagePath));
   const winstonIsStreamVersion = winstonIsStreamPath
-    ? JSON.parse(asar.extractFile(asarPath, winstonIsStreamPath).toString()).version
+    ? JSON.parse(asar.extractFile(asarPath, path.normalize(winstonIsStreamPath)).toString()).version
     : undefined;
   if (!winstonIsStreamVersion?.startsWith('2.')) {
     throw new Error(

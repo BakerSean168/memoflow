@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from '@memoflow/database';
+import { Prisma, type PrismaClient } from '@memoflow/database/prisma';
 import {
   TaskPlanReadQuerySchema,
   TaskOccurrenceReadQuerySchema,
