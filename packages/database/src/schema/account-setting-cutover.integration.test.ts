@@ -127,6 +127,31 @@ it('supports an empty schema without inventing product facts', async () => {
   ).toBe(0);
 });
 
+it('bounds lock waiting and rolls back earlier schema changes', async () => {
+  await legacyFixture();
+  const blocker = new Client({ connectionString: testUrl.toString() });
+  await blocker.connect();
+  await blocker.query('BEGIN; LOCK TABLE cloud_auth_users IN ACCESS SHARE MODE');
+  // Release a broken/unbounded implementation so the red regression can settle.
+  const release = setTimeout(() => {
+    void blocker.query('ROLLBACK');
+  }, 10000);
+  try {
+    await expect(prepareAccountSettingCutover(db)).rejects.toThrow(/lock timeout/);
+    expect((await db.query('SELECT status,settings FROM accounts')).rows[0]).toEqual({
+      status: 'ACTIVE',
+      settings: { legacy: true },
+    });
+    expect(
+      (await db.query('SELECT COUNT(*)::int AS count FROM user_settings')).rows[0]?.count,
+    ).toBe(1);
+  } finally {
+    clearTimeout(release);
+    await blocker.query('ROLLBACK');
+    await blocker.end();
+  }
+});
+
 it('prepares the missing AI Knowledge key only for an empty legacy table', async () => {
   await db.query(
     'CREATE TABLE ai_knowledge_index_entries (id TEXT PRIMARY KEY, knowledge_space_id TEXT)',

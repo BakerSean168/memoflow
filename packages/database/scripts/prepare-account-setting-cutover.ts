@@ -7,7 +7,11 @@ async function main(): Promise<void> {
   loadWorkspaceEnv();
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_URL is required for Account/Setting cutover.');
-  const client = new Client({ connectionString: databaseUrl });
+  const client = new Client({
+    connectionString: databaseUrl,
+    connectionTimeoutMillis: 5000,
+    query_timeout: 35000,
+  });
   await client.connect();
   try {
     await prepareAccountSettingCutover(client);

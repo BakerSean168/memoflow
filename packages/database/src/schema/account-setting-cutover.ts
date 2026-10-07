@@ -10,6 +10,11 @@ export async function prepareAccountSettingCutover(
   await client.query('BEGIN');
   try {
     await client.query(`
+      SET LOCAL lock_timeout = '5s';
+      SET LOCAL statement_timeout = '30s';
+      SET LOCAL transaction_timeout = '45s';
+    `);
+    await client.query(`
       DO $$
       BEGIN
         IF to_regclass('public.accounts') IS NOT NULL THEN
