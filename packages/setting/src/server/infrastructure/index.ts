@@ -21,6 +21,7 @@ export {
 export type { SettingApplicationPort } from '../application';
 
 export {
+  createSettingPrismaTimeQuery,
   createSettingPrismaModule,
   createSettingPrismaRepositories,
   type CreateSettingPrismaModuleOptions,

@@ -11,6 +11,7 @@
  * 具体 Prisma 适配器类不会越过公共 barrel——宿主只能通过 Port 形状的集合使用仓储。
  */
 
+import { IsAccountActiveUseCase } from '../application/use-cases/queries/is-account-active.use-case';
 import type { PrismaClient } from '@memoflow/database';
 import type { Clock, UserTimeContextPort } from '@memoflow/time';
 // Structural cloud-auth shape (boundary: scope:account must not import scope:authentication libs directly)
@@ -136,4 +137,34 @@ export function createAccountPrismaModule(
     ),
     auditRepository: repositories.auditRepository,
   });
+}
+
+/**
+ * Creates Account's bounded active/closing application query.
+ * @param db - Host-owned PostgreSQL client.
+ * @returns The consumer-facing authority capability, without persistence access.
+ */
+export function createAccountPrismaActiveQuery(db: PrismaClient) {
+  return async (identityId: string): Promise<boolean> =>
+    db.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT set_config('statement_timeout', '5000', true)`;
+        return new IsAccountActiveUseCase({
+          readStatus: async (id) =>
+            (await tx.account.findUnique({ where: { id }, select: { status: true } }))?.status ??
+            null,
+          hasActiveClosure: async (id) =>
+            Boolean(
+              await tx.accountClosureOperation.findFirst({
+                where: {
+                  identityId: id,
+                  phase: { in: ['requested', 'revoking', 'revoked', 'closing', 'closed'] },
+                },
+                select: { id: true },
+              }),
+            ),
+        }).execute(identityId);
+      },
+      { timeout: 5000, maxWait: 2000 },
+    );
 }

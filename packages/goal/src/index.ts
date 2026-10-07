@@ -15,6 +15,7 @@ export {
   createGoalModule,
   createGoalPrismaModule,
   createGoalPrismaRepositories,
+  createGoalPrismaPageQuery,
   createGoalTaskProgressPrismaHandler,
   createGoalPrismaDeletionTransactionRunner,
   createGoalPowerSyncModule,

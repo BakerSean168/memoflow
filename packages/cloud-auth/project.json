@@ -3,20 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/cloud-auth/src",
   "projectType": "library",
-  "tags": [
-    "scope:authentication",
-    "type:lib",
-    "layer:infra"
-  ],
+  "tags": ["scope:authentication", "type:lib", "layer:infra"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{projectRoot}/dist"
-      ],
-      "dependsOn": [
-        "^build"
-      ],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && tsc -p tsconfig.build.json --emitDeclarationOnly",
         "cwd": "packages/cloud-auth"
@@ -31,13 +23,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -46,9 +33,7 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,js}"
-        ]
+        "args": ["**/*.{ts,js}"]
       }
     },
     "test:watch": {
@@ -56,6 +41,14 @@
       "cache": false,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/cloud-auth"
+      }
+    },
+    "spike:eag-client-profile": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node testing/eag-client-profile.mjs",
         "cwd": "packages/cloud-auth"
       }
     }

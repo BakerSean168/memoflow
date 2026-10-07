@@ -74,3 +74,5 @@ export {
   type GoalScheduleProjectionPlan,
   type GoalScheduleProjectionSource,
 } from './schedule-projection-source';
+
+export { createGoalPrismaPageQuery } from './prisma';

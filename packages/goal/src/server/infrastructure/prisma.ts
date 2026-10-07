@@ -1,3 +1,6 @@
+import { ok, error } from '@memoflow/contracts/result';
+import { GoalReadLimitError } from './adapters/prisma/goal-prisma.repository';
+import { SearchGoalPageUseCase } from '../application/use-cases/queries/search-goal-page.use-case';
 /**
  * Convenience factories for Prisma-backed goal runtime composition.
  * 目标模块 Prisma 运行时组合便捷工厂。
@@ -185,3 +188,59 @@ export function createGoalPrismaReminderFireHandler(
 }
 
 export type { PrismaGoalRelationCleanupFactory };
+
+/**
+ * Creates the bounded hosted Goal application queries.
+ * @param db - Host-owned PostgreSQL client.
+ * @returns Get/page queries with owner resource and database deadline enforcement.
+ */
+export function createGoalPrismaPageQuery(db: PrismaClient) {
+  async function bounded<T>(
+    operation: (reader: GoalPrismaRepository) => Promise<T>,
+    budget?: { deadlineAt: number; signal: AbortSignal },
+  ) {
+    const remaining = Math.min(
+      30000,
+      Math.max(1, (budget?.deadlineAt ?? Date.now() + 30000) - Date.now()),
+    );
+    if (budget?.signal.aborted) return error('TIMEOUT', 'Goal read cancelled');
+    try {
+      return await db.$transaction(
+        async (tx) => {
+          if (budget?.signal.aborted) return error('TIMEOUT', 'Goal read cancelled');
+          const queryRemaining = Math.max(
+            1,
+            (budget?.deadlineAt ?? Date.now() + 30000) - Date.now(),
+          );
+          await tx.$executeRaw`SELECT set_config('statement_timeout', ${String(Math.min(remaining, queryRemaining))}, true)`;
+          const result = await operation(new GoalPrismaRepository(tx));
+          if (budget?.signal.aborted) return error('TIMEOUT', 'Goal read cancelled');
+          return result;
+        },
+        {
+          isolationLevel: 'RepeatableRead',
+          timeout: remaining,
+          maxWait: Math.min(remaining, 2000),
+        },
+      );
+    } catch (cause) {
+      if (cause instanceof GoalReadLimitError)
+        return error('RESPONSE_TOO_LARGE', 'Goal projection exceeds owner limits');
+      if (budget?.signal.aborted || Date.now() >= (budget?.deadlineAt ?? Infinity))
+        return error('TIMEOUT', 'Goal read deadline exceeded');
+      throw cause;
+    }
+  }
+  return {
+    searchGoalPage: (
+      identityId: string,
+      input: unknown,
+      budget?: { deadlineAt: number; signal: AbortSignal },
+    ) => bounded((reader) => new SearchGoalPageUseCase(reader).execute(identityId, input), budget),
+    getGoal: (
+      identityId: string,
+      id: string,
+      budget?: { deadlineAt: number; signal: AbortSignal },
+    ) => bounded(async (reader) => ok(await reader.readBoundedById(identityId, id)), budget),
+  };
+}

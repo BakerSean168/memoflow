@@ -290,6 +290,34 @@ exports.Prisma.CloudAuthDeviceCodeScalarFieldEnum = {
   scope: 'scope'
 };
 
+exports.Prisma.ExternalAgentPatScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  prefix: 'prefix',
+  tokenDigest: 'tokenDigest',
+  audience: 'audience',
+  scopes: 'scopes',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  rateWindow: 'rateWindow',
+  rateCount: 'rateCount'
+};
+
+exports.Prisma.ExternalAgentConnectionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clientId: 'clientId',
+  resource: 'resource',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt',
+  rateWindow: 'rateWindow',
+  rateCount: 'rateCount'
+};
+
 exports.Prisma.GoalScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -528,6 +556,137 @@ exports.Prisma.NotificationDispatchOutboxScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   finishedAt: 'finishedAt'
+};
+
+exports.Prisma.JwksScalarFieldEnum = {
+  id: 'id',
+  publicKey: 'publicKey',
+  privateKey: 'privateKey',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  alg: 'alg',
+  crv: 'crv'
+};
+
+exports.Prisma.OauthClientScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  clientSecret: 'clientSecret',
+  clientDiscoveryId: 'clientDiscoveryId',
+  disabled: 'disabled',
+  skipConsent: 'skipConsent',
+  enableEndSession: 'enableEndSession',
+  subjectType: 'subjectType',
+  scopes: 'scopes',
+  clientCredentialsScopes: 'clientCredentialsScopes',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  uri: 'uri',
+  icon: 'icon',
+  contacts: 'contacts',
+  tos: 'tos',
+  policy: 'policy',
+  softwareId: 'softwareId',
+  softwareVersion: 'softwareVersion',
+  softwareStatement: 'softwareStatement',
+  redirectUris: 'redirectUris',
+  postLogoutRedirectUris: 'postLogoutRedirectUris',
+  backchannelLogoutUri: 'backchannelLogoutUri',
+  backchannelLogoutSessionRequired: 'backchannelLogoutSessionRequired',
+  tokenEndpointAuthMethod: 'tokenEndpointAuthMethod',
+  applicationType: 'applicationType',
+  jwks: 'jwks',
+  jwksUri: 'jwksUri',
+  grantTypes: 'grantTypes',
+  responseTypes: 'responseTypes',
+  requirePKCE: 'requirePKCE',
+  dpopBoundAccessTokens: 'dpopBoundAccessTokens',
+  referenceId: 'referenceId',
+  metadata: 'metadata'
+};
+
+exports.Prisma.OauthResourceScalarFieldEnum = {
+  id: 'id',
+  identifier: 'identifier',
+  name: 'name',
+  accessTokenTtl: 'accessTokenTtl',
+  refreshTokenTtl: 'refreshTokenTtl',
+  signingAlgorithm: 'signingAlgorithm',
+  signingKeyId: 'signingKeyId',
+  allowedScopes: 'allowedScopes',
+  customClaims: 'customClaims',
+  dpopBoundAccessTokensRequired: 'dpopBoundAccessTokensRequired',
+  disabled: 'disabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  policyVersion: 'policyVersion',
+  metadata: 'metadata'
+};
+
+exports.Prisma.OauthClientResourceScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  resourceId: 'resourceId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OauthRefreshTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  clientId: 'clientId',
+  sessionId: 'sessionId',
+  userId: 'userId',
+  referenceId: 'referenceId',
+  authorizationCodeId: 'authorizationCodeId',
+  resources: 'resources',
+  requestedUserInfoClaims: 'requestedUserInfoClaims',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  revoked: 'revoked',
+  rotatedAt: 'rotatedAt',
+  rotationReplayResponse: 'rotationReplayResponse',
+  rotationReplayExpiresAt: 'rotationReplayExpiresAt',
+  authTime: 'authTime',
+  confirmation: 'confirmation',
+  scopes: 'scopes'
+};
+
+exports.Prisma.OauthAccessTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  clientId: 'clientId',
+  sessionId: 'sessionId',
+  userId: 'userId',
+  referenceId: 'referenceId',
+  authorizationCodeId: 'authorizationCodeId',
+  resources: 'resources',
+  requestedUserInfoClaims: 'requestedUserInfoClaims',
+  refreshId: 'refreshId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  revoked: 'revoked',
+  confirmation: 'confirmation',
+  scopes: 'scopes'
+};
+
+exports.Prisma.OauthConsentScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  userId: 'userId',
+  referenceId: 'referenceId',
+  resources: 'resources',
+  requestedUserInfoClaims: 'requestedUserInfoClaims',
+  scopes: 'scopes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OauthClientAssertionScalarFieldEnum = {
+  id: 'id',
+  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.RelationScalarFieldEnum = {
@@ -1199,6 +1358,8 @@ exports.Prisma.ModelName = {
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',
   CloudAuthVerification: 'CloudAuthVerification',
   CloudAuthDeviceCode: 'CloudAuthDeviceCode',
+  ExternalAgentPat: 'ExternalAgentPat',
+  ExternalAgentConnection: 'ExternalAgentConnection',
   Goal: 'Goal',
   KeyResult: 'KeyResult',
   GoalRecord: 'GoalRecord',
@@ -1216,6 +1377,14 @@ exports.Prisma.ModelName = {
   NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
   NotificationPreference: 'NotificationPreference',
   NotificationDispatchOutbox: 'NotificationDispatchOutbox',
+  Jwks: 'Jwks',
+  OauthClient: 'OauthClient',
+  OauthResource: 'OauthResource',
+  OauthClientResource: 'OauthClientResource',
+  OauthRefreshToken: 'OauthRefreshToken',
+  OauthAccessToken: 'OauthAccessToken',
+  OauthConsent: 'OauthConsent',
+  OauthClientAssertion: 'OauthClientAssertion',
   Relation: 'Relation',
   OutboxMessage: 'OutboxMessage',
   InboxReceipt: 'InboxReceipt',

@@ -5,6 +5,10 @@ import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer } from 'better-auth/plugins';
 import { deviceAuthorization } from 'better-auth/plugins/device-authorization';
+import { verifyJwsAccessToken } from 'better-auth/oauth2';
+import type { ExternalAgentOAuthOptions } from './external-agent-provider';
+import { createExternalAgentOAuth, type VerifiedOAuthPrincipal } from './external-agent-oauth';
+import { createOAuthStore } from './oauth-store';
 import type { RequestHandler } from 'express';
 import type { IncomingHttpHeaders } from 'node:http';
 import type { CloudAuthEmailDelivery } from './email-delivery.js';
@@ -34,6 +38,7 @@ interface CloudUserProvisioner {
 }
 
 interface CloudAuthOptions {
+  readonly externalAgents?: ExternalAgentOAuthOptions;
   readonly database: PrismaClient;
   readonly secret: string;
   readonly baseUrl: string;
@@ -56,6 +61,12 @@ interface CloudAuthOptions {
 }
 
 interface CloudAuth extends CloudSessionCapability {
+  readonly externalAgents?: Pick<
+    ReturnType<typeof createExternalAgentOAuth>,
+    'list' | 'revoke' | 'consumeReadQuota'
+  > & {
+    authenticate(authorization: string | undefined): Promise<VerifiedOAuthPrincipal | null>;
+  };
   readonly handler: (request: Request) => Promise<Response>;
   readonly expressHandler: RequestHandler;
   resolvePrincipal(headers: Headers): Promise<CloudPrincipal | null>;
@@ -73,6 +84,7 @@ export function createCloudAuth(
   options: CloudAuthOptions,
   dependencies: CloudAuthDependencies = {},
 ): CloudAuth {
+  const oauthStore = createOAuthStore(options.database);
   async function isClosureBlocked(identityId: string): Promise<boolean> {
     if (options.closureChecker && (await options.closureChecker(identityId))) {
       return true;
@@ -89,6 +101,9 @@ export function createCloudAuth(
     return false;
   }
 
+  const externalAgents = options.externalAgents
+    ? createExternalAgentOAuth(oauthStore, options.externalAgents, isClosureBlocked)
+    : undefined;
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({
     appName: 'MemoFlow',
@@ -97,7 +112,7 @@ export function createCloudAuth(
     trustedOrigins: [...options.trustedOrigins],
     database:
       databaseOverride ??
-      prismaAdapter(options.database, {
+      prismaAdapter(oauthStore.db, {
         provider: 'postgresql',
         transaction: true,
       }),
@@ -198,10 +213,10 @@ export function createCloudAuth(
           deviceCode: { modelName: 'cloudAuthDeviceCode' },
         },
       }),
+      ...(externalAgents?.plugins ?? []),
     ],
   });
 
-  const rawExpressHandler = toNodeHandler(auth);
   const rawHandler = auth.handler;
 
   const resolvePrincipal = async (headers: Headers): Promise<CloudPrincipal | null> => {
@@ -285,81 +300,55 @@ export function createCloudAuth(
     return null;
   };
 
-  const readExpressBody = async (req: any): Promise<unknown> => {
-    if (req.body !== undefined && req.body !== null) return req.body;
-    if (req.method !== 'POST' && req.method !== 'PUT' && req.method !== 'PATCH') return undefined;
-    if (req.readableEnded || req.destroyed) return undefined;
-
-    return new Promise((resolve) => {
-      let data = '';
-      const onData = (chunk: Buffer | string) => {
-        data += chunk;
-      };
-      const onEnd = () => {
-        cleanup();
-        try {
-          const parsed = JSON.parse(data);
-          req.body = parsed;
-          resolve(parsed);
-        } catch {
-          resolve(undefined);
-        }
-      };
-      const onError = () => {
-        cleanup();
-        resolve(undefined);
-      };
-      const cleanup = () => {
-        if (typeof req.off === 'function') {
-          req.off('data', onData);
-          req.off('end', onEnd);
-          req.off('error', onError);
-        } else if (typeof req.removeListener === 'function') {
-          req.removeListener('data', onData);
-          req.removeListener('end', onEnd);
-          req.removeListener('error', onError);
-        }
-      };
-      req.on('data', onData);
-      req.on('end', onEnd);
-      req.on('error', onError);
-    });
-  };
-
-  const expressHandler: RequestHandler = async (req, res, next) => {
-    const headers = fromNodeHeaders(req.headers);
-    const body = await readExpressBody(req);
-    const accessResponse = await checkRequestAccess(headers, body);
-    if (accessResponse) {
-      res.status(accessResponse.status);
-      for (const [key, value] of accessResponse.headers.entries()) {
-        res.setHeader(key, value);
-      }
-      const text = await accessResponse.text();
-      res.send(text);
-      return;
-    }
-    return rawExpressHandler(req, res);
-  };
-
   const handler = async (request: Request): Promise<Response> => {
     let body: unknown = undefined;
     if (request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH') {
-      body = await request
-        .clone()
-        .json()
-        .catch(() => undefined);
+      body = request.headers.get('content-type')?.includes('application/x-www-form-urlencoded')
+        ? Object.fromEntries(await request.clone().formData())
+        : await request
+            .clone()
+            .json()
+            .catch(() => undefined);
     }
     const accessResponse = await checkRequestAccess(request.headers, body);
     if (accessResponse) {
       return accessResponse;
+    }
+    if (externalAgents) {
+      await auth.$context;
+      return externalAgents.handle(request, body, () => rawHandler(request));
     }
     return rawHandler(request);
   };
 
   return {
     handler,
-    expressHandler,
+    expressHandler: toNodeHandler(handler),
+    externalAgents: externalAgents
+      ? {
+          list: externalAgents.list,
+          revoke: externalAgents.revoke,
+          consumeReadQuota: externalAgents.consumeReadQuota,
+          async authenticate(authorization) {
+            const token = /^Bearer ([^\s]+)$/i.exec(authorization ?? '')?.[1];
+            if (!token || token.length > 16384) return null;
+            const resource = options.externalAgents!.resource;
+            const claims = await verifyJwsAccessToken(token, {
+              jwksFetch: () => auth.api.getJwks(),
+              jwksCacheKey: auth,
+              verifyOptions: {
+                issuer: options.baseUrl,
+                audience: resource,
+                requiredClaims: ['exp', 'iat', 'sub'],
+              },
+            }).catch(() => null);
+            // This lane accepts bearer tokens only; sender-constrained tokens need
+            // request-bound proof validation and a shared replay store.
+            if (!claims || claims.cnf !== undefined) return null;
+            return externalAgents.authenticateClaims(claims);
+          },
+        }
+      : undefined,
     resolvePrincipal,
     resolveNodePrincipal,
     async cleanupExpiredDeviceCodes(now = new Date()) {
@@ -369,6 +358,11 @@ export function createCloudAuth(
       return result.count;
     },
     async revokeAllSessions(identityId) {
+      await externalAgents?.revoke(identityId);
+      await options.database.externalAgentPat?.updateMany({
+        where: { userId: identityId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
       const sessionResult = await options.database.cloudAuthSession.deleteMany({
         where: { userId: identityId },
       });

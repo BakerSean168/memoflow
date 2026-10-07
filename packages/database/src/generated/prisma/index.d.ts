@@ -76,6 +76,16 @@ export type CloudAuthVerification = $Result.DefaultSelection<Prisma.$CloudAuthVe
  */
 export type CloudAuthDeviceCode = $Result.DefaultSelection<Prisma.$CloudAuthDeviceCodePayload>
 /**
+ * Model ExternalAgentPat
+ *
+ */
+export type ExternalAgentPat = $Result.DefaultSelection<Prisma.$ExternalAgentPatPayload>
+/**
+ * Model ExternalAgentConnection
+ *
+ */
+export type ExternalAgentConnection = $Result.DefaultSelection<Prisma.$ExternalAgentConnectionPayload>
+/**
  * Model Goal
  *
  */
@@ -160,6 +170,46 @@ export type NotificationPreference = $Result.DefaultSelection<Prisma.$Notificati
  * NotificationDispatchOutbox 投递意图/Outbox（W2: LeaseClaim 与 durable receipt）
  */
 export type NotificationDispatchOutbox = $Result.DefaultSelection<Prisma.$NotificationDispatchOutboxPayload>
+/**
+ * Model Jwks
+ *
+ */
+export type Jwks = $Result.DefaultSelection<Prisma.$JwksPayload>
+/**
+ * Model OauthClient
+ *
+ */
+export type OauthClient = $Result.DefaultSelection<Prisma.$OauthClientPayload>
+/**
+ * Model OauthResource
+ *
+ */
+export type OauthResource = $Result.DefaultSelection<Prisma.$OauthResourcePayload>
+/**
+ * Model OauthClientResource
+ *
+ */
+export type OauthClientResource = $Result.DefaultSelection<Prisma.$OauthClientResourcePayload>
+/**
+ * Model OauthRefreshToken
+ *
+ */
+export type OauthRefreshToken = $Result.DefaultSelection<Prisma.$OauthRefreshTokenPayload>
+/**
+ * Model OauthAccessToken
+ *
+ */
+export type OauthAccessToken = $Result.DefaultSelection<Prisma.$OauthAccessTokenPayload>
+/**
+ * Model OauthConsent
+ *
+ */
+export type OauthConsent = $Result.DefaultSelection<Prisma.$OauthConsentPayload>
+/**
+ * Model OauthClientAssertion
+ *
+ */
+export type OauthClientAssertion = $Result.DefaultSelection<Prisma.$OauthClientAssertionPayload>
 /**
  * Model Relation
  *
@@ -650,6 +700,26 @@ export class PrismaClient<
   get cloudAuthDeviceCode(): Prisma.CloudAuthDeviceCodeDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.externalAgentPat`: Exposes CRUD operations for the **ExternalAgentPat** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExternalAgentPats
+    * const externalAgentPats = await prisma.externalAgentPat.findMany()
+    * ```
+    */
+  get externalAgentPat(): Prisma.ExternalAgentPatDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.externalAgentConnection`: Exposes CRUD operations for the **ExternalAgentConnection** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExternalAgentConnections
+    * const externalAgentConnections = await prisma.externalAgentConnection.findMany()
+    * ```
+    */
+  get externalAgentConnection(): Prisma.ExternalAgentConnectionDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.goal`: Exposes CRUD operations for the **Goal** model.
     * Example usage:
     * ```ts
@@ -818,6 +888,86 @@ export class PrismaClient<
     * ```
     */
   get notificationDispatchOutbox(): Prisma.NotificationDispatchOutboxDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.jwks`: Exposes CRUD operations for the **Jwks** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Jwks
+    * const jwks = await prisma.jwks.findMany()
+    * ```
+    */
+  get jwks(): Prisma.JwksDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthClient`: Exposes CRUD operations for the **OauthClient** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthClients
+    * const oauthClients = await prisma.oauthClient.findMany()
+    * ```
+    */
+  get oauthClient(): Prisma.OauthClientDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthResource`: Exposes CRUD operations for the **OauthResource** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthResources
+    * const oauthResources = await prisma.oauthResource.findMany()
+    * ```
+    */
+  get oauthResource(): Prisma.OauthResourceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthClientResource`: Exposes CRUD operations for the **OauthClientResource** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthClientResources
+    * const oauthClientResources = await prisma.oauthClientResource.findMany()
+    * ```
+    */
+  get oauthClientResource(): Prisma.OauthClientResourceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthRefreshToken`: Exposes CRUD operations for the **OauthRefreshToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthRefreshTokens
+    * const oauthRefreshTokens = await prisma.oauthRefreshToken.findMany()
+    * ```
+    */
+  get oauthRefreshToken(): Prisma.OauthRefreshTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthAccessToken`: Exposes CRUD operations for the **OauthAccessToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthAccessTokens
+    * const oauthAccessTokens = await prisma.oauthAccessToken.findMany()
+    * ```
+    */
+  get oauthAccessToken(): Prisma.OauthAccessTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthConsent`: Exposes CRUD operations for the **OauthConsent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthConsents
+    * const oauthConsents = await prisma.oauthConsent.findMany()
+    * ```
+    */
+  get oauthConsent(): Prisma.OauthConsentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.oauthClientAssertion`: Exposes CRUD operations for the **OauthClientAssertion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OauthClientAssertions
+    * const oauthClientAssertions = await prisma.oauthClientAssertion.findMany()
+    * ```
+    */
+  get oauthClientAssertion(): Prisma.OauthClientAssertionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.relation`: Exposes CRUD operations for the **Relation** model.
@@ -1717,6 +1867,8 @@ export namespace Prisma {
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
     CloudAuthVerification: 'CloudAuthVerification',
     CloudAuthDeviceCode: 'CloudAuthDeviceCode',
+    ExternalAgentPat: 'ExternalAgentPat',
+    ExternalAgentConnection: 'ExternalAgentConnection',
     Goal: 'Goal',
     KeyResult: 'KeyResult',
     GoalRecord: 'GoalRecord',
@@ -1734,6 +1886,14 @@ export namespace Prisma {
     NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
     NotificationPreference: 'NotificationPreference',
     NotificationDispatchOutbox: 'NotificationDispatchOutbox',
+    Jwks: 'Jwks',
+    OauthClient: 'OauthClient',
+    OauthResource: 'OauthResource',
+    OauthClientResource: 'OauthClientResource',
+    OauthRefreshToken: 'OauthRefreshToken',
+    OauthAccessToken: 'OauthAccessToken',
+    OauthConsent: 'OauthConsent',
+    OauthClientAssertion: 'OauthClientAssertion',
     Relation: 'Relation',
     OutboxMessage: 'OutboxMessage',
     InboxReceipt: 'InboxReceipt',
@@ -1793,7 +1953,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2682,6 +2842,154 @@ export namespace Prisma {
           count: {
             args: Prisma.CloudAuthDeviceCodeCountArgs<ExtArgs>
             result: $Utils.Optional<CloudAuthDeviceCodeCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExternalAgentPat: {
+        payload: Prisma.$ExternalAgentPatPayload<ExtArgs>
+        fields: Prisma.ExternalAgentPatFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExternalAgentPatFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          findFirst: {
+            args: Prisma.ExternalAgentPatFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExternalAgentPatFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          findMany: {
+            args: Prisma.ExternalAgentPatFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          create: {
+            args: Prisma.ExternalAgentPatCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          createMany: {
+            args: Prisma.ExternalAgentPatCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExternalAgentPatCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          delete: {
+            args: Prisma.ExternalAgentPatDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          update: {
+            args: Prisma.ExternalAgentPatUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExternalAgentPatDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExternalAgentPatUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExternalAgentPatUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentPatPayload>
+          }
+          aggregate: {
+            args: Prisma.ExternalAgentPatAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExternalAgentPat>
+          }
+          groupBy: {
+            args: Prisma.ExternalAgentPatGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentPatGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExternalAgentPatCountArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentPatCountAggregateOutputType> | number
+          }
+        }
+      }
+      ExternalAgentConnection: {
+        payload: Prisma.$ExternalAgentConnectionPayload<ExtArgs>
+        fields: Prisma.ExternalAgentConnectionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExternalAgentConnectionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExternalAgentConnectionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          findFirst: {
+            args: Prisma.ExternalAgentConnectionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExternalAgentConnectionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          findMany: {
+            args: Prisma.ExternalAgentConnectionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>[]
+          }
+          create: {
+            args: Prisma.ExternalAgentConnectionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          createMany: {
+            args: Prisma.ExternalAgentConnectionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExternalAgentConnectionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>[]
+          }
+          delete: {
+            args: Prisma.ExternalAgentConnectionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          update: {
+            args: Prisma.ExternalAgentConnectionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExternalAgentConnectionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExternalAgentConnectionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExternalAgentConnectionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExternalAgentConnectionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalAgentConnectionPayload>
+          }
+          aggregate: {
+            args: Prisma.ExternalAgentConnectionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExternalAgentConnection>
+          }
+          groupBy: {
+            args: Prisma.ExternalAgentConnectionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentConnectionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExternalAgentConnectionCountArgs<ExtArgs>
+            result: $Utils.Optional<ExternalAgentConnectionCountAggregateOutputType> | number
           }
         }
       }
@@ -3940,6 +4248,598 @@ export namespace Prisma {
           count: {
             args: Prisma.NotificationDispatchOutboxCountArgs<ExtArgs>
             result: $Utils.Optional<NotificationDispatchOutboxCountAggregateOutputType> | number
+          }
+        }
+      }
+      Jwks: {
+        payload: Prisma.$JwksPayload<ExtArgs>
+        fields: Prisma.JwksFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.JwksFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.JwksFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          findFirst: {
+            args: Prisma.JwksFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.JwksFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          findMany: {
+            args: Prisma.JwksFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>[]
+          }
+          create: {
+            args: Prisma.JwksCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          createMany: {
+            args: Prisma.JwksCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.JwksCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>[]
+          }
+          delete: {
+            args: Prisma.JwksDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          update: {
+            args: Prisma.JwksUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          deleteMany: {
+            args: Prisma.JwksDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.JwksUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.JwksUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>[]
+          }
+          upsert: {
+            args: Prisma.JwksUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JwksPayload>
+          }
+          aggregate: {
+            args: Prisma.JwksAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateJwks>
+          }
+          groupBy: {
+            args: Prisma.JwksGroupByArgs<ExtArgs>
+            result: $Utils.Optional<JwksGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.JwksCountArgs<ExtArgs>
+            result: $Utils.Optional<JwksCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthClient: {
+        payload: Prisma.$OauthClientPayload<ExtArgs>
+        fields: Prisma.OauthClientFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthClientFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthClientFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          findFirst: {
+            args: Prisma.OauthClientFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthClientFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          findMany: {
+            args: Prisma.OauthClientFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>[]
+          }
+          create: {
+            args: Prisma.OauthClientCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          createMany: {
+            args: Prisma.OauthClientCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthClientCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>[]
+          }
+          delete: {
+            args: Prisma.OauthClientDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          update: {
+            args: Prisma.OauthClientUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthClientDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthClientUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthClientUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthClientUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientPayload>
+          }
+          aggregate: {
+            args: Prisma.OauthClientAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthClient>
+          }
+          groupBy: {
+            args: Prisma.OauthClientGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthClientCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthResource: {
+        payload: Prisma.$OauthResourcePayload<ExtArgs>
+        fields: Prisma.OauthResourceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthResourceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthResourceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          findFirst: {
+            args: Prisma.OauthResourceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthResourceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          findMany: {
+            args: Prisma.OauthResourceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>[]
+          }
+          create: {
+            args: Prisma.OauthResourceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          createMany: {
+            args: Prisma.OauthResourceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthResourceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>[]
+          }
+          delete: {
+            args: Prisma.OauthResourceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          update: {
+            args: Prisma.OauthResourceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthResourceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthResourceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthResourceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthResourceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthResourcePayload>
+          }
+          aggregate: {
+            args: Prisma.OauthResourceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthResource>
+          }
+          groupBy: {
+            args: Prisma.OauthResourceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthResourceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthResourceCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthResourceCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthClientResource: {
+        payload: Prisma.$OauthClientResourcePayload<ExtArgs>
+        fields: Prisma.OauthClientResourceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthClientResourceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthClientResourceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          findFirst: {
+            args: Prisma.OauthClientResourceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthClientResourceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          findMany: {
+            args: Prisma.OauthClientResourceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>[]
+          }
+          create: {
+            args: Prisma.OauthClientResourceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          createMany: {
+            args: Prisma.OauthClientResourceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthClientResourceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>[]
+          }
+          delete: {
+            args: Prisma.OauthClientResourceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          update: {
+            args: Prisma.OauthClientResourceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthClientResourceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthClientResourceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthClientResourceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthClientResourceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientResourcePayload>
+          }
+          aggregate: {
+            args: Prisma.OauthClientResourceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthClientResource>
+          }
+          groupBy: {
+            args: Prisma.OauthClientResourceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientResourceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthClientResourceCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientResourceCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthRefreshToken: {
+        payload: Prisma.$OauthRefreshTokenPayload<ExtArgs>
+        fields: Prisma.OauthRefreshTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthRefreshTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthRefreshTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.OauthRefreshTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthRefreshTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          findMany: {
+            args: Prisma.OauthRefreshTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>[]
+          }
+          create: {
+            args: Prisma.OauthRefreshTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          createMany: {
+            args: Prisma.OauthRefreshTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthRefreshTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.OauthRefreshTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          update: {
+            args: Prisma.OauthRefreshTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthRefreshTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthRefreshTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthRefreshTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthRefreshTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthRefreshTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.OauthRefreshTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthRefreshToken>
+          }
+          groupBy: {
+            args: Prisma.OauthRefreshTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthRefreshTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthRefreshTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthRefreshTokenCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthAccessToken: {
+        payload: Prisma.$OauthAccessTokenPayload<ExtArgs>
+        fields: Prisma.OauthAccessTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthAccessTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthAccessTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.OauthAccessTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthAccessTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          findMany: {
+            args: Prisma.OauthAccessTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>[]
+          }
+          create: {
+            args: Prisma.OauthAccessTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          createMany: {
+            args: Prisma.OauthAccessTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthAccessTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.OauthAccessTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          update: {
+            args: Prisma.OauthAccessTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthAccessTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthAccessTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthAccessTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthAccessTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthAccessTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.OauthAccessTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthAccessToken>
+          }
+          groupBy: {
+            args: Prisma.OauthAccessTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthAccessTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthAccessTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthAccessTokenCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthConsent: {
+        payload: Prisma.$OauthConsentPayload<ExtArgs>
+        fields: Prisma.OauthConsentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthConsentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthConsentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          findFirst: {
+            args: Prisma.OauthConsentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthConsentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          findMany: {
+            args: Prisma.OauthConsentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>[]
+          }
+          create: {
+            args: Prisma.OauthConsentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          createMany: {
+            args: Prisma.OauthConsentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthConsentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>[]
+          }
+          delete: {
+            args: Prisma.OauthConsentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          update: {
+            args: Prisma.OauthConsentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthConsentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthConsentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthConsentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthConsentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthConsentPayload>
+          }
+          aggregate: {
+            args: Prisma.OauthConsentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthConsent>
+          }
+          groupBy: {
+            args: Prisma.OauthConsentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthConsentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthConsentCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthConsentCountAggregateOutputType> | number
+          }
+        }
+      }
+      OauthClientAssertion: {
+        payload: Prisma.$OauthClientAssertionPayload<ExtArgs>
+        fields: Prisma.OauthClientAssertionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OauthClientAssertionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OauthClientAssertionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          findFirst: {
+            args: Prisma.OauthClientAssertionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OauthClientAssertionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          findMany: {
+            args: Prisma.OauthClientAssertionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>[]
+          }
+          create: {
+            args: Prisma.OauthClientAssertionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          createMany: {
+            args: Prisma.OauthClientAssertionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OauthClientAssertionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>[]
+          }
+          delete: {
+            args: Prisma.OauthClientAssertionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          update: {
+            args: Prisma.OauthClientAssertionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          deleteMany: {
+            args: Prisma.OauthClientAssertionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OauthClientAssertionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OauthClientAssertionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>[]
+          }
+          upsert: {
+            args: Prisma.OauthClientAssertionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OauthClientAssertionPayload>
+          }
+          aggregate: {
+            args: Prisma.OauthClientAssertionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOauthClientAssertion>
+          }
+          groupBy: {
+            args: Prisma.OauthClientAssertionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientAssertionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OauthClientAssertionCountArgs<ExtArgs>
+            result: $Utils.Optional<OauthClientAssertionCountAggregateOutputType> | number
           }
         }
       }
@@ -7334,6 +8234,8 @@ export namespace Prisma {
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
     cloudAuthVerification?: CloudAuthVerificationOmit
     cloudAuthDeviceCode?: CloudAuthDeviceCodeOmit
+    externalAgentPat?: ExternalAgentPatOmit
+    externalAgentConnection?: ExternalAgentConnectionOmit
     goal?: GoalOmit
     keyResult?: KeyResultOmit
     goalRecord?: GoalRecordOmit
@@ -7351,6 +8253,14 @@ export namespace Prisma {
     notificationDeliveryDecisionRecord?: NotificationDeliveryDecisionRecordOmit
     notificationPreference?: NotificationPreferenceOmit
     notificationDispatchOutbox?: NotificationDispatchOutboxOmit
+    jwks?: JwksOmit
+    oauthClient?: OauthClientOmit
+    oauthResource?: OauthResourceOmit
+    oauthClientResource?: OauthClientResourceOmit
+    oauthRefreshToken?: OauthRefreshTokenOmit
+    oauthAccessToken?: OauthAccessTokenOmit
+    oauthConsent?: OauthConsentOmit
+    oauthClientAssertion?: OauthClientAssertionOmit
     relation?: RelationOmit
     outboxMessage?: OutboxMessageOmit
     inboxReceipt?: InboxReceiptOmit
@@ -7824,12 +8734,24 @@ export namespace Prisma {
     sessions: number
     providerAccounts: number
     deviceCodes: number
+    externalAgentPats: number
+    externalAgentConnections: number
+    oauthclients: number
+    oauthrefreshtokens: number
+    oauthaccesstokens: number
+    oauthconsents: number
   }
 
   export type CloudAuthUserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | CloudAuthUserCountOutputTypeCountSessionsArgs
     providerAccounts?: boolean | CloudAuthUserCountOutputTypeCountProviderAccountsArgs
     deviceCodes?: boolean | CloudAuthUserCountOutputTypeCountDeviceCodesArgs
+    externalAgentPats?: boolean | CloudAuthUserCountOutputTypeCountExternalAgentPatsArgs
+    externalAgentConnections?: boolean | CloudAuthUserCountOutputTypeCountExternalAgentConnectionsArgs
+    oauthclients?: boolean | CloudAuthUserCountOutputTypeCountOauthclientsArgs
+    oauthrefreshtokens?: boolean | CloudAuthUserCountOutputTypeCountOauthrefreshtokensArgs
+    oauthaccesstokens?: boolean | CloudAuthUserCountOutputTypeCountOauthaccesstokensArgs
+    oauthconsents?: boolean | CloudAuthUserCountOutputTypeCountOauthconsentsArgs
   }
 
   // Custom InputTypes
@@ -7862,6 +8784,88 @@ export namespace Prisma {
    */
   export type CloudAuthUserCountOutputTypeCountDeviceCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CloudAuthDeviceCodeWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountExternalAgentPatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentPatWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountExternalAgentConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentConnectionWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountOauthclientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountOauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthRefreshTokenWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountOauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthAccessTokenWhereInput
+  }
+
+  /**
+   * CloudAuthUserCountOutputType without action
+   */
+  export type CloudAuthUserCountOutputTypeCountOauthconsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthConsentWhereInput
+  }
+
+
+  /**
+   * Count Type CloudAuthSessionCountOutputType
+   */
+
+  export type CloudAuthSessionCountOutputType = {
+    oauthrefreshtokens: number
+    oauthaccesstokens: number
+  }
+
+  export type CloudAuthSessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthrefreshtokens?: boolean | CloudAuthSessionCountOutputTypeCountOauthrefreshtokensArgs
+    oauthaccesstokens?: boolean | CloudAuthSessionCountOutputTypeCountOauthaccesstokensArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CloudAuthSessionCountOutputType without action
+   */
+  export type CloudAuthSessionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthSessionCountOutputType
+     */
+    select?: CloudAuthSessionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CloudAuthSessionCountOutputType without action
+   */
+  export type CloudAuthSessionCountOutputTypeCountOauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthRefreshTokenWhereInput
+  }
+
+  /**
+   * CloudAuthSessionCountOutputType without action
+   */
+  export type CloudAuthSessionCountOutputTypeCountOauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthAccessTokenWhereInput
   }
 
 
@@ -8120,6 +9124,126 @@ export namespace Prisma {
    */
   export type NotificationCountOutputTypeCountDeliveryDecisionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NotificationDeliveryDecisionRecordWhereInput
+  }
+
+
+  /**
+   * Count Type OauthClientCountOutputType
+   */
+
+  export type OauthClientCountOutputType = {
+    oauthclientresources: number
+    oauthrefreshtokens: number
+    oauthaccesstokens: number
+    oauthconsents: number
+  }
+
+  export type OauthClientCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclientresources?: boolean | OauthClientCountOutputTypeCountOauthclientresourcesArgs
+    oauthrefreshtokens?: boolean | OauthClientCountOutputTypeCountOauthrefreshtokensArgs
+    oauthaccesstokens?: boolean | OauthClientCountOutputTypeCountOauthaccesstokensArgs
+    oauthconsents?: boolean | OauthClientCountOutputTypeCountOauthconsentsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * OauthClientCountOutputType without action
+   */
+  export type OauthClientCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientCountOutputType
+     */
+    select?: OauthClientCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * OauthClientCountOutputType without action
+   */
+  export type OauthClientCountOutputTypeCountOauthclientresourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientResourceWhereInput
+  }
+
+  /**
+   * OauthClientCountOutputType without action
+   */
+  export type OauthClientCountOutputTypeCountOauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthRefreshTokenWhereInput
+  }
+
+  /**
+   * OauthClientCountOutputType without action
+   */
+  export type OauthClientCountOutputTypeCountOauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthAccessTokenWhereInput
+  }
+
+  /**
+   * OauthClientCountOutputType without action
+   */
+  export type OauthClientCountOutputTypeCountOauthconsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthConsentWhereInput
+  }
+
+
+  /**
+   * Count Type OauthResourceCountOutputType
+   */
+
+  export type OauthResourceCountOutputType = {
+    oauthclientresources: number
+  }
+
+  export type OauthResourceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclientresources?: boolean | OauthResourceCountOutputTypeCountOauthclientresourcesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * OauthResourceCountOutputType without action
+   */
+  export type OauthResourceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResourceCountOutputType
+     */
+    select?: OauthResourceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * OauthResourceCountOutputType without action
+   */
+  export type OauthResourceCountOutputTypeCountOauthclientresourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientResourceWhereInput
+  }
+
+
+  /**
+   * Count Type OauthRefreshTokenCountOutputType
+   */
+
+  export type OauthRefreshTokenCountOutputType = {
+    oauthaccesstokens: number
+  }
+
+  export type OauthRefreshTokenCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthaccesstokens?: boolean | OauthRefreshTokenCountOutputTypeCountOauthaccesstokensArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * OauthRefreshTokenCountOutputType without action
+   */
+  export type OauthRefreshTokenCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshTokenCountOutputType
+     */
+    select?: OauthRefreshTokenCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * OauthRefreshTokenCountOutputType without action
+   */
+  export type OauthRefreshTokenCountOutputTypeCountOauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthAccessTokenWhereInput
   }
 
 
@@ -17944,6 +19068,12 @@ export namespace Prisma {
     sessions?: boolean | CloudAuthUser$sessionsArgs<ExtArgs>
     providerAccounts?: boolean | CloudAuthUser$providerAccountsArgs<ExtArgs>
     deviceCodes?: boolean | CloudAuthUser$deviceCodesArgs<ExtArgs>
+    externalAgentPats?: boolean | CloudAuthUser$externalAgentPatsArgs<ExtArgs>
+    externalAgentConnections?: boolean | CloudAuthUser$externalAgentConnectionsArgs<ExtArgs>
+    oauthclients?: boolean | CloudAuthUser$oauthclientsArgs<ExtArgs>
+    oauthrefreshtokens?: boolean | CloudAuthUser$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | CloudAuthUser$oauthaccesstokensArgs<ExtArgs>
+    oauthconsents?: boolean | CloudAuthUser$oauthconsentsArgs<ExtArgs>
     account?: boolean | CloudAuthUser$accountArgs<ExtArgs>
     _count?: boolean | CloudAuthUserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cloudAuthUser"]>
@@ -17986,6 +19116,12 @@ export namespace Prisma {
     sessions?: boolean | CloudAuthUser$sessionsArgs<ExtArgs>
     providerAccounts?: boolean | CloudAuthUser$providerAccountsArgs<ExtArgs>
     deviceCodes?: boolean | CloudAuthUser$deviceCodesArgs<ExtArgs>
+    externalAgentPats?: boolean | CloudAuthUser$externalAgentPatsArgs<ExtArgs>
+    externalAgentConnections?: boolean | CloudAuthUser$externalAgentConnectionsArgs<ExtArgs>
+    oauthclients?: boolean | CloudAuthUser$oauthclientsArgs<ExtArgs>
+    oauthrefreshtokens?: boolean | CloudAuthUser$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | CloudAuthUser$oauthaccesstokensArgs<ExtArgs>
+    oauthconsents?: boolean | CloudAuthUser$oauthconsentsArgs<ExtArgs>
     account?: boolean | CloudAuthUser$accountArgs<ExtArgs>
     _count?: boolean | CloudAuthUserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -17998,6 +19134,12 @@ export namespace Prisma {
       sessions: Prisma.$CloudAuthSessionPayload<ExtArgs>[]
       providerAccounts: Prisma.$CloudAuthProviderAccountPayload<ExtArgs>[]
       deviceCodes: Prisma.$CloudAuthDeviceCodePayload<ExtArgs>[]
+      externalAgentPats: Prisma.$ExternalAgentPatPayload<ExtArgs>[]
+      externalAgentConnections: Prisma.$ExternalAgentConnectionPayload<ExtArgs>[]
+      oauthclients: Prisma.$OauthClientPayload<ExtArgs>[]
+      oauthrefreshtokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
+      oauthaccesstokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
+      oauthconsents: Prisma.$OauthConsentPayload<ExtArgs>[]
       account: Prisma.$AccountPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -18406,6 +19548,12 @@ export namespace Prisma {
     sessions<T extends CloudAuthUser$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     providerAccounts<T extends CloudAuthUser$providerAccountsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$providerAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthProviderAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     deviceCodes<T extends CloudAuthUser$deviceCodesArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$deviceCodesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CloudAuthDeviceCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    externalAgentPats<T extends CloudAuthUser$externalAgentPatsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$externalAgentPatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    externalAgentConnections<T extends CloudAuthUser$externalAgentConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$externalAgentConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthclients<T extends CloudAuthUser$oauthclientsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$oauthclientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthrefreshtokens<T extends CloudAuthUser$oauthrefreshtokensArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$oauthrefreshtokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthaccesstokens<T extends CloudAuthUser$oauthaccesstokensArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$oauthaccesstokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthconsents<T extends CloudAuthUser$oauthconsentsArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$oauthconsentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     account<T extends CloudAuthUser$accountArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUser$accountArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -18909,6 +20057,150 @@ export namespace Prisma {
   }
 
   /**
+   * CloudAuthUser.externalAgentPats
+   */
+  export type CloudAuthUser$externalAgentPatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    where?: ExternalAgentPatWhereInput
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    cursor?: ExternalAgentPatWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.externalAgentConnections
+   */
+  export type CloudAuthUser$externalAgentConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    where?: ExternalAgentConnectionWhereInput
+    orderBy?: ExternalAgentConnectionOrderByWithRelationInput | ExternalAgentConnectionOrderByWithRelationInput[]
+    cursor?: ExternalAgentConnectionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExternalAgentConnectionScalarFieldEnum | ExternalAgentConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.oauthclients
+   */
+  export type CloudAuthUser$oauthclientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    where?: OauthClientWhereInput
+    orderBy?: OauthClientOrderByWithRelationInput | OauthClientOrderByWithRelationInput[]
+    cursor?: OauthClientWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthClientScalarFieldEnum | OauthClientScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.oauthrefreshtokens
+   */
+  export type CloudAuthUser$oauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    where?: OauthRefreshTokenWhereInput
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.oauthaccesstokens
+   */
+  export type CloudAuthUser$oauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    where?: OauthAccessTokenWhereInput
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    cursor?: OauthAccessTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthUser.oauthconsents
+   */
+  export type CloudAuthUser$oauthconsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    where?: OauthConsentWhereInput
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    cursor?: OauthConsentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthConsentScalarFieldEnum | OauthConsentScalarFieldEnum[]
+  }
+
+  /**
    * CloudAuthUser.account
    */
   export type CloudAuthUser$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19134,7 +20426,10 @@ export namespace Prisma {
     userAgent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    oauthrefreshtokens?: boolean | CloudAuthSession$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | CloudAuthSession$oauthaccesstokensArgs<ExtArgs>
     user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    _count?: boolean | CloudAuthSessionCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cloudAuthSession"]>
 
   export type CloudAuthSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -19174,7 +20469,10 @@ export namespace Prisma {
 
   export type CloudAuthSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "token" | "expiresAt" | "ipAddress" | "userAgent" | "createdAt" | "updatedAt", ExtArgs["result"]["cloudAuthSession"]>
   export type CloudAuthSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthrefreshtokens?: boolean | CloudAuthSession$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | CloudAuthSession$oauthaccesstokensArgs<ExtArgs>
     user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    _count?: boolean | CloudAuthSessionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CloudAuthSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
@@ -19186,6 +20484,8 @@ export namespace Prisma {
   export type $CloudAuthSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CloudAuthSession"
     objects: {
+      oauthrefreshtokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
+      oauthaccesstokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
       user: Prisma.$CloudAuthUserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -19591,6 +20891,8 @@ export namespace Prisma {
    */
   export interface Prisma__CloudAuthSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthrefreshtokens<T extends CloudAuthSession$oauthrefreshtokensArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthSession$oauthrefreshtokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthaccesstokens<T extends CloudAuthSession$oauthaccesstokensArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthSession$oauthaccesstokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -20027,6 +21329,54 @@ export namespace Prisma {
      * Limit how many CloudAuthSessions to delete.
      */
     limit?: number
+  }
+
+  /**
+   * CloudAuthSession.oauthrefreshtokens
+   */
+  export type CloudAuthSession$oauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    where?: OauthRefreshTokenWhereInput
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * CloudAuthSession.oauthaccesstokens
+   */
+  export type CloudAuthSession$oauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    where?: OauthAccessTokenWhereInput
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    cursor?: OauthAccessTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
   }
 
   /**
@@ -23406,6 +24756,2352 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CloudAuthDeviceCodeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExternalAgentPat
+   */
+
+  export type AggregateExternalAgentPat = {
+    _count: ExternalAgentPatCountAggregateOutputType | null
+    _avg: ExternalAgentPatAvgAggregateOutputType | null
+    _sum: ExternalAgentPatSumAggregateOutputType | null
+    _min: ExternalAgentPatMinAggregateOutputType | null
+    _max: ExternalAgentPatMaxAggregateOutputType | null
+  }
+
+  export type ExternalAgentPatAvgAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatSumAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    prefix: string | null
+    tokenDigest: string | null
+    audience: string | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    name: string | null
+    prefix: string | null
+    tokenDigest: string | null
+    audience: string | null
+    expiresAt: Date | null
+    revokedAt: Date | null
+    createdAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentPatCountAggregateOutputType = {
+    id: number
+    userId: number
+    name: number
+    prefix: number
+    tokenDigest: number
+    audience: number
+    scopes: number
+    expiresAt: number
+    revokedAt: number
+    createdAt: number
+    rateWindow: number
+    rateCount: number
+    _all: number
+  }
+
+
+  export type ExternalAgentPatAvgAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatSumAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatMinAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentPatCountAggregateInputType = {
+    id?: true
+    userId?: true
+    name?: true
+    prefix?: true
+    tokenDigest?: true
+    audience?: true
+    scopes?: true
+    expiresAt?: true
+    revokedAt?: true
+    createdAt?: true
+    rateWindow?: true
+    rateCount?: true
+    _all?: true
+  }
+
+  export type ExternalAgentPatAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentPat to aggregate.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ExternalAgentPats
+    **/
+    _count?: true | ExternalAgentPatCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ExternalAgentPatAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ExternalAgentPatSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExternalAgentPatMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExternalAgentPatMaxAggregateInputType
+  }
+
+  export type GetExternalAgentPatAggregateType<T extends ExternalAgentPatAggregateArgs> = {
+        [P in keyof T & keyof AggregateExternalAgentPat]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExternalAgentPat[P]>
+      : GetScalarType<T[P], AggregateExternalAgentPat[P]>
+  }
+
+
+
+
+  export type ExternalAgentPatGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentPatWhereInput
+    orderBy?: ExternalAgentPatOrderByWithAggregationInput | ExternalAgentPatOrderByWithAggregationInput[]
+    by: ExternalAgentPatScalarFieldEnum[] | ExternalAgentPatScalarFieldEnum
+    having?: ExternalAgentPatScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExternalAgentPatCountAggregateInputType | true
+    _avg?: ExternalAgentPatAvgAggregateInputType
+    _sum?: ExternalAgentPatSumAggregateInputType
+    _min?: ExternalAgentPatMinAggregateInputType
+    _max?: ExternalAgentPatMaxAggregateInputType
+  }
+
+  export type ExternalAgentPatGroupByOutputType = {
+    id: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes: string[]
+    expiresAt: Date
+    revokedAt: Date | null
+    createdAt: Date
+    rateWindow: Date
+    rateCount: number
+    _count: ExternalAgentPatCountAggregateOutputType | null
+    _avg: ExternalAgentPatAvgAggregateOutputType | null
+    _sum: ExternalAgentPatSumAggregateOutputType | null
+    _min: ExternalAgentPatMinAggregateOutputType | null
+    _max: ExternalAgentPatMaxAggregateOutputType | null
+  }
+
+  type GetExternalAgentPatGroupByPayload<T extends ExternalAgentPatGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExternalAgentPatGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExternalAgentPatGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExternalAgentPatGroupByOutputType[P]>
+            : GetScalarType<T[P], ExternalAgentPatGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExternalAgentPatSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentPat"]>
+
+  export type ExternalAgentPatSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    name?: boolean
+    prefix?: boolean
+    tokenDigest?: boolean
+    audience?: boolean
+    scopes?: boolean
+    expiresAt?: boolean
+    revokedAt?: boolean
+    createdAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+  }
+
+  export type ExternalAgentPatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "prefix" | "tokenDigest" | "audience" | "scopes" | "expiresAt" | "revokedAt" | "createdAt" | "rateWindow" | "rateCount", ExtArgs["result"]["externalAgentPat"]>
+  export type ExternalAgentPatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentPatIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentPatIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+
+  export type $ExternalAgentPatPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExternalAgentPat"
+    objects: {
+      user: Prisma.$CloudAuthUserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      name: string
+      prefix: string
+      tokenDigest: string
+      audience: string
+      scopes: string[]
+      expiresAt: Date
+      revokedAt: Date | null
+      createdAt: Date
+      rateWindow: Date
+      rateCount: number
+    }, ExtArgs["result"]["externalAgentPat"]>
+    composites: {}
+  }
+
+  type ExternalAgentPatGetPayload<S extends boolean | null | undefined | ExternalAgentPatDefaultArgs> = $Result.GetResult<Prisma.$ExternalAgentPatPayload, S>
+
+  type ExternalAgentPatCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExternalAgentPatFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExternalAgentPatCountAggregateInputType | true
+    }
+
+  export interface ExternalAgentPatDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExternalAgentPat'], meta: { name: 'ExternalAgentPat' } }
+    /**
+     * Find zero or one ExternalAgentPat that matches the filter.
+     * @param {ExternalAgentPatFindUniqueArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExternalAgentPatFindUniqueArgs>(args: SelectSubset<T, ExternalAgentPatFindUniqueArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExternalAgentPat that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExternalAgentPatFindUniqueOrThrowArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExternalAgentPatFindUniqueOrThrowArgs>(args: SelectSubset<T, ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentPat that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindFirstArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExternalAgentPatFindFirstArgs>(args?: SelectSubset<T, ExternalAgentPatFindFirstArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentPat that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindFirstOrThrowArgs} args - Arguments to find a ExternalAgentPat
+     * @example
+     * // Get one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExternalAgentPatFindFirstOrThrowArgs>(args?: SelectSubset<T, ExternalAgentPatFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExternalAgentPats that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExternalAgentPats
+     * const externalAgentPats = await prisma.externalAgentPat.findMany()
+     *
+     * // Get first 10 ExternalAgentPats
+     * const externalAgentPats = await prisma.externalAgentPat.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ExternalAgentPatFindManyArgs>(args?: SelectSubset<T, ExternalAgentPatFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExternalAgentPat.
+     * @param {ExternalAgentPatCreateArgs} args - Arguments to create a ExternalAgentPat.
+     * @example
+     * // Create one ExternalAgentPat
+     * const ExternalAgentPat = await prisma.externalAgentPat.create({
+     *   data: {
+     *     // ... data to create a ExternalAgentPat
+     *   }
+     * })
+     *
+     */
+    create<T extends ExternalAgentPatCreateArgs>(args: SelectSubset<T, ExternalAgentPatCreateArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExternalAgentPats.
+     * @param {ExternalAgentPatCreateManyArgs} args - Arguments to create many ExternalAgentPats.
+     * @example
+     * // Create many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ExternalAgentPatCreateManyArgs>(args?: SelectSubset<T, ExternalAgentPatCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExternalAgentPats and returns the data saved in the database.
+     * @param {ExternalAgentPatCreateManyAndReturnArgs} args - Arguments to create many ExternalAgentPats.
+     * @example
+     * // Create many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ExternalAgentPats and only return the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ExternalAgentPatCreateManyAndReturnArgs>(args?: SelectSubset<T, ExternalAgentPatCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExternalAgentPat.
+     * @param {ExternalAgentPatDeleteArgs} args - Arguments to delete one ExternalAgentPat.
+     * @example
+     * // Delete one ExternalAgentPat
+     * const ExternalAgentPat = await prisma.externalAgentPat.delete({
+     *   where: {
+     *     // ... filter to delete one ExternalAgentPat
+     *   }
+     * })
+     *
+     */
+    delete<T extends ExternalAgentPatDeleteArgs>(args: SelectSubset<T, ExternalAgentPatDeleteArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExternalAgentPat.
+     * @param {ExternalAgentPatUpdateArgs} args - Arguments to update one ExternalAgentPat.
+     * @example
+     * // Update one ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ExternalAgentPatUpdateArgs>(args: SelectSubset<T, ExternalAgentPatUpdateArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExternalAgentPats.
+     * @param {ExternalAgentPatDeleteManyArgs} args - Arguments to filter ExternalAgentPats to delete.
+     * @example
+     * // Delete a few ExternalAgentPats
+     * const { count } = await prisma.externalAgentPat.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ExternalAgentPatDeleteManyArgs>(args?: SelectSubset<T, ExternalAgentPatDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentPats.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ExternalAgentPatUpdateManyArgs>(args: SelectSubset<T, ExternalAgentPatUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentPats and returns the data updated in the database.
+     * @param {ExternalAgentPatUpdateManyAndReturnArgs} args - Arguments to update many ExternalAgentPats.
+     * @example
+     * // Update many ExternalAgentPats
+     * const externalAgentPat = await prisma.externalAgentPat.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ExternalAgentPats and only return the `id`
+     * const externalAgentPatWithIdOnly = await prisma.externalAgentPat.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ExternalAgentPatUpdateManyAndReturnArgs>(args: SelectSubset<T, ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExternalAgentPat.
+     * @param {ExternalAgentPatUpsertArgs} args - Arguments to update or create a ExternalAgentPat.
+     * @example
+     * // Update or create a ExternalAgentPat
+     * const externalAgentPat = await prisma.externalAgentPat.upsert({
+     *   create: {
+     *     // ... data to create a ExternalAgentPat
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExternalAgentPat we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExternalAgentPatUpsertArgs>(args: SelectSubset<T, ExternalAgentPatUpsertArgs<ExtArgs>>): Prisma__ExternalAgentPatClient<$Result.GetResult<Prisma.$ExternalAgentPatPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExternalAgentPats.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatCountArgs} args - Arguments to filter ExternalAgentPats to count.
+     * @example
+     * // Count the number of ExternalAgentPats
+     * const count = await prisma.externalAgentPat.count({
+     *   where: {
+     *     // ... the filter for the ExternalAgentPats we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExternalAgentPatCountArgs>(
+      args?: Subset<T, ExternalAgentPatCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExternalAgentPatCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExternalAgentPat.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExternalAgentPatAggregateArgs>(args: Subset<T, ExternalAgentPatAggregateArgs>): Prisma.PrismaPromise<GetExternalAgentPatAggregateType<T>>
+
+    /**
+     * Group by ExternalAgentPat.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentPatGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ExternalAgentPatGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExternalAgentPatGroupByArgs['orderBy'] }
+        : { orderBy?: ExternalAgentPatGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExternalAgentPatGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExternalAgentPatGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExternalAgentPat model
+   */
+  readonly fields: ExternalAgentPatFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExternalAgentPat.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExternalAgentPatClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExternalAgentPat model
+   */
+  interface ExternalAgentPatFieldRefs {
+    readonly id: FieldRef<"ExternalAgentPat", 'String'>
+    readonly userId: FieldRef<"ExternalAgentPat", 'String'>
+    readonly name: FieldRef<"ExternalAgentPat", 'String'>
+    readonly prefix: FieldRef<"ExternalAgentPat", 'String'>
+    readonly tokenDigest: FieldRef<"ExternalAgentPat", 'String'>
+    readonly audience: FieldRef<"ExternalAgentPat", 'String'>
+    readonly scopes: FieldRef<"ExternalAgentPat", 'String[]'>
+    readonly expiresAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly revokedAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly createdAt: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly rateWindow: FieldRef<"ExternalAgentPat", 'DateTime'>
+    readonly rateCount: FieldRef<"ExternalAgentPat", 'Int'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ExternalAgentPat findUnique
+   */
+  export type ExternalAgentPatFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat findUniqueOrThrow
+   */
+  export type ExternalAgentPatFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat findFirst
+   */
+  export type ExternalAgentPatFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat findFirstOrThrow
+   */
+  export type ExternalAgentPatFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPat to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat findMany
+   */
+  export type ExternalAgentPatFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentPats to fetch.
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentPats to fetch.
+     */
+    orderBy?: ExternalAgentPatOrderByWithRelationInput | ExternalAgentPatOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ExternalAgentPats.
+     */
+    cursor?: ExternalAgentPatWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentPats from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentPats.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentPats.
+     */
+    distinct?: ExternalAgentPatScalarFieldEnum | ExternalAgentPatScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentPat create
+   */
+  export type ExternalAgentPatCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExternalAgentPat.
+     */
+    data: XOR<ExternalAgentPatCreateInput, ExternalAgentPatUncheckedCreateInput>
+  }
+
+  /**
+   * ExternalAgentPat createMany
+   */
+  export type ExternalAgentPatCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExternalAgentPats.
+     */
+    data: ExternalAgentPatCreateManyInput | ExternalAgentPatCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExternalAgentPat createManyAndReturn
+   */
+  export type ExternalAgentPatCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExternalAgentPats.
+     */
+    data: ExternalAgentPatCreateManyInput | ExternalAgentPatCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentPat update
+   */
+  export type ExternalAgentPatUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExternalAgentPat.
+     */
+    data: XOR<ExternalAgentPatUpdateInput, ExternalAgentPatUncheckedUpdateInput>
+    /**
+     * Choose, which ExternalAgentPat to update.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat updateMany
+   */
+  export type ExternalAgentPatUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExternalAgentPats.
+     */
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentPats to update
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentPat updateManyAndReturn
+   */
+  export type ExternalAgentPatUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * The data used to update ExternalAgentPats.
+     */
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentPats to update
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentPat upsert
+   */
+  export type ExternalAgentPatUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExternalAgentPat to update in case it exists.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+    /**
+     * In case the ExternalAgentPat found by the `where` argument doesn't exist, create a new ExternalAgentPat with this data.
+     */
+    create: XOR<ExternalAgentPatCreateInput, ExternalAgentPatUncheckedCreateInput>
+    /**
+     * In case the ExternalAgentPat was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExternalAgentPatUpdateInput, ExternalAgentPatUncheckedUpdateInput>
+  }
+
+  /**
+   * ExternalAgentPat delete
+   */
+  export type ExternalAgentPatDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+    /**
+     * Filter which ExternalAgentPat to delete.
+     */
+    where: ExternalAgentPatWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentPat deleteMany
+   */
+  export type ExternalAgentPatDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentPats to delete
+     */
+    where?: ExternalAgentPatWhereInput
+    /**
+     * Limit how many ExternalAgentPats to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentPat without action
+   */
+  export type ExternalAgentPatDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentPat
+     */
+    select?: ExternalAgentPatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentPat
+     */
+    omit?: ExternalAgentPatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentPatInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ExternalAgentConnection
+   */
+
+  export type AggregateExternalAgentConnection = {
+    _count: ExternalAgentConnectionCountAggregateOutputType | null
+    _avg: ExternalAgentConnectionAvgAggregateOutputType | null
+    _sum: ExternalAgentConnectionSumAggregateOutputType | null
+    _min: ExternalAgentConnectionMinAggregateOutputType | null
+    _max: ExternalAgentConnectionMaxAggregateOutputType | null
+  }
+
+  export type ExternalAgentConnectionAvgAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentConnectionSumAggregateOutputType = {
+    rateCount: number | null
+  }
+
+  export type ExternalAgentConnectionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    clientId: string | null
+    resource: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentConnectionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    clientId: string | null
+    resource: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    rateWindow: Date | null
+    rateCount: number | null
+  }
+
+  export type ExternalAgentConnectionCountAggregateOutputType = {
+    id: number
+    userId: number
+    clientId: number
+    resource: number
+    createdAt: number
+    expiresAt: number
+    lastUsedAt: number
+    revokedAt: number
+    rateWindow: number
+    rateCount: number
+    _all: number
+  }
+
+
+  export type ExternalAgentConnectionAvgAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentConnectionSumAggregateInputType = {
+    rateCount?: true
+  }
+
+  export type ExternalAgentConnectionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    clientId?: true
+    resource?: true
+    createdAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentConnectionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    clientId?: true
+    resource?: true
+    createdAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    rateWindow?: true
+    rateCount?: true
+  }
+
+  export type ExternalAgentConnectionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    clientId?: true
+    resource?: true
+    createdAt?: true
+    expiresAt?: true
+    lastUsedAt?: true
+    revokedAt?: true
+    rateWindow?: true
+    rateCount?: true
+    _all?: true
+  }
+
+  export type ExternalAgentConnectionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentConnection to aggregate.
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentConnections to fetch.
+     */
+    orderBy?: ExternalAgentConnectionOrderByWithRelationInput | ExternalAgentConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ExternalAgentConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ExternalAgentConnections
+    **/
+    _count?: true | ExternalAgentConnectionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ExternalAgentConnectionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ExternalAgentConnectionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExternalAgentConnectionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExternalAgentConnectionMaxAggregateInputType
+  }
+
+  export type GetExternalAgentConnectionAggregateType<T extends ExternalAgentConnectionAggregateArgs> = {
+        [P in keyof T & keyof AggregateExternalAgentConnection]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExternalAgentConnection[P]>
+      : GetScalarType<T[P], AggregateExternalAgentConnection[P]>
+  }
+
+
+
+
+  export type ExternalAgentConnectionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalAgentConnectionWhereInput
+    orderBy?: ExternalAgentConnectionOrderByWithAggregationInput | ExternalAgentConnectionOrderByWithAggregationInput[]
+    by: ExternalAgentConnectionScalarFieldEnum[] | ExternalAgentConnectionScalarFieldEnum
+    having?: ExternalAgentConnectionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExternalAgentConnectionCountAggregateInputType | true
+    _avg?: ExternalAgentConnectionAvgAggregateInputType
+    _sum?: ExternalAgentConnectionSumAggregateInputType
+    _min?: ExternalAgentConnectionMinAggregateInputType
+    _max?: ExternalAgentConnectionMaxAggregateInputType
+  }
+
+  export type ExternalAgentConnectionGroupByOutputType = {
+    id: string
+    userId: string
+    clientId: string
+    resource: string
+    createdAt: Date
+    expiresAt: Date
+    lastUsedAt: Date | null
+    revokedAt: Date | null
+    rateWindow: Date
+    rateCount: number
+    _count: ExternalAgentConnectionCountAggregateOutputType | null
+    _avg: ExternalAgentConnectionAvgAggregateOutputType | null
+    _sum: ExternalAgentConnectionSumAggregateOutputType | null
+    _min: ExternalAgentConnectionMinAggregateOutputType | null
+    _max: ExternalAgentConnectionMaxAggregateOutputType | null
+  }
+
+  type GetExternalAgentConnectionGroupByPayload<T extends ExternalAgentConnectionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExternalAgentConnectionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExternalAgentConnectionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExternalAgentConnectionGroupByOutputType[P]>
+            : GetScalarType<T[P], ExternalAgentConnectionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExternalAgentConnectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    clientId?: boolean
+    resource?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentConnection"]>
+
+  export type ExternalAgentConnectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    clientId?: boolean
+    resource?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentConnection"]>
+
+  export type ExternalAgentConnectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    clientId?: boolean
+    resource?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalAgentConnection"]>
+
+  export type ExternalAgentConnectionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    clientId?: boolean
+    resource?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    lastUsedAt?: boolean
+    revokedAt?: boolean
+    rateWindow?: boolean
+    rateCount?: boolean
+  }
+
+  export type ExternalAgentConnectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "clientId" | "resource" | "createdAt" | "expiresAt" | "lastUsedAt" | "revokedAt" | "rateWindow" | "rateCount", ExtArgs["result"]["externalAgentConnection"]>
+  export type ExternalAgentConnectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentConnectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type ExternalAgentConnectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+
+  export type $ExternalAgentConnectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExternalAgentConnection"
+    objects: {
+      user: Prisma.$CloudAuthUserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      clientId: string
+      resource: string
+      createdAt: Date
+      expiresAt: Date
+      lastUsedAt: Date | null
+      revokedAt: Date | null
+      rateWindow: Date
+      rateCount: number
+    }, ExtArgs["result"]["externalAgentConnection"]>
+    composites: {}
+  }
+
+  type ExternalAgentConnectionGetPayload<S extends boolean | null | undefined | ExternalAgentConnectionDefaultArgs> = $Result.GetResult<Prisma.$ExternalAgentConnectionPayload, S>
+
+  type ExternalAgentConnectionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExternalAgentConnectionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExternalAgentConnectionCountAggregateInputType | true
+    }
+
+  export interface ExternalAgentConnectionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExternalAgentConnection'], meta: { name: 'ExternalAgentConnection' } }
+    /**
+     * Find zero or one ExternalAgentConnection that matches the filter.
+     * @param {ExternalAgentConnectionFindUniqueArgs} args - Arguments to find a ExternalAgentConnection
+     * @example
+     * // Get one ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExternalAgentConnectionFindUniqueArgs>(args: SelectSubset<T, ExternalAgentConnectionFindUniqueArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExternalAgentConnection that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExternalAgentConnectionFindUniqueOrThrowArgs} args - Arguments to find a ExternalAgentConnection
+     * @example
+     * // Get one ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExternalAgentConnectionFindUniqueOrThrowArgs>(args: SelectSubset<T, ExternalAgentConnectionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentConnection that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionFindFirstArgs} args - Arguments to find a ExternalAgentConnection
+     * @example
+     * // Get one ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExternalAgentConnectionFindFirstArgs>(args?: SelectSubset<T, ExternalAgentConnectionFindFirstArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalAgentConnection that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionFindFirstOrThrowArgs} args - Arguments to find a ExternalAgentConnection
+     * @example
+     * // Get one ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExternalAgentConnectionFindFirstOrThrowArgs>(args?: SelectSubset<T, ExternalAgentConnectionFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExternalAgentConnections that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExternalAgentConnections
+     * const externalAgentConnections = await prisma.externalAgentConnection.findMany()
+     *
+     * // Get first 10 ExternalAgentConnections
+     * const externalAgentConnections = await prisma.externalAgentConnection.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const externalAgentConnectionWithIdOnly = await prisma.externalAgentConnection.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ExternalAgentConnectionFindManyArgs>(args?: SelectSubset<T, ExternalAgentConnectionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExternalAgentConnection.
+     * @param {ExternalAgentConnectionCreateArgs} args - Arguments to create a ExternalAgentConnection.
+     * @example
+     * // Create one ExternalAgentConnection
+     * const ExternalAgentConnection = await prisma.externalAgentConnection.create({
+     *   data: {
+     *     // ... data to create a ExternalAgentConnection
+     *   }
+     * })
+     *
+     */
+    create<T extends ExternalAgentConnectionCreateArgs>(args: SelectSubset<T, ExternalAgentConnectionCreateArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExternalAgentConnections.
+     * @param {ExternalAgentConnectionCreateManyArgs} args - Arguments to create many ExternalAgentConnections.
+     * @example
+     * // Create many ExternalAgentConnections
+     * const externalAgentConnection = await prisma.externalAgentConnection.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ExternalAgentConnectionCreateManyArgs>(args?: SelectSubset<T, ExternalAgentConnectionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExternalAgentConnections and returns the data saved in the database.
+     * @param {ExternalAgentConnectionCreateManyAndReturnArgs} args - Arguments to create many ExternalAgentConnections.
+     * @example
+     * // Create many ExternalAgentConnections
+     * const externalAgentConnection = await prisma.externalAgentConnection.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ExternalAgentConnections and only return the `id`
+     * const externalAgentConnectionWithIdOnly = await prisma.externalAgentConnection.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ExternalAgentConnectionCreateManyAndReturnArgs>(args?: SelectSubset<T, ExternalAgentConnectionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExternalAgentConnection.
+     * @param {ExternalAgentConnectionDeleteArgs} args - Arguments to delete one ExternalAgentConnection.
+     * @example
+     * // Delete one ExternalAgentConnection
+     * const ExternalAgentConnection = await prisma.externalAgentConnection.delete({
+     *   where: {
+     *     // ... filter to delete one ExternalAgentConnection
+     *   }
+     * })
+     *
+     */
+    delete<T extends ExternalAgentConnectionDeleteArgs>(args: SelectSubset<T, ExternalAgentConnectionDeleteArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExternalAgentConnection.
+     * @param {ExternalAgentConnectionUpdateArgs} args - Arguments to update one ExternalAgentConnection.
+     * @example
+     * // Update one ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ExternalAgentConnectionUpdateArgs>(args: SelectSubset<T, ExternalAgentConnectionUpdateArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExternalAgentConnections.
+     * @param {ExternalAgentConnectionDeleteManyArgs} args - Arguments to filter ExternalAgentConnections to delete.
+     * @example
+     * // Delete a few ExternalAgentConnections
+     * const { count } = await prisma.externalAgentConnection.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ExternalAgentConnectionDeleteManyArgs>(args?: SelectSubset<T, ExternalAgentConnectionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentConnections.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExternalAgentConnections
+     * const externalAgentConnection = await prisma.externalAgentConnection.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ExternalAgentConnectionUpdateManyArgs>(args: SelectSubset<T, ExternalAgentConnectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalAgentConnections and returns the data updated in the database.
+     * @param {ExternalAgentConnectionUpdateManyAndReturnArgs} args - Arguments to update many ExternalAgentConnections.
+     * @example
+     * // Update many ExternalAgentConnections
+     * const externalAgentConnection = await prisma.externalAgentConnection.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ExternalAgentConnections and only return the `id`
+     * const externalAgentConnectionWithIdOnly = await prisma.externalAgentConnection.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ExternalAgentConnectionUpdateManyAndReturnArgs>(args: SelectSubset<T, ExternalAgentConnectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExternalAgentConnection.
+     * @param {ExternalAgentConnectionUpsertArgs} args - Arguments to update or create a ExternalAgentConnection.
+     * @example
+     * // Update or create a ExternalAgentConnection
+     * const externalAgentConnection = await prisma.externalAgentConnection.upsert({
+     *   create: {
+     *     // ... data to create a ExternalAgentConnection
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExternalAgentConnection we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExternalAgentConnectionUpsertArgs>(args: SelectSubset<T, ExternalAgentConnectionUpsertArgs<ExtArgs>>): Prisma__ExternalAgentConnectionClient<$Result.GetResult<Prisma.$ExternalAgentConnectionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExternalAgentConnections.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionCountArgs} args - Arguments to filter ExternalAgentConnections to count.
+     * @example
+     * // Count the number of ExternalAgentConnections
+     * const count = await prisma.externalAgentConnection.count({
+     *   where: {
+     *     // ... the filter for the ExternalAgentConnections we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExternalAgentConnectionCountArgs>(
+      args?: Subset<T, ExternalAgentConnectionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExternalAgentConnectionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExternalAgentConnection.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExternalAgentConnectionAggregateArgs>(args: Subset<T, ExternalAgentConnectionAggregateArgs>): Prisma.PrismaPromise<GetExternalAgentConnectionAggregateType<T>>
+
+    /**
+     * Group by ExternalAgentConnection.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalAgentConnectionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ExternalAgentConnectionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExternalAgentConnectionGroupByArgs['orderBy'] }
+        : { orderBy?: ExternalAgentConnectionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExternalAgentConnectionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExternalAgentConnectionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExternalAgentConnection model
+   */
+  readonly fields: ExternalAgentConnectionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExternalAgentConnection.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExternalAgentConnectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExternalAgentConnection model
+   */
+  interface ExternalAgentConnectionFieldRefs {
+    readonly id: FieldRef<"ExternalAgentConnection", 'String'>
+    readonly userId: FieldRef<"ExternalAgentConnection", 'String'>
+    readonly clientId: FieldRef<"ExternalAgentConnection", 'String'>
+    readonly resource: FieldRef<"ExternalAgentConnection", 'String'>
+    readonly createdAt: FieldRef<"ExternalAgentConnection", 'DateTime'>
+    readonly expiresAt: FieldRef<"ExternalAgentConnection", 'DateTime'>
+    readonly lastUsedAt: FieldRef<"ExternalAgentConnection", 'DateTime'>
+    readonly revokedAt: FieldRef<"ExternalAgentConnection", 'DateTime'>
+    readonly rateWindow: FieldRef<"ExternalAgentConnection", 'DateTime'>
+    readonly rateCount: FieldRef<"ExternalAgentConnection", 'Int'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ExternalAgentConnection findUnique
+   */
+  export type ExternalAgentConnectionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentConnection to fetch.
+     */
+    where: ExternalAgentConnectionWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentConnection findUniqueOrThrow
+   */
+  export type ExternalAgentConnectionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentConnection to fetch.
+     */
+    where: ExternalAgentConnectionWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentConnection findFirst
+   */
+  export type ExternalAgentConnectionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentConnection to fetch.
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentConnections to fetch.
+     */
+    orderBy?: ExternalAgentConnectionOrderByWithRelationInput | ExternalAgentConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentConnections.
+     */
+    cursor?: ExternalAgentConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentConnections.
+     */
+    distinct?: ExternalAgentConnectionScalarFieldEnum | ExternalAgentConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentConnection findFirstOrThrow
+   */
+  export type ExternalAgentConnectionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentConnection to fetch.
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentConnections to fetch.
+     */
+    orderBy?: ExternalAgentConnectionOrderByWithRelationInput | ExternalAgentConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalAgentConnections.
+     */
+    cursor?: ExternalAgentConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentConnections.
+     */
+    distinct?: ExternalAgentConnectionScalarFieldEnum | ExternalAgentConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentConnection findMany
+   */
+  export type ExternalAgentConnectionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalAgentConnections to fetch.
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalAgentConnections to fetch.
+     */
+    orderBy?: ExternalAgentConnectionOrderByWithRelationInput | ExternalAgentConnectionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ExternalAgentConnections.
+     */
+    cursor?: ExternalAgentConnectionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalAgentConnections from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalAgentConnections.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalAgentConnections.
+     */
+    distinct?: ExternalAgentConnectionScalarFieldEnum | ExternalAgentConnectionScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalAgentConnection create
+   */
+  export type ExternalAgentConnectionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExternalAgentConnection.
+     */
+    data: XOR<ExternalAgentConnectionCreateInput, ExternalAgentConnectionUncheckedCreateInput>
+  }
+
+  /**
+   * ExternalAgentConnection createMany
+   */
+  export type ExternalAgentConnectionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExternalAgentConnections.
+     */
+    data: ExternalAgentConnectionCreateManyInput | ExternalAgentConnectionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExternalAgentConnection createManyAndReturn
+   */
+  export type ExternalAgentConnectionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExternalAgentConnections.
+     */
+    data: ExternalAgentConnectionCreateManyInput | ExternalAgentConnectionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentConnection update
+   */
+  export type ExternalAgentConnectionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExternalAgentConnection.
+     */
+    data: XOR<ExternalAgentConnectionUpdateInput, ExternalAgentConnectionUncheckedUpdateInput>
+    /**
+     * Choose, which ExternalAgentConnection to update.
+     */
+    where: ExternalAgentConnectionWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentConnection updateMany
+   */
+  export type ExternalAgentConnectionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExternalAgentConnections.
+     */
+    data: XOR<ExternalAgentConnectionUpdateManyMutationInput, ExternalAgentConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentConnections to update
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * Limit how many ExternalAgentConnections to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentConnection updateManyAndReturn
+   */
+  export type ExternalAgentConnectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to update ExternalAgentConnections.
+     */
+    data: XOR<ExternalAgentConnectionUpdateManyMutationInput, ExternalAgentConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalAgentConnections to update
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * Limit how many ExternalAgentConnections to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalAgentConnection upsert
+   */
+  export type ExternalAgentConnectionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExternalAgentConnection to update in case it exists.
+     */
+    where: ExternalAgentConnectionWhereUniqueInput
+    /**
+     * In case the ExternalAgentConnection found by the `where` argument doesn't exist, create a new ExternalAgentConnection with this data.
+     */
+    create: XOR<ExternalAgentConnectionCreateInput, ExternalAgentConnectionUncheckedCreateInput>
+    /**
+     * In case the ExternalAgentConnection was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExternalAgentConnectionUpdateInput, ExternalAgentConnectionUncheckedUpdateInput>
+  }
+
+  /**
+   * ExternalAgentConnection delete
+   */
+  export type ExternalAgentConnectionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
+    /**
+     * Filter which ExternalAgentConnection to delete.
+     */
+    where: ExternalAgentConnectionWhereUniqueInput
+  }
+
+  /**
+   * ExternalAgentConnection deleteMany
+   */
+  export type ExternalAgentConnectionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalAgentConnections to delete
+     */
+    where?: ExternalAgentConnectionWhereInput
+    /**
+     * Limit how many ExternalAgentConnections to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalAgentConnection without action
+   */
+  export type ExternalAgentConnectionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalAgentConnection
+     */
+    select?: ExternalAgentConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalAgentConnection
+     */
+    omit?: ExternalAgentConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalAgentConnectionInclude<ExtArgs> | null
   }
 
 
@@ -43580,6 +47276,9531 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: NotificationDispatchOutboxInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Jwks
+   */
+
+  export type AggregateJwks = {
+    _count: JwksCountAggregateOutputType | null
+    _min: JwksMinAggregateOutputType | null
+    _max: JwksMaxAggregateOutputType | null
+  }
+
+  export type JwksMinAggregateOutputType = {
+    id: string | null
+    publicKey: string | null
+    privateKey: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    alg: string | null
+    crv: string | null
+  }
+
+  export type JwksMaxAggregateOutputType = {
+    id: string | null
+    publicKey: string | null
+    privateKey: string | null
+    createdAt: Date | null
+    expiresAt: Date | null
+    alg: string | null
+    crv: string | null
+  }
+
+  export type JwksCountAggregateOutputType = {
+    id: number
+    publicKey: number
+    privateKey: number
+    createdAt: number
+    expiresAt: number
+    alg: number
+    crv: number
+    _all: number
+  }
+
+
+  export type JwksMinAggregateInputType = {
+    id?: true
+    publicKey?: true
+    privateKey?: true
+    createdAt?: true
+    expiresAt?: true
+    alg?: true
+    crv?: true
+  }
+
+  export type JwksMaxAggregateInputType = {
+    id?: true
+    publicKey?: true
+    privateKey?: true
+    createdAt?: true
+    expiresAt?: true
+    alg?: true
+    crv?: true
+  }
+
+  export type JwksCountAggregateInputType = {
+    id?: true
+    publicKey?: true
+    privateKey?: true
+    createdAt?: true
+    expiresAt?: true
+    alg?: true
+    crv?: true
+    _all?: true
+  }
+
+  export type JwksAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Jwks to aggregate.
+     */
+    where?: JwksWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Jwks to fetch.
+     */
+    orderBy?: JwksOrderByWithRelationInput | JwksOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: JwksWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Jwks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Jwks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned Jwks
+    **/
+    _count?: true | JwksCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: JwksMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: JwksMaxAggregateInputType
+  }
+
+  export type GetJwksAggregateType<T extends JwksAggregateArgs> = {
+        [P in keyof T & keyof AggregateJwks]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateJwks[P]>
+      : GetScalarType<T[P], AggregateJwks[P]>
+  }
+
+
+
+
+  export type JwksGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JwksWhereInput
+    orderBy?: JwksOrderByWithAggregationInput | JwksOrderByWithAggregationInput[]
+    by: JwksScalarFieldEnum[] | JwksScalarFieldEnum
+    having?: JwksScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: JwksCountAggregateInputType | true
+    _min?: JwksMinAggregateInputType
+    _max?: JwksMaxAggregateInputType
+  }
+
+  export type JwksGroupByOutputType = {
+    id: string
+    publicKey: string
+    privateKey: string
+    createdAt: Date
+    expiresAt: Date | null
+    alg: string | null
+    crv: string | null
+    _count: JwksCountAggregateOutputType | null
+    _min: JwksMinAggregateOutputType | null
+    _max: JwksMaxAggregateOutputType | null
+  }
+
+  type GetJwksGroupByPayload<T extends JwksGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<JwksGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof JwksGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], JwksGroupByOutputType[P]>
+            : GetScalarType<T[P], JwksGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type JwksSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    publicKey?: boolean
+    privateKey?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    alg?: boolean
+    crv?: boolean
+  }, ExtArgs["result"]["jwks"]>
+
+  export type JwksSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    publicKey?: boolean
+    privateKey?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    alg?: boolean
+    crv?: boolean
+  }, ExtArgs["result"]["jwks"]>
+
+  export type JwksSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    publicKey?: boolean
+    privateKey?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    alg?: boolean
+    crv?: boolean
+  }, ExtArgs["result"]["jwks"]>
+
+  export type JwksSelectScalar = {
+    id?: boolean
+    publicKey?: boolean
+    privateKey?: boolean
+    createdAt?: boolean
+    expiresAt?: boolean
+    alg?: boolean
+    crv?: boolean
+  }
+
+  export type JwksOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "publicKey" | "privateKey" | "createdAt" | "expiresAt" | "alg" | "crv", ExtArgs["result"]["jwks"]>
+
+  export type $JwksPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Jwks"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      publicKey: string
+      privateKey: string
+      createdAt: Date
+      expiresAt: Date | null
+      alg: string | null
+      crv: string | null
+    }, ExtArgs["result"]["jwks"]>
+    composites: {}
+  }
+
+  type JwksGetPayload<S extends boolean | null | undefined | JwksDefaultArgs> = $Result.GetResult<Prisma.$JwksPayload, S>
+
+  type JwksCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<JwksFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: JwksCountAggregateInputType | true
+    }
+
+  export interface JwksDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Jwks'], meta: { name: 'Jwks' } }
+    /**
+     * Find zero or one Jwks that matches the filter.
+     * @param {JwksFindUniqueArgs} args - Arguments to find a Jwks
+     * @example
+     * // Get one Jwks
+     * const jwks = await prisma.jwks.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends JwksFindUniqueArgs>(args: SelectSubset<T, JwksFindUniqueArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Jwks that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {JwksFindUniqueOrThrowArgs} args - Arguments to find a Jwks
+     * @example
+     * // Get one Jwks
+     * const jwks = await prisma.jwks.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends JwksFindUniqueOrThrowArgs>(args: SelectSubset<T, JwksFindUniqueOrThrowArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Jwks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksFindFirstArgs} args - Arguments to find a Jwks
+     * @example
+     * // Get one Jwks
+     * const jwks = await prisma.jwks.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends JwksFindFirstArgs>(args?: SelectSubset<T, JwksFindFirstArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Jwks that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksFindFirstOrThrowArgs} args - Arguments to find a Jwks
+     * @example
+     * // Get one Jwks
+     * const jwks = await prisma.jwks.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends JwksFindFirstOrThrowArgs>(args?: SelectSubset<T, JwksFindFirstOrThrowArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Jwks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Jwks
+     * const jwks = await prisma.jwks.findMany()
+     *
+     * // Get first 10 Jwks
+     * const jwks = await prisma.jwks.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const jwksWithIdOnly = await prisma.jwks.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends JwksFindManyArgs>(args?: SelectSubset<T, JwksFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Jwks.
+     * @param {JwksCreateArgs} args - Arguments to create a Jwks.
+     * @example
+     * // Create one Jwks
+     * const Jwks = await prisma.jwks.create({
+     *   data: {
+     *     // ... data to create a Jwks
+     *   }
+     * })
+     *
+     */
+    create<T extends JwksCreateArgs>(args: SelectSubset<T, JwksCreateArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Jwks.
+     * @param {JwksCreateManyArgs} args - Arguments to create many Jwks.
+     * @example
+     * // Create many Jwks
+     * const jwks = await prisma.jwks.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends JwksCreateManyArgs>(args?: SelectSubset<T, JwksCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Jwks and returns the data saved in the database.
+     * @param {JwksCreateManyAndReturnArgs} args - Arguments to create many Jwks.
+     * @example
+     * // Create many Jwks
+     * const jwks = await prisma.jwks.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many Jwks and only return the `id`
+     * const jwksWithIdOnly = await prisma.jwks.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends JwksCreateManyAndReturnArgs>(args?: SelectSubset<T, JwksCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Jwks.
+     * @param {JwksDeleteArgs} args - Arguments to delete one Jwks.
+     * @example
+     * // Delete one Jwks
+     * const Jwks = await prisma.jwks.delete({
+     *   where: {
+     *     // ... filter to delete one Jwks
+     *   }
+     * })
+     *
+     */
+    delete<T extends JwksDeleteArgs>(args: SelectSubset<T, JwksDeleteArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Jwks.
+     * @param {JwksUpdateArgs} args - Arguments to update one Jwks.
+     * @example
+     * // Update one Jwks
+     * const jwks = await prisma.jwks.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends JwksUpdateArgs>(args: SelectSubset<T, JwksUpdateArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Jwks.
+     * @param {JwksDeleteManyArgs} args - Arguments to filter Jwks to delete.
+     * @example
+     * // Delete a few Jwks
+     * const { count } = await prisma.jwks.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends JwksDeleteManyArgs>(args?: SelectSubset<T, JwksDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Jwks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Jwks
+     * const jwks = await prisma.jwks.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends JwksUpdateManyArgs>(args: SelectSubset<T, JwksUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Jwks and returns the data updated in the database.
+     * @param {JwksUpdateManyAndReturnArgs} args - Arguments to update many Jwks.
+     * @example
+     * // Update many Jwks
+     * const jwks = await prisma.jwks.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more Jwks and only return the `id`
+     * const jwksWithIdOnly = await prisma.jwks.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends JwksUpdateManyAndReturnArgs>(args: SelectSubset<T, JwksUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Jwks.
+     * @param {JwksUpsertArgs} args - Arguments to update or create a Jwks.
+     * @example
+     * // Update or create a Jwks
+     * const jwks = await prisma.jwks.upsert({
+     *   create: {
+     *     // ... data to create a Jwks
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Jwks we want to update
+     *   }
+     * })
+     */
+    upsert<T extends JwksUpsertArgs>(args: SelectSubset<T, JwksUpsertArgs<ExtArgs>>): Prisma__JwksClient<$Result.GetResult<Prisma.$JwksPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Jwks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksCountArgs} args - Arguments to filter Jwks to count.
+     * @example
+     * // Count the number of Jwks
+     * const count = await prisma.jwks.count({
+     *   where: {
+     *     // ... the filter for the Jwks we want to count
+     *   }
+     * })
+    **/
+    count<T extends JwksCountArgs>(
+      args?: Subset<T, JwksCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], JwksCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Jwks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends JwksAggregateArgs>(args: Subset<T, JwksAggregateArgs>): Prisma.PrismaPromise<GetJwksAggregateType<T>>
+
+    /**
+     * Group by Jwks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JwksGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends JwksGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: JwksGroupByArgs['orderBy'] }
+        : { orderBy?: JwksGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, JwksGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetJwksGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Jwks model
+   */
+  readonly fields: JwksFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Jwks.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__JwksClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Jwks model
+   */
+  interface JwksFieldRefs {
+    readonly id: FieldRef<"Jwks", 'String'>
+    readonly publicKey: FieldRef<"Jwks", 'String'>
+    readonly privateKey: FieldRef<"Jwks", 'String'>
+    readonly createdAt: FieldRef<"Jwks", 'DateTime'>
+    readonly expiresAt: FieldRef<"Jwks", 'DateTime'>
+    readonly alg: FieldRef<"Jwks", 'String'>
+    readonly crv: FieldRef<"Jwks", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * Jwks findUnique
+   */
+  export type JwksFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter, which Jwks to fetch.
+     */
+    where: JwksWhereUniqueInput
+  }
+
+  /**
+   * Jwks findUniqueOrThrow
+   */
+  export type JwksFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter, which Jwks to fetch.
+     */
+    where: JwksWhereUniqueInput
+  }
+
+  /**
+   * Jwks findFirst
+   */
+  export type JwksFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter, which Jwks to fetch.
+     */
+    where?: JwksWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Jwks to fetch.
+     */
+    orderBy?: JwksOrderByWithRelationInput | JwksOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for Jwks.
+     */
+    cursor?: JwksWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Jwks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Jwks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Jwks.
+     */
+    distinct?: JwksScalarFieldEnum | JwksScalarFieldEnum[]
+  }
+
+  /**
+   * Jwks findFirstOrThrow
+   */
+  export type JwksFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter, which Jwks to fetch.
+     */
+    where?: JwksWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Jwks to fetch.
+     */
+    orderBy?: JwksOrderByWithRelationInput | JwksOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for Jwks.
+     */
+    cursor?: JwksWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Jwks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Jwks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Jwks.
+     */
+    distinct?: JwksScalarFieldEnum | JwksScalarFieldEnum[]
+  }
+
+  /**
+   * Jwks findMany
+   */
+  export type JwksFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter, which Jwks to fetch.
+     */
+    where?: JwksWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Jwks to fetch.
+     */
+    orderBy?: JwksOrderByWithRelationInput | JwksOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing Jwks.
+     */
+    cursor?: JwksWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Jwks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Jwks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Jwks.
+     */
+    distinct?: JwksScalarFieldEnum | JwksScalarFieldEnum[]
+  }
+
+  /**
+   * Jwks create
+   */
+  export type JwksCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Jwks.
+     */
+    data: XOR<JwksCreateInput, JwksUncheckedCreateInput>
+  }
+
+  /**
+   * Jwks createMany
+   */
+  export type JwksCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Jwks.
+     */
+    data: JwksCreateManyInput | JwksCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Jwks createManyAndReturn
+   */
+  export type JwksCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * The data used to create many Jwks.
+     */
+    data: JwksCreateManyInput | JwksCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Jwks update
+   */
+  export type JwksUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Jwks.
+     */
+    data: XOR<JwksUpdateInput, JwksUncheckedUpdateInput>
+    /**
+     * Choose, which Jwks to update.
+     */
+    where: JwksWhereUniqueInput
+  }
+
+  /**
+   * Jwks updateMany
+   */
+  export type JwksUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Jwks.
+     */
+    data: XOR<JwksUpdateManyMutationInput, JwksUncheckedUpdateManyInput>
+    /**
+     * Filter which Jwks to update
+     */
+    where?: JwksWhereInput
+    /**
+     * Limit how many Jwks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Jwks updateManyAndReturn
+   */
+  export type JwksUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * The data used to update Jwks.
+     */
+    data: XOR<JwksUpdateManyMutationInput, JwksUncheckedUpdateManyInput>
+    /**
+     * Filter which Jwks to update
+     */
+    where?: JwksWhereInput
+    /**
+     * Limit how many Jwks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Jwks upsert
+   */
+  export type JwksUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Jwks to update in case it exists.
+     */
+    where: JwksWhereUniqueInput
+    /**
+     * In case the Jwks found by the `where` argument doesn't exist, create a new Jwks with this data.
+     */
+    create: XOR<JwksCreateInput, JwksUncheckedCreateInput>
+    /**
+     * In case the Jwks was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<JwksUpdateInput, JwksUncheckedUpdateInput>
+  }
+
+  /**
+   * Jwks delete
+   */
+  export type JwksDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+    /**
+     * Filter which Jwks to delete.
+     */
+    where: JwksWhereUniqueInput
+  }
+
+  /**
+   * Jwks deleteMany
+   */
+  export type JwksDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Jwks to delete
+     */
+    where?: JwksWhereInput
+    /**
+     * Limit how many Jwks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Jwks without action
+   */
+  export type JwksDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Jwks
+     */
+    select?: JwksSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Jwks
+     */
+    omit?: JwksOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthClient
+   */
+
+  export type AggregateOauthClient = {
+    _count: OauthClientCountAggregateOutputType | null
+    _min: OauthClientMinAggregateOutputType | null
+    _max: OauthClientMaxAggregateOutputType | null
+  }
+
+  export type OauthClientMinAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    clientSecret: string | null
+    clientDiscoveryId: string | null
+    disabled: boolean | null
+    skipConsent: boolean | null
+    enableEndSession: boolean | null
+    subjectType: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    uri: string | null
+    icon: string | null
+    tos: string | null
+    policy: string | null
+    softwareId: string | null
+    softwareVersion: string | null
+    softwareStatement: string | null
+    backchannelLogoutUri: string | null
+    backchannelLogoutSessionRequired: boolean | null
+    tokenEndpointAuthMethod: string | null
+    applicationType: string | null
+    jwks: string | null
+    jwksUri: string | null
+    requirePKCE: boolean | null
+    dpopBoundAccessTokens: boolean | null
+    referenceId: string | null
+  }
+
+  export type OauthClientMaxAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    clientSecret: string | null
+    clientDiscoveryId: string | null
+    disabled: boolean | null
+    skipConsent: boolean | null
+    enableEndSession: boolean | null
+    subjectType: string | null
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    uri: string | null
+    icon: string | null
+    tos: string | null
+    policy: string | null
+    softwareId: string | null
+    softwareVersion: string | null
+    softwareStatement: string | null
+    backchannelLogoutUri: string | null
+    backchannelLogoutSessionRequired: boolean | null
+    tokenEndpointAuthMethod: string | null
+    applicationType: string | null
+    jwks: string | null
+    jwksUri: string | null
+    requirePKCE: boolean | null
+    dpopBoundAccessTokens: boolean | null
+    referenceId: string | null
+  }
+
+  export type OauthClientCountAggregateOutputType = {
+    id: number
+    clientId: number
+    clientSecret: number
+    clientDiscoveryId: number
+    disabled: number
+    skipConsent: number
+    enableEndSession: number
+    subjectType: number
+    scopes: number
+    clientCredentialsScopes: number
+    userId: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    uri: number
+    icon: number
+    contacts: number
+    tos: number
+    policy: number
+    softwareId: number
+    softwareVersion: number
+    softwareStatement: number
+    redirectUris: number
+    postLogoutRedirectUris: number
+    backchannelLogoutUri: number
+    backchannelLogoutSessionRequired: number
+    tokenEndpointAuthMethod: number
+    applicationType: number
+    jwks: number
+    jwksUri: number
+    grantTypes: number
+    responseTypes: number
+    requirePKCE: number
+    dpopBoundAccessTokens: number
+    referenceId: number
+    metadata: number
+    _all: number
+  }
+
+
+  export type OauthClientMinAggregateInputType = {
+    id?: true
+    clientId?: true
+    clientSecret?: true
+    clientDiscoveryId?: true
+    disabled?: true
+    skipConsent?: true
+    enableEndSession?: true
+    subjectType?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    uri?: true
+    icon?: true
+    tos?: true
+    policy?: true
+    softwareId?: true
+    softwareVersion?: true
+    softwareStatement?: true
+    backchannelLogoutUri?: true
+    backchannelLogoutSessionRequired?: true
+    tokenEndpointAuthMethod?: true
+    applicationType?: true
+    jwks?: true
+    jwksUri?: true
+    requirePKCE?: true
+    dpopBoundAccessTokens?: true
+    referenceId?: true
+  }
+
+  export type OauthClientMaxAggregateInputType = {
+    id?: true
+    clientId?: true
+    clientSecret?: true
+    clientDiscoveryId?: true
+    disabled?: true
+    skipConsent?: true
+    enableEndSession?: true
+    subjectType?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    uri?: true
+    icon?: true
+    tos?: true
+    policy?: true
+    softwareId?: true
+    softwareVersion?: true
+    softwareStatement?: true
+    backchannelLogoutUri?: true
+    backchannelLogoutSessionRequired?: true
+    tokenEndpointAuthMethod?: true
+    applicationType?: true
+    jwks?: true
+    jwksUri?: true
+    requirePKCE?: true
+    dpopBoundAccessTokens?: true
+    referenceId?: true
+  }
+
+  export type OauthClientCountAggregateInputType = {
+    id?: true
+    clientId?: true
+    clientSecret?: true
+    clientDiscoveryId?: true
+    disabled?: true
+    skipConsent?: true
+    enableEndSession?: true
+    subjectType?: true
+    scopes?: true
+    clientCredentialsScopes?: true
+    userId?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    uri?: true
+    icon?: true
+    contacts?: true
+    tos?: true
+    policy?: true
+    softwareId?: true
+    softwareVersion?: true
+    softwareStatement?: true
+    redirectUris?: true
+    postLogoutRedirectUris?: true
+    backchannelLogoutUri?: true
+    backchannelLogoutSessionRequired?: true
+    tokenEndpointAuthMethod?: true
+    applicationType?: true
+    jwks?: true
+    jwksUri?: true
+    grantTypes?: true
+    responseTypes?: true
+    requirePKCE?: true
+    dpopBoundAccessTokens?: true
+    referenceId?: true
+    metadata?: true
+    _all?: true
+  }
+
+  export type OauthClientAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClient to aggregate.
+     */
+    where?: OauthClientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClients to fetch.
+     */
+    orderBy?: OauthClientOrderByWithRelationInput | OauthClientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthClientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthClients
+    **/
+    _count?: true | OauthClientCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthClientMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthClientMaxAggregateInputType
+  }
+
+  export type GetOauthClientAggregateType<T extends OauthClientAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthClient]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthClient[P]>
+      : GetScalarType<T[P], AggregateOauthClient[P]>
+  }
+
+
+
+
+  export type OauthClientGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientWhereInput
+    orderBy?: OauthClientOrderByWithAggregationInput | OauthClientOrderByWithAggregationInput[]
+    by: OauthClientScalarFieldEnum[] | OauthClientScalarFieldEnum
+    having?: OauthClientScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthClientCountAggregateInputType | true
+    _min?: OauthClientMinAggregateInputType
+    _max?: OauthClientMaxAggregateInputType
+  }
+
+  export type OauthClientGroupByOutputType = {
+    id: string
+    clientId: string
+    clientSecret: string | null
+    clientDiscoveryId: string | null
+    disabled: boolean | null
+    skipConsent: boolean | null
+    enableEndSession: boolean | null
+    subjectType: string | null
+    scopes: string[]
+    clientCredentialsScopes: string[]
+    userId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    uri: string | null
+    icon: string | null
+    contacts: string[]
+    tos: string | null
+    policy: string | null
+    softwareId: string | null
+    softwareVersion: string | null
+    softwareStatement: string | null
+    redirectUris: string[]
+    postLogoutRedirectUris: string[]
+    backchannelLogoutUri: string | null
+    backchannelLogoutSessionRequired: boolean | null
+    tokenEndpointAuthMethod: string | null
+    applicationType: string | null
+    jwks: string | null
+    jwksUri: string | null
+    grantTypes: string[]
+    responseTypes: string[]
+    requirePKCE: boolean | null
+    dpopBoundAccessTokens: boolean | null
+    referenceId: string | null
+    metadata: JsonValue | null
+    _count: OauthClientCountAggregateOutputType | null
+    _min: OauthClientMinAggregateOutputType | null
+    _max: OauthClientMaxAggregateOutputType | null
+  }
+
+  type GetOauthClientGroupByPayload<T extends OauthClientGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthClientGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthClientGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthClientGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthClientGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthClientSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    clientSecret?: boolean
+    clientDiscoveryId?: boolean
+    disabled?: boolean
+    skipConsent?: boolean
+    enableEndSession?: boolean
+    subjectType?: boolean
+    scopes?: boolean
+    clientCredentialsScopes?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    uri?: boolean
+    icon?: boolean
+    contacts?: boolean
+    tos?: boolean
+    policy?: boolean
+    softwareId?: boolean
+    softwareVersion?: boolean
+    softwareStatement?: boolean
+    redirectUris?: boolean
+    postLogoutRedirectUris?: boolean
+    backchannelLogoutUri?: boolean
+    backchannelLogoutSessionRequired?: boolean
+    tokenEndpointAuthMethod?: boolean
+    applicationType?: boolean
+    jwks?: boolean
+    jwksUri?: boolean
+    grantTypes?: boolean
+    responseTypes?: boolean
+    requirePKCE?: boolean
+    dpopBoundAccessTokens?: boolean
+    referenceId?: boolean
+    metadata?: boolean
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+    oauthclientresources?: boolean | OauthClient$oauthclientresourcesArgs<ExtArgs>
+    oauthrefreshtokens?: boolean | OauthClient$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | OauthClient$oauthaccesstokensArgs<ExtArgs>
+    oauthconsents?: boolean | OauthClient$oauthconsentsArgs<ExtArgs>
+    _count?: boolean | OauthClientCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClient"]>
+
+  export type OauthClientSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    clientSecret?: boolean
+    clientDiscoveryId?: boolean
+    disabled?: boolean
+    skipConsent?: boolean
+    enableEndSession?: boolean
+    subjectType?: boolean
+    scopes?: boolean
+    clientCredentialsScopes?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    uri?: boolean
+    icon?: boolean
+    contacts?: boolean
+    tos?: boolean
+    policy?: boolean
+    softwareId?: boolean
+    softwareVersion?: boolean
+    softwareStatement?: boolean
+    redirectUris?: boolean
+    postLogoutRedirectUris?: boolean
+    backchannelLogoutUri?: boolean
+    backchannelLogoutSessionRequired?: boolean
+    tokenEndpointAuthMethod?: boolean
+    applicationType?: boolean
+    jwks?: boolean
+    jwksUri?: boolean
+    grantTypes?: boolean
+    responseTypes?: boolean
+    requirePKCE?: boolean
+    dpopBoundAccessTokens?: boolean
+    referenceId?: boolean
+    metadata?: boolean
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClient"]>
+
+  export type OauthClientSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    clientSecret?: boolean
+    clientDiscoveryId?: boolean
+    disabled?: boolean
+    skipConsent?: boolean
+    enableEndSession?: boolean
+    subjectType?: boolean
+    scopes?: boolean
+    clientCredentialsScopes?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    uri?: boolean
+    icon?: boolean
+    contacts?: boolean
+    tos?: boolean
+    policy?: boolean
+    softwareId?: boolean
+    softwareVersion?: boolean
+    softwareStatement?: boolean
+    redirectUris?: boolean
+    postLogoutRedirectUris?: boolean
+    backchannelLogoutUri?: boolean
+    backchannelLogoutSessionRequired?: boolean
+    tokenEndpointAuthMethod?: boolean
+    applicationType?: boolean
+    jwks?: boolean
+    jwksUri?: boolean
+    grantTypes?: boolean
+    responseTypes?: boolean
+    requirePKCE?: boolean
+    dpopBoundAccessTokens?: boolean
+    referenceId?: boolean
+    metadata?: boolean
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClient"]>
+
+  export type OauthClientSelectScalar = {
+    id?: boolean
+    clientId?: boolean
+    clientSecret?: boolean
+    clientDiscoveryId?: boolean
+    disabled?: boolean
+    skipConsent?: boolean
+    enableEndSession?: boolean
+    subjectType?: boolean
+    scopes?: boolean
+    clientCredentialsScopes?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    uri?: boolean
+    icon?: boolean
+    contacts?: boolean
+    tos?: boolean
+    policy?: boolean
+    softwareId?: boolean
+    softwareVersion?: boolean
+    softwareStatement?: boolean
+    redirectUris?: boolean
+    postLogoutRedirectUris?: boolean
+    backchannelLogoutUri?: boolean
+    backchannelLogoutSessionRequired?: boolean
+    tokenEndpointAuthMethod?: boolean
+    applicationType?: boolean
+    jwks?: boolean
+    jwksUri?: boolean
+    grantTypes?: boolean
+    responseTypes?: boolean
+    requirePKCE?: boolean
+    dpopBoundAccessTokens?: boolean
+    referenceId?: boolean
+    metadata?: boolean
+  }
+
+  export type OauthClientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientId" | "clientSecret" | "clientDiscoveryId" | "disabled" | "skipConsent" | "enableEndSession" | "subjectType" | "scopes" | "clientCredentialsScopes" | "userId" | "createdAt" | "updatedAt" | "name" | "uri" | "icon" | "contacts" | "tos" | "policy" | "softwareId" | "softwareVersion" | "softwareStatement" | "redirectUris" | "postLogoutRedirectUris" | "backchannelLogoutUri" | "backchannelLogoutSessionRequired" | "tokenEndpointAuthMethod" | "applicationType" | "jwks" | "jwksUri" | "grantTypes" | "responseTypes" | "requirePKCE" | "dpopBoundAccessTokens" | "referenceId" | "metadata", ExtArgs["result"]["oauthClient"]>
+  export type OauthClientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+    oauthclientresources?: boolean | OauthClient$oauthclientresourcesArgs<ExtArgs>
+    oauthrefreshtokens?: boolean | OauthClient$oauthrefreshtokensArgs<ExtArgs>
+    oauthaccesstokens?: boolean | OauthClient$oauthaccesstokensArgs<ExtArgs>
+    oauthconsents?: boolean | OauthClient$oauthconsentsArgs<ExtArgs>
+    _count?: boolean | OauthClientCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type OauthClientIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+  }
+  export type OauthClientIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cloudauthuser?: boolean | OauthClient$cloudauthuserArgs<ExtArgs>
+  }
+
+  export type $OauthClientPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthClient"
+    objects: {
+      cloudauthuser: Prisma.$CloudAuthUserPayload<ExtArgs> | null
+      oauthclientresources: Prisma.$OauthClientResourcePayload<ExtArgs>[]
+      oauthrefreshtokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
+      oauthaccesstokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
+      oauthconsents: Prisma.$OauthConsentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      clientId: string
+      clientSecret: string | null
+      clientDiscoveryId: string | null
+      disabled: boolean | null
+      skipConsent: boolean | null
+      enableEndSession: boolean | null
+      subjectType: string | null
+      scopes: string[]
+      clientCredentialsScopes: string[]
+      userId: string | null
+      createdAt: Date | null
+      updatedAt: Date | null
+      name: string | null
+      uri: string | null
+      icon: string | null
+      contacts: string[]
+      tos: string | null
+      policy: string | null
+      softwareId: string | null
+      softwareVersion: string | null
+      softwareStatement: string | null
+      redirectUris: string[]
+      postLogoutRedirectUris: string[]
+      backchannelLogoutUri: string | null
+      backchannelLogoutSessionRequired: boolean | null
+      tokenEndpointAuthMethod: string | null
+      applicationType: string | null
+      jwks: string | null
+      jwksUri: string | null
+      grantTypes: string[]
+      responseTypes: string[]
+      requirePKCE: boolean | null
+      dpopBoundAccessTokens: boolean | null
+      referenceId: string | null
+      metadata: Prisma.JsonValue | null
+    }, ExtArgs["result"]["oauthClient"]>
+    composites: {}
+  }
+
+  type OauthClientGetPayload<S extends boolean | null | undefined | OauthClientDefaultArgs> = $Result.GetResult<Prisma.$OauthClientPayload, S>
+
+  type OauthClientCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthClientFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthClientCountAggregateInputType | true
+    }
+
+  export interface OauthClientDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthClient'], meta: { name: 'OauthClient' } }
+    /**
+     * Find zero or one OauthClient that matches the filter.
+     * @param {OauthClientFindUniqueArgs} args - Arguments to find a OauthClient
+     * @example
+     * // Get one OauthClient
+     * const oauthClient = await prisma.oauthClient.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthClientFindUniqueArgs>(args: SelectSubset<T, OauthClientFindUniqueArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthClient that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthClientFindUniqueOrThrowArgs} args - Arguments to find a OauthClient
+     * @example
+     * // Get one OauthClient
+     * const oauthClient = await prisma.oauthClient.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthClientFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthClientFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClient that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientFindFirstArgs} args - Arguments to find a OauthClient
+     * @example
+     * // Get one OauthClient
+     * const oauthClient = await prisma.oauthClient.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthClientFindFirstArgs>(args?: SelectSubset<T, OauthClientFindFirstArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClient that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientFindFirstOrThrowArgs} args - Arguments to find a OauthClient
+     * @example
+     * // Get one OauthClient
+     * const oauthClient = await prisma.oauthClient.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthClientFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthClientFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthClients that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthClients
+     * const oauthClients = await prisma.oauthClient.findMany()
+     *
+     * // Get first 10 OauthClients
+     * const oauthClients = await prisma.oauthClient.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthClientWithIdOnly = await prisma.oauthClient.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthClientFindManyArgs>(args?: SelectSubset<T, OauthClientFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthClient.
+     * @param {OauthClientCreateArgs} args - Arguments to create a OauthClient.
+     * @example
+     * // Create one OauthClient
+     * const OauthClient = await prisma.oauthClient.create({
+     *   data: {
+     *     // ... data to create a OauthClient
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthClientCreateArgs>(args: SelectSubset<T, OauthClientCreateArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthClients.
+     * @param {OauthClientCreateManyArgs} args - Arguments to create many OauthClients.
+     * @example
+     * // Create many OauthClients
+     * const oauthClient = await prisma.oauthClient.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthClientCreateManyArgs>(args?: SelectSubset<T, OauthClientCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthClients and returns the data saved in the database.
+     * @param {OauthClientCreateManyAndReturnArgs} args - Arguments to create many OauthClients.
+     * @example
+     * // Create many OauthClients
+     * const oauthClient = await prisma.oauthClient.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthClients and only return the `id`
+     * const oauthClientWithIdOnly = await prisma.oauthClient.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthClientCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthClientCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthClient.
+     * @param {OauthClientDeleteArgs} args - Arguments to delete one OauthClient.
+     * @example
+     * // Delete one OauthClient
+     * const OauthClient = await prisma.oauthClient.delete({
+     *   where: {
+     *     // ... filter to delete one OauthClient
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthClientDeleteArgs>(args: SelectSubset<T, OauthClientDeleteArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthClient.
+     * @param {OauthClientUpdateArgs} args - Arguments to update one OauthClient.
+     * @example
+     * // Update one OauthClient
+     * const oauthClient = await prisma.oauthClient.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthClientUpdateArgs>(args: SelectSubset<T, OauthClientUpdateArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthClients.
+     * @param {OauthClientDeleteManyArgs} args - Arguments to filter OauthClients to delete.
+     * @example
+     * // Delete a few OauthClients
+     * const { count } = await prisma.oauthClient.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthClientDeleteManyArgs>(args?: SelectSubset<T, OauthClientDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthClients
+     * const oauthClient = await prisma.oauthClient.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthClientUpdateManyArgs>(args: SelectSubset<T, OauthClientUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClients and returns the data updated in the database.
+     * @param {OauthClientUpdateManyAndReturnArgs} args - Arguments to update many OauthClients.
+     * @example
+     * // Update many OauthClients
+     * const oauthClient = await prisma.oauthClient.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthClients and only return the `id`
+     * const oauthClientWithIdOnly = await prisma.oauthClient.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthClientUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthClientUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthClient.
+     * @param {OauthClientUpsertArgs} args - Arguments to update or create a OauthClient.
+     * @example
+     * // Update or create a OauthClient
+     * const oauthClient = await prisma.oauthClient.upsert({
+     *   create: {
+     *     // ... data to create a OauthClient
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthClient we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthClientUpsertArgs>(args: SelectSubset<T, OauthClientUpsertArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthClients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientCountArgs} args - Arguments to filter OauthClients to count.
+     * @example
+     * // Count the number of OauthClients
+     * const count = await prisma.oauthClient.count({
+     *   where: {
+     *     // ... the filter for the OauthClients we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthClientCountArgs>(
+      args?: Subset<T, OauthClientCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthClientCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthClient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthClientAggregateArgs>(args: Subset<T, OauthClientAggregateArgs>): Prisma.PrismaPromise<GetOauthClientAggregateType<T>>
+
+    /**
+     * Group by OauthClient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthClientGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthClientGroupByArgs['orderBy'] }
+        : { orderBy?: OauthClientGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthClientGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthClientGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthClient model
+   */
+  readonly fields: OauthClientFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthClient.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthClientClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    cloudauthuser<T extends OauthClient$cloudauthuserArgs<ExtArgs> = {}>(args?: Subset<T, OauthClient$cloudauthuserArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    oauthclientresources<T extends OauthClient$oauthclientresourcesArgs<ExtArgs> = {}>(args?: Subset<T, OauthClient$oauthclientresourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthrefreshtokens<T extends OauthClient$oauthrefreshtokensArgs<ExtArgs> = {}>(args?: Subset<T, OauthClient$oauthrefreshtokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthaccesstokens<T extends OauthClient$oauthaccesstokensArgs<ExtArgs> = {}>(args?: Subset<T, OauthClient$oauthaccesstokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    oauthconsents<T extends OauthClient$oauthconsentsArgs<ExtArgs> = {}>(args?: Subset<T, OauthClient$oauthconsentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthClient model
+   */
+  interface OauthClientFieldRefs {
+    readonly id: FieldRef<"OauthClient", 'String'>
+    readonly clientId: FieldRef<"OauthClient", 'String'>
+    readonly clientSecret: FieldRef<"OauthClient", 'String'>
+    readonly clientDiscoveryId: FieldRef<"OauthClient", 'String'>
+    readonly disabled: FieldRef<"OauthClient", 'Boolean'>
+    readonly skipConsent: FieldRef<"OauthClient", 'Boolean'>
+    readonly enableEndSession: FieldRef<"OauthClient", 'Boolean'>
+    readonly subjectType: FieldRef<"OauthClient", 'String'>
+    readonly scopes: FieldRef<"OauthClient", 'String[]'>
+    readonly clientCredentialsScopes: FieldRef<"OauthClient", 'String[]'>
+    readonly userId: FieldRef<"OauthClient", 'String'>
+    readonly createdAt: FieldRef<"OauthClient", 'DateTime'>
+    readonly updatedAt: FieldRef<"OauthClient", 'DateTime'>
+    readonly name: FieldRef<"OauthClient", 'String'>
+    readonly uri: FieldRef<"OauthClient", 'String'>
+    readonly icon: FieldRef<"OauthClient", 'String'>
+    readonly contacts: FieldRef<"OauthClient", 'String[]'>
+    readonly tos: FieldRef<"OauthClient", 'String'>
+    readonly policy: FieldRef<"OauthClient", 'String'>
+    readonly softwareId: FieldRef<"OauthClient", 'String'>
+    readonly softwareVersion: FieldRef<"OauthClient", 'String'>
+    readonly softwareStatement: FieldRef<"OauthClient", 'String'>
+    readonly redirectUris: FieldRef<"OauthClient", 'String[]'>
+    readonly postLogoutRedirectUris: FieldRef<"OauthClient", 'String[]'>
+    readonly backchannelLogoutUri: FieldRef<"OauthClient", 'String'>
+    readonly backchannelLogoutSessionRequired: FieldRef<"OauthClient", 'Boolean'>
+    readonly tokenEndpointAuthMethod: FieldRef<"OauthClient", 'String'>
+    readonly applicationType: FieldRef<"OauthClient", 'String'>
+    readonly jwks: FieldRef<"OauthClient", 'String'>
+    readonly jwksUri: FieldRef<"OauthClient", 'String'>
+    readonly grantTypes: FieldRef<"OauthClient", 'String[]'>
+    readonly responseTypes: FieldRef<"OauthClient", 'String[]'>
+    readonly requirePKCE: FieldRef<"OauthClient", 'Boolean'>
+    readonly dpopBoundAccessTokens: FieldRef<"OauthClient", 'Boolean'>
+    readonly referenceId: FieldRef<"OauthClient", 'String'>
+    readonly metadata: FieldRef<"OauthClient", 'Json'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthClient findUnique
+   */
+  export type OauthClientFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClient to fetch.
+     */
+    where: OauthClientWhereUniqueInput
+  }
+
+  /**
+   * OauthClient findUniqueOrThrow
+   */
+  export type OauthClientFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClient to fetch.
+     */
+    where: OauthClientWhereUniqueInput
+  }
+
+  /**
+   * OauthClient findFirst
+   */
+  export type OauthClientFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClient to fetch.
+     */
+    where?: OauthClientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClients to fetch.
+     */
+    orderBy?: OauthClientOrderByWithRelationInput | OauthClientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClients.
+     */
+    cursor?: OauthClientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClients.
+     */
+    distinct?: OauthClientScalarFieldEnum | OauthClientScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient findFirstOrThrow
+   */
+  export type OauthClientFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClient to fetch.
+     */
+    where?: OauthClientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClients to fetch.
+     */
+    orderBy?: OauthClientOrderByWithRelationInput | OauthClientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClients.
+     */
+    cursor?: OauthClientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClients.
+     */
+    distinct?: OauthClientScalarFieldEnum | OauthClientScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient findMany
+   */
+  export type OauthClientFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClients to fetch.
+     */
+    where?: OauthClientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClients to fetch.
+     */
+    orderBy?: OauthClientOrderByWithRelationInput | OauthClientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthClients.
+     */
+    cursor?: OauthClientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClients.
+     */
+    distinct?: OauthClientScalarFieldEnum | OauthClientScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient create
+   */
+  export type OauthClientCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthClient.
+     */
+    data: XOR<OauthClientCreateInput, OauthClientUncheckedCreateInput>
+  }
+
+  /**
+   * OauthClient createMany
+   */
+  export type OauthClientCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthClients.
+     */
+    data: OauthClientCreateManyInput | OauthClientCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthClient createManyAndReturn
+   */
+  export type OauthClientCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthClients.
+     */
+    data: OauthClientCreateManyInput | OauthClientCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthClient update
+   */
+  export type OauthClientUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthClient.
+     */
+    data: XOR<OauthClientUpdateInput, OauthClientUncheckedUpdateInput>
+    /**
+     * Choose, which OauthClient to update.
+     */
+    where: OauthClientWhereUniqueInput
+  }
+
+  /**
+   * OauthClient updateMany
+   */
+  export type OauthClientUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthClients.
+     */
+    data: XOR<OauthClientUpdateManyMutationInput, OauthClientUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClients to update
+     */
+    where?: OauthClientWhereInput
+    /**
+     * Limit how many OauthClients to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClient updateManyAndReturn
+   */
+  export type OauthClientUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthClients.
+     */
+    data: XOR<OauthClientUpdateManyMutationInput, OauthClientUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClients to update
+     */
+    where?: OauthClientWhereInput
+    /**
+     * Limit how many OauthClients to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthClient upsert
+   */
+  export type OauthClientUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthClient to update in case it exists.
+     */
+    where: OauthClientWhereUniqueInput
+    /**
+     * In case the OauthClient found by the `where` argument doesn't exist, create a new OauthClient with this data.
+     */
+    create: XOR<OauthClientCreateInput, OauthClientUncheckedCreateInput>
+    /**
+     * In case the OauthClient was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthClientUpdateInput, OauthClientUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthClient delete
+   */
+  export type OauthClientDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+    /**
+     * Filter which OauthClient to delete.
+     */
+    where: OauthClientWhereUniqueInput
+  }
+
+  /**
+   * OauthClient deleteMany
+   */
+  export type OauthClientDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClients to delete
+     */
+    where?: OauthClientWhereInput
+    /**
+     * Limit how many OauthClients to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClient.cloudauthuser
+   */
+  export type OauthClient$cloudauthuserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthUser
+     */
+    select?: CloudAuthUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CloudAuthUser
+     */
+    omit?: CloudAuthUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CloudAuthUserInclude<ExtArgs> | null
+    where?: CloudAuthUserWhereInput
+  }
+
+  /**
+   * OauthClient.oauthclientresources
+   */
+  export type OauthClient$oauthclientresourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    where?: OauthClientResourceWhereInput
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    cursor?: OauthClientResourceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthClientResourceScalarFieldEnum | OauthClientResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient.oauthrefreshtokens
+   */
+  export type OauthClient$oauthrefreshtokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    where?: OauthRefreshTokenWhereInput
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient.oauthaccesstokens
+   */
+  export type OauthClient$oauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    where?: OauthAccessTokenWhereInput
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    cursor?: OauthAccessTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient.oauthconsents
+   */
+  export type OauthClient$oauthconsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    where?: OauthConsentWhereInput
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    cursor?: OauthConsentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthConsentScalarFieldEnum | OauthConsentScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClient without action
+   */
+  export type OauthClientDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClient
+     */
+    select?: OauthClientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClient
+     */
+    omit?: OauthClientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthResource
+   */
+
+  export type AggregateOauthResource = {
+    _count: OauthResourceCountAggregateOutputType | null
+    _avg: OauthResourceAvgAggregateOutputType | null
+    _sum: OauthResourceSumAggregateOutputType | null
+    _min: OauthResourceMinAggregateOutputType | null
+    _max: OauthResourceMaxAggregateOutputType | null
+  }
+
+  export type OauthResourceAvgAggregateOutputType = {
+    accessTokenTtl: number | null
+    refreshTokenTtl: number | null
+    policyVersion: number | null
+  }
+
+  export type OauthResourceSumAggregateOutputType = {
+    accessTokenTtl: number | null
+    refreshTokenTtl: number | null
+    policyVersion: number | null
+  }
+
+  export type OauthResourceMinAggregateOutputType = {
+    id: string | null
+    identifier: string | null
+    name: string | null
+    accessTokenTtl: number | null
+    refreshTokenTtl: number | null
+    signingAlgorithm: string | null
+    signingKeyId: string | null
+    dpopBoundAccessTokensRequired: boolean | null
+    disabled: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    policyVersion: number | null
+  }
+
+  export type OauthResourceMaxAggregateOutputType = {
+    id: string | null
+    identifier: string | null
+    name: string | null
+    accessTokenTtl: number | null
+    refreshTokenTtl: number | null
+    signingAlgorithm: string | null
+    signingKeyId: string | null
+    dpopBoundAccessTokensRequired: boolean | null
+    disabled: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    policyVersion: number | null
+  }
+
+  export type OauthResourceCountAggregateOutputType = {
+    id: number
+    identifier: number
+    name: number
+    accessTokenTtl: number
+    refreshTokenTtl: number
+    signingAlgorithm: number
+    signingKeyId: number
+    allowedScopes: number
+    customClaims: number
+    dpopBoundAccessTokensRequired: number
+    disabled: number
+    createdAt: number
+    updatedAt: number
+    policyVersion: number
+    metadata: number
+    _all: number
+  }
+
+
+  export type OauthResourceAvgAggregateInputType = {
+    accessTokenTtl?: true
+    refreshTokenTtl?: true
+    policyVersion?: true
+  }
+
+  export type OauthResourceSumAggregateInputType = {
+    accessTokenTtl?: true
+    refreshTokenTtl?: true
+    policyVersion?: true
+  }
+
+  export type OauthResourceMinAggregateInputType = {
+    id?: true
+    identifier?: true
+    name?: true
+    accessTokenTtl?: true
+    refreshTokenTtl?: true
+    signingAlgorithm?: true
+    signingKeyId?: true
+    dpopBoundAccessTokensRequired?: true
+    disabled?: true
+    createdAt?: true
+    updatedAt?: true
+    policyVersion?: true
+  }
+
+  export type OauthResourceMaxAggregateInputType = {
+    id?: true
+    identifier?: true
+    name?: true
+    accessTokenTtl?: true
+    refreshTokenTtl?: true
+    signingAlgorithm?: true
+    signingKeyId?: true
+    dpopBoundAccessTokensRequired?: true
+    disabled?: true
+    createdAt?: true
+    updatedAt?: true
+    policyVersion?: true
+  }
+
+  export type OauthResourceCountAggregateInputType = {
+    id?: true
+    identifier?: true
+    name?: true
+    accessTokenTtl?: true
+    refreshTokenTtl?: true
+    signingAlgorithm?: true
+    signingKeyId?: true
+    allowedScopes?: true
+    customClaims?: true
+    dpopBoundAccessTokensRequired?: true
+    disabled?: true
+    createdAt?: true
+    updatedAt?: true
+    policyVersion?: true
+    metadata?: true
+    _all?: true
+  }
+
+  export type OauthResourceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthResource to aggregate.
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthResources to fetch.
+     */
+    orderBy?: OauthResourceOrderByWithRelationInput | OauthResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthResources
+    **/
+    _count?: true | OauthResourceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: OauthResourceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: OauthResourceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthResourceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthResourceMaxAggregateInputType
+  }
+
+  export type GetOauthResourceAggregateType<T extends OauthResourceAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthResource]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthResource[P]>
+      : GetScalarType<T[P], AggregateOauthResource[P]>
+  }
+
+
+
+
+  export type OauthResourceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthResourceWhereInput
+    orderBy?: OauthResourceOrderByWithAggregationInput | OauthResourceOrderByWithAggregationInput[]
+    by: OauthResourceScalarFieldEnum[] | OauthResourceScalarFieldEnum
+    having?: OauthResourceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthResourceCountAggregateInputType | true
+    _avg?: OauthResourceAvgAggregateInputType
+    _sum?: OauthResourceSumAggregateInputType
+    _min?: OauthResourceMinAggregateInputType
+    _max?: OauthResourceMaxAggregateInputType
+  }
+
+  export type OauthResourceGroupByOutputType = {
+    id: string
+    identifier: string
+    name: string
+    accessTokenTtl: number | null
+    refreshTokenTtl: number | null
+    signingAlgorithm: string | null
+    signingKeyId: string | null
+    allowedScopes: string[]
+    customClaims: JsonValue | null
+    dpopBoundAccessTokensRequired: boolean | null
+    disabled: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    policyVersion: number | null
+    metadata: JsonValue | null
+    _count: OauthResourceCountAggregateOutputType | null
+    _avg: OauthResourceAvgAggregateOutputType | null
+    _sum: OauthResourceSumAggregateOutputType | null
+    _min: OauthResourceMinAggregateOutputType | null
+    _max: OauthResourceMaxAggregateOutputType | null
+  }
+
+  type GetOauthResourceGroupByPayload<T extends OauthResourceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthResourceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthResourceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthResourceGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthResourceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthResourceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identifier?: boolean
+    name?: boolean
+    accessTokenTtl?: boolean
+    refreshTokenTtl?: boolean
+    signingAlgorithm?: boolean
+    signingKeyId?: boolean
+    allowedScopes?: boolean
+    customClaims?: boolean
+    dpopBoundAccessTokensRequired?: boolean
+    disabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    policyVersion?: boolean
+    metadata?: boolean
+    oauthclientresources?: boolean | OauthResource$oauthclientresourcesArgs<ExtArgs>
+    _count?: boolean | OauthResourceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthResource"]>
+
+  export type OauthResourceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identifier?: boolean
+    name?: boolean
+    accessTokenTtl?: boolean
+    refreshTokenTtl?: boolean
+    signingAlgorithm?: boolean
+    signingKeyId?: boolean
+    allowedScopes?: boolean
+    customClaims?: boolean
+    dpopBoundAccessTokensRequired?: boolean
+    disabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    policyVersion?: boolean
+    metadata?: boolean
+  }, ExtArgs["result"]["oauthResource"]>
+
+  export type OauthResourceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identifier?: boolean
+    name?: boolean
+    accessTokenTtl?: boolean
+    refreshTokenTtl?: boolean
+    signingAlgorithm?: boolean
+    signingKeyId?: boolean
+    allowedScopes?: boolean
+    customClaims?: boolean
+    dpopBoundAccessTokensRequired?: boolean
+    disabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    policyVersion?: boolean
+    metadata?: boolean
+  }, ExtArgs["result"]["oauthResource"]>
+
+  export type OauthResourceSelectScalar = {
+    id?: boolean
+    identifier?: boolean
+    name?: boolean
+    accessTokenTtl?: boolean
+    refreshTokenTtl?: boolean
+    signingAlgorithm?: boolean
+    signingKeyId?: boolean
+    allowedScopes?: boolean
+    customClaims?: boolean
+    dpopBoundAccessTokensRequired?: boolean
+    disabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    policyVersion?: boolean
+    metadata?: boolean
+  }
+
+  export type OauthResourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identifier" | "name" | "accessTokenTtl" | "refreshTokenTtl" | "signingAlgorithm" | "signingKeyId" | "allowedScopes" | "customClaims" | "dpopBoundAccessTokensRequired" | "disabled" | "createdAt" | "updatedAt" | "policyVersion" | "metadata", ExtArgs["result"]["oauthResource"]>
+  export type OauthResourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclientresources?: boolean | OauthResource$oauthclientresourcesArgs<ExtArgs>
+    _count?: boolean | OauthResourceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type OauthResourceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type OauthResourceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $OauthResourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthResource"
+    objects: {
+      oauthclientresources: Prisma.$OauthClientResourcePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identifier: string
+      name: string
+      accessTokenTtl: number | null
+      refreshTokenTtl: number | null
+      signingAlgorithm: string | null
+      signingKeyId: string | null
+      allowedScopes: string[]
+      customClaims: Prisma.JsonValue | null
+      dpopBoundAccessTokensRequired: boolean | null
+      disabled: boolean | null
+      createdAt: Date | null
+      updatedAt: Date | null
+      policyVersion: number | null
+      metadata: Prisma.JsonValue | null
+    }, ExtArgs["result"]["oauthResource"]>
+    composites: {}
+  }
+
+  type OauthResourceGetPayload<S extends boolean | null | undefined | OauthResourceDefaultArgs> = $Result.GetResult<Prisma.$OauthResourcePayload, S>
+
+  type OauthResourceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthResourceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthResourceCountAggregateInputType | true
+    }
+
+  export interface OauthResourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthResource'], meta: { name: 'OauthResource' } }
+    /**
+     * Find zero or one OauthResource that matches the filter.
+     * @param {OauthResourceFindUniqueArgs} args - Arguments to find a OauthResource
+     * @example
+     * // Get one OauthResource
+     * const oauthResource = await prisma.oauthResource.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthResourceFindUniqueArgs>(args: SelectSubset<T, OauthResourceFindUniqueArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthResource that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthResourceFindUniqueOrThrowArgs} args - Arguments to find a OauthResource
+     * @example
+     * // Get one OauthResource
+     * const oauthResource = await prisma.oauthResource.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthResourceFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthResourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthResource that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceFindFirstArgs} args - Arguments to find a OauthResource
+     * @example
+     * // Get one OauthResource
+     * const oauthResource = await prisma.oauthResource.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthResourceFindFirstArgs>(args?: SelectSubset<T, OauthResourceFindFirstArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthResource that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceFindFirstOrThrowArgs} args - Arguments to find a OauthResource
+     * @example
+     * // Get one OauthResource
+     * const oauthResource = await prisma.oauthResource.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthResourceFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthResourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthResources that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthResources
+     * const oauthResources = await prisma.oauthResource.findMany()
+     *
+     * // Get first 10 OauthResources
+     * const oauthResources = await prisma.oauthResource.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthResourceWithIdOnly = await prisma.oauthResource.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthResourceFindManyArgs>(args?: SelectSubset<T, OauthResourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthResource.
+     * @param {OauthResourceCreateArgs} args - Arguments to create a OauthResource.
+     * @example
+     * // Create one OauthResource
+     * const OauthResource = await prisma.oauthResource.create({
+     *   data: {
+     *     // ... data to create a OauthResource
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthResourceCreateArgs>(args: SelectSubset<T, OauthResourceCreateArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthResources.
+     * @param {OauthResourceCreateManyArgs} args - Arguments to create many OauthResources.
+     * @example
+     * // Create many OauthResources
+     * const oauthResource = await prisma.oauthResource.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthResourceCreateManyArgs>(args?: SelectSubset<T, OauthResourceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthResources and returns the data saved in the database.
+     * @param {OauthResourceCreateManyAndReturnArgs} args - Arguments to create many OauthResources.
+     * @example
+     * // Create many OauthResources
+     * const oauthResource = await prisma.oauthResource.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthResources and only return the `id`
+     * const oauthResourceWithIdOnly = await prisma.oauthResource.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthResourceCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthResourceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthResource.
+     * @param {OauthResourceDeleteArgs} args - Arguments to delete one OauthResource.
+     * @example
+     * // Delete one OauthResource
+     * const OauthResource = await prisma.oauthResource.delete({
+     *   where: {
+     *     // ... filter to delete one OauthResource
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthResourceDeleteArgs>(args: SelectSubset<T, OauthResourceDeleteArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthResource.
+     * @param {OauthResourceUpdateArgs} args - Arguments to update one OauthResource.
+     * @example
+     * // Update one OauthResource
+     * const oauthResource = await prisma.oauthResource.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthResourceUpdateArgs>(args: SelectSubset<T, OauthResourceUpdateArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthResources.
+     * @param {OauthResourceDeleteManyArgs} args - Arguments to filter OauthResources to delete.
+     * @example
+     * // Delete a few OauthResources
+     * const { count } = await prisma.oauthResource.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthResourceDeleteManyArgs>(args?: SelectSubset<T, OauthResourceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthResources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthResources
+     * const oauthResource = await prisma.oauthResource.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthResourceUpdateManyArgs>(args: SelectSubset<T, OauthResourceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthResources and returns the data updated in the database.
+     * @param {OauthResourceUpdateManyAndReturnArgs} args - Arguments to update many OauthResources.
+     * @example
+     * // Update many OauthResources
+     * const oauthResource = await prisma.oauthResource.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthResources and only return the `id`
+     * const oauthResourceWithIdOnly = await prisma.oauthResource.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthResourceUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthResourceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthResource.
+     * @param {OauthResourceUpsertArgs} args - Arguments to update or create a OauthResource.
+     * @example
+     * // Update or create a OauthResource
+     * const oauthResource = await prisma.oauthResource.upsert({
+     *   create: {
+     *     // ... data to create a OauthResource
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthResource we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthResourceUpsertArgs>(args: SelectSubset<T, OauthResourceUpsertArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthResources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceCountArgs} args - Arguments to filter OauthResources to count.
+     * @example
+     * // Count the number of OauthResources
+     * const count = await prisma.oauthResource.count({
+     *   where: {
+     *     // ... the filter for the OauthResources we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthResourceCountArgs>(
+      args?: Subset<T, OauthResourceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthResourceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthResource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthResourceAggregateArgs>(args: Subset<T, OauthResourceAggregateArgs>): Prisma.PrismaPromise<GetOauthResourceAggregateType<T>>
+
+    /**
+     * Group by OauthResource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthResourceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthResourceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthResourceGroupByArgs['orderBy'] }
+        : { orderBy?: OauthResourceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthResourceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthResourceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthResource model
+   */
+  readonly fields: OauthResourceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthResource.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthResourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthclientresources<T extends OauthResource$oauthclientresourcesArgs<ExtArgs> = {}>(args?: Subset<T, OauthResource$oauthclientresourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthResource model
+   */
+  interface OauthResourceFieldRefs {
+    readonly id: FieldRef<"OauthResource", 'String'>
+    readonly identifier: FieldRef<"OauthResource", 'String'>
+    readonly name: FieldRef<"OauthResource", 'String'>
+    readonly accessTokenTtl: FieldRef<"OauthResource", 'Int'>
+    readonly refreshTokenTtl: FieldRef<"OauthResource", 'Int'>
+    readonly signingAlgorithm: FieldRef<"OauthResource", 'String'>
+    readonly signingKeyId: FieldRef<"OauthResource", 'String'>
+    readonly allowedScopes: FieldRef<"OauthResource", 'String[]'>
+    readonly customClaims: FieldRef<"OauthResource", 'Json'>
+    readonly dpopBoundAccessTokensRequired: FieldRef<"OauthResource", 'Boolean'>
+    readonly disabled: FieldRef<"OauthResource", 'Boolean'>
+    readonly createdAt: FieldRef<"OauthResource", 'DateTime'>
+    readonly updatedAt: FieldRef<"OauthResource", 'DateTime'>
+    readonly policyVersion: FieldRef<"OauthResource", 'Int'>
+    readonly metadata: FieldRef<"OauthResource", 'Json'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthResource findUnique
+   */
+  export type OauthResourceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthResource to fetch.
+     */
+    where: OauthResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthResource findUniqueOrThrow
+   */
+  export type OauthResourceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthResource to fetch.
+     */
+    where: OauthResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthResource findFirst
+   */
+  export type OauthResourceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthResource to fetch.
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthResources to fetch.
+     */
+    orderBy?: OauthResourceOrderByWithRelationInput | OauthResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthResources.
+     */
+    cursor?: OauthResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthResources.
+     */
+    distinct?: OauthResourceScalarFieldEnum | OauthResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthResource findFirstOrThrow
+   */
+  export type OauthResourceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthResource to fetch.
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthResources to fetch.
+     */
+    orderBy?: OauthResourceOrderByWithRelationInput | OauthResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthResources.
+     */
+    cursor?: OauthResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthResources.
+     */
+    distinct?: OauthResourceScalarFieldEnum | OauthResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthResource findMany
+   */
+  export type OauthResourceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthResources to fetch.
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthResources to fetch.
+     */
+    orderBy?: OauthResourceOrderByWithRelationInput | OauthResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthResources.
+     */
+    cursor?: OauthResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthResources.
+     */
+    distinct?: OauthResourceScalarFieldEnum | OauthResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthResource create
+   */
+  export type OauthResourceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthResource.
+     */
+    data: XOR<OauthResourceCreateInput, OauthResourceUncheckedCreateInput>
+  }
+
+  /**
+   * OauthResource createMany
+   */
+  export type OauthResourceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthResources.
+     */
+    data: OauthResourceCreateManyInput | OauthResourceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthResource createManyAndReturn
+   */
+  export type OauthResourceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthResources.
+     */
+    data: OauthResourceCreateManyInput | OauthResourceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthResource update
+   */
+  export type OauthResourceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthResource.
+     */
+    data: XOR<OauthResourceUpdateInput, OauthResourceUncheckedUpdateInput>
+    /**
+     * Choose, which OauthResource to update.
+     */
+    where: OauthResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthResource updateMany
+   */
+  export type OauthResourceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthResources.
+     */
+    data: XOR<OauthResourceUpdateManyMutationInput, OauthResourceUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthResources to update
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * Limit how many OauthResources to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthResource updateManyAndReturn
+   */
+  export type OauthResourceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthResources.
+     */
+    data: XOR<OauthResourceUpdateManyMutationInput, OauthResourceUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthResources to update
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * Limit how many OauthResources to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthResource upsert
+   */
+  export type OauthResourceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthResource to update in case it exists.
+     */
+    where: OauthResourceWhereUniqueInput
+    /**
+     * In case the OauthResource found by the `where` argument doesn't exist, create a new OauthResource with this data.
+     */
+    create: XOR<OauthResourceCreateInput, OauthResourceUncheckedCreateInput>
+    /**
+     * In case the OauthResource was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthResourceUpdateInput, OauthResourceUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthResource delete
+   */
+  export type OauthResourceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+    /**
+     * Filter which OauthResource to delete.
+     */
+    where: OauthResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthResource deleteMany
+   */
+  export type OauthResourceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthResources to delete
+     */
+    where?: OauthResourceWhereInput
+    /**
+     * Limit how many OauthResources to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthResource.oauthclientresources
+   */
+  export type OauthResource$oauthclientresourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    where?: OauthClientResourceWhereInput
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    cursor?: OauthClientResourceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthClientResourceScalarFieldEnum | OauthClientResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthResource without action
+   */
+  export type OauthResourceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthResource
+     */
+    select?: OauthResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthResource
+     */
+    omit?: OauthResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthResourceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthClientResource
+   */
+
+  export type AggregateOauthClientResource = {
+    _count: OauthClientResourceCountAggregateOutputType | null
+    _min: OauthClientResourceMinAggregateOutputType | null
+    _max: OauthClientResourceMaxAggregateOutputType | null
+  }
+
+  export type OauthClientResourceMinAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    resourceId: string | null
+    createdAt: Date | null
+  }
+
+  export type OauthClientResourceMaxAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    resourceId: string | null
+    createdAt: Date | null
+  }
+
+  export type OauthClientResourceCountAggregateOutputType = {
+    id: number
+    clientId: number
+    resourceId: number
+    metadata: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type OauthClientResourceMinAggregateInputType = {
+    id?: true
+    clientId?: true
+    resourceId?: true
+    createdAt?: true
+  }
+
+  export type OauthClientResourceMaxAggregateInputType = {
+    id?: true
+    clientId?: true
+    resourceId?: true
+    createdAt?: true
+  }
+
+  export type OauthClientResourceCountAggregateInputType = {
+    id?: true
+    clientId?: true
+    resourceId?: true
+    metadata?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type OauthClientResourceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClientResource to aggregate.
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientResources to fetch.
+     */
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthClientResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthClientResources
+    **/
+    _count?: true | OauthClientResourceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthClientResourceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthClientResourceMaxAggregateInputType
+  }
+
+  export type GetOauthClientResourceAggregateType<T extends OauthClientResourceAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthClientResource]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthClientResource[P]>
+      : GetScalarType<T[P], AggregateOauthClientResource[P]>
+  }
+
+
+
+
+  export type OauthClientResourceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientResourceWhereInput
+    orderBy?: OauthClientResourceOrderByWithAggregationInput | OauthClientResourceOrderByWithAggregationInput[]
+    by: OauthClientResourceScalarFieldEnum[] | OauthClientResourceScalarFieldEnum
+    having?: OauthClientResourceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthClientResourceCountAggregateInputType | true
+    _min?: OauthClientResourceMinAggregateInputType
+    _max?: OauthClientResourceMaxAggregateInputType
+  }
+
+  export type OauthClientResourceGroupByOutputType = {
+    id: string
+    clientId: string
+    resourceId: string
+    metadata: JsonValue | null
+    createdAt: Date | null
+    _count: OauthClientResourceCountAggregateOutputType | null
+    _min: OauthClientResourceMinAggregateOutputType | null
+    _max: OauthClientResourceMaxAggregateOutputType | null
+  }
+
+  type GetOauthClientResourceGroupByPayload<T extends OauthClientResourceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthClientResourceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthClientResourceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthClientResourceGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthClientResourceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthClientResourceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    resourceId?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClientResource"]>
+
+  export type OauthClientResourceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    resourceId?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClientResource"]>
+
+  export type OauthClientResourceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    resourceId?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthClientResource"]>
+
+  export type OauthClientResourceSelectScalar = {
+    id?: boolean
+    clientId?: boolean
+    resourceId?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+  }
+
+  export type OauthClientResourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientId" | "resourceId" | "metadata" | "createdAt", ExtArgs["result"]["oauthClientResource"]>
+  export type OauthClientResourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }
+  export type OauthClientResourceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }
+  export type OauthClientResourceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    oauthresource?: boolean | OauthResourceDefaultArgs<ExtArgs>
+  }
+
+  export type $OauthClientResourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthClientResource"
+    objects: {
+      oauthclient: Prisma.$OauthClientPayload<ExtArgs>
+      oauthresource: Prisma.$OauthResourcePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      clientId: string
+      resourceId: string
+      metadata: Prisma.JsonValue | null
+      createdAt: Date | null
+    }, ExtArgs["result"]["oauthClientResource"]>
+    composites: {}
+  }
+
+  type OauthClientResourceGetPayload<S extends boolean | null | undefined | OauthClientResourceDefaultArgs> = $Result.GetResult<Prisma.$OauthClientResourcePayload, S>
+
+  type OauthClientResourceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthClientResourceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthClientResourceCountAggregateInputType | true
+    }
+
+  export interface OauthClientResourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthClientResource'], meta: { name: 'OauthClientResource' } }
+    /**
+     * Find zero or one OauthClientResource that matches the filter.
+     * @param {OauthClientResourceFindUniqueArgs} args - Arguments to find a OauthClientResource
+     * @example
+     * // Get one OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthClientResourceFindUniqueArgs>(args: SelectSubset<T, OauthClientResourceFindUniqueArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthClientResource that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthClientResourceFindUniqueOrThrowArgs} args - Arguments to find a OauthClientResource
+     * @example
+     * // Get one OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthClientResourceFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthClientResourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClientResource that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceFindFirstArgs} args - Arguments to find a OauthClientResource
+     * @example
+     * // Get one OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthClientResourceFindFirstArgs>(args?: SelectSubset<T, OauthClientResourceFindFirstArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClientResource that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceFindFirstOrThrowArgs} args - Arguments to find a OauthClientResource
+     * @example
+     * // Get one OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthClientResourceFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthClientResourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthClientResources that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthClientResources
+     * const oauthClientResources = await prisma.oauthClientResource.findMany()
+     *
+     * // Get first 10 OauthClientResources
+     * const oauthClientResources = await prisma.oauthClientResource.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthClientResourceWithIdOnly = await prisma.oauthClientResource.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthClientResourceFindManyArgs>(args?: SelectSubset<T, OauthClientResourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthClientResource.
+     * @param {OauthClientResourceCreateArgs} args - Arguments to create a OauthClientResource.
+     * @example
+     * // Create one OauthClientResource
+     * const OauthClientResource = await prisma.oauthClientResource.create({
+     *   data: {
+     *     // ... data to create a OauthClientResource
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthClientResourceCreateArgs>(args: SelectSubset<T, OauthClientResourceCreateArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthClientResources.
+     * @param {OauthClientResourceCreateManyArgs} args - Arguments to create many OauthClientResources.
+     * @example
+     * // Create many OauthClientResources
+     * const oauthClientResource = await prisma.oauthClientResource.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthClientResourceCreateManyArgs>(args?: SelectSubset<T, OauthClientResourceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthClientResources and returns the data saved in the database.
+     * @param {OauthClientResourceCreateManyAndReturnArgs} args - Arguments to create many OauthClientResources.
+     * @example
+     * // Create many OauthClientResources
+     * const oauthClientResource = await prisma.oauthClientResource.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthClientResources and only return the `id`
+     * const oauthClientResourceWithIdOnly = await prisma.oauthClientResource.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthClientResourceCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthClientResourceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthClientResource.
+     * @param {OauthClientResourceDeleteArgs} args - Arguments to delete one OauthClientResource.
+     * @example
+     * // Delete one OauthClientResource
+     * const OauthClientResource = await prisma.oauthClientResource.delete({
+     *   where: {
+     *     // ... filter to delete one OauthClientResource
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthClientResourceDeleteArgs>(args: SelectSubset<T, OauthClientResourceDeleteArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthClientResource.
+     * @param {OauthClientResourceUpdateArgs} args - Arguments to update one OauthClientResource.
+     * @example
+     * // Update one OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthClientResourceUpdateArgs>(args: SelectSubset<T, OauthClientResourceUpdateArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthClientResources.
+     * @param {OauthClientResourceDeleteManyArgs} args - Arguments to filter OauthClientResources to delete.
+     * @example
+     * // Delete a few OauthClientResources
+     * const { count } = await prisma.oauthClientResource.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthClientResourceDeleteManyArgs>(args?: SelectSubset<T, OauthClientResourceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClientResources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthClientResources
+     * const oauthClientResource = await prisma.oauthClientResource.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthClientResourceUpdateManyArgs>(args: SelectSubset<T, OauthClientResourceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClientResources and returns the data updated in the database.
+     * @param {OauthClientResourceUpdateManyAndReturnArgs} args - Arguments to update many OauthClientResources.
+     * @example
+     * // Update many OauthClientResources
+     * const oauthClientResource = await prisma.oauthClientResource.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthClientResources and only return the `id`
+     * const oauthClientResourceWithIdOnly = await prisma.oauthClientResource.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthClientResourceUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthClientResourceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthClientResource.
+     * @param {OauthClientResourceUpsertArgs} args - Arguments to update or create a OauthClientResource.
+     * @example
+     * // Update or create a OauthClientResource
+     * const oauthClientResource = await prisma.oauthClientResource.upsert({
+     *   create: {
+     *     // ... data to create a OauthClientResource
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthClientResource we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthClientResourceUpsertArgs>(args: SelectSubset<T, OauthClientResourceUpsertArgs<ExtArgs>>): Prisma__OauthClientResourceClient<$Result.GetResult<Prisma.$OauthClientResourcePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthClientResources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceCountArgs} args - Arguments to filter OauthClientResources to count.
+     * @example
+     * // Count the number of OauthClientResources
+     * const count = await prisma.oauthClientResource.count({
+     *   where: {
+     *     // ... the filter for the OauthClientResources we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthClientResourceCountArgs>(
+      args?: Subset<T, OauthClientResourceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthClientResourceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthClientResource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthClientResourceAggregateArgs>(args: Subset<T, OauthClientResourceAggregateArgs>): Prisma.PrismaPromise<GetOauthClientResourceAggregateType<T>>
+
+    /**
+     * Group by OauthClientResource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientResourceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthClientResourceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthClientResourceGroupByArgs['orderBy'] }
+        : { orderBy?: OauthClientResourceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthClientResourceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthClientResourceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthClientResource model
+   */
+  readonly fields: OauthClientResourceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthClientResource.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthClientResourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthclient<T extends OauthClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OauthClientDefaultArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    oauthresource<T extends OauthResourceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OauthResourceDefaultArgs<ExtArgs>>): Prisma__OauthResourceClient<$Result.GetResult<Prisma.$OauthResourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthClientResource model
+   */
+  interface OauthClientResourceFieldRefs {
+    readonly id: FieldRef<"OauthClientResource", 'String'>
+    readonly clientId: FieldRef<"OauthClientResource", 'String'>
+    readonly resourceId: FieldRef<"OauthClientResource", 'String'>
+    readonly metadata: FieldRef<"OauthClientResource", 'Json'>
+    readonly createdAt: FieldRef<"OauthClientResource", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthClientResource findUnique
+   */
+  export type OauthClientResourceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClientResource to fetch.
+     */
+    where: OauthClientResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthClientResource findUniqueOrThrow
+   */
+  export type OauthClientResourceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClientResource to fetch.
+     */
+    where: OauthClientResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthClientResource findFirst
+   */
+  export type OauthClientResourceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClientResource to fetch.
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientResources to fetch.
+     */
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClientResources.
+     */
+    cursor?: OauthClientResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientResources.
+     */
+    distinct?: OauthClientResourceScalarFieldEnum | OauthClientResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientResource findFirstOrThrow
+   */
+  export type OauthClientResourceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClientResource to fetch.
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientResources to fetch.
+     */
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClientResources.
+     */
+    cursor?: OauthClientResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientResources.
+     */
+    distinct?: OauthClientResourceScalarFieldEnum | OauthClientResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientResource findMany
+   */
+  export type OauthClientResourceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthClientResources to fetch.
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientResources to fetch.
+     */
+    orderBy?: OauthClientResourceOrderByWithRelationInput | OauthClientResourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthClientResources.
+     */
+    cursor?: OauthClientResourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientResources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientResources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientResources.
+     */
+    distinct?: OauthClientResourceScalarFieldEnum | OauthClientResourceScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientResource create
+   */
+  export type OauthClientResourceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthClientResource.
+     */
+    data: XOR<OauthClientResourceCreateInput, OauthClientResourceUncheckedCreateInput>
+  }
+
+  /**
+   * OauthClientResource createMany
+   */
+  export type OauthClientResourceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthClientResources.
+     */
+    data: OauthClientResourceCreateManyInput | OauthClientResourceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthClientResource createManyAndReturn
+   */
+  export type OauthClientResourceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthClientResources.
+     */
+    data: OauthClientResourceCreateManyInput | OauthClientResourceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthClientResource update
+   */
+  export type OauthClientResourceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthClientResource.
+     */
+    data: XOR<OauthClientResourceUpdateInput, OauthClientResourceUncheckedUpdateInput>
+    /**
+     * Choose, which OauthClientResource to update.
+     */
+    where: OauthClientResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthClientResource updateMany
+   */
+  export type OauthClientResourceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthClientResources.
+     */
+    data: XOR<OauthClientResourceUpdateManyMutationInput, OauthClientResourceUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClientResources to update
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * Limit how many OauthClientResources to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClientResource updateManyAndReturn
+   */
+  export type OauthClientResourceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthClientResources.
+     */
+    data: XOR<OauthClientResourceUpdateManyMutationInput, OauthClientResourceUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClientResources to update
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * Limit how many OauthClientResources to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthClientResource upsert
+   */
+  export type OauthClientResourceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthClientResource to update in case it exists.
+     */
+    where: OauthClientResourceWhereUniqueInput
+    /**
+     * In case the OauthClientResource found by the `where` argument doesn't exist, create a new OauthClientResource with this data.
+     */
+    create: XOR<OauthClientResourceCreateInput, OauthClientResourceUncheckedCreateInput>
+    /**
+     * In case the OauthClientResource was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthClientResourceUpdateInput, OauthClientResourceUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthClientResource delete
+   */
+  export type OauthClientResourceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+    /**
+     * Filter which OauthClientResource to delete.
+     */
+    where: OauthClientResourceWhereUniqueInput
+  }
+
+  /**
+   * OauthClientResource deleteMany
+   */
+  export type OauthClientResourceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClientResources to delete
+     */
+    where?: OauthClientResourceWhereInput
+    /**
+     * Limit how many OauthClientResources to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClientResource without action
+   */
+  export type OauthClientResourceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientResource
+     */
+    select?: OauthClientResourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientResource
+     */
+    omit?: OauthClientResourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthClientResourceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthRefreshToken
+   */
+
+  export type AggregateOauthRefreshToken = {
+    _count: OauthRefreshTokenCountAggregateOutputType | null
+    _min: OauthRefreshTokenMinAggregateOutputType | null
+    _max: OauthRefreshTokenMaxAggregateOutputType | null
+  }
+
+  export type OauthRefreshTokenMinAggregateOutputType = {
+    id: string | null
+    token: string | null
+    clientId: string | null
+    sessionId: string | null
+    userId: string | null
+    referenceId: string | null
+    authorizationCodeId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    revoked: Date | null
+    rotatedAt: Date | null
+    rotationReplayResponse: string | null
+    rotationReplayExpiresAt: Date | null
+    authTime: Date | null
+  }
+
+  export type OauthRefreshTokenMaxAggregateOutputType = {
+    id: string | null
+    token: string | null
+    clientId: string | null
+    sessionId: string | null
+    userId: string | null
+    referenceId: string | null
+    authorizationCodeId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    revoked: Date | null
+    rotatedAt: Date | null
+    rotationReplayResponse: string | null
+    rotationReplayExpiresAt: Date | null
+    authTime: Date | null
+  }
+
+  export type OauthRefreshTokenCountAggregateOutputType = {
+    id: number
+    token: number
+    clientId: number
+    sessionId: number
+    userId: number
+    referenceId: number
+    authorizationCodeId: number
+    resources: number
+    requestedUserInfoClaims: number
+    expiresAt: number
+    createdAt: number
+    revoked: number
+    rotatedAt: number
+    rotationReplayResponse: number
+    rotationReplayExpiresAt: number
+    authTime: number
+    confirmation: number
+    scopes: number
+    _all: number
+  }
+
+
+  export type OauthRefreshTokenMinAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+    rotatedAt?: true
+    rotationReplayResponse?: true
+    rotationReplayExpiresAt?: true
+    authTime?: true
+  }
+
+  export type OauthRefreshTokenMaxAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+    rotatedAt?: true
+    rotationReplayResponse?: true
+    rotationReplayExpiresAt?: true
+    authTime?: true
+  }
+
+  export type OauthRefreshTokenCountAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    resources?: true
+    requestedUserInfoClaims?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+    rotatedAt?: true
+    rotationReplayResponse?: true
+    rotationReplayExpiresAt?: true
+    authTime?: true
+    confirmation?: true
+    scopes?: true
+    _all?: true
+  }
+
+  export type OauthRefreshTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthRefreshToken to aggregate.
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthRefreshTokens to fetch.
+     */
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthRefreshTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthRefreshTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthRefreshTokens
+    **/
+    _count?: true | OauthRefreshTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthRefreshTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthRefreshTokenMaxAggregateInputType
+  }
+
+  export type GetOauthRefreshTokenAggregateType<T extends OauthRefreshTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthRefreshToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthRefreshToken[P]>
+      : GetScalarType<T[P], AggregateOauthRefreshToken[P]>
+  }
+
+
+
+
+  export type OauthRefreshTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthRefreshTokenWhereInput
+    orderBy?: OauthRefreshTokenOrderByWithAggregationInput | OauthRefreshTokenOrderByWithAggregationInput[]
+    by: OauthRefreshTokenScalarFieldEnum[] | OauthRefreshTokenScalarFieldEnum
+    having?: OauthRefreshTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthRefreshTokenCountAggregateInputType | true
+    _min?: OauthRefreshTokenMinAggregateInputType
+    _max?: OauthRefreshTokenMaxAggregateInputType
+  }
+
+  export type OauthRefreshTokenGroupByOutputType = {
+    id: string
+    token: string
+    clientId: string
+    sessionId: string | null
+    userId: string
+    referenceId: string | null
+    authorizationCodeId: string | null
+    resources: string[]
+    requestedUserInfoClaims: string[]
+    expiresAt: Date
+    createdAt: Date
+    revoked: Date | null
+    rotatedAt: Date | null
+    rotationReplayResponse: string | null
+    rotationReplayExpiresAt: Date | null
+    authTime: Date | null
+    confirmation: JsonValue | null
+    scopes: string[]
+    _count: OauthRefreshTokenCountAggregateOutputType | null
+    _min: OauthRefreshTokenMinAggregateOutputType | null
+    _max: OauthRefreshTokenMaxAggregateOutputType | null
+  }
+
+  type GetOauthRefreshTokenGroupByPayload<T extends OauthRefreshTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthRefreshTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthRefreshTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthRefreshTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthRefreshTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthRefreshTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    rotatedAt?: boolean
+    rotationReplayResponse?: boolean
+    rotationReplayExpiresAt?: boolean
+    authTime?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    oauthaccesstokens?: boolean | OauthRefreshToken$oauthaccesstokensArgs<ExtArgs>
+    _count?: boolean | OauthRefreshTokenCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthRefreshToken"]>
+
+  export type OauthRefreshTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    rotatedAt?: boolean
+    rotationReplayResponse?: boolean
+    rotationReplayExpiresAt?: boolean
+    authTime?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthRefreshToken"]>
+
+  export type OauthRefreshTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    rotatedAt?: boolean
+    rotationReplayResponse?: boolean
+    rotationReplayExpiresAt?: boolean
+    authTime?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthRefreshToken"]>
+
+  export type OauthRefreshTokenSelectScalar = {
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    rotatedAt?: boolean
+    rotationReplayResponse?: boolean
+    rotationReplayExpiresAt?: boolean
+    authTime?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+  }
+
+  export type OauthRefreshTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "clientId" | "sessionId" | "userId" | "referenceId" | "authorizationCodeId" | "resources" | "requestedUserInfoClaims" | "expiresAt" | "createdAt" | "revoked" | "rotatedAt" | "rotationReplayResponse" | "rotationReplayExpiresAt" | "authTime" | "confirmation" | "scopes", ExtArgs["result"]["oauthRefreshToken"]>
+  export type OauthRefreshTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    oauthaccesstokens?: boolean | OauthRefreshToken$oauthaccesstokensArgs<ExtArgs>
+    _count?: boolean | OauthRefreshTokenCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type OauthRefreshTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+  export type OauthRefreshTokenIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthRefreshToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+  }
+
+  export type $OauthRefreshTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthRefreshToken"
+    objects: {
+      oauthclient: Prisma.$OauthClientPayload<ExtArgs>
+      cloudauthsession: Prisma.$CloudAuthSessionPayload<ExtArgs> | null
+      cloudauthuser: Prisma.$CloudAuthUserPayload<ExtArgs>
+      oauthaccesstokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      token: string
+      clientId: string
+      sessionId: string | null
+      userId: string
+      referenceId: string | null
+      authorizationCodeId: string | null
+      resources: string[]
+      requestedUserInfoClaims: string[]
+      expiresAt: Date
+      createdAt: Date
+      revoked: Date | null
+      rotatedAt: Date | null
+      rotationReplayResponse: string | null
+      rotationReplayExpiresAt: Date | null
+      authTime: Date | null
+      confirmation: Prisma.JsonValue | null
+      scopes: string[]
+    }, ExtArgs["result"]["oauthRefreshToken"]>
+    composites: {}
+  }
+
+  type OauthRefreshTokenGetPayload<S extends boolean | null | undefined | OauthRefreshTokenDefaultArgs> = $Result.GetResult<Prisma.$OauthRefreshTokenPayload, S>
+
+  type OauthRefreshTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthRefreshTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthRefreshTokenCountAggregateInputType | true
+    }
+
+  export interface OauthRefreshTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthRefreshToken'], meta: { name: 'OauthRefreshToken' } }
+    /**
+     * Find zero or one OauthRefreshToken that matches the filter.
+     * @param {OauthRefreshTokenFindUniqueArgs} args - Arguments to find a OauthRefreshToken
+     * @example
+     * // Get one OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthRefreshTokenFindUniqueArgs>(args: SelectSubset<T, OauthRefreshTokenFindUniqueArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthRefreshToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthRefreshTokenFindUniqueOrThrowArgs} args - Arguments to find a OauthRefreshToken
+     * @example
+     * // Get one OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthRefreshTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthRefreshTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthRefreshToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenFindFirstArgs} args - Arguments to find a OauthRefreshToken
+     * @example
+     * // Get one OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthRefreshTokenFindFirstArgs>(args?: SelectSubset<T, OauthRefreshTokenFindFirstArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthRefreshToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenFindFirstOrThrowArgs} args - Arguments to find a OauthRefreshToken
+     * @example
+     * // Get one OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthRefreshTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthRefreshTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthRefreshTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthRefreshTokens
+     * const oauthRefreshTokens = await prisma.oauthRefreshToken.findMany()
+     *
+     * // Get first 10 OauthRefreshTokens
+     * const oauthRefreshTokens = await prisma.oauthRefreshToken.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthRefreshTokenWithIdOnly = await prisma.oauthRefreshToken.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthRefreshTokenFindManyArgs>(args?: SelectSubset<T, OauthRefreshTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthRefreshToken.
+     * @param {OauthRefreshTokenCreateArgs} args - Arguments to create a OauthRefreshToken.
+     * @example
+     * // Create one OauthRefreshToken
+     * const OauthRefreshToken = await prisma.oauthRefreshToken.create({
+     *   data: {
+     *     // ... data to create a OauthRefreshToken
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthRefreshTokenCreateArgs>(args: SelectSubset<T, OauthRefreshTokenCreateArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthRefreshTokens.
+     * @param {OauthRefreshTokenCreateManyArgs} args - Arguments to create many OauthRefreshTokens.
+     * @example
+     * // Create many OauthRefreshTokens
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthRefreshTokenCreateManyArgs>(args?: SelectSubset<T, OauthRefreshTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthRefreshTokens and returns the data saved in the database.
+     * @param {OauthRefreshTokenCreateManyAndReturnArgs} args - Arguments to create many OauthRefreshTokens.
+     * @example
+     * // Create many OauthRefreshTokens
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthRefreshTokens and only return the `id`
+     * const oauthRefreshTokenWithIdOnly = await prisma.oauthRefreshToken.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthRefreshTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthRefreshTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthRefreshToken.
+     * @param {OauthRefreshTokenDeleteArgs} args - Arguments to delete one OauthRefreshToken.
+     * @example
+     * // Delete one OauthRefreshToken
+     * const OauthRefreshToken = await prisma.oauthRefreshToken.delete({
+     *   where: {
+     *     // ... filter to delete one OauthRefreshToken
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthRefreshTokenDeleteArgs>(args: SelectSubset<T, OauthRefreshTokenDeleteArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthRefreshToken.
+     * @param {OauthRefreshTokenUpdateArgs} args - Arguments to update one OauthRefreshToken.
+     * @example
+     * // Update one OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthRefreshTokenUpdateArgs>(args: SelectSubset<T, OauthRefreshTokenUpdateArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthRefreshTokens.
+     * @param {OauthRefreshTokenDeleteManyArgs} args - Arguments to filter OauthRefreshTokens to delete.
+     * @example
+     * // Delete a few OauthRefreshTokens
+     * const { count } = await prisma.oauthRefreshToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthRefreshTokenDeleteManyArgs>(args?: SelectSubset<T, OauthRefreshTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthRefreshTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthRefreshTokens
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthRefreshTokenUpdateManyArgs>(args: SelectSubset<T, OauthRefreshTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthRefreshTokens and returns the data updated in the database.
+     * @param {OauthRefreshTokenUpdateManyAndReturnArgs} args - Arguments to update many OauthRefreshTokens.
+     * @example
+     * // Update many OauthRefreshTokens
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthRefreshTokens and only return the `id`
+     * const oauthRefreshTokenWithIdOnly = await prisma.oauthRefreshToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthRefreshTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthRefreshTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthRefreshToken.
+     * @param {OauthRefreshTokenUpsertArgs} args - Arguments to update or create a OauthRefreshToken.
+     * @example
+     * // Update or create a OauthRefreshToken
+     * const oauthRefreshToken = await prisma.oauthRefreshToken.upsert({
+     *   create: {
+     *     // ... data to create a OauthRefreshToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthRefreshToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthRefreshTokenUpsertArgs>(args: SelectSubset<T, OauthRefreshTokenUpsertArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthRefreshTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenCountArgs} args - Arguments to filter OauthRefreshTokens to count.
+     * @example
+     * // Count the number of OauthRefreshTokens
+     * const count = await prisma.oauthRefreshToken.count({
+     *   where: {
+     *     // ... the filter for the OauthRefreshTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthRefreshTokenCountArgs>(
+      args?: Subset<T, OauthRefreshTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthRefreshTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthRefreshToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthRefreshTokenAggregateArgs>(args: Subset<T, OauthRefreshTokenAggregateArgs>): Prisma.PrismaPromise<GetOauthRefreshTokenAggregateType<T>>
+
+    /**
+     * Group by OauthRefreshToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthRefreshTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthRefreshTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthRefreshTokenGroupByArgs['orderBy'] }
+        : { orderBy?: OauthRefreshTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthRefreshTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthRefreshTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthRefreshToken model
+   */
+  readonly fields: OauthRefreshTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthRefreshToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthRefreshTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthclient<T extends OauthClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OauthClientDefaultArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    cloudauthsession<T extends OauthRefreshToken$cloudauthsessionArgs<ExtArgs> = {}>(args?: Subset<T, OauthRefreshToken$cloudauthsessionArgs<ExtArgs>>): Prisma__CloudAuthSessionClient<$Result.GetResult<Prisma.$CloudAuthSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    cloudauthuser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    oauthaccesstokens<T extends OauthRefreshToken$oauthaccesstokensArgs<ExtArgs> = {}>(args?: Subset<T, OauthRefreshToken$oauthaccesstokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthRefreshToken model
+   */
+  interface OauthRefreshTokenFieldRefs {
+    readonly id: FieldRef<"OauthRefreshToken", 'String'>
+    readonly token: FieldRef<"OauthRefreshToken", 'String'>
+    readonly clientId: FieldRef<"OauthRefreshToken", 'String'>
+    readonly sessionId: FieldRef<"OauthRefreshToken", 'String'>
+    readonly userId: FieldRef<"OauthRefreshToken", 'String'>
+    readonly referenceId: FieldRef<"OauthRefreshToken", 'String'>
+    readonly authorizationCodeId: FieldRef<"OauthRefreshToken", 'String'>
+    readonly resources: FieldRef<"OauthRefreshToken", 'String[]'>
+    readonly requestedUserInfoClaims: FieldRef<"OauthRefreshToken", 'String[]'>
+    readonly expiresAt: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly createdAt: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly revoked: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly rotatedAt: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly rotationReplayResponse: FieldRef<"OauthRefreshToken", 'String'>
+    readonly rotationReplayExpiresAt: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly authTime: FieldRef<"OauthRefreshToken", 'DateTime'>
+    readonly confirmation: FieldRef<"OauthRefreshToken", 'Json'>
+    readonly scopes: FieldRef<"OauthRefreshToken", 'String[]'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthRefreshToken findUnique
+   */
+  export type OauthRefreshTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthRefreshToken to fetch.
+     */
+    where: OauthRefreshTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthRefreshToken findUniqueOrThrow
+   */
+  export type OauthRefreshTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthRefreshToken to fetch.
+     */
+    where: OauthRefreshTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthRefreshToken findFirst
+   */
+  export type OauthRefreshTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthRefreshToken to fetch.
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthRefreshTokens to fetch.
+     */
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthRefreshTokens.
+     */
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthRefreshTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthRefreshTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthRefreshTokens.
+     */
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthRefreshToken findFirstOrThrow
+   */
+  export type OauthRefreshTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthRefreshToken to fetch.
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthRefreshTokens to fetch.
+     */
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthRefreshTokens.
+     */
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthRefreshTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthRefreshTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthRefreshTokens.
+     */
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthRefreshToken findMany
+   */
+  export type OauthRefreshTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthRefreshTokens to fetch.
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthRefreshTokens to fetch.
+     */
+    orderBy?: OauthRefreshTokenOrderByWithRelationInput | OauthRefreshTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthRefreshTokens.
+     */
+    cursor?: OauthRefreshTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthRefreshTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthRefreshTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthRefreshTokens.
+     */
+    distinct?: OauthRefreshTokenScalarFieldEnum | OauthRefreshTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthRefreshToken create
+   */
+  export type OauthRefreshTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthRefreshToken.
+     */
+    data: XOR<OauthRefreshTokenCreateInput, OauthRefreshTokenUncheckedCreateInput>
+  }
+
+  /**
+   * OauthRefreshToken createMany
+   */
+  export type OauthRefreshTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthRefreshTokens.
+     */
+    data: OauthRefreshTokenCreateManyInput | OauthRefreshTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthRefreshToken createManyAndReturn
+   */
+  export type OauthRefreshTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthRefreshTokens.
+     */
+    data: OauthRefreshTokenCreateManyInput | OauthRefreshTokenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthRefreshToken update
+   */
+  export type OauthRefreshTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthRefreshToken.
+     */
+    data: XOR<OauthRefreshTokenUpdateInput, OauthRefreshTokenUncheckedUpdateInput>
+    /**
+     * Choose, which OauthRefreshToken to update.
+     */
+    where: OauthRefreshTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthRefreshToken updateMany
+   */
+  export type OauthRefreshTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthRefreshTokens.
+     */
+    data: XOR<OauthRefreshTokenUpdateManyMutationInput, OauthRefreshTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthRefreshTokens to update
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * Limit how many OauthRefreshTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthRefreshToken updateManyAndReturn
+   */
+  export type OauthRefreshTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthRefreshTokens.
+     */
+    data: XOR<OauthRefreshTokenUpdateManyMutationInput, OauthRefreshTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthRefreshTokens to update
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * Limit how many OauthRefreshTokens to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthRefreshToken upsert
+   */
+  export type OauthRefreshTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthRefreshToken to update in case it exists.
+     */
+    where: OauthRefreshTokenWhereUniqueInput
+    /**
+     * In case the OauthRefreshToken found by the `where` argument doesn't exist, create a new OauthRefreshToken with this data.
+     */
+    create: XOR<OauthRefreshTokenCreateInput, OauthRefreshTokenUncheckedCreateInput>
+    /**
+     * In case the OauthRefreshToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthRefreshTokenUpdateInput, OauthRefreshTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthRefreshToken delete
+   */
+  export type OauthRefreshTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    /**
+     * Filter which OauthRefreshToken to delete.
+     */
+    where: OauthRefreshTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthRefreshToken deleteMany
+   */
+  export type OauthRefreshTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthRefreshTokens to delete
+     */
+    where?: OauthRefreshTokenWhereInput
+    /**
+     * Limit how many OauthRefreshTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthRefreshToken.cloudauthsession
+   */
+  export type OauthRefreshToken$cloudauthsessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthSession
+     */
+    select?: CloudAuthSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CloudAuthSession
+     */
+    omit?: CloudAuthSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CloudAuthSessionInclude<ExtArgs> | null
+    where?: CloudAuthSessionWhereInput
+  }
+
+  /**
+   * OauthRefreshToken.oauthaccesstokens
+   */
+  export type OauthRefreshToken$oauthaccesstokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    where?: OauthAccessTokenWhereInput
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    cursor?: OauthAccessTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthRefreshToken without action
+   */
+  export type OauthRefreshTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthAccessToken
+   */
+
+  export type AggregateOauthAccessToken = {
+    _count: OauthAccessTokenCountAggregateOutputType | null
+    _min: OauthAccessTokenMinAggregateOutputType | null
+    _max: OauthAccessTokenMaxAggregateOutputType | null
+  }
+
+  export type OauthAccessTokenMinAggregateOutputType = {
+    id: string | null
+    token: string | null
+    clientId: string | null
+    sessionId: string | null
+    userId: string | null
+    referenceId: string | null
+    authorizationCodeId: string | null
+    refreshId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    revoked: Date | null
+  }
+
+  export type OauthAccessTokenMaxAggregateOutputType = {
+    id: string | null
+    token: string | null
+    clientId: string | null
+    sessionId: string | null
+    userId: string | null
+    referenceId: string | null
+    authorizationCodeId: string | null
+    refreshId: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    revoked: Date | null
+  }
+
+  export type OauthAccessTokenCountAggregateOutputType = {
+    id: number
+    token: number
+    clientId: number
+    sessionId: number
+    userId: number
+    referenceId: number
+    authorizationCodeId: number
+    resources: number
+    requestedUserInfoClaims: number
+    refreshId: number
+    expiresAt: number
+    createdAt: number
+    revoked: number
+    confirmation: number
+    scopes: number
+    _all: number
+  }
+
+
+  export type OauthAccessTokenMinAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    refreshId?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+  }
+
+  export type OauthAccessTokenMaxAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    refreshId?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+  }
+
+  export type OauthAccessTokenCountAggregateInputType = {
+    id?: true
+    token?: true
+    clientId?: true
+    sessionId?: true
+    userId?: true
+    referenceId?: true
+    authorizationCodeId?: true
+    resources?: true
+    requestedUserInfoClaims?: true
+    refreshId?: true
+    expiresAt?: true
+    createdAt?: true
+    revoked?: true
+    confirmation?: true
+    scopes?: true
+    _all?: true
+  }
+
+  export type OauthAccessTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthAccessToken to aggregate.
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthAccessTokens to fetch.
+     */
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthAccessTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthAccessTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthAccessTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthAccessTokens
+    **/
+    _count?: true | OauthAccessTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthAccessTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthAccessTokenMaxAggregateInputType
+  }
+
+  export type GetOauthAccessTokenAggregateType<T extends OauthAccessTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthAccessToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthAccessToken[P]>
+      : GetScalarType<T[P], AggregateOauthAccessToken[P]>
+  }
+
+
+
+
+  export type OauthAccessTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthAccessTokenWhereInput
+    orderBy?: OauthAccessTokenOrderByWithAggregationInput | OauthAccessTokenOrderByWithAggregationInput[]
+    by: OauthAccessTokenScalarFieldEnum[] | OauthAccessTokenScalarFieldEnum
+    having?: OauthAccessTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthAccessTokenCountAggregateInputType | true
+    _min?: OauthAccessTokenMinAggregateInputType
+    _max?: OauthAccessTokenMaxAggregateInputType
+  }
+
+  export type OauthAccessTokenGroupByOutputType = {
+    id: string
+    token: string
+    clientId: string
+    sessionId: string | null
+    userId: string | null
+    referenceId: string | null
+    authorizationCodeId: string | null
+    resources: string[]
+    requestedUserInfoClaims: string[]
+    refreshId: string | null
+    expiresAt: Date
+    createdAt: Date
+    revoked: Date | null
+    confirmation: JsonValue | null
+    scopes: string[]
+    _count: OauthAccessTokenCountAggregateOutputType | null
+    _min: OauthAccessTokenMinAggregateOutputType | null
+    _max: OauthAccessTokenMaxAggregateOutputType | null
+  }
+
+  type GetOauthAccessTokenGroupByPayload<T extends OauthAccessTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthAccessTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthAccessTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthAccessTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthAccessTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthAccessTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    refreshId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthAccessToken"]>
+
+  export type OauthAccessTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    refreshId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthAccessToken"]>
+
+  export type OauthAccessTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    refreshId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthAccessToken"]>
+
+  export type OauthAccessTokenSelectScalar = {
+    id?: boolean
+    token?: boolean
+    clientId?: boolean
+    sessionId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    authorizationCodeId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    refreshId?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    revoked?: boolean
+    confirmation?: boolean
+    scopes?: boolean
+  }
+
+  export type OauthAccessTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "clientId" | "sessionId" | "userId" | "referenceId" | "authorizationCodeId" | "resources" | "requestedUserInfoClaims" | "refreshId" | "expiresAt" | "createdAt" | "revoked" | "confirmation" | "scopes", ExtArgs["result"]["oauthAccessToken"]>
+  export type OauthAccessTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }
+  export type OauthAccessTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }
+  export type OauthAccessTokenIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthsession?: boolean | OauthAccessToken$cloudauthsessionArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthAccessToken$cloudauthuserArgs<ExtArgs>
+    oauthrefreshtoken?: boolean | OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>
+  }
+
+  export type $OauthAccessTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthAccessToken"
+    objects: {
+      oauthclient: Prisma.$OauthClientPayload<ExtArgs>
+      cloudauthsession: Prisma.$CloudAuthSessionPayload<ExtArgs> | null
+      cloudauthuser: Prisma.$CloudAuthUserPayload<ExtArgs> | null
+      oauthrefreshtoken: Prisma.$OauthRefreshTokenPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      token: string
+      clientId: string
+      sessionId: string | null
+      userId: string | null
+      referenceId: string | null
+      authorizationCodeId: string | null
+      resources: string[]
+      requestedUserInfoClaims: string[]
+      refreshId: string | null
+      expiresAt: Date
+      createdAt: Date
+      revoked: Date | null
+      confirmation: Prisma.JsonValue | null
+      scopes: string[]
+    }, ExtArgs["result"]["oauthAccessToken"]>
+    composites: {}
+  }
+
+  type OauthAccessTokenGetPayload<S extends boolean | null | undefined | OauthAccessTokenDefaultArgs> = $Result.GetResult<Prisma.$OauthAccessTokenPayload, S>
+
+  type OauthAccessTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthAccessTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthAccessTokenCountAggregateInputType | true
+    }
+
+  export interface OauthAccessTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthAccessToken'], meta: { name: 'OauthAccessToken' } }
+    /**
+     * Find zero or one OauthAccessToken that matches the filter.
+     * @param {OauthAccessTokenFindUniqueArgs} args - Arguments to find a OauthAccessToken
+     * @example
+     * // Get one OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthAccessTokenFindUniqueArgs>(args: SelectSubset<T, OauthAccessTokenFindUniqueArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthAccessToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthAccessTokenFindUniqueOrThrowArgs} args - Arguments to find a OauthAccessToken
+     * @example
+     * // Get one OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthAccessTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthAccessTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthAccessToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenFindFirstArgs} args - Arguments to find a OauthAccessToken
+     * @example
+     * // Get one OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthAccessTokenFindFirstArgs>(args?: SelectSubset<T, OauthAccessTokenFindFirstArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthAccessToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenFindFirstOrThrowArgs} args - Arguments to find a OauthAccessToken
+     * @example
+     * // Get one OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthAccessTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthAccessTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthAccessTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthAccessTokens
+     * const oauthAccessTokens = await prisma.oauthAccessToken.findMany()
+     *
+     * // Get first 10 OauthAccessTokens
+     * const oauthAccessTokens = await prisma.oauthAccessToken.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthAccessTokenWithIdOnly = await prisma.oauthAccessToken.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthAccessTokenFindManyArgs>(args?: SelectSubset<T, OauthAccessTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthAccessToken.
+     * @param {OauthAccessTokenCreateArgs} args - Arguments to create a OauthAccessToken.
+     * @example
+     * // Create one OauthAccessToken
+     * const OauthAccessToken = await prisma.oauthAccessToken.create({
+     *   data: {
+     *     // ... data to create a OauthAccessToken
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthAccessTokenCreateArgs>(args: SelectSubset<T, OauthAccessTokenCreateArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthAccessTokens.
+     * @param {OauthAccessTokenCreateManyArgs} args - Arguments to create many OauthAccessTokens.
+     * @example
+     * // Create many OauthAccessTokens
+     * const oauthAccessToken = await prisma.oauthAccessToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthAccessTokenCreateManyArgs>(args?: SelectSubset<T, OauthAccessTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthAccessTokens and returns the data saved in the database.
+     * @param {OauthAccessTokenCreateManyAndReturnArgs} args - Arguments to create many OauthAccessTokens.
+     * @example
+     * // Create many OauthAccessTokens
+     * const oauthAccessToken = await prisma.oauthAccessToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthAccessTokens and only return the `id`
+     * const oauthAccessTokenWithIdOnly = await prisma.oauthAccessToken.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthAccessTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthAccessTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthAccessToken.
+     * @param {OauthAccessTokenDeleteArgs} args - Arguments to delete one OauthAccessToken.
+     * @example
+     * // Delete one OauthAccessToken
+     * const OauthAccessToken = await prisma.oauthAccessToken.delete({
+     *   where: {
+     *     // ... filter to delete one OauthAccessToken
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthAccessTokenDeleteArgs>(args: SelectSubset<T, OauthAccessTokenDeleteArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthAccessToken.
+     * @param {OauthAccessTokenUpdateArgs} args - Arguments to update one OauthAccessToken.
+     * @example
+     * // Update one OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthAccessTokenUpdateArgs>(args: SelectSubset<T, OauthAccessTokenUpdateArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthAccessTokens.
+     * @param {OauthAccessTokenDeleteManyArgs} args - Arguments to filter OauthAccessTokens to delete.
+     * @example
+     * // Delete a few OauthAccessTokens
+     * const { count } = await prisma.oauthAccessToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthAccessTokenDeleteManyArgs>(args?: SelectSubset<T, OauthAccessTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthAccessTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthAccessTokens
+     * const oauthAccessToken = await prisma.oauthAccessToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthAccessTokenUpdateManyArgs>(args: SelectSubset<T, OauthAccessTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthAccessTokens and returns the data updated in the database.
+     * @param {OauthAccessTokenUpdateManyAndReturnArgs} args - Arguments to update many OauthAccessTokens.
+     * @example
+     * // Update many OauthAccessTokens
+     * const oauthAccessToken = await prisma.oauthAccessToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthAccessTokens and only return the `id`
+     * const oauthAccessTokenWithIdOnly = await prisma.oauthAccessToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthAccessTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthAccessTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthAccessToken.
+     * @param {OauthAccessTokenUpsertArgs} args - Arguments to update or create a OauthAccessToken.
+     * @example
+     * // Update or create a OauthAccessToken
+     * const oauthAccessToken = await prisma.oauthAccessToken.upsert({
+     *   create: {
+     *     // ... data to create a OauthAccessToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthAccessToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthAccessTokenUpsertArgs>(args: SelectSubset<T, OauthAccessTokenUpsertArgs<ExtArgs>>): Prisma__OauthAccessTokenClient<$Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthAccessTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenCountArgs} args - Arguments to filter OauthAccessTokens to count.
+     * @example
+     * // Count the number of OauthAccessTokens
+     * const count = await prisma.oauthAccessToken.count({
+     *   where: {
+     *     // ... the filter for the OauthAccessTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthAccessTokenCountArgs>(
+      args?: Subset<T, OauthAccessTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthAccessTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthAccessToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthAccessTokenAggregateArgs>(args: Subset<T, OauthAccessTokenAggregateArgs>): Prisma.PrismaPromise<GetOauthAccessTokenAggregateType<T>>
+
+    /**
+     * Group by OauthAccessToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthAccessTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthAccessTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthAccessTokenGroupByArgs['orderBy'] }
+        : { orderBy?: OauthAccessTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthAccessTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthAccessTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthAccessToken model
+   */
+  readonly fields: OauthAccessTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthAccessToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthAccessTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthclient<T extends OauthClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OauthClientDefaultArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    cloudauthsession<T extends OauthAccessToken$cloudauthsessionArgs<ExtArgs> = {}>(args?: Subset<T, OauthAccessToken$cloudauthsessionArgs<ExtArgs>>): Prisma__CloudAuthSessionClient<$Result.GetResult<Prisma.$CloudAuthSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    cloudauthuser<T extends OauthAccessToken$cloudauthuserArgs<ExtArgs> = {}>(args?: Subset<T, OauthAccessToken$cloudauthuserArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    oauthrefreshtoken<T extends OauthAccessToken$oauthrefreshtokenArgs<ExtArgs> = {}>(args?: Subset<T, OauthAccessToken$oauthrefreshtokenArgs<ExtArgs>>): Prisma__OauthRefreshTokenClient<$Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthAccessToken model
+   */
+  interface OauthAccessTokenFieldRefs {
+    readonly id: FieldRef<"OauthAccessToken", 'String'>
+    readonly token: FieldRef<"OauthAccessToken", 'String'>
+    readonly clientId: FieldRef<"OauthAccessToken", 'String'>
+    readonly sessionId: FieldRef<"OauthAccessToken", 'String'>
+    readonly userId: FieldRef<"OauthAccessToken", 'String'>
+    readonly referenceId: FieldRef<"OauthAccessToken", 'String'>
+    readonly authorizationCodeId: FieldRef<"OauthAccessToken", 'String'>
+    readonly resources: FieldRef<"OauthAccessToken", 'String[]'>
+    readonly requestedUserInfoClaims: FieldRef<"OauthAccessToken", 'String[]'>
+    readonly refreshId: FieldRef<"OauthAccessToken", 'String'>
+    readonly expiresAt: FieldRef<"OauthAccessToken", 'DateTime'>
+    readonly createdAt: FieldRef<"OauthAccessToken", 'DateTime'>
+    readonly revoked: FieldRef<"OauthAccessToken", 'DateTime'>
+    readonly confirmation: FieldRef<"OauthAccessToken", 'Json'>
+    readonly scopes: FieldRef<"OauthAccessToken", 'String[]'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthAccessToken findUnique
+   */
+  export type OauthAccessTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthAccessToken to fetch.
+     */
+    where: OauthAccessTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthAccessToken findUniqueOrThrow
+   */
+  export type OauthAccessTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthAccessToken to fetch.
+     */
+    where: OauthAccessTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthAccessToken findFirst
+   */
+  export type OauthAccessTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthAccessToken to fetch.
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthAccessTokens to fetch.
+     */
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthAccessTokens.
+     */
+    cursor?: OauthAccessTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthAccessTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthAccessTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthAccessTokens.
+     */
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthAccessToken findFirstOrThrow
+   */
+  export type OauthAccessTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthAccessToken to fetch.
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthAccessTokens to fetch.
+     */
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthAccessTokens.
+     */
+    cursor?: OauthAccessTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthAccessTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthAccessTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthAccessTokens.
+     */
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthAccessToken findMany
+   */
+  export type OauthAccessTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthAccessTokens to fetch.
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthAccessTokens to fetch.
+     */
+    orderBy?: OauthAccessTokenOrderByWithRelationInput | OauthAccessTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthAccessTokens.
+     */
+    cursor?: OauthAccessTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthAccessTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthAccessTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthAccessTokens.
+     */
+    distinct?: OauthAccessTokenScalarFieldEnum | OauthAccessTokenScalarFieldEnum[]
+  }
+
+  /**
+   * OauthAccessToken create
+   */
+  export type OauthAccessTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthAccessToken.
+     */
+    data: XOR<OauthAccessTokenCreateInput, OauthAccessTokenUncheckedCreateInput>
+  }
+
+  /**
+   * OauthAccessToken createMany
+   */
+  export type OauthAccessTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthAccessTokens.
+     */
+    data: OauthAccessTokenCreateManyInput | OauthAccessTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthAccessToken createManyAndReturn
+   */
+  export type OauthAccessTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthAccessTokens.
+     */
+    data: OauthAccessTokenCreateManyInput | OauthAccessTokenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthAccessToken update
+   */
+  export type OauthAccessTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthAccessToken.
+     */
+    data: XOR<OauthAccessTokenUpdateInput, OauthAccessTokenUncheckedUpdateInput>
+    /**
+     * Choose, which OauthAccessToken to update.
+     */
+    where: OauthAccessTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthAccessToken updateMany
+   */
+  export type OauthAccessTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthAccessTokens.
+     */
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthAccessTokens to update
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * Limit how many OauthAccessTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthAccessToken updateManyAndReturn
+   */
+  export type OauthAccessTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthAccessTokens.
+     */
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthAccessTokens to update
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * Limit how many OauthAccessTokens to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthAccessToken upsert
+   */
+  export type OauthAccessTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthAccessToken to update in case it exists.
+     */
+    where: OauthAccessTokenWhereUniqueInput
+    /**
+     * In case the OauthAccessToken found by the `where` argument doesn't exist, create a new OauthAccessToken with this data.
+     */
+    create: XOR<OauthAccessTokenCreateInput, OauthAccessTokenUncheckedCreateInput>
+    /**
+     * In case the OauthAccessToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthAccessTokenUpdateInput, OauthAccessTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthAccessToken delete
+   */
+  export type OauthAccessTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+    /**
+     * Filter which OauthAccessToken to delete.
+     */
+    where: OauthAccessTokenWhereUniqueInput
+  }
+
+  /**
+   * OauthAccessToken deleteMany
+   */
+  export type OauthAccessTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthAccessTokens to delete
+     */
+    where?: OauthAccessTokenWhereInput
+    /**
+     * Limit how many OauthAccessTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthAccessToken.cloudauthsession
+   */
+  export type OauthAccessToken$cloudauthsessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthSession
+     */
+    select?: CloudAuthSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CloudAuthSession
+     */
+    omit?: CloudAuthSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CloudAuthSessionInclude<ExtArgs> | null
+    where?: CloudAuthSessionWhereInput
+  }
+
+  /**
+   * OauthAccessToken.cloudauthuser
+   */
+  export type OauthAccessToken$cloudauthuserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthUser
+     */
+    select?: CloudAuthUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CloudAuthUser
+     */
+    omit?: CloudAuthUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CloudAuthUserInclude<ExtArgs> | null
+    where?: CloudAuthUserWhereInput
+  }
+
+  /**
+   * OauthAccessToken.oauthrefreshtoken
+   */
+  export type OauthAccessToken$oauthrefreshtokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthRefreshToken
+     */
+    select?: OauthRefreshTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthRefreshToken
+     */
+    omit?: OauthRefreshTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthRefreshTokenInclude<ExtArgs> | null
+    where?: OauthRefreshTokenWhereInput
+  }
+
+  /**
+   * OauthAccessToken without action
+   */
+  export type OauthAccessTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthAccessToken
+     */
+    select?: OauthAccessTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthAccessToken
+     */
+    omit?: OauthAccessTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthAccessTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthConsent
+   */
+
+  export type AggregateOauthConsent = {
+    _count: OauthConsentCountAggregateOutputType | null
+    _min: OauthConsentMinAggregateOutputType | null
+    _max: OauthConsentMaxAggregateOutputType | null
+  }
+
+  export type OauthConsentMinAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    userId: string | null
+    referenceId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OauthConsentMaxAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    userId: string | null
+    referenceId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OauthConsentCountAggregateOutputType = {
+    id: number
+    clientId: number
+    userId: number
+    referenceId: number
+    resources: number
+    requestedUserInfoClaims: number
+    scopes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OauthConsentMinAggregateInputType = {
+    id?: true
+    clientId?: true
+    userId?: true
+    referenceId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OauthConsentMaxAggregateInputType = {
+    id?: true
+    clientId?: true
+    userId?: true
+    referenceId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OauthConsentCountAggregateInputType = {
+    id?: true
+    clientId?: true
+    userId?: true
+    referenceId?: true
+    resources?: true
+    requestedUserInfoClaims?: true
+    scopes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OauthConsentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthConsent to aggregate.
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthConsents to fetch.
+     */
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthConsentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthConsents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthConsents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthConsents
+    **/
+    _count?: true | OauthConsentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthConsentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthConsentMaxAggregateInputType
+  }
+
+  export type GetOauthConsentAggregateType<T extends OauthConsentAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthConsent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthConsent[P]>
+      : GetScalarType<T[P], AggregateOauthConsent[P]>
+  }
+
+
+
+
+  export type OauthConsentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthConsentWhereInput
+    orderBy?: OauthConsentOrderByWithAggregationInput | OauthConsentOrderByWithAggregationInput[]
+    by: OauthConsentScalarFieldEnum[] | OauthConsentScalarFieldEnum
+    having?: OauthConsentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthConsentCountAggregateInputType | true
+    _min?: OauthConsentMinAggregateInputType
+    _max?: OauthConsentMaxAggregateInputType
+  }
+
+  export type OauthConsentGroupByOutputType = {
+    id: string
+    clientId: string
+    userId: string | null
+    referenceId: string | null
+    resources: string[]
+    requestedUserInfoClaims: string[]
+    scopes: string[]
+    createdAt: Date
+    updatedAt: Date
+    _count: OauthConsentCountAggregateOutputType | null
+    _min: OauthConsentMinAggregateOutputType | null
+    _max: OauthConsentMaxAggregateOutputType | null
+  }
+
+  type GetOauthConsentGroupByPayload<T extends OauthConsentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthConsentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthConsentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthConsentGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthConsentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthConsentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    scopes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthConsent"]>
+
+  export type OauthConsentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    scopes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthConsent"]>
+
+  export type OauthConsentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    scopes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }, ExtArgs["result"]["oauthConsent"]>
+
+  export type OauthConsentSelectScalar = {
+    id?: boolean
+    clientId?: boolean
+    userId?: boolean
+    referenceId?: boolean
+    resources?: boolean
+    requestedUserInfoClaims?: boolean
+    scopes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OauthConsentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientId" | "userId" | "referenceId" | "resources" | "requestedUserInfoClaims" | "scopes" | "createdAt" | "updatedAt", ExtArgs["result"]["oauthConsent"]>
+  export type OauthConsentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }
+  export type OauthConsentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }
+  export type OauthConsentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    oauthclient?: boolean | OauthClientDefaultArgs<ExtArgs>
+    cloudauthuser?: boolean | OauthConsent$cloudauthuserArgs<ExtArgs>
+  }
+
+  export type $OauthConsentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthConsent"
+    objects: {
+      oauthclient: Prisma.$OauthClientPayload<ExtArgs>
+      cloudauthuser: Prisma.$CloudAuthUserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      clientId: string
+      userId: string | null
+      referenceId: string | null
+      resources: string[]
+      requestedUserInfoClaims: string[]
+      scopes: string[]
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["oauthConsent"]>
+    composites: {}
+  }
+
+  type OauthConsentGetPayload<S extends boolean | null | undefined | OauthConsentDefaultArgs> = $Result.GetResult<Prisma.$OauthConsentPayload, S>
+
+  type OauthConsentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthConsentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthConsentCountAggregateInputType | true
+    }
+
+  export interface OauthConsentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthConsent'], meta: { name: 'OauthConsent' } }
+    /**
+     * Find zero or one OauthConsent that matches the filter.
+     * @param {OauthConsentFindUniqueArgs} args - Arguments to find a OauthConsent
+     * @example
+     * // Get one OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthConsentFindUniqueArgs>(args: SelectSubset<T, OauthConsentFindUniqueArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthConsent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthConsentFindUniqueOrThrowArgs} args - Arguments to find a OauthConsent
+     * @example
+     * // Get one OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthConsentFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthConsentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthConsent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentFindFirstArgs} args - Arguments to find a OauthConsent
+     * @example
+     * // Get one OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthConsentFindFirstArgs>(args?: SelectSubset<T, OauthConsentFindFirstArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthConsent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentFindFirstOrThrowArgs} args - Arguments to find a OauthConsent
+     * @example
+     * // Get one OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthConsentFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthConsentFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthConsents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthConsents
+     * const oauthConsents = await prisma.oauthConsent.findMany()
+     *
+     * // Get first 10 OauthConsents
+     * const oauthConsents = await prisma.oauthConsent.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthConsentWithIdOnly = await prisma.oauthConsent.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthConsentFindManyArgs>(args?: SelectSubset<T, OauthConsentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthConsent.
+     * @param {OauthConsentCreateArgs} args - Arguments to create a OauthConsent.
+     * @example
+     * // Create one OauthConsent
+     * const OauthConsent = await prisma.oauthConsent.create({
+     *   data: {
+     *     // ... data to create a OauthConsent
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthConsentCreateArgs>(args: SelectSubset<T, OauthConsentCreateArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthConsents.
+     * @param {OauthConsentCreateManyArgs} args - Arguments to create many OauthConsents.
+     * @example
+     * // Create many OauthConsents
+     * const oauthConsent = await prisma.oauthConsent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthConsentCreateManyArgs>(args?: SelectSubset<T, OauthConsentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthConsents and returns the data saved in the database.
+     * @param {OauthConsentCreateManyAndReturnArgs} args - Arguments to create many OauthConsents.
+     * @example
+     * // Create many OauthConsents
+     * const oauthConsent = await prisma.oauthConsent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthConsents and only return the `id`
+     * const oauthConsentWithIdOnly = await prisma.oauthConsent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthConsentCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthConsentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthConsent.
+     * @param {OauthConsentDeleteArgs} args - Arguments to delete one OauthConsent.
+     * @example
+     * // Delete one OauthConsent
+     * const OauthConsent = await prisma.oauthConsent.delete({
+     *   where: {
+     *     // ... filter to delete one OauthConsent
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthConsentDeleteArgs>(args: SelectSubset<T, OauthConsentDeleteArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthConsent.
+     * @param {OauthConsentUpdateArgs} args - Arguments to update one OauthConsent.
+     * @example
+     * // Update one OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthConsentUpdateArgs>(args: SelectSubset<T, OauthConsentUpdateArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthConsents.
+     * @param {OauthConsentDeleteManyArgs} args - Arguments to filter OauthConsents to delete.
+     * @example
+     * // Delete a few OauthConsents
+     * const { count } = await prisma.oauthConsent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthConsentDeleteManyArgs>(args?: SelectSubset<T, OauthConsentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthConsents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthConsents
+     * const oauthConsent = await prisma.oauthConsent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthConsentUpdateManyArgs>(args: SelectSubset<T, OauthConsentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthConsents and returns the data updated in the database.
+     * @param {OauthConsentUpdateManyAndReturnArgs} args - Arguments to update many OauthConsents.
+     * @example
+     * // Update many OauthConsents
+     * const oauthConsent = await prisma.oauthConsent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthConsents and only return the `id`
+     * const oauthConsentWithIdOnly = await prisma.oauthConsent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthConsentUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthConsentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthConsent.
+     * @param {OauthConsentUpsertArgs} args - Arguments to update or create a OauthConsent.
+     * @example
+     * // Update or create a OauthConsent
+     * const oauthConsent = await prisma.oauthConsent.upsert({
+     *   create: {
+     *     // ... data to create a OauthConsent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthConsent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthConsentUpsertArgs>(args: SelectSubset<T, OauthConsentUpsertArgs<ExtArgs>>): Prisma__OauthConsentClient<$Result.GetResult<Prisma.$OauthConsentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthConsents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentCountArgs} args - Arguments to filter OauthConsents to count.
+     * @example
+     * // Count the number of OauthConsents
+     * const count = await prisma.oauthConsent.count({
+     *   where: {
+     *     // ... the filter for the OauthConsents we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthConsentCountArgs>(
+      args?: Subset<T, OauthConsentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthConsentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthConsent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthConsentAggregateArgs>(args: Subset<T, OauthConsentAggregateArgs>): Prisma.PrismaPromise<GetOauthConsentAggregateType<T>>
+
+    /**
+     * Group by OauthConsent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthConsentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthConsentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthConsentGroupByArgs['orderBy'] }
+        : { orderBy?: OauthConsentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthConsentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthConsentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthConsent model
+   */
+  readonly fields: OauthConsentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthConsent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthConsentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    oauthclient<T extends OauthClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OauthClientDefaultArgs<ExtArgs>>): Prisma__OauthClientClient<$Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    cloudauthuser<T extends OauthConsent$cloudauthuserArgs<ExtArgs> = {}>(args?: Subset<T, OauthConsent$cloudauthuserArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthConsent model
+   */
+  interface OauthConsentFieldRefs {
+    readonly id: FieldRef<"OauthConsent", 'String'>
+    readonly clientId: FieldRef<"OauthConsent", 'String'>
+    readonly userId: FieldRef<"OauthConsent", 'String'>
+    readonly referenceId: FieldRef<"OauthConsent", 'String'>
+    readonly resources: FieldRef<"OauthConsent", 'String[]'>
+    readonly requestedUserInfoClaims: FieldRef<"OauthConsent", 'String[]'>
+    readonly scopes: FieldRef<"OauthConsent", 'String[]'>
+    readonly createdAt: FieldRef<"OauthConsent", 'DateTime'>
+    readonly updatedAt: FieldRef<"OauthConsent", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthConsent findUnique
+   */
+  export type OauthConsentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthConsent to fetch.
+     */
+    where: OauthConsentWhereUniqueInput
+  }
+
+  /**
+   * OauthConsent findUniqueOrThrow
+   */
+  export type OauthConsentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthConsent to fetch.
+     */
+    where: OauthConsentWhereUniqueInput
+  }
+
+  /**
+   * OauthConsent findFirst
+   */
+  export type OauthConsentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthConsent to fetch.
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthConsents to fetch.
+     */
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthConsents.
+     */
+    cursor?: OauthConsentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthConsents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthConsents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthConsents.
+     */
+    distinct?: OauthConsentScalarFieldEnum | OauthConsentScalarFieldEnum[]
+  }
+
+  /**
+   * OauthConsent findFirstOrThrow
+   */
+  export type OauthConsentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthConsent to fetch.
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthConsents to fetch.
+     */
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthConsents.
+     */
+    cursor?: OauthConsentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthConsents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthConsents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthConsents.
+     */
+    distinct?: OauthConsentScalarFieldEnum | OauthConsentScalarFieldEnum[]
+  }
+
+  /**
+   * OauthConsent findMany
+   */
+  export type OauthConsentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter, which OauthConsents to fetch.
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthConsents to fetch.
+     */
+    orderBy?: OauthConsentOrderByWithRelationInput | OauthConsentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthConsents.
+     */
+    cursor?: OauthConsentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthConsents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthConsents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthConsents.
+     */
+    distinct?: OauthConsentScalarFieldEnum | OauthConsentScalarFieldEnum[]
+  }
+
+  /**
+   * OauthConsent create
+   */
+  export type OauthConsentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OauthConsent.
+     */
+    data: XOR<OauthConsentCreateInput, OauthConsentUncheckedCreateInput>
+  }
+
+  /**
+   * OauthConsent createMany
+   */
+  export type OauthConsentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthConsents.
+     */
+    data: OauthConsentCreateManyInput | OauthConsentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthConsent createManyAndReturn
+   */
+  export type OauthConsentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthConsents.
+     */
+    data: OauthConsentCreateManyInput | OauthConsentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthConsent update
+   */
+  export type OauthConsentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OauthConsent.
+     */
+    data: XOR<OauthConsentUpdateInput, OauthConsentUncheckedUpdateInput>
+    /**
+     * Choose, which OauthConsent to update.
+     */
+    where: OauthConsentWhereUniqueInput
+  }
+
+  /**
+   * OauthConsent updateMany
+   */
+  export type OauthConsentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthConsents.
+     */
+    data: XOR<OauthConsentUpdateManyMutationInput, OauthConsentUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthConsents to update
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * Limit how many OauthConsents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthConsent updateManyAndReturn
+   */
+  export type OauthConsentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthConsents.
+     */
+    data: XOR<OauthConsentUpdateManyMutationInput, OauthConsentUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthConsents to update
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * Limit how many OauthConsents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OauthConsent upsert
+   */
+  export type OauthConsentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OauthConsent to update in case it exists.
+     */
+    where: OauthConsentWhereUniqueInput
+    /**
+     * In case the OauthConsent found by the `where` argument doesn't exist, create a new OauthConsent with this data.
+     */
+    create: XOR<OauthConsentCreateInput, OauthConsentUncheckedCreateInput>
+    /**
+     * In case the OauthConsent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthConsentUpdateInput, OauthConsentUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthConsent delete
+   */
+  export type OauthConsentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+    /**
+     * Filter which OauthConsent to delete.
+     */
+    where: OauthConsentWhereUniqueInput
+  }
+
+  /**
+   * OauthConsent deleteMany
+   */
+  export type OauthConsentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthConsents to delete
+     */
+    where?: OauthConsentWhereInput
+    /**
+     * Limit how many OauthConsents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthConsent.cloudauthuser
+   */
+  export type OauthConsent$cloudauthuserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CloudAuthUser
+     */
+    select?: CloudAuthUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CloudAuthUser
+     */
+    omit?: CloudAuthUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CloudAuthUserInclude<ExtArgs> | null
+    where?: CloudAuthUserWhereInput
+  }
+
+  /**
+   * OauthConsent without action
+   */
+  export type OauthConsentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthConsent
+     */
+    select?: OauthConsentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthConsent
+     */
+    omit?: OauthConsentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OauthConsentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OauthClientAssertion
+   */
+
+  export type AggregateOauthClientAssertion = {
+    _count: OauthClientAssertionCountAggregateOutputType | null
+    _min: OauthClientAssertionMinAggregateOutputType | null
+    _max: OauthClientAssertionMaxAggregateOutputType | null
+  }
+
+  export type OauthClientAssertionMinAggregateOutputType = {
+    id: string | null
+    expiresAt: Date | null
+  }
+
+  export type OauthClientAssertionMaxAggregateOutputType = {
+    id: string | null
+    expiresAt: Date | null
+  }
+
+  export type OauthClientAssertionCountAggregateOutputType = {
+    id: number
+    expiresAt: number
+    _all: number
+  }
+
+
+  export type OauthClientAssertionMinAggregateInputType = {
+    id?: true
+    expiresAt?: true
+  }
+
+  export type OauthClientAssertionMaxAggregateInputType = {
+    id?: true
+    expiresAt?: true
+  }
+
+  export type OauthClientAssertionCountAggregateInputType = {
+    id?: true
+    expiresAt?: true
+    _all?: true
+  }
+
+  export type OauthClientAssertionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClientAssertion to aggregate.
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientAssertions to fetch.
+     */
+    orderBy?: OauthClientAssertionOrderByWithRelationInput | OauthClientAssertionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: OauthClientAssertionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientAssertions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientAssertions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned OauthClientAssertions
+    **/
+    _count?: true | OauthClientAssertionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: OauthClientAssertionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: OauthClientAssertionMaxAggregateInputType
+  }
+
+  export type GetOauthClientAssertionAggregateType<T extends OauthClientAssertionAggregateArgs> = {
+        [P in keyof T & keyof AggregateOauthClientAssertion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOauthClientAssertion[P]>
+      : GetScalarType<T[P], AggregateOauthClientAssertion[P]>
+  }
+
+
+
+
+  export type OauthClientAssertionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OauthClientAssertionWhereInput
+    orderBy?: OauthClientAssertionOrderByWithAggregationInput | OauthClientAssertionOrderByWithAggregationInput[]
+    by: OauthClientAssertionScalarFieldEnum[] | OauthClientAssertionScalarFieldEnum
+    having?: OauthClientAssertionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OauthClientAssertionCountAggregateInputType | true
+    _min?: OauthClientAssertionMinAggregateInputType
+    _max?: OauthClientAssertionMaxAggregateInputType
+  }
+
+  export type OauthClientAssertionGroupByOutputType = {
+    id: string
+    expiresAt: Date
+    _count: OauthClientAssertionCountAggregateOutputType | null
+    _min: OauthClientAssertionMinAggregateOutputType | null
+    _max: OauthClientAssertionMaxAggregateOutputType | null
+  }
+
+  type GetOauthClientAssertionGroupByPayload<T extends OauthClientAssertionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OauthClientAssertionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OauthClientAssertionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OauthClientAssertionGroupByOutputType[P]>
+            : GetScalarType<T[P], OauthClientAssertionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OauthClientAssertionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    expiresAt?: boolean
+  }, ExtArgs["result"]["oauthClientAssertion"]>
+
+  export type OauthClientAssertionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    expiresAt?: boolean
+  }, ExtArgs["result"]["oauthClientAssertion"]>
+
+  export type OauthClientAssertionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    expiresAt?: boolean
+  }, ExtArgs["result"]["oauthClientAssertion"]>
+
+  export type OauthClientAssertionSelectScalar = {
+    id?: boolean
+    expiresAt?: boolean
+  }
+
+  export type OauthClientAssertionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "expiresAt", ExtArgs["result"]["oauthClientAssertion"]>
+
+  export type $OauthClientAssertionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OauthClientAssertion"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      expiresAt: Date
+    }, ExtArgs["result"]["oauthClientAssertion"]>
+    composites: {}
+  }
+
+  type OauthClientAssertionGetPayload<S extends boolean | null | undefined | OauthClientAssertionDefaultArgs> = $Result.GetResult<Prisma.$OauthClientAssertionPayload, S>
+
+  type OauthClientAssertionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OauthClientAssertionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OauthClientAssertionCountAggregateInputType | true
+    }
+
+  export interface OauthClientAssertionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OauthClientAssertion'], meta: { name: 'OauthClientAssertion' } }
+    /**
+     * Find zero or one OauthClientAssertion that matches the filter.
+     * @param {OauthClientAssertionFindUniqueArgs} args - Arguments to find a OauthClientAssertion
+     * @example
+     * // Get one OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OauthClientAssertionFindUniqueArgs>(args: SelectSubset<T, OauthClientAssertionFindUniqueArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OauthClientAssertion that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OauthClientAssertionFindUniqueOrThrowArgs} args - Arguments to find a OauthClientAssertion
+     * @example
+     * // Get one OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OauthClientAssertionFindUniqueOrThrowArgs>(args: SelectSubset<T, OauthClientAssertionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClientAssertion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionFindFirstArgs} args - Arguments to find a OauthClientAssertion
+     * @example
+     * // Get one OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OauthClientAssertionFindFirstArgs>(args?: SelectSubset<T, OauthClientAssertionFindFirstArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OauthClientAssertion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionFindFirstOrThrowArgs} args - Arguments to find a OauthClientAssertion
+     * @example
+     * // Get one OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OauthClientAssertionFindFirstOrThrowArgs>(args?: SelectSubset<T, OauthClientAssertionFindFirstOrThrowArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OauthClientAssertions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OauthClientAssertions
+     * const oauthClientAssertions = await prisma.oauthClientAssertion.findMany()
+     *
+     * // Get first 10 OauthClientAssertions
+     * const oauthClientAssertions = await prisma.oauthClientAssertion.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const oauthClientAssertionWithIdOnly = await prisma.oauthClientAssertion.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends OauthClientAssertionFindManyArgs>(args?: SelectSubset<T, OauthClientAssertionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OauthClientAssertion.
+     * @param {OauthClientAssertionCreateArgs} args - Arguments to create a OauthClientAssertion.
+     * @example
+     * // Create one OauthClientAssertion
+     * const OauthClientAssertion = await prisma.oauthClientAssertion.create({
+     *   data: {
+     *     // ... data to create a OauthClientAssertion
+     *   }
+     * })
+     *
+     */
+    create<T extends OauthClientAssertionCreateArgs>(args: SelectSubset<T, OauthClientAssertionCreateArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OauthClientAssertions.
+     * @param {OauthClientAssertionCreateManyArgs} args - Arguments to create many OauthClientAssertions.
+     * @example
+     * // Create many OauthClientAssertions
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends OauthClientAssertionCreateManyArgs>(args?: SelectSubset<T, OauthClientAssertionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OauthClientAssertions and returns the data saved in the database.
+     * @param {OauthClientAssertionCreateManyAndReturnArgs} args - Arguments to create many OauthClientAssertions.
+     * @example
+     * // Create many OauthClientAssertions
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many OauthClientAssertions and only return the `id`
+     * const oauthClientAssertionWithIdOnly = await prisma.oauthClientAssertion.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends OauthClientAssertionCreateManyAndReturnArgs>(args?: SelectSubset<T, OauthClientAssertionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OauthClientAssertion.
+     * @param {OauthClientAssertionDeleteArgs} args - Arguments to delete one OauthClientAssertion.
+     * @example
+     * // Delete one OauthClientAssertion
+     * const OauthClientAssertion = await prisma.oauthClientAssertion.delete({
+     *   where: {
+     *     // ... filter to delete one OauthClientAssertion
+     *   }
+     * })
+     *
+     */
+    delete<T extends OauthClientAssertionDeleteArgs>(args: SelectSubset<T, OauthClientAssertionDeleteArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OauthClientAssertion.
+     * @param {OauthClientAssertionUpdateArgs} args - Arguments to update one OauthClientAssertion.
+     * @example
+     * // Update one OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends OauthClientAssertionUpdateArgs>(args: SelectSubset<T, OauthClientAssertionUpdateArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OauthClientAssertions.
+     * @param {OauthClientAssertionDeleteManyArgs} args - Arguments to filter OauthClientAssertions to delete.
+     * @example
+     * // Delete a few OauthClientAssertions
+     * const { count } = await prisma.oauthClientAssertion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends OauthClientAssertionDeleteManyArgs>(args?: SelectSubset<T, OauthClientAssertionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClientAssertions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OauthClientAssertions
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends OauthClientAssertionUpdateManyArgs>(args: SelectSubset<T, OauthClientAssertionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OauthClientAssertions and returns the data updated in the database.
+     * @param {OauthClientAssertionUpdateManyAndReturnArgs} args - Arguments to update many OauthClientAssertions.
+     * @example
+     * // Update many OauthClientAssertions
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more OauthClientAssertions and only return the `id`
+     * const oauthClientAssertionWithIdOnly = await prisma.oauthClientAssertion.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends OauthClientAssertionUpdateManyAndReturnArgs>(args: SelectSubset<T, OauthClientAssertionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OauthClientAssertion.
+     * @param {OauthClientAssertionUpsertArgs} args - Arguments to update or create a OauthClientAssertion.
+     * @example
+     * // Update or create a OauthClientAssertion
+     * const oauthClientAssertion = await prisma.oauthClientAssertion.upsert({
+     *   create: {
+     *     // ... data to create a OauthClientAssertion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OauthClientAssertion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OauthClientAssertionUpsertArgs>(args: SelectSubset<T, OauthClientAssertionUpsertArgs<ExtArgs>>): Prisma__OauthClientAssertionClient<$Result.GetResult<Prisma.$OauthClientAssertionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OauthClientAssertions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionCountArgs} args - Arguments to filter OauthClientAssertions to count.
+     * @example
+     * // Count the number of OauthClientAssertions
+     * const count = await prisma.oauthClientAssertion.count({
+     *   where: {
+     *     // ... the filter for the OauthClientAssertions we want to count
+     *   }
+     * })
+    **/
+    count<T extends OauthClientAssertionCountArgs>(
+      args?: Subset<T, OauthClientAssertionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OauthClientAssertionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OauthClientAssertion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OauthClientAssertionAggregateArgs>(args: Subset<T, OauthClientAssertionAggregateArgs>): Prisma.PrismaPromise<GetOauthClientAssertionAggregateType<T>>
+
+    /**
+     * Group by OauthClientAssertion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OauthClientAssertionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends OauthClientAssertionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OauthClientAssertionGroupByArgs['orderBy'] }
+        : { orderBy?: OauthClientAssertionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OauthClientAssertionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOauthClientAssertionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OauthClientAssertion model
+   */
+  readonly fields: OauthClientAssertionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OauthClientAssertion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OauthClientAssertionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OauthClientAssertion model
+   */
+  interface OauthClientAssertionFieldRefs {
+    readonly id: FieldRef<"OauthClientAssertion", 'String'>
+    readonly expiresAt: FieldRef<"OauthClientAssertion", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * OauthClientAssertion findUnique
+   */
+  export type OauthClientAssertionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter, which OauthClientAssertion to fetch.
+     */
+    where: OauthClientAssertionWhereUniqueInput
+  }
+
+  /**
+   * OauthClientAssertion findUniqueOrThrow
+   */
+  export type OauthClientAssertionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter, which OauthClientAssertion to fetch.
+     */
+    where: OauthClientAssertionWhereUniqueInput
+  }
+
+  /**
+   * OauthClientAssertion findFirst
+   */
+  export type OauthClientAssertionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter, which OauthClientAssertion to fetch.
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientAssertions to fetch.
+     */
+    orderBy?: OauthClientAssertionOrderByWithRelationInput | OauthClientAssertionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClientAssertions.
+     */
+    cursor?: OauthClientAssertionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientAssertions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientAssertions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientAssertions.
+     */
+    distinct?: OauthClientAssertionScalarFieldEnum | OauthClientAssertionScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientAssertion findFirstOrThrow
+   */
+  export type OauthClientAssertionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter, which OauthClientAssertion to fetch.
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientAssertions to fetch.
+     */
+    orderBy?: OauthClientAssertionOrderByWithRelationInput | OauthClientAssertionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for OauthClientAssertions.
+     */
+    cursor?: OauthClientAssertionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientAssertions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientAssertions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientAssertions.
+     */
+    distinct?: OauthClientAssertionScalarFieldEnum | OauthClientAssertionScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientAssertion findMany
+   */
+  export type OauthClientAssertionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter, which OauthClientAssertions to fetch.
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of OauthClientAssertions to fetch.
+     */
+    orderBy?: OauthClientAssertionOrderByWithRelationInput | OauthClientAssertionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing OauthClientAssertions.
+     */
+    cursor?: OauthClientAssertionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` OauthClientAssertions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` OauthClientAssertions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of OauthClientAssertions.
+     */
+    distinct?: OauthClientAssertionScalarFieldEnum | OauthClientAssertionScalarFieldEnum[]
+  }
+
+  /**
+   * OauthClientAssertion create
+   */
+  export type OauthClientAssertionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OauthClientAssertion.
+     */
+    data: XOR<OauthClientAssertionCreateInput, OauthClientAssertionUncheckedCreateInput>
+  }
+
+  /**
+   * OauthClientAssertion createMany
+   */
+  export type OauthClientAssertionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OauthClientAssertions.
+     */
+    data: OauthClientAssertionCreateManyInput | OauthClientAssertionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthClientAssertion createManyAndReturn
+   */
+  export type OauthClientAssertionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * The data used to create many OauthClientAssertions.
+     */
+    data: OauthClientAssertionCreateManyInput | OauthClientAssertionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OauthClientAssertion update
+   */
+  export type OauthClientAssertionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OauthClientAssertion.
+     */
+    data: XOR<OauthClientAssertionUpdateInput, OauthClientAssertionUncheckedUpdateInput>
+    /**
+     * Choose, which OauthClientAssertion to update.
+     */
+    where: OauthClientAssertionWhereUniqueInput
+  }
+
+  /**
+   * OauthClientAssertion updateMany
+   */
+  export type OauthClientAssertionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OauthClientAssertions.
+     */
+    data: XOR<OauthClientAssertionUpdateManyMutationInput, OauthClientAssertionUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClientAssertions to update
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * Limit how many OauthClientAssertions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClientAssertion updateManyAndReturn
+   */
+  export type OauthClientAssertionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * The data used to update OauthClientAssertions.
+     */
+    data: XOR<OauthClientAssertionUpdateManyMutationInput, OauthClientAssertionUncheckedUpdateManyInput>
+    /**
+     * Filter which OauthClientAssertions to update
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * Limit how many OauthClientAssertions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClientAssertion upsert
+   */
+  export type OauthClientAssertionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OauthClientAssertion to update in case it exists.
+     */
+    where: OauthClientAssertionWhereUniqueInput
+    /**
+     * In case the OauthClientAssertion found by the `where` argument doesn't exist, create a new OauthClientAssertion with this data.
+     */
+    create: XOR<OauthClientAssertionCreateInput, OauthClientAssertionUncheckedCreateInput>
+    /**
+     * In case the OauthClientAssertion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OauthClientAssertionUpdateInput, OauthClientAssertionUncheckedUpdateInput>
+  }
+
+  /**
+   * OauthClientAssertion delete
+   */
+  export type OauthClientAssertionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
+    /**
+     * Filter which OauthClientAssertion to delete.
+     */
+    where: OauthClientAssertionWhereUniqueInput
+  }
+
+  /**
+   * OauthClientAssertion deleteMany
+   */
+  export type OauthClientAssertionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OauthClientAssertions to delete
+     */
+    where?: OauthClientAssertionWhereInput
+    /**
+     * Limit how many OauthClientAssertions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OauthClientAssertion without action
+   */
+  export type OauthClientAssertionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OauthClientAssertion
+     */
+    select?: OauthClientAssertionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OauthClientAssertion
+     */
+    omit?: OauthClientAssertionOmit<ExtArgs> | null
   }
 
 
@@ -95211,6 +108432,40 @@ export namespace Prisma {
   export type CloudAuthDeviceCodeScalarFieldEnum = (typeof CloudAuthDeviceCodeScalarFieldEnum)[keyof typeof CloudAuthDeviceCodeScalarFieldEnum]
 
 
+  export const ExternalAgentPatScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    name: 'name',
+    prefix: 'prefix',
+    tokenDigest: 'tokenDigest',
+    audience: 'audience',
+    scopes: 'scopes',
+    expiresAt: 'expiresAt',
+    revokedAt: 'revokedAt',
+    createdAt: 'createdAt',
+    rateWindow: 'rateWindow',
+    rateCount: 'rateCount'
+  };
+
+  export type ExternalAgentPatScalarFieldEnum = (typeof ExternalAgentPatScalarFieldEnum)[keyof typeof ExternalAgentPatScalarFieldEnum]
+
+
+  export const ExternalAgentConnectionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    clientId: 'clientId',
+    resource: 'resource',
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt',
+    lastUsedAt: 'lastUsedAt',
+    revokedAt: 'revokedAt',
+    rateWindow: 'rateWindow',
+    rateCount: 'rateCount'
+  };
+
+  export type ExternalAgentConnectionScalarFieldEnum = (typeof ExternalAgentConnectionScalarFieldEnum)[keyof typeof ExternalAgentConnectionScalarFieldEnum]
+
+
   export const GoalScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -95500,6 +108755,161 @@ export namespace Prisma {
   };
 
   export type NotificationDispatchOutboxScalarFieldEnum = (typeof NotificationDispatchOutboxScalarFieldEnum)[keyof typeof NotificationDispatchOutboxScalarFieldEnum]
+
+
+  export const JwksScalarFieldEnum: {
+    id: 'id',
+    publicKey: 'publicKey',
+    privateKey: 'privateKey',
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt',
+    alg: 'alg',
+    crv: 'crv'
+  };
+
+  export type JwksScalarFieldEnum = (typeof JwksScalarFieldEnum)[keyof typeof JwksScalarFieldEnum]
+
+
+  export const OauthClientScalarFieldEnum: {
+    id: 'id',
+    clientId: 'clientId',
+    clientSecret: 'clientSecret',
+    clientDiscoveryId: 'clientDiscoveryId',
+    disabled: 'disabled',
+    skipConsent: 'skipConsent',
+    enableEndSession: 'enableEndSession',
+    subjectType: 'subjectType',
+    scopes: 'scopes',
+    clientCredentialsScopes: 'clientCredentialsScopes',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    uri: 'uri',
+    icon: 'icon',
+    contacts: 'contacts',
+    tos: 'tos',
+    policy: 'policy',
+    softwareId: 'softwareId',
+    softwareVersion: 'softwareVersion',
+    softwareStatement: 'softwareStatement',
+    redirectUris: 'redirectUris',
+    postLogoutRedirectUris: 'postLogoutRedirectUris',
+    backchannelLogoutUri: 'backchannelLogoutUri',
+    backchannelLogoutSessionRequired: 'backchannelLogoutSessionRequired',
+    tokenEndpointAuthMethod: 'tokenEndpointAuthMethod',
+    applicationType: 'applicationType',
+    jwks: 'jwks',
+    jwksUri: 'jwksUri',
+    grantTypes: 'grantTypes',
+    responseTypes: 'responseTypes',
+    requirePKCE: 'requirePKCE',
+    dpopBoundAccessTokens: 'dpopBoundAccessTokens',
+    referenceId: 'referenceId',
+    metadata: 'metadata'
+  };
+
+  export type OauthClientScalarFieldEnum = (typeof OauthClientScalarFieldEnum)[keyof typeof OauthClientScalarFieldEnum]
+
+
+  export const OauthResourceScalarFieldEnum: {
+    id: 'id',
+    identifier: 'identifier',
+    name: 'name',
+    accessTokenTtl: 'accessTokenTtl',
+    refreshTokenTtl: 'refreshTokenTtl',
+    signingAlgorithm: 'signingAlgorithm',
+    signingKeyId: 'signingKeyId',
+    allowedScopes: 'allowedScopes',
+    customClaims: 'customClaims',
+    dpopBoundAccessTokensRequired: 'dpopBoundAccessTokensRequired',
+    disabled: 'disabled',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    policyVersion: 'policyVersion',
+    metadata: 'metadata'
+  };
+
+  export type OauthResourceScalarFieldEnum = (typeof OauthResourceScalarFieldEnum)[keyof typeof OauthResourceScalarFieldEnum]
+
+
+  export const OauthClientResourceScalarFieldEnum: {
+    id: 'id',
+    clientId: 'clientId',
+    resourceId: 'resourceId',
+    metadata: 'metadata',
+    createdAt: 'createdAt'
+  };
+
+  export type OauthClientResourceScalarFieldEnum = (typeof OauthClientResourceScalarFieldEnum)[keyof typeof OauthClientResourceScalarFieldEnum]
+
+
+  export const OauthRefreshTokenScalarFieldEnum: {
+    id: 'id',
+    token: 'token',
+    clientId: 'clientId',
+    sessionId: 'sessionId',
+    userId: 'userId',
+    referenceId: 'referenceId',
+    authorizationCodeId: 'authorizationCodeId',
+    resources: 'resources',
+    requestedUserInfoClaims: 'requestedUserInfoClaims',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt',
+    revoked: 'revoked',
+    rotatedAt: 'rotatedAt',
+    rotationReplayResponse: 'rotationReplayResponse',
+    rotationReplayExpiresAt: 'rotationReplayExpiresAt',
+    authTime: 'authTime',
+    confirmation: 'confirmation',
+    scopes: 'scopes'
+  };
+
+  export type OauthRefreshTokenScalarFieldEnum = (typeof OauthRefreshTokenScalarFieldEnum)[keyof typeof OauthRefreshTokenScalarFieldEnum]
+
+
+  export const OauthAccessTokenScalarFieldEnum: {
+    id: 'id',
+    token: 'token',
+    clientId: 'clientId',
+    sessionId: 'sessionId',
+    userId: 'userId',
+    referenceId: 'referenceId',
+    authorizationCodeId: 'authorizationCodeId',
+    resources: 'resources',
+    requestedUserInfoClaims: 'requestedUserInfoClaims',
+    refreshId: 'refreshId',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt',
+    revoked: 'revoked',
+    confirmation: 'confirmation',
+    scopes: 'scopes'
+  };
+
+  export type OauthAccessTokenScalarFieldEnum = (typeof OauthAccessTokenScalarFieldEnum)[keyof typeof OauthAccessTokenScalarFieldEnum]
+
+
+  export const OauthConsentScalarFieldEnum: {
+    id: 'id',
+    clientId: 'clientId',
+    userId: 'userId',
+    referenceId: 'referenceId',
+    resources: 'resources',
+    requestedUserInfoClaims: 'requestedUserInfoClaims',
+    scopes: 'scopes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OauthConsentScalarFieldEnum = (typeof OauthConsentScalarFieldEnum)[keyof typeof OauthConsentScalarFieldEnum]
+
+
+  export const OauthClientAssertionScalarFieldEnum: {
+    id: 'id',
+    expiresAt: 'expiresAt'
+  };
+
+  export type OauthClientAssertionScalarFieldEnum = (typeof OauthClientAssertionScalarFieldEnum)[keyof typeof OauthClientAssertionScalarFieldEnum]
 
 
   export const RelationScalarFieldEnum: {
@@ -97209,6 +110619,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionListRelationFilter
     providerAccounts?: CloudAuthProviderAccountListRelationFilter
     deviceCodes?: CloudAuthDeviceCodeListRelationFilter
+    externalAgentPats?: ExternalAgentPatListRelationFilter
+    externalAgentConnections?: ExternalAgentConnectionListRelationFilter
+    oauthclients?: OauthClientListRelationFilter
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+    oauthconsents?: OauthConsentListRelationFilter
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
   }
 
@@ -97224,6 +110640,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionOrderByRelationAggregateInput
     providerAccounts?: CloudAuthProviderAccountOrderByRelationAggregateInput
     deviceCodes?: CloudAuthDeviceCodeOrderByRelationAggregateInput
+    externalAgentPats?: ExternalAgentPatOrderByRelationAggregateInput
+    externalAgentConnections?: ExternalAgentConnectionOrderByRelationAggregateInput
+    oauthclients?: OauthClientOrderByRelationAggregateInput
+    oauthrefreshtokens?: OauthRefreshTokenOrderByRelationAggregateInput
+    oauthaccesstokens?: OauthAccessTokenOrderByRelationAggregateInput
+    oauthconsents?: OauthConsentOrderByRelationAggregateInput
     account?: AccountOrderByWithRelationInput
   }
 
@@ -97242,6 +110664,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionListRelationFilter
     providerAccounts?: CloudAuthProviderAccountListRelationFilter
     deviceCodes?: CloudAuthDeviceCodeListRelationFilter
+    externalAgentPats?: ExternalAgentPatListRelationFilter
+    externalAgentConnections?: ExternalAgentConnectionListRelationFilter
+    oauthclients?: OauthClientListRelationFilter
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+    oauthconsents?: OauthConsentListRelationFilter
     account?: XOR<AccountNullableScalarRelationFilter, AccountWhereInput> | null
   }, "id" | "email">
 
@@ -97285,6 +110713,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"CloudAuthSession"> | string | null
     createdAt?: DateTimeFilter<"CloudAuthSession"> | Date | string
     updatedAt?: DateTimeFilter<"CloudAuthSession"> | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
     user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
   }
 
@@ -97297,6 +110727,8 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    oauthrefreshtokens?: OauthRefreshTokenOrderByRelationAggregateInput
+    oauthaccesstokens?: OauthAccessTokenOrderByRelationAggregateInput
     user?: CloudAuthUserOrderByWithRelationInput
   }
 
@@ -97312,6 +110744,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"CloudAuthSession"> | string | null
     createdAt?: DateTimeFilter<"CloudAuthSession"> | Date | string
     updatedAt?: DateTimeFilter<"CloudAuthSession"> | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
     user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
   }, "id" | "token">
 
@@ -97576,6 +111010,180 @@ export namespace Prisma {
     pollingInterval?: IntNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | number | null
     clientId?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
     scope?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
+  }
+
+  export type ExternalAgentPatWhereInput = {
+    AND?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    OR?: ExternalAgentPatWhereInput[]
+    NOT?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    id?: StringFilter<"ExternalAgentPat"> | string
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }
+
+  export type ExternalAgentPatOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    user?: CloudAuthUserOrderByWithRelationInput
+  }
+
+  export type ExternalAgentPatWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tokenDigest?: string
+    AND?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    OR?: ExternalAgentPatWhereInput[]
+    NOT?: ExternalAgentPatWhereInput | ExternalAgentPatWhereInput[]
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }, "id" | "tokenDigest">
+
+  export type ExternalAgentPatOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    _count?: ExternalAgentPatCountOrderByAggregateInput
+    _avg?: ExternalAgentPatAvgOrderByAggregateInput
+    _max?: ExternalAgentPatMaxOrderByAggregateInput
+    _min?: ExternalAgentPatMinOrderByAggregateInput
+    _sum?: ExternalAgentPatSumOrderByAggregateInput
+  }
+
+  export type ExternalAgentPatScalarWhereWithAggregatesInput = {
+    AND?: ExternalAgentPatScalarWhereWithAggregatesInput | ExternalAgentPatScalarWhereWithAggregatesInput[]
+    OR?: ExternalAgentPatScalarWhereWithAggregatesInput[]
+    NOT?: ExternalAgentPatScalarWhereWithAggregatesInput | ExternalAgentPatScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    userId?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    name?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    prefix?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    audience?: StringWithAggregatesFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeWithAggregatesFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntWithAggregatesFilter<"ExternalAgentPat"> | number
+  }
+
+  export type ExternalAgentConnectionWhereInput = {
+    AND?: ExternalAgentConnectionWhereInput | ExternalAgentConnectionWhereInput[]
+    OR?: ExternalAgentConnectionWhereInput[]
+    NOT?: ExternalAgentConnectionWhereInput | ExternalAgentConnectionWhereInput[]
+    id?: StringFilter<"ExternalAgentConnection"> | string
+    userId?: StringFilter<"ExternalAgentConnection"> | string
+    clientId?: StringFilter<"ExternalAgentConnection"> | string
+    resource?: StringFilter<"ExternalAgentConnection"> | string
+    createdAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    expiresAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    rateWindow?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentConnection"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }
+
+  export type ExternalAgentConnectionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clientId?: SortOrder
+    resource?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    user?: CloudAuthUserOrderByWithRelationInput
+  }
+
+  export type ExternalAgentConnectionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExternalAgentConnectionWhereInput | ExternalAgentConnectionWhereInput[]
+    OR?: ExternalAgentConnectionWhereInput[]
+    NOT?: ExternalAgentConnectionWhereInput | ExternalAgentConnectionWhereInput[]
+    userId?: StringFilter<"ExternalAgentConnection"> | string
+    clientId?: StringFilter<"ExternalAgentConnection"> | string
+    resource?: StringFilter<"ExternalAgentConnection"> | string
+    createdAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    expiresAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    rateWindow?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentConnection"> | number
+    user?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+  }, "id">
+
+  export type ExternalAgentConnectionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clientId?: SortOrder
+    resource?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    revokedAt?: SortOrderInput | SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+    _count?: ExternalAgentConnectionCountOrderByAggregateInput
+    _avg?: ExternalAgentConnectionAvgOrderByAggregateInput
+    _max?: ExternalAgentConnectionMaxOrderByAggregateInput
+    _min?: ExternalAgentConnectionMinOrderByAggregateInput
+    _sum?: ExternalAgentConnectionSumOrderByAggregateInput
+  }
+
+  export type ExternalAgentConnectionScalarWhereWithAggregatesInput = {
+    AND?: ExternalAgentConnectionScalarWhereWithAggregatesInput | ExternalAgentConnectionScalarWhereWithAggregatesInput[]
+    OR?: ExternalAgentConnectionScalarWhereWithAggregatesInput[]
+    NOT?: ExternalAgentConnectionScalarWhereWithAggregatesInput | ExternalAgentConnectionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExternalAgentConnection"> | string
+    userId?: StringWithAggregatesFilter<"ExternalAgentConnection"> | string
+    clientId?: StringWithAggregatesFilter<"ExternalAgentConnection"> | string
+    resource?: StringWithAggregatesFilter<"ExternalAgentConnection"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ExternalAgentConnection"> | Date | string
+    expiresAt?: DateTimeWithAggregatesFilter<"ExternalAgentConnection"> | Date | string
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentConnection"> | Date | string | null
+    revokedAt?: DateTimeNullableWithAggregatesFilter<"ExternalAgentConnection"> | Date | string | null
+    rateWindow?: DateTimeWithAggregatesFilter<"ExternalAgentConnection"> | Date | string
+    rateCount?: IntWithAggregatesFilter<"ExternalAgentConnection"> | number
   }
 
   export type GoalWhereInput = {
@@ -99121,6 +112729,815 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NotificationDispatchOutbox"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"NotificationDispatchOutbox"> | Date | string
     finishedAt?: DateTimeNullableWithAggregatesFilter<"NotificationDispatchOutbox"> | Date | string | null
+  }
+
+  export type JwksWhereInput = {
+    AND?: JwksWhereInput | JwksWhereInput[]
+    OR?: JwksWhereInput[]
+    NOT?: JwksWhereInput | JwksWhereInput[]
+    id?: StringFilter<"Jwks"> | string
+    publicKey?: StringFilter<"Jwks"> | string
+    privateKey?: StringFilter<"Jwks"> | string
+    createdAt?: DateTimeFilter<"Jwks"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"Jwks"> | Date | string | null
+    alg?: StringNullableFilter<"Jwks"> | string | null
+    crv?: StringNullableFilter<"Jwks"> | string | null
+  }
+
+  export type JwksOrderByWithRelationInput = {
+    id?: SortOrder
+    publicKey?: SortOrder
+    privateKey?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    alg?: SortOrderInput | SortOrder
+    crv?: SortOrderInput | SortOrder
+  }
+
+  export type JwksWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: JwksWhereInput | JwksWhereInput[]
+    OR?: JwksWhereInput[]
+    NOT?: JwksWhereInput | JwksWhereInput[]
+    publicKey?: StringFilter<"Jwks"> | string
+    privateKey?: StringFilter<"Jwks"> | string
+    createdAt?: DateTimeFilter<"Jwks"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"Jwks"> | Date | string | null
+    alg?: StringNullableFilter<"Jwks"> | string | null
+    crv?: StringNullableFilter<"Jwks"> | string | null
+  }, "id">
+
+  export type JwksOrderByWithAggregationInput = {
+    id?: SortOrder
+    publicKey?: SortOrder
+    privateKey?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    alg?: SortOrderInput | SortOrder
+    crv?: SortOrderInput | SortOrder
+    _count?: JwksCountOrderByAggregateInput
+    _max?: JwksMaxOrderByAggregateInput
+    _min?: JwksMinOrderByAggregateInput
+  }
+
+  export type JwksScalarWhereWithAggregatesInput = {
+    AND?: JwksScalarWhereWithAggregatesInput | JwksScalarWhereWithAggregatesInput[]
+    OR?: JwksScalarWhereWithAggregatesInput[]
+    NOT?: JwksScalarWhereWithAggregatesInput | JwksScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Jwks"> | string
+    publicKey?: StringWithAggregatesFilter<"Jwks"> | string
+    privateKey?: StringWithAggregatesFilter<"Jwks"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Jwks"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Jwks"> | Date | string | null
+    alg?: StringNullableWithAggregatesFilter<"Jwks"> | string | null
+    crv?: StringNullableWithAggregatesFilter<"Jwks"> | string | null
+  }
+
+  export type OauthClientWhereInput = {
+    AND?: OauthClientWhereInput | OauthClientWhereInput[]
+    OR?: OauthClientWhereInput[]
+    NOT?: OauthClientWhereInput | OauthClientWhereInput[]
+    id?: StringFilter<"OauthClient"> | string
+    clientId?: StringFilter<"OauthClient"> | string
+    clientSecret?: StringNullableFilter<"OauthClient"> | string | null
+    clientDiscoveryId?: StringNullableFilter<"OauthClient"> | string | null
+    disabled?: BoolNullableFilter<"OauthClient"> | boolean | null
+    skipConsent?: BoolNullableFilter<"OauthClient"> | boolean | null
+    enableEndSession?: BoolNullableFilter<"OauthClient"> | boolean | null
+    subjectType?: StringNullableFilter<"OauthClient"> | string | null
+    scopes?: StringNullableListFilter<"OauthClient">
+    clientCredentialsScopes?: StringNullableListFilter<"OauthClient">
+    userId?: StringNullableFilter<"OauthClient"> | string | null
+    createdAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    updatedAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    name?: StringNullableFilter<"OauthClient"> | string | null
+    uri?: StringNullableFilter<"OauthClient"> | string | null
+    icon?: StringNullableFilter<"OauthClient"> | string | null
+    contacts?: StringNullableListFilter<"OauthClient">
+    tos?: StringNullableFilter<"OauthClient"> | string | null
+    policy?: StringNullableFilter<"OauthClient"> | string | null
+    softwareId?: StringNullableFilter<"OauthClient"> | string | null
+    softwareVersion?: StringNullableFilter<"OauthClient"> | string | null
+    softwareStatement?: StringNullableFilter<"OauthClient"> | string | null
+    redirectUris?: StringNullableListFilter<"OauthClient">
+    postLogoutRedirectUris?: StringNullableListFilter<"OauthClient">
+    backchannelLogoutUri?: StringNullableFilter<"OauthClient"> | string | null
+    backchannelLogoutSessionRequired?: BoolNullableFilter<"OauthClient"> | boolean | null
+    tokenEndpointAuthMethod?: StringNullableFilter<"OauthClient"> | string | null
+    applicationType?: StringNullableFilter<"OauthClient"> | string | null
+    jwks?: StringNullableFilter<"OauthClient"> | string | null
+    jwksUri?: StringNullableFilter<"OauthClient"> | string | null
+    grantTypes?: StringNullableListFilter<"OauthClient">
+    responseTypes?: StringNullableListFilter<"OauthClient">
+    requirePKCE?: BoolNullableFilter<"OauthClient"> | boolean | null
+    dpopBoundAccessTokens?: BoolNullableFilter<"OauthClient"> | boolean | null
+    referenceId?: StringNullableFilter<"OauthClient"> | string | null
+    metadata?: JsonNullableFilter<"OauthClient">
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+    oauthclientresources?: OauthClientResourceListRelationFilter
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+    oauthconsents?: OauthConsentListRelationFilter
+  }
+
+  export type OauthClientOrderByWithRelationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    clientSecret?: SortOrderInput | SortOrder
+    clientDiscoveryId?: SortOrderInput | SortOrder
+    disabled?: SortOrderInput | SortOrder
+    skipConsent?: SortOrderInput | SortOrder
+    enableEndSession?: SortOrderInput | SortOrder
+    subjectType?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    clientCredentialsScopes?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    uri?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
+    contacts?: SortOrder
+    tos?: SortOrderInput | SortOrder
+    policy?: SortOrderInput | SortOrder
+    softwareId?: SortOrderInput | SortOrder
+    softwareVersion?: SortOrderInput | SortOrder
+    softwareStatement?: SortOrderInput | SortOrder
+    redirectUris?: SortOrder
+    postLogoutRedirectUris?: SortOrder
+    backchannelLogoutUri?: SortOrderInput | SortOrder
+    backchannelLogoutSessionRequired?: SortOrderInput | SortOrder
+    tokenEndpointAuthMethod?: SortOrderInput | SortOrder
+    applicationType?: SortOrderInput | SortOrder
+    jwks?: SortOrderInput | SortOrder
+    jwksUri?: SortOrderInput | SortOrder
+    grantTypes?: SortOrder
+    responseTypes?: SortOrder
+    requirePKCE?: SortOrderInput | SortOrder
+    dpopBoundAccessTokens?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    cloudauthuser?: CloudAuthUserOrderByWithRelationInput
+    oauthclientresources?: OauthClientResourceOrderByRelationAggregateInput
+    oauthrefreshtokens?: OauthRefreshTokenOrderByRelationAggregateInput
+    oauthaccesstokens?: OauthAccessTokenOrderByRelationAggregateInput
+    oauthconsents?: OauthConsentOrderByRelationAggregateInput
+  }
+
+  export type OauthClientWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    clientId?: string
+    AND?: OauthClientWhereInput | OauthClientWhereInput[]
+    OR?: OauthClientWhereInput[]
+    NOT?: OauthClientWhereInput | OauthClientWhereInput[]
+    clientSecret?: StringNullableFilter<"OauthClient"> | string | null
+    clientDiscoveryId?: StringNullableFilter<"OauthClient"> | string | null
+    disabled?: BoolNullableFilter<"OauthClient"> | boolean | null
+    skipConsent?: BoolNullableFilter<"OauthClient"> | boolean | null
+    enableEndSession?: BoolNullableFilter<"OauthClient"> | boolean | null
+    subjectType?: StringNullableFilter<"OauthClient"> | string | null
+    scopes?: StringNullableListFilter<"OauthClient">
+    clientCredentialsScopes?: StringNullableListFilter<"OauthClient">
+    userId?: StringNullableFilter<"OauthClient"> | string | null
+    createdAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    updatedAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    name?: StringNullableFilter<"OauthClient"> | string | null
+    uri?: StringNullableFilter<"OauthClient"> | string | null
+    icon?: StringNullableFilter<"OauthClient"> | string | null
+    contacts?: StringNullableListFilter<"OauthClient">
+    tos?: StringNullableFilter<"OauthClient"> | string | null
+    policy?: StringNullableFilter<"OauthClient"> | string | null
+    softwareId?: StringNullableFilter<"OauthClient"> | string | null
+    softwareVersion?: StringNullableFilter<"OauthClient"> | string | null
+    softwareStatement?: StringNullableFilter<"OauthClient"> | string | null
+    redirectUris?: StringNullableListFilter<"OauthClient">
+    postLogoutRedirectUris?: StringNullableListFilter<"OauthClient">
+    backchannelLogoutUri?: StringNullableFilter<"OauthClient"> | string | null
+    backchannelLogoutSessionRequired?: BoolNullableFilter<"OauthClient"> | boolean | null
+    tokenEndpointAuthMethod?: StringNullableFilter<"OauthClient"> | string | null
+    applicationType?: StringNullableFilter<"OauthClient"> | string | null
+    jwks?: StringNullableFilter<"OauthClient"> | string | null
+    jwksUri?: StringNullableFilter<"OauthClient"> | string | null
+    grantTypes?: StringNullableListFilter<"OauthClient">
+    responseTypes?: StringNullableListFilter<"OauthClient">
+    requirePKCE?: BoolNullableFilter<"OauthClient"> | boolean | null
+    dpopBoundAccessTokens?: BoolNullableFilter<"OauthClient"> | boolean | null
+    referenceId?: StringNullableFilter<"OauthClient"> | string | null
+    metadata?: JsonNullableFilter<"OauthClient">
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+    oauthclientresources?: OauthClientResourceListRelationFilter
+    oauthrefreshtokens?: OauthRefreshTokenListRelationFilter
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+    oauthconsents?: OauthConsentListRelationFilter
+  }, "id" | "clientId">
+
+  export type OauthClientOrderByWithAggregationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    clientSecret?: SortOrderInput | SortOrder
+    clientDiscoveryId?: SortOrderInput | SortOrder
+    disabled?: SortOrderInput | SortOrder
+    skipConsent?: SortOrderInput | SortOrder
+    enableEndSession?: SortOrderInput | SortOrder
+    subjectType?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    clientCredentialsScopes?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    uri?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
+    contacts?: SortOrder
+    tos?: SortOrderInput | SortOrder
+    policy?: SortOrderInput | SortOrder
+    softwareId?: SortOrderInput | SortOrder
+    softwareVersion?: SortOrderInput | SortOrder
+    softwareStatement?: SortOrderInput | SortOrder
+    redirectUris?: SortOrder
+    postLogoutRedirectUris?: SortOrder
+    backchannelLogoutUri?: SortOrderInput | SortOrder
+    backchannelLogoutSessionRequired?: SortOrderInput | SortOrder
+    tokenEndpointAuthMethod?: SortOrderInput | SortOrder
+    applicationType?: SortOrderInput | SortOrder
+    jwks?: SortOrderInput | SortOrder
+    jwksUri?: SortOrderInput | SortOrder
+    grantTypes?: SortOrder
+    responseTypes?: SortOrder
+    requirePKCE?: SortOrderInput | SortOrder
+    dpopBoundAccessTokens?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    _count?: OauthClientCountOrderByAggregateInput
+    _max?: OauthClientMaxOrderByAggregateInput
+    _min?: OauthClientMinOrderByAggregateInput
+  }
+
+  export type OauthClientScalarWhereWithAggregatesInput = {
+    AND?: OauthClientScalarWhereWithAggregatesInput | OauthClientScalarWhereWithAggregatesInput[]
+    OR?: OauthClientScalarWhereWithAggregatesInput[]
+    NOT?: OauthClientScalarWhereWithAggregatesInput | OauthClientScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthClient"> | string
+    clientId?: StringWithAggregatesFilter<"OauthClient"> | string
+    clientSecret?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    clientDiscoveryId?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    disabled?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    skipConsent?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    enableEndSession?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    subjectType?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    scopes?: StringNullableListFilter<"OauthClient">
+    clientCredentialsScopes?: StringNullableListFilter<"OauthClient">
+    userId?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    createdAt?: DateTimeNullableWithAggregatesFilter<"OauthClient"> | Date | string | null
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"OauthClient"> | Date | string | null
+    name?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    uri?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    icon?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    contacts?: StringNullableListFilter<"OauthClient">
+    tos?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    policy?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    softwareId?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    softwareVersion?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    softwareStatement?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    redirectUris?: StringNullableListFilter<"OauthClient">
+    postLogoutRedirectUris?: StringNullableListFilter<"OauthClient">
+    backchannelLogoutUri?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    backchannelLogoutSessionRequired?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    tokenEndpointAuthMethod?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    applicationType?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    jwks?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    jwksUri?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    grantTypes?: StringNullableListFilter<"OauthClient">
+    responseTypes?: StringNullableListFilter<"OauthClient">
+    requirePKCE?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    dpopBoundAccessTokens?: BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
+    referenceId?: StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"OauthClient">
+  }
+
+  export type OauthResourceWhereInput = {
+    AND?: OauthResourceWhereInput | OauthResourceWhereInput[]
+    OR?: OauthResourceWhereInput[]
+    NOT?: OauthResourceWhereInput | OauthResourceWhereInput[]
+    id?: StringFilter<"OauthResource"> | string
+    identifier?: StringFilter<"OauthResource"> | string
+    name?: StringFilter<"OauthResource"> | string
+    accessTokenTtl?: IntNullableFilter<"OauthResource"> | number | null
+    refreshTokenTtl?: IntNullableFilter<"OauthResource"> | number | null
+    signingAlgorithm?: StringNullableFilter<"OauthResource"> | string | null
+    signingKeyId?: StringNullableFilter<"OauthResource"> | string | null
+    allowedScopes?: StringNullableListFilter<"OauthResource">
+    customClaims?: JsonNullableFilter<"OauthResource">
+    dpopBoundAccessTokensRequired?: BoolNullableFilter<"OauthResource"> | boolean | null
+    disabled?: BoolNullableFilter<"OauthResource"> | boolean | null
+    createdAt?: DateTimeNullableFilter<"OauthResource"> | Date | string | null
+    updatedAt?: DateTimeNullableFilter<"OauthResource"> | Date | string | null
+    policyVersion?: IntNullableFilter<"OauthResource"> | number | null
+    metadata?: JsonNullableFilter<"OauthResource">
+    oauthclientresources?: OauthClientResourceListRelationFilter
+  }
+
+  export type OauthResourceOrderByWithRelationInput = {
+    id?: SortOrder
+    identifier?: SortOrder
+    name?: SortOrder
+    accessTokenTtl?: SortOrderInput | SortOrder
+    refreshTokenTtl?: SortOrderInput | SortOrder
+    signingAlgorithm?: SortOrderInput | SortOrder
+    signingKeyId?: SortOrderInput | SortOrder
+    allowedScopes?: SortOrder
+    customClaims?: SortOrderInput | SortOrder
+    dpopBoundAccessTokensRequired?: SortOrderInput | SortOrder
+    disabled?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    policyVersion?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    oauthclientresources?: OauthClientResourceOrderByRelationAggregateInput
+  }
+
+  export type OauthResourceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identifier?: string
+    AND?: OauthResourceWhereInput | OauthResourceWhereInput[]
+    OR?: OauthResourceWhereInput[]
+    NOT?: OauthResourceWhereInput | OauthResourceWhereInput[]
+    name?: StringFilter<"OauthResource"> | string
+    accessTokenTtl?: IntNullableFilter<"OauthResource"> | number | null
+    refreshTokenTtl?: IntNullableFilter<"OauthResource"> | number | null
+    signingAlgorithm?: StringNullableFilter<"OauthResource"> | string | null
+    signingKeyId?: StringNullableFilter<"OauthResource"> | string | null
+    allowedScopes?: StringNullableListFilter<"OauthResource">
+    customClaims?: JsonNullableFilter<"OauthResource">
+    dpopBoundAccessTokensRequired?: BoolNullableFilter<"OauthResource"> | boolean | null
+    disabled?: BoolNullableFilter<"OauthResource"> | boolean | null
+    createdAt?: DateTimeNullableFilter<"OauthResource"> | Date | string | null
+    updatedAt?: DateTimeNullableFilter<"OauthResource"> | Date | string | null
+    policyVersion?: IntNullableFilter<"OauthResource"> | number | null
+    metadata?: JsonNullableFilter<"OauthResource">
+    oauthclientresources?: OauthClientResourceListRelationFilter
+  }, "id" | "identifier">
+
+  export type OauthResourceOrderByWithAggregationInput = {
+    id?: SortOrder
+    identifier?: SortOrder
+    name?: SortOrder
+    accessTokenTtl?: SortOrderInput | SortOrder
+    refreshTokenTtl?: SortOrderInput | SortOrder
+    signingAlgorithm?: SortOrderInput | SortOrder
+    signingKeyId?: SortOrderInput | SortOrder
+    allowedScopes?: SortOrder
+    customClaims?: SortOrderInput | SortOrder
+    dpopBoundAccessTokensRequired?: SortOrderInput | SortOrder
+    disabled?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    policyVersion?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    _count?: OauthResourceCountOrderByAggregateInput
+    _avg?: OauthResourceAvgOrderByAggregateInput
+    _max?: OauthResourceMaxOrderByAggregateInput
+    _min?: OauthResourceMinOrderByAggregateInput
+    _sum?: OauthResourceSumOrderByAggregateInput
+  }
+
+  export type OauthResourceScalarWhereWithAggregatesInput = {
+    AND?: OauthResourceScalarWhereWithAggregatesInput | OauthResourceScalarWhereWithAggregatesInput[]
+    OR?: OauthResourceScalarWhereWithAggregatesInput[]
+    NOT?: OauthResourceScalarWhereWithAggregatesInput | OauthResourceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthResource"> | string
+    identifier?: StringWithAggregatesFilter<"OauthResource"> | string
+    name?: StringWithAggregatesFilter<"OauthResource"> | string
+    accessTokenTtl?: IntNullableWithAggregatesFilter<"OauthResource"> | number | null
+    refreshTokenTtl?: IntNullableWithAggregatesFilter<"OauthResource"> | number | null
+    signingAlgorithm?: StringNullableWithAggregatesFilter<"OauthResource"> | string | null
+    signingKeyId?: StringNullableWithAggregatesFilter<"OauthResource"> | string | null
+    allowedScopes?: StringNullableListFilter<"OauthResource">
+    customClaims?: JsonNullableWithAggregatesFilter<"OauthResource">
+    dpopBoundAccessTokensRequired?: BoolNullableWithAggregatesFilter<"OauthResource"> | boolean | null
+    disabled?: BoolNullableWithAggregatesFilter<"OauthResource"> | boolean | null
+    createdAt?: DateTimeNullableWithAggregatesFilter<"OauthResource"> | Date | string | null
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"OauthResource"> | Date | string | null
+    policyVersion?: IntNullableWithAggregatesFilter<"OauthResource"> | number | null
+    metadata?: JsonNullableWithAggregatesFilter<"OauthResource">
+  }
+
+  export type OauthClientResourceWhereInput = {
+    AND?: OauthClientResourceWhereInput | OauthClientResourceWhereInput[]
+    OR?: OauthClientResourceWhereInput[]
+    NOT?: OauthClientResourceWhereInput | OauthClientResourceWhereInput[]
+    id?: StringFilter<"OauthClientResource"> | string
+    clientId?: StringFilter<"OauthClientResource"> | string
+    resourceId?: StringFilter<"OauthClientResource"> | string
+    metadata?: JsonNullableFilter<"OauthClientResource">
+    createdAt?: DateTimeNullableFilter<"OauthClientResource"> | Date | string | null
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    oauthresource?: XOR<OauthResourceScalarRelationFilter, OauthResourceWhereInput>
+  }
+
+  export type OauthClientResourceOrderByWithRelationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    resourceId?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    oauthclient?: OauthClientOrderByWithRelationInput
+    oauthresource?: OauthResourceOrderByWithRelationInput
+  }
+
+  export type OauthClientResourceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    clientId_resourceId?: OauthClientResourceClientIdResourceIdCompoundUniqueInput
+    AND?: OauthClientResourceWhereInput | OauthClientResourceWhereInput[]
+    OR?: OauthClientResourceWhereInput[]
+    NOT?: OauthClientResourceWhereInput | OauthClientResourceWhereInput[]
+    clientId?: StringFilter<"OauthClientResource"> | string
+    resourceId?: StringFilter<"OauthClientResource"> | string
+    metadata?: JsonNullableFilter<"OauthClientResource">
+    createdAt?: DateTimeNullableFilter<"OauthClientResource"> | Date | string | null
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    oauthresource?: XOR<OauthResourceScalarRelationFilter, OauthResourceWhereInput>
+  }, "id" | "clientId_resourceId">
+
+  export type OauthClientResourceOrderByWithAggregationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    resourceId?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrderInput | SortOrder
+    _count?: OauthClientResourceCountOrderByAggregateInput
+    _max?: OauthClientResourceMaxOrderByAggregateInput
+    _min?: OauthClientResourceMinOrderByAggregateInput
+  }
+
+  export type OauthClientResourceScalarWhereWithAggregatesInput = {
+    AND?: OauthClientResourceScalarWhereWithAggregatesInput | OauthClientResourceScalarWhereWithAggregatesInput[]
+    OR?: OauthClientResourceScalarWhereWithAggregatesInput[]
+    NOT?: OauthClientResourceScalarWhereWithAggregatesInput | OauthClientResourceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthClientResource"> | string
+    clientId?: StringWithAggregatesFilter<"OauthClientResource"> | string
+    resourceId?: StringWithAggregatesFilter<"OauthClientResource"> | string
+    metadata?: JsonNullableWithAggregatesFilter<"OauthClientResource">
+    createdAt?: DateTimeNullableWithAggregatesFilter<"OauthClientResource"> | Date | string | null
+  }
+
+  export type OauthRefreshTokenWhereInput = {
+    AND?: OauthRefreshTokenWhereInput | OauthRefreshTokenWhereInput[]
+    OR?: OauthRefreshTokenWhereInput[]
+    NOT?: OauthRefreshTokenWhereInput | OauthRefreshTokenWhereInput[]
+    id?: StringFilter<"OauthRefreshToken"> | string
+    token?: StringFilter<"OauthRefreshToken"> | string
+    clientId?: StringFilter<"OauthRefreshToken"> | string
+    sessionId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    userId?: StringFilter<"OauthRefreshToken"> | string
+    referenceId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    resources?: StringNullableListFilter<"OauthRefreshToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthRefreshToken">
+    expiresAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotatedAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotationReplayResponse?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    rotationReplayExpiresAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    authTime?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthRefreshToken">
+    scopes?: StringNullableListFilter<"OauthRefreshToken">
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthsession?: XOR<CloudAuthSessionNullableScalarRelationFilter, CloudAuthSessionWhereInput> | null
+    cloudauthuser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+  }
+
+  export type OauthRefreshTokenOrderByWithRelationInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    authorizationCodeId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrderInput | SortOrder
+    rotatedAt?: SortOrderInput | SortOrder
+    rotationReplayResponse?: SortOrderInput | SortOrder
+    rotationReplayExpiresAt?: SortOrderInput | SortOrder
+    authTime?: SortOrderInput | SortOrder
+    confirmation?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    oauthclient?: OauthClientOrderByWithRelationInput
+    cloudauthsession?: CloudAuthSessionOrderByWithRelationInput
+    cloudauthuser?: CloudAuthUserOrderByWithRelationInput
+    oauthaccesstokens?: OauthAccessTokenOrderByRelationAggregateInput
+  }
+
+  export type OauthRefreshTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    token?: string
+    AND?: OauthRefreshTokenWhereInput | OauthRefreshTokenWhereInput[]
+    OR?: OauthRefreshTokenWhereInput[]
+    NOT?: OauthRefreshTokenWhereInput | OauthRefreshTokenWhereInput[]
+    clientId?: StringFilter<"OauthRefreshToken"> | string
+    sessionId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    userId?: StringFilter<"OauthRefreshToken"> | string
+    referenceId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    resources?: StringNullableListFilter<"OauthRefreshToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthRefreshToken">
+    expiresAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotatedAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotationReplayResponse?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    rotationReplayExpiresAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    authTime?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthRefreshToken">
+    scopes?: StringNullableListFilter<"OauthRefreshToken">
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthsession?: XOR<CloudAuthSessionNullableScalarRelationFilter, CloudAuthSessionWhereInput> | null
+    cloudauthuser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    oauthaccesstokens?: OauthAccessTokenListRelationFilter
+  }, "id" | "token">
+
+  export type OauthRefreshTokenOrderByWithAggregationInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    authorizationCodeId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrderInput | SortOrder
+    rotatedAt?: SortOrderInput | SortOrder
+    rotationReplayResponse?: SortOrderInput | SortOrder
+    rotationReplayExpiresAt?: SortOrderInput | SortOrder
+    authTime?: SortOrderInput | SortOrder
+    confirmation?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    _count?: OauthRefreshTokenCountOrderByAggregateInput
+    _max?: OauthRefreshTokenMaxOrderByAggregateInput
+    _min?: OauthRefreshTokenMinOrderByAggregateInput
+  }
+
+  export type OauthRefreshTokenScalarWhereWithAggregatesInput = {
+    AND?: OauthRefreshTokenScalarWhereWithAggregatesInput | OauthRefreshTokenScalarWhereWithAggregatesInput[]
+    OR?: OauthRefreshTokenScalarWhereWithAggregatesInput[]
+    NOT?: OauthRefreshTokenScalarWhereWithAggregatesInput | OauthRefreshTokenScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthRefreshToken"> | string
+    token?: StringWithAggregatesFilter<"OauthRefreshToken"> | string
+    clientId?: StringWithAggregatesFilter<"OauthRefreshToken"> | string
+    sessionId?: StringNullableWithAggregatesFilter<"OauthRefreshToken"> | string | null
+    userId?: StringWithAggregatesFilter<"OauthRefreshToken"> | string
+    referenceId?: StringNullableWithAggregatesFilter<"OauthRefreshToken"> | string | null
+    authorizationCodeId?: StringNullableWithAggregatesFilter<"OauthRefreshToken"> | string | null
+    resources?: StringNullableListFilter<"OauthRefreshToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthRefreshToken">
+    expiresAt?: DateTimeWithAggregatesFilter<"OauthRefreshToken"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"OauthRefreshToken"> | Date | string
+    revoked?: DateTimeNullableWithAggregatesFilter<"OauthRefreshToken"> | Date | string | null
+    rotatedAt?: DateTimeNullableWithAggregatesFilter<"OauthRefreshToken"> | Date | string | null
+    rotationReplayResponse?: StringNullableWithAggregatesFilter<"OauthRefreshToken"> | string | null
+    rotationReplayExpiresAt?: DateTimeNullableWithAggregatesFilter<"OauthRefreshToken"> | Date | string | null
+    authTime?: DateTimeNullableWithAggregatesFilter<"OauthRefreshToken"> | Date | string | null
+    confirmation?: JsonNullableWithAggregatesFilter<"OauthRefreshToken">
+    scopes?: StringNullableListFilter<"OauthRefreshToken">
+  }
+
+  export type OauthAccessTokenWhereInput = {
+    AND?: OauthAccessTokenWhereInput | OauthAccessTokenWhereInput[]
+    OR?: OauthAccessTokenWhereInput[]
+    NOT?: OauthAccessTokenWhereInput | OauthAccessTokenWhereInput[]
+    id?: StringFilter<"OauthAccessToken"> | string
+    token?: StringFilter<"OauthAccessToken"> | string
+    clientId?: StringFilter<"OauthAccessToken"> | string
+    sessionId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    userId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    referenceId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    resources?: StringNullableListFilter<"OauthAccessToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthAccessToken">
+    refreshId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    expiresAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthAccessToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthAccessToken">
+    scopes?: StringNullableListFilter<"OauthAccessToken">
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthsession?: XOR<CloudAuthSessionNullableScalarRelationFilter, CloudAuthSessionWhereInput> | null
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+    oauthrefreshtoken?: XOR<OauthRefreshTokenNullableScalarRelationFilter, OauthRefreshTokenWhereInput> | null
+  }
+
+  export type OauthAccessTokenOrderByWithRelationInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    authorizationCodeId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    refreshId?: SortOrderInput | SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrderInput | SortOrder
+    confirmation?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    oauthclient?: OauthClientOrderByWithRelationInput
+    cloudauthsession?: CloudAuthSessionOrderByWithRelationInput
+    cloudauthuser?: CloudAuthUserOrderByWithRelationInput
+    oauthrefreshtoken?: OauthRefreshTokenOrderByWithRelationInput
+  }
+
+  export type OauthAccessTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    token?: string
+    AND?: OauthAccessTokenWhereInput | OauthAccessTokenWhereInput[]
+    OR?: OauthAccessTokenWhereInput[]
+    NOT?: OauthAccessTokenWhereInput | OauthAccessTokenWhereInput[]
+    clientId?: StringFilter<"OauthAccessToken"> | string
+    sessionId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    userId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    referenceId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    resources?: StringNullableListFilter<"OauthAccessToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthAccessToken">
+    refreshId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    expiresAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthAccessToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthAccessToken">
+    scopes?: StringNullableListFilter<"OauthAccessToken">
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthsession?: XOR<CloudAuthSessionNullableScalarRelationFilter, CloudAuthSessionWhereInput> | null
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+    oauthrefreshtoken?: XOR<OauthRefreshTokenNullableScalarRelationFilter, OauthRefreshTokenWhereInput> | null
+  }, "id" | "token">
+
+  export type OauthAccessTokenOrderByWithAggregationInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    authorizationCodeId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    refreshId?: SortOrderInput | SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrderInput | SortOrder
+    confirmation?: SortOrderInput | SortOrder
+    scopes?: SortOrder
+    _count?: OauthAccessTokenCountOrderByAggregateInput
+    _max?: OauthAccessTokenMaxOrderByAggregateInput
+    _min?: OauthAccessTokenMinOrderByAggregateInput
+  }
+
+  export type OauthAccessTokenScalarWhereWithAggregatesInput = {
+    AND?: OauthAccessTokenScalarWhereWithAggregatesInput | OauthAccessTokenScalarWhereWithAggregatesInput[]
+    OR?: OauthAccessTokenScalarWhereWithAggregatesInput[]
+    NOT?: OauthAccessTokenScalarWhereWithAggregatesInput | OauthAccessTokenScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthAccessToken"> | string
+    token?: StringWithAggregatesFilter<"OauthAccessToken"> | string
+    clientId?: StringWithAggregatesFilter<"OauthAccessToken"> | string
+    sessionId?: StringNullableWithAggregatesFilter<"OauthAccessToken"> | string | null
+    userId?: StringNullableWithAggregatesFilter<"OauthAccessToken"> | string | null
+    referenceId?: StringNullableWithAggregatesFilter<"OauthAccessToken"> | string | null
+    authorizationCodeId?: StringNullableWithAggregatesFilter<"OauthAccessToken"> | string | null
+    resources?: StringNullableListFilter<"OauthAccessToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthAccessToken">
+    refreshId?: StringNullableWithAggregatesFilter<"OauthAccessToken"> | string | null
+    expiresAt?: DateTimeWithAggregatesFilter<"OauthAccessToken"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"OauthAccessToken"> | Date | string
+    revoked?: DateTimeNullableWithAggregatesFilter<"OauthAccessToken"> | Date | string | null
+    confirmation?: JsonNullableWithAggregatesFilter<"OauthAccessToken">
+    scopes?: StringNullableListFilter<"OauthAccessToken">
+  }
+
+  export type OauthConsentWhereInput = {
+    AND?: OauthConsentWhereInput | OauthConsentWhereInput[]
+    OR?: OauthConsentWhereInput[]
+    NOT?: OauthConsentWhereInput | OauthConsentWhereInput[]
+    id?: StringFilter<"OauthConsent"> | string
+    clientId?: StringFilter<"OauthConsent"> | string
+    userId?: StringNullableFilter<"OauthConsent"> | string | null
+    referenceId?: StringNullableFilter<"OauthConsent"> | string | null
+    resources?: StringNullableListFilter<"OauthConsent">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthConsent">
+    scopes?: StringNullableListFilter<"OauthConsent">
+    createdAt?: DateTimeFilter<"OauthConsent"> | Date | string
+    updatedAt?: DateTimeFilter<"OauthConsent"> | Date | string
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+  }
+
+  export type OauthConsentOrderByWithRelationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    scopes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    oauthclient?: OauthClientOrderByWithRelationInput
+    cloudauthuser?: CloudAuthUserOrderByWithRelationInput
+  }
+
+  export type OauthConsentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_clientId_referenceId?: OauthConsentUserIdClientIdReferenceIdCompoundUniqueInput
+    AND?: OauthConsentWhereInput | OauthConsentWhereInput[]
+    OR?: OauthConsentWhereInput[]
+    NOT?: OauthConsentWhereInput | OauthConsentWhereInput[]
+    clientId?: StringFilter<"OauthConsent"> | string
+    userId?: StringNullableFilter<"OauthConsent"> | string | null
+    referenceId?: StringNullableFilter<"OauthConsent"> | string | null
+    resources?: StringNullableListFilter<"OauthConsent">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthConsent">
+    scopes?: StringNullableListFilter<"OauthConsent">
+    createdAt?: DateTimeFilter<"OauthConsent"> | Date | string
+    updatedAt?: DateTimeFilter<"OauthConsent"> | Date | string
+    oauthclient?: XOR<OauthClientScalarRelationFilter, OauthClientWhereInput>
+    cloudauthuser?: XOR<CloudAuthUserNullableScalarRelationFilter, CloudAuthUserWhereInput> | null
+  }, "id" | "userId_clientId_referenceId">
+
+  export type OauthConsentOrderByWithAggregationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    referenceId?: SortOrderInput | SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    scopes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OauthConsentCountOrderByAggregateInput
+    _max?: OauthConsentMaxOrderByAggregateInput
+    _min?: OauthConsentMinOrderByAggregateInput
+  }
+
+  export type OauthConsentScalarWhereWithAggregatesInput = {
+    AND?: OauthConsentScalarWhereWithAggregatesInput | OauthConsentScalarWhereWithAggregatesInput[]
+    OR?: OauthConsentScalarWhereWithAggregatesInput[]
+    NOT?: OauthConsentScalarWhereWithAggregatesInput | OauthConsentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthConsent"> | string
+    clientId?: StringWithAggregatesFilter<"OauthConsent"> | string
+    userId?: StringNullableWithAggregatesFilter<"OauthConsent"> | string | null
+    referenceId?: StringNullableWithAggregatesFilter<"OauthConsent"> | string | null
+    resources?: StringNullableListFilter<"OauthConsent">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthConsent">
+    scopes?: StringNullableListFilter<"OauthConsent">
+    createdAt?: DateTimeWithAggregatesFilter<"OauthConsent"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OauthConsent"> | Date | string
+  }
+
+  export type OauthClientAssertionWhereInput = {
+    AND?: OauthClientAssertionWhereInput | OauthClientAssertionWhereInput[]
+    OR?: OauthClientAssertionWhereInput[]
+    NOT?: OauthClientAssertionWhereInput | OauthClientAssertionWhereInput[]
+    id?: StringFilter<"OauthClientAssertion"> | string
+    expiresAt?: DateTimeFilter<"OauthClientAssertion"> | Date | string
+  }
+
+  export type OauthClientAssertionOrderByWithRelationInput = {
+    id?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type OauthClientAssertionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OauthClientAssertionWhereInput | OauthClientAssertionWhereInput[]
+    OR?: OauthClientAssertionWhereInput[]
+    NOT?: OauthClientAssertionWhereInput | OauthClientAssertionWhereInput[]
+    expiresAt?: DateTimeFilter<"OauthClientAssertion"> | Date | string
+  }, "id">
+
+  export type OauthClientAssertionOrderByWithAggregationInput = {
+    id?: SortOrder
+    expiresAt?: SortOrder
+    _count?: OauthClientAssertionCountOrderByAggregateInput
+    _max?: OauthClientAssertionMaxOrderByAggregateInput
+    _min?: OauthClientAssertionMinOrderByAggregateInput
+  }
+
+  export type OauthClientAssertionScalarWhereWithAggregatesInput = {
+    AND?: OauthClientAssertionScalarWhereWithAggregatesInput | OauthClientAssertionScalarWhereWithAggregatesInput[]
+    OR?: OauthClientAssertionScalarWhereWithAggregatesInput[]
+    NOT?: OauthClientAssertionScalarWhereWithAggregatesInput | OauthClientAssertionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OauthClientAssertion"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"OauthClientAssertion"> | Date | string
   }
 
   export type RelationWhereInput = {
@@ -103980,6 +118397,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -103995,6 +118418,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -104010,6 +118439,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -104025,6 +118460,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -104069,6 +118510,8 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthsessionInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthsessionInput
     user: CloudAuthUserCreateNestedOneWithoutSessionsInput
   }
 
@@ -104081,6 +118524,8 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
   }
 
   export type CloudAuthSessionUpdateInput = {
@@ -104091,6 +118536,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthsessionNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthsessionNestedInput
     user?: CloudAuthUserUpdateOneRequiredWithoutSessionsNestedInput
   }
 
@@ -104103,6 +118550,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
   }
 
   export type CloudAuthSessionCreateManyInput = {
@@ -104399,6 +118848,200 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExternalAgentPatCreateInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+    user: CloudAuthUserCreateNestedOneWithoutExternalAgentPatsInput
+  }
+
+  export type ExternalAgentPatUncheckedCreateInput = {
+    id?: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+    user?: CloudAuthUserUpdateOneRequiredWithoutExternalAgentPatsNestedInput
+  }
+
+  export type ExternalAgentPatUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatCreateManyInput = {
+    id?: string
+    userId: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionCreateInput = {
+    id?: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+    user: CloudAuthUserCreateNestedOneWithoutExternalAgentConnectionsInput
+  }
+
+  export type ExternalAgentConnectionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentConnectionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+    user?: CloudAuthUserUpdateOneRequiredWithoutExternalAgentConnectionsNestedInput
+  }
+
+  export type ExternalAgentConnectionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionCreateManyInput = {
+    id?: string
+    userId: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentConnectionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
   }
 
   export type GoalCreateInput = {
@@ -106106,6 +120749,935 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type JwksCreateInput = {
+    id?: string
+    publicKey: string
+    privateKey: string
+    createdAt: Date | string
+    expiresAt?: Date | string | null
+    alg?: string | null
+    crv?: string | null
+  }
+
+  export type JwksUncheckedCreateInput = {
+    id?: string
+    publicKey: string
+    privateKey: string
+    createdAt: Date | string
+    expiresAt?: Date | string | null
+    alg?: string | null
+    crv?: string | null
+  }
+
+  export type JwksUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    publicKey?: StringFieldUpdateOperationsInput | string
+    privateKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    alg?: NullableStringFieldUpdateOperationsInput | string | null
+    crv?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type JwksUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    publicKey?: StringFieldUpdateOperationsInput | string
+    privateKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    alg?: NullableStringFieldUpdateOperationsInput | string | null
+    crv?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type JwksCreateManyInput = {
+    id?: string
+    publicKey: string
+    privateKey: string
+    createdAt: Date | string
+    expiresAt?: Date | string | null
+    alg?: string | null
+    crv?: string | null
+  }
+
+  export type JwksUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    publicKey?: StringFieldUpdateOperationsInput | string
+    privateKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    alg?: NullableStringFieldUpdateOperationsInput | string | null
+    crv?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type JwksUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    publicKey?: StringFieldUpdateOperationsInput | string
+    privateKey?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    alg?: NullableStringFieldUpdateOperationsInput | string | null
+    crv?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OauthClientCreateInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthclientsInput
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthclientsNestedInput
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientCreateManyInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthClientUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthClientUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceCreateInput = {
+    id?: string
+    identifier: string
+    name: string
+    accessTokenTtl?: number | null
+    refreshTokenTtl?: number | null
+    signingAlgorithm?: string | null
+    signingKeyId?: string | null
+    allowedScopes?: OauthResourceCreateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: boolean | null
+    disabled?: boolean | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    policyVersion?: number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthresourceInput
+  }
+
+  export type OauthResourceUncheckedCreateInput = {
+    id?: string
+    identifier: string
+    name: string
+    accessTokenTtl?: number | null
+    refreshTokenTtl?: number | null
+    signingAlgorithm?: string | null
+    signingKeyId?: string | null
+    allowedScopes?: OauthResourceCreateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: boolean | null
+    disabled?: boolean | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    policyVersion?: number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthresourceInput
+  }
+
+  export type OauthResourceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthresourceNestedInput
+  }
+
+  export type OauthResourceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthresourceNestedInput
+  }
+
+  export type OauthResourceCreateManyInput = {
+    id?: string
+    identifier: string
+    name: string
+    accessTokenTtl?: number | null
+    refreshTokenTtl?: number | null
+    signingAlgorithm?: string | null
+    signingKeyId?: string | null
+    allowedScopes?: OauthResourceCreateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: boolean | null
+    disabled?: boolean | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    policyVersion?: number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthClientResourceCreateInput = {
+    id?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+    oauthclient: OauthClientCreateNestedOneWithoutOauthclientresourcesInput
+    oauthresource: OauthResourceCreateNestedOneWithoutOauthclientresourcesInput
+  }
+
+  export type OauthClientResourceUncheckedCreateInput = {
+    id?: string
+    clientId: string
+    resourceId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthClientResourceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthclientresourcesNestedInput
+    oauthresource?: OauthResourceUpdateOneRequiredWithoutOauthclientresourcesNestedInput
+  }
+
+  export type OauthClientResourceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resourceId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthClientResourceCreateManyInput = {
+    id?: string
+    clientId: string
+    resourceId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthClientResourceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthClientResourceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resourceId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthRefreshTokenCreateInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthuser: CloudAuthUserCreateNestedOneWithoutOauthrefreshtokensInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthrefreshtokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenCreateManyInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+  }
+
+  export type OauthRefreshTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthaccesstokensInput
+    oauthrefreshtoken?: OauthRefreshTokenCreateNestedOneWithoutOauthaccesstokensInput
+  }
+
+  export type OauthAccessTokenUncheckedCreateInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthaccesstokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthaccesstokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthaccesstokensNestedInput
+    oauthrefreshtoken?: OauthRefreshTokenUpdateOneWithoutOauthaccesstokensNestedInput
+  }
+
+  export type OauthAccessTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateManyInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthConsentCreateInput = {
+    id?: string
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+    oauthclient: OauthClientCreateNestedOneWithoutOauthconsentsInput
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthconsentsInput
+  }
+
+  export type OauthConsentUncheckedCreateInput = {
+    id?: string
+    clientId: string
+    userId?: string | null
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type OauthConsentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthconsentsNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthconsentsNestedInput
+  }
+
+  export type OauthConsentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthConsentCreateManyInput = {
+    id?: string
+    clientId: string
+    userId?: string | null
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type OauthConsentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthConsentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientAssertionCreateInput = {
+    id?: string
+    expiresAt: Date | string
+  }
+
+  export type OauthClientAssertionUncheckedCreateInput = {
+    id?: string
+    expiresAt: Date | string
+  }
+
+  export type OauthClientAssertionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientAssertionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientAssertionCreateManyInput = {
+    id?: string
+    expiresAt: Date | string
+  }
+
+  export type OauthClientAssertionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientAssertionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RelationCreateInput = {
@@ -111587,6 +127159,42 @@ export namespace Prisma {
     none?: CloudAuthDeviceCodeWhereInput
   }
 
+  export type ExternalAgentPatListRelationFilter = {
+    every?: ExternalAgentPatWhereInput
+    some?: ExternalAgentPatWhereInput
+    none?: ExternalAgentPatWhereInput
+  }
+
+  export type ExternalAgentConnectionListRelationFilter = {
+    every?: ExternalAgentConnectionWhereInput
+    some?: ExternalAgentConnectionWhereInput
+    none?: ExternalAgentConnectionWhereInput
+  }
+
+  export type OauthClientListRelationFilter = {
+    every?: OauthClientWhereInput
+    some?: OauthClientWhereInput
+    none?: OauthClientWhereInput
+  }
+
+  export type OauthRefreshTokenListRelationFilter = {
+    every?: OauthRefreshTokenWhereInput
+    some?: OauthRefreshTokenWhereInput
+    none?: OauthRefreshTokenWhereInput
+  }
+
+  export type OauthAccessTokenListRelationFilter = {
+    every?: OauthAccessTokenWhereInput
+    some?: OauthAccessTokenWhereInput
+    none?: OauthAccessTokenWhereInput
+  }
+
+  export type OauthConsentListRelationFilter = {
+    every?: OauthConsentWhereInput
+    some?: OauthConsentWhereInput
+    none?: OauthConsentWhereInput
+  }
+
   export type AccountNullableScalarRelationFilter = {
     is?: AccountWhereInput | null
     isNot?: AccountWhereInput | null
@@ -111601,6 +127209,30 @@ export namespace Prisma {
   }
 
   export type CloudAuthDeviceCodeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExternalAgentPatOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExternalAgentConnectionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OauthClientOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OauthRefreshTokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OauthAccessTokenOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OauthConsentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -111800,6 +127432,112 @@ export namespace Prisma {
 
   export type CloudAuthDeviceCodeSumOrderByAggregateInput = {
     pollingInterval?: SortOrder
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type ExternalAgentPatCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    scopes?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatAvgOrderByAggregateInput = {
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    name?: SortOrder
+    prefix?: SortOrder
+    tokenDigest?: SortOrder
+    audience?: SortOrder
+    expiresAt?: SortOrder
+    revokedAt?: SortOrder
+    createdAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentPatSumOrderByAggregateInput = {
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentConnectionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clientId?: SortOrder
+    resource?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentConnectionAvgOrderByAggregateInput = {
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentConnectionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clientId?: SortOrder
+    resource?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentConnectionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    clientId?: SortOrder
+    resource?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    lastUsedAt?: SortOrder
+    revokedAt?: SortOrder
+    rateWindow?: SortOrder
+    rateCount?: SortOrder
+  }
+
+  export type ExternalAgentConnectionSumOrderByAggregateInput = {
+    rateCount?: SortOrder
   }
 
   export type KeyResultListRelationFilter = {
@@ -112802,6 +128540,419 @@ export namespace Prisma {
     attempt?: SortOrder
     fencingToken?: SortOrder
     heartbeatIntervalMs?: SortOrder
+  }
+
+  export type JwksCountOrderByAggregateInput = {
+    id?: SortOrder
+    publicKey?: SortOrder
+    privateKey?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    alg?: SortOrder
+    crv?: SortOrder
+  }
+
+  export type JwksMaxOrderByAggregateInput = {
+    id?: SortOrder
+    publicKey?: SortOrder
+    privateKey?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    alg?: SortOrder
+    crv?: SortOrder
+  }
+
+  export type JwksMinOrderByAggregateInput = {
+    id?: SortOrder
+    publicKey?: SortOrder
+    privateKey?: SortOrder
+    createdAt?: SortOrder
+    expiresAt?: SortOrder
+    alg?: SortOrder
+    crv?: SortOrder
+  }
+
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type OauthClientResourceListRelationFilter = {
+    every?: OauthClientResourceWhereInput
+    some?: OauthClientResourceWhereInput
+    none?: OauthClientResourceWhereInput
+  }
+
+  export type OauthClientResourceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OauthClientCountOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    clientSecret?: SortOrder
+    clientDiscoveryId?: SortOrder
+    disabled?: SortOrder
+    skipConsent?: SortOrder
+    enableEndSession?: SortOrder
+    subjectType?: SortOrder
+    scopes?: SortOrder
+    clientCredentialsScopes?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    uri?: SortOrder
+    icon?: SortOrder
+    contacts?: SortOrder
+    tos?: SortOrder
+    policy?: SortOrder
+    softwareId?: SortOrder
+    softwareVersion?: SortOrder
+    softwareStatement?: SortOrder
+    redirectUris?: SortOrder
+    postLogoutRedirectUris?: SortOrder
+    backchannelLogoutUri?: SortOrder
+    backchannelLogoutSessionRequired?: SortOrder
+    tokenEndpointAuthMethod?: SortOrder
+    applicationType?: SortOrder
+    jwks?: SortOrder
+    jwksUri?: SortOrder
+    grantTypes?: SortOrder
+    responseTypes?: SortOrder
+    requirePKCE?: SortOrder
+    dpopBoundAccessTokens?: SortOrder
+    referenceId?: SortOrder
+    metadata?: SortOrder
+  }
+
+  export type OauthClientMaxOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    clientSecret?: SortOrder
+    clientDiscoveryId?: SortOrder
+    disabled?: SortOrder
+    skipConsent?: SortOrder
+    enableEndSession?: SortOrder
+    subjectType?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    uri?: SortOrder
+    icon?: SortOrder
+    tos?: SortOrder
+    policy?: SortOrder
+    softwareId?: SortOrder
+    softwareVersion?: SortOrder
+    softwareStatement?: SortOrder
+    backchannelLogoutUri?: SortOrder
+    backchannelLogoutSessionRequired?: SortOrder
+    tokenEndpointAuthMethod?: SortOrder
+    applicationType?: SortOrder
+    jwks?: SortOrder
+    jwksUri?: SortOrder
+    requirePKCE?: SortOrder
+    dpopBoundAccessTokens?: SortOrder
+    referenceId?: SortOrder
+  }
+
+  export type OauthClientMinOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    clientSecret?: SortOrder
+    clientDiscoveryId?: SortOrder
+    disabled?: SortOrder
+    skipConsent?: SortOrder
+    enableEndSession?: SortOrder
+    subjectType?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    uri?: SortOrder
+    icon?: SortOrder
+    tos?: SortOrder
+    policy?: SortOrder
+    softwareId?: SortOrder
+    softwareVersion?: SortOrder
+    softwareStatement?: SortOrder
+    backchannelLogoutUri?: SortOrder
+    backchannelLogoutSessionRequired?: SortOrder
+    tokenEndpointAuthMethod?: SortOrder
+    applicationType?: SortOrder
+    jwks?: SortOrder
+    jwksUri?: SortOrder
+    requirePKCE?: SortOrder
+    dpopBoundAccessTokens?: SortOrder
+    referenceId?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
+  export type OauthResourceCountOrderByAggregateInput = {
+    id?: SortOrder
+    identifier?: SortOrder
+    name?: SortOrder
+    accessTokenTtl?: SortOrder
+    refreshTokenTtl?: SortOrder
+    signingAlgorithm?: SortOrder
+    signingKeyId?: SortOrder
+    allowedScopes?: SortOrder
+    customClaims?: SortOrder
+    dpopBoundAccessTokensRequired?: SortOrder
+    disabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    policyVersion?: SortOrder
+    metadata?: SortOrder
+  }
+
+  export type OauthResourceAvgOrderByAggregateInput = {
+    accessTokenTtl?: SortOrder
+    refreshTokenTtl?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type OauthResourceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identifier?: SortOrder
+    name?: SortOrder
+    accessTokenTtl?: SortOrder
+    refreshTokenTtl?: SortOrder
+    signingAlgorithm?: SortOrder
+    signingKeyId?: SortOrder
+    dpopBoundAccessTokensRequired?: SortOrder
+    disabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type OauthResourceMinOrderByAggregateInput = {
+    id?: SortOrder
+    identifier?: SortOrder
+    name?: SortOrder
+    accessTokenTtl?: SortOrder
+    refreshTokenTtl?: SortOrder
+    signingAlgorithm?: SortOrder
+    signingKeyId?: SortOrder
+    dpopBoundAccessTokensRequired?: SortOrder
+    disabled?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type OauthResourceSumOrderByAggregateInput = {
+    accessTokenTtl?: SortOrder
+    refreshTokenTtl?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type OauthClientScalarRelationFilter = {
+    is?: OauthClientWhereInput
+    isNot?: OauthClientWhereInput
+  }
+
+  export type OauthResourceScalarRelationFilter = {
+    is?: OauthResourceWhereInput
+    isNot?: OauthResourceWhereInput
+  }
+
+  export type OauthClientResourceClientIdResourceIdCompoundUniqueInput = {
+    clientId: string
+    resourceId: string
+  }
+
+  export type OauthClientResourceCountOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    resourceId?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OauthClientResourceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    resourceId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OauthClientResourceMinOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    resourceId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type CloudAuthSessionNullableScalarRelationFilter = {
+    is?: CloudAuthSessionWhereInput | null
+    isNot?: CloudAuthSessionWhereInput | null
+  }
+
+  export type OauthRefreshTokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+    rotatedAt?: SortOrder
+    rotationReplayResponse?: SortOrder
+    rotationReplayExpiresAt?: SortOrder
+    authTime?: SortOrder
+    confirmation?: SortOrder
+    scopes?: SortOrder
+  }
+
+  export type OauthRefreshTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+    rotatedAt?: SortOrder
+    rotationReplayResponse?: SortOrder
+    rotationReplayExpiresAt?: SortOrder
+    authTime?: SortOrder
+  }
+
+  export type OauthRefreshTokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+    rotatedAt?: SortOrder
+    rotationReplayResponse?: SortOrder
+    rotationReplayExpiresAt?: SortOrder
+    authTime?: SortOrder
+  }
+
+  export type OauthRefreshTokenNullableScalarRelationFilter = {
+    is?: OauthRefreshTokenWhereInput | null
+    isNot?: OauthRefreshTokenWhereInput | null
+  }
+
+  export type OauthAccessTokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    refreshId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+    confirmation?: SortOrder
+    scopes?: SortOrder
+  }
+
+  export type OauthAccessTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    refreshId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+  }
+
+  export type OauthAccessTokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    token?: SortOrder
+    clientId?: SortOrder
+    sessionId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    authorizationCodeId?: SortOrder
+    refreshId?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    revoked?: SortOrder
+  }
+
+  export type OauthConsentUserIdClientIdReferenceIdCompoundUniqueInput = {
+    userId: string
+    clientId: string
+    referenceId: string
+  }
+
+  export type OauthConsentCountOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    resources?: SortOrder
+    requestedUserInfoClaims?: SortOrder
+    scopes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OauthConsentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OauthConsentMinOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    userId?: SortOrder
+    referenceId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OauthClientAssertionCountOrderByAggregateInput = {
+    id?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type OauthClientAssertionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    expiresAt?: SortOrder
+  }
+
+  export type OauthClientAssertionMinOrderByAggregateInput = {
+    id?: SortOrder
+    expiresAt?: SortOrder
   }
 
   export type RelationIdentityIdSubjectTypeSubjectIdRelationTypeObjectTypeObjectIdCompoundUniqueInput = {
@@ -114449,11 +130600,6 @@ export namespace Prisma {
     fencingToken?: SortOrder
   }
 
-  export type BoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
-  }
-
   export type ScheduledInvocationScalarRelationFilter = {
     is?: ScheduledInvocationWhereInput
     isNot?: ScheduledInvocationWhereInput
@@ -114524,14 +130670,6 @@ export namespace Prisma {
   export type InvocationAttemptSumOrderByAggregateInput = {
     attemptNumber?: SortOrder
     fencingToken?: SortOrder
-  }
-
-  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type SchedulingReconcileOperationCountOrderByAggregateInput = {
@@ -116938,6 +133076,48 @@ export namespace Prisma {
     connect?: CloudAuthDeviceCodeWhereUniqueInput | CloudAuthDeviceCodeWhereUniqueInput[]
   }
 
+  export type ExternalAgentPatCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+  }
+
+  export type ExternalAgentConnectionCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput> | ExternalAgentConnectionCreateWithoutUserInput[] | ExternalAgentConnectionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentConnectionCreateOrConnectWithoutUserInput | ExternalAgentConnectionCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentConnectionCreateManyUserInputEnvelope
+    connect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+  }
+
+  export type OauthClientCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput> | OauthClientCreateWithoutCloudauthuserInput[] | OauthClientUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthClientCreateOrConnectWithoutCloudauthuserInput | OauthClientCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthClientCreateManyCloudauthuserInputEnvelope
+    connect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput> | OauthRefreshTokenCreateWithoutCloudauthuserInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthuserInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput> | OauthAccessTokenCreateWithoutCloudauthuserInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput | OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthuserInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthConsentCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput> | OauthConsentCreateWithoutCloudauthuserInput[] | OauthConsentUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutCloudauthuserInput | OauthConsentCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthConsentCreateManyCloudauthuserInputEnvelope
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+  }
+
   export type AccountCreateNestedOneWithoutCloudUserInput = {
     create?: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
     connectOrCreate?: AccountCreateOrConnectWithoutCloudUserInput
@@ -116963,6 +133143,48 @@ export namespace Prisma {
     connectOrCreate?: CloudAuthDeviceCodeCreateOrConnectWithoutUserInput | CloudAuthDeviceCodeCreateOrConnectWithoutUserInput[]
     createMany?: CloudAuthDeviceCodeCreateManyUserInputEnvelope
     connect?: CloudAuthDeviceCodeWhereUniqueInput | CloudAuthDeviceCodeWhereUniqueInput[]
+  }
+
+  export type ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+  }
+
+  export type ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput> | ExternalAgentConnectionCreateWithoutUserInput[] | ExternalAgentConnectionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentConnectionCreateOrConnectWithoutUserInput | ExternalAgentConnectionCreateOrConnectWithoutUserInput[]
+    createMany?: ExternalAgentConnectionCreateManyUserInputEnvelope
+    connect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+  }
+
+  export type OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput> | OauthClientCreateWithoutCloudauthuserInput[] | OauthClientUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthClientCreateOrConnectWithoutCloudauthuserInput | OauthClientCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthClientCreateManyCloudauthuserInputEnvelope
+    connect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput> | OauthRefreshTokenCreateWithoutCloudauthuserInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthuserInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput> | OauthAccessTokenCreateWithoutCloudauthuserInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput | OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthuserInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput = {
+    create?: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput> | OauthConsentCreateWithoutCloudauthuserInput[] | OauthConsentUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutCloudauthuserInput | OauthConsentCreateOrConnectWithoutCloudauthuserInput[]
+    createMany?: OauthConsentCreateManyCloudauthuserInputEnvelope
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
   }
 
   export type AccountUncheckedCreateNestedOneWithoutCloudUserInput = {
@@ -117011,6 +133233,90 @@ export namespace Prisma {
     update?: CloudAuthDeviceCodeUpdateWithWhereUniqueWithoutUserInput | CloudAuthDeviceCodeUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: CloudAuthDeviceCodeUpdateManyWithWhereWithoutUserInput | CloudAuthDeviceCodeUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: CloudAuthDeviceCodeScalarWhereInput | CloudAuthDeviceCodeScalarWhereInput[]
+  }
+
+  export type ExternalAgentPatUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput | ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    set?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    disconnect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    delete?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    update?: ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput | ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentPatUpdateManyWithWhereWithoutUserInput | ExternalAgentPatUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+  }
+
+  export type ExternalAgentConnectionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput> | ExternalAgentConnectionCreateWithoutUserInput[] | ExternalAgentConnectionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentConnectionCreateOrConnectWithoutUserInput | ExternalAgentConnectionCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentConnectionUpsertWithWhereUniqueWithoutUserInput | ExternalAgentConnectionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentConnectionCreateManyUserInputEnvelope
+    set?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    disconnect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    delete?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    connect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    update?: ExternalAgentConnectionUpdateWithWhereUniqueWithoutUserInput | ExternalAgentConnectionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentConnectionUpdateManyWithWhereWithoutUserInput | ExternalAgentConnectionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentConnectionScalarWhereInput | ExternalAgentConnectionScalarWhereInput[]
+  }
+
+  export type OauthClientUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput> | OauthClientCreateWithoutCloudauthuserInput[] | OauthClientUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthClientCreateOrConnectWithoutCloudauthuserInput | OauthClientCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthClientUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthClientUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthClientCreateManyCloudauthuserInputEnvelope
+    set?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    disconnect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    delete?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    connect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    update?: OauthClientUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthClientUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthClientUpdateManyWithWhereWithoutCloudauthuserInput | OauthClientUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthClientScalarWhereInput | OauthClientScalarWhereInput[]
+  }
+
+  export type OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput> | OauthRefreshTokenCreateWithoutCloudauthuserInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthuserInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthuserInput | OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput> | OauthAccessTokenCreateWithoutCloudauthuserInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput | OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthuserInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutCloudauthuserInput | OauthAccessTokenUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthConsentUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput> | OauthConsentCreateWithoutCloudauthuserInput[] | OauthConsentUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutCloudauthuserInput | OauthConsentCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthConsentUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthConsentUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthConsentCreateManyCloudauthuserInputEnvelope
+    set?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    disconnect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    delete?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    update?: OauthConsentUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthConsentUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthConsentUpdateManyWithWhereWithoutCloudauthuserInput | OauthConsentUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
   }
 
   export type AccountUpdateOneWithoutCloudUserNestedInput = {
@@ -117065,6 +133371,90 @@ export namespace Prisma {
     deleteMany?: CloudAuthDeviceCodeScalarWhereInput | CloudAuthDeviceCodeScalarWhereInput[]
   }
 
+  export type ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput> | ExternalAgentPatCreateWithoutUserInput[] | ExternalAgentPatUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentPatCreateOrConnectWithoutUserInput | ExternalAgentPatCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput | ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentPatCreateManyUserInputEnvelope
+    set?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    disconnect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    delete?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    connect?: ExternalAgentPatWhereUniqueInput | ExternalAgentPatWhereUniqueInput[]
+    update?: ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput | ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentPatUpdateManyWithWhereWithoutUserInput | ExternalAgentPatUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+  }
+
+  export type ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput> | ExternalAgentConnectionCreateWithoutUserInput[] | ExternalAgentConnectionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ExternalAgentConnectionCreateOrConnectWithoutUserInput | ExternalAgentConnectionCreateOrConnectWithoutUserInput[]
+    upsert?: ExternalAgentConnectionUpsertWithWhereUniqueWithoutUserInput | ExternalAgentConnectionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ExternalAgentConnectionCreateManyUserInputEnvelope
+    set?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    disconnect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    delete?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    connect?: ExternalAgentConnectionWhereUniqueInput | ExternalAgentConnectionWhereUniqueInput[]
+    update?: ExternalAgentConnectionUpdateWithWhereUniqueWithoutUserInput | ExternalAgentConnectionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ExternalAgentConnectionUpdateManyWithWhereWithoutUserInput | ExternalAgentConnectionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ExternalAgentConnectionScalarWhereInput | ExternalAgentConnectionScalarWhereInput[]
+  }
+
+  export type OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput> | OauthClientCreateWithoutCloudauthuserInput[] | OauthClientUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthClientCreateOrConnectWithoutCloudauthuserInput | OauthClientCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthClientUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthClientUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthClientCreateManyCloudauthuserInputEnvelope
+    set?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    disconnect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    delete?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    connect?: OauthClientWhereUniqueInput | OauthClientWhereUniqueInput[]
+    update?: OauthClientUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthClientUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthClientUpdateManyWithWhereWithoutCloudauthuserInput | OauthClientUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthClientScalarWhereInput | OauthClientScalarWhereInput[]
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput> | OauthRefreshTokenCreateWithoutCloudauthuserInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthuserInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthuserInput | OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput> | OauthAccessTokenCreateWithoutCloudauthuserInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput | OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthuserInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutCloudauthuserInput | OauthAccessTokenUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput = {
+    create?: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput> | OauthConsentCreateWithoutCloudauthuserInput[] | OauthConsentUncheckedCreateWithoutCloudauthuserInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutCloudauthuserInput | OauthConsentCreateOrConnectWithoutCloudauthuserInput[]
+    upsert?: OauthConsentUpsertWithWhereUniqueWithoutCloudauthuserInput | OauthConsentUpsertWithWhereUniqueWithoutCloudauthuserInput[]
+    createMany?: OauthConsentCreateManyCloudauthuserInputEnvelope
+    set?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    disconnect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    delete?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    update?: OauthConsentUpdateWithWhereUniqueWithoutCloudauthuserInput | OauthConsentUpdateWithWhereUniqueWithoutCloudauthuserInput[]
+    updateMany?: OauthConsentUpdateManyWithWhereWithoutCloudauthuserInput | OauthConsentUpdateManyWithWhereWithoutCloudauthuserInput[]
+    deleteMany?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateOneWithoutCloudUserNestedInput = {
     create?: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
     connectOrCreate?: AccountCreateOrConnectWithoutCloudUserInput
@@ -117075,10 +133465,66 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutCloudUserInput, AccountUpdateWithoutCloudUserInput>, AccountUncheckedUpdateWithoutCloudUserInput>
   }
 
+  export type OauthRefreshTokenCreateNestedManyWithoutCloudauthsessionInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthRefreshTokenCreateWithoutCloudauthsessionInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthsessionInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenCreateNestedManyWithoutCloudauthsessionInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthAccessTokenCreateWithoutCloudauthsessionInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput | OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthsessionInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
   export type CloudAuthUserCreateNestedOneWithoutSessionsInput = {
     create?: XOR<CloudAuthUserCreateWithoutSessionsInput, CloudAuthUserUncheckedCreateWithoutSessionsInput>
     connectOrCreate?: CloudAuthUserCreateOrConnectWithoutSessionsInput
     connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthRefreshTokenCreateWithoutCloudauthsessionInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthsessionInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthAccessTokenCreateWithoutCloudauthsessionInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput | OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthsessionInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenUpdateManyWithoutCloudauthsessionNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthRefreshTokenCreateWithoutCloudauthsessionInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthsessionInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthsessionInput | OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthsessionInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUpdateManyWithoutCloudauthsessionNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthAccessTokenCreateWithoutCloudauthsessionInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput | OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput | OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthsessionInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput | OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutCloudauthsessionInput | OauthAccessTokenUpdateManyWithWhereWithoutCloudauthsessionInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
   }
 
   export type CloudAuthUserUpdateOneRequiredWithoutSessionsNestedInput = {
@@ -117087,6 +133533,34 @@ export namespace Prisma {
     upsert?: CloudAuthUserUpsertWithoutSessionsInput
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutSessionsInput, CloudAuthUserUpdateWithoutSessionsInput>, CloudAuthUserUncheckedUpdateWithoutSessionsInput>
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthRefreshTokenCreateWithoutCloudauthsessionInput[] | OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput | OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput[]
+    createMany?: OauthRefreshTokenCreateManyCloudauthsessionInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthsessionInput | OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthsessionInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput> | OauthAccessTokenCreateWithoutCloudauthsessionInput[] | OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput | OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput | OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput[]
+    createMany?: OauthAccessTokenCreateManyCloudauthsessionInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput | OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutCloudauthsessionInput | OauthAccessTokenUpdateManyWithWhereWithoutCloudauthsessionInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
   }
 
   export type CloudAuthUserCreateNestedOneWithoutProviderAccountsInput = {
@@ -117117,6 +133591,43 @@ export namespace Prisma {
     delete?: CloudAuthUserWhereInput | boolean
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutDeviceCodesInput, CloudAuthUserUpdateWithoutDeviceCodesInput>, CloudAuthUserUncheckedUpdateWithoutDeviceCodesInput>
+  }
+
+  export type ExternalAgentPatCreatescopesInput = {
+    set: string[]
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutExternalAgentPatsInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type ExternalAgentPatUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CloudAuthUserUpdateOneRequiredWithoutExternalAgentPatsNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput
+    upsert?: CloudAuthUserUpsertWithoutExternalAgentPatsInput
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentPatsInput, CloudAuthUserUpdateWithoutExternalAgentPatsInput>, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutExternalAgentConnectionsInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentConnectionsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentConnectionsInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type CloudAuthUserUpdateOneRequiredWithoutExternalAgentConnectionsNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentConnectionsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutExternalAgentConnectionsInput
+    upsert?: CloudAuthUserUpsertWithoutExternalAgentConnectionsInput
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentConnectionsInput, CloudAuthUserUpdateWithoutExternalAgentConnectionsInput>, CloudAuthUserUncheckedUpdateWithoutExternalAgentConnectionsInput>
   }
 
   export type AccountCreateNestedOneWithoutGoalsInput = {
@@ -118067,6 +134578,595 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutNotificationDispatchOutboxesInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutNotificationDispatchOutboxesInput, AccountUpdateWithoutNotificationDispatchOutboxesInput>, AccountUncheckedUpdateWithoutNotificationDispatchOutboxesInput>
+  }
+
+  export type OauthClientCreatescopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateclientCredentialsScopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreatecontactsInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateredirectUrisInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreatepostLogoutRedirectUrisInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreategrantTypesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateresponseTypesInput = {
+    set: string[]
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutOauthclientsInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthclientsInput, CloudAuthUserUncheckedCreateWithoutOauthclientsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthclientsInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type OauthClientResourceCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput> | OauthClientResourceCreateWithoutOauthclientInput[] | OauthClientResourceUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthclientInput | OauthClientResourceCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthClientResourceCreateManyOauthclientInputEnvelope
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput> | OauthRefreshTokenCreateWithoutOauthclientInput[] | OauthRefreshTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthclientInput | OauthRefreshTokenCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthRefreshTokenCreateManyOauthclientInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput> | OauthAccessTokenCreateWithoutOauthclientInput[] | OauthAccessTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthclientInput | OauthAccessTokenCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthAccessTokenCreateManyOauthclientInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthConsentCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput> | OauthConsentCreateWithoutOauthclientInput[] | OauthConsentUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutOauthclientInput | OauthConsentCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthConsentCreateManyOauthclientInputEnvelope
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+  }
+
+  export type OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput> | OauthClientResourceCreateWithoutOauthclientInput[] | OauthClientResourceUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthclientInput | OauthClientResourceCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthClientResourceCreateManyOauthclientInputEnvelope
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput> | OauthRefreshTokenCreateWithoutOauthclientInput[] | OauthRefreshTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthclientInput | OauthRefreshTokenCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthRefreshTokenCreateManyOauthclientInputEnvelope
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput> | OauthAccessTokenCreateWithoutOauthclientInput[] | OauthAccessTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthclientInput | OauthAccessTokenCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthAccessTokenCreateManyOauthclientInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput = {
+    create?: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput> | OauthConsentCreateWithoutOauthclientInput[] | OauthConsentUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutOauthclientInput | OauthConsentCreateOrConnectWithoutOauthclientInput[]
+    createMany?: OauthConsentCreateManyOauthclientInputEnvelope
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
+  export type OauthClientUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateclientCredentialsScopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdatecontactsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateredirectUrisInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdatepostLogoutRedirectUrisInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdategrantTypesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateresponseTypesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CloudAuthUserUpdateOneWithoutOauthclientsNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthclientsInput, CloudAuthUserUncheckedCreateWithoutOauthclientsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthclientsInput
+    upsert?: CloudAuthUserUpsertWithoutOauthclientsInput
+    disconnect?: CloudAuthUserWhereInput | boolean
+    delete?: CloudAuthUserWhereInput | boolean
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutOauthclientsInput, CloudAuthUserUpdateWithoutOauthclientsInput>, CloudAuthUserUncheckedUpdateWithoutOauthclientsInput>
+  }
+
+  export type OauthClientResourceUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput> | OauthClientResourceCreateWithoutOauthclientInput[] | OauthClientResourceUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthclientInput | OauthClientResourceCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthClientResourceUpsertWithWhereUniqueWithoutOauthclientInput | OauthClientResourceUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthClientResourceCreateManyOauthclientInputEnvelope
+    set?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    disconnect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    delete?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    update?: OauthClientResourceUpdateWithWhereUniqueWithoutOauthclientInput | OauthClientResourceUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthClientResourceUpdateManyWithWhereWithoutOauthclientInput | OauthClientResourceUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+  }
+
+  export type OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput> | OauthRefreshTokenCreateWithoutOauthclientInput[] | OauthRefreshTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthclientInput | OauthRefreshTokenCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutOauthclientInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthRefreshTokenCreateManyOauthclientInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutOauthclientInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutOauthclientInput | OauthRefreshTokenUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput> | OauthAccessTokenCreateWithoutOauthclientInput[] | OauthAccessTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthclientInput | OauthAccessTokenCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutOauthclientInput | OauthAccessTokenUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthAccessTokenCreateManyOauthclientInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutOauthclientInput | OauthAccessTokenUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutOauthclientInput | OauthAccessTokenUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthConsentUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput> | OauthConsentCreateWithoutOauthclientInput[] | OauthConsentUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutOauthclientInput | OauthConsentCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthConsentUpsertWithWhereUniqueWithoutOauthclientInput | OauthConsentUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthConsentCreateManyOauthclientInputEnvelope
+    set?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    disconnect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    delete?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    update?: OauthConsentUpdateWithWhereUniqueWithoutOauthclientInput | OauthConsentUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthConsentUpdateManyWithWhereWithoutOauthclientInput | OauthConsentUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
+  }
+
+  export type OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput> | OauthClientResourceCreateWithoutOauthclientInput[] | OauthClientResourceUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthclientInput | OauthClientResourceCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthClientResourceUpsertWithWhereUniqueWithoutOauthclientInput | OauthClientResourceUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthClientResourceCreateManyOauthclientInputEnvelope
+    set?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    disconnect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    delete?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    update?: OauthClientResourceUpdateWithWhereUniqueWithoutOauthclientInput | OauthClientResourceUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthClientResourceUpdateManyWithWhereWithoutOauthclientInput | OauthClientResourceUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput> | OauthRefreshTokenCreateWithoutOauthclientInput[] | OauthRefreshTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthclientInput | OauthRefreshTokenCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthRefreshTokenUpsertWithWhereUniqueWithoutOauthclientInput | OauthRefreshTokenUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthRefreshTokenCreateManyOauthclientInputEnvelope
+    set?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    disconnect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    delete?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    connect?: OauthRefreshTokenWhereUniqueInput | OauthRefreshTokenWhereUniqueInput[]
+    update?: OauthRefreshTokenUpdateWithWhereUniqueWithoutOauthclientInput | OauthRefreshTokenUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthRefreshTokenUpdateManyWithWhereWithoutOauthclientInput | OauthRefreshTokenUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput> | OauthAccessTokenCreateWithoutOauthclientInput[] | OauthAccessTokenUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthclientInput | OauthAccessTokenCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutOauthclientInput | OauthAccessTokenUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthAccessTokenCreateManyOauthclientInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutOauthclientInput | OauthAccessTokenUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutOauthclientInput | OauthAccessTokenUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput = {
+    create?: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput> | OauthConsentCreateWithoutOauthclientInput[] | OauthConsentUncheckedCreateWithoutOauthclientInput[]
+    connectOrCreate?: OauthConsentCreateOrConnectWithoutOauthclientInput | OauthConsentCreateOrConnectWithoutOauthclientInput[]
+    upsert?: OauthConsentUpsertWithWhereUniqueWithoutOauthclientInput | OauthConsentUpsertWithWhereUniqueWithoutOauthclientInput[]
+    createMany?: OauthConsentCreateManyOauthclientInputEnvelope
+    set?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    disconnect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    delete?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    connect?: OauthConsentWhereUniqueInput | OauthConsentWhereUniqueInput[]
+    update?: OauthConsentUpdateWithWhereUniqueWithoutOauthclientInput | OauthConsentUpdateWithWhereUniqueWithoutOauthclientInput[]
+    updateMany?: OauthConsentUpdateManyWithWhereWithoutOauthclientInput | OauthConsentUpdateManyWithWhereWithoutOauthclientInput[]
+    deleteMany?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
+  }
+
+  export type OauthResourceCreateallowedScopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientResourceCreateNestedManyWithoutOauthresourceInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput> | OauthClientResourceCreateWithoutOauthresourceInput[] | OauthClientResourceUncheckedCreateWithoutOauthresourceInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthresourceInput | OauthClientResourceCreateOrConnectWithoutOauthresourceInput[]
+    createMany?: OauthClientResourceCreateManyOauthresourceInputEnvelope
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+  }
+
+  export type OauthClientResourceUncheckedCreateNestedManyWithoutOauthresourceInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput> | OauthClientResourceCreateWithoutOauthresourceInput[] | OauthClientResourceUncheckedCreateWithoutOauthresourceInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthresourceInput | OauthClientResourceCreateOrConnectWithoutOauthresourceInput[]
+    createMany?: OauthClientResourceCreateManyOauthresourceInputEnvelope
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+  }
+
+  export type OauthResourceUpdateallowedScopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientResourceUpdateManyWithoutOauthresourceNestedInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput> | OauthClientResourceCreateWithoutOauthresourceInput[] | OauthClientResourceUncheckedCreateWithoutOauthresourceInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthresourceInput | OauthClientResourceCreateOrConnectWithoutOauthresourceInput[]
+    upsert?: OauthClientResourceUpsertWithWhereUniqueWithoutOauthresourceInput | OauthClientResourceUpsertWithWhereUniqueWithoutOauthresourceInput[]
+    createMany?: OauthClientResourceCreateManyOauthresourceInputEnvelope
+    set?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    disconnect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    delete?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    update?: OauthClientResourceUpdateWithWhereUniqueWithoutOauthresourceInput | OauthClientResourceUpdateWithWhereUniqueWithoutOauthresourceInput[]
+    updateMany?: OauthClientResourceUpdateManyWithWhereWithoutOauthresourceInput | OauthClientResourceUpdateManyWithWhereWithoutOauthresourceInput[]
+    deleteMany?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+  }
+
+  export type OauthClientResourceUncheckedUpdateManyWithoutOauthresourceNestedInput = {
+    create?: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput> | OauthClientResourceCreateWithoutOauthresourceInput[] | OauthClientResourceUncheckedCreateWithoutOauthresourceInput[]
+    connectOrCreate?: OauthClientResourceCreateOrConnectWithoutOauthresourceInput | OauthClientResourceCreateOrConnectWithoutOauthresourceInput[]
+    upsert?: OauthClientResourceUpsertWithWhereUniqueWithoutOauthresourceInput | OauthClientResourceUpsertWithWhereUniqueWithoutOauthresourceInput[]
+    createMany?: OauthClientResourceCreateManyOauthresourceInputEnvelope
+    set?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    disconnect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    delete?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    connect?: OauthClientResourceWhereUniqueInput | OauthClientResourceWhereUniqueInput[]
+    update?: OauthClientResourceUpdateWithWhereUniqueWithoutOauthresourceInput | OauthClientResourceUpdateWithWhereUniqueWithoutOauthresourceInput[]
+    updateMany?: OauthClientResourceUpdateManyWithWhereWithoutOauthresourceInput | OauthClientResourceUpdateManyWithWhereWithoutOauthresourceInput[]
+    deleteMany?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+  }
+
+  export type OauthClientCreateNestedOneWithoutOauthclientresourcesInput = {
+    create?: XOR<OauthClientCreateWithoutOauthclientresourcesInput, OauthClientUncheckedCreateWithoutOauthclientresourcesInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthclientresourcesInput
+    connect?: OauthClientWhereUniqueInput
+  }
+
+  export type OauthResourceCreateNestedOneWithoutOauthclientresourcesInput = {
+    create?: XOR<OauthResourceCreateWithoutOauthclientresourcesInput, OauthResourceUncheckedCreateWithoutOauthclientresourcesInput>
+    connectOrCreate?: OauthResourceCreateOrConnectWithoutOauthclientresourcesInput
+    connect?: OauthResourceWhereUniqueInput
+  }
+
+  export type OauthClientUpdateOneRequiredWithoutOauthclientresourcesNestedInput = {
+    create?: XOR<OauthClientCreateWithoutOauthclientresourcesInput, OauthClientUncheckedCreateWithoutOauthclientresourcesInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthclientresourcesInput
+    upsert?: OauthClientUpsertWithoutOauthclientresourcesInput
+    connect?: OauthClientWhereUniqueInput
+    update?: XOR<XOR<OauthClientUpdateToOneWithWhereWithoutOauthclientresourcesInput, OauthClientUpdateWithoutOauthclientresourcesInput>, OauthClientUncheckedUpdateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthResourceUpdateOneRequiredWithoutOauthclientresourcesNestedInput = {
+    create?: XOR<OauthResourceCreateWithoutOauthclientresourcesInput, OauthResourceUncheckedCreateWithoutOauthclientresourcesInput>
+    connectOrCreate?: OauthResourceCreateOrConnectWithoutOauthclientresourcesInput
+    upsert?: OauthResourceUpsertWithoutOauthclientresourcesInput
+    connect?: OauthResourceWhereUniqueInput
+    update?: XOR<XOR<OauthResourceUpdateToOneWithWhereWithoutOauthclientresourcesInput, OauthResourceUpdateWithoutOauthclientresourcesInput>, OauthResourceUncheckedUpdateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthRefreshTokenCreateresourcesInput = {
+    set: string[]
+  }
+
+  export type OauthRefreshTokenCreaterequestedUserInfoClaimsInput = {
+    set: string[]
+  }
+
+  export type OauthRefreshTokenCreatescopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateNestedOneWithoutOauthrefreshtokensInput = {
+    create?: XOR<OauthClientCreateWithoutOauthrefreshtokensInput, OauthClientUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthrefreshtokensInput
+    connect?: OauthClientWhereUniqueInput
+  }
+
+  export type CloudAuthSessionCreateNestedOneWithoutOauthrefreshtokensInput = {
+    create?: XOR<CloudAuthSessionCreateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: CloudAuthSessionCreateOrConnectWithoutOauthrefreshtokensInput
+    connect?: CloudAuthSessionWhereUniqueInput
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutOauthrefreshtokensInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthrefreshtokensInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type OauthAccessTokenCreateNestedManyWithoutOauthrefreshtokenInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput> | OauthAccessTokenCreateWithoutOauthrefreshtokenInput[] | OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput | OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput[]
+    createMany?: OauthAccessTokenCreateManyOauthrefreshtokenInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthAccessTokenUncheckedCreateNestedManyWithoutOauthrefreshtokenInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput> | OauthAccessTokenCreateWithoutOauthrefreshtokenInput[] | OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput | OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput[]
+    createMany?: OauthAccessTokenCreateManyOauthrefreshtokenInputEnvelope
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+  }
+
+  export type OauthRefreshTokenUpdateresourcesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthRefreshTokenUpdaterequestedUserInfoClaimsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthRefreshTokenUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateOneRequiredWithoutOauthrefreshtokensNestedInput = {
+    create?: XOR<OauthClientCreateWithoutOauthrefreshtokensInput, OauthClientUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthrefreshtokensInput
+    upsert?: OauthClientUpsertWithoutOauthrefreshtokensInput
+    connect?: OauthClientWhereUniqueInput
+    update?: XOR<XOR<OauthClientUpdateToOneWithWhereWithoutOauthrefreshtokensInput, OauthClientUpdateWithoutOauthrefreshtokensInput>, OauthClientUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthSessionUpdateOneWithoutOauthrefreshtokensNestedInput = {
+    create?: XOR<CloudAuthSessionCreateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: CloudAuthSessionCreateOrConnectWithoutOauthrefreshtokensInput
+    upsert?: CloudAuthSessionUpsertWithoutOauthrefreshtokensInput
+    disconnect?: CloudAuthSessionWhereInput | boolean
+    delete?: CloudAuthSessionWhereInput | boolean
+    connect?: CloudAuthSessionWhereUniqueInput
+    update?: XOR<XOR<CloudAuthSessionUpdateToOneWithWhereWithoutOauthrefreshtokensInput, CloudAuthSessionUpdateWithoutOauthrefreshtokensInput>, CloudAuthSessionUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthUserUpdateOneRequiredWithoutOauthrefreshtokensNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedCreateWithoutOauthrefreshtokensInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthrefreshtokensInput
+    upsert?: CloudAuthUserUpsertWithoutOauthrefreshtokensInput
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutOauthrefreshtokensInput, CloudAuthUserUpdateWithoutOauthrefreshtokensInput>, CloudAuthUserUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type OauthAccessTokenUpdateManyWithoutOauthrefreshtokenNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput> | OauthAccessTokenCreateWithoutOauthrefreshtokenInput[] | OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput | OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutOauthrefreshtokenInput | OauthAccessTokenUpsertWithWhereUniqueWithoutOauthrefreshtokenInput[]
+    createMany?: OauthAccessTokenCreateManyOauthrefreshtokenInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutOauthrefreshtokenInput | OauthAccessTokenUpdateWithWhereUniqueWithoutOauthrefreshtokenInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutOauthrefreshtokenInput | OauthAccessTokenUpdateManyWithWhereWithoutOauthrefreshtokenInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenNestedInput = {
+    create?: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput> | OauthAccessTokenCreateWithoutOauthrefreshtokenInput[] | OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput[]
+    connectOrCreate?: OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput | OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput[]
+    upsert?: OauthAccessTokenUpsertWithWhereUniqueWithoutOauthrefreshtokenInput | OauthAccessTokenUpsertWithWhereUniqueWithoutOauthrefreshtokenInput[]
+    createMany?: OauthAccessTokenCreateManyOauthrefreshtokenInputEnvelope
+    set?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    disconnect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    delete?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    connect?: OauthAccessTokenWhereUniqueInput | OauthAccessTokenWhereUniqueInput[]
+    update?: OauthAccessTokenUpdateWithWhereUniqueWithoutOauthrefreshtokenInput | OauthAccessTokenUpdateWithWhereUniqueWithoutOauthrefreshtokenInput[]
+    updateMany?: OauthAccessTokenUpdateManyWithWhereWithoutOauthrefreshtokenInput | OauthAccessTokenUpdateManyWithWhereWithoutOauthrefreshtokenInput[]
+    deleteMany?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+  }
+
+  export type OauthAccessTokenCreateresourcesInput = {
+    set: string[]
+  }
+
+  export type OauthAccessTokenCreaterequestedUserInfoClaimsInput = {
+    set: string[]
+  }
+
+  export type OauthAccessTokenCreatescopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateNestedOneWithoutOauthaccesstokensInput = {
+    create?: XOR<OauthClientCreateWithoutOauthaccesstokensInput, OauthClientUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthaccesstokensInput
+    connect?: OauthClientWhereUniqueInput
+  }
+
+  export type CloudAuthSessionCreateNestedOneWithoutOauthaccesstokensInput = {
+    create?: XOR<CloudAuthSessionCreateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: CloudAuthSessionCreateOrConnectWithoutOauthaccesstokensInput
+    connect?: CloudAuthSessionWhereUniqueInput
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutOauthaccesstokensInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthaccesstokensInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type OauthRefreshTokenCreateNestedOneWithoutOauthaccesstokensInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthaccesstokensInput
+    connect?: OauthRefreshTokenWhereUniqueInput
+  }
+
+  export type OauthAccessTokenUpdateresourcesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthAccessTokenUpdaterequestedUserInfoClaimsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthAccessTokenUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateOneRequiredWithoutOauthaccesstokensNestedInput = {
+    create?: XOR<OauthClientCreateWithoutOauthaccesstokensInput, OauthClientUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthaccesstokensInput
+    upsert?: OauthClientUpsertWithoutOauthaccesstokensInput
+    connect?: OauthClientWhereUniqueInput
+    update?: XOR<XOR<OauthClientUpdateToOneWithWhereWithoutOauthaccesstokensInput, OauthClientUpdateWithoutOauthaccesstokensInput>, OauthClientUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthSessionUpdateOneWithoutOauthaccesstokensNestedInput = {
+    create?: XOR<CloudAuthSessionCreateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: CloudAuthSessionCreateOrConnectWithoutOauthaccesstokensInput
+    upsert?: CloudAuthSessionUpsertWithoutOauthaccesstokensInput
+    disconnect?: CloudAuthSessionWhereInput | boolean
+    delete?: CloudAuthSessionWhereInput | boolean
+    connect?: CloudAuthSessionWhereUniqueInput
+    update?: XOR<XOR<CloudAuthSessionUpdateToOneWithWhereWithoutOauthaccesstokensInput, CloudAuthSessionUpdateWithoutOauthaccesstokensInput>, CloudAuthSessionUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthUserUpdateOneWithoutOauthaccesstokensNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthaccesstokensInput
+    upsert?: CloudAuthUserUpsertWithoutOauthaccesstokensInput
+    disconnect?: CloudAuthUserWhereInput | boolean
+    delete?: CloudAuthUserWhereInput | boolean
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutOauthaccesstokensInput, CloudAuthUserUpdateWithoutOauthaccesstokensInput>, CloudAuthUserUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthRefreshTokenUpdateOneWithoutOauthaccesstokensNestedInput = {
+    create?: XOR<OauthRefreshTokenCreateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedCreateWithoutOauthaccesstokensInput>
+    connectOrCreate?: OauthRefreshTokenCreateOrConnectWithoutOauthaccesstokensInput
+    upsert?: OauthRefreshTokenUpsertWithoutOauthaccesstokensInput
+    disconnect?: OauthRefreshTokenWhereInput | boolean
+    delete?: OauthRefreshTokenWhereInput | boolean
+    connect?: OauthRefreshTokenWhereUniqueInput
+    update?: XOR<XOR<OauthRefreshTokenUpdateToOneWithWhereWithoutOauthaccesstokensInput, OauthRefreshTokenUpdateWithoutOauthaccesstokensInput>, OauthRefreshTokenUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthConsentCreateresourcesInput = {
+    set: string[]
+  }
+
+  export type OauthConsentCreaterequestedUserInfoClaimsInput = {
+    set: string[]
+  }
+
+  export type OauthConsentCreatescopesInput = {
+    set: string[]
+  }
+
+  export type OauthClientCreateNestedOneWithoutOauthconsentsInput = {
+    create?: XOR<OauthClientCreateWithoutOauthconsentsInput, OauthClientUncheckedCreateWithoutOauthconsentsInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthconsentsInput
+    connect?: OauthClientWhereUniqueInput
+  }
+
+  export type CloudAuthUserCreateNestedOneWithoutOauthconsentsInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthconsentsInput, CloudAuthUserUncheckedCreateWithoutOauthconsentsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthconsentsInput
+    connect?: CloudAuthUserWhereUniqueInput
+  }
+
+  export type OauthConsentUpdateresourcesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthConsentUpdaterequestedUserInfoClaimsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthConsentUpdatescopesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type OauthClientUpdateOneRequiredWithoutOauthconsentsNestedInput = {
+    create?: XOR<OauthClientCreateWithoutOauthconsentsInput, OauthClientUncheckedCreateWithoutOauthconsentsInput>
+    connectOrCreate?: OauthClientCreateOrConnectWithoutOauthconsentsInput
+    upsert?: OauthClientUpsertWithoutOauthconsentsInput
+    connect?: OauthClientWhereUniqueInput
+    update?: XOR<XOR<OauthClientUpdateToOneWithWhereWithoutOauthconsentsInput, OauthClientUpdateWithoutOauthconsentsInput>, OauthClientUncheckedUpdateWithoutOauthconsentsInput>
+  }
+
+  export type CloudAuthUserUpdateOneWithoutOauthconsentsNestedInput = {
+    create?: XOR<CloudAuthUserCreateWithoutOauthconsentsInput, CloudAuthUserUncheckedCreateWithoutOauthconsentsInput>
+    connectOrCreate?: CloudAuthUserCreateOrConnectWithoutOauthconsentsInput
+    upsert?: CloudAuthUserUpsertWithoutOauthconsentsInput
+    disconnect?: CloudAuthUserWhereInput | boolean
+    delete?: CloudAuthUserWhereInput | boolean
+    connect?: CloudAuthUserWhereUniqueInput
+    update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutOauthconsentsInput, CloudAuthUserUpdateWithoutOauthconsentsInput>, CloudAuthUserUncheckedUpdateWithoutOauthconsentsInput>
   }
 
   export type AccountCreateNestedOneWithoutRelationsInput = {
@@ -119251,10 +136351,6 @@ export namespace Prisma {
     connect?: ScheduledInvocationWhereUniqueInput
   }
 
-  export type NullableBoolFieldUpdateOperationsInput = {
-    set?: boolean | null
-  }
-
   export type AccountUpdateOneRequiredWithoutInvocationAttemptsNestedInput = {
     create?: XOR<AccountCreateWithoutInvocationAttemptsInput, AccountUncheckedCreateWithoutInvocationAttemptsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutInvocationAttemptsInput
@@ -119882,6 +136978,19 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
   export type NestedBytesFilter<$PrismaModel = never> = {
     equals?: Bytes | BytesFieldRefInput<$PrismaModel>
     in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
@@ -119897,19 +137006,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBytesFilter<$PrismaModel>
     _max?: NestedBytesFilter<$PrismaModel>
-  }
-
-  export type NestedBoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
-  }
-
-  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedDecimalFilter<$PrismaModel = never> = {
@@ -119951,6 +137047,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
   }
 
   export type CloudAuthUserUncheckedCreateWithoutAccountInput = {
@@ -119965,6 +137067,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
   }
 
   export type CloudAuthUserCreateOrConnectWithoutAccountInput = {
@@ -121527,6 +138635,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
   }
 
   export type CloudAuthUserUncheckedUpdateWithoutAccountInput = {
@@ -121541,6 +138655,12 @@ export namespace Prisma {
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
   }
 
   export type GoalUpsertWithWhereUniqueWithoutAccountInput = {
@@ -124019,6 +141139,8 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthsessionInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthsessionInput
   }
 
   export type CloudAuthSessionUncheckedCreateWithoutUserInput = {
@@ -124029,6 +141151,8 @@ export namespace Prisma {
     userAgent?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
   }
 
   export type CloudAuthSessionCreateOrConnectWithoutUserInput = {
@@ -124112,6 +141236,300 @@ export namespace Prisma {
 
   export type CloudAuthDeviceCodeCreateManyUserInputEnvelope = {
     data: CloudAuthDeviceCodeCreateManyUserInput | CloudAuthDeviceCodeCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ExternalAgentPatCreateWithoutUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentPatCreateOrConnectWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    create: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatCreateManyUserInputEnvelope = {
+    data: ExternalAgentPatCreateManyUserInput | ExternalAgentPatCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ExternalAgentConnectionCreateWithoutUserInput = {
+    id?: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentConnectionUncheckedCreateWithoutUserInput = {
+    id?: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentConnectionCreateOrConnectWithoutUserInput = {
+    where: ExternalAgentConnectionWhereUniqueInput
+    create: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentConnectionCreateManyUserInputEnvelope = {
+    data: ExternalAgentConnectionCreateManyUserInput | ExternalAgentConnectionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthClientCreateWithoutCloudauthuserInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateWithoutCloudauthuserInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientCreateOrConnectWithoutCloudauthuserInput = {
+    where: OauthClientWhereUniqueInput
+    create: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthClientCreateManyCloudauthuserInputEnvelope = {
+    data: OauthClientCreateManyCloudauthuserInput | OauthClientCreateManyCloudauthuserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthRefreshTokenCreateWithoutCloudauthuserInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthrefreshtokensInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenCreateOrConnectWithoutCloudauthuserInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    create: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthRefreshTokenCreateManyCloudauthuserInputEnvelope = {
+    data: OauthRefreshTokenCreateManyCloudauthuserInput | OauthRefreshTokenCreateManyCloudauthuserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthAccessTokenCreateWithoutCloudauthuserInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthaccesstokensInput
+    oauthrefreshtoken?: OauthRefreshTokenCreateNestedOneWithoutOauthaccesstokensInput
+  }
+
+  export type OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateOrConnectWithoutCloudauthuserInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    create: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthAccessTokenCreateManyCloudauthuserInputEnvelope = {
+    data: OauthAccessTokenCreateManyCloudauthuserInput | OauthAccessTokenCreateManyCloudauthuserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthConsentCreateWithoutCloudauthuserInput = {
+    id?: string
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+    oauthclient: OauthClientCreateNestedOneWithoutOauthconsentsInput
+  }
+
+  export type OauthConsentUncheckedCreateWithoutCloudauthuserInput = {
+    id?: string
+    clientId: string
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type OauthConsentCreateOrConnectWithoutCloudauthuserInput = {
+    where: OauthConsentWhereUniqueInput
+    create: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthConsentCreateManyCloudauthuserInputEnvelope = {
+    data: OauthConsentCreateManyCloudauthuserInput | OauthConsentCreateManyCloudauthuserInput[]
     skipDuplicates?: boolean
   }
 
@@ -124307,6 +141725,238 @@ export namespace Prisma {
     scope?: StringNullableFilter<"CloudAuthDeviceCode"> | string | null
   }
 
+  export type ExternalAgentPatUpsertWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    update: XOR<ExternalAgentPatUpdateWithoutUserInput, ExternalAgentPatUncheckedUpdateWithoutUserInput>
+    create: XOR<ExternalAgentPatCreateWithoutUserInput, ExternalAgentPatUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatUpdateWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentPatWhereUniqueInput
+    data: XOR<ExternalAgentPatUpdateWithoutUserInput, ExternalAgentPatUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ExternalAgentPatUpdateManyWithWhereWithoutUserInput = {
+    where: ExternalAgentPatScalarWhereInput
+    data: XOR<ExternalAgentPatUpdateManyMutationInput, ExternalAgentPatUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ExternalAgentPatScalarWhereInput = {
+    AND?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+    OR?: ExternalAgentPatScalarWhereInput[]
+    NOT?: ExternalAgentPatScalarWhereInput | ExternalAgentPatScalarWhereInput[]
+    id?: StringFilter<"ExternalAgentPat"> | string
+    userId?: StringFilter<"ExternalAgentPat"> | string
+    name?: StringFilter<"ExternalAgentPat"> | string
+    prefix?: StringFilter<"ExternalAgentPat"> | string
+    tokenDigest?: StringFilter<"ExternalAgentPat"> | string
+    audience?: StringFilter<"ExternalAgentPat"> | string
+    scopes?: StringNullableListFilter<"ExternalAgentPat">
+    expiresAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentPat"> | Date | string | null
+    createdAt?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateWindow?: DateTimeFilter<"ExternalAgentPat"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentPat"> | number
+  }
+
+  export type ExternalAgentConnectionUpsertWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentConnectionWhereUniqueInput
+    update: XOR<ExternalAgentConnectionUpdateWithoutUserInput, ExternalAgentConnectionUncheckedUpdateWithoutUserInput>
+    create: XOR<ExternalAgentConnectionCreateWithoutUserInput, ExternalAgentConnectionUncheckedCreateWithoutUserInput>
+  }
+
+  export type ExternalAgentConnectionUpdateWithWhereUniqueWithoutUserInput = {
+    where: ExternalAgentConnectionWhereUniqueInput
+    data: XOR<ExternalAgentConnectionUpdateWithoutUserInput, ExternalAgentConnectionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ExternalAgentConnectionUpdateManyWithWhereWithoutUserInput = {
+    where: ExternalAgentConnectionScalarWhereInput
+    data: XOR<ExternalAgentConnectionUpdateManyMutationInput, ExternalAgentConnectionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ExternalAgentConnectionScalarWhereInput = {
+    AND?: ExternalAgentConnectionScalarWhereInput | ExternalAgentConnectionScalarWhereInput[]
+    OR?: ExternalAgentConnectionScalarWhereInput[]
+    NOT?: ExternalAgentConnectionScalarWhereInput | ExternalAgentConnectionScalarWhereInput[]
+    id?: StringFilter<"ExternalAgentConnection"> | string
+    userId?: StringFilter<"ExternalAgentConnection"> | string
+    clientId?: StringFilter<"ExternalAgentConnection"> | string
+    resource?: StringFilter<"ExternalAgentConnection"> | string
+    createdAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    expiresAt?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    lastUsedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    revokedAt?: DateTimeNullableFilter<"ExternalAgentConnection"> | Date | string | null
+    rateWindow?: DateTimeFilter<"ExternalAgentConnection"> | Date | string
+    rateCount?: IntFilter<"ExternalAgentConnection"> | number
+  }
+
+  export type OauthClientUpsertWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthClientWhereUniqueInput
+    update: XOR<OauthClientUpdateWithoutCloudauthuserInput, OauthClientUncheckedUpdateWithoutCloudauthuserInput>
+    create: XOR<OauthClientCreateWithoutCloudauthuserInput, OauthClientUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthClientUpdateWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthClientWhereUniqueInput
+    data: XOR<OauthClientUpdateWithoutCloudauthuserInput, OauthClientUncheckedUpdateWithoutCloudauthuserInput>
+  }
+
+  export type OauthClientUpdateManyWithWhereWithoutCloudauthuserInput = {
+    where: OauthClientScalarWhereInput
+    data: XOR<OauthClientUpdateManyMutationInput, OauthClientUncheckedUpdateManyWithoutCloudauthuserInput>
+  }
+
+  export type OauthClientScalarWhereInput = {
+    AND?: OauthClientScalarWhereInput | OauthClientScalarWhereInput[]
+    OR?: OauthClientScalarWhereInput[]
+    NOT?: OauthClientScalarWhereInput | OauthClientScalarWhereInput[]
+    id?: StringFilter<"OauthClient"> | string
+    clientId?: StringFilter<"OauthClient"> | string
+    clientSecret?: StringNullableFilter<"OauthClient"> | string | null
+    clientDiscoveryId?: StringNullableFilter<"OauthClient"> | string | null
+    disabled?: BoolNullableFilter<"OauthClient"> | boolean | null
+    skipConsent?: BoolNullableFilter<"OauthClient"> | boolean | null
+    enableEndSession?: BoolNullableFilter<"OauthClient"> | boolean | null
+    subjectType?: StringNullableFilter<"OauthClient"> | string | null
+    scopes?: StringNullableListFilter<"OauthClient">
+    clientCredentialsScopes?: StringNullableListFilter<"OauthClient">
+    userId?: StringNullableFilter<"OauthClient"> | string | null
+    createdAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    updatedAt?: DateTimeNullableFilter<"OauthClient"> | Date | string | null
+    name?: StringNullableFilter<"OauthClient"> | string | null
+    uri?: StringNullableFilter<"OauthClient"> | string | null
+    icon?: StringNullableFilter<"OauthClient"> | string | null
+    contacts?: StringNullableListFilter<"OauthClient">
+    tos?: StringNullableFilter<"OauthClient"> | string | null
+    policy?: StringNullableFilter<"OauthClient"> | string | null
+    softwareId?: StringNullableFilter<"OauthClient"> | string | null
+    softwareVersion?: StringNullableFilter<"OauthClient"> | string | null
+    softwareStatement?: StringNullableFilter<"OauthClient"> | string | null
+    redirectUris?: StringNullableListFilter<"OauthClient">
+    postLogoutRedirectUris?: StringNullableListFilter<"OauthClient">
+    backchannelLogoutUri?: StringNullableFilter<"OauthClient"> | string | null
+    backchannelLogoutSessionRequired?: BoolNullableFilter<"OauthClient"> | boolean | null
+    tokenEndpointAuthMethod?: StringNullableFilter<"OauthClient"> | string | null
+    applicationType?: StringNullableFilter<"OauthClient"> | string | null
+    jwks?: StringNullableFilter<"OauthClient"> | string | null
+    jwksUri?: StringNullableFilter<"OauthClient"> | string | null
+    grantTypes?: StringNullableListFilter<"OauthClient">
+    responseTypes?: StringNullableListFilter<"OauthClient">
+    requirePKCE?: BoolNullableFilter<"OauthClient"> | boolean | null
+    dpopBoundAccessTokens?: BoolNullableFilter<"OauthClient"> | boolean | null
+    referenceId?: StringNullableFilter<"OauthClient"> | string | null
+    metadata?: JsonNullableFilter<"OauthClient">
+  }
+
+  export type OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    update: XOR<OauthRefreshTokenUpdateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedUpdateWithoutCloudauthuserInput>
+    create: XOR<OauthRefreshTokenCreateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    data: XOR<OauthRefreshTokenUpdateWithoutCloudauthuserInput, OauthRefreshTokenUncheckedUpdateWithoutCloudauthuserInput>
+  }
+
+  export type OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthuserInput = {
+    where: OauthRefreshTokenScalarWhereInput
+    data: XOR<OauthRefreshTokenUpdateManyMutationInput, OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserInput>
+  }
+
+  export type OauthRefreshTokenScalarWhereInput = {
+    AND?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+    OR?: OauthRefreshTokenScalarWhereInput[]
+    NOT?: OauthRefreshTokenScalarWhereInput | OauthRefreshTokenScalarWhereInput[]
+    id?: StringFilter<"OauthRefreshToken"> | string
+    token?: StringFilter<"OauthRefreshToken"> | string
+    clientId?: StringFilter<"OauthRefreshToken"> | string
+    sessionId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    userId?: StringFilter<"OauthRefreshToken"> | string
+    referenceId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    resources?: StringNullableListFilter<"OauthRefreshToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthRefreshToken">
+    expiresAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthRefreshToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotatedAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    rotationReplayResponse?: StringNullableFilter<"OauthRefreshToken"> | string | null
+    rotationReplayExpiresAt?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    authTime?: DateTimeNullableFilter<"OauthRefreshToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthRefreshToken">
+    scopes?: StringNullableListFilter<"OauthRefreshToken">
+  }
+
+  export type OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    update: XOR<OauthAccessTokenUpdateWithoutCloudauthuserInput, OauthAccessTokenUncheckedUpdateWithoutCloudauthuserInput>
+    create: XOR<OauthAccessTokenCreateWithoutCloudauthuserInput, OauthAccessTokenUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    data: XOR<OauthAccessTokenUpdateWithoutCloudauthuserInput, OauthAccessTokenUncheckedUpdateWithoutCloudauthuserInput>
+  }
+
+  export type OauthAccessTokenUpdateManyWithWhereWithoutCloudauthuserInput = {
+    where: OauthAccessTokenScalarWhereInput
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserInput>
+  }
+
+  export type OauthAccessTokenScalarWhereInput = {
+    AND?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+    OR?: OauthAccessTokenScalarWhereInput[]
+    NOT?: OauthAccessTokenScalarWhereInput | OauthAccessTokenScalarWhereInput[]
+    id?: StringFilter<"OauthAccessToken"> | string
+    token?: StringFilter<"OauthAccessToken"> | string
+    clientId?: StringFilter<"OauthAccessToken"> | string
+    sessionId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    userId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    referenceId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    authorizationCodeId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    resources?: StringNullableListFilter<"OauthAccessToken">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthAccessToken">
+    refreshId?: StringNullableFilter<"OauthAccessToken"> | string | null
+    expiresAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    createdAt?: DateTimeFilter<"OauthAccessToken"> | Date | string
+    revoked?: DateTimeNullableFilter<"OauthAccessToken"> | Date | string | null
+    confirmation?: JsonNullableFilter<"OauthAccessToken">
+    scopes?: StringNullableListFilter<"OauthAccessToken">
+  }
+
+  export type OauthConsentUpsertWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthConsentWhereUniqueInput
+    update: XOR<OauthConsentUpdateWithoutCloudauthuserInput, OauthConsentUncheckedUpdateWithoutCloudauthuserInput>
+    create: XOR<OauthConsentCreateWithoutCloudauthuserInput, OauthConsentUncheckedCreateWithoutCloudauthuserInput>
+  }
+
+  export type OauthConsentUpdateWithWhereUniqueWithoutCloudauthuserInput = {
+    where: OauthConsentWhereUniqueInput
+    data: XOR<OauthConsentUpdateWithoutCloudauthuserInput, OauthConsentUncheckedUpdateWithoutCloudauthuserInput>
+  }
+
+  export type OauthConsentUpdateManyWithWhereWithoutCloudauthuserInput = {
+    where: OauthConsentScalarWhereInput
+    data: XOR<OauthConsentUpdateManyMutationInput, OauthConsentUncheckedUpdateManyWithoutCloudauthuserInput>
+  }
+
+  export type OauthConsentScalarWhereInput = {
+    AND?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
+    OR?: OauthConsentScalarWhereInput[]
+    NOT?: OauthConsentScalarWhereInput | OauthConsentScalarWhereInput[]
+    id?: StringFilter<"OauthConsent"> | string
+    clientId?: StringFilter<"OauthConsent"> | string
+    userId?: StringNullableFilter<"OauthConsent"> | string | null
+    referenceId?: StringNullableFilter<"OauthConsent"> | string | null
+    resources?: StringNullableListFilter<"OauthConsent">
+    requestedUserInfoClaims?: StringNullableListFilter<"OauthConsent">
+    scopes?: StringNullableListFilter<"OauthConsent">
+    createdAt?: DateTimeFilter<"OauthConsent"> | Date | string
+    updatedAt?: DateTimeFilter<"OauthConsent"> | Date | string
+  }
+
   export type AccountUpsertWithoutCloudUserInput = {
     update: XOR<AccountUpdateWithoutCloudUserInput, AccountUncheckedUpdateWithoutCloudUserInput>
     create: XOR<AccountCreateWithoutCloudUserInput, AccountUncheckedCreateWithoutCloudUserInput>
@@ -124408,6 +142058,102 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
+  export type OauthRefreshTokenCreateWithoutCloudauthsessionInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthuser: CloudAuthUserCreateNestedOneWithoutOauthrefreshtokensInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput = {
+    id?: string
+    token: string
+    clientId: string
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenCreateOrConnectWithoutCloudauthsessionInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    create: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthRefreshTokenCreateManyCloudauthsessionInputEnvelope = {
+    data: OauthRefreshTokenCreateManyCloudauthsessionInput | OauthRefreshTokenCreateManyCloudauthsessionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthAccessTokenCreateWithoutCloudauthsessionInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthaccesstokensInput
+    oauthrefreshtoken?: OauthRefreshTokenCreateNestedOneWithoutOauthaccesstokensInput
+  }
+
+  export type OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput = {
+    id?: string
+    token: string
+    clientId: string
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateOrConnectWithoutCloudauthsessionInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    create: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthAccessTokenCreateManyCloudauthsessionInputEnvelope = {
+    data: OauthAccessTokenCreateManyCloudauthsessionInput | OauthAccessTokenCreateManyCloudauthsessionInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CloudAuthUserCreateWithoutSessionsInput = {
     id?: string
     name: string
@@ -124419,6 +142165,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124433,12 +142185,50 @@ export namespace Prisma {
     updatedAt?: Date | string
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
   export type CloudAuthUserCreateOrConnectWithoutSessionsInput = {
     where: CloudAuthUserWhereUniqueInput
     create: XOR<CloudAuthUserCreateWithoutSessionsInput, CloudAuthUserUncheckedCreateWithoutSessionsInput>
+  }
+
+  export type OauthRefreshTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    update: XOR<OauthRefreshTokenUpdateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedUpdateWithoutCloudauthsessionInput>
+    create: XOR<OauthRefreshTokenCreateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedCreateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthRefreshTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    data: XOR<OauthRefreshTokenUpdateWithoutCloudauthsessionInput, OauthRefreshTokenUncheckedUpdateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthRefreshTokenUpdateManyWithWhereWithoutCloudauthsessionInput = {
+    where: OauthRefreshTokenScalarWhereInput
+    data: XOR<OauthRefreshTokenUpdateManyMutationInput, OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionInput>
+  }
+
+  export type OauthAccessTokenUpsertWithWhereUniqueWithoutCloudauthsessionInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    update: XOR<OauthAccessTokenUpdateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedUpdateWithoutCloudauthsessionInput>
+    create: XOR<OauthAccessTokenCreateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedCreateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthAccessTokenUpdateWithWhereUniqueWithoutCloudauthsessionInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    data: XOR<OauthAccessTokenUpdateWithoutCloudauthsessionInput, OauthAccessTokenUncheckedUpdateWithoutCloudauthsessionInput>
+  }
+
+  export type OauthAccessTokenUpdateManyWithWhereWithoutCloudauthsessionInput = {
+    where: OauthAccessTokenScalarWhereInput
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionInput>
   }
 
   export type CloudAuthUserUpsertWithoutSessionsInput = {
@@ -124463,6 +142253,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124477,6 +142273,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124491,6 +142293,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124505,6 +142313,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124535,6 +142349,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124549,6 +142369,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124563,6 +142389,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
     account?: AccountCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124577,6 +142409,12 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
     providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
     account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
   }
 
@@ -124607,6 +142445,12 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -124621,6 +142465,204 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
     providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserCreateWithoutExternalAgentPatsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutExternalAgentPatsInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+  }
+
+  export type CloudAuthUserUpsertWithoutExternalAgentPatsInput = {
+    update: XOR<CloudAuthUserUpdateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentPatsInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentPatsInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutExternalAgentPatsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutExternalAgentPatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutExternalAgentPatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserCreateWithoutExternalAgentConnectionsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutExternalAgentConnectionsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutExternalAgentConnectionsInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentConnectionsInput>
+  }
+
+  export type CloudAuthUserUpsertWithoutExternalAgentConnectionsInput = {
+    update: XOR<CloudAuthUserUpdateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentConnectionsInput>
+    create: XOR<CloudAuthUserCreateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedCreateWithoutExternalAgentConnectionsInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutExternalAgentConnectionsInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutExternalAgentConnectionsInput, CloudAuthUserUncheckedUpdateWithoutExternalAgentConnectionsInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutExternalAgentConnectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutExternalAgentConnectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
@@ -128590,6 +146632,1769 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type CloudAuthUserCreateWithoutOauthclientsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutOauthclientsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutOauthclientsInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutOauthclientsInput, CloudAuthUserUncheckedCreateWithoutOauthclientsInput>
+  }
+
+  export type OauthClientResourceCreateWithoutOauthclientInput = {
+    id?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+    oauthresource: OauthResourceCreateNestedOneWithoutOauthclientresourcesInput
+  }
+
+  export type OauthClientResourceUncheckedCreateWithoutOauthclientInput = {
+    id?: string
+    resourceId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthClientResourceCreateOrConnectWithoutOauthclientInput = {
+    where: OauthClientResourceWhereUniqueInput
+    create: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthClientResourceCreateManyOauthclientInputEnvelope = {
+    data: OauthClientResourceCreateManyOauthclientInput | OauthClientResourceCreateManyOauthclientInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthRefreshTokenCreateWithoutOauthclientInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthuser: CloudAuthUserCreateNestedOneWithoutOauthrefreshtokensInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateWithoutOauthclientInput = {
+    id?: string
+    token: string
+    sessionId?: string | null
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthrefreshtokenInput
+  }
+
+  export type OauthRefreshTokenCreateOrConnectWithoutOauthclientInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    create: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthRefreshTokenCreateManyOauthclientInputEnvelope = {
+    data: OauthRefreshTokenCreateManyOauthclientInput | OauthRefreshTokenCreateManyOauthclientInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthAccessTokenCreateWithoutOauthclientInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthaccesstokensInput
+    oauthrefreshtoken?: OauthRefreshTokenCreateNestedOneWithoutOauthaccesstokensInput
+  }
+
+  export type OauthAccessTokenUncheckedCreateWithoutOauthclientInput = {
+    id?: string
+    token: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateOrConnectWithoutOauthclientInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    create: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthAccessTokenCreateManyOauthclientInputEnvelope = {
+    data: OauthAccessTokenCreateManyOauthclientInput | OauthAccessTokenCreateManyOauthclientInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthConsentCreateWithoutOauthclientInput = {
+    id?: string
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthconsentsInput
+  }
+
+  export type OauthConsentUncheckedCreateWithoutOauthclientInput = {
+    id?: string
+    userId?: string | null
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type OauthConsentCreateOrConnectWithoutOauthclientInput = {
+    where: OauthConsentWhereUniqueInput
+    create: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthConsentCreateManyOauthclientInputEnvelope = {
+    data: OauthConsentCreateManyOauthclientInput | OauthConsentCreateManyOauthclientInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CloudAuthUserUpsertWithoutOauthclientsInput = {
+    update: XOR<CloudAuthUserUpdateWithoutOauthclientsInput, CloudAuthUserUncheckedUpdateWithoutOauthclientsInput>
+    create: XOR<CloudAuthUserCreateWithoutOauthclientsInput, CloudAuthUserUncheckedCreateWithoutOauthclientsInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutOauthclientsInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutOauthclientsInput, CloudAuthUserUncheckedUpdateWithoutOauthclientsInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutOauthclientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutOauthclientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type OauthClientResourceUpsertWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthClientResourceWhereUniqueInput
+    update: XOR<OauthClientResourceUpdateWithoutOauthclientInput, OauthClientResourceUncheckedUpdateWithoutOauthclientInput>
+    create: XOR<OauthClientResourceCreateWithoutOauthclientInput, OauthClientResourceUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthClientResourceUpdateWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthClientResourceWhereUniqueInput
+    data: XOR<OauthClientResourceUpdateWithoutOauthclientInput, OauthClientResourceUncheckedUpdateWithoutOauthclientInput>
+  }
+
+  export type OauthClientResourceUpdateManyWithWhereWithoutOauthclientInput = {
+    where: OauthClientResourceScalarWhereInput
+    data: XOR<OauthClientResourceUpdateManyMutationInput, OauthClientResourceUncheckedUpdateManyWithoutOauthclientInput>
+  }
+
+  export type OauthClientResourceScalarWhereInput = {
+    AND?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+    OR?: OauthClientResourceScalarWhereInput[]
+    NOT?: OauthClientResourceScalarWhereInput | OauthClientResourceScalarWhereInput[]
+    id?: StringFilter<"OauthClientResource"> | string
+    clientId?: StringFilter<"OauthClientResource"> | string
+    resourceId?: StringFilter<"OauthClientResource"> | string
+    metadata?: JsonNullableFilter<"OauthClientResource">
+    createdAt?: DateTimeNullableFilter<"OauthClientResource"> | Date | string | null
+  }
+
+  export type OauthRefreshTokenUpsertWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    update: XOR<OauthRefreshTokenUpdateWithoutOauthclientInput, OauthRefreshTokenUncheckedUpdateWithoutOauthclientInput>
+    create: XOR<OauthRefreshTokenCreateWithoutOauthclientInput, OauthRefreshTokenUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthRefreshTokenUpdateWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    data: XOR<OauthRefreshTokenUpdateWithoutOauthclientInput, OauthRefreshTokenUncheckedUpdateWithoutOauthclientInput>
+  }
+
+  export type OauthRefreshTokenUpdateManyWithWhereWithoutOauthclientInput = {
+    where: OauthRefreshTokenScalarWhereInput
+    data: XOR<OauthRefreshTokenUpdateManyMutationInput, OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientInput>
+  }
+
+  export type OauthAccessTokenUpsertWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    update: XOR<OauthAccessTokenUpdateWithoutOauthclientInput, OauthAccessTokenUncheckedUpdateWithoutOauthclientInput>
+    create: XOR<OauthAccessTokenCreateWithoutOauthclientInput, OauthAccessTokenUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthAccessTokenUpdateWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    data: XOR<OauthAccessTokenUpdateWithoutOauthclientInput, OauthAccessTokenUncheckedUpdateWithoutOauthclientInput>
+  }
+
+  export type OauthAccessTokenUpdateManyWithWhereWithoutOauthclientInput = {
+    where: OauthAccessTokenScalarWhereInput
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyWithoutOauthclientInput>
+  }
+
+  export type OauthConsentUpsertWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthConsentWhereUniqueInput
+    update: XOR<OauthConsentUpdateWithoutOauthclientInput, OauthConsentUncheckedUpdateWithoutOauthclientInput>
+    create: XOR<OauthConsentCreateWithoutOauthclientInput, OauthConsentUncheckedCreateWithoutOauthclientInput>
+  }
+
+  export type OauthConsentUpdateWithWhereUniqueWithoutOauthclientInput = {
+    where: OauthConsentWhereUniqueInput
+    data: XOR<OauthConsentUpdateWithoutOauthclientInput, OauthConsentUncheckedUpdateWithoutOauthclientInput>
+  }
+
+  export type OauthConsentUpdateManyWithWhereWithoutOauthclientInput = {
+    where: OauthConsentScalarWhereInput
+    data: XOR<OauthConsentUpdateManyMutationInput, OauthConsentUncheckedUpdateManyWithoutOauthclientInput>
+  }
+
+  export type OauthClientResourceCreateWithoutOauthresourceInput = {
+    id?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+    oauthclient: OauthClientCreateNestedOneWithoutOauthclientresourcesInput
+  }
+
+  export type OauthClientResourceUncheckedCreateWithoutOauthresourceInput = {
+    id?: string
+    clientId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthClientResourceCreateOrConnectWithoutOauthresourceInput = {
+    where: OauthClientResourceWhereUniqueInput
+    create: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput>
+  }
+
+  export type OauthClientResourceCreateManyOauthresourceInputEnvelope = {
+    data: OauthClientResourceCreateManyOauthresourceInput | OauthClientResourceCreateManyOauthresourceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthClientResourceUpsertWithWhereUniqueWithoutOauthresourceInput = {
+    where: OauthClientResourceWhereUniqueInput
+    update: XOR<OauthClientResourceUpdateWithoutOauthresourceInput, OauthClientResourceUncheckedUpdateWithoutOauthresourceInput>
+    create: XOR<OauthClientResourceCreateWithoutOauthresourceInput, OauthClientResourceUncheckedCreateWithoutOauthresourceInput>
+  }
+
+  export type OauthClientResourceUpdateWithWhereUniqueWithoutOauthresourceInput = {
+    where: OauthClientResourceWhereUniqueInput
+    data: XOR<OauthClientResourceUpdateWithoutOauthresourceInput, OauthClientResourceUncheckedUpdateWithoutOauthresourceInput>
+  }
+
+  export type OauthClientResourceUpdateManyWithWhereWithoutOauthresourceInput = {
+    where: OauthClientResourceScalarWhereInput
+    data: XOR<OauthClientResourceUpdateManyMutationInput, OauthClientResourceUncheckedUpdateManyWithoutOauthresourceInput>
+  }
+
+  export type OauthClientCreateWithoutOauthclientresourcesInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthclientsInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateWithoutOauthclientresourcesInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientCreateOrConnectWithoutOauthclientresourcesInput = {
+    where: OauthClientWhereUniqueInput
+    create: XOR<OauthClientCreateWithoutOauthclientresourcesInput, OauthClientUncheckedCreateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthResourceCreateWithoutOauthclientresourcesInput = {
+    id?: string
+    identifier: string
+    name: string
+    accessTokenTtl?: number | null
+    refreshTokenTtl?: number | null
+    signingAlgorithm?: string | null
+    signingKeyId?: string | null
+    allowedScopes?: OauthResourceCreateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: boolean | null
+    disabled?: boolean | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    policyVersion?: number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceUncheckedCreateWithoutOauthclientresourcesInput = {
+    id?: string
+    identifier: string
+    name: string
+    accessTokenTtl?: number | null
+    refreshTokenTtl?: number | null
+    signingAlgorithm?: string | null
+    signingKeyId?: string | null
+    allowedScopes?: OauthResourceCreateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: boolean | null
+    disabled?: boolean | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    policyVersion?: number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceCreateOrConnectWithoutOauthclientresourcesInput = {
+    where: OauthResourceWhereUniqueInput
+    create: XOR<OauthResourceCreateWithoutOauthclientresourcesInput, OauthResourceUncheckedCreateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthClientUpsertWithoutOauthclientresourcesInput = {
+    update: XOR<OauthClientUpdateWithoutOauthclientresourcesInput, OauthClientUncheckedUpdateWithoutOauthclientresourcesInput>
+    create: XOR<OauthClientCreateWithoutOauthclientresourcesInput, OauthClientUncheckedCreateWithoutOauthclientresourcesInput>
+    where?: OauthClientWhereInput
+  }
+
+  export type OauthClientUpdateToOneWithWhereWithoutOauthclientresourcesInput = {
+    where?: OauthClientWhereInput
+    data: XOR<OauthClientUpdateWithoutOauthclientresourcesInput, OauthClientUncheckedUpdateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthClientUpdateWithoutOauthclientresourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthclientsNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateWithoutOauthclientresourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthResourceUpsertWithoutOauthclientresourcesInput = {
+    update: XOR<OauthResourceUpdateWithoutOauthclientresourcesInput, OauthResourceUncheckedUpdateWithoutOauthclientresourcesInput>
+    create: XOR<OauthResourceCreateWithoutOauthclientresourcesInput, OauthResourceUncheckedCreateWithoutOauthclientresourcesInput>
+    where?: OauthResourceWhereInput
+  }
+
+  export type OauthResourceUpdateToOneWithWhereWithoutOauthclientresourcesInput = {
+    where?: OauthResourceWhereInput
+    data: XOR<OauthResourceUpdateWithoutOauthclientresourcesInput, OauthResourceUncheckedUpdateWithoutOauthclientresourcesInput>
+  }
+
+  export type OauthResourceUpdateWithoutOauthclientresourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthResourceUncheckedUpdateWithoutOauthclientresourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identifier?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accessTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    refreshTokenTtl?: NullableIntFieldUpdateOperationsInput | number | null
+    signingAlgorithm?: NullableStringFieldUpdateOperationsInput | string | null
+    signingKeyId?: NullableStringFieldUpdateOperationsInput | string | null
+    allowedScopes?: OauthResourceUpdateallowedScopesInput | string[]
+    customClaims?: NullableJsonNullValueInput | InputJsonValue
+    dpopBoundAccessTokensRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    policyVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthClientCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthclientsInput
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientCreateOrConnectWithoutOauthrefreshtokensInput = {
+    where: OauthClientWhereUniqueInput
+    create: XOR<OauthClientCreateWithoutOauthrefreshtokensInput, OauthClientUncheckedCreateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthSessionCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthsessionInput
+    user: CloudAuthUserCreateNestedOneWithoutSessionsInput
+  }
+
+  export type CloudAuthSessionUncheckedCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    userId: string
+    token: string
+    expiresAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
+  }
+
+  export type CloudAuthSessionCreateOrConnectWithoutOauthrefreshtokensInput = {
+    where: CloudAuthSessionWhereUniqueInput
+    create: XOR<CloudAuthSessionCreateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedCreateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthUserCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutOauthrefreshtokensInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutOauthrefreshtokensInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedCreateWithoutOauthrefreshtokensInput>
+  }
+
+  export type OauthAccessTokenCreateWithoutOauthrefreshtokenInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthaccesstokensInput
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthaccesstokensInput
+  }
+
+  export type OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateOrConnectWithoutOauthrefreshtokenInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    create: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput>
+  }
+
+  export type OauthAccessTokenCreateManyOauthrefreshtokenInputEnvelope = {
+    data: OauthAccessTokenCreateManyOauthrefreshtokenInput | OauthAccessTokenCreateManyOauthrefreshtokenInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OauthClientUpsertWithoutOauthrefreshtokensInput = {
+    update: XOR<OauthClientUpdateWithoutOauthrefreshtokensInput, OauthClientUncheckedUpdateWithoutOauthrefreshtokensInput>
+    create: XOR<OauthClientCreateWithoutOauthrefreshtokensInput, OauthClientUncheckedCreateWithoutOauthrefreshtokensInput>
+    where?: OauthClientWhereInput
+  }
+
+  export type OauthClientUpdateToOneWithWhereWithoutOauthrefreshtokensInput = {
+    where?: OauthClientWhereInput
+    data: XOR<OauthClientUpdateWithoutOauthrefreshtokensInput, OauthClientUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type OauthClientUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthclientsNestedInput
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type CloudAuthSessionUpsertWithoutOauthrefreshtokensInput = {
+    update: XOR<CloudAuthSessionUpdateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedUpdateWithoutOauthrefreshtokensInput>
+    create: XOR<CloudAuthSessionCreateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedCreateWithoutOauthrefreshtokensInput>
+    where?: CloudAuthSessionWhereInput
+  }
+
+  export type CloudAuthSessionUpdateToOneWithWhereWithoutOauthrefreshtokensInput = {
+    where?: CloudAuthSessionWhereInput
+    data: XOR<CloudAuthSessionUpdateWithoutOauthrefreshtokensInput, CloudAuthSessionUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthSessionUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthsessionNestedInput
+    user?: CloudAuthUserUpdateOneRequiredWithoutSessionsNestedInput
+  }
+
+  export type CloudAuthSessionUncheckedUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
+  }
+
+  export type CloudAuthUserUpsertWithoutOauthrefreshtokensInput = {
+    update: XOR<CloudAuthUserUpdateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedUpdateWithoutOauthrefreshtokensInput>
+    create: XOR<CloudAuthUserCreateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedCreateWithoutOauthrefreshtokensInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutOauthrefreshtokensInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutOauthrefreshtokensInput, CloudAuthUserUncheckedUpdateWithoutOauthrefreshtokensInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutOauthrefreshtokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type OauthAccessTokenUpsertWithWhereUniqueWithoutOauthrefreshtokenInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    update: XOR<OauthAccessTokenUpdateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedUpdateWithoutOauthrefreshtokenInput>
+    create: XOR<OauthAccessTokenCreateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedCreateWithoutOauthrefreshtokenInput>
+  }
+
+  export type OauthAccessTokenUpdateWithWhereUniqueWithoutOauthrefreshtokenInput = {
+    where: OauthAccessTokenWhereUniqueInput
+    data: XOR<OauthAccessTokenUpdateWithoutOauthrefreshtokenInput, OauthAccessTokenUncheckedUpdateWithoutOauthrefreshtokenInput>
+  }
+
+  export type OauthAccessTokenUpdateManyWithWhereWithoutOauthrefreshtokenInput = {
+    where: OauthAccessTokenScalarWhereInput
+    data: XOR<OauthAccessTokenUpdateManyMutationInput, OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenInput>
+  }
+
+  export type OauthClientCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthclientsInput
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientCreateOrConnectWithoutOauthaccesstokensInput = {
+    where: OauthClientWhereUniqueInput
+    create: XOR<OauthClientCreateWithoutOauthaccesstokensInput, OauthClientUncheckedCreateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthSessionCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    token: string
+    expiresAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthsessionInput
+    user: CloudAuthUserCreateNestedOneWithoutSessionsInput
+  }
+
+  export type CloudAuthSessionUncheckedCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    userId: string
+    token: string
+    expiresAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthsessionInput
+  }
+
+  export type CloudAuthSessionCreateOrConnectWithoutOauthaccesstokensInput = {
+    where: CloudAuthSessionWhereUniqueInput
+    create: XOR<CloudAuthSessionCreateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedCreateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthUserCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthconsents?: OauthConsentUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutOauthaccesstokensInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedCreateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthRefreshTokenCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    token: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+    oauthclient: OauthClientCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthsession?: CloudAuthSessionCreateNestedOneWithoutOauthrefreshtokensInput
+    cloudauthuser: CloudAuthUserCreateNestedOneWithoutOauthrefreshtokensInput
+  }
+
+  export type OauthRefreshTokenUncheckedCreateWithoutOauthaccesstokensInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+  }
+
+  export type OauthRefreshTokenCreateOrConnectWithoutOauthaccesstokensInput = {
+    where: OauthRefreshTokenWhereUniqueInput
+    create: XOR<OauthRefreshTokenCreateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedCreateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthClientUpsertWithoutOauthaccesstokensInput = {
+    update: XOR<OauthClientUpdateWithoutOauthaccesstokensInput, OauthClientUncheckedUpdateWithoutOauthaccesstokensInput>
+    create: XOR<OauthClientCreateWithoutOauthaccesstokensInput, OauthClientUncheckedCreateWithoutOauthaccesstokensInput>
+    where?: OauthClientWhereInput
+  }
+
+  export type OauthClientUpdateToOneWithWhereWithoutOauthaccesstokensInput = {
+    where?: OauthClientWhereInput
+    data: XOR<OauthClientUpdateWithoutOauthaccesstokensInput, OauthClientUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthClientUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthclientsNestedInput
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type CloudAuthSessionUpsertWithoutOauthaccesstokensInput = {
+    update: XOR<CloudAuthSessionUpdateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedUpdateWithoutOauthaccesstokensInput>
+    create: XOR<CloudAuthSessionCreateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedCreateWithoutOauthaccesstokensInput>
+    where?: CloudAuthSessionWhereInput
+  }
+
+  export type CloudAuthSessionUpdateToOneWithWhereWithoutOauthaccesstokensInput = {
+    where?: CloudAuthSessionWhereInput
+    data: XOR<CloudAuthSessionUpdateWithoutOauthaccesstokensInput, CloudAuthSessionUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthSessionUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthsessionNestedInput
+    user?: CloudAuthUserUpdateOneRequiredWithoutSessionsNestedInput
+  }
+
+  export type CloudAuthSessionUncheckedUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
+  }
+
+  export type CloudAuthUserUpsertWithoutOauthaccesstokensInput = {
+    update: XOR<CloudAuthUserUpdateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedUpdateWithoutOauthaccesstokensInput>
+    create: XOR<CloudAuthUserCreateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedCreateWithoutOauthaccesstokensInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutOauthaccesstokensInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutOauthaccesstokensInput, CloudAuthUserUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type OauthRefreshTokenUpsertWithoutOauthaccesstokensInput = {
+    update: XOR<OauthRefreshTokenUpdateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedUpdateWithoutOauthaccesstokensInput>
+    create: XOR<OauthRefreshTokenCreateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedCreateWithoutOauthaccesstokensInput>
+    where?: OauthRefreshTokenWhereInput
+  }
+
+  export type OauthRefreshTokenUpdateToOneWithWhereWithoutOauthaccesstokensInput = {
+    where?: OauthRefreshTokenWhereInput
+    data: XOR<OauthRefreshTokenUpdateWithoutOauthaccesstokensInput, OauthRefreshTokenUncheckedUpdateWithoutOauthaccesstokensInput>
+  }
+
+  export type OauthRefreshTokenUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthrefreshtokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateWithoutOauthaccesstokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthClientCreateWithoutOauthconsentsInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserCreateNestedOneWithoutOauthclientsInput
+    oauthclientresources?: OauthClientResourceCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientUncheckedCreateWithoutOauthconsentsInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    userId?: string | null
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutOauthclientInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutOauthclientInput
+  }
+
+  export type OauthClientCreateOrConnectWithoutOauthconsentsInput = {
+    where: OauthClientWhereUniqueInput
+    create: XOR<OauthClientCreateWithoutOauthconsentsInput, OauthClientUncheckedCreateWithoutOauthconsentsInput>
+  }
+
+  export type CloudAuthUserCreateWithoutOauthconsentsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserUncheckedCreateWithoutOauthconsentsInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    disabledAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sessions?: CloudAuthSessionUncheckedCreateNestedManyWithoutUserInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedCreateNestedManyWithoutUserInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedCreateNestedManyWithoutUserInput
+    externalAgentPats?: ExternalAgentPatUncheckedCreateNestedManyWithoutUserInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedCreateNestedManyWithoutUserInput
+    oauthclients?: OauthClientUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedCreateNestedManyWithoutCloudauthuserInput
+    account?: AccountUncheckedCreateNestedOneWithoutCloudUserInput
+  }
+
+  export type CloudAuthUserCreateOrConnectWithoutOauthconsentsInput = {
+    where: CloudAuthUserWhereUniqueInput
+    create: XOR<CloudAuthUserCreateWithoutOauthconsentsInput, CloudAuthUserUncheckedCreateWithoutOauthconsentsInput>
+  }
+
+  export type OauthClientUpsertWithoutOauthconsentsInput = {
+    update: XOR<OauthClientUpdateWithoutOauthconsentsInput, OauthClientUncheckedUpdateWithoutOauthconsentsInput>
+    create: XOR<OauthClientCreateWithoutOauthconsentsInput, OauthClientUncheckedCreateWithoutOauthconsentsInput>
+    where?: OauthClientWhereInput
+  }
+
+  export type OauthClientUpdateToOneWithWhereWithoutOauthconsentsInput = {
+    where?: OauthClientWhereInput
+    data: XOR<OauthClientUpdateWithoutOauthconsentsInput, OauthClientUncheckedUpdateWithoutOauthconsentsInput>
+  }
+
+  export type OauthClientUpdateWithoutOauthconsentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthclientsNestedInput
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateWithoutOauthconsentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type CloudAuthUserUpsertWithoutOauthconsentsInput = {
+    update: XOR<CloudAuthUserUpdateWithoutOauthconsentsInput, CloudAuthUserUncheckedUpdateWithoutOauthconsentsInput>
+    create: XOR<CloudAuthUserCreateWithoutOauthconsentsInput, CloudAuthUserUncheckedCreateWithoutOauthconsentsInput>
+    where?: CloudAuthUserWhereInput
+  }
+
+  export type CloudAuthUserUpdateToOneWithWhereWithoutOauthconsentsInput = {
+    where?: CloudAuthUserWhereInput
+    data: XOR<CloudAuthUserUpdateWithoutOauthconsentsInput, CloudAuthUserUncheckedUpdateWithoutOauthconsentsInput>
+  }
+
+  export type CloudAuthUserUpdateWithoutOauthconsentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUpdateOneWithoutCloudUserNestedInput
+  }
+
+  export type CloudAuthUserUncheckedUpdateWithoutOauthconsentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessions?: CloudAuthSessionUncheckedUpdateManyWithoutUserNestedInput
+    providerAccounts?: CloudAuthProviderAccountUncheckedUpdateManyWithoutUserNestedInput
+    deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentPats?: ExternalAgentPatUncheckedUpdateManyWithoutUserNestedInput
+    externalAgentConnections?: ExternalAgentConnectionUncheckedUpdateManyWithoutUserNestedInput
+    oauthclients?: OauthClientUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserNestedInput
+    account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
   export type AccountCreateWithoutRelationsInput = {
@@ -138618,6 +158423,118 @@ export namespace Prisma {
     scope?: string | null
   }
 
+  export type ExternalAgentPatCreateManyUserInput = {
+    id?: string
+    name: string
+    prefix: string
+    tokenDigest: string
+    audience: string
+    scopes?: ExternalAgentPatCreatescopesInput | string[]
+    expiresAt: Date | string
+    revokedAt?: Date | string | null
+    createdAt?: Date | string
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type ExternalAgentConnectionCreateManyUserInput = {
+    id?: string
+    clientId: string
+    resource: string
+    createdAt?: Date | string
+    expiresAt: Date | string
+    lastUsedAt?: Date | string | null
+    revokedAt?: Date | string | null
+    rateWindow?: Date | string
+    rateCount?: number
+  }
+
+  export type OauthClientCreateManyCloudauthuserInput = {
+    id?: string
+    clientId: string
+    clientSecret?: string | null
+    clientDiscoveryId?: string | null
+    disabled?: boolean | null
+    skipConsent?: boolean | null
+    enableEndSession?: boolean | null
+    subjectType?: string | null
+    scopes?: OauthClientCreatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientCreateclientCredentialsScopesInput | string[]
+    createdAt?: Date | string | null
+    updatedAt?: Date | string | null
+    name?: string | null
+    uri?: string | null
+    icon?: string | null
+    contacts?: OauthClientCreatecontactsInput | string[]
+    tos?: string | null
+    policy?: string | null
+    softwareId?: string | null
+    softwareVersion?: string | null
+    softwareStatement?: string | null
+    redirectUris?: OauthClientCreateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientCreatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: string | null
+    backchannelLogoutSessionRequired?: boolean | null
+    tokenEndpointAuthMethod?: string | null
+    applicationType?: string | null
+    jwks?: string | null
+    jwksUri?: string | null
+    grantTypes?: OauthClientCreategrantTypesInput | string[]
+    responseTypes?: OauthClientCreateresponseTypesInput | string[]
+    requirePKCE?: boolean | null
+    dpopBoundAccessTokens?: boolean | null
+    referenceId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthRefreshTokenCreateManyCloudauthuserInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateManyCloudauthuserInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthConsentCreateManyCloudauthuserInput = {
+    id?: string
+    clientId: string
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
   export type CloudAuthSessionUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
@@ -138626,6 +158543,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutCloudauthsessionNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutCloudauthsessionNestedInput
   }
 
   export type CloudAuthSessionUncheckedUpdateWithoutUserInput = {
@@ -138636,6 +158555,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionNestedInput
   }
 
   export type CloudAuthSessionUncheckedUpdateManyWithoutUserInput = {
@@ -138727,6 +158648,502 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExternalAgentPatUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentPatUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    prefix?: StringFieldUpdateOperationsInput | string
+    tokenDigest?: StringFieldUpdateOperationsInput | string
+    audience?: StringFieldUpdateOperationsInput | string
+    scopes?: ExternalAgentPatUpdatescopesInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ExternalAgentConnectionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    resource?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rateWindow?: DateTimeFieldUpdateOperationsInput | Date | string
+    rateCount?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type OauthClientUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    oauthclientresources?: OauthClientResourceUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthrefreshtokens?: OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthclientNestedInput
+    oauthconsents?: OauthConsentUncheckedUpdateManyWithoutOauthclientNestedInput
+  }
+
+  export type OauthClientUncheckedUpdateManyWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    clientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    clientDiscoveryId?: NullableStringFieldUpdateOperationsInput | string | null
+    disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    skipConsent?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    enableEndSession?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    subjectType?: NullableStringFieldUpdateOperationsInput | string | null
+    scopes?: OauthClientUpdatescopesInput | string[]
+    clientCredentialsScopes?: OauthClientUpdateclientCredentialsScopesInput | string[]
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    uri?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    contacts?: OauthClientUpdatecontactsInput | string[]
+    tos?: NullableStringFieldUpdateOperationsInput | string | null
+    policy?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareId?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    softwareStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    redirectUris?: OauthClientUpdateredirectUrisInput | string[]
+    postLogoutRedirectUris?: OauthClientUpdatepostLogoutRedirectUrisInput | string[]
+    backchannelLogoutUri?: NullableStringFieldUpdateOperationsInput | string | null
+    backchannelLogoutSessionRequired?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tokenEndpointAuthMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    applicationType?: NullableStringFieldUpdateOperationsInput | string | null
+    jwks?: NullableStringFieldUpdateOperationsInput | string | null
+    jwksUri?: NullableStringFieldUpdateOperationsInput | string | null
+    grantTypes?: OauthClientUpdategrantTypesInput | string[]
+    responseTypes?: OauthClientUpdateresponseTypesInput | string[]
+    requirePKCE?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    dpopBoundAccessTokens?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type OauthRefreshTokenUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthrefreshtokensNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthaccesstokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthaccesstokensNestedInput
+    oauthrefreshtoken?: OauthRefreshTokenUpdateOneWithoutOauthaccesstokensNestedInput
+  }
+
+  export type OauthAccessTokenUncheckedUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthConsentUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthconsentsNestedInput
+  }
+
+  export type OauthConsentUncheckedUpdateWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthConsentUncheckedUpdateManyWithoutCloudauthuserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthRefreshTokenCreateManyCloudauthsessionInput = {
+    id?: string
+    token: string
+    clientId: string
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateManyCloudauthsessionInput = {
+    id?: string
+    token: string
+    clientId: string
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthRefreshTokenUpdateWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthaccesstokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthaccesstokensNestedInput
+    oauthrefreshtoken?: OauthRefreshTokenUpdateOneWithoutOauthaccesstokensNestedInput
+  }
+
+  export type OauthAccessTokenUncheckedUpdateWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutCloudauthsessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
   }
 
   export type KeyResultCreateManyGoalInput = {
@@ -139422,6 +159839,324 @@ export namespace Prisma {
     retryAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientResourceCreateManyOauthclientInput = {
+    id?: string
+    resourceId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthRefreshTokenCreateManyOauthclientInput = {
+    id?: string
+    token: string
+    sessionId?: string | null
+    userId: string
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthRefreshTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    rotatedAt?: Date | string | null
+    rotationReplayResponse?: string | null
+    rotationReplayExpiresAt?: Date | string | null
+    authTime?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenCreateManyOauthclientInput = {
+    id?: string
+    token: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    refreshId?: string | null
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthConsentCreateManyOauthclientInput = {
+    id?: string
+    userId?: string | null
+    referenceId?: string | null
+    resources?: OauthConsentCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentCreaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentCreatescopesInput | string[]
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type OauthClientResourceUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    oauthresource?: OauthResourceUpdateOneRequiredWithoutOauthclientresourcesNestedInput
+  }
+
+  export type OauthClientResourceUncheckedUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    resourceId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthClientResourceUncheckedUpdateManyWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    resourceId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthRefreshTokenUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthrefreshtokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneRequiredWithoutOauthrefreshtokensNestedInput
+    oauthaccesstokens?: OauthAccessTokenUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+    oauthaccesstokens?: OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenNestedInput
+  }
+
+  export type OauthRefreshTokenUncheckedUpdateManyWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthRefreshTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthRefreshTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rotationReplayResponse?: NullableStringFieldUpdateOperationsInput | string | null
+    rotationReplayExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    authTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthRefreshTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthaccesstokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthaccesstokensNestedInput
+    oauthrefreshtoken?: OauthRefreshTokenUpdateOneWithoutOauthaccesstokensNestedInput
+  }
+
+  export type OauthAccessTokenUncheckedUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    refreshId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthConsentUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthconsentsNestedInput
+  }
+
+  export type OauthConsentUncheckedUpdateWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthConsentUncheckedUpdateManyWithoutOauthclientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthConsentUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthConsentUpdaterequestedUserInfoClaimsInput | string[]
+    scopes?: OauthConsentUpdatescopesInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OauthClientResourceCreateManyOauthresourceInput = {
+    id?: string
+    clientId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string | null
+  }
+
+  export type OauthClientResourceUpdateWithoutOauthresourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthclientresourcesNestedInput
+  }
+
+  export type OauthClientResourceUncheckedUpdateWithoutOauthresourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthClientResourceUncheckedUpdateManyWithoutOauthresourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type OauthAccessTokenCreateManyOauthrefreshtokenInput = {
+    id?: string
+    token: string
+    clientId: string
+    sessionId?: string | null
+    userId?: string | null
+    referenceId?: string | null
+    authorizationCodeId?: string | null
+    resources?: OauthAccessTokenCreateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenCreaterequestedUserInfoClaimsInput | string[]
+    expiresAt: Date | string
+    createdAt: Date | string
+    revoked?: Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenCreatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUpdateWithoutOauthrefreshtokenInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+    oauthclient?: OauthClientUpdateOneRequiredWithoutOauthaccesstokensNestedInput
+    cloudauthsession?: CloudAuthSessionUpdateOneWithoutOauthaccesstokensNestedInput
+    cloudauthuser?: CloudAuthUserUpdateOneWithoutOauthaccesstokensNestedInput
+  }
+
+  export type OauthAccessTokenUncheckedUpdateWithoutOauthrefreshtokenInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
+  }
+
+  export type OauthAccessTokenUncheckedUpdateManyWithoutOauthrefreshtokenInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    sessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    referenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorizationCodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    resources?: OauthAccessTokenUpdateresourcesInput | string[]
+    requestedUserInfoClaims?: OauthAccessTokenUpdaterequestedUserInfoClaimsInput | string[]
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    revoked?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    confirmation?: NullableJsonNullValueInput | InputJsonValue
+    scopes?: OauthAccessTokenUpdatescopesInput | string[]
   }
 
   export type RoutineProfileMembershipCreateManyRoutineInput = {

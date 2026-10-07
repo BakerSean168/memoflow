@@ -6,5 +6,16 @@ export default defineConfig({
   dts: false,
   clean: true,
   sourcemap: true,
-  external: ['@memoflow/database', '@memoflow/contracts', '@memoflow/http-client', '@memoflow/ipc-client', 'better-auth', '@better-auth/prisma-adapter', 'express'],
+  external: [
+    '@memoflow/database',
+    '@memoflow/contracts',
+    '@memoflow/http-client',
+    '@memoflow/ipc-client',
+    'better-auth',
+    '@better-auth/prisma-adapter',
+    '@better-auth/mcp',
+    '@better-auth/cimd',
+    '@better-auth/oauth-provider',
+    'express',
+  ],
 });

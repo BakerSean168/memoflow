@@ -21,6 +21,7 @@ updated: 2026-07-29T00:00:00
 | [coding-standards.md](./coding-standards.md)                                                 | 代码风格、分层和通用实现约束                                                 |
 | [git-workflow.md](./git-workflow.md)                                                         | 分支、提交和协作流程                                                         |
 | [local-development.md](./local-development.md)                                               | 本机开发模式、Docker/宿主服务替换、Desktop 启动与统一 Nx 命令心智            |
+| [external-agent-pat.md](./external-agent-pat.md) | PAT 六个只读 MCP 工具的受控连接、scope 与客户端配置 |
 | [local.docker.md](./local.docker.md)                                                         | 使用 `docker-compose.local.yml` 做 prod-like 本地容器验证的入口              |
 | [transactional-email-smtp.md](./transactional-email-smtp.md)                                 | 事务邮件 console / SMTP / Resend、域名 DNS、Redis challenge                  |
 | [runtime-lanes.md](./runtime-lanes.md)                                                       | host-dev / prod-like / staging / prod 四环境与辅助测试 lane 的端口契约       |

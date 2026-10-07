@@ -13,3 +13,4 @@ export * from './goal-review.dto';
 export * from './goal-invocation.schemas';
 export * from './response-schemas';
 export * from './goal-workspace.dto';
+export * from './goal-page.dto';

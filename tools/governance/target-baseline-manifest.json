@@ -7,36 +7,19 @@
   "projectCategories": {
     "app": {
       "description": "Deployable applications",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "runtime-lib": {
       "description": "Libraries with runtime code consumed by apps or other business libraries",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "ui-lib": {
       "description": "UI component and presentation libraries",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "tooling-lib": {
       "description": "Tooling, scaffolding, test helpers, config projects",
-      "requiredTargets": [
-        "build"
-      ]
+      "requiredTargets": ["build"]
     },
     "meta-project": {
       "description": "Root/workspace-level governance project",
@@ -84,7 +67,8 @@
     "test-system-v2": "tooling-lib",
     "ci-cd-platform": "tooling-lib",
     "governance-tools": "tooling-lib",
-    "time": "runtime-lib"
+    "time": "runtime-lib",
+    "agent-gateway": "runtime-lib"
   },
   "exemptions": [
     {

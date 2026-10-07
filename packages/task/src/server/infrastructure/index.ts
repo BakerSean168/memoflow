@@ -76,3 +76,5 @@ export {
   type CreateTaskReminderScheduledHandlerRegistrationDeps,
   type TaskReminderSkipReason,
 } from './task-reminder-fire.handler';
+
+export { createTaskPrismaReadQueries } from './adapters/prisma/task-page-reader';

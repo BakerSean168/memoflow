@@ -25,17 +25,25 @@
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "1.7.6",
-    "@memoflow/database": "workspace:*",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "argon2": "0.45.1",
     "better-auth": "1.7.6",
     "express": "^5.2.1",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.10",
+    "@better-auth/cimd": "1.7.6",
+    "@better-auth/mcp": "1.7.6",
+    "@better-auth/oauth-provider": "1.7.6",
+    "zod": "4.6.5"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/express": "2.0.2",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
     "@types/express": "^5.0.0",
     "@types/nodemailer": "^8.0.2"
   }

@@ -11,6 +11,10 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./environment": {
+      "types": "./dist/load-workspace-env.d.ts",
+      "import": "./dist/load-workspace-env.js"
+    },
     "./prisma": {
       "types": "./dist/generated/prisma/client.d.ts",
       "import": "./dist/generated/prisma/client.js",

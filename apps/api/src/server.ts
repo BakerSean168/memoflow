@@ -24,14 +24,26 @@
 // 环境配置必须最先加载（包含 dotenv 加载逻辑）
 import {
   env,
+  getCorsOrigins,
   getJwtConfig,
   getGithubOAuthConfig,
   getGithubAppConfig,
 } from './shared/infrastructure/config/env.js';
+import { createScopedPatService } from '@memoflow/cloud-auth/server';
+import { createGoalPrismaPageQuery } from '@memoflow/goal';
+import { composeAgentGatewayModule } from './modules/agent-gateway/module';
+import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
+import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';
+import { createSettingPrismaTimeQuery } from '@memoflow/setting';
+import { createTaskPrismaReadQueries } from '@memoflow/task';
+import { bindTaskReadPort } from './modules/agent-gateway/task-read.port';
+import { bindGoalReadPort } from './modules/agent-gateway/goal-read.port';
 import { getTrustedWebOrigins } from './shared/infrastructure/config/web-origin.js';
 import { prisma, connectDatabase, disconnectDatabase } from '@memoflow/database';
 import { getStartupInfo } from './shared/infrastructure/config/logger.config';
 import { createLogger } from '@memoflow/utils/logger';
+import { createAccountPrismaActiveQuery } from '@memoflow/account';
+import { createGatewayAudit, createGatewayDiagnostics } from './modules/agent-gateway/audit';
 import { createRuntimeOwnership } from '@memoflow/contracts/primitives';
 import { ApiBootstrapper } from './bootstrap';
 import type { TraceRuntime } from './shared/infrastructure/observability/trace-runtime';
@@ -150,6 +162,14 @@ async function bootstrap(): Promise<void> {
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
   const cloudAuth = createCloudAuth({
+    externalAgents: env.EAG_OAUTH_ENABLED
+      ? {
+          resource: env.EAG_AUDIENCE!,
+          webOrigin: env.MEMOFLOW_WEB_URL!,
+          allowedClientIds: env.EAG_OAUTH_CLIENT_IDS,
+          accountIsActive: createAccountPrismaActiveQuery(prisma),
+        }
+      : undefined,
     database: prisma,
     secret: jwtConfig.secret,
     baseUrl:
@@ -182,9 +202,16 @@ async function bootstrap(): Promise<void> {
   });
 
   // 2. 白名单注册 & 启动
-  bootstrapper = new ApiBootstrapper(prisma, cloudAuth, testEmailLinks, traceRuntime?.trace, {
-    github: Boolean(githubOAuthConfig),
-  });
+  bootstrapper = new ApiBootstrapper(
+    prisma,
+    cloudAuth,
+    testEmailLinks,
+    traceRuntime?.trace,
+    {
+      github: Boolean(githubOAuthConfig),
+    },
+    env.API_TRUST_PROXY_HOPS,
+  );
 
   // Step C：宿主 runtime 负责 feature 装配。所有 remaining 模块（account /
   // notification / reminder / repository / schedule / setting / data-portability）
@@ -272,7 +299,11 @@ async function bootstrap(): Promise<void> {
     userTimeContextPort: settingApiModule.userTimeContextPort,
     goalReadPort: {
       getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
-        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+        goalComposed.applicationPort.getKeyResultMeasurementContext(
+          goalId,
+          keyResultId,
+          identityId,
+        ),
     },
   });
   const taskDashboardUseCase = new GetTaskDashboardUseCase(
@@ -371,8 +402,29 @@ async function bootstrap(): Promise<void> {
     knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
+  const goalPageQuery = createGoalPrismaPageQuery(prisma);
+  const agentGatewayModule = composeAgentGatewayModule({
+    admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
+    enabled: env.EAG_READ_PILOT_ENABLED,
+    audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
+    cursorSecret: env.EAG_CURSOR_SECRET ?? '',
+    oauth: cloudAuth.externalAgents,
+    trustedOrigins: getTrustedWebOrigins(getCorsOrigins(), env.MEMOFLOW_WEB_URL),
+    pats: createScopedPatService({
+      database: prisma,
+      audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
+      accountIsActive: createAccountPrismaActiveQuery(prisma),
+    }),
+    goals: bindGoalReadPort(goalPageQuery),
+    tasks: env.EAG_TASK_READ_ENABLED
+      ? bindTaskReadPort(createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma)))
+      : undefined,
+    audit: createGatewayAudit(createLogger('ExternalAgentAudit')),
+    diagnose: createGatewayDiagnostics(createLogger('ExternalAgentDiagnostics')),
+  });
   const app = await bootstrapper
     // === 核心：白名单注册 ===
+    .register(agentGatewayModule)
     .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(routineApiModule) // ✅ Routine vNext configuration transport

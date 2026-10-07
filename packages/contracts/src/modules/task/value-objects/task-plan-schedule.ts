@@ -1,20 +1,15 @@
 import { z } from 'zod';
-import type { Hm, Ymd } from '../../../primitives';
+import { YmdSchema, type Hm } from '../../../primitives';
 import { DayOfWeek } from './day-of-week';
 import { RecurrenceFrequency } from './recurrence-frequency';
 
 const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
 const HM_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-export const TaskYmdSchema = z.custom<Ymd>(
-  (value) => typeof value === 'string' && YMD_RE.test(value),
-  'Expected calendar date in YYYY-MM-DD form',
-);
-
-export const TaskHmSchema = z.custom<Hm>(
-  (value) => typeof value === 'string' && HM_RE.test(value),
-  'Expected local clock time in HH:mm form',
-);
+export const TaskYmdSchema = YmdSchema.and(z.string().regex(YMD_RE));
+export const TaskHmSchema = z
+  .string()
+  .regex(HM_RE, 'Expected local clock time in HH:mm form') as unknown as z.ZodType<Hm>;
 
 export const TaskTimingKind = {
   AllDay: 'AllDay',

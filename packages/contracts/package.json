@@ -92,6 +92,10 @@
     "./relation": {
       "types": "./dist/modules/relation/index.d.ts",
       "import": "./dist/modules/relation/index.js"
+    },
+    "./agent-gateway": {
+      "types": "./dist/modules/agent-gateway/index.d.ts",
+      "import": "./dist/modules/agent-gateway/index.js"
     }
   },
   "dependencies": {

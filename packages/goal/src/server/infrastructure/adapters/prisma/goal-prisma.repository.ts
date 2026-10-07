@@ -11,14 +11,19 @@
  * - GoalReview V2 persists reflection + immutable systemContext directly
  */
 
-import type { PrismaClient, Prisma } from '@memoflow/database';
+import { Prisma, type PrismaClient } from '@memoflow/database';
 import {
   GoalLabelOwnershipError,
   GoalVersionConflictError,
   type IGoalRepository,
 } from '../../../domain';
 import { Goal } from '../../../domain';
-import type { GoalSystemView, KeyResultServerDTO } from '@memoflow/contracts/goal';
+import type {
+  GoalSystemView,
+  KeyResultServerDTO,
+  GoalPageQuery,
+  GoalClientDTO,
+} from '@memoflow/contracts/goal';
 import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
 import {
   AggregateRepositoryBase,
@@ -215,6 +220,127 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       const goal = Goal.load(rawDataToGoalState(PrismaGoalMapper.toDomainDTO(row)));
       goal.hydrateLabels(labelMap.get(row.id) ?? []);
       return goal;
+    });
+  }
+
+  /** Bounded hosted query; does not read unrelated Task/Knowledge or review bodies. */
+  async readPage(identityId: string, input: GoalPageQuery): Promise<GoalClientDTO[]> {
+    const query = input.query.replace(/[\\%_]/g, (character) => `\\${character}`);
+    const where: Prisma.GoalWhereInput = {
+      identityId,
+      deletedAt: null,
+      archivedAt: null,
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { summary: { contains: query, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+      ...(input.after
+        ? {
+            AND: [
+              {
+                OR: [
+                  { createdAt: { lt: new Date(input.after.createdAt) } },
+                  { createdAt: new Date(input.after.createdAt), id: { lt: input.after.id } },
+                ],
+              },
+            ],
+          }
+        : {}),
+    };
+    return this.readBounded(where, input.limit);
+  }
+
+  /** Hosted single-Goal read uses exactly the same owner budgets as pages. */
+  async readBoundedById(identityId: string, id: string): Promise<GoalClientDTO | null> {
+    const rows = await this.readBounded({ identityId, id, deletedAt: null }, 1);
+    return rows[0] ?? null;
+  }
+
+  private async readBounded(where: Prisma.GoalWhereInput, take: number): Promise<GoalClientDTO[]> {
+    const metadata = await this.prisma.goal.findMany({
+      where,
+      take,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { id: true, _count: { select: { keyResults: true } } },
+    });
+    if (!metadata.length) return [];
+    if (metadata.some((row) => row._count.keyResults > 100)) throw new GoalReadLimitError();
+    const ids = metadata.map((row) => row.id);
+    // Check byte lengths in PostgreSQL before returning any potentially large text.
+    const [budget] = await this.prisma.$queryRaw<{ oversized: boolean }[]>(Prisma.sql`
+      SELECT EXISTS (
+        SELECT 1 FROM goals WHERE id IN (${Prisma.join(ids)})
+          AND (octet_length(name) > 4096 OR octet_length(summary) > 16384)
+        UNION ALL
+        SELECT 1 FROM key_results WHERE goal_id IN (${Prisma.join(ids)})
+          AND (octet_length(title) > 4096 OR octet_length(unit) > 1024)
+      ) AS oversized
+    `);
+    if (budget?.oversized) throw new GoalReadLimitError();
+    const rows = await this.prisma.goal.findMany({
+      where: { ...where, id: { in: ids } },
+      take,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: {
+        id: true,
+        identityId: true,
+        name: true,
+        summary: true,
+        status: true,
+        startKind: true,
+        startDate: true,
+        targetKind: true,
+        targetEndDate: true,
+        completedAt: true,
+        archivedAt: true,
+        sortOrder: true,
+        version: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+        keyResults: {
+          take: 101,
+          orderBy: [{ order: 'asc' }, { id: 'asc' }],
+          select: {
+            id: true,
+            identityId: true,
+            goalId: true,
+            title: true,
+            aggregationMethod: true,
+            initialValue: true,
+            trackingBaseValue: true,
+            targetValue: true,
+            currentValue: true,
+            targetKind: true,
+            targetEndDate: true,
+            unit: true,
+            weight: true,
+            order: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+    return rows.map((row) => {
+      if (row.keyResults.length > 100) throw new GoalReadLimitError();
+      const goal = Goal.load(
+        rawDataToGoalState(
+          PrismaGoalMapper.toDomainDTO({
+            ...row,
+            description: null,
+            reminderConfig: null,
+            reviews: [],
+            keyResultWeightSnapshots: [],
+            keyResults: row.keyResults.map((kr) => ({ ...kr, description: null })),
+          }),
+        ),
+      );
+      return goal.toClientDTO(true);
     });
   }
 
@@ -496,5 +622,12 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       where: { id: { in: ids }, identityId },
       data: { status, updatedAt: new Date() },
     });
+  }
+}
+
+/** Owner query budget failure; no partial aggregate progress is presented. */
+export class GoalReadLimitError extends Error {
+  constructor() {
+    super('Goal read exceeds bounded projection');
   }
 }

@@ -18,6 +18,7 @@ export function createApiRedisClient(options?: {
   /** Force a new client instead of the process singleton. */
   fresh?: boolean;
   lazyConnect?: boolean;
+  commandTimeout?: number;
 }): Redis {
   if (!options?.fresh && sharedClient) {
     return sharedClient;
@@ -28,6 +29,7 @@ export function createApiRedisClient(options?: {
     'url' in cfg && cfg.url
       ? new Redis(cfg.url, {
           maxRetriesPerRequest: 3,
+          commandTimeout: options?.commandTimeout,
           lazyConnect: options?.lazyConnect ?? true,
           enableOfflineQueue: false,
         })
@@ -37,6 +39,7 @@ export function createApiRedisClient(options?: {
           password: cfg.password || undefined,
           db: cfg.db,
           maxRetriesPerRequest: 3,
+          commandTimeout: options?.commandTimeout,
           lazyConnect: options?.lazyConnect ?? true,
           enableOfflineQueue: false,
         });

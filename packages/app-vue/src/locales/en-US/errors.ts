@@ -1,4 +1,15 @@
 export default {
+  EAG_SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Please try again later.',
+  EAG_RATE_LIMITED: 'Too many requests. Please try again later.',
+  EAG_VALIDATION_ERROR: 'Some submitted data is invalid. Please review and try again.',
+  EAG_FORBIDDEN: 'You do not have permission to perform this action.',
+  EAG_UNAUTHORIZED: 'Your session is no longer valid. Please sign in again.',
+  EAG_CONSENT_INVALID: 'This authorization request is invalid or expired. Reconnect from your client.',
+  EAG_SERVICE_DISABLED: 'External connections are not enabled.',
+  EAG_INVALID_RESPONSE: 'The connection service returned an invalid response. Please retry.',
+  EAG_NETWORK_ERROR: 'Unable to connect. Check your network and retry.',
+  SIGN_IN_FAILED: 'Sign-in did not complete. Please retry.',
+
   AI_WORKFLOW_STATUS_UNSUPPORTED:
     'This workflow state is no longer supported. Start a new workflow.',
   BAD_REQUEST: 'The request is invalid. Please review and try again.',

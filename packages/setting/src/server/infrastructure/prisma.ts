@@ -6,7 +6,7 @@ import {
   type SettingModuleRuntimeContribution,
 } from './index';
 import { UserPreferencePrismaRepository } from './adapters/prisma/user-preference-prisma.repository';
-import type { IUserPreferenceRepository } from '../preferences';
+import { createUserPreferenceService, PreferenceUserTimeContextAdapter, type IUserPreferenceRepository } from '../preferences';
 
 export interface CreateSettingPrismaModuleOptions {
   readonly runtimeContributions?:
@@ -30,4 +30,26 @@ export function createSettingPrismaModule(
     userPreferenceRepository: repositories.userPreferenceRepository,
     runtimeContributions: options.runtimeContributions,
   });
+}
+
+/**
+ * Setting-owned bounded Product Time query for external application reads.
+ * @param db - Host-owned PostgreSQL client.
+ * @returns Identity-scoped time queries honoring the caller's deadline.
+ */
+export function createSettingPrismaTimeQuery(db: PrismaClient): import('@memoflow/time').UserTimeContextPort {
+  return {
+    async getUserTimeContext(identityId, budget) {
+      const deadlineAt = budget?.deadlineAt ?? Date.now() + 30000;
+      if (budget?.signal.aborted || Date.now() >= deadlineAt) throw new Error('Time read deadline exceeded');
+      const remaining = Math.max(1, Math.min(30000, deadlineAt - Date.now()));
+      return db.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT set_config('statement_timeout', ${String(Math.max(1, Math.min(remaining, deadlineAt - Date.now())))}, true)`;
+        const preferences = createUserPreferenceService(new UserPreferencePrismaRepository(tx));
+        const result = await new PreferenceUserTimeContextAdapter(preferences).getUserTimeContext(identityId);
+        if (budget?.signal.aborted || Date.now() >= deadlineAt) throw new Error('Time read deadline exceeded');
+        return result;
+      }, { timeout: remaining, maxWait: Math.min(remaining, 2000), isolationLevel: 'RepeatableRead' });
+    },
+  };
 }

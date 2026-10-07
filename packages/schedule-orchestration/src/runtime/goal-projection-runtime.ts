@@ -32,6 +32,7 @@ export function createGoalProjectionRuntime(
 
       deps.goalEvents.on('goal:created', handlers['goal:created']);
       deps.goalEvents.on('goal:updated', handlers['goal:updated']);
+      deps.goalEvents.on('goal:status-changed', handlers['goal:status-changed']);
       deps.goalEvents.on('goal:schedule-time-changed', handlers['goal:schedule-time-changed']);
       deps.goalEvents.on('goal:reminder-config-changed', handlers['goal:reminder-config-changed']);
       deps.goalEvents.on('goal:completed', handlers['goal:completed']);
@@ -45,6 +46,7 @@ export function createGoalProjectionRuntime(
 
       deps.goalEvents.off('goal:created', handlers['goal:created']);
       deps.goalEvents.off('goal:updated', handlers['goal:updated']);
+      deps.goalEvents.off('goal:status-changed', handlers['goal:status-changed']);
       deps.goalEvents.off('goal:schedule-time-changed', handlers['goal:schedule-time-changed']);
       deps.goalEvents.off('goal:reminder-config-changed', handlers['goal:reminder-config-changed']);
       deps.goalEvents.off('goal:completed', handlers['goal:completed']);

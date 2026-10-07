@@ -55,6 +55,7 @@ export interface PublicAuthCapabilities {
 
 interface ApiCloudAuthRuntime extends CloudSessionCapability {
   readonly expressHandler: RequestHandler;
+  readonly externalAgents?: unknown;
 }
 
 const NO_PUBLIC_AUTH_CAPABILITIES: PublicAuthCapabilities = Object.freeze({ github: false });
@@ -73,8 +74,10 @@ export class ApiBootstrapper {
     private readonly testEmailLinks?: Pick<CloudAuthEmailLinkCapture, 'findLatest'>,
     trace: HttpRequestTrace = NOOP_HTTP_REQUEST_TRACE,
     private readonly authCapabilities: PublicAuthCapabilities = NO_PUBLIC_AUTH_CAPABILITIES,
+    trustProxyHops: 0 | 1 = 0,
   ) {
     this.app = express();
+    this.app.set('trust proxy', trustProxyHops);
     this.rootRouter = Router();
     this.db = db;
     // Per-instance recorder: no global singleton leaks between tests.
@@ -129,6 +132,17 @@ export class ApiBootstrapper {
           });
         }
         app.all('/api/auth/*splat', this.cloudAuth.expressHandler);
+        if (this.cloudAuth.externalAgents) {
+          app.all(
+            [
+              '/.well-known/oauth-protected-resource',
+              '/.well-known/oauth-protected-resource/mcp',
+              '/.well-known/oauth-authorization-server/api/auth',
+              '/.well-known/openid-configuration/api/auth',
+            ],
+            this.cloudAuth.expressHandler,
+          );
+        }
       },
     });
 

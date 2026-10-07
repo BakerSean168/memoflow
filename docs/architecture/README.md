@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构文档入口
 created: 2026-04-13T00:00:00
-updated: 2026-04-26T00:00:00
+updated: 2026-10-07T00:00:00Z
 ---
 
 # 架构入口
@@ -15,6 +15,7 @@ updated: 2026-04-26T00:00:00
 
 - [`../standards/architecture.md`](../standards/architecture.md)：长期有效的架构规则
 - [`adr/README.md`](./adr/README.md)：正式 ADR 索引与编号规则
+- [`external-agent-gateway.md`](./external-agent-gateway.md)：External Agent Gateway 提案；owner capabilities、MCP、OAuth/PAT、可靠写入与 assisted workflow（未实施）
 - [`ci-cd-platform-v2.md`](./ci-cd-platform-v2.md)：CI/CD Platform V2 的既有控制面与稳定契约
 - [`delivery-platform-v3.md`](./delivery-platform-v3.md)：Delivery Platform V3 的目标状态机、candidate/staging/release/production 边界
 - [`release-lifecycle-v3.md`](./release-lifecycle-v3.md)：Release Please、Server candidate、跨平台 Desktop 与 production selection 契约

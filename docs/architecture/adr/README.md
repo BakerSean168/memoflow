@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-10-03T10:30:00+09:00
+updated: 2026-10-07T00:00:00Z
 ---
 
 # ADR 索引
@@ -132,6 +132,9 @@ updated: 2026-10-03T10:30:00+09:00
 | [ADR-113](./ADR-113-retire-product-governance-runtime-keep-engineering-governance.md) | Retire Product Governance Runtime, Keep Engineering Governance | 已采纳并实施（GOV-7903） | 2026-09-29 |
 | [ADR-114](./ADR-114-desktop-update-domain-runtime-and-installation-ownership.md) | Desktop Update Domain、Runtime Boundary 与 Installation Ownership | 已采纳并实施（Windows / Linux；macOS 延后） | 2026-09-30 |
 | [ADR-115](./ADR-115-goal-planner-bounded-external-research-evidence.md) | Goal Planner Bounded External Research Evidence | 已采纳并实施（AIC-5001） | 2026-10-05 |
+| [ADR-116](./ADR-116-external-agent-capability-and-gateway-boundary.md) | External Agent Capability 与 Gateway 边界 | 已采纳（实现中） | 2026-10-07 |
+| [ADR-117](./ADR-117-external-agent-authorization-and-credentials.md) | External Agent Authorization 与 Credential 边界 | 已采纳（实现中） | 2026-10-07 |
+| [ADR-118](./ADR-118-external-agent-mutations-and-assisted-workflows.md) | External Agent Mutation 与 Assisted Workflow | 已采纳（未实现） | 2026-10-07 |
 
 ## 维护规则
 

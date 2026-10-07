@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { GoalStatus } from '@memoflow/contracts/goal';
 import type {
   ScheduledIntent,
   SchedulingOwner,
@@ -203,6 +204,48 @@ describe('goal projection runtime -> SchedulingPort', () => {
     } as never);
 
     expect(scheduling.removals).toEqual([owner(), owner(), owner()]);
+  });
+
+  it('clears reminders on abandonment, restores them on reopening, and unsubscribes on stop', async () => {
+    const goalEvents = createGoalEventsHarness();
+    const scheduling = createSchedulingPortHarness();
+    let desired: readonly ScheduledIntent<GoalReminderScheduledPayload>[] = [];
+    const source = sourceWithPlan({
+      buildGoalPlan: vi.fn(async () => ({ owner: owner(), desired })),
+    });
+    const runtime = createGoalProjectionRuntime({
+      source,
+      schedulingPort: scheduling.port,
+      goalEvents: goalEvents.subscriber,
+    });
+    await runtime.start();
+    await goalEvents.emit('goal:status-changed', {
+      identityId: 'IdentityId_schedule-owner',
+      goal: { id: 'GoalId_goal' },
+      previousStatus: GoalStatus.InProgress,
+      newStatus: GoalStatus.Abandoned,
+    } as never);
+    expect(scheduling.reconciles).toEqual([{ owner: owner(), desired: [] }]);
+
+    desired = [intent()];
+    await goalEvents.emit('goal:status-changed', {
+      identityId: 'IdentityId_schedule-owner',
+      goal: { id: 'GoalId_goal' },
+      previousStatus: GoalStatus.Abandoned,
+      newStatus: GoalStatus.InProgress,
+    } as never);
+    expect(scheduling.reconciles).toEqual([
+      { owner: owner(), desired: [] },
+      { owner: owner(), desired: [intent()] },
+    ]);
+    await runtime.stop();
+    await goalEvents.emit('goal:status-changed', {
+      identityId: 'IdentityId_schedule-owner',
+      goal: { id: 'GoalId_goal' },
+      previousStatus: GoalStatus.InProgress,
+      newStatus: GoalStatus.Abandoned,
+    } as never);
+    expect(source.buildGoalPlan).toHaveBeenCalledTimes(2);
   });
 
   it('registers only the incremental fast path; durable scans are centralized', async () => {

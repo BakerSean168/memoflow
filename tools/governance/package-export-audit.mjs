@@ -36,6 +36,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ai: ['./ports', './schema', './testing'],
   repository: ['./schema', './server'],
   'cloud-auth': ['./server'],
+  'agent-gateway': ['./server'],
   notification: ['./commands', './schedule-execution', './server'],
   reminder: [
     './schema',
@@ -48,6 +49,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './server',
   ],
   contracts: [
+    './agent-gateway',
     './task',
     './goal',
     './label',
@@ -70,7 +72,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './electron',
     './mocks',
   ],
-  database: ['./prisma'],
+  database: ['./prisma', './environment'],
   'domain-shared': ['./shared'],
   patterns: ['./scheduler', './repository', './cache', './events', './operations', './lease'],
   utils: [

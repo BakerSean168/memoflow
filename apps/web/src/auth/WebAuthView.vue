@@ -6,10 +6,7 @@ import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import { Label } from '@memoflow/ui-vue-shadcn/components/ui/label';
 import { Loader2 } from '@lucide/vue';
-import {
-  usePassword,
-  useAuthenticationStore,
-} from '@memoflow/app-vue/modules/authentication';
+import { usePassword, useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { loadWebAuthCapabilities } from './capabilities';
 import { useWebAuth } from './useWebAuth';
 import {
@@ -50,7 +47,7 @@ function normalizeReturnTo(value: string | null): string {
     const resolved = new URL(value, window.location.origin);
     if (resolved.origin !== window.location.origin) return '/';
     if (resolved.pathname === '/auth' || resolved.pathname.startsWith('/auth/')) {
-      return resolved.pathname === '/auth/device'
+      return ['/auth/device', '/auth/external-agent'].includes(resolved.pathname)
         ? `${resolved.pathname}${resolved.search}${resolved.hash}`
         : '/';
     }
@@ -124,22 +121,28 @@ const legalTermsHref = computed(() =>
 const legalPrivacyHref = computed(() =>
   currentLocale.value === 'zh-CN' ? '/legal/privacy.zh-CN.html' : '/legal/privacy.en-US.html',
 );
-const title = computed(() => ({
-  login: t('auth.login.heading', { app: APP_DISPLAY_NAME }),
-  register: t('auth.register.heading', { app: APP_DISPLAY_NAME }),
-  forgot: t('auth.forgot.heading'),
-  reset: t('auth.reset.heading'),
-  verify: t('auth.verify.heading'),
-})[scene.value]);
-const description = computed(() => ({
-  login: t('auth.page.description'),
-  register: t('auth.register.description'),
-  forgot: t('auth.forgot.description'),
-  reset: t('auth.reset.description'),
-  verify: t('auth.verify.description', {
-    email: pendingVerificationEmail.value || email.value,
-  }),
-})[scene.value]);
+const title = computed(
+  () =>
+    ({
+      login: t('auth.login.heading', { app: APP_DISPLAY_NAME }),
+      register: t('auth.register.heading', { app: APP_DISPLAY_NAME }),
+      forgot: t('auth.forgot.heading'),
+      reset: t('auth.reset.heading'),
+      verify: t('auth.verify.heading'),
+    })[scene.value],
+);
+const description = computed(
+  () =>
+    ({
+      login: t('auth.page.description'),
+      register: t('auth.register.description'),
+      forgot: t('auth.forgot.description'),
+      reset: t('auth.reset.description'),
+      verify: t('auth.verify.description', {
+        email: pendingVerificationEmail.value || email.value,
+      }),
+    })[scene.value],
+);
 
 function setLocale(next: AuthLocale) {
   const normalized = normalizeLocale(next);
@@ -149,10 +152,7 @@ function setLocale(next: AuthLocale) {
   writePresentationPreferenceState({ locale: normalized });
 }
 
-function replaceErrors<T extends string>(
-  target: ValidationErrors<T>,
-  next: ValidationErrors<T>,
-) {
+function replaceErrors<T extends string>(target: ValidationErrors<T>, next: ValidationErrors<T>) {
   for (const key of Object.keys(target)) delete target[key as T];
   Object.assign(target, next);
 }
@@ -405,94 +405,273 @@ watch([newPassword, confirmNewPassword], () => {
         </div>
       </div>
 
-      <form v-if="scene === 'login'" data-testid="login-form" class="grid gap-4" novalidate @submit.prevent="submitLogin">
+      <form
+        v-if="scene === 'login'"
+        data-testid="login-form"
+        class="grid gap-4"
+        novalidate
+        @submit.prevent="submitLogin"
+      >
         <div data-testid="login-username-input" class="grid gap-1.5">
           <Label for="email">{{ t('auth.field.email') }}</Label>
-          <Input id="email" v-model="email" type="email" autocomplete="email" :class="INPUT_CLASS" :aria-invalid="Boolean(loginErrors.email)" :aria-describedby="loginErrors.email ? 'email-error' : undefined" />
-          <p v-if="loginErrors.email" id="email-error" data-testid="login-email-error" class="text-xs text-red-300">{{ t(loginErrors.email) }}</p>
+          <Input
+            id="email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(loginErrors.email)"
+            :aria-describedby="loginErrors.email ? 'email-error' : undefined"
+          />
+          <p
+            v-if="loginErrors.email"
+            id="email-error"
+            data-testid="login-email-error"
+            class="text-xs text-red-300"
+          >
+            {{ t(loginErrors.email) }}
+          </p>
         </div>
         <div data-testid="login-password-input" class="grid gap-1.5">
           <Label for="password">{{ t('auth.field.password') }}</Label>
-          <Input id="password" v-model="password" type="password" autocomplete="current-password" :class="INPUT_CLASS" :aria-invalid="Boolean(loginErrors.password)" :aria-describedby="loginErrors.password ? 'password-error' : undefined" />
-          <p v-if="loginErrors.password" id="password-error" data-testid="login-password-error" class="text-xs text-red-300">{{ t(loginErrors.password) }}</p>
+          <Input
+            id="password"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(loginErrors.password)"
+            :aria-describedby="loginErrors.password ? 'password-error' : undefined"
+          />
+          <p
+            v-if="loginErrors.password"
+            id="password-error"
+            data-testid="login-password-error"
+            class="text-xs text-red-300"
+          >
+            {{ t(loginErrors.password) }}
+          </p>
         </div>
-        <button data-testid="login-forgot-link" type="button" class="justify-self-end text-xs text-white/55 hover:text-white" @click="switchScene('forgot')">{{ t('auth.login.forgotLink') }}</button>
+        <button
+          data-testid="login-forgot-link"
+          type="button"
+          class="justify-self-end text-xs text-white/55 hover:text-white"
+          @click="switchScene('forgot')"
+        >
+          {{ t('auth.login.forgotLink') }}
+        </button>
         <Button data-testid="login-submit-button" type="submit" :disabled="isLoading">
           <Loader2 v-if="isLoading && action === 'login'" class="mr-2 h-4 w-4 animate-spin" />
           {{ t(isLoading && action === 'login' ? 'auth.login.submitting' : 'auth.login.submit') }}
         </Button>
-        <Button v-if="githubLoginAvailable" data-testid="login-github-button" type="button" variant="outline" :disabled="isLoading" @click="handleGithubLogin">
+        <Button
+          v-if="githubLoginAvailable"
+          data-testid="login-github-button"
+          type="button"
+          variant="outline"
+          :disabled="isLoading"
+          @click="handleGithubLogin"
+        >
           {{ t('auth.login.github', 'Continue with GitHub') }}
         </Button>
       </form>
 
-      <form v-else-if="scene === 'register'" data-testid="register-form" class="grid gap-4" novalidate @submit.prevent="submitRegistration">
+      <form
+        v-else-if="scene === 'register'"
+        data-testid="register-form"
+        class="grid gap-4"
+        novalidate
+        @submit.prevent="submitRegistration"
+      >
         <div class="grid gap-1.5">
           <Label for="name">{{ t('auth.field.name', 'Name') }}</Label>
           <Input id="name" v-model="name" autocomplete="name" :class="INPUT_CLASS" />
         </div>
         <div class="grid gap-1.5">
           <Label for="reg-email">{{ t('auth.field.email') }}</Label>
-          <Input id="reg-email" v-model="email" type="email" autocomplete="email" :class="INPUT_CLASS" :aria-invalid="Boolean(registerErrors.email)" />
-          <p v-if="registerErrors.email" data-testid="register-email-error" class="text-xs text-red-300">{{ t(registerErrors.email) }}</p>
+          <Input
+            id="reg-email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(registerErrors.email)"
+          />
+          <p
+            v-if="registerErrors.email"
+            data-testid="register-email-error"
+            class="text-xs text-red-300"
+          >
+            {{ t(registerErrors.email) }}
+          </p>
         </div>
         <div class="grid gap-1.5">
           <Label for="reg-password">{{ t('auth.field.password') }}</Label>
-          <Input id="reg-password" v-model="password" type="password" autocomplete="new-password" :class="INPUT_CLASS" :aria-invalid="Boolean(registerErrors.password)" />
-          <p v-if="registerErrors.password" data-testid="register-password-error" class="text-xs text-red-300">{{ t(registerErrors.password) }}</p>
+          <Input
+            id="reg-password"
+            v-model="password"
+            type="password"
+            autocomplete="new-password"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(registerErrors.password)"
+          />
+          <p
+            v-if="registerErrors.password"
+            data-testid="register-password-error"
+            class="text-xs text-red-300"
+          >
+            {{ t(registerErrors.password) }}
+          </p>
         </div>
         <div class="grid gap-1.5">
           <Label for="confirm-password">{{ t('auth.field.confirmPassword') }}</Label>
-          <Input id="confirm-password" v-model="confirmPassword" type="password" autocomplete="new-password" :class="INPUT_CLASS" :aria-invalid="Boolean(registerErrors.confirmPassword)" />
-          <p v-if="registerErrors.confirmPassword" data-testid="register-confirm-password-error" class="text-xs text-red-300">{{ t(registerErrors.confirmPassword) }}</p>
+          <Input
+            id="confirm-password"
+            v-model="confirmPassword"
+            type="password"
+            autocomplete="new-password"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(registerErrors.confirmPassword)"
+          />
+          <p
+            v-if="registerErrors.confirmPassword"
+            data-testid="register-confirm-password-error"
+            class="text-xs text-red-300"
+          >
+            {{ t(registerErrors.confirmPassword) }}
+          </p>
         </div>
         <Button data-testid="register-submit-button" type="submit" :disabled="isLoading">
           <Loader2 v-if="isLoading && action === 'register'" class="mr-2 h-4 w-4 animate-spin" />
-          {{ t(isLoading && action === 'register' ? 'auth.register.submitting' : 'auth.register.submit') }}
+          {{
+            t(
+              isLoading && action === 'register'
+                ? 'auth.register.submitting'
+                : 'auth.register.submit',
+            )
+          }}
         </Button>
       </form>
 
-      <form v-else-if="scene === 'forgot'" data-testid="forgot-form" class="grid gap-4" novalidate @submit.prevent="submitForgotPassword">
+      <form
+        v-else-if="scene === 'forgot'"
+        data-testid="forgot-form"
+        class="grid gap-4"
+        novalidate
+        @submit.prevent="submitForgotPassword"
+      >
         <div class="grid gap-1.5">
           <Label for="forgot-email">{{ t('auth.field.email') }}</Label>
-          <Input id="forgot-email" v-model="email" type="email" autocomplete="email" :class="INPUT_CLASS" :aria-invalid="Boolean(forgotErrors.email)" />
+          <Input
+            id="forgot-email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(forgotErrors.email)"
+          />
           <p v-if="forgotErrors.email" class="text-xs text-red-300">{{ t(forgotErrors.email) }}</p>
         </div>
         <Button data-testid="forgot-submit-button" type="submit" :disabled="passwordLoading">
-          <Loader2 v-if="passwordLoading && action === 'forgot'" class="mr-2 h-4 w-4 animate-spin" />
-          {{ t(passwordLoading && action === 'forgot' ? 'auth.forgot.submitting' : 'auth.forgot.submit') }}
+          <Loader2
+            v-if="passwordLoading && action === 'forgot'"
+            class="mr-2 h-4 w-4 animate-spin"
+          />
+          {{
+            t(
+              passwordLoading && action === 'forgot'
+                ? 'auth.forgot.submitting'
+                : 'auth.forgot.submit',
+            )
+          }}
         </Button>
       </form>
 
-      <form v-else-if="scene === 'reset'" data-testid="reset-form" class="grid gap-4" novalidate @submit.prevent="submitResetPassword">
+      <form
+        v-else-if="scene === 'reset'"
+        data-testid="reset-form"
+        class="grid gap-4"
+        novalidate
+        @submit.prevent="submitResetPassword"
+      >
         <div class="grid gap-1.5">
           <Label for="new-password">{{ t('auth.field.newPassword') }}</Label>
-          <Input id="new-password" v-model="newPassword" type="password" autocomplete="new-password" :class="INPUT_CLASS" :aria-invalid="Boolean(resetErrors.newPassword)" />
-          <p v-if="resetErrors.newPassword" class="text-xs text-red-300">{{ t(resetErrors.newPassword) }}</p>
+          <Input
+            id="new-password"
+            v-model="newPassword"
+            type="password"
+            autocomplete="new-password"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(resetErrors.newPassword)"
+          />
+          <p v-if="resetErrors.newPassword" class="text-xs text-red-300">
+            {{ t(resetErrors.newPassword) }}
+          </p>
         </div>
         <div class="grid gap-1.5">
           <Label for="confirm-new-password">{{ t('auth.field.confirmPassword') }}</Label>
-          <Input id="confirm-new-password" v-model="confirmNewPassword" type="password" autocomplete="new-password" :class="INPUT_CLASS" :aria-invalid="Boolean(resetErrors.confirmPassword)" />
-          <p v-if="resetErrors.confirmPassword" class="text-xs text-red-300">{{ t(resetErrors.confirmPassword) }}</p>
+          <Input
+            id="confirm-new-password"
+            v-model="confirmNewPassword"
+            type="password"
+            autocomplete="new-password"
+            :class="INPUT_CLASS"
+            :aria-invalid="Boolean(resetErrors.confirmPassword)"
+          />
+          <p v-if="resetErrors.confirmPassword" class="text-xs text-red-300">
+            {{ t(resetErrors.confirmPassword) }}
+          </p>
         </div>
-        <Button data-testid="reset-submit-button" type="submit" :disabled="passwordLoading">{{ t('auth.reset.submit') }}</Button>
+        <Button data-testid="reset-submit-button" type="submit" :disabled="passwordLoading">{{
+          t('auth.reset.submit')
+        }}</Button>
       </form>
 
-      <section v-else data-testid="verify-email-form" class="border border-white/10 bg-white/[0.03] p-4 text-center text-sm leading-6 text-white/65">
-        {{ t('auth.verify.linkInstruction', 'Open the verification link in your email. You can close this page afterward.') }}
+      <section
+        v-else
+        data-testid="verify-email-form"
+        class="border border-white/10 bg-white/[0.03] p-4 text-center text-sm leading-6 text-white/65"
+      >
+        {{
+          t(
+            'auth.verify.linkInstruction',
+            'Open the verification link in your email. You can close this page afterward.',
+          )
+        }}
       </section>
 
       <div class="mt-5 flex justify-center text-sm text-white/55">
-        <button v-if="scene === 'login'" type="button" @click="switchScene('register')">{{ t('auth.login.registerLink') }}</button>
-        <button v-else type="button" data-testid="auth-back-to-login" @click="switchScene('login')">{{ t('auth.verify.backToLogin') }}</button>
+        <button v-if="scene === 'login'" type="button" @click="switchScene('register')">
+          {{ t('auth.login.registerLink') }}
+        </button>
+        <button v-else type="button" data-testid="auth-back-to-login" @click="switchScene('login')">
+          {{ t('auth.verify.backToLogin') }}
+        </button>
       </div>
     </section>
 
-    <footer data-testid="auth-legal-footer" class="mt-7 max-w-sm text-center text-xs leading-5 text-white/40">
+    <footer
+      data-testid="auth-legal-footer"
+      class="mt-7 max-w-sm text-center text-xs leading-5 text-white/40"
+    >
       <span>{{ t('auth.page.legalNoticePrefix') }}</span>
-      <a :href="legalTermsHref" target="_blank" rel="noopener noreferrer" data-testid="auth-terms-link" class="underline underline-offset-2">{{ t('auth.page.termsOfService') }}</a>
+      <a
+        :href="legalTermsHref"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="auth-terms-link"
+        class="underline underline-offset-2"
+        >{{ t('auth.page.termsOfService') }}</a
+      >
       <span>{{ t('auth.page.legalNoticeMid') }}</span>
-      <a :href="legalPrivacyHref" target="_blank" rel="noopener noreferrer" data-testid="auth-privacy-link" class="underline underline-offset-2">{{ t('auth.page.privacyPolicy') }}</a>
+      <a
+        :href="legalPrivacyHref"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="auth-privacy-link"
+        class="underline underline-offset-2"
+        >{{ t('auth.page.privacyPolicy') }}</a
+      >
       <span>{{ t('auth.page.legalNoticeSuffix') }}</span>
     </footer>
   </main>
