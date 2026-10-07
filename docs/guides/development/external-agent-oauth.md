@@ -44,7 +44,7 @@ claude mcp add --transport http --scope user memoflow "$MEMOFLOW_MCP_URL"
 claude mcp login memoflow
 ```
 
-浏览器中登录 MemoFlow、验证邮箱，核对应用名称和 client ID，然后点击「允许只读访问」。SSH/无图形环境可使用各客户端的 `--no-browser`，按 CLI 提示完成 loopback 回调；不要把 callback URL、code 或 token 贴进日志或聊天。
+浏览器中登录 MemoFlow、验证邮箱，核对应用名称和 client ID，然后点击「允许只读访问」。SSH/无图形环境可使用各客户端的 `--no-browser`，按 CLI 提示完成 loopback 回调；Claude Code 2.1.290 仍要求交互终端，SSH 使用 `ssh -t`，不能将其登录输入接到普通 pipe；不要把 callback URL、code 或 token 贴进日志或聊天。
 
 授权范围为 `goals:read`、`tasks:read`；`offline_access` 表示允许通过 refresh token 保持连接。省略它就不会获得 refresh token。access token 有效期 10 分钟，refresh rotation 允许 30 秒同请求重试，连接最长 90 天。登录后可读取 `goal_get`、`goal_search`、`task_plan_get`、`task_plan_search`、`task_occurrence_get`、`task_occurrence_list`；列表参数和分页规则见 PAT 指南。
 

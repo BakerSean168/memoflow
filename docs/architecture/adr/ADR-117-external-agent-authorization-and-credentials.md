@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # ADR-117: External Agent Authorization 与 Credential 边界
 
-**状态：** 已采纳授权边界；PAT 六工具已实现并验证，checkpoint `320dd1ac994`。用户于 2026-10-07 批准继续 EAG-04/05 只读 OAuth；持久 OAuth 与完整客户端 journey 实施中，不能用 spike 发起证据宣称完成。
+**状态：** 已采纳并实现；PAT checkpoint `320dd1ac994`、只读 OAuth 实现 checkpoint `5a9a26221c4`。真实 PostgreSQL、浏览器与 Codex/Claude 六工具旅程已通过，最终 prod-like 验证见 [实施证据](../../analysis/2026-10-07-eag-04-oauth-read-evidence.md)。默认关闭 OAuth，公共 rollout 单独验收。
 **日期：** 2026-10-07
 **关联：** ADR-036、ADR-039、ADR-045、ADR-104、ADR-105、ADR-116、ADR-118
 
@@ -25,7 +25,7 @@ updated: 2026-10-07T00:00:00Z
 - 授权服务器复用 Cloud Auth 的身份和账户状态检查。优先验证 Better Auth 当前官方 OAuth Provider/MCP 集成，不自行实现 OAuth 签名、code exchange 或 PKCE。
 - OAuth 客户端身份优先采用当前规范的 CIMD 与受控预注册；DCR 若确实为指定客户端版本所需，作为显式兼容选项评估，不能默认为无限开放注册。
 - PAT 为独立高熵 opaque credential，绑定 owner、name、scope、MCP audience、expiry、revokedAt；仅创建时展示 secret，数据库只保存不可逆摘要和可识别前缀。不能复制现有 session token 当 PAT。
-- 私有试点允许先用短期只读 PAT 打通真实 owner；公共上线仍以 OAuth 验收为前提。PAT 的完整管理 UI 后续补齐，试点至少有受 session 保护的创建、列表、撤销入口与审计。
+- 私有试点允许先用短期只读 PAT 打通真实 owner；公共上线仍以 OAuth 验收为前提。账户设置分别管理 OAuth 连接和 PAT，提供受 session 保护的创建、列表、撤销入口与审计；PAT 完整密钥只展示一次。
 
 ### 身份、授权、业务权限各有 owner
 
@@ -75,8 +75,8 @@ redirect URI 精确匹配注册值；仅按原生客户端标准处理 loopback 
 
 ## Consequences
 
-需要新增 External Agent Connection/Grant、PAT 管理和清晰的用户撤销入口；这些属于 Cloud Auth/delegated access，不属于 AI Provider 配置。第三方 metadata 与 OAuth 错误由 ACL 清洗，不进入 owner domain。
+External Agent Connection、PAT 管理和用户撤销入口属于 Cloud Auth/delegated access，不属于 AI Provider 配置。第三方 metadata 与 OAuth 错误由 ACL 清洗，不进入 owner domain。
 
 官方依据与 SDK/provider 版本约束见 [协议研究](../../analysis/2026-10-07-external-agent-protocol-research.md)。上线验收必须包含两个不同账户与真实 Codex/Claude Code 客户端，不能用单一 curl 成功代替。
 
-实施证据：[EAG-01 兼容报告](../../analysis/2026-10-07-eag-01-compatibility-evidence.md)。JWT 验签不能替代当前 grant/账户在线检查；CLI 授权发起不能替代完整 OAuth 验收。
+实施证据：[EAG-01 兼容报告](../../analysis/2026-10-07-eag-01-compatibility-evidence.md)、[EAG-04 运行时验证](../../analysis/2026-10-07-eag-04-oauth-read-evidence.md)。JWT 验签不能替代当前 grant/账户在线检查；CLI 授权发起不能替代完整 OAuth 验收。

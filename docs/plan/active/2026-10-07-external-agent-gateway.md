@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # MemoFlow External Agent Gateway 实施方案
 
-**当前状态：OAuth read 实施中。** PAT 六工具与 prod-like 已验证并提交 checkpoint `320dd1ac994`。用户于 2026-10-07 批准按更新的 ADR-117 继续 EAG-04A～04E 和 EAG-05；只实现只读 OAuth，不开放写工具。
+**当前状态：PAT + OAuth 六工具本地只读切片已交付。** PAT 六工具与 prod-like 已验证并提交 checkpoint `320dd1ac994`。用户于 2026-10-07 批准按更新的 ADR-117 继续 EAG-04A～04E 和 EAG-05；只实现只读 OAuth，不开放写工具。
 实施基线：`3664f8da6a95174d24ae8f443f2d12b3ce223e33`；分支 `feat/external-agent-gateway-20261007`，保留开始时已有未提交修改。历史 SHA 是研究基线，不要求回退。
 EAG-01 证据：[兼容报告](../../analysis/2026-10-07-eag-01-compatibility-evidence.md)。EAG-02：[纵向链路证据](../../analysis/2026-10-07-eag-02-goal-pat-evidence.md)。
 
@@ -27,7 +27,7 @@ EAG-01 证据：[兼容报告](../../analysis/2026-10-07-eag-01-compatibility-ev
 
 ## 当前 OAuth read 范围（用户于 2026-10-07 批准继续）
 
-PAT 六工具 checkpoint 已独立提交；OAuth 现按 [EAG-04](./external-agent-gateway/2026-10-07-eag-04-oauth-and-connection-lifecycle.md) 的 A～E 切片实施，EAG-05 最终验收。协议与产品状态各有真值 owner，明确 offline_access、30 秒同结果重试、90 天授权总寿命和撤销后重新授权不得复活旧 token。两客户端首次闭环提前到 EAG-04C。下方旧 PAT 范围的延期记录不表示当前 OAuth 仍未授权；OAuth AC 在取得证据前保持未完成。
+PAT 六工具 checkpoint 已独立提交；OAuth 现按 [EAG-04](./external-agent-gateway/2026-10-07-eag-04-oauth-and-connection-lifecycle.md) 的 A～E 切片实施，EAG-05 最终验收。协议与产品状态各有真值 owner，明确 offline_access、30 秒同结果重试、90 天授权总寿命和撤销后重新授权不得复活旧 token。两客户端首次闭环提前到 EAG-04C。下方旧 PAT 范围的延期记录不表示当前 OAuth 仍未授权；当前本地 OAuth 验证已完成，证据见 [EAG-04](../../analysis/2026-10-07-eag-04-oauth-read-evidence.md)，公共 rollout 独立验收。
 
 ## 1. 成功标准
 
@@ -44,8 +44,8 @@ PAT 六工具 checkpoint 已独立提交；OAuth 现按 [EAG-04](./external-agen
 | [EAG-01：基线与协议认证试验](./external-agent-gateway/2026-10-07-eag-01-baseline-and-protocol-spike.md)    | SDK/provider/client profile 有可重复证据            | 无                                       | 基线已验证；客户端闭环待04/05         |
 | [EAG-02：Goal 私有只读接入](./external-agent-gateway/2026-10-07-eag-02-goal-read-pilot.md)                 | scoped PAT + goal_get/search + 隔离/审计            | 01                                       | 已实现并验证：Goal/PAT，证据见 EAG-02 |
 | [EAG-03：Task 只读与重复提取](./external-agent-gateway/2026-10-07-eag-03-task-read-and-shared-contract.md) | 6 个 read tools；最小共同 descriptor                | 02                                       | 已实现并验证：PAT 六工具，OAuth 延期  |
-| [EAG-04：OAuth 连接生命周期](./external-agent-gateway/2026-10-07-eag-04-oauth-and-connection-lifecycle.md) | 登录/注册、consent、refresh、revoke                 | 02；可与 03 独立推进                     | 已实现：本地 OAuth/CLI/UI；最终验证中 |
-| [EAG-05：只读版本验收](./external-agent-gateway/2026-10-07-eag-05-read-release-verification.md)            | 两客户端 + prod-like read journey                   | 03、04                                   | 验证中：两 CLI 六工具、PG；制品待收敛 |
+| [EAG-04：OAuth 连接生命周期](./external-agent-gateway/2026-10-07-eag-04-oauth-and-connection-lifecycle.md) | 登录/注册、consent、refresh、revoke                 | 02；可与 03 独立推进                     | 已交付：本地 OAuth/CLI/UI/生命周期    |
+| [EAG-05：只读版本验收](./external-agent-gateway/2026-10-07-eag-05-read-release-verification.md)            | 两客户端 + prod-like read journey                   | 03、04                                   | 本地验收通过：两 CLI、PG、HTTPS 制品  |
 | [EAG-06：Goal 可靠写入](./external-agent-gateway/2026-10-07-eag-06-goal-mutation-receipts.md)              | goal_create/update，原子 receipt                    | 05                                       | 待实施                                |
 | [EAG-07：TaskPlan 可靠写入](./external-agent-gateway/2026-10-07-eag-07-task-plan-mutations.md)             | task_plan_create/update，第二 owner 验证            | 06                                       | 待实施                                |
 | [EAG-08：TaskOccurrence 完成](./external-agent-gateway/2026-10-07-eag-08-task-occurrence-completion.md)    | 显式测量选择、版本检查、可靠 KR 贡献                | 07                                       | 待实施                                |
@@ -70,22 +70,22 @@ EAG-02 使用 PAT 是实现顺序，不改变公共默认 OAuth。没有 OAuth �
 
 以下状态按实际实施证据维护；部分子行为通过不等于整个验收项完成。
 
-| AC     | 可观察结果                                                           | 必需证据                                      | 归属       | 状态                                                                               |
-| ------ | -------------------------------------------------------------------- | --------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- |
-| EAC-01 | 2026 MCP 正常发现/调用；unsupported profile 明确拒绝                 | SDK integration transcript，精确版本          | 01～03     | 未完成：SDK 基线已验证；六工具 SDK 已验证；真实 CLI tools 尚未验证（不等同于 SDK） |
-| EAC-02 | A 无法发现或读取 B 的业务内容；伪造 identity 不生效                  | 双账户 negative tests，拒绝前无 owner query   | 02、03     | 已实现并验证：Goal/Task 双账户、伪造 identity 拒绝                                 |
-| EAC-03 | scope、audience、expiry、revoke、Account closure 都有效              | 真实 token/provider integration matrix        | 02、04     | 未完成：PAT 已验证；OAuth 实施中                                                   |
-| EAC-04 | OAuth 从 401 discovery 到 consent/callback 完成；refresh/revoke 闭环 | Codex 与 Claude Code 各一份记录               | 04、05     | 未完成：OAuth 已授权实施                                                           |
-| EAC-05 | 6 个 read tools 有严格 input/output、有界分页、Product Time 语义     | contract tests、跨页和时间边界数据            | 03、05     | 已实现并验证：PAT 六工具范围                                                       |
-| EAC-06 | Goal create+KRs、update 调 owner；无 Assistant/DOM 依赖              | 真实数据库和 Web 可见结果                     | 06         | 未完成                                                                             |
-| EAC-07 | 同 key 重试/并发/响应丢失只产生一次 effect；异 body 拒绝             | 故障注入、重启、receipt/outbox 行数           | 06、07、08 | 未完成                                                                             |
-| EAC-08 | 旧版本写入明确 conflict；不覆盖他人修改                              | 两客户端并发测试、版本 unchanged 断言         | 06～08     | 未完成                                                                             |
-| EAC-09 | TaskPlan 和 Occurrence 清晰分离；Prompt 可以 record 或 complete-only | Task/Goal 行为测试与真实完成 journey          | 07、08     | 未完成                                                                             |
-| EAC-10 | 同一已共享操作在 Mastra/MCP 的 contract/owner effect 一致            | descriptor parity + 双 adapter fixture        | 03、09     | 明确延期至 EAG-09：目前仅 descriptor seam                                          |
-| EAC-11 | read/write/assisted 关闭开关、限流和 shutdown 行为确定               | prod-like 多实例/故障验证和脱敏 audit         | 05、08     | 未完成：read pilot 核心已验证，最终部署与其他 lanes 待验收                         |
-| EAC-12 | 云端提醒不依赖 Agent 进程；local-only 能力不发布                     | Scheduler/Notification durable evidence       | 09         | 未完成                                                                             |
-| EAC-13 | workflow 重启可查询、revision 冲突、授权撤销及取消竞态正确           | restart/fault tests；支持/不支持 Tasks 客户端 | 10         | 未完成                                                                             |
-| EAC-14 | 文档宣称的制品与验证一致，无“本机可用=生产已交付”                    | Git SHA、OCI revision/digest、报告路径        | 每次发布   | 已实现并验证：本地源码/镜像一致；未发布生产                                        |
+| AC     | 可观察结果                                                           | 必需证据                                      | 归属       | 状态                                                         |
+| ------ | -------------------------------------------------------------------- | --------------------------------------------- | ---------- | ------------------------------------------------------------ |
+| EAC-01 | 2026 MCP 正常发现/调用；unsupported profile 明确拒绝                 | SDK integration transcript，精确版本          | 01～03     | 本地已验证：SDK 2026 profile、Codex/Claude 各六工具          |
+| EAC-02 | A 无法发现或读取 B 的业务内容；伪造 identity 不生效                  | 双账户 negative tests，拒绝前无 owner query   | 02、03     | 已实现并验证：Goal/Task 双账户、伪造 identity 拒绝           |
+| EAC-03 | scope、audience、expiry、revoke、Account closure 都有效              | 真实 token/provider integration matrix        | 02、04     | 本地已验证：PAT/OAuth、在线授权与真实 PG 生命周期            |
+| EAC-04 | OAuth 从 401 discovery 到 consent/callback 完成；refresh/revoke 闭环 | Codex 与 Claude Code 各一份记录               | 04、05     | 本地已验证：两 CLI OAuth/六工具；refresh、撤销与重连见证据   |
+| EAC-05 | 6 个 read tools 有严格 input/output、有界分页、Product Time 语义     | contract tests、跨页和时间边界数据            | 03、05     | 已实现并验证：PAT/OAuth 共用六工具                           |
+| EAC-06 | Goal create+KRs、update 调 owner；无 Assistant/DOM 依赖              | 真实数据库和 Web 可见结果                     | 06         | 未完成                                                       |
+| EAC-07 | 同 key 重试/并发/响应丢失只产生一次 effect；异 body 拒绝             | 故障注入、重启、receipt/outbox 行数           | 06、07、08 | 未完成                                                       |
+| EAC-08 | 旧版本写入明确 conflict；不覆盖他人修改                              | 两客户端并发测试、版本 unchanged 断言         | 06～08     | 未完成                                                       |
+| EAC-09 | TaskPlan 和 Occurrence 清晰分离；Prompt 可以 record 或 complete-only | Task/Goal 行为测试与真实完成 journey          | 07、08     | 未完成                                                       |
+| EAC-10 | 同一已共享操作在 Mastra/MCP 的 contract/owner effect 一致            | descriptor parity + 双 adapter fixture        | 03、09     | 明确延期至 EAG-09：目前仅 descriptor seam                    |
+| EAC-11 | read/write/assisted 关闭开关、限流和 shutdown 行为确定               | prod-like 多实例/故障验证和脱敏 audit         | 05、08     | 部分完成：read 本地已验证；生产多容器演练及其他 lanes 待验收 |
+| EAC-12 | 云端提醒不依赖 Agent 进程；local-only 能力不发布                     | Scheduler/Notification durable evidence       | 09         | 未完成                                                       |
+| EAC-13 | workflow 重启可查询、revision 冲突、授权撤销及取消竞态正确           | restart/fault tests；支持/不支持 Tasks 客户端 | 10         | 未完成                                                       |
+| EAC-14 | 文档宣称的制品与验证一致，无“本机可用=生产已交付”                    | Git SHA、OCI revision/digest、报告路径        | 每次发布   | 已实现并验证：本地源码/镜像一致；未发布生产                  |
 
 ## 5. 测试与交付顺序
 

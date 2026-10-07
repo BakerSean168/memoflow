@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # EAG-04 OAuth read 证据
 
-PAT checkpoint 为 `320dd1ac994`。本次实现将 OAuth 接入同一个六工具 Gateway，不增加写工具；默认 `EAG_OAUTH_ENABLED=0`。本报告记录实现与本地验证，公共 rollout 尚未执行。
+PAT checkpoint 为 `320dd1ac994`，OAuth 实现 checkpoint 为 `5a9a26221c4`。本次实现将 OAuth 接入同一个六工具 Gateway，不增加写工具；默认 `EAG_OAUTH_ENABLED=0`。本报告记录实现与本地验证，公共 rollout 尚未执行。
 
 ## 运行时与持久化
 
@@ -22,7 +22,7 @@ PAT checkpoint 为 `320dd1ac994`。本次实现将 OAuth 接入同一个六工�
 
 覆盖授权码与 form-encoded token exchange、600 秒 access TTL、offline_access、稳定 connection、跨 runtime 并发 refresh、同结果 overlap、超窗旧 token replay、scope 减少、账户禁用、RFC 7009 refresh revoke、code replay、撤销重连、错误 issuer/audience/signature、connection 到期和数据库故障回滚。原 PAT 六工具、两账户隔离和 owner parity 回归通过。
 
-Web Consent 三项行为测试通过：签名 query 保留、只有显式动作才授权、无效请求不呈现批准按钮。Cloud Auth/Gateway 单测、最终受影响 targets、governance/docs 和镜像验证结果在最终验证阶段回填。
+Web Consent 三项行为测试通过：签名 query 保留、只有显式动作才授权、无效请求不呈现批准按钮。Cloud Auth/Gateway 单测通过；最终 affected lint 41 项目、typecheck 37 项目及 31 依赖、test 36 项目及 4 依赖通过，governance/docs 通过。首次验证把部署用 `EAG_OAUTH_ENABLED=1` 传入单测却漏传 issuer/Web 配置，API 配置校验按预期拒绝；同一源码、正常测试环境重跑 affected-test 后全部通过，未修改服务代码来规避校验。最终报告保留该失败尝试和成功重跑，不重复已通过的 lint/typecheck/镜像构建。
 
 ## 浏览器与真实客户端
 
@@ -50,9 +50,26 @@ Codex 通过原生控制 API 调用，不启动模型 turn。Claude 通过本地
 
 点击撤销 Claude 后，旧 access token 调用立即返回 401，旧 refresh token 返回 400。浏览器创建只读 PAT、隐藏密钥、刷新页面和撤销均通过。截图及精简 JSON 记录位于本机 `/tmp/eag04/`；不在文档或 Git 保存 token、密码、code、verifier 或 signed query。
 
+## Prod-like 最终制品
+
+执行仓库 `validate-local-deploy` 流程，无缓存构建及 migrator 成功，API、Web、PowerSync healthy，端口和 OCI revision 一致。最终报告：`reports/local-deploy-validation/eag04-final.json` / `.md`（同步到 `latest`）；原始首次报告 `2026-10-07T14-54-08.186Z.json` 保留，汇总中的 `priorAttempt` 与 `reconciliation` 记录测试环境纠正。
+
+- 源码：`5a9a26221c4018fd66dae382193cabbebe0f6ba2`。
+- 制品 revision：`5a9a26221c4018fd66dae382193cabbebe0f6ba2-dirty-92e25a58d693`。dirty 指纹来自两份原有未跟踪 AI 操作脚本；未将其纳入 OAuth 提交，运行时源码已提交。
+- API image ID：`sha256:dabbeb40098bd43e713735f56d228552bb23c90b28ae26b9f686744782a7a3e5`。
+- Web image ID：`sha256:13e00a9d2f5e32a88fb96eecd27a763c3f8defebc6909182227136744df34249`。
+
+使用本机配置的 HTTPS 开发入口，issuer 为 `https://gcp-dev-01.taile92a8e.ts.net:20201/api/auth`、resource 为同 origin 的 `/mcp`，Web 为端口 20200。真实新账户注册/邮箱验证后，浏览器完成登录与显式 Consent；官方 SDK 固定 `2026-07-28` profile，实际调用六工具。随后真实 Codex 与 Claude Code 分别完成 HTTPS OAuth、原生 token 存储及六工具调用。Claude 仍使用固定本地模型响应，不能据此宣称上游模型推理已验收。
+
+33 项断言通过：discovery/issuer/resource、S256/CIMD、DCR 关闭、600 秒 access、offline_access、六工具、并发 refresh 同结果、稳定 connection、非法 Origin、两个原生 CLI、设置页撤销后旧/新 access 401、旧/新 refresh 400、重新 consent 后新 connection、旧 token 不复活、无 offline_access 不发 refresh，以及 Goal-only 只显示两工具且直接 Task 调用返回 403 scope challenge。该制品测试没有修改数据库 token 状态或预注入浏览器 session。
+
+记录：`/tmp/eag04/prod-oauth.json`、`/tmp/eag04/prod-clients/{codex,claude}-tools.json`、`prod-consent.png`、`prod-connections.png`。CLI 版本同上；原生 CLI 使用各自协议协商，不将 SDK 的固定 profile 冒充为 CLI header 抓包证据。Claude 的 headless 验证需要真实 TTY；测试驱动使用伪终端，并剥除 OSC 超链接控制序列后读取授权 URL。测试授权与第一方 session 已撤销/退出。
+
+Nx 保留 `contracts:build` 和本次环境误配导致的 `api:test` flaky 历史；最终命令退出码均为 0。该告警不表示最终验证失败。
+
 ## 尚未声明的验收
 
-- prod-like 最终制品及完整 affected 验证正在收敛。
+- 本轮完成单机 prod-like 与双 runtime PG 并发测试，没有进行多容器生产负载/故障演练。
 - GitHub 上游实际登录未重跑；新的授权页复用既有 GitHub popup 登录能力，邮箱真实旅程已完成。
-- loopback HTTP 符合原生客户端本地例外，但不等同于公网 HTTPS rollout。本轮未发布生产服务或启用写工具。
+- HTTPS 开发入口和原生 loopback callback 已验证，不等同于公共生产 rollout。本轮未发布生产服务或启用写工具。
 - provider 对单独 JWT 的 RFC 7009 revoke 与无 refresh 记录的 code replay 清理有限制，产品连接撤销仍即时生效，见 ADR-117。

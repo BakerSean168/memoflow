@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # EAG-04：OAuth 与连接生命周期
 
-状态：实施中。用户于 2026-10-07 在 PAT 六工具交付后批准本只读 OAuth 切片。PAT 私有接入 checkpoint 为 `320dd1ac994`；先前延期决定仅描述该 checkpoint 的范围，不再阻止本工作项。依赖：EAG-02、EAG-03。入口：[总方案](../2026-10-07-external-agent-gateway.md)、[ADR-117](../../../architecture/adr/ADR-117-external-agent-authorization-and-credentials.md)。
+状态：A～E 本地只读切片已交付。用户于 2026-10-07 在 PAT 六工具交付后批准本只读 OAuth 切片。PAT 私有接入 checkpoint 为 `320dd1ac994`；先前延期决定仅描述该 checkpoint 的范围，不再阻止本工作项。依赖：EAG-02、EAG-03。入口：[总方案](../2026-10-07-external-agent-gateway.md)、[ADR-117](../../../architecture/adr/ADR-117-external-agent-authorization-and-credentials.md)。
 
 ## 交付行为
 
@@ -31,10 +31,10 @@ updated: 2026-10-07T00:00:00Z
 | EAG-04A | provider persistence、connection 关联、discovery | 已实现；官方 1.7.6 schema、真实 PG 与两客户端 CIMD 登录通过                                                  |
 | EAG-04B | 现有登录 + Consent                               | 已实现；真实注册、邮箱验证、登录、signed query、显式 consent 通过；GitHub 复用既有 popup，未重做上游实机验收 |
 | EAG-04C | OAuth → 现有 Gateway 六工具                      | 已实现；Codex 原生控制接口及 Claude CLI 均完成六工具调用；两条 credential lane 隔离                          |
-| EAG-04D | refresh、revoke、account closure                 | 已实现；PG 并发/overlap/replay、scope 减少、账户禁用、撤销重连通过；最终故障注入回归中                       |
+| EAG-04D | refresh、revoke、account closure                 | 已实现；PG 并发/overlap/replay、scope 减少、账户禁用、撤销重连和数据库故障回滚通过                           |
 | EAG-04E | Connected apps / External agents                 | 已实现；真实浏览器列表、scope、last used、撤销、一次性 PAT secret 通过                                       |
 
-04A～04C 不构成公共上线许可；04D/04E 和 EAG-05 完整验证后才算 OAuth read 交付。EAG-05 保留最终验收，客户端初次闭环提前到 04C。
+A～E 与 EAG-05 本地只读验收通过，证据见 [运行时验证](../../../analysis/2026-10-07-eag-04-oauth-read-evidence.md)。公共 rollout、多容器生产演练与后续 write 仍独立推进。工作项保留在尚未完成的 EAG 总计划中，不把本切片完成视为 EAG-06～10 已交付。
 
 ## 实施步骤
 

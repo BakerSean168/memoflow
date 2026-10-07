@@ -7,7 +7,7 @@ updated: 2026-10-07T00:00:00Z
 
 # EAG-05：只读版本验收
 
-状态：本地最终验证中。两客户端 CIMD、浏览器 OAuth 和六工具调用已通过；Codex 使用原生 app-server 控制接口，Claude 使用本地固定模型响应驱动真实 CLI 工具通道，两者均不需要上游 LLM 调用。PG、故障回归和 prod-like 制品证据正在收敛，尚未声明公共发布就绪。依赖：EAG-03、EAG-04。入口：[总方案](../2026-10-07-external-agent-gateway.md)。
+状态：本地只读验收已通过。真实 PostgreSQL、两个原生 CLI、HTTPS 浏览器 OAuth、六工具、refresh/revoke/重新授权、受影响 checks 和 prod-like 镜像证据已闭合，见 [最终证据](../../../analysis/2026-10-07-eag-04-oauth-read-evidence.md)。Codex 使用原生 app-server 控制接口，Claude 使用本地固定模型响应驱动真实 CLI，不依赖上游 LLM。公共 rollout、多容器生产负载/故障演练和 GitHub 上游实际登录不在本轮已完成声明内。依赖：EAG-03、EAG-04。入口：[总方案](../2026-10-07-external-agent-gateway.md)。
 
 ## 交付行为
 
