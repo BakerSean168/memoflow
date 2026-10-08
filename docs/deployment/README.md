@@ -360,6 +360,30 @@ GITHUB_INSTALLATION_ROUTE_TARGETS=
 
 GitHub App private key、webhook secret、JWT/DB/Redis/PowerSync private keys 只存在于 production secret env，不进入文档示例值或 Git。
 
+### 8.1 GitHub 登录 OAuth 激活（与知识仓库 GitHub App 分离）
+
+生产 GitHub 登录是可选的 identity provider，不由 `GITHUB_APP_ID` 或知识库安装流程自动启用。只有当 API 的 `GITHUB_OAUTH_CLIENT_ID` 与 `GITHUB_OAUTH_CLIENT_SECRET` 都非空时，`GET /api/auth/capabilities` 才会返回 `{"providers":{"github":true}}`，Web 才会显示 GitHub 登录按钮。
+
+在 [GitHub Developer settings](https://github.com/settings/developers) 中为 **MemoFlow Production Login** 创建独立的 OAuth App（不要复用 Staging 测试凭据，也不要把 knowledge-repository installation 凭据当成登录凭据）：
+
+- Homepage URL：`https://memoflow.bakersean.top`
+- Authorization callback URL：`https://memoflow.bakersean.top/api/auth/callback/github`
+
+注意生产的 `AUTH_BASE_URL` 是独立的 `https://memoflowapi.bakersean.top/api/auth`，但浏览器在 `memoflow.bakersean.top` 的同源 `/api/` 代理上发起登录。为了保持 OAuth state / session Cookie 与 Web 登录页面同源，**务必显式指定 GitHub provider 的回调 override**，而不是让 provider 默认使用独立 API 子域名：
+
+```env
+# Operator-managed, chmod 0600: /opt/memoflow/.env.production.local
+GITHUB_OAUTH_CLIENT_ID=<production OAuth App client ID>
+GITHUB_OAUTH_CLIENT_SECRET=<production OAuth App client secret>
+GITHUB_OAUTH_REDIRECT_URI=https://memoflow.bakersean.top/api/auth/callback/github
+```
+
+这三个值仅保存在生产宿主机的 secret env 中；新部署的 `deployment/production/docker-compose.production.yml` 会将 redirect override 显式传给 API。**不要通过更改 `AUTH_BASE_URL` 或伪造 `providers.github=true` 规避配置门禁。**
+
+生产 watcher 的健康运行时 fast path 在 image digest / selection 未变化时可能不重建 API 容器：修改 secret env 文件后不能仅依赖下一次 timer tick 生效。需要通过正式 Published Release → Deploy Production → production watcher 的受控新版本部署让 API 获取新环境变量；不得随意在生产执行 `docker compose up`、`--force` 或破坏性迁移来强制刷新凭据。
+
+验收流程：先确认生产 API 重新启动并装载 OAuth Client ID/Secret（日志中不输出值）；检查公网 Web 和 API 的 `/api/auth/capabilities` 均为 `github:true`；发起一次真实 GitHub 登录，核对 GitHub authorize URL 的 `redirect_uri` 为上述 **Web 同源地址**；完成授权后验证弹窗关闭、主站 Session 生效、重新登录与退出登录正常。若回调失败或 Cookie/State 不一致，暂停启用并检查同源代理链路；不要降级 CSRF/SameSite 安全策略。
+
 ## 9. Rollback
 
 canonical V3 rollback 依赖 watcher 保存的上一版 exact runtime、`production-deploy-state` 与本次强制 PostgreSQL backup，不依赖 `prod-latest`。
