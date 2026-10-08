@@ -67,14 +67,30 @@ const passThrough = (name: string) =>
   });
 
 const activeChatConversationId = ref<string | null>(null);
+const conversationList = [
+  { id: 'conversation-a', title: 'A' },
+  { id: 'conversation-b', title: 'B' },
+];
+const selectConversation = vi.fn(async (summary: { id: string }) => {
+  activeChatConversationId.value = summary.id;
+});
+const startNewConversation = vi.fn(() => {
+  activeChatConversationId.value = null;
+});
+const deleteConversation = vi.fn(async (id: string) => {
+  if (activeChatConversationId.value === id) activeChatConversationId.value = null;
+});
 
 const AIChatViewStub = defineComponent({
   name: 'AIChatView',
   setup(_props, { expose }) {
     expose({
-      conversationList: [],
+      conversationList,
       conversationListLoading: false,
       chatConversationId: activeChatConversationId,
+      selectConversation,
+      startNewConversation,
+      deleteConversation,
     });
 
     return () => h('div', { 'data-testid': 'ai-chat-view' });
@@ -107,6 +123,7 @@ const WindowHeaderStub = defineComponent({
 
 const ConversationSidebarStub = defineComponent({
   name: 'ConversationSidebar',
+  emits: ['select-conversation', 'new-conversation', 'delete-conversation'],
   setup() {
     return () => h('aside', { 'data-testid': 'conversation-sidebar' });
   },
@@ -492,29 +509,81 @@ describe('AppShell right-panel integration', () => {
     host.remove();
   });
 
-  it('restores explicit focus/split layout independently for each AI conversation', async () => {
-    const { wrapper, store } = await mountShell();
-    store.rememberConversationLayout('conversation-a', 'focus');
-    store.rememberConversationLayout('conversation-b', 'split');
+  it.each(
+    (['select', 'new', 'delete'] as const).flatMap((action) =>
+      (['split', 'focus'] as const).flatMap((layout) =>
+        [true, false].map((open) => ({ action, layout, open })),
+      ),
+    ),
+  )(
+    '$action conversation preserves the workspace ($layout, panel open: $open)',
+    async ({ action, layout, open }) => {
+      const { wrapper, router, store } = await mountShell('/goals');
+      activeChatConversationId.value = 'conversation-a';
+      await nextTick();
+      store.setLayout(layout, 'user');
+      if (!open) store.closeRightPanel();
+      store.setPanelWidth(700);
+      store.setSidebarWidth(280);
+      store.setSurfaceStatus('dirty');
+      await nextTick();
+      const input = wrapper.get('[data-testid="shell-resize-focus-probe"]');
+      await input.setValue('Unsaved goal draft');
+      const businessView = wrapper.get('[data-testid="goal-draft-probe"]').element as HTMLElement;
+      businessView.scrollTop = 120;
+      const before = JSON.stringify(store.$state);
+      const originalConfirm = window.confirm;
+      const confirm = vi.fn(() => false);
+      window.confirm = confirm;
+      const navigation = vi.fn(() => false);
+      const removeGuard = router.beforeEach(navigation);
 
-    activeChatConversationId.value = 'conversation-a';
-    await nextTick();
-    expect(store.layout).toBe('focus');
-    expect(store.layoutReason).toBe('user');
-    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('focus');
+      const sidebar = wrapper.getComponent(ConversationSidebarStub);
+      if (action === 'select') sidebar.vm.$emit('select-conversation', 'conversation-b');
+      if (action === 'new') sidebar.vm.$emit('new-conversation');
+      if (action === 'delete') sidebar.vm.$emit('delete-conversation', 'conversation-a');
+      await flushPromises();
 
-    activeChatConversationId.value = 'conversation-b';
-    await nextTick();
-    expect(store.layout).toBe('split');
-    expect(store.layoutReason).toBe('user');
-    expect(wrapper.get('[data-testid="app-shell"]').attributes('data-shell-state')).toBe('split');
+      expect(activeChatConversationId.value).toBe(action === 'select' ? 'conversation-b' : null);
+      expect(JSON.stringify(store.$state)).toBe(before);
+      expect(router.currentRoute.value.fullPath).toBe('/goals');
+      expect(wrapper.get('[data-testid="goal-draft-probe"]').element).toBe(businessView);
+      expect(businessView.scrollTop).toBe(120);
+      expect((input.element as HTMLInputElement).value).toBe('Unsaved goal draft');
+      expect(goalRouteMountCount).toBe(1);
+      expect(confirm).not.toHaveBeenCalled();
+      expect(navigation).not.toHaveBeenCalled();
+      if (action === 'new') expect(startNewConversation).toHaveBeenCalledWith('chat');
+      if (action === 'delete') expect(deleteConversation).toHaveBeenCalledWith('conversation-a');
+      window.confirm = originalConfirm;
+      removeGuard();
+      wrapper.unmount();
+    },
+  );
 
-    activeChatConversationId.value = 'conversation-c';
-    await nextTick();
-    expect(store.layout).toBe('split');
-    expect(store.layoutReason).toBe('default');
-    wrapper.unmount();
-  });
+  it.each(['focus', 'split'] as const)(
+    'restores global %s intent after a narrow viewport without changing tabs',
+    async (preference) => {
+      const { wrapper, store } = await mountShell('/goals');
+      store.setLayout(preference, 'user');
+      const tabId = store.activeTabId;
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+      window.dispatchEvent(new Event('resize'));
+      await nextTick();
+      expect(store.layout).toBe('focus');
+      expect(store.layoutPreference).toBe(preference);
+      activeChatConversationId.value = 'conversation-b';
+      await nextTick();
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+      window.dispatchEvent(new Event('resize'));
+      await nextTick();
+      expect(store.layout).toBe(preference);
+      expect(store.layoutReason).toBe('user');
+      expect(store.activeTabId).toBe(tabId);
+      expect(goalRouteMountCount).toBe(1);
+      wrapper.unmount();
+    },
+  );
 
   it('mounts a cold business deep link once after creating its shell tab', async () => {
     const { wrapper, store } = await mountShell('/goals');
