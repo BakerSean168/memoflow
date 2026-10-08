@@ -253,35 +253,26 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).not.toContain('goal-agent-start-run');
     expect(source).not.toContain('knowledge-generate');
   });
-  it('restores durable Goal/supporting state before independently attempting native projection', () => {
+  it('restores durable Goal/supporting state without opening native business review', () => {
     const projection = viewComposable.indexOf('await goalWorkflow.projectRun(run, false)');
     const overlay = viewComposable.indexOf(
       'persistence.applyEditorOverlay(persisted.editorOverlay, run)',
     );
-    const opening = viewComposable.indexOf(
-      "if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview()",
-    );
     expect(projection).toBeGreaterThan(0);
     expect(overlay).toBeGreaterThan(projection);
-    expect(opening).toBeGreaterThan(overlay);
     expect(viewComposable).toContain("run.status === 'failed' || run.status === 'cancelled'");
     expect(viewComposable).toContain('persistence.clearWorkflowState(conversationId)');
     expect(viewComposable).toContain("toolMode.value = 'chat'");
     expect(viewComposable).toContain('error instanceof AIWorkflowRestoreError &&');
   });
-  it('persists authoritative Task pointer before recoverable native opening and wires native actions', () => {
+  it('persists the restored Task pointer and keeps native review opening explicit', () => {
     const projection = viewComposable.indexOf('await taskWorkflow.projectRun(run, false)');
     const persistence = viewComposable.indexOf(
       'persistence.persistWorkflowState(conversationId)',
       projection,
     );
-    const opening = viewComposable.indexOf(
-      "if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview()",
-      projection,
-    );
     expect(projection).toBeGreaterThan(0);
     expect(persistence).toBeGreaterThan(projection);
-    expect(opening).toBeGreaterThan(persistence);
     expect(source).toContain('@open-native-review="openTaskNativeReview"');
     expect(taskPanel).not.toContain('AITaskDraftEditor');
   });

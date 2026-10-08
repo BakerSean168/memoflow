@@ -25,6 +25,8 @@ updated: 2026-09-22T16:42:00+08:00
 
 ## 本轮归档
 
+- [2026-10-08 Shell 工作区与会话解耦](./2026-10-08-shell-workspace-conversation-decoupling.md)：全局布局偏好、普通会话生命周期独立、历史 Workflow 显式业务导航；affected lint/typecheck/test 与治理检查通过，原生审核离开保护保留。
+
 - [2026-10-07 AI Runtime Layering — Batch 2–6](./2026-10-07-ai-runtime-layering-batches-2-6.md)：全部实施完成；两轴复审、35 projects lint、32 projects typecheck/test 与 fresh prod-like 验证通过，最终 CI/merge 由统一 PR 跟踪。
 
 - [2026-10-07 AI Durable Workflow Runtime](./2026-10-07-ai-durable-workflow-runtime.md)：Batch 1 内部职责提取、三类 durable characterization、两轴审查与本地 prod-like 验证通过。

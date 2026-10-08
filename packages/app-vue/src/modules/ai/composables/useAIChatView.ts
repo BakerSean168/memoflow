@@ -298,10 +298,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       persistence.applyEditorOverlay(persisted.editorOverlay, run);
       // Rebase or discard any stale overlay against the runtime revision.
       persistence.persistWorkflowState(conversationId);
-      if (run.kind === 'goal.create') await goalWorkflow.openGoalNativeReview();
-      if (run.kind === 'task.create') await taskWorkflow.openTaskNativeReview();
-      if (run.kind === 'knowledge.capture')
-        await knowledgeCaptureWorkflow.openKnowledgeNativeReview();
+      // History restoration updates only AI projections; native business review is explicit.
     } catch (error) {
       // Runtime failure is an explicit empty/blocked restore. The reset above
       // ensures no stale local run or draft remains visible as authority.
@@ -484,7 +481,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         task: taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value,
         knowledge: knowledgeCaptureWorkflow.knowledgeCaptureResuming.value,
       },
-      () => canLeaveBusinessSurface(t),
+      // Chat/Q&A lifecycle does not leave the visible business surface.
+      () =>
+        toolMode.value === 'chat' ||
+        toolMode.value === 'knowledge-qa' ||
+        canLeaveBusinessSurface(t),
       () => toast.info(t('shell.panel.busyTransitionHint')),
     );
   }

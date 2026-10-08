@@ -2,6 +2,7 @@ export default {
   "title": "App Settings",
   "userSettings": "User Settings",
   "groups": {
+    "shortcuts": "Keyboard shortcuts",
     "appearance": "Appearance & Language",
     "repository": "Knowledge Repository",
     "ai": "AI",

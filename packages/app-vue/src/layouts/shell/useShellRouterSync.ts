@@ -162,7 +162,8 @@ export function useShellRouterSync() {
       store.layoutReason,
       geo.canSplit,
     );
-    if (next) store.setLayout(next.layout, next.reason);
+    if (next?.reason === 'viewport') store.setLayout(next.layout, next.reason);
+    else if (next) store.restoreLayoutPreference();
   }
 
   /** 统一离开协议（Phase 0）：busy 拦截 / dirty 确认 / clean 放行。 */
@@ -318,6 +319,15 @@ export function useShellRouterSync() {
     await navigateBusinessSurface(router, landingRoute, t);
   }
 
+  /** Keyboard entry restores the most recently active module tab, including its detail route. */
+  async function activateOrOpenModule(module: ShellModule, landingRoute: string): Promise<void> {
+    const existing = store.tabs
+      .filter((tab) => tab.module === module)
+      .sort((a, b) => b.lastActiveAt - a.lastActiveAt)[0];
+    if (existing) await activateTab(existing.id);
+    else await openModule(module, landingRoute);
+  }
+
   /** 打开独立设置场景：只改路由，不碰 tabs / layout。 */
   async function openSettings(path = '/settings'): Promise<void> {
     if (
@@ -334,7 +344,7 @@ export function useShellRouterSync() {
     await returnFromSettingsScene(router, store, route.fullPath);
   }
 
-  /** 回 STATE A（新对话 / 关面板后的地面态）。 */
+  /** 用户显式回到业务面板 Home。 */
   async function goHome(): Promise<void> {
     if (route.path !== '/') {
       await navigateBusinessSurface(router, '/', t);
@@ -432,6 +442,7 @@ export function useShellRouterSync() {
     closePanel,
     togglePanel,
     openModule,
+    activateOrOpenModule,
     openSettings,
     returnFromSettings,
     goHome,

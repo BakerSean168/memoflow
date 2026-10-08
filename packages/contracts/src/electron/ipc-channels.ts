@@ -262,6 +262,12 @@ export const DesktopFeatureChannels = {
   NOTIFICATION_DEVICE_PREFERENCE_RESET: 'desktop:notification:device-preference:reset',
 } as const;
 
+/** Device keymap IPC is registered by the Profile-aware keyboard handler. */
+export const KeyboardChannels = {
+  KEYMAP_GET: 'desktop:keyboard:keymap:get',
+  KEYMAP_SET: 'desktop:keyboard:keymap:set',
+} as const;
+
 export const RendererEventChannels = {
   TRAY_ACTION: 'tray:action',
   SHORTCUT_TRIGGERED: 'shortcut:triggered',

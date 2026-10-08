@@ -2,6 +2,7 @@ export default {
   "title": "设置",
   "userSettings": "用户设置",
   "groups": {
+    "shortcuts": "快捷键",
     "appearance": "外观与语言",
     "repository": "知识仓库",
     "ai": "AI",

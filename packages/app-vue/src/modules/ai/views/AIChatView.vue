@@ -469,10 +469,13 @@ watch(
   { immediate: true },
 );
 
-watch([goalWorkflowRun, automatedGoalId, toolMode], () => {
+watch([goalWorkflowRun, automatedGoalId, toolMode], (_current, [previousRun]) => {
   if (
     toolMode.value !== 'goal-create' ||
     goalWorkflowRun.value?.status !== 'completed' ||
+    // A restored completed run is history; only a live run transition opens business output.
+    previousRun?.runId !== goalWorkflowRun.value.runId ||
+    previousRun.status === 'completed' ||
     !automatedGoalId.value ||
     lastOpenedGoalId.value === automatedGoalId.value
   ) {

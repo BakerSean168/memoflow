@@ -133,6 +133,7 @@ onMounted(() => {
           type="button"
           class="w-full rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent/55"
           :data-testid="'goal-capsule-item-' + goal.id"
+          :data-keyboard-item="String(goal.id)"
           @click="$emit('select', String(goal.id))"
         >
           <div class="flex min-w-0 items-center justify-between gap-2">

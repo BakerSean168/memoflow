@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ensureLoginScene, ensureRegisterScene, login } from '../helpers/testHelpers';
-import { completeEmailVerification, waitForCapturedEmailLink } from '../helpers/auth-email-link';
+import { ensureLoginScene, login, registerViaAuth } from '../helpers/testHelpers';
+import { waitForCapturedEmailLink } from '../helpers/auth-email-link';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 
 const oldPassword = 'Test123456!';
@@ -23,22 +23,13 @@ async function gotoCleanAuthPage(page: Page): Promise<void> {
   await ensureLoginScene(page);
 }
 
-async function registerUser(page: Page, email: string, password: string): Promise<void> {
-  await ensureRegisterScene(page);
-  await page.locator('#reg-email').fill(email);
-  await page.locator('#reg-password').fill(password);
-  await page.locator('#confirm-password').fill(password);
-  await page.getByTestId('register-submit-button').click();
-  await completeEmailVerification(page, email, password);
-}
-
 test.describe('Authentication - password recovery', () => {
   test('[P0] forgot → link → reset → old password fails → new password works → token replay fails', async ({
     page,
   }) => {
     const email = generateTestEmail();
     await gotoCleanAuthPage(page);
-    await registerUser(page, email, oldPassword);
+    await registerViaAuth(page, email, oldPassword);
 
     await gotoCleanAuthPage(page);
     await page.getByTestId('login-forgot-link').click();

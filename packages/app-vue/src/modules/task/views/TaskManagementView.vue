@@ -53,7 +53,11 @@
         </div>
 
         <template v-else-if="activeSurface === 'plans'">
-          <div v-if="filteredPlans.length" data-testid="task-plan-list">
+          <div
+            v-if="filteredPlans.length"
+            v-keyboard-list="{ selectable: true }"
+            data-testid="task-plan-list"
+          >
             <div
               class="hidden grid-cols-[minmax(0,1fr)_11rem_8rem_10rem] items-center gap-x-6 border-b border-[hsl(var(--border-subtle))] px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
               data-testid="task-plan-list-column-header"
@@ -108,6 +112,7 @@
           <div
             v-if="visibleOccurrences.length"
             class="space-y-4"
+            v-keyboard-list="{ selectable: true }"
             data-testid="task-occurrence-list"
           >
             <section
@@ -202,6 +207,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { buildTaskPlanCreateRequest } from '../utils/task-plan-create-request';
 
 import { computed, onMounted, onActivated, onDeactivated, onBeforeUnmount, ref, watch } from 'vue';

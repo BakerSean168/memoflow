@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { createApp, nextTick } from 'vue';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { MAX_BUSINESS_TABS, useAppShellStore } from './useAppShellStore';
 
 describe('useAppShellStore (V2 shell tabs)', () => {
@@ -14,7 +16,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(store.panelSurface).toBe('home');
     expect(store.activeTab).toBeUndefined();
     expect(store.layoutReason).toBe('default');
-    expect(store.conversationLayoutPreferences).toEqual({});
+    expect(store.layoutPreference).toBeNull();
   });
 
   it('keeps right-panel visibility, tabs, and focus independent', () => {
@@ -155,7 +157,7 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(nextRoute).toBe('/goals');
     expect(store.activeTabId).toBe(a.tabId);
 
-    store.toggleFocus('conversation-a');
+    store.toggleFocus();
     expect(store.closeTab(a.tabId)).toBeNull();
     expect(store.tabs).toHaveLength(0);
     expect(store.activeTabId).toBeNull();
@@ -163,13 +165,13 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(store.rightPanelOpen).toBe(true);
     expect(store.layout).toBe('focus');
     expect(store.layoutReason).toBe('user');
-    expect(store.getConversationLayoutPreference('conversation-a')).toBe('focus');
+    expect(store.layoutPreference).toBe('focus');
   });
 
-  it('keeps the current conversation layout when returning to Home or closing all tabs', () => {
+  it('keeps the workspace layout when returning to Home or closing all tabs', () => {
     const store = useAppShellStore();
     store.openTab({ module: 'goal', route: '/goals', title: 'G', intent: 'deeplink' });
-    store.toggleFocus('conversation-a');
+    store.toggleFocus();
 
     store.showHome();
     expect(store.panelSurface).toBe('home');
@@ -213,23 +215,85 @@ describe('useAppShellStore (V2 shell tabs)', () => {
     expect(store.activeTabId).toBe(tab.tabId);
   });
 
-  it('toggleFocus records user layout reason and remembers it per AI conversation', () => {
+  it('records global user intent without persisting temporary viewport focus', () => {
     const store = useAppShellStore();
-    store.toggleFocus('conversation-a');
-    expect(store.layout).toBe('focus');
+    store.toggleFocus();
+    expect(store.layoutPreference).toBe('focus');
     expect(store.layoutReason).toBe('user');
-    expect(store.getConversationLayoutPreference('conversation-a')).toBe('focus');
-    expect(store.getConversationLayoutPreference('conversation-b')).toBeNull();
 
-    store.toggleFocus('conversation-a');
+    store.toggleFocus();
+    store.setLayout('focus', 'viewport');
+    expect(store.layout).toBe('focus');
+    expect(store.layoutPreference).toBe('split');
+
+    store.restoreLayoutPreference();
     expect(store.layout).toBe('split');
     expect(store.layoutReason).toBe('user');
-    expect(store.getConversationLayoutPreference('conversation-a')).toBe('split');
+  });
 
-    store.rememberConversationLayout('conversation-b', 'focus');
-    expect(store.getConversationLayoutPreference('conversation-b')).toBe('focus');
-    store.forgetConversationLayout('conversation-b');
-    expect(store.getConversationLayoutPreference('conversation-b')).toBeNull();
+  it.each(['focus', 'split'] as const)(
+    'restores persisted %s intent and business tabs independently from viewport layout',
+    async (preference) => {
+      function createPersistedStore() {
+        const pinia = createPinia().use(piniaPluginPersistedstate);
+        createApp({}).use(pinia);
+        setActivePinia(pinia);
+        return useAppShellStore();
+      }
+      const store = createPersistedStore();
+      const tab = store.openTab({
+        module: 'goal',
+        route: '/goals/g-1',
+        title: 'Goal',
+        intent: 'deeplink',
+      });
+      store.setLayout(preference, 'user');
+      store.setLayout('focus', 'viewport');
+      store.closeRightPanel();
+      store.setPanelWidth(720);
+      await nextTick();
+
+      const persisted = JSON.parse(localStorage.getItem('app-shell')!);
+      expect(persisted.layoutPreference).toBe(preference);
+      expect(persisted).not.toHaveProperty('layout');
+      expect(persisted).not.toHaveProperty('layoutReason');
+      expect(persisted).not.toHaveProperty('conversationLayoutPreferences');
+      const restored = createPersistedStore();
+      expect(restored.layout).toBe(preference);
+      expect(restored.layoutReason).toBe('user');
+      expect(restored.activeTabId).toBe(tab.tabId);
+      expect(restored.activeTab?.route).toBe('/goals/g-1');
+      expect(restored.rightPanelOpen).toBe(false);
+      expect(restored.panelWidth).toBe(720);
+    },
+  );
+
+  it('retires conversation preferences while retaining tabs from existing storage', () => {
+    localStorage.setItem(
+      'app-shell',
+      JSON.stringify({
+        tabs: [
+          {
+            id: 'old-goal-tab',
+            module: 'goal',
+            route: '/goals/g-1',
+            title: 'Goal',
+            lastActiveAt: 1,
+          },
+        ],
+        activeTabId: 'old-goal-tab',
+        conversationLayoutPreferences: { 'conversation-a': 'focus' },
+      }),
+    );
+    const pinia = createPinia().use(piniaPluginPersistedstate);
+    createApp({}).use(pinia);
+    setActivePinia(pinia);
+    const store = useAppShellStore();
+    expect(store.layout).toBe('split');
+    expect(store.layoutReason).toBe('default');
+    expect(store.activeTabId).toBe('old-goal-tab');
+    expect(store.activeTab?.route).toBe('/goals/g-1');
+    expect(store.$state).not.toHaveProperty('conversationLayoutPreferences');
   });
 
   it('sanitizeLegacyTabs drops setting module tabs from persisted state', () => {

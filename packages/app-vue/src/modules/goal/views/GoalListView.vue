@@ -17,7 +17,11 @@
           </div>
         </div>
 
-        <div v-else-if="goals.length > 0" data-testid="goal-list">
+        <div
+          v-else-if="goals.length > 0"
+          v-keyboard-list="{ selectable: true }"
+          data-testid="goal-list"
+        >
           <div
             class="hidden grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 border-b border-[hsl(var(--border-subtle))] px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
             data-testid="goal-list-column-header"
@@ -59,6 +63,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Target } from '@lucide/vue';

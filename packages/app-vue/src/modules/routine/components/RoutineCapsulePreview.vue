@@ -49,6 +49,7 @@
           type="button"
           class="flex min-w-0 flex-1 items-start gap-2 rounded-md px-0 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
           :data-testid="`routine-capsule-open-${occurrence.routineId}`"
+          :data-keyboard-item="occurrence.occurrenceKey"
           @click="emit('select', occurrence.routineId)"
         >
           <span

@@ -213,6 +213,19 @@ describe('useShellRouterSync startup restoration', () => {
     wrapper.unmount();
   });
 
+  it('restores global user focus on business entry after a temporary viewport override', async () => {
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    fixture.store.setLayout('focus', 'user');
+    fixture.store.setLayout('focus', 'viewport');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1400 });
+    await fixture.router.push('/tasks');
+    expect(fixture.store.layout).toBe('focus');
+    expect(fixture.store.layoutReason).toBe('user');
+    expect(fixture.store.layoutPreference).toBe('focus');
+    wrapper.unmount();
+  });
+
   it('preserves the form-owned dirty status after the user confirms hiding the panel', async () => {
     const fixture = await mountRouterSync('/goals');
     fixture.store.openTab({
@@ -419,6 +432,32 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
 
     expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-1');
     expect(fixture.store.panelSurface).toBe('business');
+    wrapper.unmount();
+  });
+});
+
+describe('keyboard module activation', () => {
+  it('restores the most recently used detail without rewriting either tab', async () => {
+    const fixture = await mountRouterSync('/tasks');
+    const wrapper = fixture.mount();
+    const first = fixture.store.openTab({
+      module: 'goal',
+      route: '/goals/g-1',
+      title: 'First',
+      intent: 'deeplink',
+    });
+    const second = fixture.store.openTab({
+      module: 'goal',
+      route: '/goals/g-2',
+      title: 'Second',
+      intent: 'deeplink',
+    });
+    fixture.store.tabs.find((tab) => tab.id === first.tabId)!.lastActiveAt = 10;
+    fixture.store.tabs.find((tab) => tab.id === second.tabId)!.lastActiveAt = 20;
+    await fixture.actions().activateOrOpenModule('goal', '/goals');
+    expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-2');
+    expect(fixture.store.activeTabId).toBe(second.tabId);
+    expect(fixture.store.tabs.find((tab) => tab.id === first.tabId)?.route).toBe('/goals/g-1');
     wrapper.unmount();
   });
 });

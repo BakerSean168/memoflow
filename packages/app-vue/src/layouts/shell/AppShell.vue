@@ -22,7 +22,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
-import { useAppShellStore, MAX_BUSINESS_TABS, type ShellLayout } from './useAppShellStore';
+import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
@@ -75,6 +75,10 @@ import {
   LOGOUT_HANDLER_KEY,
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
+import { useDeviceKeymap } from '../../shared/keyboard/device-keymap';
+import { keyboard } from '../../shared/keyboard/runtime';
+import { keyboardModules } from '../../shared/keyboard/commands';
+import { nextTick } from 'vue';
 import { defaultModuleCapsules } from '../../di/navigation';
 import { getProductTime } from '../../shared/utils/product-time';
 
@@ -318,45 +322,27 @@ const conversationGroups = computed(() => {
 const activeConversationId = computed<string | null>(
   () => (aiRef.value?.chatConversationId as string | undefined) || null,
 );
-/** 新会话在首条消息落库前没有 conversation id，先暂存一次用户显式布局选择。 */
-const pendingConversationLayoutPreference = ref<ShellLayout | null>(null);
-
-function applyConversationLayoutPreference(conversationId = activeConversationId.value): void {
-  const preferred = store.getConversationLayoutPreference(conversationId);
-  store.setLayout(preferred ?? 'split', preferred ? 'user' : 'default');
-}
-
 function handleToggleWorkspaceFocus(): void {
-  store.toggleFocus(activeConversationId.value);
-  if (!activeConversationId.value) {
-    pendingConversationLayoutPreference.value = store.layout;
-  }
-  // A narrow viewport may temporarily require focus even when the user records split as
-  // the conversation preference. Re-apply geometry immediately so the actual layout stays valid.
+  store.toggleFocus();
+  // 用户偏好与 viewport 临时约束分开；窄屏仍需满足几何下限。
   onViewportGeometryChange();
 }
 
 async function handleSelectConversation(id: string) {
   closeOverlaySidebar();
-  // Selecting an existing conversation must never inherit a pending preference from an unsaved draft.
-  pendingConversationLayoutPreference.value = null;
   const summary = conversations.value.find((item) => String(item.id) === id);
   if (!summary) return;
   await aiRef.value?.selectConversation(summary);
 }
 
 function handleDeleteConversation(id: string) {
-  store.forgetConversationLayout(id);
   void aiRef.value?.deleteConversation(id);
 }
 
-/** 「新对话」= 新建会话 + 关面板回 STATE A（V2 §5）。 */
-async function handleNewConversation() {
+/** 会话生命周期只更新 AI 区域，保留业务工作区与草稿。 */
+function handleNewConversation() {
   closeOverlaySidebar();
-  pendingConversationLayoutPreference.value = null;
-  store.setLayout('split', 'default');
   aiRef.value?.startNewConversation('chat');
-  await sync.goHome();
 }
 
 // ── 用户 / 账户入口（侧栏底部菜单，§9） ──
@@ -365,6 +351,7 @@ const accountStore = useAccountStore();
 const { isAuthenticated } = storeToRefs(authStore);
 const logout = inject(LOGOUT_HANDLER_KEY, null);
 const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
+useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
 const userName = computed<string | undefined>(
   () =>
@@ -501,7 +488,7 @@ function onViewportGeometryChange(): void {
   }
 
   if (store.layout === 'focus' && store.layoutReason === 'viewport') {
-    applyConversationLayoutPreference();
+    store.restoreLayoutPreference();
   }
 }
 
@@ -631,20 +618,6 @@ watch([workspaceMainRef, aiColumnRef], () => {
   bindHostResizeObserver();
 });
 
-watch(activeConversationId, (conversationId, previousConversationId) => {
-  if (
-    conversationId &&
-    !previousConversationId &&
-    pendingConversationLayoutPreference.value !== null
-  ) {
-    store.rememberConversationLayout(conversationId, pendingConversationLayoutPreference.value);
-    pendingConversationLayoutPreference.value = null;
-  }
-  applyConversationLayoutPreference(conversationId);
-  // 会话偏好只表达 user intent；窄视口仍由几何规则临时强制 focus。
-  onViewportGeometryChange();
-});
-
 watch([showDockedSidebar, sidebarWidth, sidebarCollapsed], () => {
   // 触发一次布局派生，便于 focus 自动恢复规则与宽度消费保持一致
   onViewportGeometryChange();
@@ -659,9 +632,7 @@ watch(isSettingsScene, (settings) => {
 });
 
 watch(rightPanelOpen, (open) => {
-  // Reopening the business/workflow panel changes the geometry budget. A conversation
-  // may have restored its split preference while the app was chat-only, so narrow
-  // viewports must immediately re-apply the viewport-owned focus override.
+  // Reopening the business panel must immediately re-apply viewport constraints.
   if (open) onViewportGeometryChange();
 });
 
@@ -799,6 +770,88 @@ function panelCacheKey(
     tabs.value.find((tab) => tab.route === fullPath)?.id ?? activeTabId.value ?? 'panel';
   return `${owner}:${resolvePanelRouteIdentity(matched, fullPath)}`;
 }
+const keyboardDisposers: Array<() => void> = [];
+const inWorkspace = () => !isSettingsScene.value;
+for (const module of keyboardModules) {
+  const enabled = () =>
+    inWorkspace() && headerCapsules.value.some((entry) => entry.id === module.id);
+  keyboardDisposers.push(
+    keyboard.register(
+      `module.${module.id}.preview`,
+      () => keyboard.togglePreview(module.id),
+      enabled,
+    ),
+  );
+  keyboardDisposers.push(
+    keyboard.register(
+      `module.${module.id}.activate`,
+      async () => {
+        keyboard.closePreview();
+        await sync.activateOrOpenModule(
+          module.id,
+          headerCapsules.value.find((entry) => entry.id === module.id)?.route ?? module.route,
+        );
+      },
+      enabled,
+    ),
+  );
+}
+keyboard.setPreviewEntry(() => {
+  const id = keyboard.preview.value;
+  const module = keyboardModules.find((entry) => entry.id === id);
+  if (module) keyboard.engine.execute(`module.${module.id}.activate`);
+});
+keyboardDisposers.push(
+  keyboard.register('layout.sidebar', handleShellSidebarToggle),
+  keyboard.register('layout.panel', () => sync.togglePanel(), inWorkspace),
+  keyboard.register('conversation.new', handleNewConversation, inWorkspace),
+  keyboard.register(
+    'conversation.search',
+    async () => {
+      if (sidebarPresentation.value === 'overlay') overlaySidebarOpen.value = true;
+      else store.sidebarCollapsed = false;
+      await nextTick();
+      const sidebars = [
+        ...document.querySelectorAll<HTMLElement>('[data-testid="conversation-sidebar"]'),
+      ];
+      const sidebar = sidebars.find((el) => el.getClientRects().length > 0);
+      const input = sidebar?.querySelector<HTMLInputElement>(
+        '[data-testid="conversation-search-input"]',
+      );
+      if (input) input.focus();
+      else
+        sidebar
+          ?.querySelector<HTMLButtonElement>('[data-testid="conversation-search-toggle"]')
+          ?.click();
+    },
+    inWorkspace,
+  ),
+  keyboard.register('app.shortcuts', () => sync.openSettings('/settings?tab=shortcuts')),
+);
+for (const [id, direction] of [
+  ['tab.next', 1],
+  ['tab.previous', -1],
+] as const) {
+  keyboardDisposers.push(
+    keyboard.register(
+      id,
+      () => {
+        const index = tabs.value.findIndex((tab) => tab.id === activeTabId.value);
+        const next = tabs.value[(index + direction + tabs.value.length) % tabs.value.length];
+        return next ? sync.activateTab(next.id) : undefined;
+      },
+      () => inWorkspace() && tabs.value.length > 1,
+    ),
+  );
+}
+watch(
+  () => route.fullPath,
+  () => keyboard.closePreview(),
+);
+onBeforeUnmount(() => {
+  keyboardDisposers.forEach((dispose) => dispose());
+  keyboard.closePreview();
+});
 </script>
 
 <template>

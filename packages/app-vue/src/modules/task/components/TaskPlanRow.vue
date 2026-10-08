@@ -16,6 +16,7 @@
       <button
         type="button"
         class="w-full text-left transition-colors hover:bg-[hsl(var(--hover)/0.5)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+        :data-keyboard-item="String(plan.id)"
         @click="emit('view')"
       >
         <div
