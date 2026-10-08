@@ -7,6 +7,7 @@
  *
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
  */
+import { vKeyboardList } from '../../shared/keyboard/list-adapter';
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MoreHorizontal, Search, SquarePen, Trash2, X } from '@lucide/vue';
@@ -172,7 +173,7 @@ const identityLabel = () => {
     </div>
 
     <!-- 会话列表（按时间分组） -->
-    <nav class="flex-1 overflow-y-auto px-2 pb-3 pt-1">
+    <nav v-keyboard-list class="flex-1 overflow-y-auto px-2 pb-3 pt-1">
       <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
         {{ t('common.loading') }}
       </p>
@@ -202,6 +203,7 @@ const identityLabel = () => {
           <button
             type="button"
             class="min-w-0 flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5"
+            :data-keyboard-item="item.id"
             @click="emit('select-conversation', item.id)"
           >
             <span class="block truncate">{{ item.title }}</span>

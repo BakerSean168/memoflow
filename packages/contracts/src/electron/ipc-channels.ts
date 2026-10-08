@@ -257,6 +257,8 @@ export const DesktopFeatureChannels = {
   SHORTCUTS_UPDATE: 'desktop:shortcuts:update',
   TRAY_FLASH: 'desktop:tray:flash',
   TRAY_STOP_FLASH: 'desktop:tray:stopFlash',
+  KEYMAP_GET: 'desktop:keyboard:keymap:get',
+  KEYMAP_SET: 'desktop:keyboard:keymap:set',
   NOTIFICATION_DEVICE_PREFERENCE_GET: 'desktop:notification:device-preference:get',
   NOTIFICATION_DEVICE_PREFERENCE_UPDATE: 'desktop:notification:device-preference:update',
   NOTIFICATION_DEVICE_PREFERENCE_RESET: 'desktop:notification:device-preference:reset',

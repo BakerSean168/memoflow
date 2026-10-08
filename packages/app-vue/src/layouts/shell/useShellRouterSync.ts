@@ -318,6 +318,15 @@ export function useShellRouterSync() {
     await navigateBusinessSurface(router, landingRoute, t);
   }
 
+  /** Keyboard entry restores the most recently active module tab, including its detail route. */
+  async function activateOrOpenModule(module: ShellModule, landingRoute: string): Promise<void> {
+    const existing = store.tabs
+      .filter((tab) => tab.module === module)
+      .sort((a, b) => b.lastActiveAt - a.lastActiveAt)[0];
+    if (existing) await activateTab(existing.id);
+    else await openModule(module, landingRoute);
+  }
+
   /** 打开独立设置场景：只改路由，不碰 tabs / layout。 */
   async function openSettings(path = '/settings'): Promise<void> {
     if (
@@ -335,14 +344,12 @@ export function useShellRouterSync() {
   }
 
   /** 回 STATE A（新对话 / 关面板后的地面态）。 */
-  async function goHome(): Promise<void> {
-    if (route.path !== '/') {
-      await navigateBusinessSurface(router, '/', t);
-    } else {
-      if (!canLeaveSurface()) return;
-      store.showHome();
-      maybeAutoFocus();
-    }
+  async function goHome(): Promise<boolean> {
+    if (route.path !== '/') return navigateBusinessSurface(router, '/', t);
+    if (!canLeaveSurface()) return false;
+    store.showHome();
+    maybeAutoFocus();
+    return true;
   }
 
   // ── 生命周期：首次渲染前恢复 + afterEach 订阅 ──
@@ -432,6 +439,7 @@ export function useShellRouterSync() {
     closePanel,
     togglePanel,
     openModule,
+    activateOrOpenModule,
     openSettings,
     returnFromSettings,
     goHome,

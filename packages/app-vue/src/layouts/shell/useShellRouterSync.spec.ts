@@ -422,3 +422,29 @@ describe('useShellRouterSync Phase 1 landing / deep-link semantics', () => {
     wrapper.unmount();
   });
 });
+
+describe('keyboard module activation', () => {
+  it('restores the most recently used detail without rewriting either tab', async () => {
+    const fixture = await mountRouterSync('/tasks');
+    const wrapper = fixture.mount();
+    const first = fixture.store.openTab({
+      module: 'goal',
+      route: '/goals/g-1',
+      title: 'First',
+      intent: 'deeplink',
+    });
+    const second = fixture.store.openTab({
+      module: 'goal',
+      route: '/goals/g-2',
+      title: 'Second',
+      intent: 'deeplink',
+    });
+    fixture.store.tabs.find((tab) => tab.id === first.tabId)!.lastActiveAt = 10;
+    fixture.store.tabs.find((tab) => tab.id === second.tabId)!.lastActiveAt = 20;
+    await fixture.actions().activateOrOpenModule('goal', '/goals');
+    expect(fixture.router.currentRoute.value.fullPath).toBe('/goals/g-2');
+    expect(fixture.store.activeTabId).toBe(second.tabId);
+    expect(fixture.store.tabs.find((tab) => tab.id === first.tabId)?.route).toBe('/goals/g-1');
+    wrapper.unmount();
+  });
+});

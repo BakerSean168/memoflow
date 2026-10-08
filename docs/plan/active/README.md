@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [Keyboard-first V1](./2026-10-08-keyboard-first-v1.md)：实现与 Web/Linux 桌面本地验收已完成，Windows/macOS 实机验收待补。
+
 - [Production schema cutover repair](./2026-10-07-production-schema-cutover-repair.md)：补齐生产快照预演暴露的旧字段退役与唯一索引准备，验证 v0.15.2 升级。
 
 - [Desktop release startup repair](./2026-10-07-desktop-release-startup-repair.md)：修复 v0.15.0 Desktop gate 暴露的 Prisma 单例加载和 Windows ASAR 路径问题，完成修正版发布。

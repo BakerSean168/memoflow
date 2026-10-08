@@ -17,6 +17,7 @@
 
 import { app, BrowserWindow } from 'electron';
 import { initializeDesktopFeatures } from '../desktop-features';
+import { registerKeyboardHandlers } from '../ipc/keyboard-handlers';
 import { registerSystemIpcHandlers } from '../ipc/system-handlers';
 import type { DesktopMainRuntime } from '../desktop-main-runtime';
 import type { WindowManager } from './window-manager';
@@ -47,6 +48,7 @@ async function handleAppReady(
 
   const mainRuntime = getMainRuntime();
   const runtimeManager = mainRuntime.profileRuntimeManager;
+  registerKeyboardHandlers(() => runtimeManager.getActiveProfileResolver());
 
   // Local Profile is the desktop access gate. Cloud authentication is optional
   // and must never decide whether local data can be opened.

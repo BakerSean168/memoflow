@@ -26,6 +26,7 @@ import { returnFromSettingsScene } from '../../../layouts/shell/useShellRouterSy
 import { ProductSurfaceHeader } from '../../../shared/components';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../../di/keys';
 
+const KeyboardSettings = defineAsyncComponent(() => import('../components/KeyboardSettings.vue'));
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
   () => import('../components/KnowledgeRepositorySettings.vue'),
@@ -57,9 +58,17 @@ const settingsContentRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
 type SettingsGroup =
-  'appearance' | 'repository' | 'ai' | 'notifications' | 'account' | 'data' | 'updates';
+  | 'shortcuts'
+  | 'appearance'
+  | 'repository'
+  | 'ai'
+  | 'notifications'
+  | 'account'
+  | 'data'
+  | 'updates';
 
 const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string }> = [
+  { value: 'shortcuts', labelKey: 'setting.groups.shortcuts' },
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
   { value: 'repository', labelKey: 'setting.groups.repository' },
   { value: 'ai', labelKey: 'setting.groups.ai' },
@@ -163,6 +172,7 @@ onBeforeUnmount(() => {
         <div class="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
           <div class="min-w-0 space-y-8">
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
+            <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
             <AISettings v-else-if="activeTab === 'ai'" />
             <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />

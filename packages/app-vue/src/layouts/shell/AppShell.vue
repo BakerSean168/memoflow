@@ -75,6 +75,10 @@ import {
   LOGOUT_HANDLER_KEY,
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
+import { useDeviceKeymap } from '../../shared/keyboard/device-keymap';
+import { keyboard } from '../../shared/keyboard/runtime';
+import { keyboardModules } from '../../shared/keyboard/commands';
+import { nextTick } from 'vue';
 import { defaultModuleCapsules } from '../../di/navigation';
 import { getProductTime } from '../../shared/utils/product-time';
 
@@ -352,11 +356,11 @@ function handleDeleteConversation(id: string) {
 
 /** 「新对话」= 新建会话 + 关面板回 STATE A（V2 §5）。 */
 async function handleNewConversation() {
+  if (!(await sync.goHome())) return;
   closeOverlaySidebar();
   pendingConversationLayoutPreference.value = null;
   store.setLayout('split', 'default');
   aiRef.value?.startNewConversation('chat');
-  await sync.goHome();
 }
 
 // ── 用户 / 账户入口（侧栏底部菜单，§9） ──
@@ -365,6 +369,7 @@ const accountStore = useAccountStore();
 const { isAuthenticated } = storeToRefs(authStore);
 const logout = inject(LOGOUT_HANDLER_KEY, null);
 const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
+useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
 const userName = computed<string | undefined>(
   () =>
@@ -799,6 +804,88 @@ function panelCacheKey(
     tabs.value.find((tab) => tab.route === fullPath)?.id ?? activeTabId.value ?? 'panel';
   return `${owner}:${resolvePanelRouteIdentity(matched, fullPath)}`;
 }
+const keyboardDisposers: Array<() => void> = [];
+const inWorkspace = () => !isSettingsScene.value;
+for (const module of keyboardModules) {
+  const enabled = () =>
+    inWorkspace() && headerCapsules.value.some((entry) => entry.id === module.id);
+  keyboardDisposers.push(
+    keyboard.register(
+      `module.${module.id}.preview`,
+      () => keyboard.togglePreview(module.id),
+      enabled,
+    ),
+  );
+  keyboardDisposers.push(
+    keyboard.register(
+      `module.${module.id}.activate`,
+      async () => {
+        keyboard.closePreview();
+        await sync.activateOrOpenModule(
+          module.id,
+          headerCapsules.value.find((entry) => entry.id === module.id)?.route ?? module.route,
+        );
+      },
+      enabled,
+    ),
+  );
+}
+keyboard.setPreviewEntry(() => {
+  const id = keyboard.preview.value;
+  const module = keyboardModules.find((entry) => entry.id === id);
+  if (module) keyboard.engine.execute(`module.${module.id}.activate`);
+});
+keyboardDisposers.push(
+  keyboard.register('layout.sidebar', handleShellSidebarToggle),
+  keyboard.register('layout.panel', () => sync.togglePanel(), inWorkspace),
+  keyboard.register('conversation.new', handleNewConversation, inWorkspace),
+  keyboard.register(
+    'conversation.search',
+    async () => {
+      if (sidebarPresentation.value === 'overlay') overlaySidebarOpen.value = true;
+      else store.sidebarCollapsed = false;
+      await nextTick();
+      const sidebars = [
+        ...document.querySelectorAll<HTMLElement>('[data-testid="conversation-sidebar"]'),
+      ];
+      const sidebar = sidebars.find((el) => el.getClientRects().length > 0);
+      const input = sidebar?.querySelector<HTMLInputElement>(
+        '[data-testid="conversation-search-input"]',
+      );
+      if (input) input.focus();
+      else
+        sidebar
+          ?.querySelector<HTMLButtonElement>('[data-testid="conversation-search-toggle"]')
+          ?.click();
+    },
+    inWorkspace,
+  ),
+  keyboard.register('app.shortcuts', () => sync.openSettings('/settings?tab=shortcuts')),
+);
+for (const [id, direction] of [
+  ['tab.next', 1],
+  ['tab.previous', -1],
+] as const) {
+  keyboardDisposers.push(
+    keyboard.register(
+      id,
+      () => {
+        const index = tabs.value.findIndex((tab) => tab.id === activeTabId.value);
+        const next = tabs.value[(index + direction + tabs.value.length) % tabs.value.length];
+        return next ? sync.activateTab(next.id) : undefined;
+      },
+      () => inWorkspace() && tabs.value.length > 1,
+    ),
+  );
+}
+watch(
+  () => route.fullPath,
+  () => keyboard.closePreview(),
+);
+onBeforeUnmount(() => {
+  keyboardDisposers.forEach((dispose) => dispose());
+  keyboard.closePreview();
+});
 </script>
 
 <template>

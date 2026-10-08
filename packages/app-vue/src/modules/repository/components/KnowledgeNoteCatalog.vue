@@ -125,10 +125,11 @@
 
     <div class="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
       <template v-if="searchMode">
-        <div class="space-y-0.5">
+        <div v-keyboard-list class="space-y-0.5">
           <DocumentCatalogRow
             v-for="note in notes"
             :key="note.id"
+            :data-keyboard-item="note.id"
             :selected="selectedNoteId === note.id"
             :data-testid="`knowledge-projection-note-${note.id}`"
             @activate="emit('select', note.id)"
@@ -171,6 +172,8 @@
         <div
           v-else-if="treeRows.length"
           class="space-y-0.5 py-0.5"
+          v-keyboard-list
+          data-keyboard-tree
           data-testid="knowledge-file-tree"
         >
           <template v-for="row in treeRows" :key="row.node.relativePath">
@@ -179,6 +182,10 @@
               type="button"
               class="flex h-7 w-full items-center gap-1 rounded-md pr-2 text-left text-sm text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover)/0.6)] hover:text-foreground"
               :style="{ paddingLeft: `${6 + row.depth * 16}px` }"
+              :data-keyboard-item="row.node.relativePath"
+              :data-keyboard-parent="row.node.relativePath.split('/').slice(0, -1).join('/')"
+              :aria-expanded="expandedDirectories.includes(row.node.relativePath)"
+              :aria-disabled="loadingDirectories.includes(row.node.relativePath)"
               :data-testid="`knowledge-tree-directory-${row.node.relativePath}`"
               @click="emit('toggle-directory', row.node.relativePath)"
             >
@@ -202,6 +209,8 @@
               class="h-7 py-0 pr-2"
               :selected="selectedNoteId === row.node.projectionId"
               :style="{ paddingLeft: `${9 + row.depth * 16}px` }"
+              :data-keyboard-item="row.node.relativePath"
+              :data-keyboard-parent="row.node.relativePath.split('/').slice(0, -1).join('/')"
               :data-testid="`knowledge-tree-note-${row.node.projectionId}`"
               @activate="emit('select', row.node.projectionId)"
             >
@@ -231,6 +240,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { computed } from 'vue';
 import {
   BookOpen,

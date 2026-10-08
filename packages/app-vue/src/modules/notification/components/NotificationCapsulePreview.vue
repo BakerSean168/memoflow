@@ -61,6 +61,7 @@
           type="button"
           class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :aria-label="item.title"
+          :data-keyboard-item="String(item.id)"
           @click="handleItemClick(item)"
         >
           <span

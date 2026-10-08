@@ -1574,6 +1574,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/services/device-keymap.store.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/services/notification.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2034,6 +2042,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/local-docker/keyboard-first.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/note/legacy-note-mutation-boundary.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2199,6 +2221,20 @@
         "role": "supplemental",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.audit.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/shell/keyboard-first-desktop.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.shell.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "shell",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.shell.config.ts"
       }
     },
     {
@@ -5063,6 +5099,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5788,6 +5832,46 @@
     },
     {
       "path": "packages/app-vue/src/shared/dialog-content-forwarding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/device-keymap-controller.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/keymap.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/list-navigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/shortcut-engine.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12293,7 +12377,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 10,
+      "fileCount": 11,
       "e2eOwnership": {
         "lane": "local-validation",
         "lifecycle": "active",
@@ -12339,7 +12423,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 2,
+      "fileCount": 3,
       "e2eOwnership": {
         "lane": "specialized",
         "lifecycle": "active",
@@ -12546,7 +12630,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 91
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12588,7 +12672,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 275
+      "fileCount": 281
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13315,12 +13399,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1149,
+    "unit": 1156,
     "integration": 40,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,
-    "e2e": 46,
+    "e2e": 48,
     "perf": 2,
     "governance": 65
   },
@@ -13329,19 +13413,19 @@
     "issues": [],
     "countsByLane": {
       "desktop": 2,
-      "local-validation": 5,
+      "local-validation": 6,
       "nightly": 5,
       "reference": 5,
       "required": 22,
       "secure-acceptance": 2,
-      "specialized": 2,
+      "specialized": 3,
       "visual-artifact": 3
     },
     "countsByRole": {
       "artifact": 3,
       "canonical": 25,
       "reference": 5,
-      "supplemental": 13
+      "supplemental": 15
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5
