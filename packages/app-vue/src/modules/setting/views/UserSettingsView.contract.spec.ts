@@ -10,12 +10,13 @@ const source = readFileSync(
 );
 
 describe('UserSettingsView owner composition', () => {
-  it('keeps six shared owner groups plus the optional Desktop updates group', () => {
+  it('keeps seven shared owner groups plus the optional Desktop updates group', () => {
     const definitions =
       source.match(/const GROUP_DEFINITIONS:[\s\S]*?\]\s*;\s*\nconst GROUP_VALUES/)?.[0] ?? '';
     const values = definitions.match(/\{ value: '[a-z]+'/g) ?? [];
 
-    expect(values).toHaveLength(7);
+    expect(values).toHaveLength(8);
+    expect(definitions).toContain("{ value: 'shortcuts'");
     expect(definitions).toContain("{ value: 'appearance'");
     expect(definitions).toContain("{ value: 'repository'");
     expect(definitions).toContain("{ value: 'ai'");

@@ -153,6 +153,7 @@ onMounted(() => {
             type="button"
             class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
             :data-testid="`schedule-capsule-event-${event.id}`"
+            :data-keyboard-item="String(event.id)"
             @click="emit('select', event)"
           >
             <span class="w-10 shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">

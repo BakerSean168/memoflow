@@ -8,6 +8,7 @@
   >
     <button
       type="button"
+      :data-keyboard-item="String(notification.id)"
       data-testid="notification-item"
       :data-notification-id="notification.id"
       :data-read-state="notification.isRead ? 'read' : 'unread'"

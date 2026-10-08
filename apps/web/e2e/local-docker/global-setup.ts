@@ -11,7 +11,13 @@ export default async function localDockerBrowserProbe(config: FullConfig): Promi
 
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage(config.projects[0]?.use);
+    const browserOptions = config.projects[0]?.use;
+    const page = await browser.newPage({
+      ...browserOptions,
+      // Production logging intentionally omits query strings. Put this non-secret,
+      // per-run marker in the logged user agent so the browser proof survives that policy.
+      userAgent: `${browserOptions?.userAgent ?? 'MemoFlow BrowserProbe'} __pm_local_docker_probe=${token}`,
+    });
     const response = await page.goto(
       `${webOrigin}/?__pm_local_docker_probe=${encodeURIComponent(token)}`,
       { waitUntil: 'domcontentloaded' },

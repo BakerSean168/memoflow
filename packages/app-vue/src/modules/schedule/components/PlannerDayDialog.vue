@@ -7,6 +7,7 @@
     <div
       v-else
       class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
+      v-keyboard-list
       data-testid="planner-day-event-list"
     >
       <div
@@ -16,6 +17,7 @@
       >
         <button
           type="button"
+          :data-keyboard-item="plannerProjectionKeyForUi(event)"
           :data-testid="`schedule-event-${event.sourceType}-${event.sourceId}`"
           :aria-label="t('schedule.calendar.openEvent', { title: event.title })"
           class="flex min-w-0 flex-1 items-start gap-3 p-3 text-left focus-visible:outline-none"
@@ -95,6 +97,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { computed } from 'vue';
 import { createReusableTemplate } from '@vueuse/core';
 import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';

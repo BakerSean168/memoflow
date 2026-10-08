@@ -21,6 +21,7 @@
     <div
       v-else
       class="divide-y divide-[hsl(var(--border-subtle))]"
+      v-keyboard-list
       data-testid="notifications-list"
     >
       <slot
@@ -42,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { Loader2, Bell } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import NotificationItem from './NotificationItem.vue';

@@ -31,3 +31,4 @@ export * from './value-objects';
 export * from './dtos';
 
 export * from './module-manifest';
+export * from './keyboard-keymap';

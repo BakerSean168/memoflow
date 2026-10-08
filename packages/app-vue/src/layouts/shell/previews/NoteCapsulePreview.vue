@@ -155,6 +155,7 @@ onMounted(() => {
           type="button"
           class="group flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent/55"
           :data-testid="'note-capsule-item-' + item.id"
+          :data-keyboard-item="String(item.id)"
           @click="$emit('select', String(item.id))"
         >
           <FileText class="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />

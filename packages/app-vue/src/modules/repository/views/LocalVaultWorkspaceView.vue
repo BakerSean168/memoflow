@@ -152,10 +152,11 @@
           </div>
 
           <div class="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
-            <div v-if="displayedNotes.length" class="space-y-0.5 py-0.5">
+            <div v-if="displayedNotes.length" v-keyboard-list class="space-y-0.5 py-0.5">
               <DocumentCatalogRow
                 v-for="note in displayedNotes"
                 :key="note.relativePath"
+                :data-keyboard-item="note.relativePath"
                 :selected="activeNote?.relativePath === note.relativePath"
                 :data-testid="`local-vault-note-${note.relativePath}`"
                 @activate="openNote(note)"
@@ -218,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';

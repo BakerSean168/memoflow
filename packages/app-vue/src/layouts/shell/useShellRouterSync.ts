@@ -319,6 +319,15 @@ export function useShellRouterSync() {
     await navigateBusinessSurface(router, landingRoute, t);
   }
 
+  /** Keyboard entry restores the most recently active module tab, including its detail route. */
+  async function activateOrOpenModule(module: ShellModule, landingRoute: string): Promise<void> {
+    const existing = store.tabs
+      .filter((tab) => tab.module === module)
+      .sort((a, b) => b.lastActiveAt - a.lastActiveAt)[0];
+    if (existing) await activateTab(existing.id);
+    else await openModule(module, landingRoute);
+  }
+
   /** 打开独立设置场景：只改路由，不碰 tabs / layout。 */
   async function openSettings(path = '/settings'): Promise<void> {
     if (
@@ -433,6 +442,7 @@ export function useShellRouterSync() {
     closePanel,
     togglePanel,
     openModule,
+    activateOrOpenModule,
     openSettings,
     returnFromSettings,
     goHome,

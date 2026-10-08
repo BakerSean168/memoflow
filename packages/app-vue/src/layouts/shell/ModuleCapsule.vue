@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import type { Component } from 'vue';
+import { keyboard } from '../../shared/keyboard/runtime';
+import { displayChord } from '../../shared/keyboard/keymap';
 import { useI18n } from 'vue-i18n';
 import { ChevronDown } from '@lucide/vue';
 import { Popover, PopoverAnchor, PopoverContent } from '@memoflow/ui-vue-shadcn';
@@ -24,11 +26,31 @@ defineSlots<{
 }>();
 
 const { t } = useI18n();
+const previewHint = computed(
+  () =>
+    keyboard.commands.value
+      .find((command) => command.id === `module.${props.id}.preview`)
+      ?.keys.map((key) => displayChord(key, keyboard.engine.host))
+      .join(' / ') ?? '',
+);
 
 type CapsuleOpenMode = 'closed' | 'hover' | 'pinned';
 
 const previewButton = ref<HTMLButtonElement | null>(null);
 const openMode = ref<CapsuleOpenMode>('closed');
+watch(keyboard.preview, (id) => {
+  if (id === props.id) {
+    if (openMode.value === 'closed') {
+      clearOpenTimer();
+      clearCloseTimer();
+      openMode.value = 'pinned';
+    }
+  } else if (openMode.value !== 'closed') dismissPreview();
+});
+watch(openMode, (mode) => {
+  if (mode !== 'closed') keyboard.preview.value = props.id;
+  else if (keyboard.preview.value === props.id) keyboard.closePreview();
+});
 const open = computed(() => openMode.value !== 'closed');
 const previewWidthClass = computed(() => {
   if (props.previewSize === 'compact') return 'w-72';
@@ -98,7 +120,7 @@ function focusPreviewContent(): void {
     ...document.querySelectorAll<HTMLElement>('[data-capsule-preview-content]'),
   ].find((entry) => entry.dataset.capsulePreviewContent === props.id);
   const target = content?.querySelector<HTMLElement>(
-    'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([data-keyboard-list])',
   );
   target?.focus({ preventScroll: true });
 }
@@ -128,6 +150,7 @@ function dismissPreview(): void {
   clearOpenTimer();
   clearCloseTimer();
   openMode.value = 'closed';
+  if (keyboard.preview.value === props.id) keyboard.closePreview();
 }
 
 function enterModule(): void {
@@ -136,6 +159,7 @@ function enterModule(): void {
 }
 
 onBeforeUnmount(() => {
+  if (keyboard.preview.value === props.id) keyboard.closePreview();
   clearOpenTimer();
   clearCloseTimer();
 });
@@ -174,6 +198,9 @@ onBeforeUnmount(() => {
           class="flex h-8 w-8 shrink-0 items-center justify-center border-l border-[hsl(var(--border-subtle))] text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--selected)/0.72)] hover:text-foreground focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :data-testid="`capsule-preview-${id}`"
           :aria-label="t('shell.previewModule', { name: label })"
+          :title="
+            previewHint ? `${t('shell.previewModule', { name: label })} (${previewHint})` : label
+          "
           :aria-expanded="open"
           aria-haspopup="dialog"
           @mouseenter="scheduleHoverOpen"
