@@ -415,6 +415,18 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install release tooling dependencies
+        shell: bash
+        run: |
+          corepack enable
+          # Evidence tooling uses pure JavaScript dependencies; no native builds are needed.
+          pnpm install --frozen-lockfile --ignore-scripts --reporter=append-only
+
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
