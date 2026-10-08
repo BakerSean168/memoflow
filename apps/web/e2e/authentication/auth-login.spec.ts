@@ -1,6 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { ensureLoginScene, ensureRegisterScene } from '../helpers/testHelpers';
-import { completeEmailVerification } from '../helpers/auth-email-link';
+import { ensureLoginScene, ensureRegisterScene, registerViaAuth } from '../helpers/testHelpers';
 import { WEB_CONFIG, TIMEOUT_CONFIG } from '../config';
 
 const generateTestEmail = () =>
@@ -15,7 +14,7 @@ test.describe('Authentication - 登录页基础验证', () => {
   test('[P0] 正确凭证可以成功登录', async ({ page }) => {
     const testEmail = generateTestEmail();
 
-    await registerUser(page, testEmail, testPassword);
+    await registerViaAuth(page, testEmail, testPassword);
     await expectAuthenticated(page);
 
     await logoutFromAccountCenter(page);
@@ -34,7 +33,7 @@ test.describe('Authentication - 登录页基础验证', () => {
   test('[P0] 错误凭证会显示错误提示', async ({ page }) => {
     const testEmail = generateTestEmail();
 
-    await registerUser(page, testEmail, testPassword);
+    await registerViaAuth(page, testEmail, testPassword);
     await expectAuthenticated(page);
 
     await logoutFromAccountCenter(page);
@@ -95,18 +94,6 @@ async function submitLoginForm(page: Page): Promise<void> {
   await page.getByTestId('login-submit-button').click();
 }
 
-async function registerUser(page: Page, email: string, password: string): Promise<void> {
-  await ensureRegisterScene(page);
-  await expect(page.locator('#reg-email')).toBeVisible({
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-  await page.locator('#reg-email').fill(email);
-  await page.locator('#reg-password').fill(password);
-  await page.locator('#confirm-password').fill(password);
-  await page.getByTestId('register-submit-button').click();
-  await completeEmailVerification(page, email, password);
-}
-
 async function expectAuthenticated(page: Page): Promise<void> {
   await page.waitForURL((url) => !url.pathname.includes(WEB_CONFIG.LOGIN_PATH), {
     timeout: TIMEOUT_CONFIG.LOGIN,
@@ -124,8 +111,9 @@ async function readAuthState(page: Page): Promise<{
     const storage = `${JSON.stringify(localStorage)} ${JSON.stringify(sessionStorage)}`;
     return {
       hasSession: Boolean(session?.session && session?.user),
-      hasPersistedBearerCredential:
-        /accessToken|refreshToken|access_token|refresh_token/.test(storage),
+      hasPersistedBearerCredential: /accessToken|refreshToken|access_token|refresh_token/.test(
+        storage,
+      ),
     };
   });
 }

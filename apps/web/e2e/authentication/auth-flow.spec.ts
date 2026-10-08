@@ -1,6 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { ensureLoginScene, ensureRegisterScene, login } from '../helpers/testHelpers';
-import { completeEmailVerification } from '../helpers/auth-email-link';
+import { ensureLoginScene, login, registerViaAuth } from '../helpers/testHelpers';
 import { WEB_CONFIG, TIMEOUT_CONFIG } from '../config';
 
 const generateTestEmail = () =>
@@ -15,7 +14,7 @@ test.describe('Authentication Flow - 认证完整流程', () => {
   test('[P0] 完整流程：注册 → 登出 → 再次登录', async ({ page }) => {
     const testEmail = generateTestEmail();
 
-    await registerUser(page, testEmail, testPassword);
+    await registerViaAuth(page, testEmail, testPassword);
     await expectAuthenticated(page);
 
     await logoutFromAccountCenter(page);
@@ -28,14 +27,14 @@ test.describe('Authentication Flow - 认证完整流程', () => {
   test('[P0] 注册：应该成功注册新用户', async ({ page }) => {
     const testEmail = generateTestEmail();
 
-    await registerUser(page, testEmail, testPassword);
+    await registerViaAuth(page, testEmail, testPassword);
     await expectAuthenticated(page);
   });
 
   test('[P1] 登录：应该拒绝错误的密码', async ({ page }) => {
     const testEmail = generateTestEmail();
 
-    await registerUser(page, testEmail, testPassword);
+    await registerViaAuth(page, testEmail, testPassword);
     await expectAuthenticated(page);
 
     await logoutFromAccountCenter(page);
@@ -66,19 +65,6 @@ async function gotoAuthPage(page: Page): Promise<void> {
 
   await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
   await ensureLoginScene(page);
-}
-
-async function fillRegisterForm(page: Page, email: string, password: string): Promise<void> {
-  await page.locator('#reg-email').fill(email);
-  await page.locator('#reg-password').fill(password);
-  await page.locator('#confirm-password').fill(password);
-}
-
-async function registerUser(page: Page, email: string, password: string): Promise<void> {
-  await ensureRegisterScene(page);
-  await fillRegisterForm(page, email, password);
-  await page.getByTestId('register-submit-button').click();
-  await completeEmailVerification(page, email, password);
 }
 
 async function fillLoginForm(page: Page, email: string, password: string): Promise<void> {

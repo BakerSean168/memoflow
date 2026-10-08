@@ -15,6 +15,7 @@
  */
 
 import { shell, type BrowserWindow } from 'electron';
+import { createExternalEditorOpener } from './wsl-obsidian-bridge';
 import { TrayManager } from '../modules/tray';
 import { ShortcutManager } from '../modules/shortcuts';
 import { AutoLaunchManager, type AutoLaunchConfig } from '../modules/autolaunch';
@@ -85,9 +86,7 @@ export function createElectronShortcutPort(mainWindow: BrowserWindow): ShortcutP
  * `AutoLaunchManager` structurally satisfies {@link AutoLaunchPort}. The
  * factory passes host options (product name, hidden start) through unchanged.
  */
-export function createElectronAutoLaunchPort(
-  options?: AutoLaunchPortOptions,
-): AutoLaunchPort {
+export function createElectronAutoLaunchPort(options?: AutoLaunchPortOptions): AutoLaunchPort {
   return new AutoLaunchManager(options);
 }
 
@@ -99,9 +98,7 @@ export function createElectronAutoLaunchPort(
  * `initNotificationService` farm is narrowed here to the port surface: boolean
  * "was rendered" returns and no Electron leakage.
  */
-export function createElectronNotificationPort(
-  options: NotificationPortOptions,
-): NotificationPort {
+export function createElectronNotificationPort(options: NotificationPortOptions): NotificationPort {
   const service = initNotificationService(
     options.mainWindow,
     options.windowManager,
@@ -127,15 +124,14 @@ export function createElectronNotificationPort(
 }
 
 /**
- * Build the external-editor capability port over Electron's `shell.openExternal`.
- *
- * This is the second of the capability seams in the product: it opens an
- * editor URI (`obsidian://`) through the OS default handler.
+ * Open normal editor URIs through the OS handler. On Windows, WSL UNC Vaults
+ * are opened in their owning Linux distro via its registered Obsidian handler.
  */
 export function createElectronExternalEditorPort(): ExternalEditorPort {
   return {
-    async openExternal(uri: string): Promise<void> {
-      await shell.openExternal(uri);
-    },
+    openExternal: createExternalEditorOpener({
+      platform: process.platform,
+      openNative: (uri) => shell.openExternal(uri),
+    }),
   };
 }
