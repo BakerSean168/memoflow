@@ -886,6 +886,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/capabilities/wsl-obsidian-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/database/__tests__/packaged-worker-path.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -12546,7 +12554,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 91
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13315,7 +13323,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1149,
+    "unit": 1150,
     "integration": 40,
     "smoke": 3,
     "boundary-ipc": 8,
