@@ -119,6 +119,31 @@ describe('getTrustedWebOrigins', () => {
   });
 });
 
+describe('production GitHub login callback wiring', () => {
+  it('forwards the dedicated provider redirect override in the canonical and legacy stacks', () => {
+    const production = readFileSync(
+      resolve(__dirname, '../../../../../../deployment/production/docker-compose.production.yml'),
+      'utf8',
+    );
+    const legacy = readFileSync(
+      resolve(__dirname, '../../../../../../docker-compose.prod.yml'),
+      'utf8',
+    );
+
+    for (const compose of [production, legacy]) {
+      expect(compose).toContain('GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}');
+      expect(compose).toContain('GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}');
+      expect(compose).toContain('GITHUB_OAUTH_REDIRECT_URI: ${GITHUB_OAUTH_REDIRECT_URI:-}');
+    }
+  });
+
+  it('keeps the login callback reachable on the Web host through the same-origin API proxy', () => {
+    const nginx = readFileSync(resolve(__dirname, '../../../../../../nginx.conf'), 'utf8');
+    expect(nginx).toContain('location /api/ {');
+    expect(nginx).toContain('proxy_pass $api_upstream;');
+  });
+});
+
 describe('O2V-01 machine-public URL wiring', () => {
   it('server.ts trustedOrigins is derived via getTrustedWebOrigins + MEMOFLOW_WEB_URL', () => {
     const server = readFileSync(resolve(__dirname, '../../../server.ts'), 'utf8');
