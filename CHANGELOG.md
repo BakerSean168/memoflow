@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.16.0](https://github.com/BakerSean168/memoflow/compare/v0.15.2...v0.16.0) (2026-10-08)
+
+
+### Features
+
+* **desktop:** open WSL Vault notes in existing Obsidian ([#430](https://github.com/BakerSean168/memoflow/issues/430)) ([8d651ff](https://github.com/BakerSean168/memoflow/commit/8d651ff9f3d90b14d60b89446e580d34c307bb86))
+* **keyboard:** implement Keyboard-first V1 ([#433](https://github.com/BakerSean168/memoflow/issues/433)) ([a0cf7fa](https://github.com/BakerSean168/memoflow/commit/a0cf7fa35b0bcf892493624169c01e103f953d2c))
+
+
+### Bug Fixes
+
+* **production:** forward GitHub OAuth callback override ([#431](https://github.com/BakerSean168/memoflow/issues/431)) ([efce511](https://github.com/BakerSean168/memoflow/commit/efce511721addc77bdb75a0a1906844bd8d7b3d4))
+
 ## [0.15.2](https://github.com/BakerSean168/memoflow/compare/v0.15.1...v0.15.2) (2026-10-08)
 
 This release carries the 0.15 milestone: External Agent OAuth, six read-only MCP
