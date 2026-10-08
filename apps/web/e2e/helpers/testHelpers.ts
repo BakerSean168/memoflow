@@ -170,7 +170,7 @@ async function navigateAfterAuth(page: Page, landingPath?: string): Promise<void
   await waitForAuthenticatedShell(page);
 }
 
-async function registerViaAuth(page: Page, email: string, password: string): Promise<void> {
+export async function registerViaAuth(page: Page, email: string, password: string): Promise<void> {
   await ensureRegisterScene(page);
 
   await page.locator('#reg-email').fill(email);
