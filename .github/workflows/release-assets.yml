@@ -430,7 +430,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: desktop-*
+          pattern: desktop-{windows-x64,linux-x64,macos-x64,macos-arm64}
           path: artifacts
 
       - name: Require an existing draft release

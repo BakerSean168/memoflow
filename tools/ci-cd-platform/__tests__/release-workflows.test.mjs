@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { matchesGlob } from 'node:path';
 import test from 'node:test';
 
 const readRepoFile = (path) => readFile(new URL(`../../../${path}`, import.meta.url), 'utf8');
@@ -163,6 +164,29 @@ test('desktop release evidence installs its locked tooling dependencies before a
   assert.ok(job.indexOf(install) < job.indexOf('- name: Build desktop release evidence'));
 });
 
+test('desktop release aggregation selects only platform assets from mixed run artifacts', async () => {
+  const workflow = await readRepoFile('.github/workflows/release-assets.yml');
+  const job = workflow.slice(workflow.indexOf('  upload-release-assets:'));
+  const download = workflowStep(job, 'Download build artifacts');
+  const pattern = download.match(/pattern: (.+)/u)?.[1];
+  assert.ok(pattern);
+  const platforms = [
+    'desktop-windows-x64',
+    'desktop-linux-x64',
+    'desktop-macos-x64',
+    'desktop-macos-arm64',
+  ];
+  const artifacts = [
+    ...platforms,
+    'desktop-update-installed-e2e-windows',
+    'desktop-update-installed-e2e-linux-appimage',
+    'desktop-update-feed-evidence',
+    'desktop-update-rollout-evidence',
+  ];
+
+  assert.deepEqual(artifacts.filter((name) => matchesGlob(name, pattern)), platforms);
+});
+
 test('desktop packaging has one stable product identity and one native rebuild owner', async () => {
   const [packageText, builder, projectText, workflow, nativeRebuildHelper] = await Promise.all([
     readRepoFile('apps/desktop/package.json'),
@@ -213,7 +237,6 @@ test('desktop packaging has one stable product identity and one native rebuild o
     resolverStep,
     /node \.\/apps\/desktop\/scripts\/resolve-packaged-executable\.mjs/u,
   );
-  assert.match(workflow, /name: Download build artifacts[\s\S]*?pattern: desktop-\*/);
   assert.doesNotMatch(workflow, /desktop:dist/);
   assert.doesNotMatch(workflow, /npm_config_msvs_version/);
   assert.match(workflow, /msbuild-architecture: x64/);
