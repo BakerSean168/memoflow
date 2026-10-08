@@ -38,3 +38,10 @@ created: 2026-10-08
 - `pnpm nx affected -t test --base=main`：6 projects，通过。
 - `pnpm nx run memoflow:governance-check`：通过；新增测试清单已由 `pnpm test:inventory` 更新。
 - 仓库 validate-local-deploy：pass，无 warnings/blockingIssues；此改动未触发 Docker 验证。最终机器报告与人类报告位于 `reports/local-deploy-validation/latest.json` / `latest.md`。
+
+## 合并前 CI 回归修正
+
+- Web Flow 第 2 分片的 `specialized.ai-native` 视觉用例仍依赖恢复工作流时自动打开任务审核，与已批准的显式导航行为冲突。
+- 本地运行原用例复现缺少 `task-plan-dialog`；改为等待审核入口、断言表单尚未打开，再显式点击审核并验证原生表单内容及既有截图。
+- 修正后用例通过，截图与原基线完全一致，无业务代码或 PNG 基线改动。
+- 完整视觉矩阵 30/30 通过；`web:typecheck:visual-regression` 通过。
