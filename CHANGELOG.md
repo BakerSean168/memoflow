@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.2](https://github.com/BakerSean168/memoflow/compare/v0.15.1...v0.15.2) (2026-10-08)
+
+
+### Bug Fixes
+
+* **database:** prepare canonical production schema cutover ([#425](https://github.com/BakerSean168/memoflow/issues/425)) ([2356590](https://github.com/BakerSean168/memoflow/commit/2356590d075251de3bd940dc15aac0cd13e56f53))
+
 ## [0.15.1](https://github.com/BakerSean168/memoflow/compare/v0.15.0...v0.15.1) (2026-10-07)
 
 This corrective release includes the 0.15 milestone, including External Agent OAuth,
