@@ -2,6 +2,15 @@
 
 ## [0.15.2](https://github.com/BakerSean168/memoflow/compare/v0.15.1...v0.15.2) (2026-10-08)
 
+This release carries the 0.15 milestone: External Agent OAuth, six read-only MCP
+tools for Goals and Tasks, and Goal lifecycle integration. See the
+[full changes since v0.14.1](https://github.com/BakerSean168/memoflow/compare/v0.14.1...v0.15.2).
+It includes the Desktop startup and Windows archive verification repairs from
+0.15.1, plus explicit production schema preparation that preserves canonical
+account profiles and login identities while retiring obsolete settings and fields.
+The v0.15.0 and v0.15.1 releases remained unpublished Drafts after acceptance
+failures; their tags are unchanged. macOS packages remain unsigned-pilot trial builds.
+
 
 ### Bug Fixes
 
