@@ -149,6 +149,20 @@ test('Windows Desktop release promotion is gated by a real installed N to N+1 up
   assert.match(uploadJob, /- build-release-assets/u);
 });
 
+test('desktop release evidence installs its locked tooling dependencies before aggregation', async () => {
+  const workflow = await readRepoFile('.github/workflows/release-assets.yml');
+  const job = workflow.slice(workflow.indexOf('  upload-release-assets:'));
+  const setup = workflowStep(job, 'Setup Node.js');
+  const install = workflowStep(job, 'Install release tooling dependencies');
+
+  assert.match(setup, /uses: actions\/setup-node@[0-9a-f]{40}/u);
+  assert.match(setup, /node-version: \$\{\{ env\.NODE_VERSION \}\}/u);
+  assert.match(install, /corepack enable/u);
+  assert.match(install, /pnpm install --frozen-lockfile --ignore-scripts/u);
+  assert.ok(job.indexOf(setup) < job.indexOf(install));
+  assert.ok(job.indexOf(install) < job.indexOf('- name: Build desktop release evidence'));
+});
+
 test('desktop packaging has one stable product identity and one native rebuild owner', async () => {
   const [packageText, builder, projectText, workflow, nativeRebuildHelper] = await Promise.all([
     readRepoFile('apps/desktop/package.json'),
