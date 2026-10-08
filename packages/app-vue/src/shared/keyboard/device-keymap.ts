@@ -6,7 +6,7 @@ import {
   DeviceKeymapSnapshotSchema,
   type DeviceKeymap,
 } from '@memoflow/contracts/shared';
-import { DesktopFeatureChannels } from '@memoflow/contracts/electron';
+import { KeyboardChannels } from '@memoflow/contracts/electron';
 import type { DesktopAccessSnapshot } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { keyboard } from './runtime';
@@ -47,11 +47,11 @@ export function useDeviceKeymap(
         };
         void controller.load({
           async read() {
-            const result = await client.invoke(DesktopFeatureChannels.KEYMAP_GET);
+            const result = await client.invoke(KeyboardChannels.KEYMAP_GET);
             return decode(unwrapOrThrowError(result));
           },
           async write(keymap: DeviceKeymap) {
-            const result = await client.invoke(DesktopFeatureChannels.KEYMAP_SET, {
+            const result = await client.invoke(KeyboardChannels.KEYMAP_SET, {
               profileId: scope,
               keymap,
             });

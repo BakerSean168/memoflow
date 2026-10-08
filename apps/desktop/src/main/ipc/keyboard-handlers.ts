@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron';
-import { DesktopFeatureChannels } from '@memoflow/contracts/electron';
+import { KeyboardChannels } from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
 import { DeviceKeymapStore, type KeymapProfile } from '../services/device-keymap.store';
 
 export function registerKeyboardHandlers(resolveProfile: () => KeymapProfile | null): void {
   const store = new DeviceKeymapStore(resolveProfile);
-  ipcMain.handle(DesktopFeatureChannels.KEYMAP_GET, () => {
+  ipcMain.handle(KeyboardChannels.KEYMAP_GET, () => {
     try {
       return ok(store.get());
     } catch (error) {
@@ -15,7 +15,7 @@ export function registerKeyboardHandlers(resolveProfile: () => KeymapProfile | n
       });
     }
   });
-  ipcMain.handle(DesktopFeatureChannels.KEYMAP_SET, (_event, input: unknown) => {
+  ipcMain.handle(KeyboardChannels.KEYMAP_SET, (_event, input: unknown) => {
     try {
       return ok(store.set(input));
     } catch (error) {

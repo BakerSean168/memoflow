@@ -2,6 +2,8 @@
 
 > **2026-10-03 GOV-7903 / ADR-113:** Product Governance package、Rule/RuleRevision、UI 与 `/governance/**` 已退休；本文相关内容仅为历史设计记录，不再作为实施输入，也不得并入 Knowledge。当前 Governance 仅指 repository-native Engineering Governance。
 
+> **2026-10-08 Shell 工作区解耦：** 业务 Tab、路由、面板显隐、宽度与用户 focus/split 偏好属于全局工作区。切换、新建、删除普通 AI 会话只影响 AI 区域；历史 Workflow 恢复不自动打开业务页面，原生 Workflow 审核继续保留既有离开保护。8 Tab 与业务引用机制不变。
+
 > 状态：实施方案。**取代** `UI_PAGE_REDESIGN_PLAN.md`（下称 V1）的壳/导航/响应式/实施顺序体系；V1 各页面章节的**内容级结论**（主/次操作、信息删减清单、拆分退役清单）仍然有效，由本文 §6 引用为面板内容设计输入。
 > **2026-09-18 Dashboard retirement:** HOME-1805 is implemented. The standalone Dashboard package, route, redirect, DTO/config, and persistence surfaces are deleted. Any remaining Dashboard wording in this historical design plan is context only; current Home and AI behavior uses owner read models and must not recreate `/dashboard`.
 > 2026-07-14 修订：Electron 实机诊断后的 Settings 独立场景、Schedule 统一分栏入口、动态面板、Global Composer 与胶囊预览方案，见 [`docs/plan/active/2026-07-14-ui-shell-diagnostic-followup.md`](plan/active/2026-07-14-ui-shell-diagnostic-followup.md)。冲突部分以该修订为准。
@@ -185,7 +187,7 @@ AppShell
 
 - **只有 AI 会话**：按时间分组（今天 / 近 7 天 / 更早），条目 = 会话标题一行，hover 出 ⋯（重命名/删除）。
 - 现 `AIConversationSidebar` 的其余内容处置：AgentRun 历史 → 收进会话条目内（该会话关联的 run 在消息流内可见，不单独列）；recentGoals / recentKnowledgeNotes → **删除**（胶囊预览浮层已承担"快速回到对象"职责）；刷新按钮 → 删除（切换会话隐式拉取）。
-- 「新对话」= 新建会话 + 关面板回 STATE A。
+- 「新对话」仅更新 AI 会话；业务 Tab、活动路由、面板显隐、布局与草稿保持原状。
 - 底部：头像+用户名（→ Settings 面板）、帮助按钮。V1 的 NotificationBell 侧栏方案作废（通知已是胶囊）。
 
 ---

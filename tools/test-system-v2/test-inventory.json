@@ -4339,6 +4339,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12672,7 +12680,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 281
+      "fileCount": 282
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13399,7 +13407,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1156,
+    "unit": 1157,
     "integration": 40,
     "smoke": 3,
     "boundary-ipc": 8,

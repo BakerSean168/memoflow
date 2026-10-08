@@ -13,6 +13,7 @@ export default mergeConfig(
     aliasEntries: createUiVueSourceAliasEntries(workspaceRoot),
     aliases: {
       '@memoflow/http-client': '../../packages/http-client/src/index.ts',
+      '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
       '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
       '@memoflow/goal/client': '../../packages/goal/src/client/index.ts',
       '@memoflow/task/client': '../../packages/task/src/client/index.ts',

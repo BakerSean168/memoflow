@@ -213,6 +213,19 @@ describe('useShellRouterSync startup restoration', () => {
     wrapper.unmount();
   });
 
+  it('restores global user focus on business entry after a temporary viewport override', async () => {
+    const fixture = await mountRouterSync('/goals');
+    const wrapper = fixture.mount();
+    fixture.store.setLayout('focus', 'user');
+    fixture.store.setLayout('focus', 'viewport');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1400 });
+    await fixture.router.push('/tasks');
+    expect(fixture.store.layout).toBe('focus');
+    expect(fixture.store.layoutReason).toBe('user');
+    expect(fixture.store.layoutPreference).toBe('focus');
+    wrapper.unmount();
+  });
+
   it('preserves the form-owned dirty status after the user confirms hiding the panel', async () => {
     const fixture = await mountRouterSync('/goals');
     fixture.store.openTab({

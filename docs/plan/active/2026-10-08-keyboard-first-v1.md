@@ -59,7 +59,7 @@ User-authorized scope: the complete Keyboard-first V1 proposal, implemented in d
 | Goal, Task, Routine, Note, Notification, conversations, day events participate          | Owner primary-action adapters; tree Left/Right; calendar grid left with FullCalendar    |
 | Live overrides, recording isolation, conflicts/replacement, reset and disable/re-enable | Settings, engine/keymap tests; Web and Electron persistence journeys                    |
 | Profile isolation, late responses, failed persistence and atomic replacement            | Device controller and Desktop store fault/isolation tests                               |
-| Existing leave protection and tab limits remain in the navigation path                  | Existing Shell router suite plus MRU cases; new conversation waits for successful leave |
+| Existing leave protection and tab limits remain in the navigation path                  | Existing Shell router suite plus MRU cases; new conversation preserves the independent business workspace |
 | Browser reserved chords / Electron registration failure                                 | Six host-default variants, reservation tests, ShortcutManager registration/retry tests  |
 
 ### Default platform map
@@ -101,4 +101,13 @@ Platform rule unit tests are not OS-level acceptance: record which actual deskto
 - Desktop's native show/hide accelerator is reserved from renderer overrides. `N` remains plain text in editors; the explicit desktop new-conversation chord is allowed there.
 - Device-only overrides and disabled entries follow ADR-094. No retired cloud shortcut preference fields, business permission bypasses, or production deployment changes are introduced.
 
-Final local source candidate: `13fc29d05bc7fc145e29b8226530058c35215ba4-dirty-b3a72a95d464`. Chromium and Electron journeys both passed. The local validation refresh preserves this candidate’s actual image build date while rechecking its source identity; it does not override `VCS_REF`.
+Initial implementation local source candidate: `13fc29d05bc7fc145e29b8226530058c35215ba4-dirty-b3a72a95d464`. Chromium and Electron journeys both passed. The local validation refresh preserves this candidate’s actual image build date while rechecking its source identity; it does not override `VCS_REF`.
+
+
+## Integration with main before merge
+
+The merged Shell work from #432 makes conversation lifecycle operations independent of the business workspace. Both sidebar and keyboard new-conversation actions now preserve the active business view, route, panel layout, scroll and unsaved draft. The existing Shell lifecycle matrix also exercises `conversation.new` through the real command registry. Explicit module navigation retains its leave guards.
+
+CI exposed two setup/ownership gaps: App Vue tests now resolve IPC client source without requiring prebuilt dist output, and Profile-owned keymap channels live in `KeyboardChannels`, separate from the system handler's desktop feature catalog. Desktop IPC acceptance remains enabled and verifies its original complete channel ownership.
+
+The two reviewed visual changes are the Settings Hub shortcut entry and the day-event list's focus target. Only their corresponding PNG baselines are updated; the full visual matrix remains compare-only in CI. Windows/macOS real-host acceptance remains a tracked follow-up and is not claimed by this merge.
