@@ -19,6 +19,8 @@ for (const entry of matrix) {
       });
     switch (entry.surface) {
       case 'specialized.ai-native':
+        await expect(page.getByTestId('task-plan-dialog')).toBeHidden();
+        await page.getByTestId('task-open-native-review').click();
         await expect(page.getByTestId('task-plan-dialog')).toBeVisible();
         await expect(page.getByTestId('task-plan-title-input')).toHaveValue(
           'Review measured progress',

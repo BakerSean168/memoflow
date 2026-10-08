@@ -162,7 +162,8 @@ export function useShellRouterSync() {
       store.layoutReason,
       geo.canSplit,
     );
-    if (next) store.setLayout(next.layout, next.reason);
+    if (next?.reason === 'viewport') store.setLayout(next.layout, next.reason);
+    else if (next) store.restoreLayoutPreference();
   }
 
   /** 统一离开协议（Phase 0）：busy 拦截 / dirty 确认 / clean 放行。 */
@@ -334,7 +335,7 @@ export function useShellRouterSync() {
     await returnFromSettingsScene(router, store, route.fullPath);
   }
 
-  /** 回 STATE A（新对话 / 关面板后的地面态）。 */
+  /** 用户显式回到业务面板 Home。 */
   async function goHome(): Promise<void> {
     if (route.path !== '/') {
       await navigateBusinessSurface(router, '/', t);
