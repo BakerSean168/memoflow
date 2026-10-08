@@ -102,7 +102,15 @@ const cases = [
     'en-US',
     'wide',
   ],
-  ['specialized.ai-native', 'pages', 'surface=ai', 'task-plan-dialog', 'light', 'en-US', 'wide'],
+  [
+    'specialized.ai-native',
+    'pages',
+    'surface=ai',
+    'task-open-native-review',
+    'light',
+    'en-US',
+    'wide',
+  ],
   ['overlay.goal-record', 'goal', '', 'goal-detail-view', 'light', 'en-US', 'narrow'],
   ['overlay.goal-kr', 'goal', '', 'goal-detail-view', 'dark', 'zh-CN', 'wide'],
   [

@@ -2,9 +2,9 @@
  * App Shell UI Store (UI 重构 V2)
  *
  * 承载 ChatGPT 桌面式壳的视图状态：右侧面板 surface、业务多 Tab 集合、
- * 布局态（split / focus）、侧栏与面板宽度。localStorage 持久化实现"会话恢复"
- * （重启后还原上次打开的 Tabs + 各自路由；显式 focus/split 偏好按 AI conversation id
- * 记忆，避免某个会话的专注态污染其他会话）。
+ * 布局态（split / focus）、侧栏与面板宽度。localStorage 持久化工作区偏好，
+ * 重启后还原上次打开的 Tabs、各自路由与全局用户布局选择；
+ * AI 会话生命周期不改变业务工作区，viewport 自动 focus 仅临时生效。
  *
  * 契约（docs/UI_REDESIGN_V2_PLAN.md + 2026-07-14 壳层诊断修订）：
  * - §2.3 多 Tab：胶囊/深链落 Tab（同 module 已开则激活，否则新开）；
@@ -98,8 +98,8 @@ interface AppShellState {
   surfaceStatus: PanelSurfaceStatus;
   layout: ShellLayout;
   layoutReason: ShellLayoutReason;
-  /** 用户显式 focus/split 偏好，按 AI conversation id 持久化。 */
-  conversationLayoutPreferences: Record<string, ShellLayout>;
+  /** 全局用户布局偏好；null 表示默认 split，不记录 viewport 临时约束。 */
+  layoutPreference: ShellLayout | null;
   sidebarCollapsed: boolean;
   sidebarWidth: number;
   /**
@@ -154,7 +154,7 @@ export const useAppShellStore = defineStore('app-shell', {
     surfaceStatus: 'clean',
     layout: 'split',
     layoutReason: 'default',
-    conversationLayoutPreferences: {},
+    layoutPreference: null,
     sidebarCollapsed: false,
     sidebarWidth: SIDEBAR_DEFAULT,
     panelWidth: null,
@@ -380,35 +380,19 @@ export const useAppShellStore = defineStore('app-shell', {
     setLayout(layout: ShellLayout, reason: ShellLayoutReason = 'default'): void {
       this.layout = layout;
       this.layoutReason = reason;
+      if (reason === 'user') this.layoutPreference = layout;
     },
 
-    /** 返回指定 AI 会话的显式布局偏好；无记录/非法记录时返回 null。 */
-    getConversationLayoutPreference(conversationId: string | null | undefined): ShellLayout | null {
-      if (!conversationId) return null;
-      const value = this.conversationLayoutPreferences[conversationId];
-      return value === 'focus' || value === 'split' ? value : null;
+    /** 空间恢复或持久化恢复时应用全局偏好，绝不固化 viewport focus。 */
+    restoreLayoutPreference(): void {
+      const preferred = this.layoutPreference;
+      const valid = preferred === 'focus' || preferred === 'split';
+      this.setLayout(valid ? preferred : 'split', valid ? 'user' : 'default');
     },
 
-    /** 记录用户显式布局选择；viewport 自动 focus 不调用此动作。 */
-    rememberConversationLayout(
-      conversationId: string | null | undefined,
-      layout: ShellLayout,
-    ): void {
-      if (!conversationId) return;
-      this.conversationLayoutPreferences[conversationId] = layout;
-    },
-
-    /** 会话删除时同步清理其本地布局偏好，避免持久化 map 长期残留孤儿键。 */
-    forgetConversationLayout(conversationId: string | null | undefined): void {
-      if (!conversationId) return;
-      delete this.conversationLayoutPreferences[conversationId];
-    },
-
-    /** B ⇄ C 切换（分栏 ⇄ 专注）；用户显式操作，并可按当前 AI 会话记忆。 */
-    toggleFocus(conversationId?: string | null): void {
-      this.layout = this.layout === 'focus' ? 'split' : 'focus';
-      this.layoutReason = 'user';
-      this.rememberConversationLayout(conversationId, this.layout);
+    /** B ⇄ C 切换（分栏 ⇄ 专注）；保存工作区的用户显式选择。 */
+    toggleFocus(): void {
+      this.setLayout(this.layout === 'focus' ? 'split' : 'focus', 'user');
     },
 
     toggleSidebar(): void {
@@ -464,12 +448,13 @@ export const useAppShellStore = defineStore('app-shell', {
   },
 
   persist: {
+    afterHydrate: ({ store }) => store.restoreLayoutPreference(),
     pick: [
       'tabs',
       'activeTabId',
       'rightPanelOpen',
       'panelSurface',
-      'conversationLayoutPreferences',
+      'layoutPreference',
       'sidebarCollapsed',
       'sidebarWidth',
       'panelWidth',
