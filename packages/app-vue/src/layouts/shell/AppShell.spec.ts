@@ -13,6 +13,7 @@ import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
 import AppShell from './AppShell.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import { useAppShellStore } from './useAppShellStore';
+import { keyboard } from '../../shared/keyboard/runtime';
 
 vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', async () => {
   const { ref: vueRef } = await import('vue');
@@ -510,7 +511,7 @@ describe('AppShell right-panel integration', () => {
   });
 
   it.each(
-    (['select', 'new', 'delete'] as const).flatMap((action) =>
+    (['select', 'new', 'keyboard-new', 'delete'] as const).flatMap((action) =>
       (['split', 'focus'] as const).flatMap((layout) =>
         [true, false].map((open) => ({ action, layout, open })),
       ),
@@ -541,6 +542,7 @@ describe('AppShell right-panel integration', () => {
       const sidebar = wrapper.getComponent(ConversationSidebarStub);
       if (action === 'select') sidebar.vm.$emit('select-conversation', 'conversation-b');
       if (action === 'new') sidebar.vm.$emit('new-conversation');
+      if (action === 'keyboard-new') keyboard.engine.execute('conversation.new');
       if (action === 'delete') sidebar.vm.$emit('delete-conversation', 'conversation-a');
       await flushPromises();
 
@@ -553,7 +555,8 @@ describe('AppShell right-panel integration', () => {
       expect(goalRouteMountCount).toBe(1);
       expect(confirm).not.toHaveBeenCalled();
       expect(navigation).not.toHaveBeenCalled();
-      if (action === 'new') expect(startNewConversation).toHaveBeenCalledWith('chat');
+      if (action === 'new' || action === 'keyboard-new')
+        expect(startNewConversation).toHaveBeenCalledWith('chat');
       if (action === 'delete') expect(deleteConversation).toHaveBeenCalledWith('conversation-a');
       window.confirm = originalConfirm;
       removeGuard();

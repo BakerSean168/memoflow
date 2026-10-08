@@ -289,6 +289,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.local-docker.config.ts"
     },
+    "apps/web/e2e/local-docker/keyboard-first.spec.ts": {
+      "surface": "local-docker",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+    },
     "apps/web/e2e/note/legacy-note-mutation-boundary.spec.ts": {
       "surface": "note",
       "role": "canonical",
@@ -360,6 +366,12 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.audit.config.ts"
+    },
+    "apps/web/e2e/shell/keyboard-first-desktop.spec.ts": {
+      "surface": "shell",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.shell.config.ts"
     },
     "apps/web/e2e/shell/responsive-sidebar.spec.ts": {
       "surface": "shell",

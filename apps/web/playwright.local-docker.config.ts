@@ -18,6 +18,7 @@ export default defineConfig({
     '**/authentication/auth-register.spec.ts',
     '**/goal/goal-crud.spec.ts',
     '**/local-docker/core-product-phase-*.spec.ts',
+    '**/local-docker/keyboard-first.spec.ts',
   ],
   globalSetup: './e2e/local-docker/global-setup.ts',
   timeout: 5 * 60 * 1000,

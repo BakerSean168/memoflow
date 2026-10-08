@@ -38,20 +38,20 @@ describe('ShortcutManager', () => {
     new ShortcutManager(window);
     window.hide();
     expect(window.isVisible()).toBe(false);
-    const action = vi.mocked(globalShortcut.register).mock.calls.find(
-      ([acc]) => acc === 'CommandOrControl+Shift+D',
-    )?.[1] as () => void;
+    const action = vi
+      .mocked(globalShortcut.register)
+      .mock.calls.find(([acc]) => acc === 'CommandOrControl+Shift+D')?.[1] as () => void;
     action();
     expect(window.isVisible()).toBe(true);
   });
 
-  it("show-app action hides the visible window", () => {
+  it('show-app action hides the visible window', () => {
     new ShortcutManager(window);
     window.show();
     expect(window.isVisible()).toBe(true);
-    const action = vi.mocked(globalShortcut.register).mock.calls.find(
-      ([acc]) => acc === 'CommandOrControl+Shift+D',
-    )?.[1] as () => void;
+    const action = vi
+      .mocked(globalShortcut.register)
+      .mock.calls.find(([acc]) => acc === 'CommandOrControl+Shift+D')?.[1] as () => void;
     action();
     expect(window.isVisible()).toBe(false);
   });
@@ -81,7 +81,10 @@ describe('ShortcutManager', () => {
       action: () => {},
     });
     expect(result).toBe(true);
-    expect(globalShortcut.register).toHaveBeenCalledWith('CommandOrControl+Alt+E', expect.any(Function));
+    expect(globalShortcut.register).toHaveBeenCalledWith(
+      'CommandOrControl+Alt+E',
+      expect.any(Function),
+    );
   });
 
   it('returns false when the OS rejects a global shortcut registration', () => {
@@ -96,6 +99,17 @@ describe('ShortcutManager', () => {
       action: () => {},
     });
     expect(result).toBe(false);
+    expect(manager.getShortcuts().some((c) => c.id === 'custom')).toBe(false);
+    expect(
+      manager.register({
+        id: 'retry',
+        accelerator: 'CommandOrControl+Alt+K',
+        description: 'retry',
+        global: true,
+        enabled: true,
+        action: () => {},
+      }),
+    ).toBe(true);
   });
 
   it('unregisters a global shortcut and removes it from the registry', () => {

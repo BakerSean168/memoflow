@@ -1,17 +1,10 @@
 <script setup lang="ts">
-/**
- * GlobalCommandPalette.vue
- *
- * 全局命令面板，Ctrl+K / Cmd+K 唤起。
- * 基于 shadcn-vue 的 CommandDialog 组件。
- *
- * 使用方式：
- *   1. 在 App.vue 中挂载 <GlobalCommandPalette />
- *   2. 通过 registerStaticCommands / registerDynamicCommands 注册命令
- *   3. 用户按 Ctrl+K 即可呼出
- */
+import { displayChord } from '../keyboard/keymap';
+/** Displays the runtime command catalog and its current device bindings. */
+import { computed } from 'vue';
+import { keyboard } from '../keyboard/runtime';
 import { useI18n } from 'vue-i18n';
-import { _getCommandPaletteState, _setOpen, useCommandGroups } from '@memoflow/ui-vue-shadcn';
+import { _getCommandPaletteState, _setOpen } from '@memoflow/ui-vue-shadcn';
 import {
   CommandDialog,
   CommandEmpty,
@@ -23,13 +16,30 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 
 const state = _getCommandPaletteState();
-const groups = useCommandGroups();
+const groups = computed(() => [
+  {
+    id: 'commands',
+    label: '命令',
+    items: keyboard.commands.value
+      .filter(
+        (command) =>
+          command.scope !== 'list' &&
+          command.scope !== 'preview' &&
+          keyboard.engine.available(command.id),
+      )
+      .map((command) => ({
+        id: command.id,
+        label: command.title,
+        shortcut: command.keys.map((key) => displayChord(key, keyboard.engine.host)).join(' / '),
+        action: () => keyboard.engine.execute(command.id),
+      })),
+  },
+]);
 const { t } = useI18n();
 
 function handleSelect(action: () => void) {
   _setOpen(false);
-  // Execute after dialog closes for smooth transition
-  setTimeout(action, 150);
+  action();
 }
 </script>
 

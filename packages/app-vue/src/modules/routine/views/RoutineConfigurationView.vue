@@ -242,6 +242,7 @@
           <div
             v-if="visibleDefinitions.length"
             class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
+            v-keyboard-list
             data-testid="routine-list"
           >
             <article
@@ -253,6 +254,7 @@
               <button
                 type="button"
                 class="min-w-0 flex-1 text-left transition-colors hover:bg-[hsl(var(--hover)/0.52)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+                :data-keyboard-item="String(routine.id)"
                 @click="openEditRoutine(routine)"
               >
                 <div
@@ -414,6 +416,7 @@
 </template>
 
 <script setup lang="ts">
+import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';

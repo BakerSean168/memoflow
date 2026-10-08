@@ -1,7 +1,7 @@
 /**
  * @file Shortcut Manager
  * @description
- * Manages global and local keyboard shortcuts for the application.
+ * Manages operating-system global keyboard shortcuts for the application.
  *
  * @module modules/shortcuts/shortcutManager
  */
@@ -69,7 +69,7 @@ export class ShortcutManager {
       return false;
     }
 
-    this.shortcuts.set(config.accelerator, config);
+    if (!config.global) return false;
 
     if (config.enabled) {
       if (config.global) {
@@ -83,12 +83,10 @@ export class ShortcutManager {
           console.error(`Error registering global shortcut ${config.accelerator}:`, error);
           return false;
         }
-      } else {
-        // Local shortcuts are typically handled via menu or renderer events
-        // For simplicity, we'll focus on global shortcuts here or specific menu integration
       }
     }
 
+    this.shortcuts.set(config.accelerator, { ...config });
     return true;
   }
 

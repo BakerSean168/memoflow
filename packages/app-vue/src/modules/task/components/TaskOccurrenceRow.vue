@@ -36,9 +36,14 @@
       <button
         type="button"
         class="min-w-0 flex-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
-        :aria-label="t(inspect ? 'task.inspect.open' : 'task.occurrence.openPlan', { title: template.name })"
+        :aria-label="
+          t(inspect ? 'task.inspect.open' : 'task.occurrence.openPlan', { title: template.name })
+        "
+        :data-keyboard-item="String(occurrence.id)"
         data-testid="task-occurrence-body"
-        @click="inspect ? emit('inspect', String(occurrence.id)) : emit('open-plan', String(template.id))"
+        @click="
+          inspect ? emit('inspect', String(occurrence.id)) : emit('open-plan', String(template.id))
+        "
       >
         <div class="flex min-w-0 items-center gap-2">
           <h3

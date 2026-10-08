@@ -34,6 +34,7 @@
             class="min-w-0 flex-1 truncate rounded-sm text-left text-xs font-medium text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
             :class="{ 'line-through text-muted-foreground': occurrence.status === 'Completed' }"
             :aria-label="template.name"
+            :data-keyboard-item="String(occurrence.id)"
             @click="emit('open-plan', String(template.id))"
           >
             {{ template.name }}

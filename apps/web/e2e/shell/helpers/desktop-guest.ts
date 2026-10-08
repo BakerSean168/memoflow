@@ -58,7 +58,7 @@ export class DesktopGuestShellController {
 
     this.electronApp = await electron.launch({
       args: [
-        desktopMainEntrypoint,
+        path.join(__dirname, 'ephemeral-safe-storage.cjs'),
         // Stability flags for headless CI / agent Windows hosts.
         '--disable-gpu',
         '--disable-dev-shm-usage',
@@ -66,6 +66,7 @@ export class DesktopGuestShellController {
       env: {
         ...process.env,
         MEMOFLOW_DESKTOP_USER_DATA_PATH: this.userDataDir,
+        MEMOFLOW_SHELL_EPHEMERAL_STORAGE: '1',
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
         VITEST: 'true',
       },
@@ -73,31 +74,9 @@ export class DesktopGuestShellController {
 
     const first = await this.electronApp.firstWindow({ timeout: 30_000 });
     await first.waitForLoadState('domcontentloaded');
-    await this.configureEphemeralSafeStorage();
     this.currentWindow = first;
     await this.setWindowSize(size);
     return first;
-  }
-
-  private async configureEphemeralSafeStorage(): Promise<void> {
-    if (!this.electronApp) return;
-
-    await this.electronApp.evaluate(({ safeStorage }) => {
-      if (process.platform !== 'linux' || safeStorage.isEncryptionAvailable()) return;
-
-      // Playwright forces Electron's non-encrypting `basic_text` backend on Linux.
-      // Shell tests use a disposable guest profile and do not exercise credential storage.
-      const prefix = 'memoflow-shell-e2e:';
-      safeStorage.isEncryptionAvailable = () => true;
-      safeStorage.encryptString = (value) => Buffer.from(`${prefix}${value}`, 'utf8');
-      safeStorage.decryptString = (value) => {
-        const plaintext = value.toString('utf8');
-        if (!plaintext.startsWith(prefix)) {
-          throw new Error('Unexpected shell E2E safe-storage payload');
-        }
-        return plaintext.slice(prefix.length);
-      };
-    });
   }
 
   async enterGuestAndWaitForShell(timeoutMs = 45_000): Promise<Page> {
