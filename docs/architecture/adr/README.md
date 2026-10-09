@@ -135,6 +135,7 @@ updated: 2026-10-07T00:00:00Z
 | [ADR-116](./ADR-116-external-agent-capability-and-gateway-boundary.md) | External Agent Capability 与 Gateway 边界 | 已采纳（实现中） | 2026-10-07 |
 | [ADR-117](./ADR-117-external-agent-authorization-and-credentials.md) | External Agent Authorization 与 Credential 边界 | 已采纳（实现中） | 2026-10-07 |
 | [ADR-118](./ADR-118-external-agent-mutations-and-assisted-workflows.md) | External Agent Mutation 与 Assisted Workflow | 已采纳（未实现） | 2026-10-07 |
+| [ADR-119](./ADR-119-independent-desktop-profiles-and-guest-copy-import.md) | 独立 Desktop Profile 与访客复制导入 | 已采纳，Linux / 本地部署验证通过 | 2026-10-09 |
 
 ## 维护规则
 

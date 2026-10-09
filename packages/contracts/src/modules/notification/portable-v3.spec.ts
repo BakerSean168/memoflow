@@ -64,12 +64,11 @@ const notificationFact = {
   importance: 'Important',
   urgency: 'High',
   relatedEntityType: null,
-  relatedEntityId: null,
+
   navigationIntent: null,
   actions: [{ kind: 'archive', actionKey: 'archive', labelKey: 'archive' }],
   presentation: { icon: null, image: null, color: null },
-  correlationId: null,
-  causationId: null,
+
   readAt: null,
   archivedAt: null,
   expiresAt: null,
@@ -86,10 +85,8 @@ describe('NotificationPortablePayloadV3', () => {
           actionKey: 'archive',
           actionKind: 'archive',
           occurredAt: 1_758_000_000_000,
-          commandReceiptId: null,
+
           outcome: 'accepted',
-          correlationId: null,
-          causationId: null,
         },
       ],
     });
@@ -108,7 +105,12 @@ describe('NotificationPortablePayloadV3', () => {
     ).toBe(false);
     expect(
       NotificationPortablePayloadV3Schema.safeParse({
-        facts: [{ ...notificationFact, presentation: { icon: null, image: null, color: null, sound: 'ding' } }],
+        facts: [
+          {
+            ...notificationFact,
+            presentation: { icon: null, image: null, color: null, sound: 'ding' },
+          },
+        ],
         interactions: [],
       }).success,
     ).toBe(false);
@@ -125,10 +127,8 @@ describe('NotificationPortablePayloadV3', () => {
             actionKey: 'archive',
             actionKind: 'archive',
             occurredAt: 1,
-            commandReceiptId: null,
+
             outcome: 'accepted',
-            correlationId: null,
-            causationId: null,
           },
         ],
       }).success,

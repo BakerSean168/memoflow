@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 
@@ -15,7 +15,12 @@ function createSharedResolver(rootDir: string): SharedPathResolver {
     profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
     deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
     runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(rootDir, 'shared', 'ui', 'profile-access-window-state.json'),
+    profileAccessWindowStatePath: path.join(
+      rootDir,
+      'shared',
+      'ui',
+      'profile-access-window-state.json',
+    ),
     registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
     cacheDir: path.join(rootDir, 'cache'),
     snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
@@ -38,6 +43,36 @@ describe('ProfileRegistry', () => {
 
   afterEach(async () => {
     await fs.promises.rm(rootDir, { recursive: true, force: true });
+  });
+
+  it('creates independent guests and replays the same creation request without a duplicate', async () => {
+    const registry = new ProfileRegistry(createSharedResolver(rootDir));
+    const first = await registry.ensureGuest();
+    const second = await registry.createGuest('create-second', 'Work');
+    const replay = await registry.createGuest('create-second', 'Work');
+
+    expect(second.profileId).not.toBe(first.profileId);
+    expect(second.localOwnerId).not.toBe(first.localOwnerId);
+    expect(second.keyEnvelopeId).not.toBe(first.keyEnvelopeId);
+    expect(second.cloudBinding).toBeNull();
+    expect(replay.profileId).toBe(second.profileId);
+    expect((await registry.ensureGuest()).profileId).toBe(first.profileId);
+    expect(await new ProfileRegistry(createSharedResolver(rootDir)).list()).toHaveLength(2);
+  });
+
+  it('does not publish failed writes and accepts a retry after persistence recovers', async () => {
+    const registry = new ProfileRegistry(createSharedResolver(rootDir));
+    const first = await registry.ensureGuest();
+    const rename = vi.spyOn(fs.promises, 'rename').mockRejectedValueOnce(new Error('disk full'));
+    await expect(
+      registry.updateProfileMetadata(first.profileId, { displayName: 'Lost' }),
+    ).rejects.toThrow('disk full');
+    rename.mockRestore();
+    expect((await registry.list())[0].displayName).toBe(first.displayName);
+    await registry.updateProfileMetadata(first.profileId, { displayName: 'Saved' });
+    expect((await new ProfileRegistry(createSharedResolver(rootDir)).list())[0].displayName).toBe(
+      'Saved',
+    );
   });
 
   it('tracks snapshot metadata and profile status', async () => {
@@ -68,7 +103,7 @@ describe('ProfileRegistry', () => {
     const second = await registry.register('identity-1', 'Alice Updated', 'alice@example.com');
 
     expect(second.profileId).toBe(first.profileId);
-    expect(second.displayName).toBe('Alice Updated');
+    expect(second.displayName).toBe('Alice');
   });
 
   it('assigns different profileIds for different identityIds', async () => {
@@ -191,9 +226,7 @@ describe('ProfileRegistry', () => {
   it('setActiveProfile throws when profileId does not exist', async () => {
     const registry = new ProfileRegistry(createSharedResolver(rootDir));
 
-    await expect(registry.setActiveProfile('nonexistent')).rejects.toThrow(
-      'Profile not found',
-    );
+    await expect(registry.setActiveProfile('nonexistent')).rejects.toThrow('Profile not found');
   });
 
   it('getActiveProfile returns null when no profile is active', async () => {
@@ -212,38 +245,15 @@ describe('ProfileRegistry', () => {
     expect(updated.identifier).toBe('alice@new.com');
   });
 
-  it('rebinds guest ownership to online identity without changing profileId', async () => {
+  it('persists concurrent creates without lost updates or duplicate requests', async () => {
     const registry = new ProfileRegistry(createSharedResolver(rootDir));
-    const guest = await registry.ensureGuest();
-    const guestOwnerId = guest.localOwnerId;
-    const rebound = await registry.rebindIdentityOwnership({
-      fromOwnerId: guestOwnerId,
-      toCloudAccountId: 'IdentityId_online_1',
-      displayName: 'Online User',
-      identifier: 'user@example.com',
-    });
-
-    expect(rebound.profileId).toBe(guest.profileId);
-    expect(rebound.keyEnvelopeId).toBe(guest.keyEnvelopeId);
-    expect(rebound.localOwnerId).toBe('IdentityId_online_1');
-    expect(rebound.cloudBinding?.cloudAccountId).toBe('IdentityId_online_1');
-    expect(rebound.displayName).toBe('Online User');
-    expect(rebound.identifier).toBe('user@example.com');
-    expect(await registry.findByOwnerId(guestOwnerId)).toBeNull();
-    expect((await registry.findByOwnerId('IdentityId_online_1'))?.profileId).toBe(guest.profileId);
-  });
-
-  it('refuses rebind when target identity already owns another profile', async () => {
-    const registry = new ProfileRegistry(createSharedResolver(rootDir));
-    const guest = await registry.ensureGuest();
-    await registry.register('IdentityId_online_1', 'Existing', 'user@example.com');
-
-    await expect(
-      registry.rebindIdentityOwnership({
-        fromOwnerId: guest.localOwnerId,
-        toCloudAccountId: 'IdentityId_online_1',
-      }),
-    ).rejects.toThrow(/refusing silent merge/);
+    const results = await Promise.all([
+      registry.createGuest('one'),
+      registry.createGuest('two'),
+      registry.createGuest('one'),
+    ]);
+    expect(results[0].profileId).toBe(results[2].profileId);
+    expect(await registry.list()).toHaveLength(2);
   });
 
   it('creates one persistent random guest profile and reuses it after reload', async () => {
@@ -266,15 +276,17 @@ describe('ProfileRegistry', () => {
   it('rejects legacy registry versions instead of silently migrating them', async () => {
     const resolver = createSharedResolver(rootDir);
     await fs.promises.mkdir(resolver.profilesRegistryDir, { recursive: true });
-    await fs.promises.writeFile(resolver.registryPath, JSON.stringify({
-      version: 1,
-      activeProfileId: null,
-      profiles: [],
-    }));
+    await fs.promises.writeFile(
+      resolver.registryPath,
+      JSON.stringify({
+        version: 1,
+        activeProfileId: null,
+        profiles: [],
+      }),
+    );
 
     await expect(new ProfileRegistry(resolver).list()).rejects.toThrow(
       'Unsupported Profile registry version: 1',
     );
   });
-
 });

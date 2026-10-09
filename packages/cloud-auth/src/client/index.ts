@@ -166,8 +166,11 @@ class CloudAuthIpcClient implements CloudAuthDesktopClientPort {
   getSession() {
     return this.ipc.invoke<CloudSessionState>(CloudAuthChannels.SESSION);
   }
-  beginCloudConnection() {
-    return this.ipc.invoke<DesktopCloudConnectionAttempt>(CloudAuthChannels.CLOUD_CONNECTION_BEGIN);
+  beginCloudConnection(request: import('@memoflow/contracts').DesktopCloudConnectionRequest) {
+    return this.ipc.invoke<DesktopCloudConnectionAttempt>(
+      CloudAuthChannels.CLOUD_CONNECTION_BEGIN,
+      request,
+    );
   }
   getCurrentCloudConnection() {
     return this.ipc.invoke<DesktopCloudConnectionAttempt | null>(

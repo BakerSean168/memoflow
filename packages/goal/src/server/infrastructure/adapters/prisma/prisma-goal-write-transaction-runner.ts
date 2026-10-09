@@ -21,7 +21,7 @@ export class PrismaGoalWriteTransactionRunner implements GoalWriteTransactionRun
   async run<T>(work: (context: GoalWriteTransactionContext) => Promise<T>): Promise<T> {
     const bufferedEventBus = new BufferedGoalWriteEventBus();
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const receiptAdapter = new PrismaGoalReliableOperationAdapter(tx as unknown as PrismaClient);
+      const receiptAdapter = new PrismaGoalReliableOperationAdapter(tx);
       return work({
         goalRepository: new GoalPrismaRepository(tx, bufferedEventBus, true),
         goalRecordRepository: new GoalRecordPrismaRepository(tx),

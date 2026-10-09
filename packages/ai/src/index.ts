@@ -125,3 +125,5 @@ export type {
   AINotificationActionReceipt,
   AIUnreadNotificationSummary,
 } from './ports';
+export { createAiBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export { createAiPrismaPortableCapability } from './server/infrastructure/ai-profile-import';

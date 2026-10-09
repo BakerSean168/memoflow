@@ -54,3 +54,8 @@ export {
 // 导出，apps 无需导入 `/commands` 或 `/schedule-execution` 子路径。
 export { CreateNotificationUseCase } from './server/application/use-cases/commands/create-notification.use-case';
 export type { ScheduleNotificationPort } from './schedule-execution';
+export { createNotificationBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export {
+  createNotificationPrismaPortability,
+  createNotificationPowerSyncPortability,
+} from './server/infrastructure/notification-profile-import';

@@ -20,8 +20,11 @@ import {
   RotateCw,
   X,
 } from '@lucide/vue';
-import type { DesktopCloudConnectionAttempt } from '@memoflow/contracts';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import type {
+  DesktopCloudConnectionAttempt,
+  DesktopCloudConnectionRequest,
+} from '@memoflow/contracts';
+import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
@@ -31,7 +34,11 @@ import {
 import { readDesktopAccessSnapshot } from '../../shared/utils/desktop-profile-access';
 import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
 
-const props = defineProps<{ open: boolean; profileName?: string }>();
+const props = defineProps<{
+  open: boolean;
+  profileName?: string;
+  intent?: DesktopCloudConnectionRequest['intent'];
+}>();
 const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 
 const { t } = useI18n();
@@ -84,7 +91,19 @@ async function hydrateSession(): Promise<void> {
 async function applyAttempt(next: DesktopCloudConnectionAttempt | null): Promise<void> {
   attempt.value = next;
   message.value = next?.error?.message ?? null;
-  if (next?.status === 'connected') await hydrateSession();
+  if (next?.status === 'connected' && next.result) {
+    if (next.result.targetProfileId !== next.originProfileId) {
+      stopPolling();
+      await bridge?.invoke(
+        WindowChannels.TRANSITION_TO_PROFILE_ACCESS,
+        next.result.targetProfileId,
+      );
+      return;
+    }
+    await hydrateSession();
+    if (next.result.activation === 'sync_pending')
+      message.value = t('shell.cloudConnection.syncPending');
+  }
   schedulePoll();
 }
 
@@ -98,7 +117,7 @@ async function restoreAttempt(): Promise<void> {
     message.value = result.error.message;
     return;
   }
-  await applyAttempt(result.data);
+  await applyAttempt(result.data?.status === 'connected' ? null : result.data);
 }
 
 async function refreshAttempt(): Promise<void> {
@@ -116,7 +135,7 @@ async function beginConnection(): Promise<void> {
   if (!service) return;
   loading.value = true;
   message.value = null;
-  const result = await service.beginCloudConnection();
+  const result = await service.beginCloudConnection({ intent: props.intent ?? 'add_account' });
   loading.value = false;
   if (!result.ok) {
     message.value = result.error.message;
@@ -267,7 +286,7 @@ onBeforeUnmount(stopPolling);
           {{ t('common.close') }}
         </Button>
         <Button
-          v-if="!attempt || canRetry"
+          v-if="!attempt || canRetry || isConnected"
           data-testid="cloud-connection-continue"
           :disabled="loading || !service"
           @click="beginConnection"

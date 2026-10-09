@@ -1,0 +1,18 @@
+/// Empty-account copy operation. The committed result shares its transaction with all owner facts.
+model ProfileImportOperation {
+  id String @id
+  identityId String @map("identity_id")
+  requestId String @map("request_id")
+  sourceDigest String @map("source_digest")
+  effectiveDigest String @map("effective_digest")
+  status String
+  planJson String @map("plan_json")
+  schedulingReconciledAt DateTime? @map("scheduling_reconciled_at")
+  resultJson String? @map("result_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, requestId])
+  @@map("profile_import_operations")
+}

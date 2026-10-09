@@ -125,3 +125,14 @@ export interface IElectronModule {
    */
   destroy?(): Promise<void> | void;
 }
+
+export {
+  ProfileIdSchema,
+  ProfilePinSchema,
+  SelectProfileRequestSchema,
+  RemoveProfileRequestSchema,
+  CreateGuestProfileRequestSchema,
+  RenameProfileRequestSchema,
+} from './profile-access';
+export type { CreateGuestProfileRequest, RenameProfileRequest } from './profile-access';
+export * from './profile-import';

@@ -211,6 +211,11 @@ export type OauthConsent = $Result.DefaultSelection<Prisma.$OauthConsentPayload>
  */
 export type OauthClientAssertion = $Result.DefaultSelection<Prisma.$OauthClientAssertionPayload>
 /**
+ * Model ProfileImportOperation
+ * Empty-account copy operation. The committed result shares its transaction with all owner facts.
+ */
+export type ProfileImportOperation = $Result.DefaultSelection<Prisma.$ProfileImportOperationPayload>
+/**
  * Model Relation
  *
  */
@@ -968,6 +973,16 @@ export class PrismaClient<
     * ```
     */
   get oauthClientAssertion(): Prisma.OauthClientAssertionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.profileImportOperation`: Exposes CRUD operations for the **ProfileImportOperation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProfileImportOperations
+    * const profileImportOperations = await prisma.profileImportOperation.findMany()
+    * ```
+    */
+  get profileImportOperation(): Prisma.ProfileImportOperationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.relation`: Exposes CRUD operations for the **Relation** model.
@@ -1894,6 +1909,7 @@ export namespace Prisma {
     OauthAccessToken: 'OauthAccessToken',
     OauthConsent: 'OauthConsent',
     OauthClientAssertion: 'OauthClientAssertion',
+    ProfileImportOperation: 'ProfileImportOperation',
     Relation: 'Relation',
     OutboxMessage: 'OutboxMessage',
     InboxReceipt: 'InboxReceipt',
@@ -1953,7 +1969,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4840,6 +4856,80 @@ export namespace Prisma {
           count: {
             args: Prisma.OauthClientAssertionCountArgs<ExtArgs>
             result: $Utils.Optional<OauthClientAssertionCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProfileImportOperation: {
+        payload: Prisma.$ProfileImportOperationPayload<ExtArgs>
+        fields: Prisma.ProfileImportOperationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProfileImportOperationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProfileImportOperationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          findFirst: {
+            args: Prisma.ProfileImportOperationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProfileImportOperationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          findMany: {
+            args: Prisma.ProfileImportOperationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>[]
+          }
+          create: {
+            args: Prisma.ProfileImportOperationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          createMany: {
+            args: Prisma.ProfileImportOperationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProfileImportOperationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>[]
+          }
+          delete: {
+            args: Prisma.ProfileImportOperationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          update: {
+            args: Prisma.ProfileImportOperationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProfileImportOperationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProfileImportOperationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProfileImportOperationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProfileImportOperationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfileImportOperationPayload>
+          }
+          aggregate: {
+            args: Prisma.ProfileImportOperationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProfileImportOperation>
+          }
+          groupBy: {
+            args: Prisma.ProfileImportOperationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProfileImportOperationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProfileImportOperationCountArgs<ExtArgs>
+            result: $Utils.Optional<ProfileImportOperationCountAggregateOutputType> | number
           }
         }
       }
@@ -8261,6 +8351,7 @@ export namespace Prisma {
     oauthAccessToken?: OauthAccessTokenOmit
     oauthConsent?: OauthConsentOmit
     oauthClientAssertion?: OauthClientAssertionOmit
+    profileImportOperation?: ProfileImportOperationOmit
     relation?: RelationOmit
     outboxMessage?: OutboxMessageOmit
     inboxReceipt?: InboxReceiptOmit
@@ -8386,6 +8477,7 @@ export namespace Prisma {
 
   export type AccountCountOutputType = {
     goals: number
+    profileImportOperations: number
     labels: number
     goalLabels: number
     taskLabels: number
@@ -8425,6 +8517,7 @@ export namespace Prisma {
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     goals?: boolean | AccountCountOutputTypeCountGoalsArgs
+    profileImportOperations?: boolean | AccountCountOutputTypeCountProfileImportOperationsArgs
     labels?: boolean | AccountCountOutputTypeCountLabelsArgs
     goalLabels?: boolean | AccountCountOutputTypeCountGoalLabelsArgs
     taskLabels?: boolean | AccountCountOutputTypeCountTaskLabelsArgs
@@ -8478,6 +8571,13 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountGoalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GoalWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountProfileImportOperationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfileImportOperationWhereInput
   }
 
   /**
@@ -9781,6 +9881,7 @@ export namespace Prisma {
     closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
+    profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
     taskLabels?: boolean | Account$taskLabelsArgs<ExtArgs>
@@ -9853,6 +9954,7 @@ export namespace Prisma {
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
+    profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
     taskLabels?: boolean | Account$taskLabelsArgs<ExtArgs>
@@ -9903,6 +10005,7 @@ export namespace Prisma {
     objects: {
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
       goals: Prisma.$GoalPayload<ExtArgs>[]
+      profileImportOperations: Prisma.$ProfileImportOperationPayload<ExtArgs>[]
       labels: Prisma.$LabelPayload<ExtArgs>[]
       goalLabels: Prisma.$GoalLabelPayload<ExtArgs>[]
       taskLabels: Prisma.$TaskLabelPayload<ExtArgs>[]
@@ -10343,6 +10446,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    profileImportOperations<T extends Account$profileImportOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$profileImportOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     labels<T extends Account$labelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goalLabels<T extends Account$goalLabelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskLabels<T extends Account$taskLabelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -10836,6 +10940,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: GoalScalarFieldEnum | GoalScalarFieldEnum[]
+  }
+
+  /**
+   * Account.profileImportOperations
+   */
+  export type Account$profileImportOperationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    where?: ProfileImportOperationWhereInput
+    orderBy?: ProfileImportOperationOrderByWithRelationInput | ProfileImportOperationOrderByWithRelationInput[]
+    cursor?: ProfileImportOperationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProfileImportOperationScalarFieldEnum | ProfileImportOperationScalarFieldEnum[]
   }
 
   /**
@@ -56801,6 +56929,1147 @@ export namespace Prisma {
      * Omit specific fields from the OauthClientAssertion
      */
     omit?: OauthClientAssertionOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProfileImportOperation
+   */
+
+  export type AggregateProfileImportOperation = {
+    _count: ProfileImportOperationCountAggregateOutputType | null
+    _min: ProfileImportOperationMinAggregateOutputType | null
+    _max: ProfileImportOperationMaxAggregateOutputType | null
+  }
+
+  export type ProfileImportOperationMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    requestId: string | null
+    sourceDigest: string | null
+    effectiveDigest: string | null
+    status: string | null
+    planJson: string | null
+    schedulingReconciledAt: Date | null
+    resultJson: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfileImportOperationMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    requestId: string | null
+    sourceDigest: string | null
+    effectiveDigest: string | null
+    status: string | null
+    planJson: string | null
+    schedulingReconciledAt: Date | null
+    resultJson: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfileImportOperationCountAggregateOutputType = {
+    id: number
+    identityId: number
+    requestId: number
+    sourceDigest: number
+    effectiveDigest: number
+    status: number
+    planJson: number
+    schedulingReconciledAt: number
+    resultJson: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ProfileImportOperationMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    requestId?: true
+    sourceDigest?: true
+    effectiveDigest?: true
+    status?: true
+    planJson?: true
+    schedulingReconciledAt?: true
+    resultJson?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfileImportOperationMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    requestId?: true
+    sourceDigest?: true
+    effectiveDigest?: true
+    status?: true
+    planJson?: true
+    schedulingReconciledAt?: true
+    resultJson?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfileImportOperationCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    requestId?: true
+    sourceDigest?: true
+    effectiveDigest?: true
+    status?: true
+    planJson?: true
+    schedulingReconciledAt?: true
+    resultJson?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ProfileImportOperationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfileImportOperation to aggregate.
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ProfileImportOperations to fetch.
+     */
+    orderBy?: ProfileImportOperationOrderByWithRelationInput | ProfileImportOperationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ProfileImportOperationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ProfileImportOperations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ProfileImportOperations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ProfileImportOperations
+    **/
+    _count?: true | ProfileImportOperationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProfileImportOperationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProfileImportOperationMaxAggregateInputType
+  }
+
+  export type GetProfileImportOperationAggregateType<T extends ProfileImportOperationAggregateArgs> = {
+        [P in keyof T & keyof AggregateProfileImportOperation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProfileImportOperation[P]>
+      : GetScalarType<T[P], AggregateProfileImportOperation[P]>
+  }
+
+
+
+
+  export type ProfileImportOperationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfileImportOperationWhereInput
+    orderBy?: ProfileImportOperationOrderByWithAggregationInput | ProfileImportOperationOrderByWithAggregationInput[]
+    by: ProfileImportOperationScalarFieldEnum[] | ProfileImportOperationScalarFieldEnum
+    having?: ProfileImportOperationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProfileImportOperationCountAggregateInputType | true
+    _min?: ProfileImportOperationMinAggregateInputType
+    _max?: ProfileImportOperationMaxAggregateInputType
+  }
+
+  export type ProfileImportOperationGroupByOutputType = {
+    id: string
+    identityId: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt: Date | null
+    resultJson: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ProfileImportOperationCountAggregateOutputType | null
+    _min: ProfileImportOperationMinAggregateOutputType | null
+    _max: ProfileImportOperationMaxAggregateOutputType | null
+  }
+
+  type GetProfileImportOperationGroupByPayload<T extends ProfileImportOperationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProfileImportOperationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProfileImportOperationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProfileImportOperationGroupByOutputType[P]>
+            : GetScalarType<T[P], ProfileImportOperationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProfileImportOperationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    requestId?: boolean
+    sourceDigest?: boolean
+    effectiveDigest?: boolean
+    status?: boolean
+    planJson?: boolean
+    schedulingReconciledAt?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["profileImportOperation"]>
+
+  export type ProfileImportOperationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    requestId?: boolean
+    sourceDigest?: boolean
+    effectiveDigest?: boolean
+    status?: boolean
+    planJson?: boolean
+    schedulingReconciledAt?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["profileImportOperation"]>
+
+  export type ProfileImportOperationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    requestId?: boolean
+    sourceDigest?: boolean
+    effectiveDigest?: boolean
+    status?: boolean
+    planJson?: boolean
+    schedulingReconciledAt?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["profileImportOperation"]>
+
+  export type ProfileImportOperationSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    requestId?: boolean
+    sourceDigest?: boolean
+    effectiveDigest?: boolean
+    status?: boolean
+    planJson?: boolean
+    schedulingReconciledAt?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ProfileImportOperationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "requestId" | "sourceDigest" | "effectiveDigest" | "status" | "planJson" | "schedulingReconciledAt" | "resultJson" | "createdAt" | "updatedAt", ExtArgs["result"]["profileImportOperation"]>
+  export type ProfileImportOperationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type ProfileImportOperationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type ProfileImportOperationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $ProfileImportOperationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProfileImportOperation"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      requestId: string
+      sourceDigest: string
+      effectiveDigest: string
+      status: string
+      planJson: string
+      schedulingReconciledAt: Date | null
+      resultJson: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["profileImportOperation"]>
+    composites: {}
+  }
+
+  type ProfileImportOperationGetPayload<S extends boolean | null | undefined | ProfileImportOperationDefaultArgs> = $Result.GetResult<Prisma.$ProfileImportOperationPayload, S>
+
+  type ProfileImportOperationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProfileImportOperationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProfileImportOperationCountAggregateInputType | true
+    }
+
+  export interface ProfileImportOperationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProfileImportOperation'], meta: { name: 'ProfileImportOperation' } }
+    /**
+     * Find zero or one ProfileImportOperation that matches the filter.
+     * @param {ProfileImportOperationFindUniqueArgs} args - Arguments to find a ProfileImportOperation
+     * @example
+     * // Get one ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProfileImportOperationFindUniqueArgs>(args: SelectSubset<T, ProfileImportOperationFindUniqueArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProfileImportOperation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProfileImportOperationFindUniqueOrThrowArgs} args - Arguments to find a ProfileImportOperation
+     * @example
+     * // Get one ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProfileImportOperationFindUniqueOrThrowArgs>(args: SelectSubset<T, ProfileImportOperationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfileImportOperation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationFindFirstArgs} args - Arguments to find a ProfileImportOperation
+     * @example
+     * // Get one ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProfileImportOperationFindFirstArgs>(args?: SelectSubset<T, ProfileImportOperationFindFirstArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfileImportOperation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationFindFirstOrThrowArgs} args - Arguments to find a ProfileImportOperation
+     * @example
+     * // Get one ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProfileImportOperationFindFirstOrThrowArgs>(args?: SelectSubset<T, ProfileImportOperationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProfileImportOperations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProfileImportOperations
+     * const profileImportOperations = await prisma.profileImportOperation.findMany()
+     *
+     * // Get first 10 ProfileImportOperations
+     * const profileImportOperations = await prisma.profileImportOperation.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const profileImportOperationWithIdOnly = await prisma.profileImportOperation.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ProfileImportOperationFindManyArgs>(args?: SelectSubset<T, ProfileImportOperationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProfileImportOperation.
+     * @param {ProfileImportOperationCreateArgs} args - Arguments to create a ProfileImportOperation.
+     * @example
+     * // Create one ProfileImportOperation
+     * const ProfileImportOperation = await prisma.profileImportOperation.create({
+     *   data: {
+     *     // ... data to create a ProfileImportOperation
+     *   }
+     * })
+     *
+     */
+    create<T extends ProfileImportOperationCreateArgs>(args: SelectSubset<T, ProfileImportOperationCreateArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProfileImportOperations.
+     * @param {ProfileImportOperationCreateManyArgs} args - Arguments to create many ProfileImportOperations.
+     * @example
+     * // Create many ProfileImportOperations
+     * const profileImportOperation = await prisma.profileImportOperation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ProfileImportOperationCreateManyArgs>(args?: SelectSubset<T, ProfileImportOperationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProfileImportOperations and returns the data saved in the database.
+     * @param {ProfileImportOperationCreateManyAndReturnArgs} args - Arguments to create many ProfileImportOperations.
+     * @example
+     * // Create many ProfileImportOperations
+     * const profileImportOperation = await prisma.profileImportOperation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ProfileImportOperations and only return the `id`
+     * const profileImportOperationWithIdOnly = await prisma.profileImportOperation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ProfileImportOperationCreateManyAndReturnArgs>(args?: SelectSubset<T, ProfileImportOperationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProfileImportOperation.
+     * @param {ProfileImportOperationDeleteArgs} args - Arguments to delete one ProfileImportOperation.
+     * @example
+     * // Delete one ProfileImportOperation
+     * const ProfileImportOperation = await prisma.profileImportOperation.delete({
+     *   where: {
+     *     // ... filter to delete one ProfileImportOperation
+     *   }
+     * })
+     *
+     */
+    delete<T extends ProfileImportOperationDeleteArgs>(args: SelectSubset<T, ProfileImportOperationDeleteArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProfileImportOperation.
+     * @param {ProfileImportOperationUpdateArgs} args - Arguments to update one ProfileImportOperation.
+     * @example
+     * // Update one ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ProfileImportOperationUpdateArgs>(args: SelectSubset<T, ProfileImportOperationUpdateArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProfileImportOperations.
+     * @param {ProfileImportOperationDeleteManyArgs} args - Arguments to filter ProfileImportOperations to delete.
+     * @example
+     * // Delete a few ProfileImportOperations
+     * const { count } = await prisma.profileImportOperation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ProfileImportOperationDeleteManyArgs>(args?: SelectSubset<T, ProfileImportOperationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfileImportOperations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProfileImportOperations
+     * const profileImportOperation = await prisma.profileImportOperation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ProfileImportOperationUpdateManyArgs>(args: SelectSubset<T, ProfileImportOperationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfileImportOperations and returns the data updated in the database.
+     * @param {ProfileImportOperationUpdateManyAndReturnArgs} args - Arguments to update many ProfileImportOperations.
+     * @example
+     * // Update many ProfileImportOperations
+     * const profileImportOperation = await prisma.profileImportOperation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ProfileImportOperations and only return the `id`
+     * const profileImportOperationWithIdOnly = await prisma.profileImportOperation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ProfileImportOperationUpdateManyAndReturnArgs>(args: SelectSubset<T, ProfileImportOperationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProfileImportOperation.
+     * @param {ProfileImportOperationUpsertArgs} args - Arguments to update or create a ProfileImportOperation.
+     * @example
+     * // Update or create a ProfileImportOperation
+     * const profileImportOperation = await prisma.profileImportOperation.upsert({
+     *   create: {
+     *     // ... data to create a ProfileImportOperation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProfileImportOperation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProfileImportOperationUpsertArgs>(args: SelectSubset<T, ProfileImportOperationUpsertArgs<ExtArgs>>): Prisma__ProfileImportOperationClient<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProfileImportOperations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationCountArgs} args - Arguments to filter ProfileImportOperations to count.
+     * @example
+     * // Count the number of ProfileImportOperations
+     * const count = await prisma.profileImportOperation.count({
+     *   where: {
+     *     // ... the filter for the ProfileImportOperations we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProfileImportOperationCountArgs>(
+      args?: Subset<T, ProfileImportOperationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProfileImportOperationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProfileImportOperation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProfileImportOperationAggregateArgs>(args: Subset<T, ProfileImportOperationAggregateArgs>): Prisma.PrismaPromise<GetProfileImportOperationAggregateType<T>>
+
+    /**
+     * Group by ProfileImportOperation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfileImportOperationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ProfileImportOperationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProfileImportOperationGroupByArgs['orderBy'] }
+        : { orderBy?: ProfileImportOperationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProfileImportOperationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProfileImportOperationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProfileImportOperation model
+   */
+  readonly fields: ProfileImportOperationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProfileImportOperation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProfileImportOperationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProfileImportOperation model
+   */
+  interface ProfileImportOperationFieldRefs {
+    readonly id: FieldRef<"ProfileImportOperation", 'String'>
+    readonly identityId: FieldRef<"ProfileImportOperation", 'String'>
+    readonly requestId: FieldRef<"ProfileImportOperation", 'String'>
+    readonly sourceDigest: FieldRef<"ProfileImportOperation", 'String'>
+    readonly effectiveDigest: FieldRef<"ProfileImportOperation", 'String'>
+    readonly status: FieldRef<"ProfileImportOperation", 'String'>
+    readonly planJson: FieldRef<"ProfileImportOperation", 'String'>
+    readonly schedulingReconciledAt: FieldRef<"ProfileImportOperation", 'DateTime'>
+    readonly resultJson: FieldRef<"ProfileImportOperation", 'String'>
+    readonly createdAt: FieldRef<"ProfileImportOperation", 'DateTime'>
+    readonly updatedAt: FieldRef<"ProfileImportOperation", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ProfileImportOperation findUnique
+   */
+  export type ProfileImportOperationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileImportOperation to fetch.
+     */
+    where: ProfileImportOperationWhereUniqueInput
+  }
+
+  /**
+   * ProfileImportOperation findUniqueOrThrow
+   */
+  export type ProfileImportOperationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileImportOperation to fetch.
+     */
+    where: ProfileImportOperationWhereUniqueInput
+  }
+
+  /**
+   * ProfileImportOperation findFirst
+   */
+  export type ProfileImportOperationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileImportOperation to fetch.
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ProfileImportOperations to fetch.
+     */
+    orderBy?: ProfileImportOperationOrderByWithRelationInput | ProfileImportOperationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ProfileImportOperations.
+     */
+    cursor?: ProfileImportOperationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ProfileImportOperations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ProfileImportOperations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ProfileImportOperations.
+     */
+    distinct?: ProfileImportOperationScalarFieldEnum | ProfileImportOperationScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileImportOperation findFirstOrThrow
+   */
+  export type ProfileImportOperationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileImportOperation to fetch.
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ProfileImportOperations to fetch.
+     */
+    orderBy?: ProfileImportOperationOrderByWithRelationInput | ProfileImportOperationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ProfileImportOperations.
+     */
+    cursor?: ProfileImportOperationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ProfileImportOperations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ProfileImportOperations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ProfileImportOperations.
+     */
+    distinct?: ProfileImportOperationScalarFieldEnum | ProfileImportOperationScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileImportOperation findMany
+   */
+  export type ProfileImportOperationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter, which ProfileImportOperations to fetch.
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ProfileImportOperations to fetch.
+     */
+    orderBy?: ProfileImportOperationOrderByWithRelationInput | ProfileImportOperationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ProfileImportOperations.
+     */
+    cursor?: ProfileImportOperationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ProfileImportOperations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ProfileImportOperations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ProfileImportOperations.
+     */
+    distinct?: ProfileImportOperationScalarFieldEnum | ProfileImportOperationScalarFieldEnum[]
+  }
+
+  /**
+   * ProfileImportOperation create
+   */
+  export type ProfileImportOperationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ProfileImportOperation.
+     */
+    data: XOR<ProfileImportOperationCreateInput, ProfileImportOperationUncheckedCreateInput>
+  }
+
+  /**
+   * ProfileImportOperation createMany
+   */
+  export type ProfileImportOperationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProfileImportOperations.
+     */
+    data: ProfileImportOperationCreateManyInput | ProfileImportOperationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProfileImportOperation createManyAndReturn
+   */
+  export type ProfileImportOperationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProfileImportOperations.
+     */
+    data: ProfileImportOperationCreateManyInput | ProfileImportOperationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProfileImportOperation update
+   */
+  export type ProfileImportOperationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ProfileImportOperation.
+     */
+    data: XOR<ProfileImportOperationUpdateInput, ProfileImportOperationUncheckedUpdateInput>
+    /**
+     * Choose, which ProfileImportOperation to update.
+     */
+    where: ProfileImportOperationWhereUniqueInput
+  }
+
+  /**
+   * ProfileImportOperation updateMany
+   */
+  export type ProfileImportOperationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProfileImportOperations.
+     */
+    data: XOR<ProfileImportOperationUpdateManyMutationInput, ProfileImportOperationUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfileImportOperations to update
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * Limit how many ProfileImportOperations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfileImportOperation updateManyAndReturn
+   */
+  export type ProfileImportOperationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * The data used to update ProfileImportOperations.
+     */
+    data: XOR<ProfileImportOperationUpdateManyMutationInput, ProfileImportOperationUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfileImportOperations to update
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * Limit how many ProfileImportOperations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ProfileImportOperation upsert
+   */
+  export type ProfileImportOperationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ProfileImportOperation to update in case it exists.
+     */
+    where: ProfileImportOperationWhereUniqueInput
+    /**
+     * In case the ProfileImportOperation found by the `where` argument doesn't exist, create a new ProfileImportOperation with this data.
+     */
+    create: XOR<ProfileImportOperationCreateInput, ProfileImportOperationUncheckedCreateInput>
+    /**
+     * In case the ProfileImportOperation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProfileImportOperationUpdateInput, ProfileImportOperationUncheckedUpdateInput>
+  }
+
+  /**
+   * ProfileImportOperation delete
+   */
+  export type ProfileImportOperationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
+    /**
+     * Filter which ProfileImportOperation to delete.
+     */
+    where: ProfileImportOperationWhereUniqueInput
+  }
+
+  /**
+   * ProfileImportOperation deleteMany
+   */
+  export type ProfileImportOperationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfileImportOperations to delete
+     */
+    where?: ProfileImportOperationWhereInput
+    /**
+     * Limit how many ProfileImportOperations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfileImportOperation without action
+   */
+  export type ProfileImportOperationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileImportOperation
+     */
+    select?: ProfileImportOperationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfileImportOperation
+     */
+    omit?: ProfileImportOperationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProfileImportOperationInclude<ExtArgs> | null
   }
 
 
@@ -108912,6 +110181,23 @@ export namespace Prisma {
   export type OauthClientAssertionScalarFieldEnum = (typeof OauthClientAssertionScalarFieldEnum)[keyof typeof OauthClientAssertionScalarFieldEnum]
 
 
+  export const ProfileImportOperationScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    requestId: 'requestId',
+    sourceDigest: 'sourceDigest',
+    effectiveDigest: 'effectiveDigest',
+    status: 'status',
+    planJson: 'planJson',
+    schedulingReconciledAt: 'schedulingReconciledAt',
+    resultJson: 'resultJson',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ProfileImportOperationScalarFieldEnum = (typeof ProfileImportOperationScalarFieldEnum)[keyof typeof ProfileImportOperationScalarFieldEnum]
+
+
   export const RelationScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -109842,6 +111128,7 @@ export namespace Prisma {
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     goals?: GoalListRelationFilter
+    profileImportOperations?: ProfileImportOperationListRelationFilter
     labels?: LabelListRelationFilter
     goalLabels?: GoalLabelListRelationFilter
     taskLabels?: TaskLabelListRelationFilter
@@ -109889,6 +111176,7 @@ export namespace Prisma {
     closedAt?: SortOrderInput | SortOrder
     cloudUser?: CloudAuthUserOrderByWithRelationInput
     goals?: GoalOrderByRelationAggregateInput
+    profileImportOperations?: ProfileImportOperationOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
     goalLabels?: GoalLabelOrderByRelationAggregateInput
     taskLabels?: TaskLabelOrderByRelationAggregateInput
@@ -109939,6 +111227,7 @@ export namespace Prisma {
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     goals?: GoalListRelationFilter
+    profileImportOperations?: ProfileImportOperationListRelationFilter
     labels?: LabelListRelationFilter
     goalLabels?: GoalLabelListRelationFilter
     taskLabels?: TaskLabelListRelationFilter
@@ -113538,6 +114827,92 @@ export namespace Prisma {
     NOT?: OauthClientAssertionScalarWhereWithAggregatesInput | OauthClientAssertionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"OauthClientAssertion"> | string
     expiresAt?: DateTimeWithAggregatesFilter<"OauthClientAssertion"> | Date | string
+  }
+
+  export type ProfileImportOperationWhereInput = {
+    AND?: ProfileImportOperationWhereInput | ProfileImportOperationWhereInput[]
+    OR?: ProfileImportOperationWhereInput[]
+    NOT?: ProfileImportOperationWhereInput | ProfileImportOperationWhereInput[]
+    id?: StringFilter<"ProfileImportOperation"> | string
+    identityId?: StringFilter<"ProfileImportOperation"> | string
+    requestId?: StringFilter<"ProfileImportOperation"> | string
+    sourceDigest?: StringFilter<"ProfileImportOperation"> | string
+    effectiveDigest?: StringFilter<"ProfileImportOperation"> | string
+    status?: StringFilter<"ProfileImportOperation"> | string
+    planJson?: StringFilter<"ProfileImportOperation"> | string
+    schedulingReconciledAt?: DateTimeNullableFilter<"ProfileImportOperation"> | Date | string | null
+    resultJson?: StringNullableFilter<"ProfileImportOperation"> | string | null
+    createdAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+    updatedAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type ProfileImportOperationOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    requestId?: SortOrder
+    sourceDigest?: SortOrder
+    effectiveDigest?: SortOrder
+    status?: SortOrder
+    planJson?: SortOrder
+    schedulingReconciledAt?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type ProfileImportOperationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_requestId?: ProfileImportOperationIdentityIdRequestIdCompoundUniqueInput
+    AND?: ProfileImportOperationWhereInput | ProfileImportOperationWhereInput[]
+    OR?: ProfileImportOperationWhereInput[]
+    NOT?: ProfileImportOperationWhereInput | ProfileImportOperationWhereInput[]
+    identityId?: StringFilter<"ProfileImportOperation"> | string
+    requestId?: StringFilter<"ProfileImportOperation"> | string
+    sourceDigest?: StringFilter<"ProfileImportOperation"> | string
+    effectiveDigest?: StringFilter<"ProfileImportOperation"> | string
+    status?: StringFilter<"ProfileImportOperation"> | string
+    planJson?: StringFilter<"ProfileImportOperation"> | string
+    schedulingReconciledAt?: DateTimeNullableFilter<"ProfileImportOperation"> | Date | string | null
+    resultJson?: StringNullableFilter<"ProfileImportOperation"> | string | null
+    createdAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+    updatedAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id" | "identityId_requestId">
+
+  export type ProfileImportOperationOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    requestId?: SortOrder
+    sourceDigest?: SortOrder
+    effectiveDigest?: SortOrder
+    status?: SortOrder
+    planJson?: SortOrder
+    schedulingReconciledAt?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ProfileImportOperationCountOrderByAggregateInput
+    _max?: ProfileImportOperationMaxOrderByAggregateInput
+    _min?: ProfileImportOperationMinOrderByAggregateInput
+  }
+
+  export type ProfileImportOperationScalarWhereWithAggregatesInput = {
+    AND?: ProfileImportOperationScalarWhereWithAggregatesInput | ProfileImportOperationScalarWhereWithAggregatesInput[]
+    OR?: ProfileImportOperationScalarWhereWithAggregatesInput[]
+    NOT?: ProfileImportOperationScalarWhereWithAggregatesInput | ProfileImportOperationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    identityId?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    requestId?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    sourceDigest?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    effectiveDigest?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    status?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    planJson?: StringWithAggregatesFilter<"ProfileImportOperation"> | string
+    schedulingReconciledAt?: DateTimeNullableWithAggregatesFilter<"ProfileImportOperation"> | Date | string | null
+    resultJson?: StringNullableWithAggregatesFilter<"ProfileImportOperation"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ProfileImportOperation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ProfileImportOperation"> | Date | string
   }
 
   export type RelationWhereInput = {
@@ -117482,6 +118857,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -117528,6 +118904,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -117574,6 +118951,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -117620,6 +118998,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -121678,6 +123057,103 @@ export namespace Prisma {
   export type OauthClientAssertionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileImportOperationCreateInput = {
+    id: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutProfileImportOperationsInput
+  }
+
+  export type ProfileImportOperationUncheckedCreateInput = {
+    id: string
+    identityId: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfileImportOperationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutProfileImportOperationsNestedInput
+  }
+
+  export type ProfileImportOperationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileImportOperationCreateManyInput = {
+    id: string
+    identityId: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfileImportOperationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileImportOperationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RelationCreateInput = {
@@ -126166,6 +127642,12 @@ export namespace Prisma {
     none?: GoalWhereInput
   }
 
+  export type ProfileImportOperationListRelationFilter = {
+    every?: ProfileImportOperationWhereInput
+    some?: ProfileImportOperationWhereInput
+    none?: ProfileImportOperationWhereInput
+  }
+
   export type LabelListRelationFilter = {
     every?: LabelWhereInput
     some?: LabelWhereInput
@@ -126387,6 +127869,10 @@ export namespace Prisma {
   }
 
   export type GoalOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ProfileImportOperationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -128955,6 +130441,53 @@ export namespace Prisma {
     expiresAt?: SortOrder
   }
 
+  export type ProfileImportOperationIdentityIdRequestIdCompoundUniqueInput = {
+    identityId: string
+    requestId: string
+  }
+
+  export type ProfileImportOperationCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    requestId?: SortOrder
+    sourceDigest?: SortOrder
+    effectiveDigest?: SortOrder
+    status?: SortOrder
+    planJson?: SortOrder
+    schedulingReconciledAt?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfileImportOperationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    requestId?: SortOrder
+    sourceDigest?: SortOrder
+    effectiveDigest?: SortOrder
+    status?: SortOrder
+    planJson?: SortOrder
+    schedulingReconciledAt?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfileImportOperationMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    requestId?: SortOrder
+    sourceDigest?: SortOrder
+    effectiveDigest?: SortOrder
+    status?: SortOrder
+    planJson?: SortOrder
+    schedulingReconciledAt?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type RelationIdentityIdSubjectTypeSubjectIdRelationTypeObjectTypeObjectIdCompoundUniqueInput = {
     identityId: string
     subjectType: string
@@ -131382,6 +132915,13 @@ export namespace Prisma {
     connect?: GoalWhereUniqueInput | GoalWhereUniqueInput[]
   }
 
+  export type ProfileImportOperationCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput> | ProfileImportOperationCreateWithoutAccountInput[] | ProfileImportOperationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ProfileImportOperationCreateOrConnectWithoutAccountInput | ProfileImportOperationCreateOrConnectWithoutAccountInput[]
+    createMany?: ProfileImportOperationCreateManyAccountInputEnvelope
+    connect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+  }
+
   export type LabelCreateNestedManyWithoutAccountInput = {
     create?: XOR<LabelCreateWithoutAccountInput, LabelUncheckedCreateWithoutAccountInput> | LabelCreateWithoutAccountInput[] | LabelUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: LabelCreateOrConnectWithoutAccountInput | LabelCreateOrConnectWithoutAccountInput[]
@@ -131638,6 +133178,13 @@ export namespace Prisma {
     connectOrCreate?: GoalCreateOrConnectWithoutAccountInput | GoalCreateOrConnectWithoutAccountInput[]
     createMany?: GoalCreateManyAccountInputEnvelope
     connect?: GoalWhereUniqueInput | GoalWhereUniqueInput[]
+  }
+
+  export type ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput> | ProfileImportOperationCreateWithoutAccountInput[] | ProfileImportOperationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ProfileImportOperationCreateOrConnectWithoutAccountInput | ProfileImportOperationCreateOrConnectWithoutAccountInput[]
+    createMany?: ProfileImportOperationCreateManyAccountInputEnvelope
+    connect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
   }
 
   export type LabelUncheckedCreateNestedManyWithoutAccountInput = {
@@ -131923,6 +133470,20 @@ export namespace Prisma {
     update?: GoalUpdateWithWhereUniqueWithoutAccountInput | GoalUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: GoalUpdateManyWithWhereWithoutAccountInput | GoalUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: GoalScalarWhereInput | GoalScalarWhereInput[]
+  }
+
+  export type ProfileImportOperationUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput> | ProfileImportOperationCreateWithoutAccountInput[] | ProfileImportOperationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ProfileImportOperationCreateOrConnectWithoutAccountInput | ProfileImportOperationCreateOrConnectWithoutAccountInput[]
+    upsert?: ProfileImportOperationUpsertWithWhereUniqueWithoutAccountInput | ProfileImportOperationUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ProfileImportOperationCreateManyAccountInputEnvelope
+    set?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    disconnect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    delete?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    connect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    update?: ProfileImportOperationUpdateWithWhereUniqueWithoutAccountInput | ProfileImportOperationUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ProfileImportOperationUpdateManyWithWhereWithoutAccountInput | ProfileImportOperationUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ProfileImportOperationScalarWhereInput | ProfileImportOperationScalarWhereInput[]
   }
 
   export type LabelUpdateManyWithoutAccountNestedInput = {
@@ -132437,6 +133998,20 @@ export namespace Prisma {
     update?: GoalUpdateWithWhereUniqueWithoutAccountInput | GoalUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: GoalUpdateManyWithWhereWithoutAccountInput | GoalUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: GoalScalarWhereInput | GoalScalarWhereInput[]
+  }
+
+  export type ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput> | ProfileImportOperationCreateWithoutAccountInput[] | ProfileImportOperationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ProfileImportOperationCreateOrConnectWithoutAccountInput | ProfileImportOperationCreateOrConnectWithoutAccountInput[]
+    upsert?: ProfileImportOperationUpsertWithWhereUniqueWithoutAccountInput | ProfileImportOperationUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ProfileImportOperationCreateManyAccountInputEnvelope
+    set?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    disconnect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    delete?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    connect?: ProfileImportOperationWhereUniqueInput | ProfileImportOperationWhereUniqueInput[]
+    update?: ProfileImportOperationUpdateWithWhereUniqueWithoutAccountInput | ProfileImportOperationUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ProfileImportOperationUpdateManyWithWhereWithoutAccountInput | ProfileImportOperationUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ProfileImportOperationScalarWhereInput | ProfileImportOperationScalarWhereInput[]
   }
 
   export type LabelUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -135169,6 +136744,20 @@ export namespace Prisma {
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutOauthconsentsInput, CloudAuthUserUpdateWithoutOauthconsentsInput>, CloudAuthUserUncheckedUpdateWithoutOauthconsentsInput>
   }
 
+  export type AccountCreateNestedOneWithoutProfileImportOperationsInput = {
+    create?: XOR<AccountCreateWithoutProfileImportOperationsInput, AccountUncheckedCreateWithoutProfileImportOperationsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutProfileImportOperationsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutProfileImportOperationsNestedInput = {
+    create?: XOR<AccountCreateWithoutProfileImportOperationsInput, AccountUncheckedCreateWithoutProfileImportOperationsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutProfileImportOperationsInput
+    upsert?: AccountUpsertWithoutProfileImportOperationsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutProfileImportOperationsInput, AccountUpdateWithoutProfileImportOperationsInput>, AccountUncheckedUpdateWithoutProfileImportOperationsInput>
+  }
+
   export type AccountCreateNestedOneWithoutRelationsInput = {
     create?: XOR<AccountCreateWithoutRelationsInput, AccountUncheckedCreateWithoutRelationsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutRelationsInput
@@ -137138,6 +138727,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ProfileImportOperationCreateWithoutAccountInput = {
+    id: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfileImportOperationUncheckedCreateWithoutAccountInput = {
+    id: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfileImportOperationCreateOrConnectWithoutAccountInput = {
+    where: ProfileImportOperationWhereUniqueInput
+    create: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ProfileImportOperationCreateManyAccountInputEnvelope = {
+    data: ProfileImportOperationCreateManyAccountInput | ProfileImportOperationCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type LabelCreateWithoutAccountInput = {
     id: string
     name: string
@@ -138703,6 +140328,39 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
   }
 
+  export type ProfileImportOperationUpsertWithWhereUniqueWithoutAccountInput = {
+    where: ProfileImportOperationWhereUniqueInput
+    update: XOR<ProfileImportOperationUpdateWithoutAccountInput, ProfileImportOperationUncheckedUpdateWithoutAccountInput>
+    create: XOR<ProfileImportOperationCreateWithoutAccountInput, ProfileImportOperationUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ProfileImportOperationUpdateWithWhereUniqueWithoutAccountInput = {
+    where: ProfileImportOperationWhereUniqueInput
+    data: XOR<ProfileImportOperationUpdateWithoutAccountInput, ProfileImportOperationUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ProfileImportOperationUpdateManyWithWhereWithoutAccountInput = {
+    where: ProfileImportOperationScalarWhereInput
+    data: XOR<ProfileImportOperationUpdateManyMutationInput, ProfileImportOperationUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type ProfileImportOperationScalarWhereInput = {
+    AND?: ProfileImportOperationScalarWhereInput | ProfileImportOperationScalarWhereInput[]
+    OR?: ProfileImportOperationScalarWhereInput[]
+    NOT?: ProfileImportOperationScalarWhereInput | ProfileImportOperationScalarWhereInput[]
+    id?: StringFilter<"ProfileImportOperation"> | string
+    identityId?: StringFilter<"ProfileImportOperation"> | string
+    requestId?: StringFilter<"ProfileImportOperation"> | string
+    sourceDigest?: StringFilter<"ProfileImportOperation"> | string
+    effectiveDigest?: StringFilter<"ProfileImportOperation"> | string
+    status?: StringFilter<"ProfileImportOperation"> | string
+    planJson?: StringFilter<"ProfileImportOperation"> | string
+    schedulingReconciledAt?: DateTimeNullableFilter<"ProfileImportOperation"> | Date | string | null
+    resultJson?: StringNullableFilter<"ProfileImportOperation"> | string | null
+    createdAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+    updatedAt?: DateTimeFilter<"ProfileImportOperation"> | Date | string
+  }
+
   export type LabelUpsertWithWhereUniqueWithoutAccountInput = {
     where: LabelWhereUniqueInput
     update: XOR<LabelUpdateWithoutAccountInput, LabelUncheckedUpdateWithoutAccountInput>
@@ -139963,6 +141621,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140008,6 +141667,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -140069,6 +141729,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -140114,6 +141775,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -140159,6 +141821,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140204,6 +141867,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -140265,6 +141929,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -140310,6 +141975,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -140355,6 +142021,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140400,6 +142067,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -140461,6 +142129,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -140506,6 +142175,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -140551,6 +142221,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140596,6 +142267,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -140657,6 +142329,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -140702,6 +142375,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -140747,6 +142421,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140792,6 +142467,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -140853,6 +142529,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -140898,6 +142575,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -140943,6 +142621,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -140988,6 +142667,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -141049,6 +142729,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -141094,6 +142775,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -141540,6 +143222,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -141585,6 +143268,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -141975,6 +143659,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -142020,6 +143705,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -142673,6 +144359,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -142718,6 +144405,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -142918,6 +144606,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -142963,6 +144652,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -143869,6 +145559,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -143914,6 +145605,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -144024,6 +145716,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -144069,6 +145762,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -144416,6 +146110,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
@@ -144461,6 +146156,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -144560,6 +146256,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
@@ -144605,6 +146302,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -144682,6 +146380,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
@@ -144727,6 +146426,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -144868,6 +146568,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
@@ -144913,6 +146614,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -145050,6 +146752,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
@@ -145095,6 +146798,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
@@ -145245,6 +146949,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
@@ -145290,6 +146995,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
@@ -145570,6 +147276,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -145615,6 +147322,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -145740,6 +147448,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -145785,6 +147494,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -145830,6 +147540,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -145875,6 +147586,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -146003,6 +147715,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -146048,6 +147761,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -146373,6 +148087,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -146418,6 +148133,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -146552,6 +148268,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -146597,6 +148314,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -148397,6 +150115,206 @@ export namespace Prisma {
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
+  export type AccountCreateWithoutProfileImportOperationsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutProfileImportOperationsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutProfileImportOperationsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutProfileImportOperationsInput, AccountUncheckedCreateWithoutProfileImportOperationsInput>
+  }
+
+  export type AccountUpsertWithoutProfileImportOperationsInput = {
+    update: XOR<AccountUpdateWithoutProfileImportOperationsInput, AccountUncheckedUpdateWithoutProfileImportOperationsInput>
+    create: XOR<AccountCreateWithoutProfileImportOperationsInput, AccountUncheckedCreateWithoutProfileImportOperationsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutProfileImportOperationsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutProfileImportOperationsInput, AccountUncheckedUpdateWithoutProfileImportOperationsInput>
+  }
+
+  export type AccountUpdateWithoutProfileImportOperationsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutProfileImportOperationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type AccountCreateWithoutRelationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -148405,6 +150323,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -148450,6 +150369,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -148511,6 +150431,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -148556,6 +150477,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -148601,6 +150523,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -148646,6 +150569,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -148864,6 +150788,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -148909,6 +150834,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -149028,6 +150954,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -149073,6 +151000,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -149134,6 +151062,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -149179,6 +151108,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -149224,6 +151154,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -149269,6 +151200,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -149357,6 +151289,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -149402,6 +151335,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -149463,6 +151397,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -149508,6 +151443,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -149633,6 +151569,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -149678,6 +151615,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -149799,6 +151737,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -149844,6 +151783,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -149940,6 +151880,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -149985,6 +151926,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -150046,6 +151988,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -150091,6 +152034,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -150177,6 +152121,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -150222,6 +152167,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -150335,6 +152281,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -150380,6 +152327,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -150518,6 +152466,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -150563,6 +152512,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -150624,6 +152574,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -150669,6 +152620,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -150838,6 +152790,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -150883,6 +152836,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151085,6 +153039,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -151130,6 +153085,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151234,6 +153190,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -151279,6 +153236,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151324,6 +153282,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -151369,6 +153328,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151430,6 +153390,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -151475,6 +153436,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151706,6 +153668,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -151751,6 +153714,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -152102,6 +154066,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -152147,6 +154112,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153100,6 +155066,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -153145,6 +155112,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153251,6 +155219,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -153296,6 +155265,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153392,6 +155362,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -153437,6 +155408,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153498,6 +155470,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -153543,6 +155516,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153588,6 +155562,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -153633,6 +155608,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153738,6 +155714,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -153783,6 +155760,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153844,6 +155822,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -153889,6 +155868,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -154015,6 +155995,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -154060,6 +156041,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -154176,6 +156158,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -154221,6 +156204,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -154282,6 +156266,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -154327,6 +156312,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -154372,6 +156358,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -154417,6 +156404,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -154478,6 +156466,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -154523,6 +156512,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -154568,6 +156558,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -154613,6 +156604,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -154811,6 +156803,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -154856,6 +156849,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -155003,6 +156997,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -155048,6 +157043,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -155171,6 +157167,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -155216,6 +157213,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -155329,6 +157327,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -155374,6 +157373,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -155497,6 +157497,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -155542,6 +157543,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -155655,6 +157657,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -155700,6 +157703,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -155795,6 +157799,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -155840,6 +157845,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -155926,6 +157932,7 @@ export namespace Prisma {
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -155971,6 +157978,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -156063,6 +158071,7 @@ export namespace Prisma {
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -156108,6 +158117,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -156163,6 +158173,19 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+  }
+
+  export type ProfileImportOperationCreateManyAccountInput = {
+    id: string
+    requestId: string
+    sourceDigest: string
+    effectiveDigest: string
+    status: string
+    planJson: string
+    schedulingReconciledAt?: Date | string | null
+    resultJson?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type LabelCreateManyAccountInput = {
@@ -156756,6 +158779,45 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ProfileImportOperationUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileImportOperationUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfileImportOperationUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requestId?: StringFieldUpdateOperationsInput | string
+    sourceDigest?: StringFieldUpdateOperationsInput | string
+    effectiveDigest?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    planJson?: StringFieldUpdateOperationsInput | string
+    schedulingReconciledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resultJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabelUpdateWithoutAccountInput = {

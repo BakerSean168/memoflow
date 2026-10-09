@@ -5,6 +5,7 @@ import type {
 } from '@memoflow/contracts/data-portability';
 import {
   PreferencePortablePayloadV3Schema,
+  createDefaultUserPreferenceProfile,
   type PreferenceNamespace,
   type PreferenceNamespaceResponse,
   type PreferencePortablePayloadV3,
@@ -14,10 +15,7 @@ import type { UserPreferenceService } from './user-preference-service';
 const NAMESPACES = ['presentation', 'regional'] as const satisfies readonly PreferenceNamespace[];
 const MAX_CAS_ATTEMPTS = 3;
 
-function changedKeys(
-  current: Record<string, unknown>,
-  target: Record<string, unknown>,
-): string[] {
+function changedKeys(current: Record<string, unknown>, target: Record<string, unknown>): string[] {
   return Object.keys(target).filter((key) => !Object.is(current[key], target[key]));
 }
 
@@ -36,6 +34,25 @@ export class PreferencePortableService {
     return PreferencePortablePayloadV3Schema.parse(
       await this.preferenceService.getPreferenceProfile(identityId),
     );
+  }
+
+  async planProfileImport(identityId: string, payload: PreferencePortablePayloadV3) {
+    const target = PreferencePortablePayloadV3Schema.parse(payload);
+    const current = await this.export(identityId);
+    const defaults = createDefaultUserPreferenceProfile();
+    const preservedFields: string[] = [];
+    for (const namespace of NAMESPACES) {
+      for (const [key, value] of Object.entries(current[namespace])) {
+        if (
+          value !== Reflect.get(defaults[namespace], key) &&
+          value !== Reflect.get(target[namespace], key)
+        ) {
+          Object.assign(target[namespace], { [key]: value });
+          preservedFields.push(`${namespace}.${key}`);
+        }
+      }
+    }
+    return { payload: PreferencePortablePayloadV3Schema.parse(target), preservedFields };
   }
 
   async dryRun(
@@ -68,7 +85,11 @@ export class PreferencePortableService {
     let skipped = 0;
 
     for (const namespace of NAMESPACES) {
-      const outcome = await this.applyNamespace(identityId, namespace, namespaceTarget(target, namespace));
+      const outcome = await this.applyNamespace(
+        identityId,
+        namespace,
+        namespaceTarget(target, namespace),
+      );
       if (outcome === 'created') created += 1;
       else if (outcome === 'updated') updated += 1;
       else skipped += 1;
@@ -81,10 +102,7 @@ export class PreferencePortableService {
     current: PreferenceNamespaceResponse,
     target: Record<string, unknown>,
   ): string[] {
-    return changedKeys(
-      current.preferences as unknown as Record<string, unknown>,
-      target,
-    );
+    return changedKeys(current.preferences as unknown as Record<string, unknown>, target);
   }
 
   private async applyNamespace(
@@ -121,6 +139,13 @@ export class PreferencePortableCapability implements PortableCapability<Preferen
 
   export(context: PortableCapabilityExecutionContext): Promise<PreferencePortablePayloadV3> {
     return this.portableService.export(context.identityId);
+  }
+
+  planProfileImport(
+    payload: PreferencePortablePayloadV3,
+    context: PortableCapabilityExecutionContext,
+  ) {
+    return this.portableService.planProfileImport(context.identityId, payload);
   }
 
   dryRun(

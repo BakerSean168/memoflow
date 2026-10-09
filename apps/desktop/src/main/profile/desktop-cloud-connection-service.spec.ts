@@ -1,62 +1,58 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { CloudAuthResponse } from '@memoflow/contracts';
-import { DesktopCloudConnectionService } from './desktop-cloud-connection-service';
+import { describe, expect, it, vi } from 'vitest';
 import { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
-
+import { DesktopCloudConnectionService } from './desktop-cloud-connection-service';
 vi.mock('../utils/api-config', () => ({ getApiBaseUrl: () => 'https://memo.test/api/v1' }));
-
-const auth: CloudAuthResponse = {
-  account: {
-    id: 'account-1',
-    email: 'user@example.com',
-    name: 'User',
-    emailVerified: true,
-  },
+const auth = {
+  account: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
   session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
   requiresEmailVerification: false,
 };
-
 function fixture() {
   const runtime = {
-    getActiveProfileId: vi.fn(() => 'profile-1'),
-    getActiveProfileDescriptorSync: vi.fn(() => ({ profileId: 'profile-1' })),
+    getProfileGeneration: () => 0,
+    listProfiles: vi.fn().mockResolvedValue([]),
+    runExclusive: <T>(fn: () => Promise<T>) => fn(),
+    getActiveProfileId: vi.fn(() => 'guest-1'),
+    getActiveProfileDescriptorSync: vi.fn(() => ({ profileId: 'guest-1', cloudBinding: null })),
     disableCloudSync: vi.fn().mockResolvedValue(undefined),
-    getCurrentLocalAccount: vi.fn().mockResolvedValue({
-      profile: { nickname: 'Local User', avatarUrl: null, bio: null },
-    }),
-    bindCurrentProfile: vi.fn().mockResolvedValue(undefined),
+    registerCloudProfile: vi.fn().mockResolvedValue({ profileId: 'cloud-1' }),
+    hasPin: vi.fn().mockResolvedValue(false),
     enableCloudSync: vi.fn().mockResolvedValue(undefined),
   };
   const sessions = {
     save: vi.fn().mockResolvedValue(undefined),
-    remove: vi.fn().mockResolvedValue(undefined),
-    getValidToken: vi.fn(),
+    remove: vi.fn(),
     load: vi.fn(),
+    getValidToken: vi.fn(),
   };
-  const fetchImpl = vi.fn().mockResolvedValue(
-    new Response(
-      JSON.stringify({
-        ok: true,
-        data: { profile: { nickname: 'Cloud User', avatarUrl: null, bio: null } },
-      }),
-      { status: 200 },
-    ),
-  );
+  const fetchImpl = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
   const manager = new DesktopCloudConnectionManager(sessions as never, runtime as never);
-  const service = new DesktopCloudConnectionService(
-    runtime as never,
-    sessions as never,
+  return {
     manager,
+    runtime,
+    sessions,
     fetchImpl,
-  );
-  return { service, runtime, sessions, fetchImpl, manager };
+    service: new DesktopCloudConnectionService(
+      runtime as never,
+      sessions as never,
+      manager,
+      fetchImpl,
+    ),
+  };
 }
+describe('independent cloud Profile commit', () => {
+  function reauthenticationFixture() {
+    const result = fixture();
+    result.runtime.getActiveProfileDescriptorSync.mockReturnValue({
+      profileId: 'guest-1',
+      cloudBinding: { cloudAccountId: auth.account.id },
+    } as never);
+    result.runtime.registerCloudProfile.mockResolvedValue({ profileId: 'guest-1' });
+    return result;
+  }
 
-describe('DesktopCloudConnectionService commit point', () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it('drains an in-flight authenticated save before sign-out removes the session', async () => {
-    const { service, runtime, sessions, manager } = fixture();
+  it('drains an in-flight replacement before sign-out removes the session', async () => {
+    const { service, runtime, sessions, manager, fetchImpl } = reauthenticationFixture();
     let finishSave!: () => void;
     sessions.save.mockImplementationOnce(
       () =>
@@ -64,9 +60,9 @@ describe('DesktopCloudConnectionService commit point', () => {
           finishSave = resolve;
         }),
     );
-    const connecting = service.connect('profile-1', auth, 'token-2');
+    const connecting = service.connect('guest-1', auth, 'token', { intent: 'reauthenticate' });
     await vi.waitFor(() => expect(sessions.save).toHaveBeenCalledOnce());
-    const signingOut = manager.clearSession('profile-1');
+    const signingOut = manager.clearSession('guest-1');
     await Promise.resolve();
     expect(sessions.remove).not.toHaveBeenCalled();
     finishSave();
@@ -74,25 +70,26 @@ describe('DesktopCloudConnectionService commit point', () => {
     expect(sessions.save).toHaveBeenCalledBefore(sessions.remove);
     expect(sessions.remove).toHaveBeenCalledOnce();
     expect(runtime.enableCloudSync).not.toHaveBeenCalled();
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it('transfers completed sync credentials from the auth attempt to the active Profile', async () => {
-    const { service, runtime, sessions } = fixture();
+  it('keeps completed sync credentials scoped to the active Profile after the attempt ends', async () => {
+    const { service, runtime, sessions } = reauthenticationFixture();
     const attempt = new AbortController();
-    sessions.getValidToken.mockResolvedValue('token-1');
+    sessions.getValidToken.mockResolvedValue('token');
     await expect(
-      service.connect('profile-1', auth, 'token-1', attempt.signal),
+      service.connect('guest-1', auth, 'token', { intent: 'reauthenticate' }, attempt.signal),
     ).resolves.toMatchObject({ ok: true });
     const credentials = runtime.enableCloudSync.mock.calls[0]![0];
     attempt.abort();
-    await expect(credentials.getAccessToken()).resolves.toBe('token-1');
+    await expect(credentials.getAccessToken()).resolves.toBe('token');
     expect(runtime.disableCloudSync).toHaveBeenCalledOnce();
     runtime.getActiveProfileId.mockReturnValue('other-profile');
     await expect(credentials.getAccessToken()).resolves.toBeNull();
   });
 
-  it('disconnects a pending sync connection when its authentication attempt is cancelled', async () => {
-    const { service, runtime } = fixture();
+  it('cancels a pending sync connection without revoking the already committed session', async () => {
+    const { service, runtime, fetchImpl } = reauthenticationFixture();
     const attempt = new AbortController();
     let finishConnect!: () => void;
     runtime.enableCloudSync.mockImplementationOnce(
@@ -101,82 +98,78 @@ describe('DesktopCloudConnectionService commit point', () => {
           finishConnect = resolve;
         }),
     );
-    const connecting = service.connect('profile-1', auth, 'token-1', attempt.signal);
+    const connecting = service.connect(
+      'guest-1',
+      auth,
+      'token',
+      { intent: 'reauthenticate' },
+      attempt.signal,
+    );
     await vi.waitFor(() => expect(runtime.enableCloudSync).toHaveBeenCalledOnce());
     runtime.disableCloudSync.mockImplementationOnce(async () => {
       finishConnect();
     });
     attempt.abort();
-    await vi.waitFor(() => expect(runtime.disableCloudSync).toHaveBeenCalledTimes(2));
-    await expect(connecting).resolves.toMatchObject({ ok: false });
-  });
-
-  it('revokes the new session when reconciliation fails before Profile binding', async () => {
-    const { service, runtime, sessions, fetchImpl } = fixture();
-    fetchImpl
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            ok: false,
-            error: { message: 'account unavailable' },
-          }),
-          { status: 503 },
-        ),
-      )
-      .mockResolvedValueOnce(new Response(null, { status: 200 }));
-
-    await expect(service.connect('profile-1', auth, 'token-1')).resolves.toMatchObject({
-      ok: false,
-      error: { code: 'PROFILE_CLOUD_CONNECTION_FAILED' },
-    });
-    expect(runtime.bindCurrentProfile).not.toHaveBeenCalled();
-    expect(sessions.save).not.toHaveBeenCalled();
-    expect(fetchImpl).toHaveBeenLastCalledWith(
-      'https://memo.test/api/auth/sign-out',
-      expect.objectContaining({
-        headers: expect.objectContaining({ authorization: 'Bearer token-1' }),
-      }),
-    );
-  });
-
-  it('keeps the registered Profile and requires reauthentication when session persistence fails', async () => {
-    const { service, runtime, sessions, fetchImpl } = fixture();
-    sessions.save.mockRejectedValue(new Error('secure storage unavailable'));
-
-    await expect(service.connect('profile-1', auth, 'token-1')).resolves.toMatchObject({
-      ok: false,
-      error: { code: 'PROFILE_CLOUD_REAUTH_REQUIRED' },
-    });
-    expect(runtime.bindCurrentProfile).toHaveBeenCalledOnce();
-    expect(sessions.remove).toHaveBeenCalledWith('profile-1');
-    expect(runtime.enableCloudSync).not.toHaveBeenCalled();
-    expect(fetchImpl).toHaveBeenLastCalledWith(
-      'https://memo.test/api/auth/sign-out',
-      expect.any(Object),
-    );
-  });
-
-  it('keeps binding and the saved session when sync startup fails', async () => {
-    const { service, runtime, sessions, fetchImpl } = fixture();
-    runtime.enableCloudSync.mockRejectedValue(new Error('sync unavailable'));
-
-    await expect(service.connect('profile-1', auth, 'token-1')).resolves.toMatchObject({
-      ok: false,
-      error: { code: 'PROFILE_CLOUD_SYNC_FAILED' },
-    });
-    expect(runtime.bindCurrentProfile).toHaveBeenCalledOnce();
-    expect(sessions.save).toHaveBeenCalledOnce();
-    expect(sessions.remove).not.toHaveBeenCalled();
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
-  });
-
-  it('reports success only after binding, persistence and sync startup all complete', async () => {
-    const { service, runtime, sessions } = fixture();
-
-    await expect(service.connect('profile-1', auth, 'token-1')).resolves.toMatchObject({
+    await expect(connecting).resolves.toMatchObject({
       ok: true,
+      data: { activation: 'sync_pending' },
     });
-    expect(runtime.bindCurrentProfile).toHaveBeenCalledBefore(sessions.save);
-    expect(sessions.save).toHaveBeenCalledBefore(runtime.enableCloudSync);
+    expect(runtime.disableCloudSync).toHaveBeenCalledTimes(2);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('saves under the independent target without reading or modifying the source account', async () => {
+    const { service, sessions, runtime, fetchImpl } = fixture();
+    expect(await service.connect('guest-1', auth, 'token', { intent: 'add_account' })).toEqual({
+      ok: true,
+      data: { targetProfileId: 'cloud-1', activation: 'pending' },
+    });
+    expect(sessions.save).toHaveBeenCalledWith(
+      'cloud-1',
+      expect.objectContaining({ token: 'token', account: auth.account }),
+    );
+    expect(runtime.enableCloudSync).not.toHaveBeenCalled();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+  it('rejects a different identity during reauthentication', async () => {
+    const { service, sessions, runtime, fetchImpl } = fixture();
+    runtime.getActiveProfileDescriptorSync.mockReturnValue({
+      profileId: 'guest-1',
+      cloudBinding: { cloudAccountId: 'another' },
+    } as never);
+    expect(
+      await service.connect('guest-1', auth, 'token', { intent: 'reauthenticate' }),
+    ).toMatchObject({ ok: false, error: { code: 'CLOUD_IDENTITY_MISMATCH' } });
+    expect(sessions.save).not.toHaveBeenCalled();
+    expect(runtime.registerCloudProfile).not.toHaveBeenCalled();
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+  it('preserves an existing target session if the replacement cannot be saved', async () => {
+    const { service, sessions, fetchImpl } = fixture();
+    sessions.save.mockRejectedValue(new Error('storage unavailable'));
+    expect(
+      await service.connect('guest-1', auth, 'token', { intent: 'add_account' }),
+    ).toMatchObject({ ok: false });
+    expect(sessions.remove).not.toHaveBeenCalled();
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+  it('commits authentication but defers opening a protected target to local PIN entry', async () => {
+    const { service, runtime } = fixture();
+    runtime.hasPin.mockResolvedValue(true);
+    expect(
+      await service.connect('guest-1', auth, 'token', { intent: 'add_account' }),
+    ).toMatchObject({ ok: true, data: { activation: 'pin_required' } });
+  });
+  it('revokes an unadopted token if cancellation happens before commit', async () => {
+    const { service, sessions, runtime } = fixture();
+    const controller = new AbortController();
+    runtime.registerCloudProfile.mockImplementation(async () => {
+      controller.abort();
+      return { profileId: 'cloud-1' };
+    });
+    expect(
+      await service.connect('guest-1', auth, 'token', { intent: 'add_account' }, controller.signal),
+    ).toMatchObject({ ok: false });
+    expect(sessions.save).not.toHaveBeenCalled();
   });
 });

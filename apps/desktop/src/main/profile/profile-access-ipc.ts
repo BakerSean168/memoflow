@@ -4,8 +4,11 @@ import {
   ProfileAccessChannels,
   type DesktopAccessSnapshot,
   type ProfileSummary,
-  type RemoveProfileRequest,
-  type SelectProfileRequest,
+  SelectProfileRequestSchema,
+  RemoveProfileRequestSchema,
+  CreateGuestProfileRequestSchema,
+  RenameProfileRequestSchema,
+  ProfilePinSchema,
 } from '@memoflow/contracts/electron';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
@@ -57,50 +60,64 @@ export function registerProfileAccessIpc(
   };
   ipcMain.handle(ProfileAccessChannels.GET_SNAPSHOT, async () => ok(await readSnapshot()));
   ipcMain.handle(ProfileAccessChannels.REFRESH_CLOUD_STATE, async () => {
-    const descriptor = runtime.getActiveProfileDescriptorSync();
-    if (descriptor) await cloudConnection.restore(descriptor);
-    return ok(await readSnapshot());
+    return runtime.runExclusive(async () => {
+      const descriptor = runtime.getActiveProfileDescriptorSync();
+      if (descriptor) await cloudConnection.restore(descriptor);
+      return ok(await readSnapshot());
+    });
   });
 
   ipcMain.handle(ProfileAccessChannels.LIST, async () =>
     ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),
   );
 
-  ipcMain.handle(
-    ProfileAccessChannels.SELECT,
-    async (_event, input: string | SelectProfileRequest) => {
-      if (deviceAuth) {
-        const activeProfileId = runtime.getActiveProfileId();
-        if (activeProfileId) deviceAuth.cancelForProfile(activeProfileId);
-      }
-      const profileId = typeof input === 'string' ? input : input.profileId;
-      const profile = (await registry.list()).find((entry) => entry.profileId === profileId);
-      if (!profile) return fail({ code: 'PROFILE_NOT_FOUND', message: 'Profile not found' });
-      const pinRequired = await runtime.hasPin(profileId);
-      const pin = typeof input === 'string' ? undefined : input.pin;
-      if (pinRequired && !pin) {
-        return fail({ code: 'PIN_REQUIRED', message: '此 Profile 需要本地 PIN 解锁' });
-      }
-      if (pinRequired && pin) await runtime.preparePinUnlock(profileId, pin);
-      if (profile.profileKind === 'guest') {
-        await runtime.prepareGuestProfile();
-      } else {
-        await runtime.prepareProfile(profile.localOwnerId, {
-          displayName: profile.displayName,
-          identifier: profile.identifier,
-        });
-      }
-      await runtime.activatePreparedProfile();
-      return ok(null);
-    },
-  );
+  ipcMain.handle(ProfileAccessChannels.CREATE_GUEST, async (_event, input: unknown) => {
+    const parsed = CreateGuestProfileRequestSchema.safeParse(input);
+    if (!parsed.success)
+      return fail({
+        code: 'INVALID_REQUEST',
+        message: '请输入 1–80 字的 Profile 名称和有效请求 ID',
+      });
+    const profile = await runtime.createGuestProfile(
+      parsed.data.requestId,
+      parsed.data.displayName,
+    );
+    return ok(await toSummary(profile, runtime));
+  });
 
-  ipcMain.handle(ProfileAccessChannels.REMOVE, async (_event, input: RemoveProfileRequest) => {
-    if (runtime.getActiveProfileId() === input.profileId) {
+  ipcMain.handle(ProfileAccessChannels.RENAME, async (_event, input: unknown) => {
+    const parsed = RenameProfileRequestSchema.safeParse(input);
+    if (!parsed.success)
+      return fail({ code: 'INVALID_REQUEST', message: '请输入 1–80 字的 Profile 名称' });
+    await runtime.updateProfileDisplayName(parsed.data.profileId, parsed.data.displayName);
+    return ok(null);
+  });
+
+  ipcMain.handle(ProfileAccessChannels.SELECT, async (_event, input: unknown) => {
+    const parsed = SelectProfileRequestSchema.safeParse(input);
+    if (!parsed.success)
+      return fail({ code: 'INVALID_REQUEST', message: 'Profile 或 PIN 格式无效' });
+    const activeProfileId = runtime.getActiveProfileId();
+    if (activeProfileId) deviceAuth?.cancelForProfile(activeProfileId);
+    try {
+      await runtime.openProfile(parsed.data.profileId, parsed.data.pin);
+      return ok(null);
+    } catch (error) {
+      return fail({
+        code: 'PROFILE_OPEN_FAILED',
+        message: error instanceof Error ? error.message : '无法打开 Profile',
+      });
+    }
+  });
+
+  ipcMain.handle(ProfileAccessChannels.REMOVE, async (_event, input: unknown) => {
+    const parsed = RemoveProfileRequestSchema.safeParse(input);
+    if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Profile 格式无效' });
+    if (runtime.getActiveProfileId() === parsed.data.profileId) {
       return fail({ code: 'PROFILE_ACTIVE', message: '请先锁定或切换当前 Profile' });
     }
-    deviceAuth?.cancelForProfile(input.profileId);
-    await runtime.removeProfile(input.profileId);
+    deviceAuth?.cancelForProfile(parsed.data.profileId);
+    await runtime.removeProfile(parsed.data.profileId);
     return ok(null);
   });
 
@@ -113,8 +130,11 @@ export function registerProfileAccessIpc(
     return ok(null);
   });
 
-  ipcMain.handle(ProfileAccessChannels.PIN_SET, async (_event, pin: string) => {
-    await runtime.setCurrentProfilePin(pin);
+  ipcMain.handle(ProfileAccessChannels.PIN_SET, async (_event, pin: unknown) => {
+    const parsed = ProfilePinSchema.safeParse(pin);
+    if (!parsed.success)
+      return fail({ code: 'INVALID_REQUEST', message: '请输入 6 至 12 位数字 PIN' });
+    await runtime.setCurrentProfilePin(parsed.data);
     return ok(null);
   });
 

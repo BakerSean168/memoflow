@@ -63,3 +63,8 @@ export type {
   GoalDeletionTransactionContext,
   GoalRelationCleanupPort,
 } from './server/application';
+export { createGoalBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export {
+  createGoalPrismaPortableCapability,
+  createGoalPowerSyncPortableCapability,
+} from './server/infrastructure/goal-profile-import';

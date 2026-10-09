@@ -4,7 +4,6 @@ import { ImportanceLevel } from '../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../shared/value-objects/urgency';
 import { NotificationCategory } from './value-objects/notification-category';
 import { NotificationType } from './value-objects/notification-type';
-import { NotificationActionIntentSchema, NotificationNavigationIntentSchema } from './api/notification-action.dto';
 
 /**
  * Stable, user-owned notification delivery choices portable across hosts.
@@ -63,12 +62,21 @@ export const NotificationPortableFactV3Schema = z
     importance: z.enum(ImportanceLevel),
     urgency: z.enum(UrgencyLevel),
     relatedEntityType: z.string().trim().min(1).max(120).nullable(),
-    relatedEntityId: z.string().trim().min(1).max(500).nullable(),
-    navigationIntent: NotificationNavigationIntentSchema.nullable(),
-    actions: z.array(NotificationActionIntentSchema).nullable(),
+    // Host navigation and owner commands contain private identities. Historical
+    // interactions remain portable; only source-independent archive is executable.
+    navigationIntent: z.null(),
+    actions: z
+      .array(
+        z
+          .object({
+            kind: z.literal('archive'),
+            actionKey: z.string().min(1),
+            labelKey: z.string().min(1),
+          })
+          .strict(),
+      )
+      .nullable(),
     presentation: NotificationPortablePresentationV3Schema.nullable(),
-    correlationId: z.string().nullable(),
-    causationId: z.string().nullable(),
     readAt: PortableInstantSchema.nullable(),
     archivedAt: PortableInstantSchema.nullable(),
     expiresAt: PortableInstantSchema.nullable(),
@@ -97,10 +105,7 @@ export const NotificationPortableInteractionV3Schema = z
     actionKey: z.string().trim().min(1).max(200),
     actionKind: z.enum(['navigate', 'owner-command', 'archive']),
     occurredAt: PortableInstantSchema,
-    commandReceiptId: z.string().nullable(),
     outcome: z.enum(['accepted', 'rejected', 'failed']),
-    correlationId: z.string().nullable(),
-    causationId: z.string().nullable(),
   })
   .strict();
 

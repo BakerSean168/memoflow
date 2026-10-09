@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { RoutineTemporaryOverride } from '../../domain/routine';
 import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
 import {
@@ -16,7 +16,7 @@ import {
  * to projection and execution.
  */
 export class PrismaRoutineTemporaryOverrideStore implements RoutineTemporaryOverrideStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async findRoutineTemporaryOverride(input: {
     readonly identityId: string;

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { Result } from './result';
 
 export interface CloudAccountSummary {
@@ -12,11 +13,7 @@ export interface CloudSessionSummary {
   expiresAt: string;
 }
 
-export interface CloudAuthResponse {
-  account: CloudAccountSummary;
-  session: CloudSessionSummary | null;
-  requiresEmailVerification: boolean;
-}
+export type CloudAuthResponse = z.infer<typeof CloudAuthResponseSchema>;
 
 export interface CloudSessionState {
   account: CloudAccountSummary | null;
@@ -40,8 +37,45 @@ export type DesktopCloudConnectionStatus =
   | 'cancelled'
   | 'failed';
 
+export const DesktopCloudConnectionRequestSchema = z
+  .object({
+    intent: z.enum(['add_account', 'reauthenticate']),
+  })
+  .strict();
+export type DesktopCloudConnectionRequest = z.infer<typeof DesktopCloudConnectionRequestSchema>;
+
+export const CloudAuthResponseSchema = z.object({
+  account: z.object({
+    id: z.string().min(1),
+    email: z.string().email(),
+    name: z.string(),
+    emailVerified: z.boolean(),
+  }),
+  session: z.object({ id: z.string().min(1), expiresAt: z.string().datetime() }).nullable(),
+  requiresEmailVerification: z.boolean(),
+});
+
+export const BetterAuthSessionResponseSchema = z.object({
+  user: z.object({
+    id: z.string().min(1),
+    email: z.string().email(),
+    name: z.string(),
+    emailVerified: z.boolean().optional(),
+  }),
+  session: z.object({ id: z.string().min(1), expiresAt: z.string().datetime() }),
+});
+
+export const DesktopCloudAttemptRequestSchema = z.object({ attemptId: z.string().uuid() }).strict();
+
+export interface DesktopCloudConnectionResult {
+  targetProfileId: string;
+  activation: 'active' | 'pending' | 'pin_required' | 'sync_pending';
+}
+
 export interface DesktopCloudConnectionAttempt {
   attemptId: string;
+  originProfileId: string;
+  result: DesktopCloudConnectionResult | null;
   userCode: string;
   verificationUrl: string;
   expiresAt: string;
@@ -79,7 +113,9 @@ export interface CloudAuthWebClientPort extends CloudAuthClientPort {
 }
 
 export interface CloudAuthDesktopClientPort extends CloudSessionClientPort {
-  beginCloudConnection(): Promise<Result<DesktopCloudConnectionAttempt>>;
+  beginCloudConnection(
+    request: DesktopCloudConnectionRequest,
+  ): Promise<Result<DesktopCloudConnectionAttempt>>;
   getCurrentCloudConnection(): Promise<Result<DesktopCloudConnectionAttempt | null>>;
   getCloudConnectionStatus(attemptId: string): Promise<Result<DesktopCloudConnectionAttempt>>;
   cancelCloudConnection(attemptId: string): Promise<Result<void>>;

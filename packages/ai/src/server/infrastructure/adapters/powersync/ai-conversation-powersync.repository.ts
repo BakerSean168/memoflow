@@ -22,25 +22,44 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
           `UPDATE ai_conversations
            SET identity_id = ?, name = ?, status = ?, version = ?, updated_at = ?, deleted_at = ?
            WHERE id = ?`,
-          [persisted.identity_id, persisted.name, persisted.status, persisted.version,
-           persisted.updated_at, persisted.deleted_at, persisted.id],
+          [
+            persisted.identity_id,
+            persisted.name,
+            persisted.status,
+            persisted.version,
+            persisted.updated_at,
+            persisted.deleted_at,
+            persisted.id,
+          ],
         );
       } else {
         await tx.execute(
           `INSERT INTO ai_conversations (
              id, identity_id, name, status, version, created_at, updated_at, deleted_at
            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [persisted.id, persisted.identity_id, persisted.name, persisted.status,
-           persisted.version, persisted.created_at, persisted.updated_at, persisted.deleted_at],
+          [
+            persisted.id,
+            persisted.identity_id,
+            persisted.name,
+            persisted.status,
+            persisted.version,
+            persisted.created_at,
+            persisted.updated_at,
+            persisted.deleted_at,
+          ],
         );
       }
     });
     flushDomainEvents(aiEventPublisher, conversation);
   }
 
-  async findByIdForIdentity(identityId: string, id: string): Promise<AIConversation | null> {
+  async findByIdForIdentity(
+    identityId: string,
+    id: string,
+    options?: { includeDeleted?: boolean },
+  ): Promise<AIConversation | null> {
     const row = await this.db.getOptional<PowerSyncAIConversationRow>(
-      `SELECT * FROM ai_conversations WHERE id = ? AND identity_id = ? AND deleted_at IS NULL LIMIT 1`,
+      `SELECT * FROM ai_conversations WHERE id = ? AND identity_id = ? ${options?.includeDeleted ? '' : 'AND deleted_at IS NULL'} LIMIT 1`,
       [id, identityId],
     );
     return row ? PowerSyncAIConversationMapper.toDomain(row) : null;

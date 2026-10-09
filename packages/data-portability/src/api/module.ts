@@ -1,3 +1,4 @@
+import type { ProfileImportApplicationPort } from '../server/infrastructure/prisma-profile-import';
 /**
  * Data Portability API Transport Module Factory
  * 数据导出导入 API 传输模块工厂
@@ -101,6 +102,7 @@ export interface DataPortabilityApiModuleDef extends ServerModuleHandle<DataPort
  * server-held disclosure port 的选项。
  */
 export interface DataPortabilityApiModuleOptions {
+  readonly profileImport?: ProfileImportApplicationPort;
   readonly instance: DataPortabilityModuleInstance;
   readonly serverHeldDataDisclosureApi: ServerHeldDataDisclosureApplicationPort;
 }
@@ -145,6 +147,7 @@ export function createDataPortabilityApiModule(
           options.serverHeldDataDisclosureApi,
           middleware,
           openApiRegistry,
+          options.profileImport,
         );
 
         options.instance.start();
@@ -175,11 +178,12 @@ export function createDataPortabilityApiModule(
 
     destroy() {
       if (state === 'disposed' || state === 'failed') {
-        return;
+        return options.instance.drain?.();
       }
       state = 'disposed';
       options.instance.dispose();
       logger.info('DataPortability module destroyed');
+      return options.instance.drain?.();
     },
   };
 }

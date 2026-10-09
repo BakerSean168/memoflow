@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import { PrismaProtocolSessionStore } from './routine-vnext/protocol-session-store.prisma';
 import { PrismaRoutineOccurrenceTruthStore } from './routine-vnext/routine-occurrence-truth-store.prisma';
 import { PrismaRoutineProfileStore } from './routine-vnext/routine-profile-store.prisma';
@@ -21,7 +21,9 @@ export interface RoutinePrismaRepositorySet {
   readonly routineOccurrenceTruthStore: RoutineOccurrenceTruthStore;
 }
 
-export function createRoutinePrismaRepositories(db: PrismaClient): RoutinePrismaRepositorySet {
+export function createRoutinePrismaRepositories(
+  db: PrismaClient | Prisma.TransactionClient,
+): RoutinePrismaRepositorySet {
   return {
     routineProfileStore: new PrismaRoutineProfileStore(db),
     routinePreferencesStore: new PrismaRoutinePreferencesStore(db),

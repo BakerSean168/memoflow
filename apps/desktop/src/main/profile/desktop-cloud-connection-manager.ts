@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { BetterAuthSessionResponseSchema } from '@memoflow/contracts';
 import type { ProfileCloudState } from '@memoflow/contracts/electron';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
@@ -6,16 +6,6 @@ import type { ProfileDescriptor } from './profile-registry';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
 
 const SESSION_CHECK_TIMEOUT_MS = 5_000;
-const RemoteSessionSchema = z.object({
-  session: z.object({ id: z.string().min(1), expiresAt: z.coerce.date() }),
-  user: z.object({
-    id: z.string().min(1),
-    email: z.string(),
-    name: z.string(),
-    emailVerified: z.boolean().optional(),
-  }),
-});
-
 interface CloudCheck {
   profileId: string;
   accountId: string;
@@ -253,11 +243,11 @@ export class DesktopCloudConnectionManager {
       );
       if (response.status === 401) return 'REAUTH_REQUIRED';
       if (!response.ok) return 'OFFLINE';
-      const parsed = RemoteSessionSchema.safeParse(await response.json());
+      const parsed = BetterAuthSessionResponseSchema.safeParse(await response.json());
       if (
         !parsed.success ||
         parsed.data.user.id !== check.accountId ||
-        parsed.data.session.expiresAt.getTime() <= Date.now()
+        Date.parse(parsed.data.session.expiresAt) <= Date.now()
       ) {
         return 'REAUTH_REQUIRED';
       }
@@ -265,7 +255,7 @@ export class DesktopCloudConnectionManager {
         token,
         sessionId: parsed.data.session.id,
         account: { ...parsed.data.user, emailVerified: parsed.data.user.emailVerified === true },
-        expiresAt: parsed.data.session.expiresAt.toISOString(),
+        expiresAt: parsed.data.session.expiresAt,
       };
     };
     try {

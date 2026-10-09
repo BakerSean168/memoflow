@@ -151,7 +151,7 @@
     }
   },
   "specs": {
-    "apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts": {
+    "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts": {
       "surface": "authentication",
       "role": "canonical",
       "lifecycle": "active",

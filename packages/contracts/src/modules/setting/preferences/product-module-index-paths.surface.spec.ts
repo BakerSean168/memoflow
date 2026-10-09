@@ -41,15 +41,11 @@ describe('product module-index path integrity surface', () => {
 
   it('authentication-files.md locks the active cloud/local auth boundaries', () => {
     const authIndex = readFileSync(resolve(indexDir, 'authentication-files.md'), 'utf8');
-    expect(authIndex).toContain(
-      'packages/cloud-auth/src/server/cloud-auth.ts',
-    );
-    expect(authIndex).toContain(
-      'apps/desktop/src/main/profile/profile-registry.ts',
-    );
+    expect(authIndex).toContain('packages/cloud-auth/src/server/cloud-auth.ts');
+    expect(authIndex).toContain('apps/desktop/src/main/profile/profile-registry.ts');
     expect(authIndex).toContain('apps/web/src/auth/WebAuthView.vue');
     expect(authIndex).toContain(
-      'apps/desktop/src/main/profile/local-tenant-adoption-service.ts',
+      'apps/desktop/src/main/profile/desktop-cloud-connection-service.ts',
     );
     expect(authIndex).not.toContain('](../../../packages/authentication');
     expect(authIndex).not.toContain('apps/desktop/src/main/modules/authentication');

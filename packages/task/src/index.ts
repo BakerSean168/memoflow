@@ -42,3 +42,8 @@ export {
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';
 
 export { createTaskPrismaReadQueries } from './server';
+export { createTaskBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export {
+  createTaskPrismaPortableCapability,
+  createTaskPowerSyncPortableCapability,
+} from './server/infrastructure/task-profile-import';

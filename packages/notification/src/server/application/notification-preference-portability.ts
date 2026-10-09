@@ -124,6 +124,30 @@ export class NotificationDeliveryPreferencePortableService {
     return preference ? projectPreference(preference) : null;
   }
 
+  async planProfileImport(
+    identityId: string,
+    payload: NotificationDeliveryPreferencePortablePayloadV3,
+  ) {
+    const target = normalizePayload(payload);
+    const current = await this.export(identityId);
+    const preservedFields: string[] = [];
+    if (!current) return { payload: target, preservedFields };
+    const merge = (existing: ChannelFlags, incoming: ChannelFlags, prefix: string) => {
+      for (const channel of CHANNELS) {
+        if (existing[channel] === undefined) continue;
+        if (incoming[channel] !== undefined && incoming[channel] !== existing[channel])
+          preservedFields.push(`${prefix}.${channel}`);
+        incoming[channel] = existing[channel];
+      }
+    };
+    merge(current.globalChannels, target.globalChannels, 'globalChannels');
+    for (const [workflow, channels] of Object.entries(current.workflowOverrides)) {
+      target.workflowOverrides[workflow] ??= {};
+      merge(channels, target.workflowOverrides[workflow]!, `workflowOverrides.${workflow}`);
+    }
+    return { payload: normalizePayload(target), preservedFields };
+  }
+
   async dryRun(
     identityId: string,
     payload: NotificationDeliveryPreferencePortablePayloadV3,
@@ -164,6 +188,13 @@ export class NotificationDeliveryPreferencePortableCapability implements Portabl
   readonly payloadSchema = NotificationDeliveryPreferencePortablePayloadV3Schema;
 
   constructor(private readonly service: NotificationDeliveryPreferencePortableService) {}
+
+  planProfileImport(
+    payload: NotificationDeliveryPreferencePortablePayloadV3,
+    context: PortableCapabilityExecutionContext,
+  ) {
+    return this.service.planProfileImport(context.identityId, payload);
+  }
 
   export(
     context: PortableCapabilityExecutionContext,

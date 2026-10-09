@@ -1,10 +1,10 @@
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { INotificationPreferenceRepository } from '../../../domain';
 import { NotificationPreference } from '../../../domain/aggregates/notification-preference';
 import { NotificationPreferencePrismaMapper } from './mappers/notification-preference-prisma.mapper';
 
 export class NotificationPreferencePrismaRepository implements INotificationPreferenceRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async save(preference: NotificationPreference): Promise<void> {
     const { dto, globalChannels, workflowOverrides, quietHours } =
@@ -30,7 +30,10 @@ export class NotificationPreferencePrismaRepository implements INotificationPref
     });
   }
 
-  async findByIdForIdentity(identityId: string, id: string): Promise<NotificationPreference | null> {
+  async findByIdForIdentity(
+    identityId: string,
+    id: string,
+  ): Promise<NotificationPreference | null> {
     const row = await this.prisma.notificationPreference.findFirst({ where: { id, identityId } });
     return row ? NotificationPreferencePrismaMapper.toDomain(row) : null;
   }
@@ -41,8 +44,11 @@ export class NotificationPreferencePrismaRepository implements INotificationPref
   }
 
   async delete(identityId: string, id: string): Promise<void> {
-    const result = await this.prisma.notificationPreference.deleteMany({ where: { id, identityId } });
-    if (result.count === 0) throw new Error('Notification preference not found for the current identity.');
+    const result = await this.prisma.notificationPreference.deleteMany({
+      where: { id, identityId },
+    });
+    if (result.count === 0)
+      throw new Error('Notification preference not found for the current identity.');
   }
 
   async exists(identityId: string, id: string): Promise<boolean> {

@@ -45,7 +45,13 @@ const EMPTY_REGISTRY: RegistryFile = {
 function assertProfileDescriptor(value: unknown): asserts value is ProfileDescriptor {
   if (!value || typeof value !== 'object') throw new Error('Invalid Profile descriptor');
   const profile = value as Record<string, unknown>;
-  const requiredStrings = ['profileId', 'localOwnerId', 'displayName', 'avatarSeed', 'keyEnvelopeId'];
+  const requiredStrings = [
+    'profileId',
+    'localOwnerId',
+    'displayName',
+    'avatarSeed',
+    'keyEnvelopeId',
+  ];
   if (requiredStrings.some((key) => typeof profile[key] !== 'string' || profile[key] === '')) {
     throw new Error('Invalid Profile descriptor');
   }
@@ -55,7 +61,10 @@ function assertProfileDescriptor(value: unknown): asserts value is ProfileDescri
   if (profile.profileKind === 'guest' && profile.cloudBinding !== null) {
     throw new Error('Guest Profile cannot have a cloud binding');
   }
-  if (profile.profileKind === 'registered' && (!profile.cloudBinding || typeof profile.cloudBinding !== 'object')) {
+  if (
+    profile.profileKind === 'registered' &&
+    (!profile.cloudBinding || typeof profile.cloudBinding !== 'object')
+  ) {
     throw new Error('Registered Profile requires a cloud binding');
   }
   if (typeof profile.lastActiveAt !== 'number' || typeof profile.createdAt !== 'number') {
@@ -75,6 +84,7 @@ export class ProfileRegistry {
   private readonly registryDir: string;
   private cached: RegistryFile | null = null;
   private loadPromise: Promise<RegistryFile> | null = null;
+  private mutationTail: Promise<void> = Promise.resolve();
 
   constructor(private readonly sharedResolver: SharedPathResolver) {
     this.registryPath = sharedResolver.registryPath;
@@ -130,8 +140,9 @@ export class ProfileRegistry {
         logger.error('Failed to read registry file', { error: err });
         throw err;
       }
-      this.cached = { ...EMPTY_REGISTRY, profiles: [] };
-      await this.save();
+      const initial = { ...EMPTY_REGISTRY, profiles: [] };
+      await this.persist(initial);
+      this.cached = initial;
     }
 
     return this.cached!;
@@ -155,8 +166,7 @@ export class ProfileRegistry {
    */
   async list(): Promise<ProfileDescriptor[]> {
     const data = await this.load();
-    return [...data.profiles]
-      .sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+    return [...data.profiles].sort((a, b) => b.lastActiveAt - a.lastActiveAt);
   }
 
   /**
@@ -169,71 +179,22 @@ export class ProfileRegistry {
 
   async findByCloudAccountId(cloudAccountId: string): Promise<ProfileDescriptor | null> {
     const data = await this.load();
-    return data.profiles.find(
-      (profile) => profile.cloudBinding?.cloudAccountId === cloudAccountId,
-    ) ?? null;
-  }
-
-  /**
-   * Rebind an existing profile directory/registry entry to a new online identity.
-   * Keeps the same profileId so local Vault/data paths do not move (guest upgrade).
-   * 将既有 profile 目录/注册表项重绑到新的在线 identity；保留 profileId，本地 Vault 不搬家。
-   */
-  async rebindIdentityOwnership(params: {
-    fromOwnerId: string;
-    toCloudAccountId: string;
-    displayName?: string;
-    identifier?: string | null;
-  }): Promise<ProfileDescriptor> {
-    const data = await this.load();
-    const from = data.profiles.find((p) => p.localOwnerId === params.fromOwnerId);
-    if (!from) {
-      throw new Error(`Profile not found for owner: ${params.fromOwnerId}`);
-    }
-
-    const conflict = data.profiles.find(
-      (p) => p.cloudBinding?.cloudAccountId === params.toCloudAccountId && p.profileId !== from.profileId,
+    return (
+      data.profiles.find((profile) => profile.cloudBinding?.cloudAccountId === cloudAccountId) ??
+      null
     );
-    if (conflict) {
-      throw new Error(
-        `Target identity already owns another profile (${conflict.profileId}); refusing silent merge`,
-      );
-    }
-
-    from.localOwnerId = params.toCloudAccountId;
-    from.profileKind = 'registered';
-    from.cloudBinding = {
-      cloudAccountId: params.toCloudAccountId,
-      boundAt: Date.now(),
-      lastValidatedAt: null,
-    };
-    if (params.displayName !== undefined) {
-      from.displayName = params.displayName;
-    }
-    if (params.identifier !== undefined) {
-      from.identifier = params.identifier?.trim().toLowerCase() || null;
-    }
-    from.lastActiveAt = Date.now();
-    await this.save();
-
-    logger.info('Profile identity ownership rebound', {
-      profileId: from.profileId,
-      fromOwnerId: params.fromOwnerId,
-      toCloudAccountId: params.toCloudAccountId,
-    });
-    return from;
   }
 
   async updateProfileMetadata(
     profileId: string,
     patch: Partial<Pick<ProfileDescriptor, 'displayName' | 'avatarSeed' | 'identifier'>>,
   ): Promise<ProfileDescriptor> {
-    const data = await this.load();
-    const profile = data.profiles.find((entry) => entry.profileId === profileId);
-    if (!profile) throw new Error(`Profile not found: ${profileId}`);
-    Object.assign(profile, patch);
-    await this.save();
-    return profile;
+    return this.mutate((data) => {
+      const profile = data.profiles.find((entry) => entry.profileId === profileId);
+      if (!profile) throw new Error(`Profile not found: ${profileId}`);
+      Object.assign(profile, patch);
+      return profile;
+    });
   }
 
   async findByIdentifier(identifier: string): Promise<ProfileDescriptor | null> {
@@ -256,61 +217,71 @@ export class ProfileRegistry {
     displayName: string,
     identifier?: string | null,
   ): Promise<ProfileDescriptor> {
-    const data = await this.load();
-    const normalizedIdentifier = identifier?.trim().toLowerCase() || null;
+    return this.mutate((data) => {
+      const normalizedIdentifier = identifier?.trim().toLowerCase() || null;
 
-    const existing = data.profiles.find((p) => p.cloudBinding?.cloudAccountId === cloudAccountId);
-    if (existing) {
-      if (
-        existing.displayName !== displayName ||
-        (existing.identifier ?? null) !== normalizedIdentifier
-      ) {
-        existing.displayName = displayName;
+      const existing = data.profiles.find((p) => p.cloudBinding?.cloudAccountId === cloudAccountId);
+      if (existing) {
         existing.identifier = normalizedIdentifier;
-        await this.save();
+        return existing;
       }
-      return existing;
-    }
 
-    const now = Date.now();
-    const descriptor: ProfileDescriptor = {
-      profileId: computeProfileId(cloudAccountId),
-      profileKind: 'registered',
-      localOwnerId: cloudAccountId,
-      displayName,
-      avatarSeed: crypto.randomUUID(),
-      keyEnvelopeId: computeProfileId(cloudAccountId),
-      identifier: normalizedIdentifier,
-      cloudBinding: { cloudAccountId, boundAt: now, lastValidatedAt: null },
-      lastActiveAt: now,
-      createdAt: now,
-      hasSnapshot: false,
-      lastSnapshotVersion: null,
-      lastSnapshotHydratedAt: null,
-      status: 'pending',
-    };
+      const now = Date.now();
+      const descriptor: ProfileDescriptor = {
+        profileId: computeProfileId(cloudAccountId),
+        profileKind: 'registered',
+        localOwnerId: cloudAccountId,
+        displayName,
+        avatarSeed: crypto.randomUUID(),
+        keyEnvelopeId: computeProfileId(cloudAccountId),
+        identifier: normalizedIdentifier,
+        cloudBinding: { cloudAccountId, boundAt: now, lastValidatedAt: null },
+        lastActiveAt: now,
+        createdAt: now,
+        hasSnapshot: false,
+        lastSnapshotVersion: null,
+        lastSnapshotHydratedAt: null,
+        status: 'pending',
+      };
 
-    data.profiles.push(descriptor);
-    await this.save();
+      data.profiles.push(descriptor);
 
-    logger.info('Profile registered', { profileId: descriptor.profileId, cloudAccountId });
-    return descriptor;
+      logger.info('Profile registered', { profileId: descriptor.profileId, cloudAccountId });
+      return descriptor;
+    });
   }
 
-  /** Create the persistent local guest profile exactly once. */
-  async ensureGuest(): Promise<ProfileDescriptor> {
-    const data = await this.load();
-    const existing = data.profiles.find((profile) => profile.profileKind === 'guest');
-    if (existing) return existing;
+  /** Explicit creation is idempotent per request, separate from startup fallback. */
+  async createGuest(requestId: string, displayName?: string): Promise<ProfileDescriptor> {
+    if (!requestId.trim()) throw new Error('Profile creation request ID is required');
+    const profileId = computeProfileId(`guest:${requestId}`);
+    return this.mutate((data) => {
+      const existing = data.profiles.find((profile) => profile.profileId === profileId);
+      if (existing) {
+        if (existing.profileKind !== 'guest') throw new Error('Profile identity conflict');
+        return existing;
+      }
+      return this.addGuest(data, profileId, displayName);
+    });
+  }
 
+  /** Startup fallback; explicit creation must use createGuest. */
+  async ensureGuest(): Promise<ProfileDescriptor> {
+    return this.mutate((data) => {
+      const existing = data.profiles.find((profile) => profile.profileKind === 'guest');
+      return existing ?? this.addGuest(data, `p_${crypto.randomBytes(12).toString('hex')}`);
+    });
+  }
+
+  private addGuest(data: RegistryFile, profileId: string, displayName?: string): ProfileDescriptor {
     const now = Date.now();
     const suffix = String(Math.floor(1000 + Math.random() * 9000));
     const localOwnerId = IdentityId.generate();
     const descriptor: ProfileDescriptor = {
-      profileId: `p_${crypto.randomUUID().replace(/-/g, '')}`,
+      profileId,
       profileKind: 'guest',
       localOwnerId,
-      displayName: `访客 ${suffix}`,
+      displayName: displayName?.trim() || `访客 ${suffix}`,
       avatarSeed: crypto.randomUUID(),
       keyEnvelopeId: `key_${crypto.randomUUID().replace(/-/g, '')}`,
       identifier: null,
@@ -323,7 +294,6 @@ export class ProfileRegistry {
       status: 'pending',
     };
     data.profiles.push(descriptor);
-    await this.save();
     return descriptor;
   }
 
@@ -332,35 +302,34 @@ export class ProfileRegistry {
    * Does NOT delete the profile directory — caller is responsible for that.
    */
   async remove(profileId: string): Promise<void> {
-    const data = await this.load();
-    const index = data.profiles.findIndex((p) => p.profileId === profileId);
-    if (index === -1) return;
+    return this.mutate((data) => {
+      const index = data.profiles.findIndex((p) => p.profileId === profileId);
+      if (index === -1) return;
 
-    data.profiles.splice(index, 1);
+      data.profiles.splice(index, 1);
 
-    if (data.activeProfileId === profileId) {
-      data.activeProfileId = null;
-    }
+      if (data.activeProfileId === profileId) {
+        data.activeProfileId = null;
+      }
 
-    await this.save();
-    logger.info('Profile removed from registry', { profileId });
+      logger.info('Profile removed from registry', { profileId });
+    });
   }
 
   /**
    * Set the active profile ID. Validates that the profile exists.
    */
   async setActiveProfile(profileId: string | null): Promise<void> {
-    const data = await this.load();
-
-    if (profileId !== null) {
-      const exists = data.profiles.some((p) => p.profileId === profileId);
-      if (!exists) {
-        throw new Error(`Profile not found: ${profileId}`);
+    return this.mutate((data) => {
+      if (profileId !== null) {
+        const exists = data.profiles.some((p) => p.profileId === profileId);
+        if (!exists) {
+          throw new Error(`Profile not found: ${profileId}`);
+        }
       }
-    }
 
-    data.activeProfileId = profileId;
-    await this.save();
+      data.activeProfileId = profileId;
+    });
   }
 
   /**
@@ -375,12 +344,12 @@ export class ProfileRegistry {
    * Update lastActiveAt for a profile.
    */
   async touch(profileId: string): Promise<void> {
-    const data = await this.load();
-    const profile = data.profiles.find((p) => p.profileId === profileId);
-    if (!profile) return;
+    return this.mutate((data) => {
+      const profile = data.profiles.find((p) => p.profileId === profileId);
+      if (!profile) return;
 
-    profile.lastActiveAt = Date.now();
-    await this.save();
+      profile.lastActiveAt = Date.now();
+    });
   }
 
   async markReady(profileId: string): Promise<void> {
@@ -420,32 +389,41 @@ export class ProfileRegistry {
     return profile;
   }
 
-  private async updateProfile(
-    profileId: string,
-    patch: Partial<ProfileDescriptor>,
-  ): Promise<void> {
-    const data = await this.load();
-    const profile = data.profiles.find((entry) => entry.profileId === profileId);
-    if (!profile) {
-      return;
-    }
+  private async updateProfile(profileId: string, patch: Partial<ProfileDescriptor>): Promise<void> {
+    return this.mutate((data) => {
+      const profile = data.profiles.find((entry) => entry.profileId === profileId);
+      if (!profile) {
+        return;
+      }
 
-    Object.assign(profile, patch);
-    await this.save();
+      Object.assign(profile, patch);
+    });
   }
 
-  /**
-   * Atomically persist the registry to disk.
-   */
-  private async save(): Promise<void> {
-    if (!this.cached) return;
+  /** Single writer: failed persistence never publishes a half-committed cache. */
+  private mutate<T>(change: (data: RegistryFile) => T): Promise<T> {
+    const mutation = this.mutationTail.then(async () => {
+      const data = structuredClone(await this.load());
+      const result = change(data);
+      await this.persist(data);
+      this.cached = data;
+      return structuredClone(result);
+    });
+    this.mutationTail = mutation.then(
+      () => undefined,
+      () => undefined,
+    );
+    return mutation;
+  }
 
+  private async persist(data: RegistryFile): Promise<void> {
     await fs.promises.mkdir(this.registryDir, { recursive: true });
-
-    const tmpPath = `${this.registryPath}.tmp`;
-    const content = JSON.stringify(this.cached, null, 2);
-
-    await fs.promises.writeFile(tmpPath, content, 'utf-8');
-    await fs.promises.rename(tmpPath, this.registryPath);
+    const tmpPath = `${this.registryPath}.${crypto.randomUUID()}.tmp`;
+    try {
+      await fs.promises.writeFile(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
+      await fs.promises.rename(tmpPath, this.registryPath);
+    } finally {
+      await fs.promises.rm(tmpPath, { force: true }).catch(() => undefined);
+    }
   }
 }

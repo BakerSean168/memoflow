@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [独立 Desktop Profile](./2026-10-09-desktop-independent-profiles.md)：独立 Profile、复制导入、恢复与核验后清理已实现，Linux E2E / 本地部署验证通过；main 性能改动已整合，跨平台和真实云端网络同步待验收。
+
 - [Desktop parity and production OAuth repair](./2026-10-09-desktop-parity-oauth-repair.md)：修复 Keyboard IPC、统一共享样式与打包组件 CSS，生产 v0.16.0 OAuth 已恢复，本地验证进行中。
 
 - [Keyboard-first V1](./2026-10-08-keyboard-first-v1.md)：实现与 Web/Linux 桌面本地验收已完成，Windows/macOS 实机验收待补。

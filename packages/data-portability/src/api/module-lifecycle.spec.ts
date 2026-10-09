@@ -16,10 +16,7 @@ import type { Express, Router } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DataPortabilityModuleInstance } from '../server/infrastructure';
 import type { ServerHeldDataDisclosureApplicationPort } from '../server/application';
-import {
-  createDataPortabilityApiModule,
-  type DataPortabilityApiModuleContext,
-} from './module';
+import { createDataPortabilityApiModule, type DataPortabilityApiModuleContext } from './module';
 
 function createDisclosureApiStub(): ServerHeldDataDisclosureApplicationPort {
   return {
@@ -153,6 +150,28 @@ describe('createDataPortabilityApiModule lifecycle', () => {
     moduleDef.destroy?.();
     moduleDef.destroy?.();
     expect(fake.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for in-flight recovery work after stopping the module', async () => {
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    fake.instance.drain = vi.fn(() => pending);
+    const moduleDef = createDataPortabilityApiModule({
+      instance: fake.instance,
+      serverHeldDataDisclosureApi: disclosureApi,
+    });
+    let destroyed = false;
+    const destruction = Promise.resolve(moduleDef.destroy?.()).then(() => {
+      destroyed = true;
+    });
+    await Promise.resolve();
+    expect(fake.dispose).toHaveBeenCalledOnce();
+    expect(destroyed).toBe(false);
+    finish();
+    await destruction;
+    expect(destroyed).toBe(true);
   });
 
   it('disposes and rethrows when start() throws, leaving a handle that cannot be re-registered', () => {

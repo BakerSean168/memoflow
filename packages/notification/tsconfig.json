@@ -12,6 +12,7 @@
       "@/*": [
         "./src/*"
       ],
+      "@memoflow/database/transaction": ["../database/src/transaction.ts"],
       "@memoflow/database": [
         "../database/src/index.ts"
       ],

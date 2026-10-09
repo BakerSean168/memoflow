@@ -56,9 +56,6 @@ const AUDITED_PATHS = [
  * 宽泛 Record。原因内联，使审计自文档化。
  */
 const ALLOWLIST: Record<string, string> = {
-  // Goal: low-level transaction runner native handle (Prisma transaction client).
-  'packages/goal/src/server/infrastructure/adapters/prisma/prisma-goal-write-transaction-runner.ts':
-    'native Prisma transaction client cast (allowlist)',
   // Goal: domain aggregate writes a branded-id snapshot (domain-client
   // branded-id boundary; cannot express from contract types).
   'packages/goal/src/server/domain/aggregates/goal.ts':
