@@ -53,12 +53,20 @@ const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records'] as const
 // Module state
 // ──────────────────────────────────────────────
 
-let powerSyncDb: PowerSyncDatabase | null = null;
-let syncConnected = false;
-let currentDbPath: string | null = null;
+interface ProfileDatabaseInstance {
+  db: PowerSyncDatabase;
+  path: string;
+  phase: 'opening' | 'open' | 'closing' | 'close-failed';
+  ready: Promise<void>;
+  syncConnected: boolean;
+  syncTail: Promise<void>;
+  syncGeneration: number;
+  syncController: AbortController | null;
+  disconnecting: Promise<void> | null;
+  closing: Promise<void> | null;
+}
 
-// Concurrency guard — prevent duplicate local-only opens when two callers race.
-let openingPromise: Promise<PowerSyncDatabase> | null = null;
+let powerSyncInstance: ProfileDatabaseInstance | null = null;
 
 // ──────────────────────────────────────────────
 // Helpers
@@ -70,14 +78,6 @@ function ensureDbDirectory(dbPath: string): string {
     fs.mkdirSync(dbDir, { recursive: true });
   }
   return dbPath;
-}
-
-function assertCompatibleDbPath(dbPath: string): void {
-  if (powerSyncDb && currentDbPath && currentDbPath !== dbPath) {
-    throw new Error(
-      `PowerSync database is already open for another profile: ${currentDbPath} != ${dbPath}`,
-    );
-  }
 }
 
 function createPowerSyncDatabase(dbPath: string): PowerSyncDatabase {
@@ -213,7 +213,10 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
   private readonly apiBaseUrl: string;
   private readonly credentialProvider: CloudCredentialProvider;
 
-  constructor(credentialProvider: CloudCredentialProvider) {
+  constructor(
+    credentialProvider: CloudCredentialProvider,
+    private readonly signal: AbortSignal,
+  ) {
     this.apiBaseUrl = getApiBaseUrl();
     this.credentialProvider = credentialProvider;
   }
@@ -223,7 +226,9 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
    * existing HS256 access token stored in safeStorage.
    */
   async fetchCredentials(): Promise<PowerSyncCredentials> {
+    this.signal.throwIfAborted();
     const accessToken = await this.credentialProvider.getAccessToken();
+    this.signal.throwIfAborted();
 
     if (!accessToken) {
       throw new Error(
@@ -232,6 +237,7 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
     }
 
     const response = await fetch(`${this.apiBaseUrl}/powersync/token`, {
+      signal: AbortSignal.any([this.signal, AbortSignal.timeout(5_000)]),
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -284,7 +290,9 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
    * The API's `/powersync/crud` endpoint applies them inside a Prisma $transaction.
    */
   async uploadData(database: AbstractPowerSyncDatabase): Promise<void> {
+    this.signal.throwIfAborted();
     const accessToken = await this.credentialProvider.getAccessToken();
+    this.signal.throwIfAborted();
 
     if (!accessToken) {
       throw new Error('[PowerSync] No cloud-eligible access token — cannot upload data');
@@ -294,6 +302,7 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
 
     while ((transaction = await database.getNextCrudTransaction()) !== null) {
       try {
+        this.signal.throwIfAborted();
         const ops = serializeCrudTransaction(transaction);
 
         const tableCounts = ops.reduce<Record<string, number>>((acc, op) => {
@@ -308,6 +317,7 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
         });
 
         const response = await fetch(`${this.apiBaseUrl}/powersync/crud`, {
+          signal: AbortSignal.any([this.signal, AbortSignal.timeout(15_000)]),
           method: 'PUT',
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -353,49 +363,112 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
  * @param dbPath - Required per-profile database path.
  */
 export async function openPowerSyncLocalOnly(dbPath: string): Promise<PowerSyncDatabase> {
-  assertCompatibleDbPath(dbPath);
-
-  if (powerSyncDb) {
-    console.log('[PowerSync] Already open (reusing existing instance)');
-    return powerSyncDb;
+  const resolvedDbPath = path.resolve(dbPath);
+  let instance = powerSyncInstance;
+  if (instance?.phase === 'closing') {
+    await instance.closing;
+    return openPowerSyncLocalOnly(resolvedDbPath);
   }
-  if (openingPromise) {
-    console.log('[PowerSync] Local-only open already in progress, waiting…');
-    return openingPromise;
+  if (instance?.phase === 'close-failed') {
+    throw new Error('PowerSync database close failed; retry shutdown before opening a Profile');
   }
-
-  openingPromise = (async () => {
-    const resolvedDbPath = ensureDbDirectory(dbPath);
-
-    console.log(`[PowerSync] Opening local-only database: ${resolvedDbPath}`);
-
-    const db = createPowerSyncDatabase(resolvedDbPath);
-    console.log('[PowerSync] Waiting for local-only database to become ready...');
-    try {
-      await db.waitForReady();
-    } catch (error) {
-      await db.close();
-      throw error;
-    }
-    console.log('[PowerSync] Local-only database is ready');
-
-    powerSyncDb = db;
-    syncConnected = false;
-    currentDbPath = resolvedDbPath;
-
-    // Do NOT call db.connect(connector) — local-only mode
-    // Just initialize the database and start change broadcast
-    startChangeBroadcast(db);
-
-    console.log('[PowerSync] Local-only mode active (no sync)');
-    return db;
-  })();
-
+  if (instance && instance.path !== resolvedDbPath) {
+    throw new Error(
+      `PowerSync database is already open for another profile: ${instance.path} != ${resolvedDbPath}`,
+    );
+  }
+  if (!instance) {
+    const db = createPowerSyncDatabase(ensureDbDirectory(resolvedDbPath));
+    instance = {
+      db,
+      path: resolvedDbPath,
+      phase: 'opening',
+      ready: Promise.resolve().then(() => db.waitForReady()),
+      syncConnected: false,
+      syncTail: Promise.resolve(),
+      syncGeneration: 0,
+      syncController: null,
+      disconnecting: null,
+      closing: null,
+    };
+    // Own the path and DB before the first await, including failed/late opens.
+    powerSyncInstance = instance;
+  }
   try {
-    return await openingPromise;
-  } finally {
-    openingPromise = null;
+    await instance.ready;
+    if (
+      powerSyncInstance !== instance ||
+      (instance.phase !== 'opening' && instance.phase !== 'open')
+    ) {
+      throw new Error('PowerSync database opening was cancelled by Profile shutdown');
+    }
+    if (instance.phase === 'opening') {
+      startChangeBroadcast(instance.db);
+      instance.phase = 'open';
+      console.log('[PowerSync] Local-only Profile database ready');
+    }
+    return instance.db;
+  } catch (error) {
+    if (instance.phase === 'opening') {
+      await closeProfileDatabase(instance).catch((closeError) => {
+        console.error('[PowerSync] Failed to close an unready database', closeError);
+      });
+    }
+    throw error;
   }
+}
+
+function requireOpenInstance(instance: ProfileDatabaseInstance): void {
+  if (powerSyncInstance !== instance || instance.phase !== 'open') {
+    throw new Error('PowerSync operation requires the current open Profile database');
+  }
+}
+
+function runSyncOperation<T>(
+  instance: ProfileDatabaseInstance,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const task = instance.syncTail.then(() => {
+    requireOpenInstance(instance);
+    return operation();
+  });
+  instance.syncTail = task.then(
+    () => undefined,
+    () => undefined,
+  );
+  return task;
+}
+
+function closeProfileDatabase(instance: ProfileDatabaseInstance): Promise<void> {
+  if (instance.closing) return instance.closing;
+  instance.phase = 'closing';
+  instance.syncController?.abort();
+  const closing = (async () => {
+    try {
+      // Abort the SDK connection before draining it: connect() may itself be
+      // waiting for disconnect to signal cancellation.
+      await instance.ready.catch(() => undefined);
+      try {
+        await stopSync(instance);
+      } finally {
+        try {
+          stopChangeBroadcast();
+        } finally {
+          await instance.db.close();
+        }
+      }
+      if (powerSyncInstance === instance) powerSyncInstance = null;
+      console.log('[PowerSync] Profile database closed (data preserved)');
+    } catch (error) {
+      // Keep ownership so a retry can close it; a new Profile must not hide it.
+      instance.phase = 'close-failed';
+      throw error;
+    } finally {
+      instance.closing = null;
+    }
+  })();
+  instance.closing = closing;
+  return closing;
 }
 
 /**
@@ -407,30 +480,55 @@ export async function openPowerSyncLocalOnly(dbPath: string): Promise<PowerSyncD
 export async function ensurePowerSyncSyncMode(
   credentialProvider: CloudCredentialProvider,
 ): Promise<PowerSyncDatabase> {
-  if (!powerSyncDb) {
+  const instance = powerSyncInstance;
+  if (!instance || instance.phase !== 'open') {
     throw new Error('PowerSync sync mode requires an already prepared profile-local database');
   }
 
-  if (syncConnected) {
-    console.log('[PowerSync] Already in sync mode');
-    return powerSyncDb;
-  }
-
-  await purgeNonSyncableLocalCrud(powerSyncDb);
-  await purgePreHydrationBootstrapCrud(powerSyncDb);
-  const connector = new DesktopPowerSyncConnector(credentialProvider);
-  await powerSyncDb.connect(connector);
-  syncConnected = true;
-  console.log('[PowerSync] Promoted to sync mode');
-  return powerSyncDb;
+  const generation = instance.syncGeneration;
+  const assertSyncCurrent = () => {
+    requireOpenInstance(instance);
+    if (instance.syncGeneration !== generation)
+      throw new Error('PowerSync connection was cancelled');
+  };
+  return runSyncOperation(instance, async () => {
+    await instance.disconnecting;
+    assertSyncCurrent();
+    if (instance.syncConnected) return instance.db;
+    await purgeNonSyncableLocalCrud(instance.db);
+    await purgePreHydrationBootstrapCrud(instance.db);
+    assertSyncCurrent();
+    const controller = new AbortController();
+    instance.syncController = controller;
+    await instance.db.connect(new DesktopPowerSyncConnector(credentialProvider, controller.signal));
+    assertSyncCurrent();
+    instance.syncConnected = true;
+    console.log('[PowerSync] Promoted to sync mode');
+    return instance.db;
+  });
 }
 
 /** Disconnect cloud sync while keeping the active Profile database open locally. */
 export async function disablePowerSyncSyncMode(): Promise<void> {
-  if (!powerSyncDb || !syncConnected) return;
-  await powerSyncDb.disconnect();
-  syncConnected = false;
+  const instance = powerSyncInstance;
+  if (!instance || instance.phase !== 'open') return;
+  await stopSync(instance);
   console.log('[PowerSync] Cloud sync disconnected; local Profile remains open');
+}
+
+async function stopSync(instance: ProfileDatabaseInstance): Promise<void> {
+  instance.syncGeneration++;
+  instance.syncController?.abort();
+  instance.syncController = null;
+  instance.syncConnected = false;
+  const inFlight = instance.syncTail;
+  if (!instance.disconnecting) {
+    const disconnecting = instance.db.disconnect().finally(() => {
+      if (instance.disconnecting === disconnecting) instance.disconnecting = null;
+    });
+    instance.disconnecting = disconnecting;
+  }
+  await Promise.all([instance.disconnecting, inFlight]);
 }
 
 /**
@@ -438,27 +536,14 @@ export async function disablePowerSyncSyncMode(): Promise<void> {
  * Use on app quit to preserve the sync cache for the next cold start.
  */
 export async function shutdownPowerSync(): Promise<void> {
-  const db = powerSyncDb;
-  if (!db) return;
-  stopChangeBroadcast();
-  await db
-    .disconnect()
-    .catch((error) => console.error('[PowerSync] Disconnect failed during shutdown:', error));
-  syncConnected = false;
-  // Closing releases SQLite and worker resources; disconnect alone leaves them alive.
-  // Keep the handle if close fails so a retry can release it before any other Profile opens.
-  await db.close();
-  powerSyncDb = null;
-  currentDbPath = null;
-  openingPromise = null;
-  console.log('[PowerSync] Shut down gracefully (data preserved)');
+  if (powerSyncInstance) await closeProfileDatabase(powerSyncInstance);
 }
 
 /**
  * Returns the active PowerSync database instance, or null if not connected.
  */
 export function getPowerSyncDatabase(): PowerSyncDatabase | null {
-  return powerSyncDb;
+  return powerSyncInstance?.phase === 'open' ? powerSyncInstance.db : null;
 }
 
 // ──────────────────────────────────────────────
@@ -509,8 +594,9 @@ function startChangeBroadcast(db: PowerSyncDatabase): void {
  */
 function stopChangeBroadcast(): void {
   if (onChangeDispose) {
-    onChangeDispose();
+    const dispose = onChangeDispose;
     onChangeDispose = null;
+    dispose();
     console.log('[PowerSync] Change broadcast stopped');
   }
 }

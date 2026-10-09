@@ -146,28 +146,45 @@
               :placeholder="t('repository.localVault.searchPlaceholder')"
               :clear-label="t('common.clear')"
               test-id="local-vault-search"
-              @submit="search"
+              @submit="submitSearch"
               @clear="clearSearch"
             />
           </div>
 
-          <div class="min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
-            <div v-if="displayedNotes.length" v-keyboard-list class="space-y-0.5 py-0.5">
-              <DocumentCatalogRow
-                v-for="note in displayedNotes"
+          <div
+            v-bind="containerProps"
+            class="min-h-0 flex-1 overflow-auto px-1.5"
+            data-testid="local-vault-catalog-scroll"
+          >
+            <div
+              v-if="displayedNotes.length"
+              v-keyboard-list="keyboardList"
+              v-bind="wrapperProps"
+              role="list"
+            >
+              <div
+                v-for="{ data: note, index } in virtualNotes"
                 :key="note.relativePath"
-                :data-keyboard-item="note.relativePath"
-                :selected="activeNote?.relativePath === note.relativePath"
-                :data-testid="`local-vault-note-${note.relativePath}`"
-                @activate="openNote(note)"
-                @dblclick="openInObsidian(note.relativePath)"
+                role="listitem"
+                :style="{ height: `${rowHeight}px` }"
+                :aria-posinset="index + 1"
+                :aria-setsize="displayedNotes.length"
               >
-                {{ note.title }}
-                <template #meta>{{ note.relativePath }}</template>
-                <template v-if="resultExcerpt(note.relativePath)" #description>
-                  {{ resultExcerpt(note.relativePath) }}
-                </template>
-              </DocumentCatalogRow>
+                <DocumentCatalogRow
+                  :style="{ height: `${rowHeight - 2}px` }"
+                  :data-keyboard-item="note.relativePath"
+                  :selected="activeNote?.relativePath === note.relativePath"
+                  :data-testid="`local-vault-note-${note.relativePath}`"
+                  @activate="openNote(note)"
+                  @dblclick="openInObsidian(note.relativePath)"
+                >
+                  {{ note.title }}
+                  <template #meta>{{ note.relativePath }}</template>
+                  <template v-if="resultExcerpt(note.relativePath)" #description>
+                    {{ resultExcerpt(note.relativePath) }}
+                  </template>
+                </DocumentCatalogRow>
+              </div>
             </div>
 
             <DocumentWorkspaceState v-if="loading && displayedNotes.length === 0" kind="loading" />
@@ -220,7 +237,8 @@
 
 <script setup lang="ts">
 import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue';
+import { useVirtualList } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -272,6 +290,38 @@ const {
   notes,
 } = useLocalVault();
 
+const rowHeight = computed(() => (searchActive.value ? 100 : 56));
+const {
+  list: virtualNotes,
+  containerProps,
+  wrapperProps,
+  scrollTo,
+} = useVirtualList(displayedNotes, {
+  itemHeight: () => rowHeight.value,
+  overscan: 6,
+});
+const noteIds = computed(() => displayedNotes.value.map((note) => note.relativePath));
+const keyboardList = {
+  virtual: {
+    getIds: () => noteIds.value,
+    async reveal(id: string): Promise<void> {
+      const index = noteIds.value.indexOf(id);
+      if (index < 0) return;
+      scrollTo(index, { block: 'nearest' });
+      await nextTick();
+    },
+  },
+};
+watch(
+  displayedNotes,
+  () => {
+    const container = containerProps.ref.value;
+    if (container) container.scrollTop = 0;
+    containerProps.onScroll();
+  },
+  { flush: 'post' },
+);
+
 const knowledgeCaptureDialogOpen = computed(() => route.query.dialog === 'knowledge-capture');
 const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>(() => {
   if (!isBound.value || !binding.value) return [];
@@ -300,6 +350,13 @@ function noteQueryId(): string {
 }
 
 let refreshedNoteQuery = '';
+let attemptedNoteQuery = '';
+let attemptedCatalog: typeof notes.value | null = null;
+watch(noteQueryId, () => {
+  refreshedNoteQuery = '';
+  attemptedNoteQuery = '';
+  attemptedCatalog = null;
+});
 
 async function applyNoteQuerySelection(): Promise<void> {
   const requested = noteQueryId();
@@ -321,6 +378,9 @@ async function applyNoteQuerySelection(): Promise<void> {
   }
   if (!target) return;
   if (activeNote.value?.relativePath === target.relativePath) return;
+  if (attemptedNoteQuery === requested && attemptedCatalog === notes.value) return;
+  attemptedNoteQuery = requested;
+  attemptedCatalog = notes.value;
   await openNote(target);
 }
 
@@ -329,12 +389,7 @@ onMounted(() => {
 });
 
 watch(
-  () => [
-    route.query.note,
-    isBound.value,
-    loading.value,
-    notes.value.map((note) => `${note.knowledgeDocumentId}:${note.relativePath}`).join('|'),
-  ],
+  () => [route.query.note, isBound.value, loading.value, notes.value],
   () => {
     void applyNoteQuerySelection();
   },
@@ -342,9 +397,17 @@ watch(
 
 const LOCAL_SEARCH_DEBOUNCE_MS = 220;
 let localSearchTimer: ReturnType<typeof setTimeout> | null = null;
+function stopSearchTimer(): void {
+  if (localSearchTimer) clearTimeout(localSearchTimer);
+  localSearchTimer = null;
+}
+function submitSearch(): void {
+  stopSearchTimer();
+  void search();
+}
 
 watch(searchQuery, () => {
-  if (localSearchTimer) clearTimeout(localSearchTimer);
+  stopSearchTimer();
   localSearchTimer = setTimeout(() => {
     localSearchTimer = null;
     if (searchQuery.value.trim()) void search();
@@ -352,13 +415,21 @@ watch(searchQuery, () => {
   }, LOCAL_SEARCH_DEBOUNCE_MS);
 });
 
-onBeforeUnmount(() => {
-  if (localSearchTimer) clearTimeout(localSearchTimer);
-});
+onBeforeUnmount(stopSearchTimer);
+onDeactivated(stopSearchTimer);
+
+const resultExcerpts = computed(
+  () =>
+    new Map(
+      searchResults.value.map((item) => [
+        item.note.relativePath,
+        item.matches[0]?.lineContent ?? '',
+      ]),
+    ),
+);
 
 function resultExcerpt(relativePath: string): string {
-  const result = searchResults.value.find((item) => item.note.relativePath === relativePath);
-  return result?.matches[0]?.lineContent ?? '';
+  return resultExcerpts.value.get(relativePath) ?? '';
 }
 
 async function confirmDetach(): Promise<void> {

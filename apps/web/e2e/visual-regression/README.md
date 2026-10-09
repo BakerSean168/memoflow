@@ -23,3 +23,14 @@ The matrix deliberately pairs themes/locales/widths instead of multiplying all p
 Desktop host inventory: `manifest.mjs#desktopRunner` exposes `web:e2e:desktop-screenshots` and `playwright.desktop-screenshot.config.ts`. That runner requires Electron/backend authentication and retains host ownership. Its debug/thesis captures and `shell/shell-geometry.spec.ts` are specialized compatibility evidence, not UI-9001 baselines.
 
 PVC-UI-9002 adds two semantic tests in the same acceptance entry point (29 tests, 27 PNG baselines): measured 520px/eight-tab geometry, named 32px shell actions/36px tabs, keyboard navigation, single business scroll ownership, capsule Enter/Escape focus return, and computed normal/reduced Popover motion. The optional `tabs=8` query seeds real shell tabs through the production store; default screenshot fixtures remain unchanged. Six baseline images were reviewed and updated for the required target-size changes.
+
+## Web/Desktop stylesheet parity
+
+The canonical matrix builds each fixture twice: the default Web global entry and
+`--mode desktop` with the Desktop global entry. Both compare against the same 27
+reviewed PNG baselines (54 screenshot cases plus three semantic cases). This
+checks the same theme, locale, viewport and fixture data, without requiring cloud
+account state to match a local guest Profile. No separate Desktop baselines are
+accepted. The Desktop run in this matrix covers global styles; the actual
+`desktop:test:packaged-smoke` release gate separately checks app-vue's emitted
+component CSS, native window dragging and keyboard settings across process restart.

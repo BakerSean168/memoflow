@@ -386,7 +386,8 @@ export class DesktopProfileRuntimeManager {
       }
       return;
     }
-    const profileId = this.activeRuntime.descriptor.profileId;
+    const active = this.activeRuntime;
+    const profileId = active.descriptor.profileId;
     // Flush profile-local owner truth before any other runtime is torn down.
     // This hook is allowed to veto deactivation: losing a due Routine occurrence
     // is worse than keeping the current Profile active for a retry.
@@ -395,6 +396,8 @@ export class DesktopProfileRuntimeManager {
     // path never exposes a successfully active Profile.
     await this.beforeDeactivation?.();
     this.profileGeneration += 1;
+    // No IPC may resolve the runtime while its modules are being destroyed.
+    this.activeRuntime = null;
 
     // Stop the bound schedule runtime controller (idempotent; the SAME instance
     // the profile's module handle owns), then clear the reference BEFORE the
@@ -410,7 +413,7 @@ export class DesktopProfileRuntimeManager {
     }
     // Shell-held references were cleared by beforeDeactivation before module
     // teardown, so concurrent IPC cannot resolve a half-destroyed repository.
-    await this.activeRuntime.bootstrapper
+    await active.bootstrapper
       .destroy()
       .catch((error) => logger.error('Failed to destroy profile modules', { error }));
     // NOTE: the closure-request marker is intentionally NOT cleared here —
@@ -588,11 +591,15 @@ export class DesktopProfileRuntimeManager {
 
   private async disposePreparedRuntime(): Promise<void> {
     if (this.preparedRuntime) {
-      await shutdownPowerSync();
       this.preparedRuntime = null;
+      this.databaseCleanupRequired = true;
     }
     this.preparedUnlockKey?.fill(0);
     this.preparedUnlockKey = null;
     this.preparedUnlockProfileId = null;
+    if (this.databaseCleanupRequired) {
+      await shutdownPowerSync();
+      this.databaseCleanupRequired = false;
+    }
   }
 }

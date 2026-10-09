@@ -6,7 +6,14 @@ export const PANEL_WIDTHS = { wide: 1280, narrow: 520 } as const;
 
 export async function openVisualCase(
   page: Page,
-  entry: { owner: string; theme: string; locale: string; width: 'wide' | 'narrow'; query?: string },
+  entry: {
+    owner: string;
+    theme: string;
+    locale: string;
+    width: 'wide' | 'narrow';
+    query?: string;
+    host?: 'web' | 'desktop';
+  },
 ) {
   const externalRequests: string[] = [];
   await page.route('**/*', async (route) => {
@@ -37,7 +44,7 @@ export async function openVisualCase(
     panelWidth: String(PANEL_WIDTHS[entry.width]),
   });
   for (const [key, value] of new URLSearchParams(entry.query)) query.set(key, value);
-  await page.goto(`/?${query}`);
+  await page.goto(`${entry.host === 'desktop' ? '/desktop/index.html' : '/'}?${query}`);
   return externalRequests;
 }
 

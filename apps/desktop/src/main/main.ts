@@ -732,6 +732,7 @@ async function initializeShellRuntime(): Promise<void> {
   const cloudConnectionService = new DesktopCloudConnectionService(
     profileRuntimeManager,
     cloudSessionStore,
+    cloudConnectionManager,
   );
   const deviceAuthCoordinator = new DeviceAuthCoordinator(
     profileRuntimeManager,
@@ -817,6 +818,7 @@ async function initializeShellRuntime(): Promise<void> {
     profileRegistry,
     profileRuntimeManager,
     cloudSessionStore,
+    cloudConnectionManager,
     deviceAuthCoordinator,
   );
 
@@ -835,14 +837,13 @@ async function initializeShellRuntime(): Promise<void> {
       async () => {
         await profileRuntimeManager.runExclusive(async () => {
           if (profileRuntimeManager.getActiveProfileId() !== profilePaths.profileId) return;
-          await cloudSessionStore.remove(profilePaths.profileId);
-          await profileRuntimeManager.disableCloudSync();
+          await cloudConnectionManager.clearSession(profilePaths.profileId);
         });
       },
     );
   });
   profileRuntimeManager.setAfterActivation(async (profile) => {
-    await cloudConnectionManager.restore(profile).catch((error) => {
+    void cloudConnectionManager.restore(profile).catch((error) => {
       logger.warn('Cloud connection restore failed; Profile remains locally available', { error });
     });
     try {
@@ -878,6 +879,8 @@ async function initializeShellRuntime(): Promise<void> {
     activeReminderElapsedRuntime = null;
     activeReminderActivityRuntime = null;
     activeReminderOccurrenceFlush = null;
+    await cloudConnectionManager.cancel();
+    mainRuntime?.notification?.clearPresentation();
     activeInterventionWindowController = null;
     activeFocusWindowController = null;
     // Clear the WindowManager's bound schedule runtime controller BEFORE the

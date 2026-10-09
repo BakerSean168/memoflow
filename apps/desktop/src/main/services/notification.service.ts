@@ -80,13 +80,20 @@ export class NotificationService {
     this.mainWindow = window;
   }
 
+  clearPresentation(): void {
+    this.customNotificationManager.clearPresentation();
+  }
+
+  destroy(): void {
+    this.customNotificationManager.destroy();
+    this.mainWindow = null;
+  }
+
   getDevicePreference(): DeviceNotificationPreference {
     return this.devicePreferenceStore.get();
   }
 
-  updateDevicePreference(
-    patch: DesktopNotificationPreferencePatch,
-  ): DeviceNotificationPreference {
+  updateDevicePreference(patch: DesktopNotificationPreferencePatch): DeviceNotificationPreference {
     return this.devicePreferenceStore.update(patch);
   }
 
@@ -272,9 +279,12 @@ export class NotificationService {
       return { rendered: true, notification: null };
     }
 
-    logger.info('[Desktop][NotificationFlow] Routing notification to native Electron notification', {
-      title: options.title,
-    });
+    logger.info(
+      '[Desktop][NotificationFlow] Routing notification to native Electron notification',
+      {
+        title: options.title,
+      },
+    );
     if (!Notification.isSupported()) {
       console.warn('[NotificationService] Notifications are not supported on this system');
       return { rendered: false, notification: null };

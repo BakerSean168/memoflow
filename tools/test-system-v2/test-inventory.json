@@ -942,6 +942,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/database/__tests__/powersync-lifecycle.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/database/__tests__/powersync-public-surface.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -1630,6 +1638,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/services/custom-notification.manager.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/services/custom-notification.manager.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1703,6 +1719,22 @@
     },
     {
       "path": "apps/desktop/src/preload/allowed-channels.desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/preload/keyboard-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/CustomNotificationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -12371,7 +12403,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 9
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -12764,7 +12796,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 97
+      "fileCount": 100
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13536,11 +13568,11 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1167,
+    "unit": 1170,
     "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,
-    "boundary-main": 8,
+    "boundary-main": 9,
     "e2e": 48,
     "perf": 2,
     "governance": 65

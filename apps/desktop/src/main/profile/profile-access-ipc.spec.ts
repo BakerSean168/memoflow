@@ -8,6 +8,62 @@ type Handler = (_event: unknown, input?: unknown) => Promise<unknown>;
 describe('registerProfileAccessIpc', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('returns local capabilities while cloud validation is still pending', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const profile = {
+      profileId: 'local-1',
+      profileKind: 'registered',
+      cloudBinding: { cloudAccountId: 'cloud-1' },
+    };
+    const runtime = {
+      getActiveProfileDescriptorSync: vi.fn(() => profile),
+      hasPin: vi.fn(async () => false),
+    };
+    const cloud = {
+      getState: vi.fn(async () => 'CHECKING'),
+      restore: vi.fn(() => new Promise(() => undefined)),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, cloud as never);
+    await expect(handlers.get(ProfileAccessChannels.GET_SNAPSHOT)?.({})).resolves.toMatchObject({
+      ok: true,
+      data: {
+        unlockState: 'UNLOCKED',
+        cloudState: 'CHECKING',
+        capabilities: { local: true, sync: false, cloudAi: false, repositoryConnection: false },
+      },
+    });
+    expect(cloud.restore).not.toHaveBeenCalled();
+  });
+
+  it('does not publish an unlocked snapshot after the profile changes during its local reads', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileDescriptorSync: vi.fn().mockReturnValue({ profileId: 'old-profile' }),
+      hasPin: vi.fn(async () => false),
+    };
+    const cloud = {
+      getState: vi.fn(async () => {
+        runtime.getActiveProfileDescriptorSync.mockReturnValue(null);
+        return 'ONLINE';
+      }),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, cloud as never);
+    await expect(handlers.get(ProfileAccessChannels.GET_SNAPSHOT)?.({})).resolves.toMatchObject({
+      ok: true,
+      data: {
+        profile: null,
+        unlockState: 'LOCKED',
+        capabilities: { local: false, sync: false, cloudAi: false },
+      },
+    });
+  });
+
   it.each([null, '../outside', { profileId: '../outside' }, { profileId: 'valid', pin: 'x' }])(
     'rejects malformed selection %j before lifecycle access',
     async (input) => {

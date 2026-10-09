@@ -1,0 +1,232 @@
+{
+  "recordedAt": "2026-10-09T09:26:41.585Z",
+  "revision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "sourceSha256": "6df4fdf0d9acac02c405447fcf1f065607a2b044b69c491ec3b1c6d1b426c0cb",
+  "environment": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v24.21.0",
+    "cpu": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "logicalCpus": 8,
+    "loadAverage": [
+      26.67,
+      19.44,
+      16.24
+    ]
+  },
+  "methodology": {
+    "bytesPerNote": 4096,
+    "samples": 5,
+    "query": "needlealpha",
+    "filesystem": "Same synthetic fixture shape as baseline; OS cache not evicted.",
+    "counts": "Separate fs.promises instrumentation; timed samples are uninstrumented.",
+    "scope": "Node/Linux source-level experiment, not Electron/IPC/renderer or Windows.",
+    "cacheBudget": "128 MiB accounted serialized payload; not a hard RSS bound."
+  },
+  "search": [
+    {
+      "notes": 100,
+      "firstQueryMs": 497.1501840000001,
+      "resultCount": 1,
+      "repeatedQueryMs": [
+        36.26896099999976,
+        47.31506300000001,
+        90.18447800000013,
+        54.25868599999967,
+        56.547051000000465
+      ],
+      "medianMs": 54.25868599999967,
+      "coldIo": {
+        "markdownReads": 100,
+        "bindingReads": 1,
+        "markdownBytes": 409600,
+        "readFile": 101,
+        "stat": 101,
+        "realpath": 101,
+        "access": 1,
+        "readdir": 2
+      },
+      "warmIo": {
+        "markdownReads": 0,
+        "bindingReads": 1,
+        "markdownBytes": 0,
+        "readFile": 1,
+        "stat": 101,
+        "realpath": 101,
+        "access": 1,
+        "readdir": 2
+      },
+      "changedIo": {
+        "markdownReads": 1,
+        "bindingReads": 1,
+        "markdownBytes": 4096,
+        "readFile": 2,
+        "stat": 101,
+        "realpath": 101,
+        "access": 1,
+        "readdir": 2
+      },
+      "parserCacheEntries": 0
+    },
+    {
+      "notes": 1000,
+      "firstQueryMs": 2150.9775499999996,
+      "resultCount": 10,
+      "repeatedQueryMs": [
+        406.1273390000006,
+        359.22646299999997,
+        503.99608100000023,
+        707.4120579999999,
+        648.7018899999985
+      ],
+      "medianMs": 503.99608100000023,
+      "coldIo": {
+        "markdownReads": 1000,
+        "bindingReads": 1,
+        "markdownBytes": 4096000,
+        "readFile": 1001,
+        "stat": 1001,
+        "realpath": 1001,
+        "access": 1,
+        "readdir": 6
+      },
+      "warmIo": {
+        "markdownReads": 0,
+        "bindingReads": 1,
+        "markdownBytes": 0,
+        "readFile": 1,
+        "stat": 1001,
+        "realpath": 1001,
+        "access": 1,
+        "readdir": 6
+      },
+      "changedIo": {
+        "markdownReads": 1,
+        "bindingReads": 1,
+        "markdownBytes": 4096,
+        "readFile": 2,
+        "stat": 1001,
+        "realpath": 1001,
+        "access": 1,
+        "readdir": 6
+      },
+      "parserCacheEntries": 0
+    },
+    {
+      "notes": 10000,
+      "firstQueryMs": 12273.843955999997,
+      "resultCount": 100,
+      "repeatedQueryMs": [
+        3153.580535000001,
+        4229.054973999999,
+        5502.7356750000035,
+        5286.888018000005,
+        2975.5685690000028
+      ],
+      "medianMs": 4229.054973999999,
+      "coldIo": {
+        "markdownReads": 10000,
+        "bindingReads": 1,
+        "markdownBytes": 40960000,
+        "readFile": 10001,
+        "stat": 10001,
+        "realpath": 10001,
+        "access": 1,
+        "readdir": 51
+      },
+      "warmIo": {
+        "markdownReads": 0,
+        "bindingReads": 1,
+        "markdownBytes": 0,
+        "readFile": 1,
+        "stat": 10001,
+        "realpath": 10001,
+        "access": 1,
+        "readdir": 51
+      },
+      "changedIo": {
+        "markdownReads": 1,
+        "bindingReads": 1,
+        "markdownBytes": 4096,
+        "readFile": 2,
+        "stat": 10001,
+        "realpath": 10001,
+        "access": 1,
+        "readdir": 51
+      },
+      "parserCacheEntries": 0
+    }
+  ],
+  "scanCompleteness": {
+    "inputNotes": 10001,
+    "returnedNotes": 10001,
+    "sentinelSearchResults": 1,
+    "duplicateIdentityRejected": true
+  },
+  "bindingRace": {
+    "staleSearchRejected": true,
+    "mixedVaultResultPublished": false
+  },
+  "parserCache": {
+    "uniqueFiles": 1,
+    "versions": 200,
+    "bytesPerVersion": 65536,
+    "gcExposed": true,
+    "snapshots": [
+      {
+        "label": "before",
+        "parserCacheEntries": 0,
+        "rss": 416178176,
+        "heapTotal": 161177600,
+        "heapUsed": 20868336,
+        "external": 6091790,
+        "arrayBuffers": 3326507
+      },
+      {
+        "label": "after-50-versions",
+        "parserCacheEntries": 0,
+        "rss": 416006144,
+        "heapTotal": 162488320,
+        "heapUsed": 20896152,
+        "external": 6091830,
+        "arrayBuffers": 3326507
+      },
+      {
+        "label": "after-100-versions",
+        "parserCacheEntries": 0,
+        "rss": 416006144,
+        "heapTotal": 163536896,
+        "heapUsed": 20944264,
+        "external": 6091830,
+        "arrayBuffers": 3326507
+      },
+      {
+        "label": "after-150-versions",
+        "parserCacheEntries": 0,
+        "rss": 416006144,
+        "heapTotal": 164847616,
+        "heapUsed": 20934216,
+        "external": 6091830,
+        "arrayBuffers": 3326507
+      },
+      {
+        "label": "after-200-versions",
+        "parserCacheEntries": 0,
+        "rss": 416006144,
+        "heapTotal": 164323328,
+        "heapUsed": 20949656,
+        "external": 6091830,
+        "arrayBuffers": 3326507
+      },
+      {
+        "label": "after-detach",
+        "parserCacheEntries": 0,
+        "rss": 416006144,
+        "heapTotal": 159604736,
+        "heapUsed": 20804016,
+        "external": 6091830,
+        "arrayBuffers": 3326507
+      }
+    ]
+  }
+}

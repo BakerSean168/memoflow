@@ -1,0 +1,93 @@
+{
+  "recordedAt": "2026-10-09T10:47:43.859603+00:00",
+  "baseRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "sourceManifest": "implementation-source-manifest.json",
+  "localDeployEvidence": "local-deploy-final.json",
+  "desktopPackageEvidence": "desktop-package-final.json",
+  "benchmarks": {
+    "vault": "local-vault-after-results.json",
+    "powerSync": "powersync-wrapper-final-results.json"
+  },
+  "checks": [
+    {
+      "command": "pnpm nx run desktop:test --args='src/main/profile src/main/database/__tests__/powersync-lifecycle.spec.ts'",
+      "status": "pass",
+      "files": 13,
+      "tests": 103
+    },
+    {
+      "command": "pnpm nx run desktop:test:boundary",
+      "status": "pass",
+      "suites": [
+        {
+          "name": "ipc",
+          "files": 8,
+          "tests": 48
+        },
+        {
+          "name": "main",
+          "files": 9,
+          "tests": 36
+        }
+      ]
+    },
+    {
+      "command": "pnpm nx run app-vue:test --args='src/modules/repository/views/LocalVaultWorkspaceView.spec.ts'",
+      "status": "pass",
+      "files": 1,
+      "tests": 11
+    },
+    {
+      "command": "pnpm nx run memoflow:governance-check",
+      "status": "pass",
+      "exitCode": 0,
+      "warnings": [
+        "Nx marked test-system-v2:test:governance as flaky. The latest run passed; an earlier run failed on a stale generated inventory, which was regenerated."
+      ]
+    },
+    {
+      "command": "node ./tools/docs/check-docs-config.mjs",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "exitCode": 0
+    }
+  ],
+  "review": {
+    "standards": {
+      "status": "pass",
+      "remainingFindings": 0,
+      "resolved": [
+        "failed close retains owner and withdraws access",
+        "session writes drain before sign-out removal",
+        "transient authentication cancellation does not invalidate committed credentials"
+      ]
+    },
+    "spec": {
+      "status": "pass",
+      "remainingBlockingFindings": 0,
+      "resolved": [
+        "stalled SDK connections cancelled before drain",
+        "older cloud validation cannot overwrite replacement session",
+        "Vault KeepAlive transitions include absence and health loss",
+        "lock drains in-flight preparation",
+        "queued preparation waits for current activation before disposal"
+      ]
+    }
+  },
+  "limitations": [
+    "Windows/macOS packaged performance not measured",
+    "AI history pagination deferred",
+    "Vault metadata traversal remains linear",
+    "128 MiB cache budget accounts serialized payload, not process RSS",
+    "Release-level Web product journey and AI performance E2E were not run; historical browser evidence excluded"
+  ],
+  "finalSourceVerification": {
+    "sourceFilesMatched": 54,
+    "benchmarkSourceHashesMatch": true,
+    "planArchived": true
+  }
+}

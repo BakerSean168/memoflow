@@ -26,7 +26,12 @@ import type {
 } from '@memoflow/contracts';
 import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
-import { DESKTOP_BRIDGE_KEY, DESKTOP_CLOUD_AUTH_SERVICE_KEY } from '../../di/keys';
+import {
+  DESKTOP_ACCESS_SNAPSHOT_KEY,
+  DESKTOP_BRIDGE_KEY,
+  DESKTOP_CLOUD_AUTH_SERVICE_KEY,
+} from '../../di/keys';
+import { readDesktopAccessSnapshot } from '../../shared/utils/desktop-profile-access';
 import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
 
 const props = defineProps<{
@@ -39,6 +44,7 @@ const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 const { t } = useI18n();
 const service = inject(DESKTOP_CLOUD_AUTH_SERVICE_KEY, null);
 const bridge = inject(DESKTOP_BRIDGE_KEY, null);
+const accessSnapshot = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, null);
 const authStore = useAuthenticationStore();
 const attempt = ref<DesktopCloudConnectionAttempt | null>(null);
 const loading = ref(false);
@@ -78,6 +84,8 @@ async function hydrateSession(): Promise<void> {
   if (!service) return;
   const result = await service.getSession();
   if (result.ok) authStore.hydrateCloudSession(result.data);
+  if (accessSnapshot && bridge)
+    accessSnapshot.value = await readDesktopAccessSnapshot(bridge, { refreshCloud: true });
 }
 
 async function applyAttempt(next: DesktopCloudConnectionAttempt | null): Promise<void> {

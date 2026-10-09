@@ -8,6 +8,7 @@
  */
 
 import { BrowserWindow, screen, ipcMain } from 'electron';
+import { randomUUID } from 'node:crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createLogger } from '@memoflow/utils/logger';
@@ -21,6 +22,16 @@ import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../ut
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger = createLogger('CustomNotificationManager');
+const MAX_PENDING_NOTIFICATIONS = 32;
+const RENDERER_READY_TIMEOUT_MS = 10_000;
+const CUSTOM_CHANNELS = [
+  NotificationChannels.CUSTOM_CLICK,
+  NotificationChannels.CUSTOM_CLOSE,
+  NotificationChannels.CUSTOM_RESIZE,
+  NotificationChannels.CUSTOM_MOUSE_ENTER,
+  NotificationChannels.CUSTOM_MOUSE_LEAVE,
+  NotificationChannels.CUSTOM_RENDERER_READY,
+];
 
 export class CustomNotificationManager {
   private notificationWindow: BrowserWindow | null = null;
@@ -28,10 +39,13 @@ export class CustomNotificationManager {
   private devServerUrl = getDesktopDevServerUrlOrDefault();
   private preloadPath = resolvePreloadPath(__dirname);
 
-  private notificationQueue: Array<NotificationOptions & { id: string }> = [];
+  private notificationQueue = new Map<string, NotificationOptions & { id: string }>();
+  private displayed = new Map<string, NotificationOptions & { id: string }>();
   private isRendererReady: boolean = false;
+  private readyTimer: ReturnType<typeof setTimeout> | null = null;
+  private disposed = false;
 
-  constructor(private readonly windowManager: WindowManager) {
+  constructor(private readonly windowManager: Pick<WindowManager, 'getMainWindow'>) {
     this.registerIpcHandlers();
   }
 
@@ -40,13 +54,18 @@ export class CustomNotificationManager {
       logger.info('[Desktop][CustomNotification] Reusing existing notification window', {
         isVisible: this.notificationWindow.isVisible(),
         isRendererReady: this.isRendererReady,
-        queueLength: this.notificationQueue.length,
+        queueLength: this.notificationQueue.size,
       });
       return this.notificationWindow;
     }
 
     const primaryDisplay = screen.getPrimaryDisplay();
-    const { x: workAreaX, y: workAreaY, width: workAreaWidth, height: workAreaHeight } = primaryDisplay.workArea;
+    const {
+      x: workAreaX,
+      y: workAreaY,
+      width: workAreaWidth,
+      height: workAreaHeight,
+    } = primaryDisplay.workArea;
 
     // Fixed width for notifications, height is initially small but can grow
     const windowWidth = 360;
@@ -70,7 +89,7 @@ export class CustomNotificationManager {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: false,
-        backgroundThrottling: false, // Keep animations smooth even when not focused
+        backgroundThrottling: true,
       },
       show: false, // Don't show immediately
     });
@@ -93,11 +112,17 @@ export class CustomNotificationManager {
     win.setIgnoreMouseEvents(true, { forward: true });
 
     if (this.isDev) {
-      win.loadURL(`${this.devServerUrl}#/custom-notification`);
-    } else {
-      win.loadFile(path.join(__dirname, '../dist-renderer/index.html'), {
-        hash: '/custom-notification',
+      void win.loadURL(`${this.devServerUrl}#/custom-notification`).catch(() => {
+        if (this.notificationWindow === win) this.clearPresentation();
       });
+    } else {
+      void win
+        .loadFile(path.join(__dirname, '../dist-renderer/index.html'), {
+          hash: '/custom-notification',
+        })
+        .catch(() => {
+          if (this.notificationWindow === win) this.clearPresentation();
+        });
     }
 
     win.webContents.on('did-finish-load', () => {
@@ -121,6 +146,7 @@ export class CustomNotificationManager {
           validatedURL,
           isMainFrame,
         });
+        if (isMainFrame && this.notificationWindow === win) this.clearPresentation();
       },
     );
 
@@ -134,11 +160,20 @@ export class CustomNotificationManager {
     });
 
     this.notificationWindow = win;
+    this.armReadyDeadline(win);
+    win.webContents.on('did-start-loading', () => {
+      if (this.notificationWindow !== win) return;
+      this.isRendererReady = false;
+      this.displayed.clear();
+      this.armReadyDeadline(win);
+    });
+    win.webContents.on('render-process-gone', () => {
+      if (this.notificationWindow === win) this.clearPresentation();
+    });
 
     win.on('closed', () => {
       logger.info('[Desktop][CustomNotification] Notification window closed');
-      this.isRendererReady = false;
-      this.notificationWindow = null;
+      if (this.notificationWindow === win) this.clearPresentation();
     });
 
     return win;
@@ -148,7 +183,7 @@ export class CustomNotificationManager {
     if (!this.notificationWindow || this.notificationWindow.isDestroyed()) {
       logger.warn('[Desktop][CustomNotification] Flush skipped because window is unavailable', {
         reason,
-        queueLength: this.notificationQueue.length,
+        queueLength: this.notificationQueue.size,
       });
       return;
     }
@@ -156,12 +191,12 @@ export class CustomNotificationManager {
     if (!this.isRendererReady) {
       logger.info('[Desktop][CustomNotification] Flush deferred until renderer is ready', {
         reason,
-        queueLength: this.notificationQueue.length,
+        queueLength: this.notificationQueue.size,
       });
       return;
     }
 
-    if (this.notificationQueue.length === 0) {
+    if (this.notificationQueue.size === 0) {
       logger.info('[Desktop][CustomNotification] Flush skipped because queue is empty', {
         reason,
       });
@@ -170,14 +205,52 @@ export class CustomNotificationManager {
 
     logger.info('[Desktop][CustomNotification] Flushing queued notifications', {
       reason,
-      queueLength: this.notificationQueue.length,
+      queueLength: this.notificationQueue.size,
     });
 
-    for (const notification of this.notificationQueue) {
-      this.notificationWindow.webContents.send(NotificationChannels.CUSTOM_RECEIVE, notification);
+    for (const notification of this.notificationQueue.values()) {
+      this.sendNotification(notification);
     }
 
-    this.notificationQueue = [];
+    this.notificationQueue.clear();
+  }
+
+  private sendNotification(notification: NotificationOptions & { id: string }): void {
+    this.displayed.delete(notification.id);
+    this.displayed.set(notification.id, notification);
+    if (this.displayed.size > MAX_PENDING_NOTIFICATIONS) {
+      this.displayed.delete(this.displayed.keys().next().value!);
+    }
+    this.notificationWindow?.webContents.send(NotificationChannels.CUSTOM_RECEIVE, notification);
+  }
+
+  private armReadyDeadline(win: BrowserWindow): void {
+    if (this.readyTimer) clearTimeout(this.readyTimer);
+    this.readyTimer = setTimeout(() => {
+      if (this.notificationWindow === win && !this.isRendererReady) this.clearPresentation();
+    }, RENDERER_READY_TIMEOUT_MS);
+  }
+
+  clearPresentation(): void {
+    if (this.readyTimer) clearTimeout(this.readyTimer);
+    this.readyTimer = null;
+    this.notificationQueue.clear();
+    this.displayed.clear();
+    this.isRendererReady = false;
+    const win = this.notificationWindow;
+    this.notificationWindow = null;
+    if (win && !win.isDestroyed()) win.destroy();
+  }
+
+  destroy(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.clearPresentation();
+    for (const channel of CUSTOM_CHANNELS) ipcMain.removeHandler(channel);
+  }
+
+  private isNotificationSender(senderId: number): boolean {
+    return !this.disposed && this.notificationWindow?.webContents.id === senderId;
   }
 
   /**
@@ -186,7 +259,9 @@ export class CustomNotificationManager {
    * @param {NotificationOptions} options - The notification options.
    */
   dispatch(options: NotificationOptions): void {
-    const id = Math.random().toString(36).substring(2, 9);
+    if (this.disposed) return;
+    const id =
+      typeof options.data?.notificationId === 'string' ? options.data.notificationId : randomUUID();
     const notificationWithId = { ...options, id };
 
     const win = this.createWindow();
@@ -195,7 +270,7 @@ export class CustomNotificationManager {
       title: options.title,
       isWindowLoading: win.webContents.isLoading(),
       isRendererReady: this.isRendererReady,
-      queueLength: this.notificationQueue.length,
+      queueLength: this.notificationQueue.size,
     });
 
     // If renderer is ready, send immediately
@@ -204,13 +279,17 @@ export class CustomNotificationManager {
         id,
         title: options.title,
       });
-      win.webContents.send(NotificationChannels.CUSTOM_RECEIVE, notificationWithId);
+      this.sendNotification(notificationWithId);
     } else {
-      this.notificationQueue.push(notificationWithId);
+      this.notificationQueue.delete(id);
+      this.notificationQueue.set(id, notificationWithId);
+      if (this.notificationQueue.size > MAX_PENDING_NOTIFICATIONS) {
+        this.notificationQueue.delete(this.notificationQueue.keys().next().value!);
+      }
       logger.info('[Desktop][CustomNotification] Queued notification until renderer is ready', {
         id,
         title: options.title,
-        queueLength: this.notificationQueue.length,
+        queueLength: this.notificationQueue.size,
       });
       this.flushQueuedNotifications('dispatch');
     }
@@ -221,35 +300,38 @@ export class CustomNotificationManager {
    */
   private registerIpcHandlers(): void {
     // Handle notification click
-    ipcMain.handle(
-      NotificationChannels.CUSTOM_CLICK,
-      (_, id: string, data?: Record<string, unknown>) => {
-        console.log(`[CustomNotification] Clicked notification ${id}`, data);
+    ipcMain.handle(NotificationChannels.CUSTOM_CLICK, (event, id: string) => {
+      if (!this.isNotificationSender(event.sender.id)) return ok(null);
+      const notification = this.displayed.get(id);
+      if (!notification) return ok(null);
+      const data = notification.data;
 
-        const mainWin = this.windowManager.getMainWindow();
+      const mainWin = this.windowManager.getMainWindow();
 
-        if (mainWin) {
-          if (mainWin.isMinimized()) {
-            mainWin.restore();
-          }
-          mainWin.focus();
-
-          if (data) {
-            mainWin.webContents.send(RendererEventChannels.NOTIFICATION_CLICKED, data);
-          }
+      if (mainWin) {
+        if (mainWin.isMinimized()) {
+          mainWin.restore();
         }
-        return ok(null);
-      },
-    );
+        mainWin.focus();
+
+        if (data) {
+          mainWin.webContents.send(RendererEventChannels.NOTIFICATION_CLICKED, data);
+        }
+      }
+      return ok(null);
+    });
 
     // Handle notification close (manual dismiss)
-    ipcMain.handle(NotificationChannels.CUSTOM_CLOSE, (_, id: string) => {
+    ipcMain.handle(NotificationChannels.CUSTOM_CLOSE, (event, id: string) => {
+      if (!this.isNotificationSender(event.sender.id)) return ok(null);
+      this.displayed.delete(id);
       logger.info('[Desktop][CustomNotification] Notification closed from renderer', { id });
       return ok(null);
     });
 
     // Handle window resizing dynamically based on notification count/height
-    ipcMain.handle(NotificationChannels.CUSTOM_RESIZE, (_, height: number) => {
+    ipcMain.handle(NotificationChannels.CUSTOM_RESIZE, (event, height: number) => {
+      if (!this.isNotificationSender(event.sender.id) || !Number.isFinite(height)) return ok(null);
       if (this.notificationWindow && !this.notificationWindow.isDestroyed()) {
         if (height <= 0) {
           logger.info('[Desktop][CustomNotification] Hiding notification window after resize', {
@@ -259,8 +341,14 @@ export class CustomNotificationManager {
           this.notificationWindow.setIgnoreMouseEvents(true, { forward: true });
         } else {
           const primaryDisplay = screen.getPrimaryDisplay();
-          const { x: workAreaX, y: workAreaY, width: workAreaWidth, height: workAreaHeight } = primaryDisplay.workArea;
+          const {
+            x: workAreaX,
+            y: workAreaY,
+            width: workAreaWidth,
+            height: workAreaHeight,
+          } = primaryDisplay.workArea;
           const windowWidth = 360;
+          height = Math.min(Math.ceil(height), workAreaHeight - 40);
 
           // Reposition to stay anchored to the bottom right
           this.notificationWindow.setBounds({
@@ -289,7 +377,8 @@ export class CustomNotificationManager {
     });
 
     // Handle precise mouse interaction to avoid dead-zones in transparent areas
-    ipcMain.handle(NotificationChannels.CUSTOM_MOUSE_ENTER, () => {
+    ipcMain.handle(NotificationChannels.CUSTOM_MOUSE_ENTER, (event) => {
+      if (!this.isNotificationSender(event.sender.id)) return ok(null);
       if (this.notificationWindow && !this.notificationWindow.isDestroyed()) {
         logger.info('[Desktop][CustomNotification] Mouse entered notification card');
         // When mouse is explicitly over a card, stop ignoring mouse events so click works
@@ -298,7 +387,8 @@ export class CustomNotificationManager {
       return ok(null);
     });
 
-    ipcMain.handle(NotificationChannels.CUSTOM_MOUSE_LEAVE, () => {
+    ipcMain.handle(NotificationChannels.CUSTOM_MOUSE_LEAVE, (event) => {
+      if (!this.isNotificationSender(event.sender.id)) return ok(null);
       if (this.notificationWindow && !this.notificationWindow.isDestroyed()) {
         logger.info('[Desktop][CustomNotification] Mouse left notification card');
         // When mouse leaves a card, start ignoring again to let clicks pass through to apps below
@@ -307,10 +397,13 @@ export class CustomNotificationManager {
       return ok(null);
     });
 
-    ipcMain.handle(NotificationChannels.CUSTOM_RENDERER_READY, () => {
+    ipcMain.handle(NotificationChannels.CUSTOM_RENDERER_READY, (event) => {
+      if (!this.isNotificationSender(event.sender.id)) return ok(false);
+      if (this.readyTimer) clearTimeout(this.readyTimer);
+      this.readyTimer = null;
       this.isRendererReady = true;
       logger.info('[Desktop][CustomNotification] Renderer reported ready', {
-        queueLength: this.notificationQueue.length,
+        queueLength: this.notificationQueue.size,
       });
       this.flushQueuedNotifications('renderer-ready');
       return ok(true);

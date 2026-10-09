@@ -36,6 +36,8 @@ function createLocalVaultPort(active = true): LocalVaultElectronPort {
       };
     }),
     selectVault: vi.fn(),
+    findNoteById: vi.fn(),
+    dispose: vi.fn(),
     detachVault: vi.fn(),
     scanVault: vi.fn(async () => ({
       binding: {
@@ -113,6 +115,34 @@ describe('DesktopKnowledgeSourceAdapter', () => {
     ).resolves.toBeNull();
     expect(localVault.scanVault).not.toHaveBeenCalled();
     expect(localVault.readNote).not.toHaveBeenCalled();
+  });
+
+  it('uses the stable lookup when reading a document by id', async () => {
+    const vault = createLocalVaultPort();
+    vi.mocked(vault.findNoteById).mockResolvedValue({
+      binding: (await vault.getBinding())!.binding,
+      note: await vault.readNote({ relativePath: summary.relativePath }),
+    });
+    const adapter = new DesktopKnowledgeSourceAdapter(vault);
+    expect((await adapter.getNoteById('identity-1', DOCUMENT_ID))?.sourcePath).toBe(
+      summary.relativePath,
+    );
+    expect(vault.findNoteById).toHaveBeenCalledWith(DOCUMENT_ID);
+    expect(vault.scanVault).not.toHaveBeenCalled();
+  });
+
+  it('rejects hydration when the selected Vault changes during a read', async () => {
+    const vault = createLocalVaultPort();
+    const snapshot = (await vault.getBinding())!;
+    const note = await vault.readNote({ relativePath: summary.relativePath });
+    vi.mocked(vault.readNote).mockImplementationOnce(async () => {
+      vi.mocked(vault.getBinding).mockResolvedValueOnce(null);
+      return note;
+    });
+    expect(snapshot.binding.id).toBe(BINDING_ID);
+    await expect(
+      new DesktopKnowledgeSourceAdapter(vault).listRelevantNotes('identity-1', 'capability', 5),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
   });
 
   it('returns no knowledge and performs no scan when the profile has no Vault binding', async () => {

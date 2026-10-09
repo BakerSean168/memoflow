@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-22T16:42:00+08:00
+updated: 2026-10-09T00:00:00Z
 ---
 
 # Archived Plans
@@ -26,6 +26,10 @@ updated: 2026-09-22T16:42:00+08:00
 - [2026 Q3（7–9 月）](./2026-Q3.md)
 
 ## 本轮归档
+
+- [2026-10-09 Desktop 性能优化实施](./2026-10-09-desktop-performance-implementation.md)：PowerSync 生命周期、Vault 缓存/搜索/虚拟列表、本地启动与通知优化；两轴复审、完整 affected 检查、本地 prod-like 与 Linux 解包产物烟测通过；万篇重复搜索中位数 16.274→4.229 秒，Windows 性能及 AI 历史分页仍为后续范围。
+
+- [2026-10-09 Desktop 性能深入研究](./2026-10-09-desktop-performance-research.md)：0.16.0 源码与上游取证、三组隔离实验、优化纵切与 Windows 验收矩阵；相关现有测试 30/30、governance/docs/diff 检查通过，仅交付研究。
 
 - [2026-10-08 Shell 工作区与会话解耦](./2026-10-08-shell-workspace-conversation-decoupling.md)：全局布局偏好、普通会话生命周期独立、历史 Workflow 显式业务导航；affected lint/typecheck/test 与治理检查通过，原生审核离开保护保留。
 

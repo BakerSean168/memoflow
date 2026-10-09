@@ -37,24 +37,35 @@ export function registerProfileAccessIpc(
   cloudConnection: DesktopCloudConnectionManager,
   deviceAuth?: DeviceAuthCoordinator,
 ): void {
-  ipcMain.handle(ProfileAccessChannels.GET_SNAPSHOT, async () =>
-    runtime.runExclusive(async () => {
+  const readSnapshot = async (): Promise<DesktopAccessSnapshot> => {
+    const descriptor = runtime.getActiveProfileDescriptorSync();
+    const [cloudState, profile] = await Promise.all([
+      cloudConnection.getState(descriptor),
+      descriptor ? toSummary(descriptor, runtime) : null,
+    ]);
+    const stillActive =
+      descriptor !== null && runtime.getActiveProfileDescriptorSync() === descriptor;
+    const online = stillActive && cloudState === 'ONLINE';
+    return {
+      profile: stillActive ? profile : null,
+      unlockState: stillActive ? 'UNLOCKED' : 'LOCKED',
+      cloudState: stillActive ? cloudState : 'UNBOUND',
+      capabilities: {
+        local: stillActive,
+        sync: online,
+        cloudAi: online,
+        repositoryConnection: online,
+      },
+    };
+  };
+  ipcMain.handle(ProfileAccessChannels.GET_SNAPSHOT, async () => ok(await readSnapshot()));
+  ipcMain.handle(ProfileAccessChannels.REFRESH_CLOUD_STATE, async () => {
+    return runtime.runExclusive(async () => {
       const descriptor = runtime.getActiveProfileDescriptorSync();
-      const cloudState = await cloudConnection.getState(descriptor);
-      const snapshot: DesktopAccessSnapshot = {
-        profile: descriptor ? await toSummary(descriptor, runtime) : null,
-        unlockState: descriptor ? 'UNLOCKED' : 'LOCKED',
-        cloudState,
-        capabilities: {
-          local: descriptor !== null,
-          sync: cloudState === 'ONLINE',
-          cloudAi: cloudState === 'ONLINE',
-          repositoryConnection: cloudState === 'ONLINE',
-        },
-      };
-      return ok(snapshot);
-    }),
-  );
+      if (descriptor) await cloudConnection.restore(descriptor);
+      return ok(await readSnapshot());
+    });
+  });
 
   ipcMain.handle(ProfileAccessChannels.LIST, async () =>
     ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),

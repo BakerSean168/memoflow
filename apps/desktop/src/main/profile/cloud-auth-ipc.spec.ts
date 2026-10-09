@@ -41,6 +41,14 @@ function registerFixture() {
     registry as never,
     runtime as never,
     sessions as never,
+    {
+      clearSession: async (profileId: string) => {
+        const stored = await sessions.load(profileId);
+        await sessions.remove(profileId);
+        await runtime.disableCloudSync();
+        return stored;
+      },
+    },
     cloudConnection as never,
   );
   return { handlers, runtime, sessions, cloudConnection };
@@ -128,5 +136,21 @@ describe('registerCloudAuthIpc', () => {
     expect(cloudConnection.getCurrent).toHaveBeenCalledOnce();
     expect(cloudConnection.getStatus).toHaveBeenCalledWith('8c7e083e-1b4c-42e6-901f-979d9a7b8b32');
     expect(cloudConnection.cancel).toHaveBeenCalledWith('8c7e083e-1b4c-42e6-901f-979d9a7b8b32');
+  });
+
+  it('finishes local sign-out even when remote revocation does not respond', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise<Response>(() => undefined)),
+    );
+    const { handlers, sessions, runtime } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'token-1' });
+    let finished = false;
+    void Promise.resolve(handlers.get(CloudAuthChannels.SIGN_OUT)?.({})).then(() => {
+      finished = true;
+    });
+    await vi.waitFor(() => expect(finished).toBe(true), { timeout: 200 });
+    expect(sessions.remove).toHaveBeenCalledWith('profile-1');
+    expect(runtime.disableCloudSync).toHaveBeenCalledOnce();
   });
 });

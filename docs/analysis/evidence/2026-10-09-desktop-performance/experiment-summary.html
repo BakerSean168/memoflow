@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MemoFlow 桌面实验对照</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;color:var(--foreground,#20232a);font:14px/1.6 var(--font-sans,system-ui,sans-serif)}
+button{font:inherit;color:inherit;cursor:pointer}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border,#d6d9e0);padding:0 0 12px}
+.tab{border:1px solid transparent;border-radius:var(--radius,8px);background:transparent;padding:7px 13px}
+.tab[aria-selected=true]{background:var(--secondary,#eef1f5);border-color:var(--border,#d6d9e0);font-weight:650}
+button:focus-visible{outline:2px solid var(--ring,#3278c8);outline-offset:3px}
+.scope{font-size:12px;color:var(--muted-foreground,#646e7c);margin:12px 0 18px}
+.panel[hidden]{display:none}
+.lead{font-size:16px;font-weight:650;margin:0 0 6px}
+.note{color:var(--muted-foreground,#646e7c);font-size:12px;margin:8px 0 0}
+.chart{margin:20px 0 10px}
+.bar-row{display:grid;grid-template-columns:84px minmax(0,1fr) 72px;align-items:center;gap:12px;width:100%;border:0;background:transparent;padding:10px 0;text-align:left;border-radius:4px}
+.name{white-space:nowrap}
+.track{height:18px;background:var(--secondary,#eef1f5);border-radius:4px;overflow:hidden}
+.bar{height:100%;min-width:2px;background:var(--chart-1,#4284d6);border-radius:4px;opacity:.72}
+.bar-row[aria-pressed=true] .bar{opacity:1}
+.bar-row[aria-pressed=true] .name{font-weight:750}
+.value{text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
+.axis{display:flex;justify-content:space-between;color:var(--muted-foreground,#646e7c);font-size:11px;margin:0 84px 0 96px}
+.details{border-top:1px solid var(--border,#d6d9e0);padding-top:14px;margin-top:18px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.metric strong{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.4}
+.metric span{font-size:12px;color:var(--muted-foreground,#646e7c)}
+.foot{font-size:12px;color:var(--muted-foreground,#646e7c);margin:18px 0 0}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.step{padding:16px;background:var(--secondary,#eef1f5);border-radius:var(--radius,8px)}
+.step strong{font-size:30px;display:block;font-variant-numeric:tabular-nums}
+.step small{font-size:12px;color:var(--muted-foreground,#646e7c)}
+.success{color:var(--success,#24845a)}
+.rows{display:grid;gap:12px;margin:16px 0}
+.finding{border-left:3px solid var(--chart-1,#4284d6);padding:2px 0 2px 14px}
+.finding strong{display:block}
+.finding p{margin:4px 0 0;font-size:13px;color:var(--muted-foreground,#646e7c)}
+.cache{display:flex;align-items:baseline;gap:12px;margin:16px 0}
+.cache strong{font-size:28px;white-space:nowrap;flex-shrink:0}
+code{font-family:var(--font-mono,monospace);font-size:.92em}
+@media(max-width:440px){.tab{padding:6px 9px}.bar-row{grid-template-columns:76px minmax(0,1fr) 65px;gap:8px}.axis{margin-left:84px;margin-right:73px}.metrics{gap:8px}.metric strong{font-size:20px}.steps{gap:7px}.step{padding:16px}.step small{font-size:11px}.scope{margin-bottom:14px}}
+</style>
+</head>
+<body>
+<main>
+<div class="tabs" role="tablist" aria-label="实验结果">
+<button class="tab" id="tab-search" role="tab" aria-selected="true" aria-controls="search" tabindex="0">搜索规模</button>
+<button class="tab" id="tab-resources" role="tab" aria-selected="false" aria-controls="resources" tabindex="-1">资源释放</button>
+<button class="tab" id="tab-correctness" role="tab" aria-selected="false" aria-controls="correctness" tabindex="-1">边界验证</button>
+</div>
+<p class="scope">MemoFlow 0.16.0 · 当前源码 / SDK · Linux、Node 24 · 合成数据</p>
+<section class="panel" id="search" role="tabpanel" aria-labelledby="tab-search">
+<p class="lead">热查询仍读取全部笔记两遍</p>
+<p class="note">每篇 4 KiB；5 次重复查询的中位数。点击规模查看读取量。</p>
+<div class="chart" aria-label="100 篇 0.24 秒，1000 篇 1.61 秒，10000 篇 16.27 秒">
+<button class="bar-row" data-notes="100" aria-pressed="false"><span class="name">100 篇</span><span class="track"><span class="bar" style="display:block;width:1.462%"></span></span><span class="value">0.24 s</span></button>
+<button class="bar-row" data-notes="1000" aria-pressed="false"><span class="name">1,000 篇</span><span class="track"><span class="bar" style="display:block;width:9.864%"></span></span><span class="value">1.61 s</span></button>
+<button class="bar-row" data-notes="10000" aria-pressed="true"><span class="name">10,000 篇</span><span class="track"><span class="bar" style="display:block;width:100%"></span></span><span class="value">16.27 s</span></button>
+<div class="axis"><span>0</span><span>查询耗时 · 16.27 秒</span></div>
+</div>
+<div class="details" aria-live="polite">
+<div class="metrics">
+<div class="metric"><strong id="md-reads">20,000</strong><span>Markdown 读取 / 次</span></div>
+<div class="metric"><strong id="binding-reads">10,001</strong><span>binding 读取 / 次</span></div>
+<div class="metric"><strong id="read-bytes">78.13 MiB</strong><span>Markdown 读取量 / 次</span></div>
+</div>
+<p class="note" id="range">10,000 篇的五次范围：14.16–18.30 秒。</p>
+</div>
+<p class="foot">未清 OS 文件缓存；读取量另行插桩统计。不是 Windows 整应用指标，也不代表主线程连续阻塞相同时间。</p>
+</section>
+<section class="panel" id="resources" role="tabpanel" aria-labelledby="tab-resources" hidden>
+<p class="lead">PowerSync：断开同步后，数据库 Worker 仍保留</p>
+<div class="steps">
+<div class="step"><small>init 后</small><strong>6</strong><small>活跃 Worker</small></div>
+<div class="step"><small>disconnect 后</small><strong>6</strong><small>活跃 Worker</small></div>
+<div class="step"><small>close 后</small><strong class="success">0</strong><small>活跃 Worker</small></div>
+</div>
+<p class="note">另一实例丢弃业务引用并执行 20 次 GC 后，仍有 6 个 Worker；显式 close 后为 0。Worker 是线程。</p>
+<div class="details">
+<p class="lead">gray-matter：一个文件的历史版本进入全局缓存</p>
+<div class="cache"><strong>200 → 200</strong><span>200 个版本读入 → detach 后</span></div>
+<p class="note">每版本 64 KiB；测试器显式 clearCache 后为 0，显式 options 对照为 0。不是整应用 RSS 降幅测量。</p>
+</div>
+<p class="foot">真实 PowerSync SDK、空数据库、无网络；解析缓存使用当前 Vault 源码。结果反映生命周期机制。</p>
+</section>
+<section class="panel" id="correctness" role="tabpanel" aria-labelledby="tab-correctness" hidden>
+<p class="lead">规模和交叠操作也暴露了正确性缺口</p>
+<div class="rows">
+<div class="finding"><strong>第 10,001 篇被静默跳过</strong><p>真实 Vault 源码：尾部文档搜不到，其稳定 ID 也未阻止另一文件重复写入。</p></div>
+<div class="finding"><strong>搜索中换库，摘要和正文来自不同库</strong><p>受控切换时刻：返回 A 库标题与 B 库命中行。操作需要固定 binding 和代次。</p></div>
+<div class="finding"><strong>关闭返回后，迟到的 DB 仍可发布</strong><p>真实 wrapper + fake DB：打开未完成时 shutdown 返回，随后 ready 重新发布旧实例。</p></div>
+<div class="finding"><strong>不同路径的并发打开共用同一实例</strong><p>真实 wrapper + fake DB：open(A) 与 open(B) 都得到 A。正在打开阶段也必须绑定路径。</p></div>
+</div>
+<p class="foot">这些是合成数据与受控调用交叠的反例；本轮未把它们描述为已经发生的用户事故。</p>
+</section>
+</main>
+<script>
+const tabs = Array.from(document.querySelectorAll('[role=tab]'));
+function activate(tab) {
+  tabs.forEach(item => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+  });
+}
+tabs.forEach((tab,index) => {
+  tab.addEventListener('click', () => activate(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if(event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+    if(event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    if(event.key === 'Home') next = 0;
+    if(event.key === 'End') next = tabs.length - 1;
+    if(next !== undefined) { event.preventDefault(); activate(tabs[next]); tabs[next].focus(); }
+  });
+});
+const measurements = {
+  100: {markdown:200,binding:101,mib:0.78125,min:0.187856,max:0.261840},
+  1000: {markdown:2000,binding:1001,mib:7.8125,min:1.537421,max:2.029787},
+  10000: {markdown:20000,binding:10001,mib:78.125,min:14.164443,max:18.302511}
+};
+const scales = Array.from(document.querySelectorAll('[data-notes]'));
+scales.forEach(button => button.addEventListener('click', () => {
+  const count = Number(button.dataset.notes);
+  const value = measurements[count];
+  scales.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+  document.getElementById('md-reads').textContent = value.markdown.toLocaleString('en-US');
+  document.getElementById('binding-reads').textContent = value.binding.toLocaleString('en-US');
+  document.getElementById('read-bytes').textContent = value.mib.toFixed(2) + ' MiB';
+  document.getElementById('range').textContent = count.toLocaleString('en-US') + ' 篇的五次范围：' + value.min.toFixed(2) + '–' + value.max.toFixed(2) + ' 秒。';
+}));
+</script>
+</body>
+</html>

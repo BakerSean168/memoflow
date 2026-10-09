@@ -460,7 +460,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -489,7 +489,11 @@ import {
   KnowledgeRepositorySyncConflictContextSchema,
   KnowledgeRepositorySyncPendingContextSchema,
 } from '@memoflow/contracts/repository';
-import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
+import {
+  DESKTOP_ACCESS_SNAPSHOT_KEY,
+  DESKTOP_BRIDGE_KEY,
+  REPOSITORY_SERVICE_KEY,
+} from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { readDesktopAccessSnapshot } from '../../../shared/utils/desktop-profile-access';
 import {
@@ -513,7 +517,9 @@ const desktopApi =
         }
       ).electronAPI
     : undefined;
-const desktopAccess = ref<Awaited<ReturnType<typeof readDesktopAccessSnapshot>>>(null);
+const sharedDesktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, null);
+const desktopAccess =
+  sharedDesktopAccess ?? ref<Awaited<ReturnType<typeof readDesktopAccessSnapshot>>>(null);
 const desktopAccessLoaded = ref(desktopApi === undefined);
 const canUseCloudKnowledgeRepo = computed(
   () =>
@@ -521,6 +527,14 @@ const canUseCloudKnowledgeRepo = computed(
     (desktopAccessLoaded.value && desktopAccess.value?.capabilities.repositoryConnection === true),
 );
 const isGuest = computed(() => desktopAccess.value?.profile?.profileKind === 'guest');
+if (sharedDesktopAccess) {
+  watch(
+    () => sharedDesktopAccess.value?.capabilities.repositoryConnection,
+    () => {
+      if (desktopAccessLoaded.value) void loadConnections();
+    },
+  );
+}
 
 const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const installationRepositories = ref<GitHubInstallationRepositoryDTO[]>([]);
@@ -639,7 +653,9 @@ async function loadConnections(): Promise<void> {
   busyAction.value = 'load';
   errorMessage.value = '';
   const result = await service.listKnowledgeRepositoryConnections();
-  if (result.ok) {
+  if (!canUseCloudKnowledgeRepo.value) {
+    connections.value = [];
+  } else if (result.ok) {
     connections.value = result.data.connections;
   } else {
     connections.value = [];
@@ -1268,7 +1284,8 @@ onBeforeUnmount(() => {
 
 onMounted(async () => {
   if (desktopApi) {
-    desktopAccess.value = await readDesktopAccessSnapshot(desktopApi);
+    if (!sharedDesktopAccess)
+      desktopAccess.value = await readDesktopAccessSnapshot(desktopApi, { refreshCloud: true });
     desktopAccessLoaded.value = true;
   }
   await Promise.all([loadConnections(), loadLocalVault()]);

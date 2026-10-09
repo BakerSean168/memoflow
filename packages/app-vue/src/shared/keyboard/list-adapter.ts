@@ -1,6 +1,14 @@
 import type { ObjectDirective } from 'vue';
 import { createListNavigation } from './list-navigation';
 
+interface KeyboardListOptions {
+  selectable?: boolean;
+  virtual?: {
+    getIds(): readonly string[];
+    reveal(id: string): Promise<void>;
+  };
+}
+
 export function isKeyboardVisible(element: HTMLElement): boolean {
   if (!element.isConnected) return false;
   for (let node: HTMLElement | null = element; node; node = node.parentElement) {
@@ -23,9 +31,14 @@ export interface ListNavigationAdapter {
   toggleSelection(): void;
   clear(): void;
   tree(direction: 'expand' | 'collapse'): boolean;
+  configure(options: KeyboardListOptions): void;
+  dispose(): void;
 }
 const adapters = new WeakMap<HTMLElement, ListNavigationAdapter>();
-function createAdapter(root: HTMLElement, selectable: boolean): ListNavigationAdapter {
+function createAdapter(root: HTMLElement, options: KeyboardListOptions): ListNavigationAdapter {
+  let selectable = options.selectable ?? false;
+  let virtual = options.virtual;
+  let disposed = false;
   const model = createListNavigation();
   function visibleItems() {
     return [...root.querySelectorAll<HTMLElement>('[data-keyboard-item]')].filter(
@@ -43,19 +56,41 @@ function createAdapter(root: HTMLElement, selectable: boolean): ListNavigationAd
     }
   }
   function reconcile() {
-    model.reconcile(visibleItems().map((el) => el.dataset.keyboardItem!));
+    model.reconcile(virtual?.getIds() ?? visibleItems().map((el) => el.dataset.keyboardItem!));
     paint();
   }
   function active() {
     return visibleItems().find((el) => el.dataset.keyboardItem === model.activeId);
   }
-  function scrollToItem() {
+  function focusRenderedItem() {
     const item = active();
     if (!item) return;
     item.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     // Focus remains in the explicit list. Existing tab stops are preserved.
     if (!item.matches('button, a[href], input, select, textarea, [tabindex]')) item.tabIndex = -1;
     item.focus({ preventScroll: true });
+  }
+  function revealActive(action: () => void): void {
+    const id = model.activeId;
+    if (!id) return;
+    if (!virtual) {
+      action();
+      return;
+    }
+    void virtual.reveal(id).then(() => {
+      if (!disposed && isKeyboardVisible(root) && model.activeId === id) {
+        paint();
+        action();
+      }
+    });
+  }
+  function clickActive(): boolean {
+    const item = active();
+    if (!item) return false;
+    const target = item.querySelector<HTMLElement>('[data-keyboard-open]') ?? item;
+    if (target.matches('[disabled], [aria-disabled="true"]')) return false;
+    target.click();
+    return true;
   }
   const adapter: ListNavigationAdapter = {
     root,
@@ -66,22 +101,34 @@ function createAdapter(root: HTMLElement, selectable: boolean): ListNavigationAd
       return model.selected.size > 0;
     },
     focusItem: model.focus,
-    selectable,
+    get selectable() {
+      return selectable;
+    },
+    set selectable(value) {
+      selectable = value;
+    },
+    configure(next) {
+      selectable = next.selectable ?? false;
+      virtual = next.virtual;
+    },
+    dispose() {
+      disposed = true;
+    },
     visibleItems,
     reconcile,
     moveSelection(direction, extend = false) {
       reconcile();
       model.move(direction, selectable && extend);
       paint();
-      scrollToItem();
+      revealActive(focusRenderedItem);
     },
     openItem() {
       reconcile();
-      const item = active();
-      if (!item) return false;
-      const target = item.querySelector<HTMLElement>('[data-keyboard-open]') ?? item;
-      if (target.matches('[disabled], [aria-disabled="true"]')) return false;
-      target.click();
+      if (active()) return clickActive();
+      if (!virtual || !model.activeId) return false;
+      revealActive(() => {
+        clickActive();
+      });
       return true;
     },
     toggleSelection() {
@@ -107,7 +154,7 @@ function createAdapter(root: HTMLElement, selectable: boolean): ListNavigationAd
       else if (direction === 'collapse' && item.dataset.keyboardParent) {
         model.focus(item.dataset.keyboardParent);
         paint();
-        scrollToItem();
+        revealActive(focusRenderedItem);
       }
       return true;
     },
@@ -115,18 +162,21 @@ function createAdapter(root: HTMLElement, selectable: boolean): ListNavigationAd
   return adapter;
 }
 
-/** A DOM adapter for rendered, stable-ID owner rows; never attaches a key listener. */
-export const vKeyboardList: ObjectDirective<HTMLElement, { selectable?: boolean } | undefined> = {
+/** Stable-ID owner rows, optionally virtualized; never attaches a key listener. */
+export const vKeyboardList: ObjectDirective<HTMLElement, KeyboardListOptions | undefined> = {
   mounted(root, binding) {
     root.dataset.keyboardList = '';
     if (!root.hasAttribute('tabindex')) root.tabIndex = 0;
-    adapters.set(root, createAdapter(root, binding.value?.selectable ?? false));
+    adapters.set(root, createAdapter(root, binding.value ?? {}));
     adapters.get(root)?.reconcile();
   },
-  updated(root) {
-    adapters.get(root)?.reconcile();
+  updated(root, binding) {
+    const adapter = adapters.get(root);
+    adapter?.configure(binding.value ?? {});
+    adapter?.reconcile();
   },
   unmounted(root) {
+    adapters.get(root)?.dispose();
     adapters.delete(root);
   },
 };

@@ -9,6 +9,8 @@ function createLocalVaultPort(): LocalVaultElectronPort {
     detachVault: vi.fn(),
     scanVault: vi.fn(),
     readNote: vi.fn(),
+    findNoteById: vi.fn(),
+    dispose: vi.fn(),
     searchVault: vi.fn(),
     openInObsidian: vi.fn(),
     writeConfirmedNote: vi.fn(async () => ({

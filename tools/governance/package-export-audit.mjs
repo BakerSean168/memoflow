@@ -111,6 +111,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './globals.css',
   ],
   'app-vue': [
+    './style.css', // Vite library CSS consumed by the packaged Desktop renderer.
     './web-overlays',
     './di',
     './desktop',

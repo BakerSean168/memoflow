@@ -25,9 +25,7 @@ describe('custom notification ElectronBridge dual retired (residual 911/941)', (
   it('imports getElectronBridge from host sole helper and drops local duals', () => {
     expect(view).toContain('Residual 911');
     expect(view).toContain('Residual 941');
-    expect(view).toContain(
-      "import { getElectronBridge } from './platform/electron-bridge'",
-    );
+    expect(view).toContain("import { getElectronBridge } from './platform/electron-bridge'");
     expect(view).not.toMatch(/function getElectronBridge\b/);
     expect(view).not.toMatch(/interface ElectronBridge\s*\{/);
     expect(view).not.toMatch(/type ElectronBridge\s*=\s*\{/);
@@ -38,15 +36,18 @@ describe('custom notification ElectronBridge dual retired (residual 911/941)', (
     expect(ipcTypes).toMatch(/export interface ElectronBridge\s*\{/);
     expect(ipcTypes).toContain('invoke(channel: string, ...args: unknown[]): Promise<unknown>');
     expect(ipcTypes).toContain('on(channel: string, callback: (...args: unknown[]) => void): void');
-    expect(ipcTypes).toContain('off(channel: string, callback: (...args: unknown[]) => void): void');
+    expect(ipcTypes).toContain(
+      'off(channel: string, callback: (...args: unknown[]) => void): void',
+    );
   });
 
   it('still consumes invoke/on/off notification channels via getElectronBridge', () => {
     expect(env).toContain('electronAPI?: ElectronBridge');
     expect(view).toContain('NotificationChannels.CUSTOM_RECEIVE');
-    expect(view).toContain('getElectronBridge().on(');
-    expect(view).toContain('getElectronBridge().off(');
-    expect(view).toContain('getElectronBridge().invoke(');
+    expect(view).toContain('const bridge = getElectronBridge()');
+    expect(view).toContain('bridge.on(');
+    expect(view).toContain('bridge.off(');
+    expect(view).toContain('bridge.invoke(');
     expect(hostBridge).toContain('Residual 941');
     expect(hostBridge).toMatch(/export function getElectronBridge\b/);
   });

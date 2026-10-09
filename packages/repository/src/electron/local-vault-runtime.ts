@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { serialize } from 'node:v8';
 import matter from 'gray-matter';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import {
   KnowledgeDocumentIdSchema,
   LocalVaultBindingClientDTOSchema,
@@ -27,8 +29,11 @@ import { isMissing, isTemporaryFile } from './vault-fs-guards';
 
 const MAX_NOTE_BYTES = 2 * 1024 * 1024;
 const MAX_WRITE_BYTES = 1024 * 1024;
-const MAX_SCAN_NOTES = 10_000;
+const MAX_SCAN_ENTRIES = 100_000;
 const MAX_SEARCH_RESULTS = 200;
+// Budget serialized payloads at 2x their size to allow for JS string/object overhead.
+const MAX_CACHED_NOTE_BYTES = 128 * 1024 * 1024;
+const NOTE_READ_CONCURRENCY = 8;
 const IGNORED_DIRECTORIES = new Set(['.git', '.obsidian', '.trash', '.Trash', 'node_modules']);
 const SYNC_IGNORED_DIRECTORIES = new Set([...IGNORED_DIRECTORIES, '.memory-flow']);
 
@@ -40,9 +45,60 @@ function tokenizeSearchQuery(query: string): string[] {
   return [...new Set(query.normalize('NFKC').trim().split(/\s+/u).filter(Boolean))].slice(0, 8);
 }
 
+const searchSegments = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+function displayedSearchMatch(line: string, start: number, length: number) {
+  let originalStart = start;
+  let originalEnd = start + length;
+  if (line.normalize('NFKC') !== line || line.toLowerCase().length !== line.length) {
+    let offset = 0;
+    let foundStart = false;
+    for (const { segment, index } of searchSegments.segment(line)) {
+      const next = offset + normalizeSearchValue(segment).length;
+      if (!foundStart && next > start) {
+        originalStart = index;
+        foundStart = true;
+      }
+      if (next >= start + length) {
+        originalEnd = index + segment.length;
+        break;
+      }
+      offset = next;
+    }
+  }
+  const excerptStart = Math.max(0, originalStart - 120);
+  const lineContent = line.slice(excerptStart, excerptStart + 500);
+  return {
+    lineContent,
+    startIndex: originalStart - excerptStart,
+    endIndex: Math.min(originalEnd - excerptStart, lineContent.length),
+  };
+}
+
 interface StoredBindingFile {
   schemaVersion: 2;
   binding: LocalVaultBindingClientDTO;
+}
+
+interface VaultReadScope {
+  binding: LocalVaultBindingClientDTO;
+  root: string;
+  generation: number;
+  signal?: AbortSignal;
+}
+
+interface CachedVaultNote {
+  absolutePath: string;
+  version: string;
+  note: LocalVaultNoteDTO;
+  bytes: number;
+}
+
+interface VaultCatalog {
+  scope: VaultReadScope;
+  scan: ScanLocalVaultRes;
+  byId: Map<string, LocalVaultNoteSummaryDTO[]>;
+  incomplete: LocalVaultRuntimeError | null;
 }
 
 interface WriteLedgerEntry {
@@ -89,10 +145,18 @@ export interface LocalVaultElectronPort {
   detachVault(): Promise<void>;
   scanVault(): Promise<ScanLocalVaultRes>;
   readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
-  searchVault(request: SearchLocalVaultReq): Promise<SearchLocalVaultRes>;
+  findNoteById(documentId: KnowledgeDocumentId): Promise<{
+    binding: LocalVaultBindingClientDTO;
+    note: LocalVaultNoteDTO;
+  } | null>;
+  searchVault(
+    request: SearchLocalVaultReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<SearchLocalVaultRes>;
   openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void>;
   writeConfirmedNote(request: ConfirmedLocalVaultWriteReq): Promise<ConfirmedLocalVaultWriteRes>;
   inspectSyncContent(): Promise<KnowledgeRepositoryContentState>;
+  dispose(): Promise<void>;
 }
 
 /**
@@ -240,6 +304,13 @@ async function writeJsonAtomically(filePath: string, value: unknown): Promise<vo
 export class LocalVaultRuntime implements LocalVaultElectronPort {
   private readonly platform: LocalVaultPlatform;
   private readonly now: () => number;
+  private generation = 0;
+  private disposed = false;
+  private mutationTail: Promise<void> = Promise.resolve();
+  private readonly noteCache = new Map<string, CachedVaultNote>();
+  private cachedNoteBytes = 0;
+  private catalogFlight: { generation: number; promise: Promise<VaultCatalog | null> } | null =
+    null;
 
   constructor(private readonly options: LocalVaultRuntimeOptions) {
     this.platform = options.platform ?? createElectronLocalVaultPlatform();
@@ -247,17 +318,24 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
   }
 
   async getBinding(): Promise<LocalVaultBindingSnapshotDTO | null> {
+    await this.mutationTail;
+    const generation = this.generation;
+    this.assertGeneration(generation);
     const stored = await this.loadBinding();
+    this.assertGeneration(generation);
     if (!stored || stored.binding.detachedAt !== null) return null;
+    const health = await this.observeHealth(stored.binding);
+    this.assertGeneration(generation);
     return {
       binding: stored.binding,
-      health: await this.observeHealth(stored.binding),
+      health,
     };
   }
 
   async selectVault(
     request: SelectLocalVaultReq = {},
   ): Promise<LocalVaultBindingSnapshotDTO | null> {
+    this.assertGeneration(this.generation);
     const selectedPath = await this.platform.selectDirectory({
       suggestedPath: request.suggestedPath,
     });
@@ -269,6 +347,10 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Selected Vault must be a directory');
     }
 
+    return this.runMutation(() => this.bindDirectory(canonicalRoot));
+  }
+
+  private async bindDirectory(canonicalRoot: string): Promise<LocalVaultBindingSnapshotDTO> {
     const existing = await this.loadBinding();
     if (
       existing?.binding.detachedAt === null &&
@@ -306,67 +388,177 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
   }
 
   async detachVault(): Promise<void> {
-    const stored = await this.loadBinding();
-    if (!stored || stored.binding.detachedAt !== null) return;
-    await this.saveBinding({
-      ...stored.binding,
-      detachedAt: this.now(),
+    await this.runMutation(async () => {
+      const stored = await this.loadBinding();
+      if (!stored || stored.binding.detachedAt !== null) return;
+      await this.saveBinding({
+        ...stored.binding,
+        detachedAt: this.now(),
+      });
     });
   }
 
   async scanVault(): Promise<ScanLocalVaultRes> {
-    const binding = await this.requireAvailableBinding();
-    const root = await fs.promises.realpath(binding.rootPath);
-    const notes: LocalVaultNoteSummaryDTO[] = [];
+    const catalog = await this.getCatalog();
+    if (!catalog) throw new LocalVaultRuntimeError('NOT_FOUND', 'No local Vault is selected');
+    this.assertScope(catalog.scope);
+    return structuredClone(catalog.scan);
+  }
 
+  private async getCatalog(): Promise<VaultCatalog | null> {
+    const generation = this.generation;
+    if (this.catalogFlight?.generation === generation) return this.catalogFlight.promise;
+    const flight = { generation, promise: this.buildCatalog() };
+    this.catalogFlight = flight;
+    try {
+      return await flight.promise;
+    } finally {
+      if (this.catalogFlight === flight) this.catalogFlight = null;
+    }
+  }
+
+  private async buildCatalog(): Promise<VaultCatalog | null> {
+    const scope = await this.captureOptionalScope();
+    if (!scope) return null;
+    const notes: LocalVaultNoteSummaryDTO[] = [];
+    const byId = new Map<string, LocalVaultNoteSummaryDTO[]>();
+    const incomplete = await this.walkNotes(scope, (note) => {
+      const summary = this.toSummary(note);
+      notes.push(summary);
+      if (summary.knowledgeDocumentId) {
+        const matches = byId.get(summary.knowledgeDocumentId) ?? [];
+        matches.push(summary);
+        byId.set(summary.knowledgeDocumentId, matches);
+      }
+    });
+    const scannedAt = this.now();
+    return {
+      scope,
+      byId,
+      incomplete,
+      scan: {
+        binding: scope.binding,
+        health: {
+          bindingId: scope.binding.id,
+          state: 'Available',
+          observedAt: scannedAt,
+          detail: null,
+        },
+        notes,
+        scannedAt,
+      },
+    };
+  }
+
+  private async walkNotes(
+    scope: VaultReadScope,
+    visit: (note: LocalVaultNoteDTO) => void,
+    requireComplete = false,
+  ): Promise<LocalVaultRuntimeError | null> {
+    let entryCount = 0;
+    const seenPaths = new Set<string>();
+    let incomplete: LocalVaultRuntimeError | null = null;
     const walk = async (directory: string): Promise<void> => {
-      if (notes.length >= MAX_SCAN_NOTES) return;
       const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+      this.assertScope(scope);
+      entryCount += entries.length;
+      if (entryCount > MAX_SCAN_ENTRIES) {
+        throw new LocalVaultRuntimeError(
+          'VALIDATION_ERROR',
+          'Vault exceeds the complete scan budget of 100,000 directory entries',
+        );
+      }
       entries.sort((left, right) => left.name.localeCompare(right.name));
 
+      let batch: Promise<LocalVaultNoteDTO>[] = [];
+      const flush = async () => {
+        const results = await Promise.allSettled(batch);
+        batch = [];
+        this.assertScope(scope);
+        for (const result of results) {
+          if (result.status === 'fulfilled') {
+            visit(result.value);
+            continue;
+          }
+          const error: unknown = result.reason;
+          if (
+            requireComplete ||
+            !(error instanceof LocalVaultRuntimeError) ||
+            error.code === 'CONFLICT'
+          ) {
+            throw error;
+          }
+          incomplete ??= error;
+        }
+      };
+
       for (const entry of entries) {
-        if (notes.length >= MAX_SCAN_NOTES || entry.isSymbolicLink()) continue;
+        if (entry.isSymbolicLink()) continue;
         const absolutePath = path.join(directory, entry.name);
         if (entry.isDirectory()) {
-          if (!IGNORED_DIRECTORIES.has(entry.name)) await walk(absolutePath);
+          if (!IGNORED_DIRECTORIES.has(entry.name)) {
+            await flush();
+            await walk(absolutePath);
+          }
           continue;
         }
         if (!entry.isFile() || !/\.md$/i.test(entry.name)) continue;
 
-        const relativePath = toPortablePath(path.relative(root, absolutePath));
-        try {
-          const note = await this.readNoteFromBinding(binding, { relativePath });
-          notes.push(this.toSummary(note));
-        } catch (error) {
-          if (!(error instanceof LocalVaultRuntimeError) || error.code === 'CONFLICT') throw error;
-        }
+        const relativePath = toPortablePath(path.relative(scope.root, absolutePath));
+        seenPaths.add(relativePath);
+        batch.push(this.readNoteInScope(scope, { relativePath }));
+        if (batch.length === NOTE_READ_CONCURRENCY) await flush();
       }
+      await flush();
     };
 
-    await walk(root);
-    const scannedAt = this.now();
-    return {
-      binding,
-      health: {
-        bindingId: binding.id,
-        state: 'Available',
-        observedAt: scannedAt,
-        detail: null,
-      },
-      notes,
-      scannedAt,
-    };
+    await walk(scope.root);
+    this.assertScope(scope);
+    for (const relativePath of this.noteCache.keys()) {
+      if (!seenPaths.has(relativePath)) this.forgetNote(relativePath);
+    }
+    return incomplete;
   }
 
   async readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO> {
-    return this.readNoteFromBinding(await this.requireAvailableBinding(), request);
+    return structuredClone(await this.readNoteInScope(await this.captureScope(), request));
   }
 
-  async searchVault(request: SearchLocalVaultReq): Promise<SearchLocalVaultRes> {
+  async findNoteById(
+    documentId: KnowledgeDocumentId,
+  ): ReturnType<LocalVaultElectronPort['findNoteById']> {
+    const catalog = await this.getCatalog();
+    if (!catalog) return null;
+    this.assertScope(catalog.scope);
+    if (catalog.incomplete) throw catalog.incomplete;
+    const matches = catalog.byId.get(documentId) ?? [];
+    if (matches.length > 1) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Knowledge document identity is ambiguous in the active Local Vault',
+      );
+    }
+    const match = matches[0];
+    if (!match) return null;
+    const note = await this.readNoteInScope(catalog.scope, { relativePath: match.relativePath });
+    if (note.knowledgeDocumentId !== documentId) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Knowledge document identity changed during lookup',
+      );
+    }
+    return structuredClone({ binding: catalog.scope.binding, note });
+  }
+
+  async searchVault(
+    request: SearchLocalVaultReq,
+    options: { signal?: AbortSignal } = {},
+  ): Promise<SearchLocalVaultRes> {
+    this.assertGeneration(this.generation);
     const query = request.query.trim();
     if (!query) return { query, results: [] };
     const limit = Math.min(Math.max(request.limit ?? 50, 1), MAX_SEARCH_RESULTS);
-    const scanned = await this.scanVault();
+    const scope = await this.captureScope(options.signal);
     const normalizedQuery = normalizeSearchValue(query);
     const terms = tokenizeSearchQuery(query).map(normalizeSearchValue);
     const ranked: Array<{
@@ -375,8 +567,8 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       updatedAt: number;
     }> = [];
 
-    for (const summary of scanned.notes) {
-      const note = await this.readNote({ relativePath: summary.relativePath });
+    await this.walkNotes(scope, (note) => {
+      const summary = this.toSummary(note);
       const normalizedTitle = normalizeSearchValue(summary.title);
       const normalizedPath = normalizeSearchValue(summary.relativePath);
       const normalizedContent = normalizeSearchValue(note.contentMarkdown);
@@ -388,7 +580,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
             normalizedContent.includes(term),
         )
       ) {
-        continue;
+        return;
       }
 
       const matches: SearchLocalVaultRes['results'][number]['matches'] = [];
@@ -404,13 +596,11 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         if (startIndex < 0) continue;
         const matchedLength =
           phraseIndex >= 0
-            ? query.length
+            ? normalizedQuery.length
             : (terms.find((term) => normalizedLine.indexOf(term) === startIndex)?.length ?? 1);
         matches.push({
           lineNumber: index + 1,
-          lineContent: line.slice(0, 500),
-          startIndex,
-          endIndex: startIndex + matchedLength,
+          ...displayedSearchMatch(line, startIndex, matchedLength),
         });
         if (matches.length >= 5) break;
       }
@@ -438,7 +628,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         score,
         updatedAt: Number(summary.updatedAt),
       });
-    }
+    });
 
     return {
       query,
@@ -450,15 +640,27 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
   }
 
   async openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void> {
-    const binding = await this.requireAvailableBinding();
+    const scope = await this.captureScope();
     const targetPath = request.relativePath
-      ? await this.resolveExistingNotePath(binding, request.relativePath)
-      : await fs.promises.realpath(binding.rootPath);
+      ? await this.resolveExistingNotePath(scope, request.relativePath)
+      : scope.root;
+    this.assertScope(scope);
     const search = new URLSearchParams({ path: targetPath });
     await this.platform.openExternal(`obsidian://open?${search.toString()}`);
   }
 
   async writeConfirmedNote(
+    request: ConfirmedLocalVaultWriteReq,
+  ): Promise<ConfirmedLocalVaultWriteRes> {
+    const scope = await this.captureScope();
+    return this.runMutation(() => {
+      this.assertScope(scope);
+      return this.writeNoteInScope(scope, request);
+    });
+  }
+
+  private async writeNoteInScope(
+    scope: VaultReadScope,
     request: ConfirmedLocalVaultWriteReq,
   ): Promise<ConfirmedLocalVaultWriteRes> {
     if (!request.proposalId.trim() || !request.requestId.trim() || request.proposalRevision < 1) {
@@ -475,7 +677,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       );
     }
     const knowledgeDocumentId = parsedDocumentId.data;
-    const parsedRequestedMarkdown = matter(request.contentMarkdown);
+    const parsedRequestedMarkdown = matter(request.contentMarkdown, {});
     const requestedFrontmatter = parsedRequestedMarkdown.data as Record<string, unknown>;
     const embeddedDocumentId = requestedFrontmatter['memoflow_id'];
     if (embeddedDocumentId !== undefined && embeddedDocumentId !== knowledgeDocumentId) {
@@ -484,17 +686,17 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         'Confirmed note contains a different memoflow_id marker',
       );
     }
-    const contentMarkdown = matter.stringify(parsedRequestedMarkdown.content, {
-      ...requestedFrontmatter,
-      memoflow_id: knowledgeDocumentId,
-    });
+    const contentMarkdown = matter.stringify(
+      parsedRequestedMarkdown.content,
+      { ...requestedFrontmatter, memoflow_id: knowledgeDocumentId },
+      {},
+    );
     const contentBytes = Buffer.byteLength(contentMarkdown, 'utf8');
     if (contentBytes === 0 || contentBytes > MAX_WRITE_BYTES) {
       throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note content size is invalid');
     }
 
     const relativePath = normalizeRelativeMarkdownPath(request.relativePath);
-    const binding = await this.requireAvailableBinding();
     const ledger = await this.loadLedger();
     const replay = ledger.entries.find((entry) => entry.requestId === request.requestId);
     if (replay) {
@@ -510,25 +712,31 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         );
       }
       return {
-        note: await this.readNoteFromBinding(binding, { relativePath }),
+        note: structuredClone(await this.readNoteInScope(scope, { relativePath })),
         created: false,
       };
     }
 
-    const duplicateIdentity = (await this.scanVault()).notes.find(
-      (note) => note.knowledgeDocumentId === knowledgeDocumentId,
+    // A UI scan may omit unreadable files; absence is only authoritative after
+    // a complete identity check. Mutations share one queue with binding changes.
+    await this.walkNotes(
+      scope,
+      (note) => {
+        if (note.knowledgeDocumentId === knowledgeDocumentId) {
+          throw new LocalVaultRuntimeError(
+            'CONFLICT',
+            'Knowledge document identity already exists in this Vault',
+          );
+        }
+      },
+      true,
     );
-    if (duplicateIdentity) {
-      throw new LocalVaultRuntimeError(
-        'CONFLICT',
-        'Knowledge document identity already exists in this Vault',
-      );
-    }
 
-    const root = await fs.promises.realpath(binding.rootPath);
+    const root = scope.root;
     const candidate = path.resolve(root, relativePath);
     assertContained(root, candidate);
     await this.ensureSafeParent(root, path.dirname(candidate));
+    this.assertScope(scope);
 
     let handle: fs.promises.FileHandle | null = null;
     try {
@@ -560,17 +768,17 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     ledger.entries = ledger.entries.slice(-1000);
     await writeJsonAtomically(this.options.writeLedgerFilePath, ledger);
     return {
-      note: await this.readNoteFromBinding(binding, { relativePath }),
+      note: structuredClone(await this.readNoteInScope(scope, { relativePath })),
       created: true,
     };
   }
 
   async inspectSyncContent(): Promise<KnowledgeRepositoryContentState> {
-    const binding = await this.requireAvailableBinding();
-    const root = await fs.promises.realpath(binding.rootPath);
+    const scope = await this.captureScope();
 
     const containsUserContent = async (directory: string): Promise<boolean> => {
       const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+      this.assertScope(scope);
       for (const entry of entries) {
         if (entry.isSymbolicLink()) continue;
         const absolutePath = path.join(directory, entry.name);
@@ -585,7 +793,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       return false;
     };
 
-    return (await containsUserContent(root)) ? 'NonEmpty' : 'Empty';
+    return (await containsUserContent(scope.root)) ? 'NonEmpty' : 'Empty';
   }
 
   private async observeHealth(binding: LocalVaultBindingClientDTO): Promise<LocalVaultHealthDTO> {
@@ -614,26 +822,80 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     };
   }
 
-  private async requireAvailableBinding(): Promise<LocalVaultBindingClientDTO> {
+  private async captureOptionalScope(): Promise<VaultReadScope | null> {
+    const generation = this.generation;
     const snapshot = await this.getBinding();
-    if (!snapshot) {
-      throw new LocalVaultRuntimeError('NOT_FOUND', 'No local Vault is selected');
-    }
+    if (!snapshot) return null;
     if (snapshot.health.state !== 'Available') {
       throw new LocalVaultRuntimeError(
         'NOT_FOUND',
         `Local Vault is ${snapshot.health.state.toLowerCase()}`,
       );
     }
-    return snapshot.binding;
+    const binding = snapshot.binding;
+    const root = await fs.promises.realpath(binding.rootPath);
+    const scope = { binding, root, generation };
+    this.assertScope(scope);
+    return scope;
+  }
+
+  private async captureScope(signal?: AbortSignal): Promise<VaultReadScope> {
+    const scope = await this.captureOptionalScope();
+    if (!scope) throw new LocalVaultRuntimeError('NOT_FOUND', 'No local Vault is selected');
+    scope.signal = signal;
+    this.assertScope(scope);
+    return scope;
+  }
+
+  private runMutation<T>(operation: () => Promise<T>): Promise<T> {
+    this.catalogFlight = null;
+    const task = this.mutationTail.then(() => {
+      this.assertGeneration(this.generation);
+      return operation();
+    });
+    this.mutationTail = task.then(
+      () => undefined,
+      () => undefined,
+    );
+    return task;
+  }
+
+  private assertScope(scope: VaultReadScope): void {
+    this.assertGeneration(scope.generation);
+    if (scope.signal?.aborted) {
+      throw new LocalVaultRuntimeError('CONFLICT', 'Vault operation was cancelled');
+    }
+  }
+
+  private assertGeneration(generation: number): void {
+    if (this.disposed || generation !== this.generation) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'The selected Vault changed during the operation',
+      );
+    }
+  }
+
+  async dispose(): Promise<void> {
+    this.disposed = true;
+    this.invalidateProjection();
+    // Finish any write already past its exclusive file creation before releasing the profile.
+    await this.mutationTail;
+  }
+
+  private invalidateProjection(): void {
+    this.generation++;
+    this.catalogFlight = null;
+    this.noteCache.clear();
+    this.cachedNoteBytes = 0;
   }
 
   private async resolveExistingNotePath(
-    binding: LocalVaultBindingClientDTO,
+    scope: VaultReadScope,
     relativePathValue: string,
   ): Promise<string> {
     const relativePath = normalizeRelativeMarkdownPath(relativePathValue);
-    const root = await fs.promises.realpath(binding.rootPath);
+    const root = scope.root;
     const candidate = path.resolve(root, relativePath);
     assertContained(root, candidate);
     let canonicalPath: string;
@@ -645,27 +907,41 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       }
       throw error;
     }
+    this.assertScope(scope);
     assertContained(root, canonicalPath);
     return canonicalPath;
   }
 
-  private async readNoteFromBinding(
-    binding: LocalVaultBindingClientDTO,
+  private async readNoteInScope(
+    scope: VaultReadScope,
     request: ReadLocalVaultNoteReq,
   ): Promise<LocalVaultNoteDTO> {
+    this.assertScope(scope);
     const relativePath = normalizeRelativeMarkdownPath(request.relativePath);
-    const absolutePath = await this.resolveExistingNotePath(binding, relativePath);
+    const absolutePath = await this.resolveExistingNotePath(scope, relativePath);
     const stat = await fs.promises.stat(absolutePath);
+    this.assertScope(scope);
     if (!stat.isFile() || stat.size > MAX_NOTE_BYTES) {
+      this.forgetNote(relativePath);
       throw new LocalVaultRuntimeError(
         'VALIDATION_ERROR',
         'Vault note is not a readable Markdown file',
       );
     }
+    const version = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
+    const cached = this.noteCache.get(relativePath);
+    if (cached?.absolutePath === absolutePath && cached.version === version) {
+      this.noteCache.delete(relativePath);
+      this.noteCache.set(relativePath, cached);
+      return cached.note;
+    }
+    this.forgetNote(relativePath);
     const contentMarkdown = await fs.promises.readFile(absolutePath, 'utf8');
-    const parsed = matter(contentMarkdown);
+    this.assertScope(scope);
+    // Explicit options bypass gray-matter's unbounded process-global text cache.
+    const parsed = matter(contentMarkdown, {});
     const frontmatter = parsed.data as Record<string, unknown>;
-    return {
+    const note: LocalVaultNoteDTO = {
       relativePath,
       knowledgeDocumentId: readStableKnowledgeDocumentId(frontmatter),
       title: extractTitle(relativePath, parsed.content, frontmatter),
@@ -677,11 +953,30 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       contentMarkdown,
       frontmatter,
     };
+    const bytes = serialize(note).byteLength * 2 + absolutePath.length * 2 + 256;
+    if (bytes <= MAX_CACHED_NOTE_BYTES) {
+      this.forgetNote(relativePath);
+      while (this.cachedNoteBytes + bytes > MAX_CACHED_NOTE_BYTES) {
+        const oldestPath = this.noteCache.keys().next().value;
+        if (oldestPath === undefined) break;
+        this.forgetNote(oldestPath);
+      }
+      this.noteCache.set(relativePath, { absolutePath, version, note, bytes });
+      this.cachedNoteBytes += bytes;
+    }
+    return note;
+  }
+
+  private forgetNote(relativePath: string): void {
+    const cached = this.noteCache.get(relativePath);
+    if (!cached) return;
+    this.cachedNoteBytes -= cached.bytes;
+    this.noteCache.delete(relativePath);
   }
 
   private toSummary(note: LocalVaultNoteDTO): LocalVaultNoteSummaryDTO {
     const { contentMarkdown: _contentMarkdown, frontmatter: _frontmatter, ...summary } = note;
-    return summary;
+    return { ...summary, tags: [...summary.tags], outgoingLinks: [...summary.outgoingLinks] };
   }
 
   private async ensureSafeParent(root: string, parent: string): Promise<void> {
@@ -731,6 +1026,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
   }
 
   private async saveBinding(binding: LocalVaultBindingClientDTO): Promise<void> {
+    this.invalidateProjection();
     await writeJsonAtomically(this.options.bindingFilePath, { schemaVersion: 2, binding });
   }
 

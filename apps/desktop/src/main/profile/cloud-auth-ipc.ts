@@ -10,6 +10,7 @@ import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';
 import type { ProfileRegistry } from './profile-registry';
+import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import type { CloudSessionStore } from './cloud-session-store';
 
 function authOrigin(): string {
@@ -20,6 +21,7 @@ export function registerCloudAuthIpc(
   _registry: ProfileRegistry,
   runtime: DesktopProfileRuntimeManager,
   sessions: CloudSessionStore,
+  cloudChecks: Pick<DesktopCloudConnectionManager, 'clearSession'>,
   cloudConnection?: DeviceAuthCoordinator,
 ): void {
   ipcMain.handle(CloudAuthChannels.SESSION, async () => {
@@ -47,9 +49,10 @@ export function registerCloudAuthIpc(
       if (profile?.profileId !== origin)
         return fail({ code: 'PROFILE_CHANGED', message: 'Profile 已切换，请在当前 Profile 重试' });
       if (profile) {
-        const stored = await sessions.load(profile.profileId);
+        cloudConnection?.clearForProfile(profile.profileId);
+        const stored = await cloudChecks.clearSession(profile.profileId);
         if (stored) {
-          await fetch(`${authOrigin()}/api/auth/sign-out`, {
+          void fetch(`${authOrigin()}/api/auth/sign-out`, {
             method: 'POST',
             headers: {
               'content-type': 'application/json',
@@ -59,9 +62,6 @@ export function registerCloudAuthIpc(
             signal: AbortSignal.timeout(10_000),
           }).catch(() => undefined);
         }
-        await sessions.remove(profile.profileId);
-        await runtime.disableCloudSync();
-        cloudConnection?.clearForProfile(profile.profileId);
       }
       return ok(undefined);
     });

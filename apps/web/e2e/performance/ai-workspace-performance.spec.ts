@@ -85,20 +85,25 @@ test.describe('AI workspace performance', () => {
     });
 
     const fcp = await page.evaluate(() => {
-      return new Promise<number>((resolve) => {
+      return new Promise<number>((resolve, reject) => {
+        const timer = window.setTimeout(() => {
+          observer.disconnect();
+          reject(new Error('First Contentful Paint was not observed within 5 seconds'));
+        }, 5000);
         const observer = new PerformanceObserver((list) => {
           const entry = list.getEntries().find((item) => item.name === 'first-contentful-paint');
           if (entry) {
             observer.disconnect();
+            window.clearTimeout(timer);
             resolve(entry.startTime);
           }
         });
         observer.observe({ type: 'paint', buffered: true });
-        window.setTimeout(() => resolve(0), 5000);
       });
     });
 
-    if (fcp > 0) expect(fcp).toBeLessThanOrEqual(1000);
+    expect(fcp).toBeGreaterThan(0);
+    expect(fcp).toBeLessThanOrEqual(1000);
   });
 
   test('[P0] reaches Largest Contentful Paint within 2 seconds', async ({ page }) => {
@@ -123,7 +128,8 @@ test.describe('AI workspace performance', () => {
       });
     });
 
-    if (lcp > 0) expect(lcp).toBeLessThanOrEqual(2000);
+    expect(lcp, 'Largest Contentful Paint must be observed').toBeGreaterThan(0);
+    expect(lcp).toBeLessThanOrEqual(2000);
   });
 
   test('[P1] opens the current Add Context menu within 300ms of the browser interaction', async ({
@@ -180,9 +186,9 @@ test.describe('AI workspace performance', () => {
     }
 
     const finalMemory = await readHeap();
-    if (initialMemory > 0 && finalMemory > 0) {
-      expect((finalMemory - initialMemory) / (1024 * 1024)).toBeLessThan(10);
-    }
+    expect(initialMemory, 'Chromium heap measurement must be available').toBeGreaterThan(0);
+    expect(finalMemory, 'Chromium heap measurement must be available').toBeGreaterThan(0);
+    expect((finalMemory - initialMemory) / (1024 * 1024)).toBeLessThan(10);
   });
 
   test('[P2] remains usable under 4x CPU throttling', async ({ page, context }) => {
