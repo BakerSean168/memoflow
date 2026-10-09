@@ -1,4 +1,3 @@
-import { profileImportDigest } from '@memoflow/data-portability';
 import {
   ProfileImportRequestSchema,
   type ProfileImportPlan,
@@ -441,6 +440,11 @@ test('a second guest keeps an independent Account and its PIN selection across r
 });
 
 test('guest copy preview persists across restart and waits for local content without repeating the cloud commit', async () => {
+  // Inventory lists this suite before runtime libraries are built. Load the
+  // fixture helper only when the E2E runs, after desktop:e2e builds its closure.
+  const portabilityPackage = '@memoflow/data-portability';
+  const { profileImportDigest }: typeof import('@memoflow/data-portability') =
+    await import(portabilityPackage);
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-copy-e2e-'));
   const userData = path.join(root, 'user-data');
   const userFiles = path.join(root, 'user-files');

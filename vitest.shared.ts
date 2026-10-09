@@ -267,6 +267,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     'notification',
     'patterns',
     'powersync-schema',
+    'relation',
     'reminder',
     'repository',
     'schedule',

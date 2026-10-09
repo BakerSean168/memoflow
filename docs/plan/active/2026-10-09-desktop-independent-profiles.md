@@ -259,3 +259,8 @@ API、Web、PowerSync、PostgreSQL、Redis 均 healthy。API/Web 镜像 revision
 冲突按两边行为合并：保留 Profile 串行生命周期、精确 ID、PIN 和独立云端身份；复用 main 的 PowerSync instance 状态机、关闭失败重试、异步云端检查、取消/drain、Vault 缓存和通知清理。认证事务在持有生命周期队列之后进入 cloud transition，避免停用回调等待排在自身后面的认证；提交后取消不撤销已采用会话。旧 prepare/activate 分离接口的性能回归测试迁至原子 open 接口。
 
 已通过定向检查：Desktop 类型检查；4 文件 51 项生命周期/认证测试；IPC 8 文件 52 项和主进程 9 文件 37 项边界测试；Linux Electron E2E 4 项（57.8 秒）；隔离真实 PostgreSQL 4 文件 13 项（22.97 秒）。后续最终本地部署报告与 PR exact-head CI 是合并依据，前一轮 `f34eff34f4a-dirty-*` 报告不覆盖组合代码。此处不声明生产发布或跨平台验收。
+
+
+本地最终报告 `2026-10-09T17:20:14.957Z` 在 `21a56136a8c` 上通过：41 项目 lint、37 项目 typecheck、36 项目 test、prod-like 部署及 5 服务健康检查全部成功，API/Web 镜像 revision 与该提交一致。完整治理通过。
+
+PR [#438](https://github.com/BakerSean168/memoflow/pull/438) 第一轮 CI 揭示了本地已有构建产物掩盖的测试配置问题：E2E 列举时提前加载 Data Portability、旧集成测试 resolver 缺少 database/transaction、共享测试 resolver 缺少 relation。修复仅修改测试加载/映射与本文档，未改产品运行时代码；移走对应 dist 后 inventory（1,350 文件）及 API 76 文件/356 项通过，Account/Notification/Reminder 三个真实 PostgreSQL 集成 target 通过，Electron 4 项再次通过（57.2 秒）。第一轮失败不计为合并通过证据，最终合并以修复提交对应的 PR CI 为准。

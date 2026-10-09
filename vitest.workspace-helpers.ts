@@ -129,6 +129,10 @@ const contractsSrc = path.resolve(import.meta.dirname, './packages/contracts/src
 
 export const domainResolveAliases = [
   {
+    find: '@memoflow/database/transaction',
+    replacement: path.resolve(import.meta.dirname, './packages/database/src/transaction.ts'),
+  },
+  {
     find: '@memoflow/database/prisma',
     replacement: path.resolve(import.meta.dirname, './packages/database/src/generated/prisma/client.js'),
   },
