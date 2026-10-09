@@ -1,7 +1,11 @@
 import { createHash } from 'node:crypto';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
-import type { LocalVaultNoteDTO, LocalVaultNoteSummaryDTO } from '@memoflow/contracts/repository';
-import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
+import {
+  KnowledgeDocumentIdSchema,
+  type LocalVaultNoteDTO,
+  type LocalVaultNoteSummaryDTO,
+} from '@memoflow/contracts/repository';
+import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 
 /** Local Vault is the only Desktop knowledge source; disconnected Vaults return no cloud fallback. */
 export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
@@ -46,17 +50,21 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     const snapshot = await this.localVault.getBinding();
     if (!snapshot || snapshot.health.state !== 'Available') return null;
     if (knowledgeSpaceId && snapshot.binding.knowledgeSpaceId !== knowledgeSpaceId) return null;
-    const scanned = await this.localVault.scanVault();
-    const summary = scanned.notes.find((note) => note.knowledgeDocumentId === knowledgeDocumentId);
-    if (!summary) return null;
-    const note = await this.localVault.readNote({
-      relativePath: summary.relativePath,
-    });
+    const id = KnowledgeDocumentIdSchema.safeParse(knowledgeDocumentId);
+    if (!id.success) return null;
+    const match = await this.localVault.findNoteById(id.data);
+    if (!match) return null;
+    if (match.binding.id !== snapshot.binding.id) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'The selected Vault changed during knowledge lookup',
+      );
+    }
     return this.toKnowledgeNote(
       identityId,
-      snapshot.binding.id,
-      snapshot.binding.knowledgeSpaceId,
-      note,
+      match.binding.id,
+      match.binding.knowledgeSpaceId,
+      match.note,
     );
   }
 
@@ -66,18 +74,26 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     knowledgeSpaceId: string,
     summaries: LocalVaultNoteSummaryDTO[],
   ): Promise<KnowledgeSourceNote[]> {
-    return Promise.all(
-      summaries.map(async (summary) =>
-        this.toKnowledgeNote(
-          identityId,
-          repositoryId,
-          knowledgeSpaceId,
-          await this.localVault.readNote({
-            relativePath: summary.relativePath,
-          }),
-        ),
-      ),
+    const notes = await Promise.all(
+      summaries.map(async (summary) => {
+        const note = await this.localVault.readNote({ relativePath: summary.relativePath });
+        if (note.knowledgeDocumentId !== summary.knowledgeDocumentId) {
+          throw new LocalVaultRuntimeError(
+            'CONFLICT',
+            'Knowledge document identity changed during hydration',
+          );
+        }
+        return this.toKnowledgeNote(identityId, repositoryId, knowledgeSpaceId, note);
+      }),
     );
+    const current = await this.localVault.getBinding();
+    if (current?.binding.id !== repositoryId) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'The selected Vault changed during knowledge hydration',
+      );
+    }
+    return notes;
   }
 
   private toKnowledgeNote(
@@ -86,13 +102,14 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     knowledgeSpaceId: string,
     note: LocalVaultNoteDTO,
   ): KnowledgeSourceNote {
+    const contentDigest = createHash('sha256').update(note.contentMarkdown).digest('hex');
     return {
       identityId,
       repositoryId,
       knowledgeSpaceId,
       knowledgeDocumentId: note.knowledgeDocumentId,
       sourcePath: note.relativePath,
-      sourceContentHash: createHash('sha256').update(note.contentMarkdown).digest('hex'),
+      sourceContentHash: contentDigest,
       sourceVersion: String(note.updatedAt),
       title: note.title,
       mimeType: 'text/markdown',
@@ -101,7 +118,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         ...note.frontmatter,
         tags: note.tags,
         outgoingLinks: note.outgoingLinks,
-        contentDigest: createHash('sha256').update(note.contentMarkdown).digest('hex'),
+        contentDigest,
         knowledgeDocumentId: note.knowledgeDocumentId,
         knowledgeSpaceId,
       },

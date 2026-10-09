@@ -119,7 +119,8 @@ export function createElectronNotificationPort(options: NotificationPortOptions)
     showSchedule: (config) => service.showScheduleNotification(config) !== null,
     showGoalProgress: (config) => service.showGoalProgressNotification(config) !== null,
     showTaskCompleted: (config) => service.showTaskCompletedNotification(config) !== null,
-    destroy: () => undefined,
+    destroy: () => service.destroy(),
+    clearPresentation: () => service.clearPresentation(),
   };
 }
 

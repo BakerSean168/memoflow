@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MemoFlow 性能优化实测</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--foreground, #182431);
+        font: 14px/1.65 var(--font-sans, system-ui, sans-serif);
+      }
+      p {
+        margin: 0;
+      }
+      .lead {
+        margin-bottom: 14px;
+        font-size: 16px;
+        font-weight: 650;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+      .switch {
+        display: inline-flex;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid var(--border, #d6dde5);
+        border-radius: var(--radius, 8px);
+      }
+      button,
+      select {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        padding: 5px 12px;
+        border: 0;
+        border-radius: 5px;
+        background: transparent;
+        cursor: pointer;
+      }
+      button[aria-pressed='true'] {
+        background: var(--secondary, #e9eff5);
+        font-weight: 650;
+      }
+      button:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--ring, #347bca);
+        outline-offset: 3px;
+      }
+      select {
+        background: var(--background, #fff);
+        border: 1px solid var(--border, #d6dde5);
+        padding: 5px 8px;
+        border-radius: 5px;
+        margin-left: 6px;
+      }
+      .plot {
+        padding: 20px;
+        background: var(--card, #f5f7fa);
+        border: 1px solid var(--border, #d6dde5);
+        border-radius: var(--radius, 8px);
+      }
+      .metric {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .number {
+        font-size: 30px;
+        line-height: 1.2;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      .muted {
+        color: var(--muted-foreground, #53677b);
+      }
+      .series + .series {
+        margin-top: 16px;
+      }
+      .labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 16px;
+        margin-bottom: 5px;
+      }
+      .value {
+        font-weight: 650;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .track {
+        height: 22px;
+        border-radius: 4px;
+        background: var(--muted, #e2e9f0);
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        border-radius: 4px;
+      }
+      .before {
+        background: var(--chart-3, #9aa8b8);
+      }
+      .after {
+        background: var(--chart-1, #247eae);
+      }
+      .note {
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--muted-foreground, #53677b);
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .fact {
+        border-top: 2px solid var(--border, #d6dde5);
+        padding-top: 10px;
+      }
+      .fact strong {
+        display: block;
+        font-size: 21px;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.4;
+      }
+      .fact span {
+        font-size: 12px;
+        color: var(--muted-foreground, #53677b);
+      }
+      .scope {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--muted-foreground, #53677b);
+      }
+      @media (max-width: 460px) {
+        .plot {
+          padding: 16px;
+        }
+        .facts {
+          gap: 10px;
+        }
+        .fact strong {
+          font-size: 18px;
+        }
+        .controls {
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="lead">Vault 搜索实测，可切换查询状态与笔记数量</p>
+    <div class="controls">
+      <div class="switch" role="group" aria-label="查询状态">
+        <button type="button" data-mode="warm" aria-pressed="true">重复查询</button>
+        <button type="button" data-mode="first" aria-pressed="false">首次查询</button>
+      </div>
+      <label
+        >笔记数<select id="count">
+          <option value="100">100</option>
+          <option value="1000">1,000</option>
+          <option value="10000" selected>10,000</option>
+        </select></label
+      >
+    </div>
+    <div class="plot" aria-live="polite">
+      <div class="metric">
+        <span id="change" class="number"></span><span id="direction" class="muted"></span>
+      </div>
+      <div class="series">
+        <div class="labels"><span>优化前</span><span id="before-value" class="value"></span></div>
+        <div class="track" aria-hidden="true"><div id="before-bar" class="bar before"></div></div>
+      </div>
+      <div class="series">
+        <div class="labels"><span>优化后</span><span id="after-value" class="value"></span></div>
+        <div class="track" aria-hidden="true"><div id="after-bar" class="bar after"></div></div>
+      </div>
+      <p id="method" class="note"></p>
+    </div>
+    <div class="facts">
+      <div class="fact"><strong>20,000 → 0</strong><span>万篇重复搜索的正文读取次数</span></div>
+      <div class="fact"><strong>6 → 0</strong><span>关闭 Profile 后的真实 SDK Worker 数</span></div>
+      <div class="fact">
+        <strong>&lt; 40 行</strong><span>组件测试的挂载行数；键盘可达第 1 万篇</span>
+      </div>
+    </div>
+    <p class="scope">
+      Linux x64 · Node 24.21.0 · 每篇约 4
+      KiB。前后测量存在宿主机负载差异，未清系统页缓存。首次小规模查询没有稳定加速证据；Windows
+      正式包的启动、内存与耗电尚未实测。
+    </p>
+    <script>
+      const samples = {
+        100: { warm: [237.960563, 54.258686], first: [288.31341, 497.150184] },
+        1000: { warm: [1605.257564, 503.996081], first: [1741.107482, 2150.97755] },
+        10000: { warm: [16273.972905, 4229.054974], first: [23795.881045, 12273.843956] },
+      };
+      let mode = 'warm';
+      const count = document.querySelector('#count');
+      const format = (value) =>
+        value >= 1000 ? `${(value / 1000).toFixed(2)} 秒` : `${Math.round(value)} 毫秒`;
+      function render() {
+        const [before, after] = samples[count.value][mode];
+        const reduction = (1 - after / before) * 100;
+        document.querySelector('#change').textContent = `${Math.abs(reduction).toFixed(1)}%`;
+        document.querySelector('#direction').textContent =
+          reduction >= 0 ? '本次测量用时减少' : '本次测量用时增加';
+        document.querySelector('#before-value').textContent = format(before);
+        document.querySelector('#after-value').textContent = format(after);
+        const maximum = Math.max(before, after);
+        document.querySelector('#before-bar').style.width = `${(before / maximum) * 100}%`;
+        document.querySelector('#after-bar').style.width = `${(after / maximum) * 100}%`;
+        document.querySelector('#method').textContent =
+          mode === 'warm'
+            ? '5 次重复查询中位数。正文缓存复用，仍遍历文件元数据。'
+            : '单次首次查询，应用正文缓存尚未建立；不代表清空系统缓存后的冷启动。';
+        document
+          .querySelectorAll('[data-mode]')
+          .forEach((button) =>
+            button.setAttribute('aria-pressed', String(button.dataset.mode === mode)),
+          );
+      }
+      document.querySelectorAll('[data-mode]').forEach((button) =>
+        button.addEventListener('click', () => {
+          mode = button.dataset.mode;
+          render();
+        }),
+      );
+      count.addEventListener('change', render);
+      render();
+      console.log(
+        'Benchmark comparison: 3 fixture sizes, 2 query states; source results preserved in adjacent JSON files.',
+      );
+    </script>
+  </body>
+</html>

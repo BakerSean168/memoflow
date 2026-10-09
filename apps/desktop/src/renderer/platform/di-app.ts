@@ -63,6 +63,7 @@ import {
   ProfileAccessChannels,
   WindowChannels,
   type DesktopNotificationPreferencePatch,
+  type DesktopAccessSnapshot,
 } from '@memoflow/contracts/electron';
 import { fromIpcResult, isOk, type IpcResult } from '@memoflow/contracts/result';
 
@@ -74,7 +75,10 @@ function getAppT(): (key: string) => string {
   }
 }
 
-export function installDesktopAppServices(app: App): void {
+export function installDesktopAppServices(
+  app: App,
+  initialSnapshot: DesktopAccessSnapshot | null = null,
+): void {
   const bridge = requireElectronBridge('installDesktopAppServices');
 
   const resultIpcClient = createResultIpcClient({ bridge });
@@ -121,12 +125,22 @@ export function installDesktopAppServices(app: App): void {
   app.provide(DESKTOP_AUTH_API_KEY, bridge);
   app.provide(DESKTOP_BRIDGE_KEY, bridge);
   app.provide(DESKTOP_UPDATE_SERVICE_KEY, createDesktopUpdateService(resultIpcClient, bridge));
-  const desktopAccessSnapshot = ref<Awaited<ReturnType<typeof readDesktopAccessSnapshot>>>(null);
-  app.provide(DESKTOP_ACCESS_SNAPSHOT_KEY, desktopAccessSnapshot);
-  void readDesktopAccessSnapshot(bridge).then((snapshot) => {
-    desktopAccessSnapshot.value = snapshot;
+  const desktopAccessSnapshot = ref<DesktopAccessSnapshot | null>(initialSnapshot);
+  let snapshotGeneration = 0;
+  const refreshGeneration = snapshotGeneration;
+  app.onUnmount(() => {
+    snapshotGeneration++;
   });
+  app.provide(DESKTOP_ACCESS_SNAPSHOT_KEY, desktopAccessSnapshot);
+  void readDesktopAccessSnapshot(bridge, { refreshCloud: true })
+    .then((snapshot) => {
+      if (refreshGeneration === snapshotGeneration) desktopAccessSnapshot.value = snapshot;
+    })
+    .catch((error) => {
+      console.warn('[Desktop] Cloud state refresh failed; local access remains available', error);
+    });
   app.provide(PROFILE_LOCK_HANDLER_KEY, async () => {
+    snapshotGeneration++;
     // 锁定/切换 profile：先清空当前 identity 的 query cache，避免下一 profile 数据闪现。
     clearDesktopServerStateIdentity(useAccountStore().getCurrentAccountId ?? '');
     const lockResult = fromIpcResult(
@@ -139,11 +153,13 @@ export function installDesktopAppServices(app: App): void {
     if (!isOk(transitionResult)) throw new Error(getAppT()('common.operationFailed'));
   });
   app.provide(LOGOUT_HANDLER_KEY, async () => {
+    snapshotGeneration++;
     console.info('[Desktop Logout] Handler invoked');
     // 登出：先清空当前 identity 的 query cache（§3.1）。
     clearDesktopServerStateIdentity(useAccountStore().getCurrentAccountId ?? '');
     try {
       await bridge.invoke('cloud-auth:sign-out');
+      desktopAccessSnapshot.value = await readDesktopAccessSnapshot(bridge);
 
       const authStore = useAuthenticationStore();
       console.info('[Desktop Logout] Resetting auth store');

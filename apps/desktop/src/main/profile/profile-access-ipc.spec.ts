@@ -8,6 +8,62 @@ type Handler = (_event: unknown, input?: unknown) => Promise<unknown>;
 describe('registerProfileAccessIpc', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('returns local capabilities while cloud validation is still pending', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const profile = {
+      profileId: 'local-1',
+      profileKind: 'registered',
+      cloudBinding: { cloudAccountId: 'cloud-1' },
+    };
+    const runtime = {
+      getActiveProfileDescriptorSync: vi.fn(() => profile),
+      hasPin: vi.fn(async () => false),
+    };
+    const cloud = {
+      getState: vi.fn(async () => 'CHECKING'),
+      restore: vi.fn(() => new Promise(() => undefined)),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, cloud as never);
+    await expect(handlers.get(ProfileAccessChannels.GET_SNAPSHOT)?.({})).resolves.toMatchObject({
+      ok: true,
+      data: {
+        unlockState: 'UNLOCKED',
+        cloudState: 'CHECKING',
+        capabilities: { local: true, sync: false, cloudAi: false, repositoryConnection: false },
+      },
+    });
+    expect(cloud.restore).not.toHaveBeenCalled();
+  });
+
+  it('does not publish an unlocked snapshot after the profile changes during its local reads', async () => {
+    const handlers = new Map<string, Handler>();
+    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+      handlers.set(channel, handler as Handler);
+    });
+    const runtime = {
+      getActiveProfileDescriptorSync: vi.fn().mockReturnValue({ profileId: 'old-profile' }),
+      hasPin: vi.fn(async () => false),
+    };
+    const cloud = {
+      getState: vi.fn(async () => {
+        runtime.getActiveProfileDescriptorSync.mockReturnValue(null);
+        return 'ONLINE';
+      }),
+    };
+    registerProfileAccessIpc({} as never, runtime as never, cloud as never);
+    await expect(handlers.get(ProfileAccessChannels.GET_SNAPSHOT)?.({})).resolves.toMatchObject({
+      ok: true,
+      data: {
+        profile: null,
+        unlockState: 'LOCKED',
+        capabilities: { local: false, sync: false, cloudAi: false },
+      },
+    });
+  });
+
   it('rejects renderer attempts to open a PIN-protected Profile without a PIN', async () => {
     const handlers = new Map<string, Handler>();
     vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
@@ -32,7 +88,10 @@ describe('registerProfileAccessIpc', () => {
     };
 
     registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.({}, { profileId: 'profile-1' });
+    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
+      {},
+      { profileId: 'profile-1' },
+    );
 
     expect(result).toMatchObject({ ok: false, error: { code: 'PIN_REQUIRED' } });
     expect(runtime.prepareProfile).not.toHaveBeenCalled();
@@ -64,10 +123,13 @@ describe('registerProfileAccessIpc', () => {
     };
 
     registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.({}, {
-      profileId: 'profile-1',
-      pin: '123456',
-    });
+    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
+      {},
+      {
+        profileId: 'profile-1',
+        pin: '123456',
+      },
+    );
 
     expect(result).toMatchObject({ ok: true });
     expect(runtime.preparePinUnlock).toHaveBeenCalledWith('profile-1', '123456');
@@ -103,9 +165,12 @@ describe('registerProfileAccessIpc', () => {
     };
 
     registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.({}, {
-      profileId: 'profile-guest',
-    });
+    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
+      {},
+      {
+        profileId: 'profile-guest',
+      },
+    );
 
     expect(result).toMatchObject({ ok: true });
     expect(runtime.prepareGuestProfile).toHaveBeenCalledOnce();
@@ -124,9 +189,12 @@ describe('registerProfileAccessIpc', () => {
     };
 
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
-    const result = await handlers.get(ProfileAccessChannels.REMOVE)?.({}, {
-      profileId: 'profile-1',
-    });
+    const result = await handlers.get(ProfileAccessChannels.REMOVE)?.(
+      {},
+      {
+        profileId: 'profile-1',
+      },
+    );
 
     expect(result).toMatchObject({ ok: false, error: { code: 'PROFILE_ACTIVE' } });
     expect(runtime.removeProfile).not.toHaveBeenCalled();
@@ -143,9 +211,12 @@ describe('registerProfileAccessIpc', () => {
     };
 
     registerProfileAccessIpc({} as never, runtime as never, {} as never);
-    const result = await handlers.get(ProfileAccessChannels.REMOVE)?.({}, {
-      profileId: 'profile-2',
-    });
+    const result = await handlers.get(ProfileAccessChannels.REMOVE)?.(
+      {},
+      {
+        profileId: 'profile-2',
+      },
+    );
 
     expect(result).toMatchObject({ ok: true });
     expect(runtime.removeProfile).toHaveBeenCalledWith('profile-2');

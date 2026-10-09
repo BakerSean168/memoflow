@@ -377,7 +377,11 @@ async function registerBusinessModules(
     userTimeContextPort: settingElectronModule.userTimeContextPort,
     goalReadPort: {
       getKeyResultMeasurementContext: (goalId, keyResultId, identityId) =>
-        goalComposed.applicationPort.getKeyResultMeasurementContext(goalId, keyResultId, identityId),
+        goalComposed.applicationPort.getKeyResultMeasurementContext(
+          goalId,
+          keyResultId,
+          identityId,
+        ),
     },
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
@@ -735,6 +739,7 @@ async function initializeShellRuntime(): Promise<void> {
   const cloudConnectionService = new DesktopCloudConnectionService(
     profileRuntimeManager,
     cloudSessionStore,
+    cloudConnectionManager,
   );
   const deviceAuthCoordinator = new DeviceAuthCoordinator(
     profileRuntimeManager,
@@ -815,8 +820,8 @@ async function initializeShellRuntime(): Promise<void> {
   );
   registerCloudAuthIpc(
     profileRegistry,
-    profileRuntimeManager,
     cloudSessionStore,
+    cloudConnectionManager,
     deviceAuthCoordinator,
   );
 
@@ -833,13 +838,12 @@ async function initializeShellRuntime(): Promise<void> {
       },
       async () => {
         const profileId = profileRuntimeManager.getActiveProfileId();
-        if (profileId) await cloudSessionStore.remove(profileId);
-        await profileRuntimeManager.disableCloudSync();
+        if (profileId) await cloudConnectionManager.clearSession(profileId);
       },
     );
   });
   profileRuntimeManager.setAfterActivation(async (profile) => {
-    await cloudConnectionManager.restore(profile).catch((error) => {
+    void cloudConnectionManager.restore(profile).catch((error) => {
       logger.warn('Cloud connection restore failed; Profile remains locally available', { error });
     });
     try {
@@ -875,6 +879,8 @@ async function initializeShellRuntime(): Promise<void> {
     activeReminderElapsedRuntime = null;
     activeReminderActivityRuntime = null;
     activeReminderOccurrenceFlush = null;
+    await cloudConnectionManager.cancel();
+    mainRuntime?.notification?.clearPresentation();
     activeInterventionWindowController = null;
     activeFocusWindowController = null;
     // Clear the WindowManager's bound schedule runtime controller BEFORE the

@@ -62,6 +62,7 @@ const nativeSurface = useGoalNativeSurfaceRegistration();
 let unregisterSession: (() => void) | null = null;
 let currentSession: GoalNativeEditSession | null = null;
 let surfaceActive = true;
+let goalsStale = false;
 function handleSessionChange(session: GoalNativeEditSession | null): void {
   unregisterSession?.();
   currentSession = session;
@@ -70,6 +71,10 @@ function handleSessionChange(session: GoalNativeEditSession | null): void {
 }
 onActivated(() => {
   surfaceActive = true;
+  if (goalsStale) {
+    goalsStale = false;
+    void fetchGoals();
+  }
   if (dialogIdentity() !== lastSynchronizedIdentity) void syncDialogFromRoute();
   else if (currentSession) handleSessionChange(currentSession);
 });
@@ -187,7 +192,9 @@ async function handleSaved() {
 
 function handleDatabaseTablesChanged(event: Event) {
   const detail = (event as CustomEvent<{ modules?: string[] }>).detail;
-  if (detail?.modules?.includes('goal')) void fetchGoals();
+  if (!detail?.modules?.includes('goal')) return;
+  if (surfaceActive) void fetchGoals();
+  else goalsStale = true;
 }
 
 watch(

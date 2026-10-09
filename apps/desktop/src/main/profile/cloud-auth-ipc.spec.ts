@@ -32,8 +32,15 @@ function registerFixture() {
   };
   registerCloudAuthIpc(
     registry as never,
-    runtime as never,
     sessions as never,
+    {
+      clearSession: async (profileId: string) => {
+        const stored = await sessions.load(profileId);
+        await sessions.remove(profileId);
+        await runtime.disableCloudSync();
+        return stored;
+      },
+    },
     cloudConnection as never,
   );
   return { handlers, runtime, sessions, cloudConnection };
@@ -68,7 +75,9 @@ describe('registerCloudAuthIpc', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       'https://api.memo.test/api/auth/sign-out',
-      expect.objectContaining({ headers: expect.objectContaining({ authorization: 'Bearer token-1' }) }),
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'Bearer token-1' }),
+      }),
     );
     expect(sessions.remove).toHaveBeenCalledWith('profile-1');
     expect(runtime.disableCloudSync).toHaveBeenCalledOnce();
@@ -80,12 +89,32 @@ describe('registerCloudAuthIpc', () => {
 
     await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_BEGIN)?.({});
     await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_CURRENT)?.({});
-    await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_STATUS)?.({}, { attemptId: 'attempt-1' } as never);
-    await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_CANCEL)?.({}, { attemptId: 'attempt-1' } as never);
+    await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_STATUS)?.({}, {
+      attemptId: 'attempt-1',
+    } as never);
+    await handlers.get(CloudAuthChannels.CLOUD_CONNECTION_CANCEL)?.({}, {
+      attemptId: 'attempt-1',
+    } as never);
 
     expect(cloudConnection.begin).toHaveBeenCalledOnce();
     expect(cloudConnection.getCurrent).toHaveBeenCalledOnce();
     expect(cloudConnection.getStatus).toHaveBeenCalledWith('attempt-1');
     expect(cloudConnection.cancel).toHaveBeenCalledWith('attempt-1');
+  });
+
+  it('finishes local sign-out even when remote revocation does not respond', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise<Response>(() => undefined)),
+    );
+    const { handlers, sessions, runtime } = registerFixture();
+    sessions.load.mockResolvedValue({ token: 'token-1' });
+    let finished = false;
+    void Promise.resolve(handlers.get(CloudAuthChannels.SIGN_OUT)?.({})).then(() => {
+      finished = true;
+    });
+    await vi.waitFor(() => expect(finished).toBe(true), { timeout: 200 });
+    expect(sessions.remove).toHaveBeenCalledWith('profile-1');
+    expect(runtime.disableCloudSync).toHaveBeenCalledOnce();
   });
 });

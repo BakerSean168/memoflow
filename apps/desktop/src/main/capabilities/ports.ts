@@ -173,6 +173,8 @@ export interface NotificationPort {
 
   /** Release notification resources at shutdown. */
   destroy(): void;
+  /** Clear transient toasts at a Profile boundary without replacing the device capability. */
+  clearPresentation(): void;
 }
 
 /**
@@ -187,9 +189,4 @@ export interface ExternalEditorPort {
 }
 
 /** Identifiers for capabilities tracked by the registry. */
-export type CapabilityId =
-  | 'tray'
-  | 'shortcut'
-  | 'autolaunch'
-  | 'notification'
-  | 'external-editor';
+export type CapabilityId = 'tray' | 'shortcut' | 'autolaunch' | 'notification' | 'external-editor';

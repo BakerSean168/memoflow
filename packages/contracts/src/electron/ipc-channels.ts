@@ -107,6 +107,7 @@ export const AccountChannels = {
 
 export const ProfileAccessChannels = {
   GET_SNAPSHOT: 'profile-access:get-snapshot',
+  REFRESH_CLOUD_STATE: 'profile-access:refresh-cloud-state',
   LIST: 'profile-access:list',
   SELECT: 'profile-access:select',
   REMOVE: 'profile-access:remove',

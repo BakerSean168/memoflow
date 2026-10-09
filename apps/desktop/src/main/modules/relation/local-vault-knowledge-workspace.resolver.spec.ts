@@ -8,22 +8,20 @@ const snapshot = {
     knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440091',
   },
   health: { state: 'Available' },
-} as never;
+};
 
 describe('LocalVaultKnowledgeWorkspaceResolver', () => {
   it('resolves the current renamed/moved display projection by stable kdoc', async () => {
     const resolver = new LocalVaultKnowledgeWorkspaceResolver({
-      getBinding: vi.fn().mockResolvedValue(snapshot),
-      scanVault: vi.fn().mockResolvedValue({
-        notes: [
-          {
-            knowledgeDocumentId: documentId,
-            title: 'Renamed note',
-            excerpt: 'Still the same document',
-            relativePath: 'moved/renamed.md',
-            updatedAt: 12,
-          },
-        ],
+      findNoteById: vi.fn().mockResolvedValue({
+        binding: snapshot.binding,
+        note: {
+          knowledgeDocumentId: documentId,
+          title: 'Renamed note',
+          excerpt: 'Still the same document',
+          relativePath: 'moved/renamed.md',
+          updatedAt: 12,
+        },
       }),
     } as never);
 
@@ -35,14 +33,12 @@ describe('LocalVaultKnowledgeWorkspaceResolver', () => {
 
   it('returns missing for no current note and fails when the bound Vault itself is unavailable', async () => {
     const missing = new LocalVaultKnowledgeWorkspaceResolver({
-      getBinding: vi.fn().mockResolvedValue(snapshot),
-      scanVault: vi.fn().mockResolvedValue({ notes: [] }),
+      findNoteById: vi.fn().mockResolvedValue(null),
     } as never);
     await expect(missing.resolveForWorkspace('identity-1', documentId)).resolves.toBeNull();
 
     const unavailable = new LocalVaultKnowledgeWorkspaceResolver({
-      getBinding: vi.fn().mockResolvedValue({ ...snapshot, health: { state: 'Missing' } }),
-      scanVault: vi.fn(),
+      findNoteById: vi.fn().mockRejectedValue(new Error('Local Vault is currently unavailable.')),
     } as never);
     await expect(unavailable.resolveForWorkspace('identity-1', documentId)).rejects.toThrow(
       'unavailable',

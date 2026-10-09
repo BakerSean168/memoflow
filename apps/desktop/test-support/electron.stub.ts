@@ -41,6 +41,7 @@ class MockWebContents extends EventEmitter {
   readonly insertCSS = vi.fn();
   readonly isLoading = vi.fn(() => false);
   readonly reload = vi.fn();
+  readonly getURL = vi.fn(() => 'about:blank');
 }
 
 export class BrowserWindow extends EventEmitter {
@@ -94,6 +95,7 @@ export class BrowserWindow extends EventEmitter {
   readonly setAlwaysOnTop = vi.fn();
   readonly setContentProtection = vi.fn();
   readonly setBackgroundColor = vi.fn();
+  readonly setIgnoreMouseEvents = vi.fn();
   readonly setIcon = vi.fn();
   readonly setMinimumSize = vi.fn();
   readonly setProgressBar = vi.fn();

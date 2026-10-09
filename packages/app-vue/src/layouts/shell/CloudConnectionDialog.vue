@@ -23,7 +23,12 @@ import {
 import type { DesktopCloudConnectionAttempt } from '@memoflow/contracts';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
-import { DESKTOP_BRIDGE_KEY, DESKTOP_CLOUD_AUTH_SERVICE_KEY } from '../../di/keys';
+import {
+  DESKTOP_ACCESS_SNAPSHOT_KEY,
+  DESKTOP_BRIDGE_KEY,
+  DESKTOP_CLOUD_AUTH_SERVICE_KEY,
+} from '../../di/keys';
+import { readDesktopAccessSnapshot } from '../../shared/utils/desktop-profile-access';
 import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
 
 const props = defineProps<{ open: boolean; profileName?: string }>();
@@ -32,20 +37,25 @@ const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 const { t } = useI18n();
 const service = inject(DESKTOP_CLOUD_AUTH_SERVICE_KEY, null);
 const bridge = inject(DESKTOP_BRIDGE_KEY, null);
+const accessSnapshot = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, null);
 const authStore = useAuthenticationStore();
 const attempt = ref<DesktopCloudConnectionAttempt | null>(null);
 const loading = ref(false);
 const message = ref<string | null>(null);
 let pollTimer: ReturnType<typeof setTimeout> | null = null;
 
-const isPending = computed(() =>
-  attempt.value !== null
-  && ['requesting_code', 'awaiting_authorization', 'connecting_profile'].includes(attempt.value.status),
+const isPending = computed(
+  () =>
+    attempt.value !== null &&
+    ['requesting_code', 'awaiting_authorization', 'connecting_profile'].includes(
+      attempt.value.status,
+    ),
 );
 const isConnected = computed(() => attempt.value?.status === 'connected');
-const canRetry = computed(() =>
-  attempt.value !== null
-  && ['denied', 'expired', 'cancelled', 'failed'].includes(attempt.value.status),
+const canRetry = computed(
+  () =>
+    attempt.value !== null &&
+    ['denied', 'expired', 'cancelled', 'failed'].includes(attempt.value.status),
 );
 const statusLabel = computed(() => {
   if (!attempt.value) return t('shell.cloudConnection.ready');
@@ -67,6 +77,8 @@ async function hydrateSession(): Promise<void> {
   if (!service) return;
   const result = await service.getSession();
   if (result.ok) authStore.hydrateCloudSession(result.data);
+  if (accessSnapshot && bridge)
+    accessSnapshot.value = await readDesktopAccessSnapshot(bridge, { refreshCloud: true });
 }
 
 async function applyAttempt(next: DesktopCloudConnectionAttempt | null): Promise<void> {
@@ -153,7 +165,9 @@ onBeforeUnmount(stopPolling);
       body-class="space-y-5"
     >
       <template #icon>
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted/40">
+        <div
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted/40"
+        >
           <Cloud class="h-4 w-4" />
         </div>
       </template>
@@ -172,7 +186,9 @@ onBeforeUnmount(stopPolling);
         </div>
         <div
           class="flex h-10 w-10 items-center justify-center rounded-full border"
-          :class="isConnected ? 'border-primary bg-primary text-primary-foreground' : 'bg-background'"
+          :class="
+            isConnected ? 'border-primary bg-primary text-primary-foreground' : 'bg-background'
+          "
         >
           <CheckCircle2 v-if="isConnected" class="h-4 w-4" />
           <Cloud v-else class="h-4 w-4" />
