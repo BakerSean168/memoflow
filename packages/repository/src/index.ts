@@ -49,3 +49,4 @@ export {
 export type { RepositoryApplicationPort } from './server';
 export { KnowledgeDocumentRefResolverService } from './server/application';
 export { KnowledgeDocumentWorkspaceResolverService } from './server/application';
+export { createRepositoryBusinessDataPresence } from './server/infrastructure/business-data-presence';

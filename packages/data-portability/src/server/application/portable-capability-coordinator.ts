@@ -1,6 +1,9 @@
 import type {
   PortableBackupEnvelopeV3,
   PortableCapabilityKey,
+  ProfileImportBinding,
+  ProfileImportManifest,
+  ProfileImportBlocker,
 } from '@memoflow/contracts/data-portability';
 import { parsePortableBackupEnvelopeV3 } from '@memoflow/contracts/data-portability';
 import type {
@@ -10,6 +13,8 @@ import type {
 } from './portable-capability';
 import { PortableCapabilityRegistry } from './portable-capability';
 import { PortableReferenceRegistry } from './portable-reference-registry';
+import { profileImportDigest, selectProfileImportPayload } from './profile-import-manifest';
+import { z } from 'zod';
 
 export interface PortableCapabilityCoordinatorOptions {
   readonly productVersion: string;
@@ -117,11 +122,91 @@ export class PortableCapabilityCoordinator {
     return this.executeImport(this.decode(content), identityId, batchId, false);
   }
 
+  async planProfileCopy(content: string, identityId: string, batchId: string) {
+    const envelope = this.decode(content);
+    const sourceDigest = profileImportDigest(envelope);
+    const blockers: ProfileImportBlocker[] = [];
+    const payloads = new Map(envelope.capabilities.map((entry) => [entry.key, entry.payload]));
+    const ordered = this.registry.resolveDependencyOrder([...payloads.keys()], {
+      requireExplicitDependencies: true,
+    });
+    for (const owner of ordered) {
+      const entry = envelope.capabilities.find((item) => item.key === owner.key)!;
+      this.assertCompatibleVersion(owner, entry.schemaVersion);
+      const plan = await owner.planProfileImportValidated(entry.payload, {
+        identityId,
+        batchId,
+        references: new PortableReferenceRegistry(),
+        importedCapabilityPayloads: payloads,
+      });
+      entry.payload = z.json().parse(plan.payload);
+      payloads.set(entry.key, entry.payload);
+      blockers.push(
+        ...plan.preservedFields.map((field) => ({
+          capability: owner.key,
+          reason: 'preserved_target' as const,
+          field,
+        })),
+      );
+    }
+    const effectiveContent = JSON.stringify(envelope);
+    return {
+      sourceDigest,
+      effectiveDigest: profileImportDigest(envelope),
+      effectiveContent,
+      blockers,
+      preview: await this.dryRun(effectiveContent, identityId, batchId),
+    };
+  }
+
+  /** The caller owns the transaction covering apply, readback, and the durable operation receipt. */
+  async applyProfileCopy(content: string, identityId: string, batchId: string) {
+    const envelope = this.decode(content);
+    const references = new PortableReferenceRegistry();
+    const receipt = await this.executeImport(envelope, identityId, batchId, false, references);
+    const bindings = references.importedBindings();
+    const manifests = await this.readProfileManifests(
+      identityId,
+      bindings,
+      envelope.capabilities.map((entry) => entry.key),
+    );
+    for (const manifest of manifests) {
+      const entry = envelope.capabilities.find((item) => item.key === manifest.key)!;
+      const expected = this.registry.get(entry.key)!.validatePayload(entry.payload);
+      if (manifest.digest !== profileImportDigest(expected)) {
+        throw new Error(`Profile import readback mismatch: ${manifest.key}`);
+      }
+    }
+    return { receipt, bindings, manifests };
+  }
+
+  async readProfileManifests(
+    identityId: string,
+    bindings: readonly ProfileImportBinding[],
+    keys: readonly PortableCapabilityKey[],
+  ): Promise<ProfileImportManifest[]> {
+    this.assertIdentity(identityId);
+    const references = new PortableReferenceRegistry(bindings);
+    const manifests: ProfileImportManifest[] = [];
+    for (const owner of this.registry.resolveDependencyOrder(keys)) {
+      const payload = await owner.exportValidated({ identityId, references });
+      manifests.push({
+        key: owner.key,
+        schemaVersion: owner.schemaVersion,
+        digest: profileImportDigest(
+          payload === null ? null : selectProfileImportPayload(payload, bindings),
+        ),
+      });
+    }
+    return manifests.sort((a, b) => a.key.localeCompare(b.key));
+  }
+
   private async executeImport(
     envelope: PortableBackupEnvelopeV3,
     identityId: string,
     batchId: string,
     dryRun: boolean,
+    references = new PortableReferenceRegistry(),
   ): Promise<PortableImportReceiptV3> {
     this.assertIdentity(identityId);
     if (batchId.trim().length === 0) throw new Error('Portable import batchId must be non-empty');
@@ -162,7 +247,7 @@ export class PortableCapabilityCoordinator {
     const context: PortableCapabilityExecutionContext = {
       identityId,
       batchId,
-      references: new PortableReferenceRegistry(),
+      references,
       importedCapabilityPayloads,
     };
     if (dryRun) {

@@ -81,6 +81,29 @@ describe('DesktopProfileRuntimeManager', () => {
   let registry: ProfileRegistry;
   let runtime: DesktopProfileRuntimeManager;
 
+  it('requires the source PIN before invoking an inactive guest reader and leaves the target active', async () => {
+    const source = await registry.createGuest('11111111-1111-4111-8111-111111111111');
+    const target = await registry.createGuest('22222222-2222-4222-8222-222222222222');
+    await runtime.openProfile(source.profileId);
+    await runtime.setCurrentProfilePin('123456');
+    await runtime.openProfile(target.profileId);
+    const read = vi.fn(async () => 'read');
+    await expect(
+      runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, undefined, read)),
+    ).rejects.toThrow('SOURCE_PIN_REQUIRED');
+    await expect(
+      runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, '999999', read)),
+    ).rejects.toThrow();
+    expect(read).not.toHaveBeenCalled();
+    expect(
+      await runtime.runExclusive(() => runtime.withInactiveGuest(source.profileId, '123456', read)),
+    ).toBe('read');
+    expect(runtime.getActiveProfileId()).toBe(target.profileId);
+    await expect(
+      runtime.runExclusive(() => runtime.withInactiveGuest(target.profileId, undefined, read)),
+    ).rejects.toThrow('SOURCE_PROFILE_ACTIVE');
+  });
+
   beforeEach(async () => {
     rootDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'profile-runtime-'));
     registry = new ProfileRegistry(sharedResolver(rootDir));
@@ -106,9 +129,26 @@ describe('DesktopProfileRuntimeManager', () => {
 
   afterEach(async () => fs.promises.rm(rootDir, { recursive: true, force: true }));
 
+  it('opens the selected guest, preserves its PIN unlock across switching, and restores it at startup', async () => {
+    const first = await registry.ensureGuest();
+    const second = await registry.createGuest('second', 'Work');
+    await runtime.openProfile(second.profileId);
+    await runtime.setCurrentProfilePin('123456');
+    await runtime.openProfile(first.profileId);
+    await expect(runtime.openProfile(second.profileId, '000000')).rejects.toThrow();
+    expect(runtime.getActiveProfileId()).toBe(first.profileId);
+    await runtime.openProfile(second.profileId, '123456');
+    expect(runtime.getActiveProfileId()).toBe(second.profileId);
+    await runtime.openProfile(second.profileId);
+    await runtime.deactivateProfile({ preserveSelection: true });
+    expect((await runtime.getStartupProfile()).profileId).toBe(second.profileId);
+    await expect(runtime.activateStartupProfile()).rejects.toThrow('PIN');
+    await runtime.openProfile(second.profileId, '123456');
+    expect(runtime.getActiveProfileId()).toBe(second.profileId);
+  });
+
   it('creates and activates a persistent local guest Profile without cloud auth', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    const prepared = await runtime.activateStartupProfile();
 
     expect(prepared.descriptor.profileKind).toBe('guest');
     expect(prepared.descriptor.localOwnerId).toMatch(/^IdentityId_/);
@@ -127,8 +167,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('locks the Profile without deleting its directory or registry entry', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    const prepared = await runtime.activateStartupProfile();
     await runtime.deactivateProfile();
 
     expect(runtime.getActiveProfileId()).toBeNull();
@@ -139,8 +178,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('preserves the selected Profile when releasing runtime resources for shutdown', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    const prepared = await runtime.activateStartupProfile();
 
     await runtime.deactivateProfile({ preserveSelection: true });
 
@@ -150,8 +188,7 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('withdraws local access after teardown even if the database close fails, and retries the close', async () => {
-    await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    await runtime.activateStartupProfile();
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
     await expect(runtime.deactivateProfile()).rejects.toThrow('database close failed');
     expect(runtime.getActiveProfileId()).toBeNull();
@@ -161,30 +198,28 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(1);
   });
 
-  it('retires a prepared database after failed close before the same Profile can be activated', async () => {
-    const prepared = await runtime.prepareGuestProfile();
+  it('retires a failed prepared database before retrying the same Profile', async () => {
+    const profile = await registry.ensureGuest();
+    mocks.getOptional.mockRejectedValueOnce(new Error('account read failed'));
     mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
-    await expect(runtime.discardPreparedProfile()).rejects.toThrow('database close failed');
+    await expect(runtime.openProfile(profile.profileId)).rejects.toThrow('database close failed');
     expect(runtime.getCurrentIdentityId()).toBeNull();
-    await expect(runtime.activatePreparedProfile()).rejects.toThrow('No prepared profile');
-    const replacement = await runtime.prepareGuestProfile();
-    expect(replacement).not.toBe(prepared);
+    const replacement = await runtime.openProfile(profile.profileId);
+    expect(replacement.descriptor.profileId).toBe(profile.profileId);
     expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(2);
-    await runtime.activatePreparedProfile();
+    expect(mocks.bootstrapInit).toHaveBeenCalledOnce();
   });
 
   it('closes a database when preparation fails before publishing its runtime', async () => {
     mocks.getOptional.mockRejectedValueOnce(new Error('adoption recovery failed'));
-    await expect(runtime.prepareGuestProfile()).rejects.toThrow('adoption recovery failed');
+    await expect(runtime.activateStartupProfile()).rejects.toThrow('adoption recovery failed');
     expect(runtime.getCurrentIdentityId()).toBeNull();
     expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
-    await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    await runtime.activateStartupProfile();
     expect(runtime.getActiveProfileId()).not.toBeNull();
   });
 
   it('finishes a lock only after in-flight activation has been retired', async () => {
-    await runtime.prepareGuestProfile();
     let finishInit!: () => void;
     mocks.bootstrapInit.mockImplementationOnce(
       () =>
@@ -192,7 +227,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishInit = resolve;
         }),
     );
-    const activation = runtime.activatePreparedProfile();
+    const activation = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
     let locked = false;
     const locking = runtime.deactivateProfile().then(() => {
@@ -221,8 +256,7 @@ describe('DesktopProfileRuntimeManager', () => {
           finishOpen = () => resolve(database as never);
         }),
     );
-    const selection = runtime.prepareGuestProfile().then(() => runtime.activatePreparedProfile());
-    const rejectedSelection = expect(selection).rejects.toThrow('No prepared profile');
+    const selection = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
     let locked = false;
     const locking = runtime.deactivateProfile().then(() => {
@@ -234,10 +268,11 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(locked).toBe(false);
     finishOpen();
     await locking;
-    await rejectedSelection;
+    await selection;
     expect(runtime.getActiveProfileId()).toBeNull();
     expect(runtime.getCurrentIdentityId()).toBeNull();
-    expect(mocks.bootstrapInit).not.toHaveBeenCalled();
+    expect(mocks.bootstrapInit).toHaveBeenCalledOnce();
+    expect(mocks.bootstrapDestroy).toHaveBeenCalledOnce();
     expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
   });
 
@@ -269,17 +304,15 @@ describe('DesktopProfileRuntimeManager', () => {
     mocks.shutdownPowerSync.mockImplementation(async () => {
       closedDuringBootstrap ||= !bootstrapFinished;
     });
-    const firstSelection = runtime
-      .prepareGuestProfile()
-      .then(() => runtime.activatePreparedProfile());
+    const firstSelection = runtime.activateStartupProfile();
     await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
-    const secondPreparation = runtime.prepareProfile('IdentityId_other');
+    const secondProfile = await registry.register('IdentityId_other', 'Other');
+    const secondPreparation = runtime.openProfile(secondProfile.profileId);
     finishOpen();
     await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
     finishInit();
     const [, next] = await Promise.all([firstSelection, secondPreparation]);
     expect(closedDuringBootstrap).toBe(false);
-    await runtime.activatePreparedProfile();
     expect(runtime.getActiveProfileId()).toBe(next.descriptor.profileId);
   });
 
@@ -287,8 +320,7 @@ describe('DesktopProfileRuntimeManager', () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);
 
-    await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    await runtime.activateStartupProfile();
     await runtime.deactivateProfile();
 
     expect(beforeDeactivation).toHaveBeenCalledOnce();
@@ -303,8 +335,7 @@ describe('DesktopProfileRuntimeManager', () => {
     });
     runtime.setBeforeDeactivation(beforeDeactivation);
 
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
+    const prepared = await runtime.activateStartupProfile();
 
     await expect(runtime.deactivateProfile()).rejects.toThrow('routine occurrence flush failed');
 
@@ -319,8 +350,7 @@ describe('DesktopProfileRuntimeManager', () => {
     runtime.setBeforeDeactivation(beforeDeactivation);
     mocks.bootstrapInit.mockRejectedValueOnce(new Error('init failed'));
 
-    await runtime.prepareGuestProfile();
-    await expect(runtime.activatePreparedProfile()).rejects.toThrow('init failed');
+    await expect(runtime.activateStartupProfile()).rejects.toThrow('init failed');
 
     expect(beforeDeactivation).toHaveBeenCalledOnce();
     expect(beforeDeactivation.mock.invocationCallOrder[0]).toBeLessThan(
@@ -332,91 +362,35 @@ describe('DesktopProfileRuntimeManager', () => {
     runtime.setAfterActivation(async () => {
       throw new Error('offline');
     });
-    const prepared = await runtime.prepareGuestProfile();
-
-    await expect(runtime.activatePreparedProfile()).resolves.toBeUndefined();
+    const prepared = await runtime.activateStartupProfile();
     expect(runtime.getActiveProfileId()).toBe(prepared.descriptor.profileId);
   });
 
-  it('cannot activate a PIN-protected Profile without a verified local unlock', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
-    await runtime.setCurrentProfilePin('123456');
-    await runtime.deactivateProfile();
-
-    await runtime.prepareGuestProfile();
-    await expect(runtime.activatePreparedProfile()).rejects.toThrow('需要本地 PIN 解锁');
-
-    await runtime.prepareGuestProfile();
-    await runtime.preparePinUnlock(prepared.descriptor.profileId, '123456');
-    await expect(runtime.activatePreparedProfile()).resolves.toBeUndefined();
-    expect(runtime.getActiveProfileId()).toBe(prepared.descriptor.profileId);
+  it('serializes concurrent switches and lock without leaving an active runtime', async () => {
+    const first = await registry.ensureGuest();
+    const second = await registry.createGuest('second');
+    await Promise.all([
+      runtime.openProfile(first.profileId),
+      runtime.openProfile(second.profileId),
+      runtime.deactivateProfile(),
+    ]);
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(mocks.bootstrapInit).toHaveBeenCalledTimes(2);
+    expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(2);
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(2);
   });
 
-  it('recovers a committed tenant adoption when registry rebind was interrupted', async () => {
-    const guest = await registry.ensureGuest();
-    const guestOwnerId = guest.localOwnerId;
-    mocks.getOptional
-      .mockResolvedValueOnce({
-        from_owner_id: guestOwnerId,
-        to_owner_id: 'cloud-1',
-        display_name: 'Cloud User',
-        identifier: 'user@example.com',
-        adopted_at: Date.now(),
-      })
-      .mockResolvedValueOnce(null);
-
-    const prepared = await runtime.prepareGuestProfile();
-
-    expect(prepared.descriptor.profileId).toBe(guest.profileId);
-    expect(prepared.descriptor.profileKind).toBe('registered');
-    expect(prepared.descriptor.localOwnerId).toBe('cloud-1');
-    expect(prepared.descriptor.cloudBinding?.cloudAccountId).toBe('cloud-1');
-    expect(await registry.findByOwnerId(guestOwnerId)).toBeNull();
-    expect((await registry.findByOwnerId('cloud-1'))?.profileId).toBe(guest.profileId);
-    expect(mocks.execute).toHaveBeenCalledWith(
-      'DELETE FROM profile_adoption_journal WHERE id = ?',
-      ['current'],
-    );
-  });
-
-  it('rejects a cloud binding conflict before starting the adoption transaction', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
-    await registry.register('cloud-1', 'Existing Cloud Profile', 'existing@example.com');
-    mocks.writeTransaction.mockClear();
-
-    await expect(
-      runtime.bindCurrentProfile('cloud-1', 'Cloud User', 'user@example.com', true),
-    ).rejects.toThrow('拒绝静默合并');
-
-    expect(mocks.writeTransaction).not.toHaveBeenCalled();
-    expect((await registry.findByOwnerId(prepared.descriptor.localOwnerId))?.profileKind).toBe(
-      'guest',
-    );
-  });
-
-  it('preserves the local Profile display name when adopting a cloud account', async () => {
-    const prepared = await runtime.prepareGuestProfile();
-    await runtime.activatePreparedProfile();
-    const localDisplayName = prepared.descriptor.displayName;
-
-    await runtime.bindCurrentProfile('cloud-1', 'Cloud Auth Name', 'user@example.com', true);
-
-    const rebound = await registry.findByCloudAccountId('cloud-1');
-    expect(rebound?.profileId).toBe(prepared.descriptor.profileId);
-    expect(rebound?.displayName).toBe(localDisplayName);
-    expect(rebound?.identifier).toBe('user@example.com');
-    expect(mocks.execute).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT OR REPLACE INTO profile_adoption_journal'),
-      expect.arrayContaining([
-        'current',
-        prepared.descriptor.localOwnerId,
-        'cloud-1',
-        localDisplayName,
-        'user@example.com',
-      ]),
-    );
+  it('locks on a database-close failure and retries cleanup before the next open', async () => {
+    const first = await registry.ensureGuest();
+    const second = await registry.createGuest('second');
+    await runtime.openProfile(first.profileId);
+    mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('close failed'));
+    await expect(runtime.openProfile(second.profileId)).rejects.toThrow('close failed');
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(mocks.bootstrapInit).toHaveBeenCalledTimes(1);
+    await runtime.openProfile(second.profileId);
+    expect(runtime.getActiveProfileId()).toBe(second.profileId);
+    expect(mocks.bootstrapInit).toHaveBeenCalledTimes(2);
   });
 
   it('removes a non-active Profile with its local data and secure credentials', async () => {

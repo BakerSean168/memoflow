@@ -16,6 +16,8 @@ updated: 2026-09-08T23:26:00+08:00
 **Date:** 2026-08-02
 **Supersedes:** ADR-036 §1 及其中依赖自建 `AuthIdentity` / `AuthSession` 的实现决策
 
+> 2026-10-09 修订：guest 原地重绑 / tenant adoption 由 [ADR-119](./ADR-119-independent-desktop-profiles-and-guest-copy-import.md) 的独立 Profile 登录路径取代；显式访客复制导入及核验后可选清理已实现，本地验证范围见 ADR-119 和实施计划。下文相关旧决策仅保留历史背景。
+
 ## Context
 
 MemoFlow Desktop 同时存在本地 Profile 访问、访客身份、离线恢复、云端认证和同步授权。旧实现使用同一个认证 Session 表达这些不同事实，导致云端凭据或 guest Session 失效时，本地 Profile 也被判定为不可访问。

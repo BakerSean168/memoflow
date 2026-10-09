@@ -19,7 +19,10 @@ vi.mock('@memoflow/data-portability', async (importOriginal) => {
 
 vi.mock('@memoflow/data-portability/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/data-portability/api')>();
-  return { ...actual, createDataPortabilityApiModule: vi.fn(actual.createDataPortabilityApiModule) };
+  return {
+    ...actual,
+    createDataPortabilityApiModule: vi.fn(actual.createDataPortabilityApiModule),
+  };
 });
 
 import { composeDataPortability } from './compose-data-portability';
@@ -45,7 +48,7 @@ const portableCapabilities = [
 describe('composeDataPortability V3 assembly', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('assembles only owner capabilities plus the disclosure-only Prisma port', () => {
+  it('assembles owner capabilities, disclosure and the durable Profile import API', () => {
     composeDataPortability({ db: fakeDb, portableCapabilities });
     expect(createPrismaServerHeldDataDisclosureApplicationPort).toHaveBeenCalledWith(fakeDb);
     expect(createDataPortabilityModule).toHaveBeenCalledWith({
@@ -54,6 +57,11 @@ describe('composeDataPortability V3 assembly', () => {
     });
     expect(createDataPortabilityApiModule).toHaveBeenCalledWith({
       instance: createDataPortabilityModule.mock.results[0]!.value,
+      profileImport: {
+        preflight: expect.any(Function),
+        commit: expect.any(Function),
+        get: expect.any(Function),
+      },
       serverHeldDataDisclosureApi:
         createPrismaServerHeldDataDisclosureApplicationPort.mock.results[0]!.value,
     });

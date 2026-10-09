@@ -16,3 +16,4 @@ export { PrismaRelationRepository } from './infrastructure/prisma/prisma-relatio
 export { PowerSyncRelationRepository } from './infrastructure/powersync/powersync-relation.repository';
 export { PrismaGoalRelationCleanupCapability } from './infrastructure/prisma/prisma-goal-relation-cleanup';
 export { PowerSyncGoalRelationCleanupCapability } from './infrastructure/powersync/powersync-goal-relation-cleanup';
+export { createRelationBusinessDataPresence } from './infrastructure/business-data-presence';

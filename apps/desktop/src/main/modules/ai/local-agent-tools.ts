@@ -30,7 +30,7 @@ import {
   TaskAgentReceiptSchema,
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 
 function ownerResult<T>(result: Result<T>): T {
   if (result.ok) return result.data;
@@ -184,7 +184,7 @@ export function createDesktopLocalAgentTools(
       if (context.writeScopes.includes('tasks:write')) {
         const authority = {
           connectionId: context.connectionId,
-          authorize: (tx: import('@memoflow/contracts/electron').IElectronDatabaseTransaction) =>
+          authorize: (tx: IElectronDatabaseTransaction) =>
             context.authorize('tasks:write', tx),
         };
         const annotations = {
@@ -230,7 +230,7 @@ export function createDesktopLocalAgentTools(
       if (context.writeScopes.includes('goals:write')) {
         const authority = {
           connectionId: context.connectionId,
-          authorize: (tx: import('@memoflow/contracts/electron').IElectronDatabaseTransaction) =>
+          authorize: (tx: IElectronDatabaseTransaction) =>
             context.authorize('goals:write', tx),
         };
         server.registerTool(

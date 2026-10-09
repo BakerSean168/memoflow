@@ -30,14 +30,16 @@ export function mapPrismaOutboxToGoalOperationReceipt(
     attemptsHistory: [],
     createdAt: outbox.createdAt.toISOString(),
     updatedAt: outbox.createdAt.toISOString(),
-    finishedAt: outbox.dispatchedAt ? outbox.dispatchedAt.toISOString() : outbox.createdAt.toISOString(),
+    finishedAt: outbox.dispatchedAt
+      ? outbox.dispatchedAt.toISOString()
+      : outbox.createdAt.toISOString(),
   };
 
   return assertValidBusinessOperationReceipt(rawReceipt);
 }
 
 export class PrismaGoalReliableOperationAdapter implements GoalReliableOperationPort {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(private readonly db: Pick<PrismaClient, 'outboxMessage'>) {}
 
   async recordGoalCompletionReceipt(
     input: GoalRecordReceiptInput,

@@ -689,6 +689,20 @@ exports.Prisma.OauthClientAssertionScalarFieldEnum = {
   expiresAt: 'expiresAt'
 };
 
+exports.Prisma.ProfileImportOperationScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  requestId: 'requestId',
+  sourceDigest: 'sourceDigest',
+  effectiveDigest: 'effectiveDigest',
+  status: 'status',
+  planJson: 'planJson',
+  schedulingReconciledAt: 'schedulingReconciledAt',
+  resultJson: 'resultJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.RelationScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1385,6 +1399,7 @@ exports.Prisma.ModelName = {
   OauthAccessToken: 'OauthAccessToken',
   OauthConsent: 'OauthConsent',
   OauthClientAssertion: 'OauthClientAssertion',
+  ProfileImportOperation: 'ProfileImportOperation',
   Relation: 'Relation',
   OutboxMessage: 'OutboxMessage',
   InboxReceipt: 'InboxReceipt',

@@ -33,22 +33,6 @@ const accounts = new Table({
 });
 
 /**
- * Local-only crash recovery journal for guest-to-cloud ownership adoption.
- * The identity updates and this marker commit in the same SQLite transaction;
- * Profile Registry rebind can then be completed safely after a process restart.
- */
-const profile_adoption_journal = new Table(
-  {
-    from_owner_id: column.text,
-    to_owner_id: column.text,
-    display_name: column.text,
-    identifier: column.text,
-    adopted_at: column.integer,
-  },
-  { localOnly: true },
-);
-
-/**
  * Coalesced local intent for projecting the registered Profile display data
  * to the cloud Account API. The Account row remains the local source of truth;
  * this table only records that the latest projection still needs delivery.
@@ -813,7 +797,6 @@ const ai_local_conversation_items = new Table(
 export const PowerSyncAppSchema = new Schema({
   // Account
   accounts,
-  profile_adoption_journal,
   account_profile_sync_outbox,
   account_closure_requested,
   user_preference_records,

@@ -82,19 +82,14 @@ Profile 使用三个不混用的标识：
 - 创建真实本地 Account row；
 - 不创建 access token、refresh token 或 cloud session；
 - 可以离线编辑昵称、头像、简介、语言、主题和业务数据；
-- 侧栏显示持久化访客昵称，不显示“未登录”；
+- 侧栏显示持久化 Profile 名称；Account 昵称可独立编辑；
 - 只有同步和云端能力需要注册或登录。
 
 ## 5. Guest 到云端账号
 
-访客在当前 Profile 内完成在线认证后执行 tenant adoption：
+认证成功按 Better Auth user ID 查找或创建独立云端 Profile，session 保存在目标 Profile 下。源 guest 的身份、目录和数据保留。重新认证必须匹配当前 Profile 的云端身份；云端认证不能绕过本机 PIN。
 
-1. 拒绝目标账号已绑定其他本机 Profile 的静默合并；
-2. 在 PowerSync 本地数据库事务内更新全部 `identity_id` 表和 Account 主键；
-3. 表范围从 `PowerSyncAppSchema` 自动派生，新增 identity-owned 表不会漏入；
-4. 将 registry entry 重绑为 registered Profile；
-5. 保持 `profileId`、目录、key envelope 和 Vault 路径不变；
-6. 保存 profile-scoped cloud credential 并启动首次同步。
+跨 Profile 激活先释放旧 renderer，再通过串行生命周期关闭旧数据库和后台 owner、打开目标容器。Profile 名称与 Account 昵称独立维护。登录不会自动复制或重绑数据；访客复制导入属于 [ADR-119](../../architecture/adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md) 后续切片，尚未实现。
 
 ## 6. 状态和能力
 
@@ -122,7 +117,7 @@ Profile 云端状态只有：
 当前实现已经覆盖：
 
 - Better Auth contract、邮箱链接、Account provisioning、关闭账号后的 API 拒绝；
-- Desktop PIN 防绕过、Profile registry、guest adoption、云端退出与本地锁定分离；
+- Desktop PIN 防绕过、Profile registry、独立云端 Profile 路由、云端退出与本地锁定分离；
 - 生产 Electron 旅程中的离线 guest 首次启动、资料编辑、锁定/重新打开、Profile 目录不变和进程重启恢复；
 - local-docker 下真实 Better Auth 注册/验证/登录与核心 Web 产品旅程，Playwright 结果为 7/7；
 - API、Web、Desktop、PowerSync 的 prod-like 容器启动与健康检查。

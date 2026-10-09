@@ -48,3 +48,8 @@ export {
   createTaskPowerSyncAgentMutations,
   TaskAgentMutationError,
 } from './server/infrastructure/adapters/powersync/task-agent-mutations';
+export { createTaskBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export {
+  createTaskPrismaPortableCapability,
+  createTaskPowerSyncPortableCapability,
+} from './server/infrastructure/task-profile-import';

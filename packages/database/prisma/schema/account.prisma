@@ -17,6 +17,7 @@ model Account {
 
   // 关联的业务模块
   goals                           Goal[]
+  profileImportOperations         ProfileImportOperation[]
   labels                          Label[]
   goalLabels                      GoalLabel[]
   taskLabels                      TaskLabel[]

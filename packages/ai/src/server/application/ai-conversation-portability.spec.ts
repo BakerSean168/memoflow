@@ -50,10 +50,32 @@ function context(
 }
 
 describe('AIConversationPortableCapability', () => {
+  it('replays one batch without duplicate shells and rejects changed content', async () => {
+    const repository = new AIConversationMemoryRepository();
+    const capability = new AIConversationPortableCapability(repository);
+    const payload = {
+      conversations: [
+        { ref: 'ai-conversations:1', name: 'Keep once', status: ConversationStatus.Archived },
+      ],
+    };
+    const first = createReferences();
+    await capability.apply(payload, context('target-user', first.references));
+    const second = createReferences();
+    expect(
+      await capability.apply(payload, context('target-user', second.references)),
+    ).toMatchObject({ created: 0, skipped: 1 });
+    expect(await repository.findByIdentityId('target-user')).toHaveLength(1);
+    expect(second.imported).toEqual(first.imported);
+    await expect(
+      capability.apply(
+        { conversations: [{ ...payload.conversations[0]!, name: 'Changed' }] },
+        context('target-user', createReferences().references),
+      ),
+    ).rejects.toThrow(/conflict/);
+    expect((await repository.findByIdentityId('target-user'))[0]!.name).toBe('Keep once');
+  });
   it('declares the stable owner capability without dependencies', () => {
-    const capability = new AIConversationPortableCapability(
-      new AIConversationMemoryRepository(),
-    );
+    const capability = new AIConversationPortableCapability(new AIConversationMemoryRepository());
 
     expect(capability.key).toBe('ai-conversations');
     expect(capability.schemaVersion).toBe(3);
@@ -119,8 +141,8 @@ describe('AIConversationPortableCapability', () => {
       warnings: [],
     });
     expect(await targetRepository.findByIdentityId('target-user')).toEqual([]);
-    expect(dryRunRefs.references.resolveImportedReference('ai-conversations:1')).toBe(
-      'portable-ai-conversation:restore-batch:ai-conversations:1',
+    expect(dryRunRefs.references.resolveImportedReference('ai-conversations:1')).toMatch(
+      /^IAiConversationId_/,
     );
 
     const applyRefs = createReferences();
@@ -140,6 +162,7 @@ describe('AIConversationPortableCapability', () => {
     expect(applyRefs.references.resolveImportedReference('ai-conversations:1')).toBe(
       String(restored[0]?.id),
     );
+    expect(applyRefs.imported).toEqual(dryRunRefs.imported);
   });
 
   it('fails closed for invalid status/ref and cannot accept source identity fields', async () => {
@@ -147,7 +170,9 @@ describe('AIConversationPortableCapability', () => {
     const capability = new AIConversationPortableCapability(repository);
     const { references } = createReferences();
     const valid = {
-      conversations: [{ ref: 'ai-conversations:1', name: 'Valid', status: ConversationStatus.Active }],
+      conversations: [
+        { ref: 'ai-conversations:1', name: 'Valid', status: ConversationStatus.Active },
+      ],
     };
 
     await expect(

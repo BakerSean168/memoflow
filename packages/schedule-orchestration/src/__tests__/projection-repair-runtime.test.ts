@@ -48,6 +48,30 @@ function listenerContribution(name: string, order: string[]): RuntimeContributio
 }
 
 describe('common projection repair runtime (SCHED-3601)', () => {
+  it('reconciles only the imported identity and reports failure for durable retry', async () => {
+    const repaired: string[] = [];
+    let fail = true;
+    const runtime = createProjectionRepairRuntime([
+      defineProjectionRepairLane({
+        source: 'task',
+        enumerate: async () => [
+          { id: 'a', identityId: 'imported' },
+          { id: 'b', identityId: 'other' },
+        ],
+        buildOwner: (ref) => ({ id: ref.id, identityId: ref.identityId, type: 'task.owner' }),
+        describe: (ref) => ref.id,
+        repair: async (ref) => {
+          if (fail) throw new Error('temporarily unavailable');
+          repaired.push(ref.id);
+          return receipt(owner('task', ref.id));
+        },
+      }),
+    ]);
+    expect(await runtime.reconcileIdentity('imported')).toBe(false);
+    fail = false;
+    expect(await runtime.reconcileIdentity('imported')).toBe(true);
+    expect(repaired).toEqual(['a']);
+  });
   it('registers every incremental listener before full repair and heals lost Task/Goal/Routine events after restart', async () => {
     const order: string[] = [];
     const durableProjection = new Set<string>();

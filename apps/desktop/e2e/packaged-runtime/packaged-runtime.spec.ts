@@ -172,7 +172,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     // Shared account settings must only mount password management when the host
     // provides the full CloudAuthClientPort (AUTH_SERVICE_KEY). Desktop exposes
     // a narrower session/device-auth port and must degrade without crashing.
-    // Menu navigation is already exercised by desktop-auth-flow.spec.ts. The
+    // Menu navigation is already exercised by desktop-auth-flow.spec.mts. The
     // packaged gate should isolate the production route/component contract so
     // dropdown timing differences cannot hide or mimic an AuthService DI crash.
     await mainWindow.evaluate(() => {

@@ -1,3 +1,5 @@
+import { DesktopProfileImportService } from './profile/desktop-profile-import-service';
+import { registerProfileImportIpc } from './profile/profile-import-ipc';
 /**
  * Electron Main Process Entry Point
  *
@@ -478,15 +480,6 @@ async function registerBusinessModules(
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
           ?.cloudAccountId ?? null,
       getCloudAccessToken,
-      async updateLocalProfileMetadata(request) {
-        if (request.nickname === undefined) return;
-        const profileId = mainRuntime?.profileRuntimeManager.getActiveProfileId();
-        if (!profileId) return;
-        await mainRuntime?.profileRuntimeManager.updateProfileDisplayName(
-          profileId,
-          request.nickname,
-        );
-      },
       async pushCloudProfile(token, request) {
         const response = await fetch(`${getApiBaseUrl()}/accounts/me`, {
           method: 'PUT',
@@ -817,6 +810,9 @@ async function initializeShellRuntime(): Promise<void> {
     ownershipReason: desktopUpdateShell.installation.reason,
     state: desktopUpdateSnapshot.state.type,
   });
+  registerProfileImportIpc(
+    new DesktopProfileImportService(profileRuntimeManager, cloudSessionStore),
+  );
   registerProfileAccessIpc(
     profileRegistry,
     profileRuntimeManager,
@@ -825,6 +821,7 @@ async function initializeShellRuntime(): Promise<void> {
   );
   registerCloudAuthIpc(
     profileRegistry,
+    profileRuntimeManager,
     cloudSessionStore,
     cloudConnectionManager,
     deviceAuthCoordinator,
@@ -838,12 +835,15 @@ async function initializeShellRuntime(): Promise<void> {
       db,
       profilePaths,
       async () => {
-        const profileId = profileRuntimeManager.getActiveProfileId();
-        return profileId ? cloudSessionStore.getValidToken(profileId) : null;
+        if (profileRuntimeManager.getActiveProfileId() !== profilePaths.profileId) return null;
+        const token = await cloudSessionStore.getValidToken(profilePaths.profileId);
+        return profileRuntimeManager.getActiveProfileId() === profilePaths.profileId ? token : null;
       },
       async () => {
-        const profileId = profileRuntimeManager.getActiveProfileId();
-        if (profileId) await cloudConnectionManager.clearSession(profileId);
+        await profileRuntimeManager.runExclusive(async () => {
+          if (profileRuntimeManager.getActiveProfileId() !== profilePaths.profileId) return;
+          await cloudConnectionManager.clearSession(profilePaths.profileId);
+        });
       },
     );
   });

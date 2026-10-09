@@ -370,6 +370,7 @@ async function bootstrap(): Promise<void> {
   });
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,
+    reconcileImportedProfile: scheduleOrchestrationModule.reconcileImportedProfile,
     portableCapabilities: [
       accountApiModule.portableCapability,
       settingApiModule.portableCapability,

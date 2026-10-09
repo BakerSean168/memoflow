@@ -1,3 +1,13 @@
+import { z } from 'zod';
+import { ok } from '@memoflow/contracts/result';
+import type { ProfileImportApplicationPort } from '../server/infrastructure/prisma-profile-import';
+import {
+  ProfileImportRequestSchema,
+  ProfileImportCommitRequestSchema,
+  ProfileImportPlanSchema,
+  ProfileImportCommittedSchema,
+  ProfileImportOperationSchema,
+} from '@memoflow/contracts/data-portability';
 /**
  * Data Portability API Routes
  *
@@ -40,6 +50,7 @@ export function registerDataPortabilityRoutes(
   disclosureApi: ServerHeldDataDisclosureApplicationPort,
   middleware: PlatformMiddleware,
   openApiRegistry?: OpenApiRegistryLike | null,
+  profileImport?: ProfileImportApplicationPort,
 ): Router {
   const router = Router();
   const { auth } = middleware;
@@ -77,7 +88,9 @@ export function registerDataPortabilityRoutes(
       method: 'post',
       path: '/export',
       summary: '导出 V3 用户数据',
-      request: { body: { content: { 'application/json': { schema: ExportPortableDataV3ReqSchema } } } },
+      request: {
+        body: { content: { 'application/json': { schema: ExportPortableDataV3ReqSchema } } },
+      },
       responses: {
         200: successResponse(ExportPortableDataV3ResSchema, 'V3 导出成功'),
       },
@@ -91,7 +104,9 @@ export function registerDataPortabilityRoutes(
       method: 'post',
       path: '/dry-run',
       summary: '校验 V3 导入（不修改数据）',
-      request: { body: { content: { 'application/json': { schema: PortableDataV3ImportReqSchema } } } },
+      request: {
+        body: { content: { 'application/json': { schema: PortableDataV3ImportReqSchema } } },
+      },
       responses: {
         200: successResponse(PortableDataV3ImportResSchema, 'V3 导入校验成功'),
         400: errorResponse('参数错误'),
@@ -106,7 +121,9 @@ export function registerDataPortabilityRoutes(
       method: 'post',
       path: '/apply',
       summary: '应用 V3 导入',
-      request: { body: { content: { 'application/json': { schema: PortableDataV3ImportReqSchema } } } },
+      request: {
+        body: { content: { 'application/json': { schema: PortableDataV3ImportReqSchema } } },
+      },
       responses: {
         200: successResponse(PortableDataV3ImportResSchema, 'V3 导入成功'),
         400: errorResponse('参数错误'),
@@ -116,5 +133,68 @@ export function registerDataPortabilityRoutes(
     (req, ctx) => controller.applyPortableDataV3(req.body, ctx),
   );
 
+  if (profileImport) {
+    r.route(
+      {
+        method: 'post',
+        path: '/profile-import/preflight',
+        summary: '预检访客 Profile 复制导入',
+        request: {
+          body: { content: { 'application/json': { schema: ProfileImportRequestSchema } } },
+        },
+        responses: { 200: successResponse(ProfileImportPlanSchema, '导入预检') },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportPlanSchema.parse(
+            await profileImport.preflight(
+              ctx.identityId,
+              ProfileImportRequestSchema.parse(req.body),
+            ),
+          ),
+        ),
+    );
+    r.route(
+      {
+        method: 'post',
+        path: '/profile-import/commit',
+        summary: '提交访客 Profile 复制导入',
+        request: {
+          body: { content: { 'application/json': { schema: ProfileImportCommitRequestSchema } } },
+        },
+        responses: { 200: successResponse(ProfileImportCommittedSchema, '导入已提交') },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportCommittedSchema.parse(
+            await profileImport.commit(
+              ctx.identityId,
+              ProfileImportCommitRequestSchema.parse(req.body),
+            ),
+          ),
+        ),
+    );
+    r.route(
+      {
+        method: 'get',
+        path: '/profile-import/:requestId',
+        summary: '恢复并核验 Profile 导入',
+        request: { params: z.object({ requestId: ProfileImportRequestSchema.shape.requestId }) },
+        responses: { 200: successResponse(ProfileImportOperationSchema, '导入状态') },
+      },
+      [auth],
+      async (req, ctx) =>
+        ok(
+          ProfileImportOperationSchema.parse(
+            await profileImport.get(
+              ctx.identityId,
+              ProfileImportRequestSchema.shape.requestId.parse(req.params?.requestId),
+            ),
+          ),
+        ),
+    );
+  }
   return router;
 }

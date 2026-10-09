@@ -64,118 +64,40 @@ describe('registerProfileAccessIpc', () => {
     });
   });
 
-  it('rejects renderer attempts to open a PIN-protected Profile without a PIN', async () => {
+  it.each([null, '../outside', { profileId: '../outside' }, { profileId: 'valid', pin: 'x' }])(
+    'rejects malformed selection %j before lifecycle access',
+    async (input) => {
+      const handlers = new Map<string, Handler>();
+      vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
+        handlers.set(channel, handler as Handler);
+      });
+      const runtime = { openProfile: vi.fn() };
+      registerProfileAccessIpc({} as never, runtime as never, {} as never);
+      expect(await handlers.get(ProfileAccessChannels.SELECT)?.({}, input)).toMatchObject({
+        ok: false,
+        error: { code: 'INVALID_REQUEST' },
+      });
+      expect(runtime.openProfile).not.toHaveBeenCalled();
+    },
+  );
+
+  it('passes the exact selected guest and PIN to the serialized lifecycle', async () => {
     const handlers = new Map<string, Handler>();
     vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
       handlers.set(channel, handler as Handler);
     });
-    const profile = {
-      profileId: 'profile-1',
-      localOwnerId: 'IdentityId_cloud-1',
-      profileKind: 'registered',
-      displayName: 'Cloud User',
-      avatarSeed: 'seed',
-      identifier: 'user@example.com',
-      cloudBinding: { cloudAccountId: 'IdentityId_cloud-1' },
-      lastActiveAt: 1,
-    };
-    const registry = { list: vi.fn().mockResolvedValue([profile]) };
     const runtime = {
-      hasPin: vi.fn().mockResolvedValue(true),
-      preparePinUnlock: vi.fn(),
-      prepareProfile: vi.fn(),
-      activatePreparedProfile: vi.fn(),
+      getActiveProfileId: () => null,
+      openProfile: vi.fn().mockResolvedValue(undefined),
     };
-
-    registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
-      {},
-      { profileId: 'profile-1' },
-    );
-
-    expect(result).toMatchObject({ ok: false, error: { code: 'PIN_REQUIRED' } });
-    expect(runtime.prepareProfile).not.toHaveBeenCalled();
-    expect(runtime.activatePreparedProfile).not.toHaveBeenCalled();
-  });
-
-  it('verifies the PIN before preparing and activating the selected Profile', async () => {
-    const handlers = new Map<string, Handler>();
-    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
-      handlers.set(channel, handler as Handler);
-    });
-    const profile = {
-      profileId: 'profile-1',
-      localOwnerId: 'IdentityId_cloud-1',
-      profileKind: 'registered',
-      displayName: 'Cloud User',
-      avatarSeed: 'seed',
-      identifier: 'user@example.com',
-      cloudBinding: { cloudAccountId: 'IdentityId_cloud-1' },
-      lastActiveAt: 1,
-    };
-    const registry = { list: vi.fn().mockResolvedValue([profile]) };
-    const runtime = {
-      hasPin: vi.fn().mockResolvedValue(true),
-      preparePinUnlock: vi.fn().mockResolvedValue(undefined),
-      prepareProfile: vi.fn().mockResolvedValue(undefined),
-      prepareGuestProfile: vi.fn(),
-      activatePreparedProfile: vi.fn().mockResolvedValue(undefined),
-    };
-
-    registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
-      {},
-      {
-        profileId: 'profile-1',
-        pin: '123456',
-      },
-    );
-
-    expect(result).toMatchObject({ ok: true });
-    expect(runtime.preparePinUnlock).toHaveBeenCalledWith('profile-1', '123456');
-    expect(runtime.prepareProfile).toHaveBeenCalledWith('IdentityId_cloud-1', {
-      displayName: 'Cloud User',
-      identifier: 'user@example.com',
-    });
-    expect(runtime.prepareGuestProfile).not.toHaveBeenCalled();
-    expect(runtime.activatePreparedProfile).toHaveBeenCalledOnce();
-  });
-
-  it('reopens the persistent guest descriptor instead of registering its owner as cloud identity', async () => {
-    const handlers = new Map<string, Handler>();
-    vi.mocked(ipcMain.handle).mockImplementation((channel, handler) => {
-      handlers.set(channel, handler as Handler);
-    });
-    const profile = {
-      profileId: 'profile-guest',
-      localOwnerId: 'IdentityId_guest-owner',
-      profileKind: 'guest',
-      displayName: 'Guest',
-      avatarSeed: 'seed',
-      identifier: null,
-      cloudBinding: null,
-      lastActiveAt: 1,
-    };
-    const registry = { list: vi.fn().mockResolvedValue([profile]) };
-    const runtime = {
-      hasPin: vi.fn().mockResolvedValue(false),
-      prepareGuestProfile: vi.fn().mockResolvedValue(undefined),
-      prepareProfile: vi.fn(),
-      activatePreparedProfile: vi.fn().mockResolvedValue(undefined),
-    };
-
-    registerProfileAccessIpc(registry as never, runtime as never, { getState: vi.fn() } as never);
-    const result = await handlers.get(ProfileAccessChannels.SELECT)?.(
-      {},
-      {
-        profileId: 'profile-guest',
-      },
-    );
-
-    expect(result).toMatchObject({ ok: true });
-    expect(runtime.prepareGuestProfile).toHaveBeenCalledOnce();
-    expect(runtime.prepareProfile).not.toHaveBeenCalled();
-    expect(runtime.activatePreparedProfile).toHaveBeenCalledOnce();
+    registerProfileAccessIpc({} as never, runtime as never, {} as never);
+    expect(
+      await handlers.get(ProfileAccessChannels.SELECT)?.(
+        {},
+        { profileId: 'second-guest', pin: '123456' },
+      ),
+    ).toMatchObject({ ok: true });
+    expect(runtime.openProfile).toHaveBeenCalledWith('second-guest', '123456');
   });
 
   it('refuses to remove the active Profile', async () => {

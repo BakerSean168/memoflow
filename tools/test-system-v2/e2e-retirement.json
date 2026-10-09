@@ -86,6 +86,7 @@
     {
       "id": "legacy-profile-route",
       "needle": "/profile",
+      "suffixPattern": "^(?:$|[/?#\\s'\"`])",
       "reason": "The standalone profile route is retired; Account & Privacy is owned by Settings.",
       "replacement": "/settings?tab=account"
     },

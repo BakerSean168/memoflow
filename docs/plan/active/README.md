@@ -14,6 +14,7 @@ updated: 2026-10-07T00:00:00Z
 ## 当前计划
 
 - [本地 BYOA 与内置助手](./2026-10-09-local-byoa-and-builtin-assistant.md)：ADR-120/121 已采纳；保留 Mastra，按 Codex、可靠业务写入、Claude/Pi/Knowledge 和打包验收分阶段实施，完整实施进行中。
+- [独立 Desktop Profile](./2026-10-09-desktop-independent-profiles.md)：独立 Profile、复制导入、恢复与核验后清理已实现，Linux E2E / 本地部署验证通过；main 性能改动已整合，跨平台和真实云端网络同步待验收。
 
 - [Desktop parity and production OAuth repair](./2026-10-09-desktop-parity-oauth-repair.md)：修复 Keyboard IPC、统一共享样式与打包组件 CSS，生产 v0.16.0 OAuth 已恢复，本地验证进行中。
 

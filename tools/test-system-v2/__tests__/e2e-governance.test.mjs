@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 import {
   analyzeE2EOwnership,
@@ -13,6 +15,29 @@ const root = process.cwd();
 const inventory = await buildInventory(root);
 const ownership = await loadE2EOwnership(root);
 const retirement = await loadE2ERetirement(root);
+
+test('retired route matching rejects profile navigation while allowing the profile-import API', async () => {
+  const fixture = await mkdtemp(path.join(tmpdir(), 'e2e-retired-routes-'));
+  try {
+    await mkdir(path.join(fixture, 'apps/web/e2e'), { recursive: true });
+    await writeFile(
+      path.join(fixture, 'apps/web/e2e/routes.spec.ts'),
+      [
+        "page.goto('/profile');",
+        "page.goto('/profile?tab=info');",
+        "page.goto('/profile/edit');",
+        "request.post('/api/v1/data-portability/profile-import/preflight');",
+      ].join('\n'),
+    );
+    const result = await analyzeE2ERetirement(fixture, { ...retirement, retiredSpecs: [] });
+    assert.deepEqual(
+      result.issues.map((issue) => issue.line),
+      [1, 2, 3],
+    );
+  } finally {
+    await rm(fixture, { recursive: true, force: true });
+  }
+});
 
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);

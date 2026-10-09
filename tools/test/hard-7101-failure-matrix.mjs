@@ -145,7 +145,7 @@ function runMatrix({ skipE2e }) {
         [
           'bash',
           'apps/desktop/scripts/run-linux-electron-e2e-with-keyring.sh',
-          'e2e/authentication/desktop-auth-flow.spec.ts',
+          'e2e/authentication/desktop-auth-flow.spec.mts',
           '--grep',
           desktop.title,
         ],
@@ -159,7 +159,7 @@ function runMatrix({ skipE2e }) {
           'run',
           'desktop:e2e',
           '--',
-          'e2e/authentication/desktop-auth-flow.spec.ts',
+          'e2e/authentication/desktop-auth-flow.spec.mts',
           '--grep',
           desktop.title,
         ],

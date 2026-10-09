@@ -162,7 +162,7 @@
       "evidence": [
         {
           "runner": "desktop-e2e",
-          "file": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts",
+          "file": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
           "title": "persistent guest works offline, survives lock, and reopens with edited profile data"
         }
       ]

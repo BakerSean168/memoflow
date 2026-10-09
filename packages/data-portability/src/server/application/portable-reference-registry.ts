@@ -2,6 +2,7 @@ import type {
   PortableCapabilityKey,
   PortableReferencePort,
   PortableReferenceV3,
+  ProfileImportBinding,
 } from '@memoflow/contracts/data-portability';
 import {
   PortableCapabilityKeySchema,
@@ -17,7 +18,28 @@ export class PortableReferenceRegistry implements PortableReferencePort {
   private readonly exportRefs = new Map<string, PortableReferenceV3>();
   private readonly importTargets = new Map<PortableReferenceV3, string>();
 
-  declareExportReference(capabilityKey: PortableCapabilityKey, sourceKey: string): PortableReferenceV3 {
+  constructor(bindings: readonly ProfileImportBinding[] = []) {
+    for (const { ref, targetKey } of bindings) {
+      this.bindImportedReference(ref, targetKey);
+      const [capabilityKey, ordinal] = ref.split(':');
+      this.exportRefs.set(this.exportMapKey(capabilityKey!, targetKey), ref);
+      this.counters.set(
+        capabilityKey!,
+        Math.max(this.counters.get(capabilityKey!) ?? 0, Number(ordinal)),
+      );
+    }
+  }
+
+  importedBindings(): ProfileImportBinding[] {
+    return [...this.importTargets]
+      .map(([ref, targetKey]) => ({ ref, targetKey }))
+      .sort((a, b) => a.ref.localeCompare(b.ref));
+  }
+
+  declareExportReference(
+    capabilityKey: PortableCapabilityKey,
+    sourceKey: string,
+  ): PortableReferenceV3 {
     this.assertCapabilityKey(capabilityKey);
     this.assertPrivateKey(sourceKey, 'source');
     const mapKey = this.exportMapKey(capabilityKey, sourceKey);
@@ -31,7 +53,10 @@ export class PortableReferenceRegistry implements PortableReferencePort {
     return portableRef;
   }
 
-  resolveExportReference(capabilityKey: PortableCapabilityKey, sourceKey: string): PortableReferenceV3 {
+  resolveExportReference(
+    capabilityKey: PortableCapabilityKey,
+    sourceKey: string,
+  ): PortableReferenceV3 {
     this.assertCapabilityKey(capabilityKey);
     this.assertPrivateKey(sourceKey, 'source');
     const portableRef = this.exportRefs.get(this.exportMapKey(capabilityKey, sourceKey));

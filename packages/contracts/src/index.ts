@@ -161,3 +161,11 @@ export type {
   DesktopCloudConnectionStatus,
   DesktopCloudConnectionAttempt,
 } from './cloud-auth';
+
+export {
+  DesktopCloudConnectionRequestSchema,
+  DesktopCloudAttemptRequestSchema,
+  CloudAuthResponseSchema,
+  BetterAuthSessionResponseSchema,
+} from './cloud-auth';
+export type { DesktopCloudConnectionRequest, DesktopCloudConnectionResult } from './cloud-auth';

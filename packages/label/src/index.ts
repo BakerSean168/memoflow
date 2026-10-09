@@ -17,3 +17,5 @@ export {
 } from './application/label-portability';
 export { PrismaLabelRepository } from './infrastructure/prisma/prisma-label.repository';
 export { PowerSyncLabelRepository } from './infrastructure/powersync/powersync-label.repository';
+export { createLabelBusinessDataPresence } from './infrastructure/business-data-presence';
+export { createLabelPrismaPortableCapability } from './infrastructure/label-profile-import';

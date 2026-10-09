@@ -15,6 +15,8 @@ updated: 2026-09-19T00:00:00+00:00
 
 ## 当前入口
 
+- [独立 Desktop Profile](./desktop-profiles/README.md)：容器、认证和访客复制导入的设计及分阶段实施。
+
 - [功能地图](./feature-map.md)：核心模块、功能点、业务目标和盘点状态。
 - [目标模块说明](./modules/goal.md)：目标模块当前功能、用户路径、业务规则和风险点。
 - [目标模块文件索引](./module-index/goal-files.md)：目标模块相关页面、接口、领域代码、数据结构和测试入口。

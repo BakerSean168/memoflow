@@ -134,7 +134,11 @@ export function composeAccount(dependencies: ComposeAccountDependencies): Compos
   });
 
   return {
-    module: createAccountApiModule({ instance }),
+    module: createAccountApiModule({
+      instance,
+      readDataSummary: composeBusinessDataSummary(dependencies.db),
+    }),
     portableCapability: instance.portableCapability,
   };
 }
+import { composeBusinessDataSummary } from './compose-business-data-summary';

@@ -267,6 +267,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     'notification',
     'patterns',
     'powersync-schema',
+    'relation',
     'reminder',
     'repository',
     'schedule',
@@ -293,6 +294,10 @@ export function createSharedConfig(options: SharedConfigOptions) {
   }));
 
   const commonWorkspaceAliasEntries: Alias[] = [
+    {
+      find: /^@memoflow\/database\/transaction$/,
+      replacement: path.resolve(workspaceRoot, 'packages/database/src/transaction.ts'),
+    },
     {
       find: /^@memoflow\/database\/prisma$/,
       replacement: path.resolve(workspaceRoot, 'packages/database/src/generated/prisma/client.js'),

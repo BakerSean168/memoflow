@@ -324,7 +324,7 @@ interface GoalLifecycleState {
 }
 
 async function transitionGoal(
-  api: GoalApplicationPort,
+  api: GoalPortableLifecyclePort,
   goal: GoalPortableDefinitionV3,
   context: PortableCapabilityExecutionContext,
   state: GoalLifecycleState,
@@ -379,7 +379,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
   }
 
   constructor(
-    private readonly api: GoalApplicationPort,
+    private readonly api: GoalPortableLifecyclePort,
     private readonly portability: GoalPortabilityApplicationPort,
   ) {}
 
@@ -684,8 +684,13 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
 }
 
 export function createGoalPortableCapability(
-  api: GoalApplicationPort,
+  api: GoalPortableLifecyclePort,
   portability: GoalPortabilityApplicationPort,
 ): GoalPortableCapability {
   return new GoalPortableCapability(api, portability);
 }
+
+type GoalPortableLifecyclePort = Pick<
+  GoalApplicationPort,
+  'activateGoal' | 'completeGoal' | 'abandonGoal' | 'archiveGoal'
+>;

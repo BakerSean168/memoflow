@@ -5,6 +5,7 @@
       "@memoflow/database": [
         "./packages/database/src/index.ts"
       ],
+      "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],
       "@memoflow/database/environment": [
         "./packages/database/src/load-workspace-env.ts"
       ],

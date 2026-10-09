@@ -19,13 +19,13 @@ export interface DataPortabilityModuleDependencies {
   readonly nowIsoString?: () => string;
   readonly createBatchId?: () => string;
   readonly runtimeContributions?:
-    | DataPortabilityModuleRuntimeContribution
-    | readonly DataPortabilityModuleRuntimeContribution[];
+    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[];
 }
 
 export interface DataPortabilityModuleRuntimeContribution {
   start(): void;
   stop(): void;
+  drain?(): Promise<void>;
 }
 
 export interface DataPortabilityModuleUseCases {
@@ -39,12 +39,12 @@ export interface DataPortabilityModuleInstance {
   readonly api: DataPortabilityApplicationPort;
   start(): void;
   dispose(): void;
+  drain?(): Promise<void>;
 }
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    | DataPortabilityModuleRuntimeContribution
-    | readonly DataPortabilityModuleRuntimeContribution[],
+    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[],
 ): readonly DataPortabilityModuleRuntimeContribution[] {
   if (!runtimeContributions) return [];
   return Array.isArray(runtimeContributions)
@@ -155,6 +155,9 @@ export function createDataPortabilityModule(
       if (!started) return;
       for (const runtime of [...runtimeContributions].reverse()) runtime.stop();
       started = false;
+    },
+    async drain() {
+      await Promise.all(runtimeContributions.map((runtime) => runtime.drain?.()));
     },
   };
 }

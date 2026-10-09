@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import { deserializeProtocolSession, protocolSessionToPrisma } from './protocol-persistence-parity';
 import {
   ProtocolSessionNotFoundError,
@@ -21,7 +21,7 @@ function receipt(
 }
 
 export class PrismaProtocolSessionStore implements ProtocolSessionStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async create(session: ProtocolSession): Promise<ProtocolSessionPersistenceReceipt> {
     const data = protocolSessionToPrisma(session);

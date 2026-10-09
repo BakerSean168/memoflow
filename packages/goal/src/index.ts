@@ -71,3 +71,8 @@ export {
   createGoalPowerSyncAgentMutations,
   GoalAgentMutationError,
 } from './server/infrastructure/adapters/powersync/goal-agent-mutations';
+export { createGoalBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export {
+  createGoalPrismaPortableCapability,
+  createGoalPowerSyncPortableCapability,
+} from './server/infrastructure/goal-profile-import';

@@ -1,9 +1,9 @@
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { RoutinePreferencesStore } from '../../domain/ports';
 import { RoutinePreferences } from '../../domain/routine';
 
 export class PrismaRoutinePreferencesStore implements RoutinePreferencesStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async find(input: { readonly identityId: string }): Promise<RoutinePreferences | null> {
     const row = await this.prisma.routinePreference.findUnique({

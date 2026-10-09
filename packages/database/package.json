@@ -15,6 +15,11 @@
       "types": "./dist/load-workspace-env.d.ts",
       "import": "./dist/load-workspace-env.js"
     },
+    "./transaction": {
+      "types": "./dist/transaction.d.ts",
+      "import": "./dist/transaction.js",
+      "default": "./dist/transaction.js"
+    },
     "./prisma": {
       "types": "./dist/generated/prisma/client.d.ts",
       "import": "./dist/generated/prisma/client.js",

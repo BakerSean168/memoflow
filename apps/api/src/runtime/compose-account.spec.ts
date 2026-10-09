@@ -136,7 +136,10 @@ describe('composeAccount assembly order', () => {
     );
 
     const instance = createAccountModule.mock.results[0].value;
-    expect(createAccountApiModule).toHaveBeenCalledWith({ instance });
+    expect(createAccountApiModule).toHaveBeenCalledWith({
+      instance,
+      readDataSummary: expect.any(Function),
+    });
   });
 
   it('returns the pure module handle plus the Account-owned portability capability', () => {

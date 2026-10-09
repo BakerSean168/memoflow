@@ -132,3 +132,5 @@ export {
   LocalAgentToolBridge,
   type LocalToolContext,
 } from './server/local-agent/local-tool-bridge';
+export { createAiBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export { createAiPrismaPortableCapability } from './server/infrastructure/ai-profile-import';

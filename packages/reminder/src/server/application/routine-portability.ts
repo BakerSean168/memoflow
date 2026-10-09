@@ -560,6 +560,20 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     private readonly preferencesStore?: RoutinePreferencesStore,
   ) {}
 
+  async planProfileImport(
+    payload: RoutinePortablePayloadV3,
+    context: PortableCapabilityExecutionContext,
+  ) {
+    const target = this.payloadSchema.parse(payload);
+    const current = await this.preferencesStore?.find({ identityId: context.identityId });
+    const preservedFields: string[] = [];
+    if (current && !current.globalEnabled && target.preferences.globalEnabled) {
+      target.preferences.globalEnabled = false;
+      preservedFields.push('preferences.globalEnabled');
+    }
+    return { payload: target, preservedFields };
+  }
+
   async export(context: PortableCapabilityExecutionContext): Promise<RoutinePortablePayloadV3> {
     const preferences = this.preferencesStore
       ? await this.preferencesStore.find({ identityId: context.identityId })
@@ -827,7 +841,7 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
       } else created += 1;
       context.references.bindImportedReference(
         occurrence.ref,
-        `${routineId}\u0000${occurrence.occurrenceKey}`,
+        current?.id ?? `${routineId}\u0000${occurrence.occurrenceKey}`,
       );
     }
 
@@ -1089,10 +1103,7 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
         });
         updated += 1;
       }
-      context.references.bindImportedReference(
-        occurrence.ref,
-        `${routineId}\u0000${occurrence.occurrenceKey}`,
-      );
+      context.references.bindImportedReference(occurrence.ref, resulting.id);
     }
 
     const existingInteractions = await this.occurrenceStore.listInteractionsForIdentity({

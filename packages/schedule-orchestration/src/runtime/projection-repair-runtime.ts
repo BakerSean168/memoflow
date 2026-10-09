@@ -69,6 +69,7 @@ export function defineProjectionRepairLane<TRef>(
 export interface ProjectionRepairRuntime extends RuntimeContribution {
   /** Run one explicit durable repair sweep (also used once during startup). */
   sweep(): Promise<void>;
+  reconcileIdentity(identityId: string): Promise<boolean>;
   readonly metrics: ProjectionRepairMetricsReader;
 }
 
@@ -227,6 +228,30 @@ export function createProjectionRepairRuntime(
   return {
     metrics,
     sweep,
+    async reconcileIdentity(identityId: string): Promise<boolean> {
+      let succeeded = true;
+      for (const lane of lanes) {
+        if (!lane.buildOwner) {
+          succeeded = false;
+          continue;
+        }
+        try {
+          const refs = await lane.enumerate();
+          for (const ref of refs) {
+            if (lane.buildOwner(ref).identityId !== identityId) continue;
+            try {
+              const receipt = await lane.repair(ref);
+              if (receipt.status === 'failed') succeeded = false;
+            } catch {
+              succeeded = false;
+            }
+          }
+        } catch {
+          succeeded = false;
+        }
+      }
+      return succeeded;
+    },
     async start(): Promise<void> {
       if (started) return;
       await sweep();

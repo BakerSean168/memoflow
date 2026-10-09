@@ -13,6 +13,8 @@ updated: 2026-09-10T00:55:00+08:00
 
 > 2026-09-10 implementation checkpoint: `Account.settings` 已退休；`AccountView + CloudIdentitySummary` 已上线；Account lifecycle 已收敛为 `Active | Closed + closedAt`；无真实 capability 的 `ContactPhone` 与五个 phone persistence columns 已物理删除。ADR-111 的 destructive cutover 规则适用，因此本轮不保留 legacy backfill/dual-read compatibility。`ACC-1406` 已进一步退休 Account auth-email shadow、dead availability 与 legacy-auth bootstrap。`ACC-1407` 已删除 Account product `version`，保留 `AccountClosureOperation.version` 作为真实 CAS，并将 Account 创建/资料更新/关闭时间统一为显式 `Instant` + 注入式 `Clock`；Account persistence 不再以 ambient time 补缺。
 
+> 2026-10-09 修订：guest 原地重绑 / tenant adoption 由 [ADR-119](./ADR-119-independent-desktop-profiles-and-guest-copy-import.md) 的独立 Profile 登录路径取代；显式访客复制导入及核验后可选清理已实现，本地验证范围见 ADR-119 和实施计划。下文相关旧决策仅保留历史背景。
+
 ## Decision
 
 Account 的 canonical ownership 收敛为：
