@@ -3,6 +3,7 @@ export const electronNativeModules = ['electron', 'argon2', 'better-sqlite3'];
 export const electronNativeRuntimePackages = ['argon2', 'better-sqlite3'];
 
 export const electronJsExternalPackages = [
+  '@anthropic-ai/claude-agent-sdk',
   '@powersync/node',
   '@powersync/common',
   'date-fns',

@@ -125,6 +125,7 @@ export type OpenLocalVaultInObsidianReq = z.infer<typeof OpenLocalVaultInObsidia
 
 // Residual 795: confirmed write req dual retired — sole ReqSchema + z.infer.
 export const ConfirmedLocalVaultWriteReqSchema = z.object({
+  expectedBindingId: z.string().min(1).optional(),
   relativePath: z.string(),
   knowledgeDocumentId: KnowledgeDocumentIdSchema,
   contentMarkdown: z.string(),

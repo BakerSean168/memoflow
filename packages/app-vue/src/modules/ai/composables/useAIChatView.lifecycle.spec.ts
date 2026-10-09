@@ -17,6 +17,8 @@ const fixture = await vi.hoisted(async () => {
   const openTask = vi.fn();
   const openKnowledge = vi.fn();
   const session = {
+    runtimeChoice: ref({ runtimeKind: 'builtin' as const }),
+    historyIncomplete: ref(false),
     chatMessage: ref(''),
     chatTimeline: ref([]),
     chatLoading: ref(false),

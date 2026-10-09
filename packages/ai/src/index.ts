@@ -61,6 +61,8 @@ export {
   type AIKnowledgeEvidenceInput,
 } from './server/mastra/context';
 export { AIEvaluationReportFileAdapter } from './server/infrastructure';
+export { LocalAgentRuntime } from './server/local-agent/local-agent-runtime';
+export { LocalAgentRepository } from './server/infrastructure/adapters/powersync/local-agent.repository';
 export {
   projectAIOwnerActivity,
   type AIOwnerActivityGoalFact,
@@ -125,3 +127,8 @@ export type {
   AINotificationActionReceipt,
   AIUnreadNotificationSummary,
 } from './ports';
+
+export {
+  LocalAgentToolBridge,
+  type LocalToolContext,
+} from './server/local-agent/local-tool-bridge';

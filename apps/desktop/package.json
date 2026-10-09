@@ -15,7 +15,9 @@
   "version": "0.16.0",
   "type": "commonjs",
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.295",
     "@memoflow/account": "workspace:*",
+    "@memoflow/agent-gateway": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/app-vue": "workspace:*",
     "@memoflow/assets": "workspace:*",

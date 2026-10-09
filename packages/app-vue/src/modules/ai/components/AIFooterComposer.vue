@@ -162,7 +162,11 @@
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" class="w-60">
-                <DropdownMenuItem data-testid="ai-chat-upload-file" @click="openFilePicker">
+                <DropdownMenuItem
+                  v-if="!localAgent"
+                  data-testid="ai-chat-upload-file"
+                  @click="openFilePicker"
+                >
                   <Paperclip class="mr-2 h-4 w-4" />
                   {{ t('aiAssistant.chatPage.attachments.upload') }}
                 </DropdownMenuItem>
@@ -262,7 +266,7 @@
             </span>
           </div>
 
-          <div v-if="modelGroups.length" class="min-w-0 shrink-0">
+          <div v-if="!localAgent && modelGroups.length" class="min-w-0 shrink-0">
             <Select
               :model-value="selectedModelKey"
               @update:model-value="$emit('select-model', String($event))"
@@ -284,7 +288,7 @@
             </Select>
           </div>
           <Button
-            v-else
+            v-else-if="!localAgent"
             variant="ghost"
             class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             data-testid="ai-chat-empty-models"
@@ -376,6 +380,7 @@ import {
 
 const props = withDefaults(
   defineProps<{
+    localAgent?: boolean;
     modelValue: string;
     loading: boolean;
     canSend: boolean;
@@ -545,10 +550,12 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function openFilePicker() {
+  if (props.localAgent) return;
   fileInput.value?.click();
 }
 
 function handleFileInput(event: Event) {
+  if (props.localAgent) return;
   const input = event.target as HTMLInputElement;
   const files = Array.from(input.files ?? []);
   if (files.length) emit('add-files', files);
@@ -556,6 +563,7 @@ function handleFileInput(event: Event) {
 }
 
 function handlePaste(event: ClipboardEvent) {
+  if (props.localAgent) return;
   const clipboard = event.clipboardData;
   if (!clipboard) return;
   const directFiles = Array.from(clipboard.files ?? []);
@@ -572,6 +580,7 @@ function handlePaste(event: ClipboardEvent) {
 
 function handleDrop(event: DragEvent) {
   dragging.value = false;
+  if (props.localAgent) return;
   const files = Array.from(event.dataTransfer?.files ?? []);
   if (files.length) emit('add-files', files);
 }

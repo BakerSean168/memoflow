@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * AI-VNEXT-03 architecture lock: product open chat is Mastra-native. The
+ * AI-VNEXT-03 / ADR-120: builtin chat remains Mastra-native. The
  * transitional AIClientService remains available to non-migrated workflows,
  * but default chat must never re-enter AssistantFacade/DirectTurn/Pi profiles.
  */
-describe('useAIChatSession Mastra-native open chat surface', () => {
+describe('useAIChatSession runtime-owned open chat surface', () => {
   const session = [
     'useAIChatSession.ts',
     'useAssistantStream.ts',
@@ -35,8 +35,10 @@ describe('useAIChatSession Mastra-native open chat surface', () => {
     expect(session).toContain('options.runtime.deleteConversation(id)');
     expect(session).toContain('options.runtime.streamMessage(');
     expect(session).toContain('options.runtime.cancelRun(runId)');
-    expect(session).toContain('providerId: selectedModel.providerId');
-    expect(session).toContain('modelId: selectedModel.modelId');
+    expect(session).toContain('providerId: selectedModel!.providerId');
+    expect(session).toContain('modelId: selectedModel!.modelId');
+    expect(session).toContain("{ runtimeKind: 'local_agent', modelId: choice.modelId }");
+    expect(session).toContain('options.runtime.listMessages(conversationId, kind)');
     expect(session).toContain("event.type === 'assistant.message.delta'");
     expect(session).toContain("event.type === 'assistant.usage.updated'");
     expect(session).toContain("event.type === 'assistant.run.completed'");

@@ -1,4 +1,8 @@
-import type { AssistantRuntimeClient, RuntimeUsageClient } from '@memoflow/ai/client';
+import type {
+  AssistantRuntimeClient,
+  RuntimeUsageClient,
+  LocalAgentClient,
+} from '@memoflow/ai/client';
 import type { AIRuntimeSurface } from '@memoflow/contracts/ai';
 import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -13,6 +17,8 @@ const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
 export interface UseAIChatSessionOptions {
   /** Transitional shell/workflow client. Open-chat transcript execution never uses it. */
   service: AIChatService;
+  localAgent?: LocalAgentClient;
+  getDefaultRuntimeChoice?: () => import('@memoflow/contracts/ai').AssistantRuntimeChoice;
   /** Mastra-native authoritative history/stream/cancel client. */
   runtime: AssistantRuntimeClient;
   /** Durable conversation/run usage projection. */
@@ -49,6 +55,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     startNewConversation: () => startNewConversation(),
   });
   const {
+    runtimeChoice,
+    historyIncomplete,
     chatConversationId,
     chatTimeline,
     conversationTitle,
@@ -124,6 +132,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
 
   function resetChatSession(mode: string = 'chat', getDefaultName: (m: string) => string) {
     chatConversationId.value = '';
+    runtimeChoice.value =
+      mode === 'chat'
+        ? (options.getDefaultRuntimeChoice?.() ?? { runtimeKind: 'builtin' })
+        : { runtimeKind: 'builtin' };
+    historyIncomplete.value = false;
     chatTimeline.value = [];
     chatMessage.value = '';
     conversationTitle.value = getDefaultName(mode);
@@ -157,6 +170,9 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   }
 
   return {
+    runtimeChoice,
+    historyIncomplete,
+    respondNativeRequest: stream.respondNativeRequest,
     chatMessage,
     chatLoading,
     chatConversationId,

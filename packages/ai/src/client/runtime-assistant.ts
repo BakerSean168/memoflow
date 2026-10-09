@@ -1,4 +1,5 @@
 import {
+  type AssistantRuntimeKind,
   AssistantRuntimeApprovalCommandSchema,
   AssistantRuntimeApprovalResultSchema,
   type AssistantRuntimeApprovalCommand,
@@ -36,14 +37,17 @@ export interface AssistantRuntimeHandlers {
 
 /** Thin client-side vNext seam; no Mastra private type crosses this interface. */
 export interface AssistantRuntimeClient {
-  listMessages(conversationId: string): Promise<AssistantRuntimeHistoryView>;
-  deleteConversation(conversationId: string): Promise<boolean>;
+  listMessages(
+    conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantRuntimeHistoryView>;
+  deleteConversation(conversationId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean>;
   streamMessage(
     command: AssistantRuntimeMessageCommand,
     handlers: AssistantRuntimeHandlers,
     signal?: AbortSignal,
   ): Promise<void>;
-  cancelRun(runId: string): Promise<boolean>;
+  cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean>;
   decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
 
@@ -95,8 +99,16 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 
   constructor(private readonly httpClient: IResultHttpClient) {}
 
-  async listMessages(conversationId: string): Promise<AssistantRuntimeHistoryView> {
-    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+  async listMessages(
+    conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantRuntimeHistoryView> {
+    if (runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent history requires Desktop', 'NOT_SUPPORTED');
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({
+      conversationId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.httpClient.post<unknown>(this.historyUrl, request);
     const parsed = AssistantRuntimeHistoryViewSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success) {
@@ -105,8 +117,16 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     return parsed.data;
   }
 
-  async deleteConversation(conversationId: string): Promise<boolean> {
-    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+  async deleteConversation(
+    conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<boolean> {
+    if (runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent history requires Desktop', 'NOT_SUPPORTED');
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({
+      conversationId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.httpClient.post<unknown>(this.deleteUrl, request);
     const parsed = AssistantRuntimeConversationDeleteResultSchema.safeParse(
       unwrapOrThrowError(result),
@@ -123,6 +143,8 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     signal?: AbortSignal,
   ): Promise<void> {
     const validatedCommand = validateMessageCommand(command);
+    if (validatedCommand.runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent execution requires Desktop', 'NOT_SUPPORTED');
     let response: Response;
     try {
       response = await this.httpClient.stream(this.streamUrl, {
@@ -191,8 +213,14 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     return parsed.data.accepted;
   }
 
-  async cancelRun(runId: string): Promise<boolean> {
-    const command = AssistantRuntimeClientCommandSchema.parse({ type: 'cancel_run', runId });
+  async cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean> {
+    if (runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent execution requires Desktop', 'NOT_SUPPORTED');
+    const command = AssistantRuntimeClientCommandSchema.parse({
+      type: 'cancel_run',
+      runId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.httpClient.post<unknown>(this.cancelUrl, command);
     const parsed = AssistantRuntimeCancelResultSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success) {
@@ -205,8 +233,14 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
-  async listMessages(conversationId: string): Promise<AssistantRuntimeHistoryView> {
-    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+  async listMessages(
+    conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantRuntimeHistoryView> {
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({
+      conversationId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.ipcClient.invoke<unknown>(
       AIChannels.RUNTIME_ASSISTANT_HISTORY,
       request,
@@ -218,8 +252,14 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     return parsed.data;
   }
 
-  async deleteConversation(conversationId: string): Promise<boolean> {
-    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+  async deleteConversation(
+    conversationId: string,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<boolean> {
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({
+      conversationId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.ipcClient.invoke<unknown>(
       AIChannels.RUNTIME_ASSISTANT_DELETE,
       request,
@@ -277,7 +317,7 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     };
     const requestRuntimeCancel = () => {
       if (!activeRunId) return;
-      void this.cancelRun(activeRunId).catch(() => undefined);
+      void this.cancelRun(activeRunId, validatedCommand.runtimeKind).catch(() => undefined);
     };
     const onAbort = () => {
       abortRequested = true;
@@ -337,8 +377,12 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     return parsed.data.accepted;
   }
 
-  async cancelRun(runId: string): Promise<boolean> {
-    const command = AssistantRuntimeClientCommandSchema.parse({ type: 'cancel_run', runId });
+  async cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean> {
+    const command = AssistantRuntimeClientCommandSchema.parse({
+      type: 'cancel_run',
+      runId,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
     const result = await this.ipcClient.invoke<unknown>(
       AIChannels.RUNTIME_ASSISTANT_CANCEL,
       command,

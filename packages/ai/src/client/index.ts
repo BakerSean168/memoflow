@@ -41,14 +41,8 @@ import type {
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
 } from '@memoflow/contracts/ai';
-import {
-  createAIHttpAdapters,
-  type AIHttpAdapters,
-} from '../infrastructure-client/adapters/http';
-import {
-  createAIIpcAdapters,
-  type AIIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
+import { createAIHttpAdapters, type AIHttpAdapters } from '../infrastructure-client/adapters/http';
+import { createAIIpcAdapters, type AIIpcAdapters } from '../infrastructure-client/adapters/ipc';
 
 export interface AIClientPort {
   getCapabilities(): Promise<Result<AICapabilities>>;
@@ -57,9 +51,15 @@ export interface AIClientPort {
   ): Promise<Result<GetAIEvaluationOverviewRes>>;
 
   getProviderCatalog(): Promise<Result<ListAIProviderCatalogRes>>;
-  probeProviderConnection(request: ProbeAIProviderConnectionReq): Promise<Result<ProbeAIProviderConnectionRes>>;
-  testProviderOnboardingModel(request: TestAIProviderOnboardingModelReq): Promise<Result<TestAIProviderOnboardingModelRes>>;
-  commitProviderOnboarding(request: CommitAIProviderOnboardingReq): Promise<Result<AIProviderConfigClientDTO>>;
+  probeProviderConnection(
+    request: ProbeAIProviderConnectionReq,
+  ): Promise<Result<ProbeAIProviderConnectionRes>>;
+  testProviderOnboardingModel(
+    request: TestAIProviderOnboardingModelReq,
+  ): Promise<Result<TestAIProviderOnboardingModelRes>>;
+  commitProviderOnboarding(
+    request: CommitAIProviderOnboardingReq,
+  ): Promise<Result<AIProviderConfigClientDTO>>;
   probeProviderReplacement(
     id: string,
     request: ProbeAIProviderReplacementReq,
@@ -100,9 +100,7 @@ export interface AIClientPort {
 
 interface ProductAdapters {
   readonly capabilities: AIHttpAdapters['capabilities'] | AIIpcAdapters['capabilities'];
-  readonly evaluationReport:
-    | AIHttpAdapters['evaluationReport']
-    | AIIpcAdapters['evaluationReport'];
+  readonly evaluationReport: AIHttpAdapters['evaluationReport'] | AIIpcAdapters['evaluationReport'];
   readonly providerConfig: AIHttpAdapters['providerConfig'] | AIIpcAdapters['providerConfig'];
   readonly conversation: AIHttpAdapters['conversation'] | AIIpcAdapters['conversation'];
   readonly knowledge: AIHttpAdapters['knowledge'] | AIIpcAdapters['knowledge'];
@@ -112,13 +110,14 @@ interface ProductAdapters {
 function createProductClient(adapters: ProductAdapters): AIClientPort {
   return {
     getCapabilities: () => adapters.capabilities.getCapabilities(),
-    getEvaluationOverview: (request) =>
-      adapters.evaluationReport.getEvaluationOverview(request),
+    getEvaluationOverview: (request) => adapters.evaluationReport.getEvaluationOverview(request),
 
     getProviderCatalog: () => adapters.providerConfig.getProviderCatalog(),
     probeProviderConnection: (request) => adapters.providerConfig.probeProviderConnection(request),
-    testProviderOnboardingModel: (request) => adapters.providerConfig.testProviderOnboardingModel(request),
-    commitProviderOnboarding: (request) => adapters.providerConfig.commitProviderOnboarding(request),
+    testProviderOnboardingModel: (request) =>
+      adapters.providerConfig.testProviderOnboardingModel(request),
+    commitProviderOnboarding: (request) =>
+      adapters.providerConfig.commitProviderOnboarding(request),
     probeProviderReplacement: (id, request) =>
       adapters.providerConfig.probeProviderReplacement(id, request),
     commitProviderReplacement: (id, request) =>
@@ -155,10 +154,7 @@ export function createAIIpcClient(ipcClient: IResultIpcClient): AIClientPort {
 }
 
 export type { IResultHttpClient, IResultIpcClient, AIHttpAdapters, AIIpcAdapters };
-export {
-  createAIHttpAdapters,
-  createAIIpcAdapters,
-} from '../infrastructure-client/adapters';
+export { createAIHttpAdapters, createAIIpcAdapters } from '../infrastructure-client/adapters';
 export {
   AssistantRuntimeHttpClient,
   AssistantRuntimeIpcClient,
@@ -183,3 +179,4 @@ export {
   createRuntimeUsageIpcClient,
   type RuntimeUsageClient,
 } from './runtime-usage';
+export { createLocalAgentIpcClient, type LocalAgentClient } from './local-agent';

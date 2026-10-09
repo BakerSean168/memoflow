@@ -4,6 +4,9 @@ import type {
   AssistantRuntimeEvent,
   AssistantRuntimeAttachment,
   ConversationListRes,
+  LocalAgentConversation,
+  LocalAgentRequest,
+  LocalAgentActivity,
   GoalPlanDraft,
   GoalPlanKnowledge,
   GoalPlanTask,
@@ -113,9 +116,21 @@ export type ChatItem = {
     { activityType: 'tool' }
   >;
   approvals?: ChatToolApproval[];
+  nativeActivity?: { toolCallId: string; label: string };
+  nativeActivities?: LocalAgentActivity[];
+  nativeRequests?: ChatNativeRequest[];
 };
 
-export type ConversationSummary = ConversationListRes['data'][number];
+export type ChatNativeRequest = {
+  request: LocalAgentRequest;
+  conversationId: string;
+  runId: string;
+  status: 'pending' | 'sending' | 'answered' | 'expired';
+  errorMessage?: string;
+};
+
+export type ConversationSummary =
+  (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' }) | LocalAgentConversation;
 
 export type ProviderListItem = {
   id: string;

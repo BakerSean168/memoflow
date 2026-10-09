@@ -42,3 +42,9 @@ export {
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';
 
 export { createTaskPrismaReadQueries } from './server';
+
+export { createTaskPowerSyncReadQueries } from './server/infrastructure/adapters/powersync/task-page-reader';
+export {
+  createTaskPowerSyncAgentMutations,
+  TaskAgentMutationError,
+} from './server/infrastructure/adapters/powersync/task-agent-mutations';

@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [本地 BYOA 与内置助手](./2026-10-09-local-byoa-and-builtin-assistant.md)：ADR-120/121 已采纳；保留 Mastra，按 Codex、可靠业务写入、Claude/Pi/Knowledge 和打包验收分阶段实施，完整实施进行中。
+
 - [Desktop parity and production OAuth repair](./2026-10-09-desktop-parity-oauth-repair.md)：修复 Keyboard IPC、统一共享样式与打包组件 CSS，生产 v0.16.0 OAuth 已恢复，本地验证进行中。
 
 - [Keyboard-first V1](./2026-10-08-keyboard-first-v1.md)：实现与 Web/Linux 桌面本地验收已完成，Windows/macOS 实机验收待补。

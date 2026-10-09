@@ -107,6 +107,30 @@
                   </button>
                 </div>
               </section>
+              <p
+                v-if="item.nativeActivity"
+                role="status"
+                class="mb-2 text-xs text-muted-foreground"
+              >
+                {{ item.nativeActivity.label }}
+              </p>
+              <AILocalRequestCard
+                v-for="request in item.nativeRequests ?? []"
+                :key="request.request.requestId"
+                :request="request"
+                @respond="$emit('native-response', request, $event)"
+              />
+              <details
+                v-if="item.nativeActivities?.length"
+                class="mb-2 text-xs text-muted-foreground"
+              >
+                <summary class="cursor-pointer">{{ t('aiAssistant.local.toolHistory') }}</summary>
+                <ul class="mt-1 space-y-1">
+                  <li v-for="activity in item.nativeActivities" :key="activity.toolCallId">
+                    {{ activity.label }}
+                  </li>
+                </ul>
+              </details>
               <AIMessageContent
                 v-if="item.content.trim()"
                 :content="item.content"
@@ -128,6 +152,16 @@
                 class="mt-1.5 flex h-8 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/message:opacity-100"
                 data-testid="ai-message-actions"
               >
+                <button
+                  v-if="canSaveLocalNote && item.status !== 'generating'"
+                  type="button"
+                  class="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  data-testid="ai-message-save-note"
+                  @click="$emit('save-local-note', item.content)"
+                >
+                  <NotebookPen class="h-3.5 w-3.5" />
+                  {{ t('aiAssistant.local.saveNote') }}
+                </button>
                 <button
                   type="button"
                   class="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
@@ -317,12 +351,15 @@ import {
   Target,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import type { LocalAgentRequestResponse } from '@memoflow/contracts/ai';
+import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   getToolLocaleKey,
   type ChatItem,
   type ChatToolApproval,
+  type ChatNativeRequest,
   type WorkflowMode,
 } from '../composables/types';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
@@ -336,6 +373,7 @@ withDefaults(
     hasModels?: boolean;
     /** Show workflow decision/actions + artifact surface near the timeline. */
     showWorkflowSurface?: boolean;
+    canSaveLocalNote?: boolean;
   }>(),
   {
     hasModels: true,
@@ -348,6 +386,8 @@ defineEmits<{
   'configure-ai': [];
   'create-goal': [];
   'quick-task': [];
+  'native-response': [request: ChatNativeRequest, response: LocalAgentRequestResponse['response']];
+  'save-local-note': [content: string];
   'tool-decision': [approval: ChatToolApproval, decision: 'approve' | 'decline'];
 }>();
 

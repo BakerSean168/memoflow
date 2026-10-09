@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue';
+import { inject, onBeforeUnmount, ref, watch } from 'vue';
+import { routerKey } from 'vue-router';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 
 const props = withDefaults(
@@ -11,6 +12,23 @@ const props = withDefaults(
 );
 
 const STREAM_MARKDOWN_RENDER_MS = 120;
+const router = inject(routerKey, undefined);
+function openReference(event: MouseEvent) {
+  if (
+    !router ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const target = event.target instanceof Element ? event.target.closest('a') : null;
+  const href = target?.getAttribute('href');
+  if (!href || !/^\/(goals|tasks)\/[A-Za-z0-9_-]+$/.test(href)) return;
+  event.preventDefault();
+  void router.push(href);
+}
 const rendered = ref(renderSafeMarkdown(props.content));
 let pendingContent = props.content;
 let renderTimer: ReturnType<typeof setTimeout> | null = null;
@@ -46,6 +64,7 @@ onBeforeUnmount(cancelRenderTimer);
   <div
     class="ai-message-content min-w-0 text-sm leading-7 text-foreground"
     data-testid="ai-message-markdown"
+    @click="openReference"
     v-html="rendered"
   />
 </template>

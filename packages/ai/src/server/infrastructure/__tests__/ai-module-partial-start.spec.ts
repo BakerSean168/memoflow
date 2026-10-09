@@ -95,7 +95,7 @@ describe('createAIModule partial-start cleanup', () => {
     expect(a.stop).toHaveBeenCalledTimes(1);
   });
 
-  it('stops all contributions in reverse order on dispose after a successful start', () => {
+  it('stops all contributions in reverse order on dispose after a successful start', async () => {
     const a = makeContribution('a');
     const b = makeContribution('b');
 
@@ -105,7 +105,7 @@ describe('createAIModule partial-start cleanup', () => {
     expect(a.start).toHaveBeenCalledTimes(1);
     expect(b.start).toHaveBeenCalledTimes(1);
 
-    instance.dispose();
+    await instance.dispose();
     expect(b.stop.mock.invocationCallOrder[0]).toBeLessThan(a.stop.mock.invocationCallOrder[0]);
   });
 });

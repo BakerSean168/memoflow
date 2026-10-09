@@ -16,8 +16,10 @@
     "./setup/*": "./src/setup/*.ts"
   },
   "dependencies": {
+    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
+    "@memoflow/powersync-schema": "workspace:*",
     "@vue/test-utils": "^2.5.1",
     "pg": "8.23.0",
     "pinia": "^4.0.3",

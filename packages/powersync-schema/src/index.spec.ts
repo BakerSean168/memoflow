@@ -9,6 +9,20 @@ function getColumnType(tableName: keyof typeof PowerSyncAppSchema.props, columnN
 }
 
 describe('PowerSyncAppSchema', () => {
+  it('keeps local Agent settings, bindings and display history out of synchronization', () => {
+    for (const name of [
+      'ai_local_agent_connections',
+      'ai_local_conversations',
+      'ai_local_conversation_items',
+      'task_agent_mutation_receipts',
+      'goal_operation_receipts',
+    ] as const) {
+      const table = PowerSyncAppSchema.tables.find((candidate) => candidate.name === name);
+      expect(table, name).toBeDefined();
+      expect(table?.localOnly, name).toBe(true);
+      expect(table?.columns.find((column) => column.name === 'identity_id')?.type).toBe('TEXT');
+    }
+  });
   it('syncs GoalRecord authorship separately from correlation and recordedAt', () => {
     for (const name of ['authorship', 'source_type', 'source_id', 'recorded_at'])
       expect(getColumnType('goal_records', name)).toBe('TEXT');

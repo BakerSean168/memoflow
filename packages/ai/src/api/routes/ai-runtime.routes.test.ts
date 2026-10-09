@@ -159,6 +159,32 @@ const messageCommand = {
 };
 
 describe('registerAIRuntimeRoutes', () => {
+  it.each([
+    [
+      '/assistant/sse',
+      { type: 'message', conversationId: 'local-1', content: 'Hello', surface: 'desktop' },
+    ],
+    ['/assistant/history', { conversationId: 'local-1' }],
+    ['/assistant/delete', { conversationId: 'local-1' }],
+    ['/assistant/cancel', { type: 'cancel_run', runId: 'local-run' }],
+  ])('rejects Desktop local runtime references over HTTP at %s', async (path, body) => {
+    const runtime = runtimeStub();
+    const router = registerAIRuntimeRoutes(runtime.runtime, { auth: vi.fn() });
+    const { res } = response();
+    await getRouteHandler(
+      router,
+      'post',
+      String(path),
+    )(
+      request({ ...body, runtimeKind: 'local_agent' }) as unknown as Request,
+      res as unknown as Response,
+    );
+    expect(res.statusCode).toBe(400);
+    expect(runtime.dispatchMessage).not.toHaveBeenCalled();
+    expect(runtime.listMessages).not.toHaveBeenCalled();
+    expect(runtime.deleteConversation).not.toHaveBeenCalled();
+    expect(runtime.cancelRun).not.toHaveBeenCalled();
+  });
   it('streams only canonical vNext events and injects authenticated identity into Mastra runtime', async () => {
     const started: AssistantRuntimeEvent = {
       eventId: 'run-1:1',

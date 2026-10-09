@@ -1,9 +1,13 @@
-import type { AssistantRuntimeEvent, AssistantRuntimeSelectedEntity } from '@memoflow/contracts/ai';
+import type {
+  AssistantRuntimeEvent,
+  AssistantRuntimeSelectedEntity,
+  LocalAgentRequestResponse,
+} from '@memoflow/contracts/ai';
 import { nextTick, ref, shallowRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
-import type { AIChatService, ChatModelOption, ChatToolApproval } from './types';
+import type { AIChatService, ChatModelOption, ChatToolApproval, ChatNativeRequest } from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 import type { useAIComposerContext } from './useAIComposerContext';
@@ -14,6 +18,7 @@ export function useAssistantStream(input: {
   chatMessage: Ref<string>;
   conversation: Pick<
     ReturnType<typeof useConversationProjection>,
+    | 'runtimeChoice'
     | 'chatConversationId'
     | 'chatTimeline'
     | 'lastRuntimeUsage'
@@ -24,6 +29,7 @@ export function useAssistantStream(input: {
 }) {
   const { options, chatMessage, composer } = input;
   const {
+    runtimeChoice,
     chatConversationId,
     chatTimeline,
     lastRuntimeUsage,
@@ -61,6 +67,10 @@ export function useAssistantStream(input: {
       : chatTimeline.value;
     for (const item of items) {
       if (item.toolActivity) delete item.toolActivity;
+      delete item.nativeActivity;
+      for (const request of item.nativeRequests ?? [])
+        if (request.status === 'pending' || request.status === 'sending')
+          request.status = 'expired';
       for (const approval of item.approvals ?? []) {
         if (approval.status === 'pending' || approval.status === 'sending') {
           approval.status = resolution;
@@ -102,6 +112,35 @@ export function useAssistantStream(input: {
       if (stillWaiting()) {
         approval.status = 'pending';
         approval.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+      }
+    }
+  }
+
+  async function respondNativeRequest(
+    request: ChatNativeRequest,
+    response: LocalAgentRequestResponse['response'],
+  ) {
+    if (
+      request.status !== 'pending' ||
+      request.runId !== activeRuntimeRunId.value ||
+      request.conversationId !== chatConversationId.value ||
+      !chatLoading.value ||
+      !options.localAgent
+    )
+      return;
+    request.status = 'sending';
+    try {
+      const accepted = await options.localAgent.respond({
+        conversationId: request.conversationId,
+        runId: request.runId,
+        requestId: request.request.requestId,
+        response,
+      });
+      if (!accepted && request.status === 'sending') request.status = 'expired';
+    } catch {
+      if (request.status === 'sending') {
+        request.status = 'pending';
+        request.errorMessage = t('aiAssistant.chatPage.tools.transportError');
       }
     }
   }
@@ -166,7 +205,11 @@ export function useAssistantStream(input: {
     abortActiveStream();
     markGeneratingAssistantAborted();
     if (!runId) return;
-    void options.runtime.cancelRun(runId).catch(() => {
+    const cancel =
+      runtimeChoice.value.runtimeKind === 'local_agent'
+        ? options.runtime.cancelRun(runId, 'local_agent')
+        : options.runtime.cancelRun(runId);
+    void cancel.catch(() => {
       // Transport abort is already applied locally; owner-scoped cancel is best effort.
     });
   }
@@ -176,7 +219,37 @@ export function useAssistantStream(input: {
     if (activeRuntimeRunId.value && event.runId !== activeRuntimeRunId.value) return;
     const item = chatTimeline.value.find((candidate) => candidate.id === assistantDraftId);
     if (!item) return;
+    if (event.type === 'assistant.request.required') {
+      item.nativeRequests ??= [];
+      if (!item.nativeRequests.some((value) => value.request.requestId === event.data.requestId))
+        item.nativeRequests.push({
+          request: event.data,
+          conversationId: event.conversationId,
+          runId: event.runId,
+          status: 'pending',
+        });
+      return;
+    }
+    if (event.type === 'assistant.request.resolved') {
+      const request = item.nativeRequests?.find(
+        (value) => value.request.requestId === event.data.requestId,
+      );
+      if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+      return;
+    }
     if (event.type === 'assistant.activity') {
+      if (event.data.activityType === 'native_tool') {
+        const activity = event.data;
+        item.nativeActivities ??= [];
+        const existing = item.nativeActivities.findIndex(
+          (value) => value.toolCallId === activity.toolCallId,
+        );
+        if (existing >= 0) item.nativeActivities[existing] = activity;
+        else if (item.nativeActivities.length < 256) item.nativeActivities.push(activity);
+        if (event.data.state === 'running') item.nativeActivity = event.data;
+        else if (item.nativeActivity?.toolCallId === event.data.toolCallId)
+          delete item.nativeActivity;
+      }
       if (event.data.activityType === 'tool') {
         if (event.data.state === 'running') item.toolActivity = event.data;
         else if (item.toolActivity?.toolCallId === event.data.toolCallId) delete item.toolActivity;
@@ -257,7 +330,8 @@ export function useAssistantStream(input: {
     conversationName: string,
     adjustComposerHeight: () => void,
   ) {
-    if (!selectedModel || chatLoading.value) return;
+    const choice = runtimeChoice.value;
+    if ((choice.runtimeKind === 'builtin' && !selectedModel) || chatLoading.value) return;
 
     let userDraftId = '';
     let assistantDraftId = '';
@@ -311,8 +385,9 @@ export function useAssistantStream(input: {
           conversationId,
           content: pendingUserMessage,
           surface: options.surface,
-          providerId: selectedModel.providerId,
-          modelId: selectedModel.modelId,
+          ...(choice.runtimeKind === 'local_agent'
+            ? { runtimeKind: 'local_agent', modelId: choice.modelId }
+            : { providerId: selectedModel!.providerId, modelId: selectedModel!.modelId }),
           attachments: pendingAttachments,
           selectedEntities: pendingEntities,
         },
@@ -366,6 +441,7 @@ export function useAssistantStream(input: {
   }
 
   return {
+    respondNativeRequest,
     chatLoading,
     activeStreamAbortController,
     activeRuntimeRunId,

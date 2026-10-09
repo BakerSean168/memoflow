@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { AssistantToolNameSchema } from './assistant-runtime.dto';
 import { RuntimeEventBaseShape } from './runtime-event-base';
 import { AIRuntimeUsageSchema } from './runtime-usage.dto';
+import { LocalAgentRequestSchema, LocalAgentActivitySchema } from './local-agent.dto';
 const AssistantToolShape = {
   toolCallId: z.string().min(1).max(512),
   toolName: AssistantToolNameSchema,
@@ -34,11 +35,33 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
           state: z.enum(['running', 'completed', 'failed', 'denied']),
         })
         .strict(),
+      LocalAgentActivitySchema.extend({
+        activityType: z.literal('native_tool'),
+      }).strict(),
       z
         .object({ activityType: z.literal('generating'), message: z.string().max(240).optional() })
         .strict(),
     ]),
   }),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.request.required'),
+      data: LocalAgentRequestSchema,
+    })
+    .strict(),
+  z
+    .object({
+      ...RuntimeEventBaseShape,
+      type: z.literal('assistant.request.resolved'),
+      data: z
+        .object({
+          requestId: z.string().min(1),
+          resolution: z.enum(['answered', 'cancelled', 'failed']),
+        })
+        .strict(),
+    })
+    .strict(),
   z
     .object({
       ...RuntimeEventBaseShape,

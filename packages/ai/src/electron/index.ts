@@ -85,6 +85,7 @@ import {
   AIWorkflowResumeClientRequestSchema,
   AIWorkflowRunViewSchema,
   AIWorkflowStartClientRequestSchema,
+  LocalAgentClientCommandSchema,
 } from '@memoflow/contracts/ai';
 import { fail, ok } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
@@ -329,6 +330,61 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         );
         installed.push(AIChannels.CONVERSATION_DELETE);
 
+        ipcMain.handle(AIChannels.LOCAL_AGENT, async (_, command) =>
+          withAuthenticatedValue<unknown>(ctx, async (requestContext) => {
+            const runtime = aiModule.localAgentRuntime;
+            if (!runtime)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Local Agents require Desktop' });
+            const parsed = LocalAgentClientCommandSchema.safeParse(command);
+            if (!parsed.success)
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid local Agent command',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            const input = parsed.data;
+            const owner = requestContext.identityId;
+            try {
+              switch (input.action) {
+                case 'list_connections':
+                  return ok(await runtime.listConnections(owner));
+                case 'get_default':
+                  return ok(await runtime.getDefaultChoice(owner));
+                case 'set_default':
+                  await runtime.setDefaultChoice(owner, input.choice);
+                  return ok(null);
+                case 'save_connection':
+                  return ok(
+                    await runtime.saveConnection(
+                      owner,
+                      input.connection,
+                      input.id,
+                      input.expectedRevision,
+                    ),
+                  );
+                case 'delete_connection':
+                  await runtime.deleteConnection(owner, input.id);
+                  return ok(null);
+                case 'probe_connection':
+                  return ok(await runtime.probeConnection(owner, input.id));
+                case 'list_conversations':
+                  return ok(await runtime.listConversations(owner));
+                case 'create_conversation':
+                  return ok(await runtime.createConversation(owner, input.conversation));
+                case 'respond':
+                  return ok({ accepted: runtime.respond(owner, input.response) });
+              }
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'INTERNAL_ERROR',
+                fallbackMessage: 'Local Agent operation failed',
+              });
+              return fail({ code: failure.code, message: failure.message });
+            }
+          }),
+        );
+        installed.push(AIChannels.LOCAL_AGENT);
+
         // AI vNext canonical Mastra Assistant transport. The renderer sends only
         // a typed client command; authenticated identity is injected here. All
         // runtime events are validated against the shared contract before push.
@@ -338,9 +394,6 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             const streamId = String(payload.streamId ?? '');
             if (!streamId) {
               return fail({ code: 'VALIDATION_ERROR', message: 'Missing streamId' });
-            }
-            if (!aiModule.mastraRuntime) {
-              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
             }
 
             const parsed = AssistantRuntimeClientCommandSchema.safeParse(payload.command);
@@ -361,6 +414,17 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             }
 
             const messageCommand = parsed.data;
+            const runtime =
+              messageCommand.runtimeKind === 'local_agent'
+                ? aiModule.localAgentRuntime
+                : aiModule.mastraRuntime;
+            if (!runtime)
+              return fail({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Selected AI runtime unavailable',
+              });
+            if (activeStreamSessions.has(streamId))
+              return fail({ code: 'CONFLICT', message: 'Stream already active' });
             const abortController = new AbortController();
             activeStreamSessions.set(streamId, {
               abortController,
@@ -369,7 +433,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
 
             void (async () => {
               try {
-                for await (const runtimeEvent of aiModule.mastraRuntime!.dispatchMessage({
+                for await (const runtimeEvent of runtime.dispatchMessage({
                   identityId: requestContext.identityId,
                   context: requestContext,
                   conversationId: messageCommand.conversationId,
@@ -431,9 +495,6 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.RUNTIME_ASSISTANT_APPROVAL);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_CANCEL, async (_, command) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (!aiModule.mastraRuntime) {
-              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
-            }
             const parsed = AssistantRuntimeClientCommandSchema.safeParse(command);
             if (!parsed.success || parsed.data.type !== 'cancel_run') {
               return fail({
@@ -450,7 +511,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   : formatZodErrors(parsed.error.issues),
               });
             }
-            const cancelled = aiModule.mastraRuntime.cancelRun({
+            const runtime =
+              parsed.data.runtimeKind === 'local_agent'
+                ? aiModule.localAgentRuntime
+                : aiModule.mastraRuntime;
+            if (!runtime)
+              return fail({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Selected AI runtime unavailable',
+              });
+            const cancelled = runtime.cancelRun({
               identityId: requestContext.identityId,
               runId: parsed.data.runId,
             });
@@ -460,9 +530,6 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.RUNTIME_ASSISTANT_CANCEL);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_HISTORY, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (!aiModule.mastraRuntime) {
-              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
-            }
             const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(request);
             if (!parsed.success) {
               return fail({
@@ -471,9 +538,18 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 details: formatZodErrors(parsed.error.issues),
               });
             }
+            const runtime =
+              parsed.data.runtimeKind === 'local_agent'
+                ? aiModule.localAgentRuntime
+                : aiModule.mastraRuntime;
+            if (!runtime)
+              return fail({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Selected AI runtime unavailable',
+              });
             try {
               const history = AssistantRuntimeHistoryViewSchema.parse(
-                await aiModule.mastraRuntime.listMessages({
+                await runtime.listMessages({
                   identityId: requestContext.identityId,
                   conversationId: parsed.data.conversationId,
                 }),
@@ -503,9 +579,6 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.RUNTIME_ASSISTANT_HISTORY);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_DELETE, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (!aiModule.mastraRuntime) {
-              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
-            }
             const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(request);
             if (!parsed.success) {
               return fail({
@@ -514,9 +587,18 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 details: formatZodErrors(parsed.error.issues),
               });
             }
+            const runtime =
+              parsed.data.runtimeKind === 'local_agent'
+                ? aiModule.localAgentRuntime
+                : aiModule.mastraRuntime;
+            if (!runtime)
+              return fail({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'Selected AI runtime unavailable',
+              });
             try {
               const result = AssistantRuntimeConversationDeleteResultSchema.parse({
-                deleted: await aiModule.mastraRuntime.deleteConversation({
+                deleted: await runtime.deleteConversation({
                   identityId: requestContext.identityId,
                   conversationId: parsed.data.conversationId,
                 }),

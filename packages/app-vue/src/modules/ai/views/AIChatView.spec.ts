@@ -283,7 +283,7 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(viewComposable).toContain('canLeaveBusinessSurface(t)');
     expect(viewComposable).toContain('goalWorkflow.goalOwnerAttemptPending.value');
     expect(viewComposable).toContain('knowledgeCaptureWorkflow.knowledgeCaptureResuming.value');
-    expect(viewComposable.match(/if \(!canLeaveWorkflowReview\(\)\) return/g)).toHaveLength(3);
+    expect(viewComposable.match(/if \(!canLeaveWorkflowReview\(\)\) return/g)).toHaveLength(4);
   });
   it('routes all normal reviews to native owners without retired editor wiring', () => {
     for (const symbol of [

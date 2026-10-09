@@ -14,6 +14,7 @@
     </template>
 
     <div class="space-y-5">
+      <LocalAgentSettings />
       <SettingsStatusBlock
         v-if="defaultProvider"
         kind="info"
@@ -507,6 +508,7 @@
 </template>
 
 <script setup lang="ts">
+import LocalAgentSettings from './LocalAgentSettings.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

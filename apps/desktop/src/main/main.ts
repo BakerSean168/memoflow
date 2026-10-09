@@ -576,6 +576,11 @@ async function registerBusinessModules(
 
   const aiComposed = composeAI({
     db,
+    localAgent: {
+      cwd: path.join(profilePaths.storageDir, 'local-agents'),
+      isActive: () =>
+        mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
+    },
     knowledgeNotePersistence: new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime),
     knowledgeSourcePort: new DesktopKnowledgeSourceAdapter(localVaultRuntime),
     analyticsReadPort: analyticsReadAdapter,

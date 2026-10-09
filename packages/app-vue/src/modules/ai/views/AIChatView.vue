@@ -149,20 +149,42 @@
         </div>
       </header>
 
+      <p v-if="historyIncomplete" role="status" class="px-4 text-xs text-muted-foreground">
+        {{ t('aiAssistant.local.incompleteHistory') }}
+      </p>
       <AIMessagePanel
         v-show="!composerOnly"
         ref="messagePanelRef"
         :timeline="chatTimeline"
         :tool-mode="toolMode"
-        :has-models="modelGroups.length > 0"
+        :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
+        :can-save-local-note="
+          runtimeChoice.runtimeKind === 'local_agent' && localAssistant.canSaveNote
+        "
         @select-shortcut="handleWelcomeShortcut"
         @configure-ai="openAISettings"
         @create-goal="openGoalWithoutAI"
         @quick-task="openQuickTaskWithoutAI"
         @tool-decision="decideToolApproval"
+        @native-response="respondNativeRequest"
+        @save-local-note="localAssistant.saveNote"
       />
 
       <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
+        <AILocalRuntimePicker
+          v-if="localAssistant.available"
+          :choice="runtimeChoice"
+          :connections="localAssistant.connections.value"
+          :models="localAssistant.models.value"
+          :status="localAssistant.status.value"
+          :loading="localAssistant.loading.value"
+          :error="localAssistant.error.value"
+          :disabled="chatLoading"
+          @select="localAssistant.select"
+          @refresh="localAssistant.probe"
+          @set-default="localAssistant.setDefault"
+          @settings="openAISettings"
+        />
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -174,6 +196,7 @@
           :recent-tasks="referenceTaskList"
           :recent-knowledge-notes="referenceKnowledgeNoteList"
           :model-groups="modelGroups"
+          :local-agent="runtimeChoice.runtimeKind === 'local_agent'"
           :selected-model-key="selectedModelKey"
           :density="composerDensity"
           @send="handleComposerSend"
@@ -264,6 +287,7 @@ import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
+import AILocalRuntimePicker from '../components/AILocalRuntimePicker.vue';
 import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
@@ -302,6 +326,7 @@ const composerRef = ref<{ composerTextarea?: HTMLTextAreaElement | null } | null
 
 const {
   session,
+  localAssistant,
   model,
   goalWorkflow,
   knowledgeQaWorkflow,
@@ -329,6 +354,9 @@ const {
 });
 
 const {
+  runtimeChoice,
+  historyIncomplete,
+  respondNativeRequest,
   chatMessage,
   chatLoading,
   chatConversationId,

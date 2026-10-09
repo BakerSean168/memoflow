@@ -15,3 +15,5 @@ export * from './task-goal-context.dto';
 export * from './task-workspace.dto';
 
 export * from './read-page.dto';
+
+export * from './agent-mutation.dto';

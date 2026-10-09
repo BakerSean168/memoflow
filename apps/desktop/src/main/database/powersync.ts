@@ -45,6 +45,9 @@ const NON_SYNCABLE_LOCAL_TABLES = [
   'ai_provider_configs',
   'ai_provider_onboarding_sessions',
   'ai_provider_secrets',
+  'ai_local_agent_connections',
+  'ai_local_conversations',
+  'ai_local_conversation_items',
 ] as const;
 
 const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records'] as const;
