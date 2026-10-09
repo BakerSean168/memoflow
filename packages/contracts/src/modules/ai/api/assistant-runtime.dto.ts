@@ -182,6 +182,14 @@ export const AssistantRuntimeMessageViewSchema = z
     content: z.string(),
     attachments: z.array(AssistantRuntimeMessageAttachmentViewSchema).max(4).default([]),
     nativeActivities: z.array(LocalAgentActivitySchema).max(256).optional(),
+    localAgentSource: z
+      .object({
+        connectionId: z.string().min(1).max(512),
+        modelId: z.string().min(1).max(512),
+        runId: z.string().min(1).max(512),
+      })
+      .strict()
+      .optional(),
     createdAt: z.number().int().nonnegative(),
   })
   .strict();

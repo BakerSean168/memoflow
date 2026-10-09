@@ -21,6 +21,14 @@ updated: 2026-09-09T00:00:00+08:00
 **取代：** ADR-035 中关于自研 Agent Host、Workflow/Turn/Model 三引擎宿主、Python LangGraph 长期保留的目标态决策  
 **影响范围：** `packages/ai`、`packages/contracts/ai`、`apps/api`、`apps/desktop`、`packages/app-vue`、`apps/ai-service`、AI 数据表与部署
 
+## 2026-10-09 修订：可选本地 Agent
+
+[ADR-120](./ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md) 与
+[ADR-121](./ADR-121-desktop-local-agent-host-and-tool-bridge.md) 将本文的 Mastra 权威限定于**内置助手及其工作流**。
+Desktop 的本地 Agent 会话由用户选定的 Codex、Claude 或 Pi 拥有原生执行、上下文与恢复状态；MemoFlow 仅保存当前 Profile 内的关联与不可执行展示记录。
+每个会话仍只有一个执行状态所有者，不跨运行时回退，不复制 checkpoint，不恢复已退休的 AgentHost/TurnEngine。
+内置助手长期保留，Web/API 继续只提供内置路径。本地接入验收状态见[实施方案](../../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)。
+
 ## 1. 决策摘要
 
 MemoFlow AI vNext 采用 **TypeScript + Mastra-native** 作为唯一核心 Agent runtime。MemoFlow 不再维护一套自研 Agent Framework 去包装 Mastra，也不再以独立 Python FastAPI/LangGraph 服务作为核心 AI 执行面。

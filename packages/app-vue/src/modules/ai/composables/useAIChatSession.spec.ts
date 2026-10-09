@@ -197,6 +197,49 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it.each(['stop', 'new', 'select'] as const)(
+    'fences a pending native creation after %s',
+    async (action) => {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      let resolve!: (value: unknown) => void;
+      const localAgent = {
+        createConversation: vi.fn(
+          () =>
+            new Promise((r) => {
+              resolve = r;
+            }),
+        ),
+      };
+      const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+        localAgent: localAgent as never,
+      });
+      session.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: 'codex',
+        modelId: 'native-model',
+      };
+      session.chatMessage.value = 'Do not send after cancellation';
+      const pending = session.handleSendChat(service as never, null, 'New chat', () => {});
+      await nextTick();
+      if (action === 'stop') session.stopGenerating();
+      else if (action === 'new') session.startNewConversation();
+      else
+        await session.selectConversation(
+          { id: 'other-chat', name: 'Other' },
+          service as never,
+          () => {},
+          () => '',
+        );
+      expect(session.chatLoading.value).toBe(false);
+      const selected = session.chatConversationId.value;
+      resolve({ id: 'late-native-chat' });
+      await pending;
+      expect(session.chatConversationId.value).toBe(selected);
+      expect(runtime.streamMessage).not.toHaveBeenCalled();
+      expect(session.chatLoading.value).toBe(false);
+    },
+  );
   it('keeps native creation/history/deletion separate from builtin shells and workflow recovery', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

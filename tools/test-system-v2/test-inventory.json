@@ -1086,6 +1086,38 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-tools.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-writes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/ai/routine-command.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3579,6 +3611,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3700,6 +3742,96 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/claude-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/codex-app-server-transport.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/codex-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/native-executable.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/native-failure.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/native-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/pi-driver.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4964,6 +5096,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6530,6 +6670,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/local-agent.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8273,6 +8421,26 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/goal-page-reader.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -11200,7 +11368,27 @@
       ]
     },
     {
+      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-agent-mutations.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/infrastructure/adapters/powersync/task-occurrence-powersync.repository.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-page-reader.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -12277,7 +12465,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 101
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12305,7 +12493,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 105
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12375,7 +12563,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 87
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12796,7 +12984,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 100
+      "fileCount": 104
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12831,14 +13019,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 91
+      "fileCount": 101
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 283
+      "fileCount": 284
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12859,7 +13047,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 94
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12887,7 +13075,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 105
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12985,7 +13173,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 87
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13179,6 +13367,7 @@
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-onboarding-session-memory.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-ownership.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
@@ -13192,6 +13381,15 @@
       "packages/ai/src/server/infrastructure/security/ai-secret-cipher.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
+      "packages/ai/src/server/local-agent/claude-driver.spec.ts",
+      "packages/ai/src/server/local-agent/codex-app-server-transport.spec.ts",
+      "packages/ai/src/server/local-agent/codex-driver.spec.ts",
+      "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
+      "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
+      "packages/ai/src/server/local-agent/native-executable.spec.ts",
+      "packages/ai/src/server/local-agent/native-failure.spec.ts",
+      "packages/ai/src/server/local-agent/native-identity.spec.ts",
+      "packages/ai/src/server/local-agent/pi-driver.spec.ts",
       "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
       "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
@@ -13325,6 +13523,8 @@
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-label-assignment.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-schedule-projection.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/goal-page-reader.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
@@ -13538,7 +13738,9 @@
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-goal-outbox-dispatch-store.test.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-write-transaction-runner.test.ts",
+      "packages/task/src/server/infrastructure/adapters/powersync/task-agent-mutations.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/task-occurrence-powersync.repository.test.ts",
+      "packages/task/src/server/infrastructure/adapters/powersync/task-page-reader.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.spec.ts",
       "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-occurrence-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-occurrence-range.spec.ts",
@@ -13568,7 +13770,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1170,
+    "unit": 1190,
     "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,

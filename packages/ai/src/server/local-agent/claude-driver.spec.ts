@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
+import { nativeIdentity } from './native-identity';
 
 const connection: LocalAgentConnection = {
   id: 'claude',
@@ -13,6 +14,32 @@ const connection: LocalAgentConnection = {
   createdAt: 1,
   updatedAt: 1,
 };
+it('rejects a changed account before giving the SDK the old session ID', async () => {
+  const resumes: Array<string | undefined> = [];
+  const factory: ClaudeQueryFactory = ({ options }) => {
+    resumes.push(options.resume);
+    return {
+      async initializationResult() {
+        return {
+          account: { email: 'new@example.test' },
+          models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+        };
+      },
+      async interrupt() {},
+      close() {},
+      async *[Symbol.asyncIterator]() {},
+    };
+  };
+  const driver = new ClaudeDriver(connection, '/tmp', factory);
+  const stream = driver.run({
+    nativeSessionId: 'private-old-session',
+    accountFingerprint: await nativeIdentity('claude', undefined, { email: 'old@example.test' }),
+    modelId: 'sonnet',
+    content: 'Hi',
+  });
+  await expect(stream.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_SESSION_UNAVAILABLE' });
+  expect(resumes).toEqual([undefined]);
+});
 it('uses SDK initialization for a model catalog without sending a probe prompt', async () => {
   let prompts = 0;
   let closed = false;
@@ -45,12 +72,15 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
   expect(closed).toBe(true);
 });
 it('resumes the SDK session, injects MCP, answers native permission and streams once', async () => {
+  const initializationCalls: Array<string | undefined> = [];
   const factory: ClaudeQueryFactory = ({ prompt, options }) => ({
     async initializationResult() {
-      expect(options.resume).toBe('native');
-      expect(options.mcpServers).toMatchObject({
-        memoflow: { url: 'http://127.0.0.1/mcp', headers: { Authorization: 'Bearer token' } },
-      });
+      initializationCalls.push(options.resume);
+      if (options.resume)
+        expect(options.mcpServers).toMatchObject({
+          memoflow: { url: 'http://127.0.0.1/mcp', headers: { Authorization: 'Bearer token' } },
+        });
+      else expect(options.mcpServers).toEqual({});
       return {
         account: { email: 'test@example.test', tokenSource: 'oauth' },
         models: [{ value: 'sonnet', displayName: 'Sonnet' }],
@@ -96,6 +126,10 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
   const events = [];
   for await (const event of driver.run({
     nativeSessionId: 'native',
+    accountFingerprint: await nativeIdentity('claude', undefined, {
+      email: 'test@example.test',
+      tokenSource: 'oauth',
+    }),
     modelId: 'sonnet',
     content: 'Hello',
     mcp: { url: 'http://127.0.0.1/mcp', token: 'token' },
@@ -110,6 +144,7 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
     { type: 'delta', content: 'Answer' },
   ]);
   expect(events.at(-1)).toEqual({ type: 'completed' });
+  expect(initializationCalls).toEqual([undefined, 'native']);
   expect(driver.respond('stale', { type: 'permission', decision: 'approve_once' })).toBe(false);
 });
 it('retires a permission card when the native request signal expires', async () => {

@@ -74,6 +74,9 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
       ).text();
     }
     expect(await call('knowledge_search', { query: 'Orchard', limit: 5 })).toContain(documentId);
+    expect(await call('knowledge_search', { query: 'Orchard', limit: 5 })).toContain(
+      `/repository?note=${documentId}`,
+    );
     expect(await call('knowledge_get', { documentId })).toContain('Orchard evidence');
     expect(await call('knowledge_get', { documentId: '../../secret.md' })).not.toContain(
       'Orchard evidence',

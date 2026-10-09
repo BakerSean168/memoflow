@@ -240,8 +240,7 @@ export class LocalAgentRuntime {
         this.options.store.resolveConversation(input.identityId, input.conversationId),
       );
       this.assertActive();
-      if (input.modelId && input.modelId !== conversation.modelId)
-        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+      const modelId = input.modelId ?? conversation.modelId;
       run.connectionId = connection.id;
       if (input.signal?.aborted) run.abort.abort();
       await mkdir(this.options.cwd, { recursive: true });
@@ -272,6 +271,7 @@ export class LocalAgentRuntime {
         role: 'assistant',
         content: '',
         attachments: [],
+        localAgentSource: { connectionId: connection.id, modelId, runId: run.runId },
         createdAt: now + 1,
       };
       await this.persist(() => this.options.store.saveMessage(input.identityId, assistant!, false));
@@ -286,22 +286,26 @@ export class LocalAgentRuntime {
       yield {
         ...envelope(),
         type: 'assistant.run.started',
-        data: { modelId: conversation.modelId, providerId: connection.id },
+        data: { modelId, providerId: connection.id },
       };
       if (this.stopped || run.abort.signal.aborted || this.options.isActive?.() === false) {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
         return;
       }
-      const content = `${input.content}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
+      const content = `${input.content}\n\nMemoFlow reference format: cite Goal and TaskPlan results using Markdown links [name](/goals/ID) and [title](/tasks/ID), with IDs returned by MemoFlow tools. Cite Knowledge notes using [title](url) with the exact url returned by knowledge_search/knowledge_get.${input.selectedEntities?.length ? `\nUser-selected MemoFlow references (look up using MemoFlow tools):\n${JSON.stringify(input.selectedEntities)}` : ''}`;
       for await (const event of run.driver.run({
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
-        modelId: conversation.modelId,
+        modelId,
         content,
         mcp: run.grant,
         signal: run.abort.signal,
       })) {
         if (run.abort.signal.aborted || this.stopped || this.options.isActive?.() === false) {
+          if (!this.stopped && this.options.isActive?.() !== false)
+            await this.persist(() =>
+              this.options.store.saveMessage(input.identityId, assistant!, false),
+            ).catch(() => undefined);
           yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
           return;
         }
@@ -312,6 +316,7 @@ export class LocalAgentRuntime {
               conversation.id,
               event.nativeSessionId,
               event.accountFingerprint,
+              modelId,
             ),
           );
           continue;

@@ -1,5 +1,6 @@
 import {
   LocalAgentActivitySchema,
+  AssistantRuntimeMessageViewSchema,
   type AIRuntimeUsage,
   type AssistantRuntimeChoice,
 } from '@memoflow/contracts/ai';
@@ -49,6 +50,7 @@ export function useConversationProjection(input: {
       content?: unknown;
       attachments?: unknown;
       nativeActivities?: unknown;
+      localAgentSource?: unknown;
     },
     index: number,
   ): ChatItem {
@@ -74,6 +76,9 @@ export function useConversationProjection(input: {
       ...(attachments.length ? { attachments } : {}),
       nativeActivities: LocalAgentActivitySchema.array().max(256).safeParse(item.nativeActivities)
         .data,
+      localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
+        item.localAgentSource,
+      ).data,
       status: 'success',
     };
   }
@@ -209,7 +214,12 @@ export function useConversationProjection(input: {
     }
   }
 
-  async function ensureConversationCreated(loadService: AIChatService, conversationName: string) {
+  async function ensureConversationCreated(
+    loadService: AIChatService,
+    conversationName: string,
+    signal?: AbortSignal,
+  ) {
+    signal?.throwIfAborted();
     if (chatConversationId.value) return chatConversationId.value;
     const choice = runtimeChoice.value;
     if (choice.runtimeKind === 'local_agent') {
@@ -219,6 +229,7 @@ export function useConversationProjection(input: {
         modelId: choice.modelId,
         name: conversationName,
       });
+      signal?.throwIfAborted();
       chatConversationId.value = conversation.id;
       updateLastActiveConversation(conversation.id);
       return conversation.id;
@@ -228,6 +239,7 @@ export function useConversationProjection(input: {
         name: conversationName,
       }),
     );
+    signal?.throwIfAborted();
     chatConversationId.value = String(conversation.id);
     updateLastActiveConversation(String(conversation.id));
     options.onConversationCreated?.(String(conversation.id));

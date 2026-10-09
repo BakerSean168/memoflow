@@ -3,7 +3,7 @@ import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/contracts/ai';
 import AIChatView from '../views/AIChatView.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import { SHELL_COMPOSER_MOUNT_KEY } from '../../../di/keys';
@@ -17,7 +17,7 @@ const fixture = await vi.hoisted(async () => {
   const openTask = vi.fn();
   const openKnowledge = vi.fn();
   const session = {
-    runtimeChoice: ref({ runtimeKind: 'builtin' as const }),
+    runtimeChoice: ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' }),
     historyIncomplete: ref(false),
     chatMessage: ref(''),
     chatTimeline: ref([]),
@@ -178,6 +178,33 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.task.taskWorkflowRun.value = null;
     fixture.knowledge.knowledgeCaptureRun.value = null;
     fixture.session.chatConversationId.value = null;
+    fixture.session.runtimeChoice.value = { runtimeKind: 'builtin' };
+  });
+
+  it('keeps the conversation and composer draft when changing the same Agent model', async () => {
+    const { wrapper } = await mountView();
+    fixture.session.runtimeChoice.value = {
+      runtimeKind: 'local_agent',
+      connectionId: 'agent-one',
+      modelId: 'old',
+    };
+    fixture.session.chatConversationId.value = 'native-conversation';
+    fixture.session.chatMessage.value = 'Keep my draft';
+    await wrapper.vm.localAssistant.select({
+      runtimeKind: 'local_agent',
+      connectionId: 'agent-one',
+      modelId: 'new',
+    });
+    expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
+    expect(fixture.session.chatConversationId.value).toBe('native-conversation');
+    expect(fixture.session.chatMessage.value).toBe('Keep my draft');
+    expect(fixture.session.runtimeChoice.value.modelId).toBe('new');
+    await wrapper.vm.localAssistant.select({
+      runtimeKind: 'local_agent',
+      connectionId: 'agent-two',
+      modelId: 'new',
+    });
+    expect(fixture.session.startNewConversation).toHaveBeenCalledOnce();
   });
 
   it.each(['goal.create', 'task.create', 'knowledge.capture'] as const)(

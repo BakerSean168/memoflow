@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { LocalAgentRuntime } from './local-agent-runtime';
-import type { NativeAgentEvent } from './codex-driver';
+import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
 afterEach(() => databases.splice(0).forEach((db) => db.close()));
@@ -26,6 +26,89 @@ async function setup() {
 }
 
 describe('local Agent conversation execution', () => {
+  it('changes model within one native conversation and snapshots each turn model', async () => {
+    const { store, conversation } = await setup();
+    const runs: NativeAgentRunInput[] = [];
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
+          runs.push(input);
+          yield {
+            type: 'session',
+            nativeSessionId: 'same-native-session',
+            accountFingerprint: 'account',
+          };
+          yield { type: 'delta', content: input.modelId };
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+        async probe() {
+          return { status: 'ready' as const, models: [] };
+        },
+      }),
+    });
+    for (const modelId of ['model', 'second-model']) {
+      const events = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: conversation.id,
+        content: 'Hi',
+        modelId,
+      }))
+        events.push(event);
+      expect(events.at(-1)?.type).toBe('assistant.run.completed');
+    }
+    expect(runs[1]).toMatchObject({
+      nativeSessionId: 'same-native-session',
+      modelId: 'second-model',
+    });
+    expect((await store.getConversation('owner', conversation.id)).modelId).toBe('second-model');
+    const history = await store.listMessages('owner', conversation.id);
+    expect(
+      history.messages
+        .filter((m) => m.role === 'assistant')
+        .map((m) => m.localAgentSource?.modelId),
+    ).toEqual(['model', 'second-model']);
+    await runtime.dispose();
+  });
+  it('keeps text already shown to the user when a running turn is cancelled', async () => {
+    const { store, conversation } = await setup();
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield { type: 'delta', content: 'Accepted partial answer' };
+          yield { type: 'delta', content: 'Late answer must be ignored' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+        async probe() {
+          return { status: 'ready' as const, models: [] };
+        },
+      }),
+    });
+    const stream = runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Hello',
+    });
+    const started = await stream.next();
+    expect((await stream.next()).value).toMatchObject({ type: 'assistant.message.delta' });
+    if (!started.value) throw new Error('Missing run');
+    runtime.cancelRun({ identityId: 'owner', runId: started.value.runId });
+    expect((await stream.next()).value).toMatchObject({ type: 'assistant.run.cancelled' });
+    await stream.return();
+    const history = await store.listMessages('owner', conversation.id);
+    expect(history.incomplete).toBe(true);
+    expect(history.messages.at(-1)?.content).toBe('Accepted partial answer');
+    await runtime.dispose();
+  });
   it('waits for an in-flight Profile database read and rejects its stale result during teardown', async () => {
     const { store } = await setup();
     let release!: () => void;

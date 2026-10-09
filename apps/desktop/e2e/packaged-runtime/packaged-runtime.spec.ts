@@ -204,6 +204,40 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       'Desktop account/privacy settings must not mount Web-only password auth without the capability',
     ).toEqual([]);
 
+    // Exercise the packaged host/IPC/database route with no usable native CLI.
+    // Saving a connection must not require installation or break builtin setup.
+    await mainWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=ai';
+    });
+    const localSettings = mainWindow.getByTestId('ai-local-settings');
+    await expect(localSettings).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
+    await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
+    await localSettings.getByLabel('连接名称', { exact: true }).fill('Packaged unavailable Agent');
+    await localSettings
+      .getByLabel('程序路径或命令', { exact: true })
+      .fill(
+        path.join(
+          runtimeRoot,
+          'not installed',
+          process.platform === 'win32' ? 'codex.exe' : 'codex',
+        ),
+      );
+    await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
+    await expect(
+      localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
+    ).not.toBeChecked();
+    await localSettings.getByRole('button', { name: '保存连接', exact: true }).click();
+    await expect(localSettings.getByText('Packaged unavailable Agent · codex')).toBeVisible();
+    await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
+    await expect(localSettings.getByRole('status')).toContainText('could not be started', {
+      timeout: 30_000,
+    });
+    await expect(mainWindow.getByTestId('ai-provider-add')).toBeEnabled();
+    await testInfo.attach('packaged-local-agent-settings.png', {
+      body: await mainWindow.screenshot(),
+      contentType: 'image/png',
+    });
+
     await mainWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=shortcuts';
     });
@@ -230,6 +264,20 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     electronApp = await electron.launch(launchOptions);
     const restartedWindow = await electronApp.firstWindow({ timeout: 45_000 });
     await expect(restartedWindow.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    await restartedWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=ai';
+    });
+    const restoredLocalSettings = restartedWindow.getByTestId('ai-local-settings');
+    await expect(restoredLocalSettings.getByText('Packaged unavailable Agent · codex')).toBeVisible(
+      {
+        timeout: SETTINGS_READY_TIMEOUT_MS,
+      },
+    );
+    await restoredLocalSettings.getByRole('button', { name: '移除连接', exact: true }).click();
+    await expect(restoredLocalSettings.getByText('Packaged unavailable Agent · codex')).toHaveCount(
+      0,
+    );
+    await expect(restartedWindow.getByTestId('ai-provider-add')).toBeEnabled();
     await restartedWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=shortcuts';
     });

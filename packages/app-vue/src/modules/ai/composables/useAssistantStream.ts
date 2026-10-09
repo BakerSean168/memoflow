@@ -187,6 +187,8 @@ export function useAssistantStream(input: {
     if (!activeStreamAbortController.value) return;
     activeStreamAbortController.value.abort();
     activeStreamAbortController.value = null;
+    activeRuntimeRunId.value = null;
+    chatLoading.value = false;
   }
 
   function markGeneratingAssistantAborted() {
@@ -291,6 +293,16 @@ export function useAssistantStream(input: {
     }
     if (event.type === 'assistant.run.started') {
       activeRuntimeRunId.value = event.runId;
+      if (
+        runtimeChoice.value.runtimeKind === 'local_agent' &&
+        event.data.modelId &&
+        event.data.providerId
+      )
+        item.localAgentSource = {
+          connectionId: event.data.providerId,
+          modelId: event.data.modelId,
+          runId: event.runId,
+        };
       return;
     }
     if (event.type === 'assistant.message.delta') {
@@ -349,10 +361,15 @@ export function useAssistantStream(input: {
       if (!pendingUserMessage && pendingAttachments.length === 0) return;
 
       chatLoading.value = true;
-      conversationId = await ensureConversationCreated(loadService, conversationName);
       streamController = new AbortController();
       activeStreamAbortController.value = streamController;
       activeRuntimeRunId.value = null;
+      conversationId = await ensureConversationCreated(
+        loadService,
+        conversationName,
+        streamController.signal,
+      );
+      streamController.signal.throwIfAborted();
       lastRuntimeUsage.value = null;
 
       userDraftId = `user-draft-${Date.now()}`;
@@ -410,7 +427,7 @@ export function useAssistantStream(input: {
       flushPendingStreamDelta(assistantDraftId);
       const assistantDraft = chatTimeline.value.find((item) => item.id === assistantDraftId);
       const userDraft = chatTimeline.value.find((item) => item.id === userDraftId);
-      if (isAbortLikeError(error)) {
+      if (streamController?.signal.aborted || isAbortLikeError(error)) {
         if (assistantDraft) {
           assistantDraft.status = 'aborted';
           assistantDraft.errorMessage = undefined;
@@ -434,9 +451,9 @@ export function useAssistantStream(input: {
         });
       if (activeStreamAbortController.value === streamController) {
         activeStreamAbortController.value = null;
+        activeRuntimeRunId.value = null;
+        chatLoading.value = false;
       }
-      activeRuntimeRunId.value = null;
-      chatLoading.value = false;
     }
   }
 

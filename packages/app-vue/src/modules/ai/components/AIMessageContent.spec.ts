@@ -4,6 +4,21 @@ import AIMessageContent from './AIMessageContent.vue';
 import { createRouter, createMemoryHistory } from 'vue-router';
 
 describe('AIMessageContent', () => {
+  it('opens a stable Knowledge document reference through its Repository route', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }],
+    });
+    const href = '/repository?note=kdoc_00000000-0000-4000-8000-000000000001';
+    const wrapper = mount(AIMessageContent, {
+      props: { content: `[Note](${href})` },
+      global: { plugins: [router] },
+    });
+    await router.isReady();
+    const pushed = vi.spyOn(router, 'push');
+    await wrapper.get('a').trigger('click');
+    expect(pushed).toHaveBeenCalledWith(href);
+  });
   it('opens a cited Goal through the product router without navigating the Electron document', async () => {
     const router = createRouter({
       history: createMemoryHistory(),

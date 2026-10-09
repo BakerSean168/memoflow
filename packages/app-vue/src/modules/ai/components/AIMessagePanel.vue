@@ -53,6 +53,13 @@
             </div>
             <div class="group/message min-w-0 flex-1 pt-0.5">
               <p
+                v-if="item.localAgentSource"
+                class="mb-2 text-xs text-muted-foreground"
+                data-testid="ai-message-native-model"
+              >
+                {{ item.localAgentSource.modelId }}
+              </p>
+              <p
                 v-if="item.toolActivity"
                 role="status"
                 class="mb-2 text-xs text-muted-foreground"

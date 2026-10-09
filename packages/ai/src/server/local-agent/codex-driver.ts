@@ -189,8 +189,12 @@ export class CodexDriver {
       transport.onNotification = (method, params) => {
         try {
           this.notification(method, params, emit);
-        } catch {
-          fail(new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR'));
+        } catch (error) {
+          fail(
+            error instanceof LocalAgentError
+              ? error
+              : new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR'),
+          );
         }
       };
       const turn = turnSchema.parse(

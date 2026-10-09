@@ -57,6 +57,20 @@ function driver(extra = '') {
 }
 
 describe('Codex native driver', () => {
+  it('reports a valid failed turn as unavailable instead of protocol corruption', async () => {
+    const native = driver(`if (frame.method === 'turn/start') {
+      reply({turn:{id:'turn-1'}});
+      setTimeout(() => send({method:'turn/completed',params:{threadId:'native-1',turn:{id:'turn-1',status:'failed'}}}),10);
+      return;
+    }`);
+    const run = native.run({
+      modelId: 'model',
+      content: 'Hi',
+      mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+    });
+    await run.next();
+    await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_UNAVAILABLE' });
+  });
   it('queries native account and catalog without starting inference', async () => {
     expect(await driver().probe()).toMatchObject({
       status: 'ready',

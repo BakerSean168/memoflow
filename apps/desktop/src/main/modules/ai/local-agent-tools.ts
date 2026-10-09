@@ -61,6 +61,7 @@ export function createDesktopLocalAgentTools(
       if (knowledge) {
         const reference = z.object({
           documentId: KnowledgeDocumentIdSchema,
+          url: z.string().max(1024),
           spaceId: z.string(),
           path: z.string(),
           title: z.string(),
@@ -71,6 +72,7 @@ export function createDesktopLocalAgentTools(
           if (note.identityId !== context.identityId) throw new GatewayReadError('FORBIDDEN');
           return reference.parse({
             documentId: note.knowledgeDocumentId,
+            url: `/repository?note=${note.knowledgeDocumentId}`,
             spaceId: note.knowledgeSpaceId,
             path: note.sourcePath,
             title: note.title ?? note.sourcePath,
@@ -184,8 +186,7 @@ export function createDesktopLocalAgentTools(
       if (context.writeScopes.includes('tasks:write')) {
         const authority = {
           connectionId: context.connectionId,
-          authorize: (tx: IElectronDatabaseTransaction) =>
-            context.authorize('tasks:write', tx),
+          authorize: (tx: IElectronDatabaseTransaction) => context.authorize('tasks:write', tx),
         };
         const annotations = {
           readOnlyHint: false,
@@ -230,8 +231,7 @@ export function createDesktopLocalAgentTools(
       if (context.writeScopes.includes('goals:write')) {
         const authority = {
           connectionId: context.connectionId,
-          authorize: (tx: IElectronDatabaseTransaction) =>
-            context.authorize('goals:write', tx),
+          authorize: (tx: IElectronDatabaseTransaction) => context.authorize('goals:write', tx),
         };
         server.registerTool(
           'goal_create',

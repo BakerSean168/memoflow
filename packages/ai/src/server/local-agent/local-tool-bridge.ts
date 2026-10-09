@@ -106,11 +106,13 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
           const authorize = async (scope: string, tx?: IElectronDatabaseTransaction) => {
             if (!this.live(token, grant) || signal.aborted)
               throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
-            const current = await this.track(() => this.options.store.getConnection(
-              grant.input.identityId,
-              grant.input.connectionId,
-              tx,
-            ));
+            const current = await this.track(() =>
+              this.options.store.getConnection(
+                grant.input.identityId,
+                grant.input.connectionId,
+                tx,
+              ),
+            );
             if (
               !this.live(token, grant) ||
               signal.aborted ||

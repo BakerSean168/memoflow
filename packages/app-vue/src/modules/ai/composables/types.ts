@@ -2,6 +2,7 @@ import type { Ref } from 'vue';
 import type {
   AIContextEntityType,
   AssistantRuntimeEvent,
+  AssistantRuntimeMessageView,
   AssistantRuntimeAttachment,
   ConversationListRes,
   LocalAgentConversation,
@@ -118,6 +119,7 @@ export type ChatItem = {
   approvals?: ChatToolApproval[];
   nativeActivity?: { toolCallId: string; label: string };
   nativeActivities?: LocalAgentActivity[];
+  localAgentSource?: AssistantRuntimeMessageView['localAgentSource'];
   nativeRequests?: ChatNativeRequest[];
 };
 

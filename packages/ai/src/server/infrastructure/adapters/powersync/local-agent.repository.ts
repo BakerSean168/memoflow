@@ -220,6 +220,7 @@ export class LocalAgentRepository {
     id: string,
     nativeSessionId: string,
     accountFingerprint?: string,
+    modelId?: string,
   ): Promise<void> {
     await this.db.writeTransaction(async (tx) => {
       const conversation = await this.read(
@@ -241,6 +242,7 @@ export class LocalAgentRepository {
         ...conversation,
         nativeSessionId,
         accountFingerprint: accountFingerprint ?? conversation.accountFingerprint,
+        modelId: modelId ?? conversation.modelId,
         updatedAt: Date.now(),
       });
       await tx.execute(

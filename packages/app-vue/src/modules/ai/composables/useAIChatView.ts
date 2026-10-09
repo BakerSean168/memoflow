@@ -674,8 +674,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       canSaveNote: Boolean(repository && knowledgeNativeSurface),
       saveNote: saveLocalNote,
       async select(choice: import('@memoflow/contracts/ai').AssistantRuntimeChoice) {
+        if (chatSession.chatLoading.value) return;
         if (!canLeaveWorkflowReview()) return;
-        startNewConversation();
+        const previous = chatSession.runtimeChoice.value;
+        if (!(
+          previous.runtimeKind === 'local_agent' &&
+          choice.runtimeKind === 'local_agent' &&
+          previous.connectionId === choice.connectionId
+        ))
+          startNewConversation();
         chatSession.runtimeChoice.value = choice;
       },
       async setDefault() {

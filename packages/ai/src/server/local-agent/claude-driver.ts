@@ -206,6 +206,25 @@ export class ClaudeDriver {
         yield { type: 'cancelled' };
         return;
       }
+      if (input.nativeSessionId && input.accountFingerprint) {
+        // SDK query options already initiate resume. Inspect identity in a
+        // separate, prompt-free query before giving any process the old ID.
+        const probe = new ClaudeDriver(this.connection, this.cwd, this.factory);
+        const cancelProbe = () => probe.cancel();
+        input.signal?.addEventListener('abort', cancelProbe, { once: true });
+        try {
+          const identity = await probe.connect();
+          if (identity.fingerprint !== input.accountFingerprint)
+            throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
+        } finally {
+          input.signal?.removeEventListener('abort', cancelProbe);
+          await probe.close();
+        }
+        if (this.cancelled) {
+          yield { type: 'cancelled' };
+          return;
+        }
+      }
       const init = await this.connect(input);
       if (input.accountFingerprint && input.accountFingerprint !== init.fingerprint)
         throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');

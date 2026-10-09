@@ -23,6 +23,14 @@ updated: 2026-09-18T00:00:00+00:00
 AI-9610 已删除 legacy message persistence，AI-9612 closure evidence 记录 restart/HITL/delete/
 transport parity 与 anti-resurrection gates。
 
+## 2026-10-09 修订：可选本地 Agent
+
+[ADR-120](./ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md) 与
+[ADR-121](./ADR-121-desktop-local-agent-host-and-tool-bridge.md) 将本文的 Mastra 权威限定于**内置助手及其工作流**。
+Desktop 的本地 Agent 会话由用户选定的 Codex、Claude 或 Pi 拥有原生执行、上下文与恢复状态；MemoFlow 仅保存当前 Profile 内的关联与不可执行展示记录。
+每个会话仍只有一个执行状态所有者，不跨运行时回退，不复制 checkpoint，不恢复已退休的 AgentHost/TurnEngine。
+内置助手长期保留，Web/API 继续只提供内置路径。本地接入验收状态见[实施方案](../../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)。
+
 ## 1. 决策摘要
 
 MemoFlow 将 AI conversation 明确拆成：
