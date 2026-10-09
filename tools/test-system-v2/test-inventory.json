@@ -1638,6 +1638,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/preload/keyboard-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/renderer/bootstrap/app.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12646,7 +12654,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 93
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13415,7 +13423,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1158,
+    "unit": 1159,
     "integration": 40,
     "smoke": 3,
     "boundary-ipc": 8,

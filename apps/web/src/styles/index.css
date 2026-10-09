@@ -1,32 +1,3 @@
-/**
- * Web App Global Styles — Tailwind 4 + Design System
- *
- * Import Order:
- * 1. @tailwindcss - Tailwind CSS directives
- * 2. Design System (ui-core) - Theme variables, component colors, and animations
- * 3. Base HTML styles - Body, scrollbars, and foundation elements
- * 4. vue-sonner styles - Toast notifications
- * 5. Tailwind source scanning - @source directives for component discovery
- * 6. Custom layer overrides - Priority colors, settings animations
- */
+@import '../../../../packages/app-vue/src/styles/index.css';
 
-/* Tailwind CSS directives (handles @layer base, @layer components, @layer utilities) */
-@import 'tailwindcss';
-
-/* Design System: Global styles, theme definitions, and animations */
-@import '../../../../packages/ui-core/src/styles/globals.css';
-
-/* Base HTML/Body styles and scrollbar styling */
-@import './base-styles.css';
-
-/* Toast notification styles (vue-sonner) */
-@import 'vue-sonner/style.css';
-
-/* Tailwind source scanning for @apply helpers in component classes */
-@source "../../../../packages/ui-core/src";
-@source "../../../../packages/ui-vue-shadcn/src";
-@source "../../../../packages/app-vue/src";
-
-/* Custom utility layers (priority colors, animation overrides) */
-@import './priority-colors.css';
-@import './settings-animations.css';
+@source '..';

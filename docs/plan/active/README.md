@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [Desktop parity and production OAuth repair](./2026-10-09-desktop-parity-oauth-repair.md)：修复 Keyboard IPC、统一共享样式与打包组件 CSS，生产 v0.16.0 OAuth 已恢复，本地验证进行中。
+
 - [Keyboard-first V1](./2026-10-08-keyboard-first-v1.md)：实现与 Web/Linux 桌面本地验收已完成，Windows/macOS 实机验收待补。
 
 - [Production schema cutover repair](./2026-10-07-production-schema-cutover-repair.md)：补齐生产快照预演暴露的旧字段退役与唯一索引准备，验证 v0.15.2 升级。

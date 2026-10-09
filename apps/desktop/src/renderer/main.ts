@@ -82,6 +82,13 @@ async function startRenderer() {
 
   ensureElectronBridgeAvailable();
 
+  // Vite library mode emits component styles separately from app-vue's JS.
+  // Development aliases load Vue source styles; packaged builds need this asset
+  // before mounting any shared surface (including Profile/access windows).
+  if (import.meta.env.PROD) {
+    await import('./styles/components.css');
+  }
+
   const hashPath = getHashPath();
   if (isInterventionWindowHashRoute(hashPath)) {
     const { bootstrapInterventionWindow } = await import('./bootstrap/intervention-window');
