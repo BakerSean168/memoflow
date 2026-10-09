@@ -21,7 +21,7 @@ export default defineConfig({
   webServer: {
     env: { ...process.env, RAYON_NUM_THREADS: '2' },
     command:
-      'node ../../node_modules/vite/bin/vite.js build --config e2e/visual-regression/vite.config.ts && node ../../node_modules/vite/bin/vite.js preview --config e2e/visual-regression/vite.config.ts',
+      'node ../../node_modules/vite/bin/vite.js build --config e2e/visual-regression/vite.config.ts && node ../../node_modules/vite/bin/vite.js build --config e2e/visual-regression/vite.config.ts --mode desktop && node ../../node_modules/vite/bin/vite.js preview --config e2e/visual-regression/vite.config.ts',
     url: 'http://127.0.0.1:53191',
     reuseExistingServer: false,
     timeout: 180_000,

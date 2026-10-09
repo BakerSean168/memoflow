@@ -59,6 +59,7 @@ async function closeElectronApp(app: ElectronApplication, logs: string[]): Promi
 }
 
 test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) => {
+  test.setTimeout(180_000);
   expect(
     executablePath,
     'MEMOFLOW_PACKAGED_EXECUTABLE must point to a packaged executable',
@@ -91,7 +92,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       }
     }
 
-    electronApp = await electron.launch({
+    const launchOptions = {
       executablePath,
       args,
       env: {
@@ -100,7 +101,8 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
         MEMOFLOW_DESKTOP_USER_FILES_PATH: userFilesPath,
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
-    });
+    };
+    electronApp = await electron.launch(launchOptions);
     electronApp.on('console', (message) =>
       appendLog(logs, `main:${message.type()}`, message.text()),
     );
@@ -121,6 +123,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     });
 
     await expect(mainWindow.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+
+    // Scoped app-vue CSS is a separate library artifact in production builds.
+    // Source-based Web fixtures alone cannot catch a missing CSS import here.
+    await expect(mainWindow.locator('.workspace-content-well')).toHaveCSS('margin-top', '4px');
+    await expect(mainWindow.locator('.workspace-content-well')).not.toHaveCSS(
+      'border-top-left-radius',
+      '0px',
+    );
 
     const windowHeader = mainWindow.getByTestId('window-header');
     await expect(windowHeader).toBeVisible();
@@ -193,6 +203,48 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       rendererPageErrors.filter((message) => message.includes('Missing injection: AuthService')),
       'Desktop account/privacy settings must not mount Web-only password auth without the capability',
     ).toEqual([]);
+
+    await mainWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=shortcuts';
+    });
+    await expect(mainWindow.getByTestId('keyboard-settings')).toBeVisible();
+    await expect(mainWindow.getByText('当前使用默认键位', { exact: false })).toHaveCount(0);
+    await mainWindow.getByRole('button', { name: '录制：进入目标', exact: true }).click();
+    await mainWindow.keyboard.press('Alt+g');
+    await mainWindow.getByRole('button', { name: '保存', exact: true }).click();
+    await expect(mainWindow.getByTestId('keyboard-settings-status')).toContainText('已保存');
+    await mainWindow.getByRole('button', { name: '禁用：进入任务', exact: true }).click();
+    await expect(
+      mainWindow.getByRole('button', { name: '启用：进入任务', exact: true }),
+    ).toBeVisible();
+    await testInfo.attach('packaged-keyboard-settings.png', {
+      body: await mainWindow.screenshot(),
+      contentType: 'image/png',
+    });
+
+    // Restart the whole packaged process with the same isolated Profile, rather
+    // than accepting an in-memory renderer reload as persistence evidence.
+    const restartCloseFailure = await closeElectronApp(electronApp, logs);
+    if (restartCloseFailure) throw restartCloseFailure;
+    electronApp = null;
+    electronApp = await electron.launch(launchOptions);
+    const restartedWindow = await electronApp.firstWindow({ timeout: 45_000 });
+    await expect(restartedWindow.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    await restartedWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=shortcuts';
+    });
+    await expect(restartedWindow.getByTestId('shortcut-module.goal.activate')).toContainText(
+      'Alt+G',
+    );
+    await expect(
+      restartedWindow.getByRole('button', { name: '启用：进入任务', exact: true }),
+    ).toBeVisible();
+    await expect(restartedWindow.getByText('当前使用默认键位', { exact: false })).toHaveCount(0);
+    await restartedWindow.getByTestId('settings-return-to-app').click();
+    await restartedWindow.keyboard.press('Alt+g');
+    await expect(restartedWindow).toHaveURL(/#\/goals$/);
+    await restartedWindow.keyboard.press('Alt+2');
+    await expect(restartedWindow).toHaveURL(/#\/goals$/);
   } catch (error) {
     testFailure = error;
     appendLog(logs, 'smoke-error', error instanceof Error ? (error.stack ?? error.message) : error);

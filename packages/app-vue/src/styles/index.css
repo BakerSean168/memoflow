@@ -1,0 +1,11 @@
+/* Shared Web/Desktop visual foundations. Host-specific chrome stays in each app. */
+@import 'tailwindcss';
+@import '../../../ui-core/src/styles/globals.css';
+@import './base-styles.css';
+@import 'vue-sonner/style.css';
+@import './priority-colors.css';
+@import './settings-animations.css';
+
+@source '../../../ui-core/src';
+@source '../../../ui-vue-shadcn/src';
+@source '..';
