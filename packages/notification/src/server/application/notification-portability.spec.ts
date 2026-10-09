@@ -216,12 +216,11 @@ describe('NotificationPortableCapability', () => {
       importance: 'Moderate',
       urgency: 'None',
       relatedEntityType: null,
-      relatedEntityId: null,
+
       navigationIntent: null,
       actions: [{ kind: 'archive', actionKey: 'archive', labelKey: 'archive' }],
       presentation: null,
-      correlationId: null,
-      causationId: null,
+
       readAt: null,
       archivedAt: null,
       expiresAt: null,
@@ -235,10 +234,8 @@ describe('NotificationPortableCapability', () => {
           actionKey: 'archive',
           actionKind: 'archive',
           occurredAt: 1,
-          commandReceiptId: null,
+
           outcome: 'accepted',
-          correlationId: null,
-          causationId: null,
         },
       ],
     };

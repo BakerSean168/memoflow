@@ -35,3 +35,4 @@ export {
   type ResetUserPreferencesResult,
 } from './server';
 export type { SettingApplicationPort } from './server';
+export { createSettingPrismaPortability } from './server/infrastructure/setting-profile-import';

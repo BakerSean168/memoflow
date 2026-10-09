@@ -1,15 +1,19 @@
+import { composeProfileImportCapabilities } from './compose-profile-import-capabilities';
+import { composeBusinessDataSummary } from './compose-business-data-summary';
 /**
  * API-lane Data Portability composition root.
  *
  * The host supplies the owner-registered V3 capability set. Prisma is used
- * only for the separate server-held disclosure source; no persistence-shaped
- * portability repository or import store is assembled here.
+ * for server-held disclosure and the durable, transaction-scoped Profile import
+ * operation. Business writes remain in owner-provided capabilities.
  */
 
 import type { PortableCapability } from '@memoflow/contracts/data-portability';
 import type { PrismaClient } from '@memoflow/database';
 import {
   createDataPortabilityModule,
+  createPrismaProfileImportService,
+  createProfileImportScheduleRecovery,
   createPrismaServerHeldDataDisclosureApplicationPort,
   type ServerHeldDataDisclosureApplicationPort,
 } from '@memoflow/data-portability';
@@ -19,7 +23,8 @@ import {
 } from '@memoflow/data-portability/api';
 
 export interface ComposeDataPortabilityDependencies {
-  /** Shared Prisma client used only by the disclosure-only export path. */
+  readonly reconcileImportedProfile?: (identityId: string) => Promise<boolean>;
+  /** Shared Prisma client for disclosure, Profile import transactions and recovery. */
   readonly db: PrismaClient;
   /** Complete owner-provided V3 capability registry input. */
   readonly portableCapabilities?: readonly PortableCapability<unknown>[];
@@ -38,6 +43,9 @@ export function composeDataPortability(
     dependencies.db,
   );
   const instance = createDataPortabilityModule({
+    runtimeContributions: dependencies.reconcileImportedProfile
+      ? createProfileImportScheduleRecovery(dependencies.db, dependencies.reconcileImportedProfile)
+      : undefined,
     portableCapabilities: dependencies.portableCapabilities,
     productVersion: dependencies.productVersion ?? '0.0.1',
   });
@@ -45,6 +53,10 @@ export function composeDataPortability(
   return {
     module: createDataPortabilityApiModule({
       instance,
+      profileImport: createPrismaProfileImportService(dependencies.db, {
+        capabilities: composeProfileImportCapabilities,
+        readSummary: (tx, identityId) => composeBusinessDataSummary(tx)(identityId),
+      }),
       serverHeldDataDisclosureApi,
     }),
     serverHeldDataDisclosureApi,

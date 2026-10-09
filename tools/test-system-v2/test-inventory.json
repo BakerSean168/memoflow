@@ -390,6 +390,14 @@
       ]
     },
     {
+      "path": "apps/api/src/runtime/business-data-summary.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/runtime/compose-account.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -598,6 +606,30 @@
       "measurementCollectors": [
         "apps/api/vitest.config.ts"
       ]
+    },
+    {
+      "path": "apps/api/src/runtime/profile-import-capabilities.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/runtime/profile-import-operation.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/api/src/runtime/profile-import-owners.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "apps/api/src/scripts/database-startup-chain.test.ts",
@@ -850,7 +882,7 @@
       ]
     },
     {
-      "path": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts",
+      "path": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/desktop/playwright.config.ts"
@@ -1430,6 +1462,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/profile/compose-profile-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/profile/desktop-cloud-connection-manager.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1446,7 +1486,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/profile/device-auth-coordinator.spec.ts",
+      "path": "apps/desktop/src/main/profile/desktop-profile-import-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1454,7 +1494,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/profile/local-tenant-adoption-service.spec.ts",
+      "path": "apps/desktop/src/main/profile/device-auth-coordinator.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1478,6 +1518,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/profile/profile-cleanup.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/profile/profile-key-store.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1487,6 +1535,30 @@
     },
     {
       "path": "apps/desktop/src/main/profile/profile-pin-store.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/profile/profile-powersync-snapshot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/profile/profile-source-inventory.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/profile/profile-sqlite-snapshot.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -2642,6 +2714,16 @@
     },
     {
       "path": "packages/account/src/server/application/account-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/account/src/server/application/business-data-summary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account/vitest.config.ts"
@@ -3954,6 +4036,14 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/PanelErrorBoundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/ProfileImportDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6953,6 +7043,16 @@
       ]
     },
     {
+      "path": "packages/data-portability/src/api/profile-import-routes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6994,6 +7094,16 @@
     },
     {
       "path": "packages/data-portability/src/infrastructure-client/adapters/ipc/__tests__/data-portability-ipc-adapter.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/application/profile-import-manifest.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -8311,6 +8421,14 @@
       "measurementCollectors": [
         "packages/goal/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/goal-profile-import.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/goal/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/goal/src/server/infrastructure/goal-reminder-fire.handler.spec.ts",
@@ -12120,7 +12238,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 29
+      "fileCount": 30
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -12141,7 +12259,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -12534,7 +12652,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 12
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -12555,7 +12673,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 5
     },
     {
       "id": "packages/label/vitest.integration.config.ts",
@@ -12646,7 +12764,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 92
+      "fileCount": 97
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12667,7 +12785,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 29
+      "fileCount": 30
     },
     {
       "id": "packages/agent-gateway/vitest.config.ts",
@@ -12688,7 +12806,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 282
+      "fileCount": 283
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12716,7 +12834,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 18
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -12953,6 +13071,7 @@
       "packages/account/src/electron/desktop-account-profile-sync.spec.ts",
       "packages/account/src/electron/index.spec.ts",
       "packages/account/src/server/application/account-portability.spec.ts",
+      "packages/account/src/server/application/business-data-summary.spec.ts",
       "packages/account/src/server/application/services/__tests__/account-closure-coordinator.spec.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
@@ -13072,11 +13191,13 @@
       "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
       "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
       "packages/data-portability/src/api/module-lifecycle.spec.ts",
+      "packages/data-portability/src/api/profile-import-routes.spec.ts",
       "packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts",
       "packages/data-portability/src/application-client/ports/data-portability-api-client-port.surface.spec.ts",
       "packages/data-portability/src/electron/index-lifecycle.spec.ts",
       "packages/data-portability/src/infrastructure-client/adapters/http/data-portability-http.adapter.test.ts",
       "packages/data-portability/src/infrastructure-client/adapters/ipc/__tests__/data-portability-ipc-adapter.test.ts",
+      "packages/data-portability/src/server/application/profile-import-manifest.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/editor-persistence-retirement.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/editor-portability-retirement.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
@@ -13415,8 +13536,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1158,
-    "integration": 40,
+    "unit": 1167,
+    "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 8,

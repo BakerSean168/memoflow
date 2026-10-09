@@ -1,4 +1,5 @@
-import type { PrismaClient } from '@memoflow/database';
+import { withPrismaTransaction } from '@memoflow/database/transaction';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { RoutineProfileStore } from '../../domain/ports';
 import { ProfileMembership, RoutineDefinition, RoutineProfile } from '../../domain/routine';
 import {
@@ -9,7 +10,7 @@ import {
 import { deserializeRoutineTrigger } from './trigger-persistence-parity';
 
 export class PrismaRoutineProfileStore implements RoutineProfileStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async upsertDefinition(definition: RoutineDefinition): Promise<void> {
     const data = routineDefinitionToPrisma(definition.snapshot());
@@ -61,7 +62,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     const membershipData = input.memberships.map((membership) =>
       profileMembershipToPrisma(membership.snapshot()),
     );
-    await this.prisma.$transaction(async (tx) => {
+    await withPrismaTransaction(this.prisma, async (tx) => {
       const existingDefinition = await tx.routineDefinition.findUnique({
         where: { id: definitionData.id },
       });
@@ -334,7 +335,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     readonly expectedVersion?: number;
   }): Promise<void> {
     assertMembershipSet(input);
-    await this.prisma.$transaction(async (tx) => {
+    await withPrismaTransaction(this.prisma, async (tx) => {
       if (input.expectedVersion !== undefined) {
         const routineUpdate = await tx.routineDefinition.updateMany({
           where: {

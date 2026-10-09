@@ -15,7 +15,11 @@
 import { BrowserWindow, ipcMain, app } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { RendererEventChannels, WindowChannels } from '@memoflow/contracts/electron';
+import {
+  RendererEventChannels,
+  WindowChannels,
+  ProfileIdSchema,
+} from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ScheduleRuntimeController } from '../runtime/compose-schedule';
@@ -67,6 +71,7 @@ export class WindowManager {
 
   private readonly config: Required<WindowManagerConfig>;
   private isTransitioning = false;
+  private profileNavigationPending = false;
   private activeMainProfileId: string | null = null;
   private profileAccessWindowStateManager: WindowStateManager | null = null;
   private mainWindowStateManager: WindowStateManager | null = null;
@@ -129,8 +134,9 @@ export class WindowManager {
   /**
    * 创建 Profile Access 窗口
    */
-  createProfileAccessWindow(): BrowserWindow {
+  createProfileAccessWindow(targetProfileId?: string, interactive = true): BrowserWindow {
     if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
+      this.profileAccessWindow.setEnabled(interactive);
       this.profileAccessWindow.focus();
       return this.profileAccessWindow;
     }
@@ -169,6 +175,7 @@ export class WindowManager {
       show: false,
     });
 
+    this.profileAccessWindow.setEnabled(interactive);
     this.profileAccessWindow.setMenuBarVisibility(false);
     this.profileAccessWindow.removeMenu();
 
@@ -182,7 +189,12 @@ export class WindowManager {
       logger.info('Profile Access window shown');
     });
 
-    this.loadWindowContent(this.profileAccessWindow, '/profile-access');
+    this.loadWindowContent(
+      this.profileAccessWindow,
+      targetProfileId
+        ? `/profile-access?profileId=${encodeURIComponent(targetProfileId)}`
+        : '/profile-access',
+    );
 
     if (this.config.isDev) {
       this.profileAccessWindow.webContents.openDevTools({ mode: 'detach' });
@@ -303,12 +315,9 @@ export class WindowManager {
       this.desktopFeaturesRuntime?.bindWindow(mainWin);
       await this.scheduleRuntimeController?.start();
 
-      // 4. 关闭 Profile Access 窗口（稍微延迟，让过渡更平滑）
-      setTimeout(() => {
-        if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed()) {
-          this.profileAccessWindow.close();
-        }
-      }, 100);
+      // Close the outgoing renderer before accepting another Profile transition.
+      if (this.profileAccessWindow && !this.profileAccessWindow.isDestroyed())
+        this.profileAccessWindow.close();
 
       logger.info('Transition complete');
     } finally {
@@ -319,7 +328,10 @@ export class WindowManager {
   /**
    * 关闭本地 Profile 后切换到 Profile Access 窗口
    */
-  async transitionToProfileAccessWindow(): Promise<void> {
+  async transitionToProfileAccessWindow(
+    targetProfileId?: string,
+    interactive = true,
+  ): Promise<void> {
     if (this.isTransitioning) {
       logger.warn('Already transitioning');
       return;
@@ -330,7 +342,9 @@ export class WindowManager {
 
     try {
       await this.scheduleRuntimeController?.stop();
-      const profileAccessWindow = this.createProfileAccessWindow();
+      const profileAccessWindow = this.createProfileAccessWindow(targetProfileId, interactive);
+      // Destroy the old renderer before Profile Access can select a different runtime.
+      this.mainWindow?.destroy();
 
       // 2. 等待 Profile Access 窗口准备好
       await new Promise<void>((resolve) => {
@@ -345,12 +359,6 @@ export class WindowManager {
       profileAccessWindow.show();
       this.desktopFeaturesRuntime?.bindWindow(profileAccessWindow);
 
-      // 4. 关闭主窗口
-      setTimeout(() => {
-        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-          this.mainWindow.close();
-        }
-      }, 100);
       logger.info('Transition complete');
     } finally {
       this.isTransitioning = false;
@@ -510,6 +518,8 @@ export class WindowManager {
   private registerIpcHandlers(): void {
     // 登录成功 → 切换到主窗口
     ipcMain.handle(WindowChannels.TRANSITION_TO_MAIN, async () => {
+      if (this.isTransitioning)
+        return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
       logger.info('IPC window:transition-to-main received');
       if (!this.runtimeManager) {
         throw new Error('WindowManager: runtimeManager not set before TRANSITION_TO_MAIN');
@@ -523,10 +533,35 @@ export class WindowManager {
       return ok(null);
     });
 
-    ipcMain.handle(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, async () => {
-      logger.info('IPC window:transition-to-profile-access received');
-      await this.transitionToProfileAccessWindow();
-      return ok(null);
+    ipcMain.handle(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, async (_event, input: unknown) => {
+      const parsed = ProfileIdSchema.optional().safeParse(input);
+      if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: 'Invalid Profile ID' });
+      if (parsed.data && parsed.data === this.runtimeManager?.getActiveProfileId()) return ok(null);
+      if (this.profileNavigationPending || this.isTransitioning)
+        return fail({ code: 'WINDOW_TRANSITION_PENDING', message: 'Profile 切换正在进行' });
+      this.profileNavigationPending = true;
+      try {
+        const autoOpen =
+          parsed.data && this.runtimeManager && !(await this.runtimeManager.hasPin(parsed.data));
+        await this.transitionToProfileAccessWindow(parsed.data, !autoOpen);
+        if (autoOpen && parsed.data && this.runtimeManager) {
+          try {
+            const prepared = await this.runtimeManager.openProfile(parsed.data);
+            await this.transitionToMainWindow(
+              parsed.data,
+              prepared.profileResolver.mainWindowStatePath,
+            );
+          } catch (error) {
+            this.profileAccessWindow?.setEnabled(true);
+            logger.warn('Target Profile could not open; Profile Access remains available', {
+              error,
+            });
+          }
+        }
+        return ok(null);
+      } finally {
+        this.profileNavigationPending = false;
+      }
     });
 
     // 获取当前窗口类型

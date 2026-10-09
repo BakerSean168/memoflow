@@ -23,3 +23,4 @@ export * from './api';
 
 // ============ Data Portability V3 ============
 export * from './portable-v3';
+export * from './business-data-summary';

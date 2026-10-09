@@ -42,6 +42,11 @@ export interface PortableCapability<TPayload> {
   readonly dependsOn?: readonly PortableCapabilityKey[];
   readonly payloadSchema: z.ZodType<TPayload>;
   export(context: PortableCapabilityExecutionContext): Promise<TPayload | null>;
+  /** Empty-account copy policy; ordinary V3 import retains its explicit overwrite semantics. */
+  planProfileImport?(
+    payload: TPayload,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<{ payload: TPayload; preservedFields: readonly string[] }>;
   validateImport?(payload: TPayload, context: PortableCapabilityExecutionContext): Promise<void>;
   dryRun(
     payload: TPayload,

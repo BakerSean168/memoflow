@@ -1,3 +1,4 @@
+import { withPrismaTransaction } from '@memoflow/database/transaction';
 /**
  * Notification Prisma Repository.
  * 通知 Prisma 仓储。
@@ -13,7 +14,11 @@ import type {
   NotificationOutboxDispatchPlan,
 } from '../../../domain/repositories/i-notification-repository';
 import type { NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
-import type { NotificationCategory, NotificationEventMap, NotificationChannelType } from '@memoflow/contracts/notification';
+import type {
+  NotificationCategory,
+  NotificationEventMap,
+  NotificationChannelType,
+} from '@memoflow/contracts/notification';
 import { Notification } from '../../../domain/aggregates/notification';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 import {
@@ -26,13 +31,12 @@ import { randomUUID } from 'crypto';
 
 const notificationEventPublisher = createTypedEventPublisher<NotificationEventMap>(eventBus);
 
-
 /**
  * Notification Prisma Repository
  */
 export class NotificationPrismaRepository implements INotificationRepository {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaClient | Prisma.TransactionClient,
     private readonly metricsService?: import('../../../domain/services/notification-metrics-service').NotificationMetricsService,
   ) {}
 
@@ -43,7 +47,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
   ): Promise<void> {
     const dto = notification.toServerDTO();
 
-    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await withPrismaTransaction(this.prisma, async (tx: Prisma.TransactionClient) => {
       // 1. Upsert the Notification aggregate root
       await tx.notification.upsert({
         where: { id: String(dto.id) },
@@ -187,14 +191,15 @@ export class NotificationPrismaRepository implements INotificationRepository {
     const hourStart = new Date(now.getTime() - 60 * 60 * 1000);
     const dayStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const plannedOutcomes = ['enqueued', 'deferred'];
-    const count = (since: Date) => this.prisma.notificationDeliveryDecisionRecord.count({
-      where: {
-        identityId,
-        channel,
-        outcome: { in: plannedOutcomes },
-        notification: { is: { workflowKey, createdAt: { gte: since } } },
-      },
-    });
+    const count = (since: Date) =>
+      this.prisma.notificationDeliveryDecisionRecord.count({
+        where: {
+          identityId,
+          channel,
+          outcome: { in: plannedOutcomes },
+          notification: { is: { workflowKey, createdAt: { gte: since } } },
+        },
+      });
     const [hourCount, dayCount] = await Promise.all([count(hourStart), count(dayStart)]);
     return { hourCount, dayCount };
   }
@@ -211,7 +216,10 @@ export class NotificationPrismaRepository implements INotificationRepository {
     return NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations);
   }
 
-  async findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<Notification | null> {
+  async findByIdempotencyKey(
+    identityId: string,
+    idempotencyKey: string,
+  ): Promise<Notification | null> {
     const row = await this.prisma.notification.findUnique({
       where: { identityId_idempotencyKey: { identityId, idempotencyKey } },
     });
@@ -250,7 +258,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
       skip: options?.offset,
     });
 
-    return rows.map((row) => NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations));
+    return rows.map((row) =>
+      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
+    );
   }
 
   async findByCategory(
@@ -263,14 +273,20 @@ export class NotificationPrismaRepository implements INotificationRepository {
         identityId,
         category,
         deletedAt: null,
-        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
+        ...(options?.archiveState === 'archived'
+          ? { archivedAt: { not: null } }
+          : options?.archiveState === 'all'
+            ? {}
+            : { archivedAt: null }),
       },
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
     });
 
-    return rows.map((row) => NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations));
+    return rows.map((row) =>
+      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
+    );
   }
 
   async findUnread(identityId: string, options?: { limit?: number }): Promise<Notification[]> {
@@ -285,7 +301,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
       take: options?.limit,
     });
 
-    return rows.map((row) => NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations));
+    return rows.map((row) =>
+      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
+    );
   }
 
   async findByRelatedEntity(
@@ -300,12 +318,18 @@ export class NotificationPrismaRepository implements INotificationRepository {
         relatedEntityType,
         relatedEntityId,
         deletedAt: null,
-        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
+        ...(options?.archiveState === 'archived'
+          ? { archivedAt: { not: null } }
+          : options?.archiveState === 'all'
+            ? {}
+            : { archivedAt: null }),
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return rows.map((row) => NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations));
+    return rows.map((row) =>
+      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
+    );
   }
 
   async delete(identityId: string, id: string): Promise<void> {

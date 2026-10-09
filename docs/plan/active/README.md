@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [独立 Desktop Profile](./2026-10-09-desktop-independent-profiles.md)：独立 Profile、复制导入、恢复与核验后清理已实现，Linux E2E / 本地部署验证通过；跨平台、主工作区集成和真实云端网络同步待验收。
+
 - [Keyboard-first V1](./2026-10-08-keyboard-first-v1.md)：实现与 Web/Linux 桌面本地验收已完成，Windows/macOS 实机验收待补。
 
 - [Production schema cutover repair](./2026-10-07-production-schema-cutover-repair.md)：补齐生产快照预演暴露的旧字段退役与唯一索引准备，验证 v0.15.2 升级。

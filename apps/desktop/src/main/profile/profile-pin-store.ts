@@ -34,7 +34,8 @@ export class ProfilePinStore {
     try {
       await fs.promises.access(this.filePath(profileId));
       return true;
-    } catch {
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       return false;
     }
   }
@@ -74,7 +75,9 @@ export class ProfilePinStore {
     this.validatePin(pin);
     const failure = this.failures.get(profileId);
     if (failure && failure.retryAt > Date.now()) {
-      throw new Error(`PIN 暂时锁定，请在 ${Math.ceil((failure.retryAt - Date.now()) / 1000)} 秒后重试`);
+      throw new Error(
+        `PIN 暂时锁定，请在 ${Math.ceil((failure.retryAt - Date.now()) / 1000)} 秒后重试`,
+      );
     }
 
     try {

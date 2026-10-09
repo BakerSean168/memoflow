@@ -19,3 +19,5 @@ export {
   createSchedulePortableCapability,
 } from './server';
 export type { IScheduleRepository } from './server';
+export { createScheduleBusinessDataPresence } from './server/infrastructure/business-data-presence';
+export { createSchedulePrismaPortableCapability } from './server/infrastructure/schedule-profile-import';

@@ -16,6 +16,7 @@ import {
   AggregateRepositoryBase,
   createEventBusAdapter,
   publishAggregateEvents,
+  type IEventBus,
 } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 
@@ -41,8 +42,11 @@ export class PrismaAccountRepository
   extends AggregateRepositoryBase<Account>
   implements IAccountRepository
 {
-  constructor(private readonly prisma: PrismaClient) {
-    super(eventBusAdapter);
+  constructor(
+    private readonly prisma: AccountDb,
+    events: IEventBus = eventBusAdapter,
+  ) {
+    super(events);
   }
 
   /**

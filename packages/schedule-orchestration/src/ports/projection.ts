@@ -30,6 +30,7 @@ export interface ScheduleOrchestrationHandlerRegistry {
 }
 
 export interface ScheduleOrchestrationModule {
+  reconcileImportedProfile(identityId: string): Promise<boolean>;
   readonly projectionRuntime: RuntimeContribution;
   /** Cumulative startup/manual durable repair outcomes for Task, Goal and Routine. */
   readonly projectionRepairMetrics: ProjectionRepairMetricsReader;

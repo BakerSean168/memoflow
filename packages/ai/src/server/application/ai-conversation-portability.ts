@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto';
+import { IdentityId } from '@memoflow/domain-shared';
+import { AiConversationId } from '../domain/value-objects/ai-conversation-id';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,
@@ -38,14 +41,28 @@ function requireBatchId(context: PortableCapabilityExecutionContext): string {
   return batchId;
 }
 
-function dryRunTargetId(context: PortableCapabilityExecutionContext, ref: string): string {
-  return `portable-ai-conversation:${requireBatchId(context)}:${ref}`;
+function targetId(context: PortableCapabilityExecutionContext, ref: string): string {
+  const hex = createHash('sha256')
+    .update(JSON.stringify([requireHostIdentity(context), requireBatchId(context), ref]))
+    .digest('hex');
+  return `IAiConversationId_${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+
+function assertMatches(
+  current: AIConversation,
+  incoming: AIConversationPortablePayloadV3['conversations'][number],
+): void {
+  if (
+    current.deletedAt !== null ||
+    current.name !== incoming.name ||
+    current.status !== incoming.status
+  ) {
+    throw new Error(`ai-conversations@3 deterministic target conflicts with ${incoming.ref}`);
+  }
 }
 
 /** AI-owned V3 portability for product Conversation shells only. */
-export class AIConversationPortableCapability
-  implements PortableCapability<AIConversationPortablePayloadV3>
-{
+export class AIConversationPortableCapability implements PortableCapability<AIConversationPortablePayloadV3> {
   readonly key = 'ai-conversations' as const;
   readonly schemaVersion = 3;
   readonly dependsOn = [] as const;
@@ -87,18 +104,26 @@ export class AIConversationPortableCapability
   ): Promise<PortableCapabilityReceipt> {
     requireHostIdentity(context);
     const target = AIConversationPortablePayloadV3Schema.parse(payload);
+    let skipped = 0;
     for (const conversation of target.conversations) {
       ConversationStatus.of(conversation.status);
-      context.references.bindImportedReference(
-        conversation.ref,
-        dryRunTargetId(context, conversation.ref),
+      const id = targetId(context, conversation.ref);
+      const current = await this.conversationRepository.findByIdForIdentity(
+        context.identityId,
+        id,
+        { includeDeleted: true },
       );
+      if (current) {
+        assertMatches(current, conversation);
+        skipped += 1;
+      }
+      context.references.bindImportedReference(conversation.ref, id);
     }
 
     return {
-      created: target.conversations.length,
+      created: target.conversations.length - skipped,
       updated: 0,
-      skipped: 0,
+      skipped,
       warnings: [],
     };
   }
@@ -109,24 +134,36 @@ export class AIConversationPortableCapability
   ): Promise<PortableCapabilityReceipt> {
     const identityId = requireHostIdentity(context);
     const target = AIConversationPortablePayloadV3Schema.parse(payload);
-
+    let skipped = 0;
     for (const portableConversation of target.conversations) {
-      const status = ConversationStatus.of(portableConversation.status);
-      const conversation = AIConversation.create({
-        identityId,
-        name: portableConversation.name,
-      });
-      if (status !== ConversationStatus.Active) {
-        conversation.updateStatus(status);
+      const id = targetId(context, portableConversation.ref);
+      const current = await this.conversationRepository.findByIdForIdentity(identityId, id);
+      if (current) {
+        assertMatches(current, portableConversation);
+        context.references.bindImportedReference(portableConversation.ref, id);
+        skipped += 1;
+        continue;
       }
+      const status = ConversationStatus.of(portableConversation.status);
+      const now = new Date();
+      const conversation = AIConversation.load({
+        id: AiConversationId.of(id),
+        identityId: IdentityId.of(identityId),
+        name: portableConversation.name,
+        status,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+        version: 1,
+      });
       await this.conversationRepository.save(conversation);
       context.references.bindImportedReference(portableConversation.ref, String(conversation.id));
     }
 
     return {
-      created: target.conversations.length,
+      created: target.conversations.length - skipped,
       updated: 0,
-      skipped: 0,
+      skipped,
       warnings: [],
     };
   }

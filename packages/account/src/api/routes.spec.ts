@@ -1,4 +1,8 @@
 import type { RequestHandler } from 'express';
+import express from 'express';
+import { once } from 'node:events';
+import type { AddressInfo } from 'node:net';
+import { createBusinessDataSummaryReader } from '../server/application/business-data-summary';
 import { describe, expect, it, vi } from 'vitest';
 import type { OpenApiRegistryLike } from '@memoflow/utils/result';
 import type { AccountApplicationPort } from '../server/application';
@@ -22,6 +26,46 @@ class TestOpenApiRegistry implements OpenApiRegistryLike {
 }
 
 const authMiddleware = ((_, __, next) => next()) as RequestHandler;
+
+it('serves data-summary only for the authenticated principal and ignores a requested other identity', async () => {
+  const seen: string[] = [];
+  const read = createBusinessDataSummaryReader({
+    repository: async (identityId) => {
+      seen.push(identityId);
+      return true;
+    },
+  });
+  const auth: RequestHandler = (req, res, next) => {
+    if (req.get('authorization') !== 'Bearer summary-test') {
+      res.sendStatus(401);
+      return;
+    }
+    Object.assign(req, { user: { identityId: 'principal-a', sessionId: 'session-a' } });
+    next();
+  };
+  const app = express();
+  app.use(
+    '/accounts',
+    registerAccountRoutes(createAccountApiStub(), { auth, requireRole: () => auth }, null, read),
+  );
+  const server = app.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  try {
+    expect((await fetch(`${origin}/accounts/me/data-summary`)).status).toBe(401);
+    const response = await fetch(`${origin}/accounts/me/data-summary?identityId=victim`, {
+      headers: { authorization: 'Bearer summary-test' },
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, data: { state: 'non_empty' } });
+    expect(seen).toEqual(['principal-a']);
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+  }
+});
 
 function createAccountApiStub(): AccountApplicationPort {
   return {

@@ -24,6 +24,7 @@ import {
   CloseAccountSchema,
   AccountViewSchema,
   AccountClosureReceiptSchema,
+  BusinessDataSummarySchema,
 } from '@memoflow/contracts/account';
 import type {
   AccountClientDTO,
@@ -37,6 +38,8 @@ import {
 } from '@memoflow/contracts/operations';
 import { AccountController } from '../server/transport';
 import type { AccountApplicationPort } from '../server/application';
+import type { BusinessDataSummaryReader } from '../server/application';
+import { ok } from '@memoflow/contracts/result';
 
 interface PlatformMiddleware {
   readonly auth: RequestHandler;
@@ -71,6 +74,7 @@ export function registerAccountRoutes(
   api: AccountApplicationPort,
   middleware: PlatformMiddleware,
   openApiRegistry?: OpenApiRegistryLike | null,
+  readDataSummary?: BusinessDataSummaryReader,
 ): Router {
   const router = Router();
   const { auth, requireEmailVerified } = middleware;
@@ -84,6 +88,23 @@ export function registerAccountRoutes(
     defaultTags: ['Account'],
     defaultSecurity: [{ bearerAuth: [] }],
   });
+
+  if (readDataSummary) {
+    r.route(
+      {
+        method: 'get',
+        path: '/me/data-summary',
+        summary: '检查当前账户的用户资料是否为空',
+        responses: {
+          200: successResponse(BusinessDataSummarySchema, '账户资料摘要'),
+          401: errorResponse('未认证'),
+        },
+      },
+      readAuth,
+      async (_req, ctx) =>
+        ok(BusinessDataSummarySchema.parse(await readDataSummary(ctx.identityId))),
+    );
+  }
 
   // GET /me — 获取当前用户资料
   r.route(

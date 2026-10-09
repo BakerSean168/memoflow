@@ -10,7 +10,7 @@ import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflo
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);
 
 export class AIConversationPrismaRepository implements IAIConversationRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: Pick<PrismaClient, 'aiConversation'>) {}
 
   async save(conversation: AIConversation): Promise<void> {
     const dto = conversation.toServerDTO();
@@ -44,9 +44,13 @@ export class AIConversationPrismaRepository implements IAIConversationRepository
     flushDomainEvents(aiEventPublisher, conversation);
   }
 
-  async findByIdForIdentity(identityId: string, id: string): Promise<AIConversation | null> {
+  async findByIdForIdentity(
+    identityId: string,
+    id: string,
+    options?: { includeDeleted?: boolean },
+  ): Promise<AIConversation | null> {
     const row = await this.prisma.aiConversation.findFirst({
-      where: { id, identityId, deletedAt: null },
+      where: { id, identityId, ...(options?.includeDeleted ? {} : { deletedAt: null }) },
     });
     return row ? this.toDomain(row) : null;
   }

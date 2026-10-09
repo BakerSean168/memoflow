@@ -1,3 +1,6 @@
+import { ResultErrorException } from '@memoflow/contracts/result';
+import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
+import { randomUUID } from 'node:crypto';
 import type { Clock } from '@memoflow/time';
 import fs from 'node:fs';
 import type { PowerSyncDatabase } from '@powersync/node';
@@ -21,7 +24,6 @@ import type { AccountClientDTO } from '@memoflow/contracts/account';
 import { ElectronProfileKeyStore } from './profile-key-store';
 import { ProfilePinStore } from './profile-pin-store';
 import { CloudSessionStore } from './cloud-session-store';
-import { LocalTenantAdoptionService } from './local-tenant-adoption-service';
 import {
   type CloudCredentialProvider,
   ensurePowerSyncSyncMode,
@@ -61,9 +63,10 @@ type ProfileDeactivationHook = () => void | Promise<void>;
 /** Owns local Profile lifecycle. Cloud authentication is deliberately absent. */
 export class DesktopProfileRuntimeManager {
   private readonly profileSnapshotService = new ProfileSnapshotService();
+  private profileGeneration = 0;
   private activeRuntime: ActiveProfileRuntime | null = null;
   private preparedRuntime: PreparedProfileRuntime | null = null;
-  private activationLock: Promise<void> | null = null;
+  private lifecycleTail: Promise<void> = Promise.resolve();
   private registerModules: ProfileModuleRegistration | null = null;
   private afterActivation: ProfileActivationHook | null = null;
   private beforeDeactivation: ProfileDeactivationHook | null = null;
@@ -74,12 +77,15 @@ export class DesktopProfileRuntimeManager {
   private preparedUnlockKey: Buffer | null = null;
   private preparedUnlockProfileId: string | null = null;
   private activeProfileKey: Buffer | null = null;
+  private databaseCleanupRequired = false;
+  private readonly cleanup: ProfileCleanup;
 
   constructor(
     private readonly sharedResolver: SharedPathResolver,
     private readonly profileRegistry: ProfileRegistry,
     private readonly accountClock: Clock,
   ) {
+    this.cleanup = new ProfileCleanup(sharedResolver.rootDir);
     this.keyStore = new ElectronProfileKeyStore(sharedResolver.rootDir);
     this.pinStore = new ProfilePinStore(sharedResolver.rootDir);
     this.cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
@@ -120,6 +126,10 @@ export class DesktopProfileRuntimeManager {
     return this.activeRuntime?.profileResolver ?? null;
   }
 
+  getProfileGeneration(): number {
+    return this.profileGeneration;
+  }
+
   getActiveProfileId(): string | null {
     return this.activeRuntime?.descriptor.profileId ?? null;
   }
@@ -144,7 +154,15 @@ export class DesktopProfileRuntimeManager {
     );
   }
 
-  async updateProfileDisplayName(profileId: string, displayName: string): Promise<void> {
+  updateProfileDisplayName(profileId: string, displayName: string): Promise<void> {
+    const expectedProfileId = this.getActiveProfileId();
+    return this.runExclusive(async () => {
+      if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
+      await this.updateProfileDisplayNameNow(profileId, displayName);
+    });
+  }
+
+  private async updateProfileDisplayNameNow(profileId: string, displayName: string): Promise<void> {
     await this.profileRegistry.updateProfileMetadata(profileId, { displayName });
     if (this.activeRuntime?.descriptor.profileId === profileId) {
       this.activeRuntime.descriptor = { ...this.activeRuntime.descriptor, displayName };
@@ -158,22 +176,91 @@ export class DesktopProfileRuntimeManager {
     return this.pinStore.hasPin(profileId);
   }
 
-  async preparePinUnlock(profileId: string, pin: string): Promise<void> {
-    this.preparedUnlockKey?.fill(0);
-    this.preparedUnlockKey = null;
-    this.preparedUnlockProfileId = null;
-    const key = await this.pinStore.unlock(profileId, pin);
-    this.preparedUnlockKey = key;
-    this.preparedUnlockProfileId = profileId;
+  /** All callers that combine session changes with lifecycle work share this queue.
+   * Call openProfileInTransition inside it; never recursively enqueue an operation.
+   */
+  runExclusive<T>(operation: () => Promise<T>): Promise<T> {
+    const result = this.lifecycleTail.then(operation);
+    this.lifecycleTail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
   }
 
-  async setCurrentProfilePin(pin: string): Promise<void> {
+  createGuestProfile(requestId: string, displayName?: string): Promise<ProfileDescriptor> {
+    return this.runExclusive(() => this.profileRegistry.createGuest(requestId, displayName));
+  }
+
+  registerCloudProfile(
+    cloudAccountId: string,
+    displayName: string,
+    identifier: string,
+  ): Promise<ProfileDescriptor> {
+    return this.profileRegistry.register(cloudAccountId, displayName, identifier);
+  }
+
+  openProfile(profileId: string, pin?: string): Promise<PreparedProfileRuntime> {
+    return this.runExclusive(() => this.openProfileInTransition(profileId, pin));
+  }
+
+  /** Called only while holding the lifecycle queue. */
+  private async openProfileInTransition(
+    profileId: string,
+    pin?: string,
+    options?: PrepareProfileOptions,
+  ): Promise<PreparedProfileRuntime> {
+    LocalProfileIdSchema.parse(profileId);
+    if (await this.cleanup.isPending(profileId))
+      throw new ResultErrorException('PROFILE_CLEANUP_PENDING', 'PROFILE_CLEANUP_PENDING');
+    if (this.activeRuntime?.descriptor.profileId === profileId) return this.activeRuntime;
+    const descriptor = (await this.profileRegistry.list()).find(
+      (profile) => profile.profileId === profileId,
+    );
+    if (!descriptor) throw new Error('Profile not found');
+    const protectedProfile = await this.pinStore.hasPin(profileId);
+    if (protectedProfile && !pin) throw new Error('此 Profile 需要本地 PIN 解锁');
+    // Keep the verified target key outside old runtime teardown, and never open its DB before PIN verification.
+    let key = protectedProfile ? await this.pinStore.unlock(profileId, pin!) : null;
+    try {
+      await this.deactivateProfileNow();
+      await this.disposePreparedRuntime();
+      this.preparedUnlockKey = key;
+      this.preparedUnlockProfileId = key ? profileId : null;
+      key = null;
+      const prepared = await this.prepareDescriptor(descriptor, options);
+      await this.activatePreparedProfile();
+      return prepared;
+    } catch (error) {
+      key?.fill(0);
+      await this.disposePreparedRuntime();
+      throw error;
+    }
+  }
+
+  setCurrentProfilePin(pin: string): Promise<void> {
+    const expectedProfileId = this.getActiveProfileId();
+    return this.runExclusive(async () => {
+      if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
+      await this.setCurrentProfilePinNow(pin);
+    });
+  }
+
+  private async setCurrentProfilePinNow(pin: string): Promise<void> {
     const profileId = this.getActiveProfileId();
     if (!profileId || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
     await this.pinStore.setPin(profileId, pin, this.activeProfileKey);
   }
 
-  async removeCurrentProfilePin(): Promise<void> {
+  removeCurrentProfilePin(): Promise<void> {
+    const expectedProfileId = this.getActiveProfileId();
+    return this.runExclusive(async () => {
+      if (this.getActiveProfileId() !== expectedProfileId) throw new Error('Profile 已切换');
+      await this.removeCurrentProfilePinNow();
+    });
+  }
+
+  private async removeCurrentProfilePinNow(): Promise<void> {
     const profileId = this.getActiveProfileId();
     if (!profileId || !this.activeProfileKey) throw new Error('必须先解锁 Profile');
     await this.pinStore.remove(profileId);
@@ -208,109 +295,36 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.findByIdentifier(identifier);
   }
 
-  async prepareProfile(
-    localOwnerId: string,
-    options?: PrepareProfileOptions,
-  ): Promise<PreparedProfileRuntime> {
-    if (this.activationLock) await this.activationLock;
-
-    if (this.activeRuntime?.descriptor.localOwnerId === localOwnerId) return this.activeRuntime;
-    if (this.preparedRuntime?.descriptor.localOwnerId === localOwnerId) return this.preparedRuntime;
-
-    if (this.activeRuntime) await this.deactivateProfile();
-    await this.disposePreparedRuntime();
-
-    const descriptor = await this.profileRegistry.register(
-      localOwnerId,
-      options?.displayName ?? options?.identifier ?? localOwnerId,
-      options?.identifier,
-    );
-    return this.prepareDescriptor(descriptor, options);
-  }
-
-  async prepareGuestProfile(): Promise<PreparedProfileRuntime> {
-    const guest = await this.profileRegistry.ensureGuest();
-    if (this.activeRuntime?.descriptor.profileId === guest.profileId) return this.activeRuntime;
-    if (this.preparedRuntime?.descriptor.profileId === guest.profileId) return this.preparedRuntime;
-    if (this.activeRuntime) await this.deactivateProfile();
-    await this.disposePreparedRuntime();
-    return this.prepareDescriptor(guest);
-  }
-
   async activateStartupProfile(): Promise<PreparedProfileRuntime> {
-    const active = await this.profileRegistry.getActiveProfile();
-    const descriptor = active ?? (await this.profileRegistry.ensureGuest());
-    const prepared =
-      descriptor.profileKind === 'guest'
-        ? await this.prepareGuestProfile()
-        : await this.prepareProfile(descriptor.localOwnerId, {
-            displayName: descriptor.displayName,
-            identifier: descriptor.identifier,
-          });
-    await this.activatePreparedProfile();
-    return prepared;
+    return this.runExclusive(async () => {
+      const descriptor = await this.getStartupProfile();
+      return this.openProfileInTransition(descriptor.profileId);
+    });
   }
 
   async getStartupProfile(): Promise<ProfileDescriptor> {
-    return (
-      (await this.profileRegistry.getActiveProfile()) ?? (await this.profileRegistry.ensureGuest())
-    );
-  }
-
-  async bindCurrentProfile(
-    cloudAccountId: string,
-    displayName: string,
-    identifier: string,
-  ): Promise<void> {
-    const current = this.activeRuntime?.descriptor ?? this.preparedRuntime?.descriptor;
-    if (!current) throw new Error('No active Profile to bind');
-    if (current.profileKind === 'guest') {
-      const existingCloudProfile = await this.profileRegistry.findByCloudAccountId(cloudAccountId);
-      if (existingCloudProfile && existingCloudProfile.profileId !== current.profileId) {
-        throw new Error(
-          `目标云端账号已绑定本机 Profile (${existingCloudProfile.profileId})，拒绝静默合并`,
-        );
+    for (const profileId of await this.cleanup.pending()) {
+      try {
+        await this.finishCleanup(profileId);
+      } catch (error) {
+        logger.warn('Profile cleanup remains pending', { profileId, error });
       }
-      const db = this.activeRuntime?.db ?? this.preparedRuntime?.db;
-      if (!db) throw new Error('Profile database is not open');
-      const adoption = new LocalTenantAdoptionService(db);
-      await adoption.adopt({
-        fromOwnerId: current.localOwnerId,
-        toOwnerId: cloudAccountId,
-        displayName: current.displayName,
-        identifier,
-      });
-      const rebound = await this.profileRegistry.rebindIdentityOwnership({
-        fromOwnerId: current.localOwnerId,
-        toCloudAccountId: cloudAccountId,
-        displayName: current.displayName,
-        identifier,
-      });
-      if (this.activeRuntime) this.activeRuntime.descriptor = rebound;
-      if (this.preparedRuntime) this.preparedRuntime.descriptor = rebound;
-      await adoption.clearCompleted().catch((error) => {
-        logger.warn('Profile binding committed but adoption journal cleanup failed', {
-          profileId: rebound.profileId,
-          cloudAccountId,
-          error,
-        });
-      });
-      return;
     }
-    if (current.cloudBinding?.cloudAccountId !== cloudAccountId) {
-      throw new Error('当前 Profile 已绑定其他云端账号');
-    }
+    const pending = new Set(await this.cleanup.pending());
+    const selected = await this.profileRegistry.getActiveProfile();
+    if (selected && !pending.has(selected.profileId)) return selected;
+    if (pending.size === 0) return this.profileRegistry.ensureGuest();
+    const available = (await this.profileRegistry.list()).find(
+      (profile) => !pending.has(profile.profileId),
+    );
+    return available ?? this.profileRegistry.createGuest(randomUUID());
   }
 
-  async activatePreparedProfile(): Promise<void> {
+  private async activatePreparedProfile(): Promise<void> {
     if (!this.preparedRuntime) throw new Error('No prepared profile is available for activation');
-    if (this.activationLock) {
-      await this.activationLock;
-      return;
-    }
-
     const preparedProfileId = this.preparedRuntime.descriptor.profileId;
-    const activation = (async () => {
+    let bootstrapper: ElectronBootstrapper | null = null;
+    try {
       const prepared = this.preparedRuntime!;
       await this.keyStore.ensure(prepared.descriptor.profileId);
       const pinRequired = await this.pinStore.hasPin(prepared.descriptor.profileId);
@@ -321,14 +335,14 @@ export class DesktopProfileRuntimeManager {
         this.preparedUnlockKey ?? (await this.keyStore.unlock(prepared.descriptor.profileId));
       this.preparedUnlockKey = null;
       this.preparedUnlockProfileId = null;
-      const bootstrapper = new ElectronBootstrapper(prepared.db);
+      bootstrapper = new ElectronBootstrapper(prepared.db);
       if (this.registerModules)
         await this.registerModules(bootstrapper, prepared.db, prepared.profileResolver);
       await bootstrapper.init(prepared.profileAccessContext);
-      this.activeRuntime = { ...prepared, bootstrapper };
-      this.preparedRuntime = null;
       await this.profileRegistry.setActiveProfile(preparedProfileId);
       await this.profileRegistry.touch(preparedProfileId);
+      this.activeRuntime = { ...prepared, bootstrapper };
+      this.preparedRuntime = null;
       if (this.afterActivation) {
         await this.afterActivation(this.activeRuntime.descriptor).catch((error) => {
           logger.warn('Cloud connection restore failed; Profile remains locally available', {
@@ -341,11 +355,6 @@ export class DesktopProfileRuntimeManager {
         localOwnerId: prepared.descriptor.localOwnerId,
         profileKind: prepared.descriptor.profileKind,
       });
-    })();
-
-    this.activationLock = activation;
-    try {
-      await activation;
     } catch (error) {
       // A failed activation may still have composed business modules (and so
       // published their repositories to the shell bridge); clear those
@@ -355,16 +364,28 @@ export class DesktopProfileRuntimeManager {
       } catch (cleanupError) {
         logger.warn('Failed to run profile activation cleanup hook', { error: cleanupError });
       }
+      await bootstrapper?.destroy().catch(() => undefined);
+      this.activeProfileKey?.fill(0);
+      this.activeProfileKey = null;
+      await this.profileRegistry.setActiveProfile(null).catch(() => undefined);
       await this.profileRegistry.markError(preparedProfileId).catch(() => undefined);
       await this.disposePreparedRuntime();
       throw error;
-    } finally {
-      this.activationLock = null;
     }
   }
 
-  async deactivateProfile(options: { preserveSelection?: boolean } = {}): Promise<void> {
-    if (!this.activeRuntime) return;
+  deactivateProfile(options: { preserveSelection?: boolean } = {}): Promise<void> {
+    return this.runExclusive(() => this.deactivateProfileNow(options));
+  }
+
+  private async deactivateProfileNow(options: { preserveSelection?: boolean } = {}): Promise<void> {
+    if (!this.activeRuntime) {
+      if (this.databaseCleanupRequired) {
+        await shutdownPowerSync();
+        this.databaseCleanupRequired = false;
+      }
+      return;
+    }
     const profileId = this.activeRuntime.descriptor.profileId;
     // Flush profile-local owner truth before any other runtime is torn down.
     // This hook is allowed to veto deactivation: losing a due Routine occurrence
@@ -373,6 +394,7 @@ export class DesktopProfileRuntimeManager {
     // The activation-failure cleanup path remains best-effort above because that
     // path never exposes a successfully active Profile.
     await this.beforeDeactivation?.();
+    this.profileGeneration += 1;
 
     // Stop the bound schedule runtime controller (idempotent; the SAME instance
     // the profile's module handle owns), then clear the reference BEFORE the
@@ -396,24 +418,29 @@ export class DesktopProfileRuntimeManager {
     // be reactivated; clearing the marker there would reopen the local
     // new-work gate while the account is still closed. The marker is cleared
     // ONLY when the cloud close FAILS (close handler catch path).
-    await shutdownPowerSync();
     this.activeRuntime = null;
-    this.activeProfileKey?.fill(0);
-    this.activeProfileKey = null;
-    this.preparedUnlockKey?.fill(0);
-    this.preparedUnlockKey = null;
-    this.preparedUnlockProfileId = null;
-    if (!options.preserveSelection) {
-      await this.profileRegistry.setActiveProfile(null).catch(() => undefined);
+    this.databaseCleanupRequired = true;
+    try {
+      await shutdownPowerSync();
+      this.databaseCleanupRequired = false;
+    } finally {
+      this.activeProfileKey?.fill(0);
+      this.activeProfileKey = null;
+      this.preparedUnlockKey?.fill(0);
+      this.preparedUnlockKey = null;
+      this.preparedUnlockProfileId = null;
+      if (!options.preserveSelection) {
+        await this.profileRegistry.setActiveProfile(null).catch(() => undefined);
+      }
     }
     logger.info('Local profile deactivated', { profileId });
   }
 
-  async discardPreparedProfile(): Promise<void> {
-    await this.disposePreparedRuntime();
+  removeProfile(profileId: string): Promise<void> {
+    return this.runExclusive(() => this.removeProfileNow(profileId));
   }
 
-  async removeProfile(profileId: string): Promise<void> {
+  private async removeProfileNow(profileId: string): Promise<void> {
     const descriptor = (await this.profileRegistry.list()).find(
       (profile) => profile.profileId === profileId,
     );
@@ -422,14 +449,76 @@ export class DesktopProfileRuntimeManager {
       throw new Error('Cannot remove active profile');
     if (descriptor.profileId === this.preparedRuntime?.descriptor.profileId)
       throw new Error('Cannot remove prepared profile');
-    await this.cloudSessionStore.remove(descriptor.profileId);
-    await this.pinStore.remove(descriptor.profileId);
-    await this.keyStore.remove(descriptor.profileId);
-    await fs.promises.rm(
-      createProfilePathResolver(this.sharedResolver.rootDir, descriptor.profileId).profileDir,
-      { recursive: true, force: true },
+    await this.finishCleanup(descriptor.profileId);
+  }
+
+  private async finishCleanup(profileId: string): Promise<void> {
+    await this.cleanup.remove(profileId, async () => {
+      await this.cloudSessionStore.remove(profileId);
+      await this.pinStore.remove(profileId);
+      await this.keyStore.remove(profileId);
+      await this.profileRegistry.remove(profileId);
+    });
+  }
+
+  /** These composition callbacks are used only inside runExclusive, never exposed over IPC. */
+  async withInactiveGuest<T>(
+    profileId: string,
+    pin: string | undefined,
+    read: (descriptor: ProfileDescriptor, paths: ProfilePathResolver) => Promise<T>,
+  ): Promise<T> {
+    LocalProfileIdSchema.parse(profileId);
+    if (
+      this.getActiveProfileId() === profileId ||
+      this.preparedRuntime?.descriptor.profileId === profileId
+    )
+      throw new ResultErrorException('SOURCE_PROFILE_ACTIVE', 'SOURCE_PROFILE_ACTIVE');
+    if (await this.cleanup.isPending(profileId))
+      throw new ResultErrorException('PROFILE_CLEANUP_PENDING', 'PROFILE_CLEANUP_PENDING');
+    const profile = (await this.profileRegistry.list()).find(
+      (item) => item.profileId === profileId,
     );
-    await this.profileRegistry.remove(descriptor.profileId);
+    if (!profile || profile.profileKind !== 'guest')
+      throw new ResultErrorException('SOURCE_NOT_GUEST', 'SOURCE_NOT_GUEST');
+    const protectedProfile = await this.pinStore.hasPin(profileId);
+    if (protectedProfile && !pin)
+      throw new ResultErrorException('SOURCE_PIN_REQUIRED', 'SOURCE_PIN_REQUIRED');
+    const key = protectedProfile
+      ? await this.pinStore.unlock(profileId, pin!)
+      : await this.keyStore.unlock(profileId);
+    try {
+      const paths = createProfilePathResolver(this.sharedResolver.rootDir, profileId);
+      if ((await fs.promises.lstat(paths.profileDir)).isSymbolicLink())
+        throw new ResultErrorException('SOURCE_PATH_UNSAFE', 'SOURCE_PATH_UNSAFE');
+      return await read(profile, paths);
+    } finally {
+      key.fill(0);
+    }
+  }
+
+  async withActiveProfileKey<T>(profileId: string, work: (key: Buffer) => Promise<T>): Promise<T> {
+    if (profileId !== this.getActiveProfileId() || !this.activeProfileKey)
+      throw new ResultErrorException('PROFILE_CHANGED', 'PROFILE_CHANGED');
+    const key = Buffer.from(this.activeProfileKey);
+    try {
+      return await work(key);
+    } finally {
+      key.fill(0);
+    }
+  }
+
+  /** Cleanup caller already holds the lifecycle queue and has proved copy verification. */
+  async removeImportedGuest(profileId: string): Promise<void> {
+    const descriptor = (await this.profileRegistry.list()).find(
+      (item) => item.profileId === profileId,
+    );
+    if (descriptor?.profileKind !== 'guest')
+      throw new ResultErrorException('SOURCE_NOT_GUEST', 'SOURCE_NOT_GUEST');
+    await this.removeProfileNow(profileId);
+  }
+
+  isProfileCleanupPending(profileId: string): Promise<boolean> {
+    return this.cleanup.isPending(profileId);
   }
 
   private async prepareDescriptor(
@@ -459,60 +548,27 @@ export class DesktopProfileRuntimeManager {
       );
     }
     const db = await openPowerSyncLocalOnly(profileResolver.dbPath);
-    const recoveredDescriptor = await this.recoverCompletedAdoption(db, descriptor);
-    await this.ensureLocalAccount(db, recoveredDescriptor);
-    const profileAccessContext = new DesktopProfileAccessContext(
-      () =>
-        this.activeRuntime?.descriptor.localOwnerId ??
-        this.preparedRuntime?.descriptor.localOwnerId ??
-        recoveredDescriptor.localOwnerId,
-    );
+    // Publish the prepared handle before owner initialization so failures close the DB.
     this.preparedRuntime = {
-      descriptor: recoveredDescriptor,
+      descriptor,
+      profileResolver,
+      db,
+      profileAccessContext: new DesktopProfileAccessContext(() => descriptor.localOwnerId),
+    };
+    await this.ensureLocalAccount(db, descriptor);
+    const profileAccessContext = new DesktopProfileAccessContext(() => descriptor.localOwnerId);
+    this.preparedRuntime = {
+      descriptor: descriptor,
       profileResolver,
       db,
       profileAccessContext,
     };
-    await this.profileRegistry.markReady(recoveredDescriptor.profileId);
+    await this.profileRegistry.markReady(descriptor.profileId);
     logger.info('Profile prepared', {
-      profileId: recoveredDescriptor.profileId,
+      profileId: descriptor.profileId,
       snapshotHydrated: snapshotResult.hydrated,
     });
     return this.preparedRuntime;
-  }
-
-  private async recoverCompletedAdoption(
-    db: PowerSyncDatabase,
-    descriptor: ProfileDescriptor,
-  ): Promise<ProfileDescriptor> {
-    const adoption = new LocalTenantAdoptionService(db);
-    const completed = await adoption.getCompleted();
-    if (!completed) return descriptor;
-
-    if (descriptor.profileKind === 'registered') {
-      if (descriptor.cloudBinding?.cloudAccountId !== completed.toOwnerId) {
-        throw new Error('Profile adoption journal conflicts with the registered cloud binding');
-      }
-      await adoption.clearCompleted();
-      return descriptor;
-    }
-
-    if (descriptor.localOwnerId !== completed.fromOwnerId) {
-      throw new Error('Profile adoption journal does not belong to the current Profile');
-    }
-
-    const rebound = await this.profileRegistry.rebindIdentityOwnership({
-      fromOwnerId: completed.fromOwnerId,
-      toCloudAccountId: completed.toOwnerId,
-      displayName: completed.displayName,
-      identifier: completed.identifier,
-    });
-    await adoption.clearCompleted();
-    logger.warn('Recovered completed tenant adoption after interrupted registry rebind', {
-      profileId: rebound.profileId,
-      cloudAccountId: completed.toOwnerId,
-    });
-    return rebound;
   }
 
   private async ensureLocalAccount(

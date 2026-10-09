@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { PrismaClient } from '@memoflow/database';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
 import type {
   INotificationInteractionRepository,
@@ -35,7 +35,7 @@ function toDTO(row: {
 }
 
 export class NotificationInteractionPrismaRepository implements INotificationInteractionRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async record(input: RecordNotificationInteractionInput): Promise<NotificationInteractionDTO> {
     const row = await this.prisma.notificationInteraction.upsert({

@@ -49,3 +49,12 @@ export {
   type IAccountRepository,
 } from './server';
 export type { AccountApplicationPort } from './server';
+export { createBusinessDataSummaryReader } from './server/application/business-data-summary';
+export {
+  createAccountPrismaPortableCapability,
+  createAccountPowerSyncPortableCapability,
+} from './server/infrastructure/account-profile-import';
+export type {
+  BusinessDataPresenceReaders,
+  BusinessDataSummaryReader,
+} from './server/application/business-data-summary';

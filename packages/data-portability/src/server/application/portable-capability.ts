@@ -22,6 +22,10 @@ export interface RegisteredPortableCapability {
     context: PortableCapabilityExecutionContext,
   ): Promise<void>;
   exportValidated(context: PortableCapabilityExecutionContext): Promise<unknown | null>;
+  planProfileImportValidated(
+    payload: unknown,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<{ payload: unknown; preservedFields: readonly string[] }>;
   dryRunValidated(
     payload: unknown,
     context: PortableCapabilityExecutionContext,
@@ -88,6 +92,13 @@ export class PortableCapabilityRegistry {
       async exportValidated(context) {
         const payload = await capability.export(context);
         return payload === null ? null : parsePayload(payload);
+      },
+      async planProfileImportValidated(payload, context) {
+        const parsed = parsePayload(payload);
+        const plan = capability.planProfileImport
+          ? await capability.planProfileImport(parsed, context)
+          : { payload: parsed, preservedFields: [] };
+        return { payload: parsePayload(plan.payload), preservedFields: plan.preservedFields };
       },
       async dryRunValidated(payload, context) {
         return capability.dryRun(parsePayload(payload), context);

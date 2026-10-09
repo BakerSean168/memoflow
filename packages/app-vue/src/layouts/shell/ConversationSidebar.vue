@@ -10,7 +10,7 @@
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { MoreHorizontal, Search, SquarePen, Trash2, X } from '@lucide/vue';
+import { MoreHorizontal, Search, SquarePen, Trash2, X, Check, LockKeyhole } from '@lucide/vue';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
+import type { ProfileSummary } from '@memoflow/contracts/electron';
 import { APP_NAME_ZH } from '@memoflow/assets';
 
 interface ConversationEntry {
@@ -32,6 +33,8 @@ interface ConversationGroup {
 }
 
 const props = defineProps<{
+  profiles?: ProfileSummary[];
+  activeProfileId?: string;
   groups: ConversationGroup[];
   activeConversationId: string | null;
   userName?: string;
@@ -53,6 +56,11 @@ const emit = defineEmits<{
   (e: 'open-account'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
+  (e: 'add-account'): void;
+  (e: 'create-profile'): void;
+  (e: 'manage-profiles'): void;
+  (e: 'import-profile'): void;
+  (e: 'switch-profile', profileId: string): void;
 }>();
 
 const { t } = useI18n();
@@ -267,6 +275,40 @@ const identityLabel = () => {
           <DropdownMenuItem data-testid="shell-open-settings" @click="emit('open-settings')">
             {{ t('shell.account.settings') }}
           </DropdownMenuItem>
+          <template v-if="isDesktop">
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              v-for="profile in profiles"
+              :key="profile.profileId"
+              @click="emit('switch-profile', profile.profileId)"
+              ><span class="min-w-0 flex-1"
+                ><span class="block truncate">{{ profile.displayName }}</span
+                ><small class="block truncate text-muted-foreground">{{
+                  profile.identifierHint || t('auth.profileAccess.guest')
+                }}</small></span
+              ><LockKeyhole v-if="profile.hasPin" class="h-3 w-3" /><Check
+                v-if="profile.profileId === activeProfileId"
+                class="h-3 w-3"
+                :aria-label="t('shell.account.currentProfile')"
+            /></DropdownMenuItem>
+            <DropdownMenuItem data-testid="shell-create-profile" @click="emit('create-profile')">{{
+              t('shell.account.createProfile')
+            }}</DropdownMenuItem>
+            <DropdownMenuItem
+              data-testid="shell-manage-profiles"
+              @click="emit('manage-profiles')"
+              >{{ t('shell.account.manageProfiles') }}</DropdownMenuItem
+            >
+            <DropdownMenuItem
+              v-if="identityKind !== 'guest'"
+              data-testid="shell-import-profile"
+              @click="emit('import-profile')"
+              >{{ t('shell.profileImport.title') }}</DropdownMenuItem
+            >
+            <DropdownMenuItem data-testid="shell-add-account" @click="emit('add-account')">{{
+              t('shell.account.addAccount')
+            }}</DropdownMenuItem>
+          </template>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             v-if="cloudConnected"
@@ -281,7 +323,11 @@ const identityLabel = () => {
             data-testid="shell-open-cloud-connection"
             @click="emit('open-cloud-connection')"
           >
-            {{ t('shell.account.connectCloud') }}
+            {{
+              identityKind === 'registered-local'
+                ? t('shell.account.reauthenticate')
+                : t('shell.account.connectCloud')
+            }}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

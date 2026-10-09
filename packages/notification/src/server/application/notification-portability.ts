@@ -6,6 +6,7 @@ import type {
 } from '@memoflow/contracts/notification';
 import {
   NotificationActionIntentSchema,
+  NotificationPortableFactV3Schema,
   NotificationPortablePayloadV3Schema,
 } from '@memoflow/contracts/notification';
 import type {
@@ -14,7 +15,10 @@ import type {
   PortableCapabilityReceipt,
   PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
-import type { INotificationInteractionRepository, INotificationRepository } from '../domain/repositories';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+} from '../domain/repositories';
 import { Notification } from '../domain/aggregates/notification';
 import { NotificationId, NotificationAction, NotificationMetadata } from '../domain/value-objects';
 
@@ -63,10 +67,7 @@ function portableInteractionSortKey(interaction: PortableInteractionSortInput): 
     interaction.actionKey,
     interaction.actionKind,
     interaction.occurredAt,
-    interaction.commandReceiptId,
     interaction.outcome,
-    interaction.correlationId,
-    interaction.causationId,
   ]);
 }
 
@@ -78,7 +79,7 @@ function portableFact(
   const metadata = dto.metadata
     ? { icon: dto.metadata.icon, image: dto.metadata.image, color: dto.metadata.color }
     : null;
-  return {
+  return NotificationPortableFactV3Schema.parse({
     ref,
     workflowKey: dto.workflowKey,
     topic: dto.topic,
@@ -89,26 +90,28 @@ function portableFact(
     importance: dto.importance,
     urgency: dto.urgency,
     relatedEntityType: dto.relatedEntityType ?? null,
-    relatedEntityId: dto.relatedEntityId ?? null,
-    navigationIntent: dto.navigationIntent ?? null,
+    navigationIntent: null,
     actions: dto.actions
-      ? dto.actions.map((action) => NotificationActionIntentSchema.parse(action))
+      ? dto.actions.flatMap((action) => {
+          const parsed = NotificationActionIntentSchema.parse(action);
+          return parsed.kind === 'archive' ? [parsed] : [];
+        })
       : null,
     presentation: metadata,
-    correlationId: dto.correlationId ?? null,
-    causationId: dto.causationId ?? null,
     readAt: dto.readAt ?? null,
     archivedAt: dto.archivedAt ?? null,
     expiresAt: dto.expiresAt ?? null,
-  };
+  });
 }
 
-function assertFactMatches(
-  current: Notification,
-  incoming: NotificationPortableFactV3,
-): void {
-  if (current.toServerDTO().deletedAt !== null || !same(portableFact(incoming.ref, current), incoming)) {
-    throw new Error(`notifications@3 deterministic target conflicts with portable Fact ${incoming.ref}`);
+function assertFactMatches(current: Notification, incoming: NotificationPortableFactV3): void {
+  if (
+    current.toServerDTO().deletedAt !== null ||
+    !same(portableFact(incoming.ref, current), incoming)
+  ) {
+    throw new Error(
+      `notifications@3 deterministic target conflicts with portable Fact ${incoming.ref}`,
+    );
   }
 }
 
@@ -123,12 +126,11 @@ function assertInteractionMatches(
     current.actionKey !== incoming.actionKey ||
     current.actionKind !== incoming.actionKind ||
     current.occurredAt !== incoming.occurredAt ||
-    (current.commandReceiptId ?? null) !== incoming.commandReceiptId ||
-    current.outcome !== incoming.outcome ||
-    (current.correlationId ?? null) !== incoming.correlationId ||
-    (current.causationId ?? null) !== incoming.causationId
+    current.outcome !== incoming.outcome
   ) {
-    throw new Error(`notifications@3 interaction target conflicts with portable Interaction ${incoming.ref}`);
+    throw new Error(
+      `notifications@3 interaction target conflicts with portable Interaction ${incoming.ref}`,
+    );
   }
 }
 
@@ -137,7 +139,7 @@ function validateInteractionAction(
   fact: NotificationPortableFactV3,
 ): void {
   const action = fact.actions?.find((candidate) => candidate.actionKey === interaction.actionKey);
-  if (!action || action.kind !== interaction.actionKind) {
+  if (action && action.kind !== interaction.actionKind) {
     throw new Error(
       `notifications@3 Interaction ${interaction.ref} references an unavailable typed action on ${fact.ref}`,
     );
@@ -149,7 +151,9 @@ function validatePayloadReferences(payload: NotificationPortablePayloadV3): void
   for (const interaction of payload.interactions) {
     const fact = factsByRef.get(interaction.notificationRef);
     if (!fact) {
-      throw new Error(`notifications@3 Interaction has unknown Fact: ${interaction.notificationRef}`);
+      throw new Error(
+        `notifications@3 Interaction has unknown Fact: ${interaction.notificationRef}`,
+      );
     }
     validateInteractionAction(interaction, fact);
   }
@@ -173,10 +177,10 @@ function createImportedNotification(
     importance: fact.importance,
     urgency: fact.urgency,
     relatedEntityType: fact.relatedEntityType,
-    relatedEntityId: fact.relatedEntityId,
+    relatedEntityId: null,
     navigationIntent: fact.navigationIntent,
-    correlationId: fact.correlationId,
-    causationId: fact.causationId,
+    correlationId: null,
+    causationId: null,
     isRead: fact.readAt !== null,
     readAt: fact.readAt,
     actions: fact.actions?.map((action) => NotificationAction.fromDTO(action)) ?? null,
@@ -210,7 +214,9 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
     private readonly interactionRepository: INotificationInteractionRepository,
   ) {}
 
-  async export(context: PortableCapabilityExecutionContext): Promise<NotificationPortablePayloadV3> {
+  async export(
+    context: PortableCapabilityExecutionContext,
+  ): Promise<NotificationPortablePayloadV3> {
     const notifications = await this.notificationRepository.findByIdentityId(context.identityId, {
       includeRead: true,
       includeDeleted: false,
@@ -229,7 +235,8 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
     const interactions: NotificationPortableInteractionV3[] = [];
     for (const notification of ordered) {
       const notificationRef = refs.get(String(notification.id));
-      if (!notificationRef) throw new Error(`notifications@3 missing Fact reference: ${String(notification.id)}`);
+      if (!notificationRef)
+        throw new Error(`notifications@3 missing Fact reference: ${String(notification.id)}`);
       const current = await this.interactionRepository.listByNotification(
         context.identityId,
         String(notification.id),
@@ -240,10 +247,7 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
         actionKey: item.actionKey,
         actionKind: item.actionKind,
         occurredAt: item.occurredAt,
-        commandReceiptId: item.commandReceiptId ?? null,
         outcome: item.outcome,
-        correlationId: item.correlationId ?? null,
-        causationId: item.causationId ?? null,
       }));
       for (const interaction of portableForNotification.sort((a, b) =>
         portableInteractionSortKey(a).localeCompare(portableInteractionSortKey(b)),
@@ -254,10 +258,7 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
           actionKey: interaction.actionKey,
           actionKind: interaction.actionKind,
           occurredAt: interaction.occurredAt,
-          commandReceiptId: interaction.commandReceiptId,
           outcome: interaction.outcome,
-          correlationId: interaction.correlationId,
-          causationId: interaction.causationId,
         });
       }
     }
@@ -308,7 +309,9 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
     for (const interaction of target.interactions) {
       const notificationId = idsByRef.get(interaction.notificationRef);
       if (!notificationId) {
-        throw new Error(`notifications@3 Interaction has an unbound Fact reference: ${interaction.notificationRef}`);
+        throw new Error(
+          `notifications@3 Interaction has an unbound Fact reference: ${interaction.notificationRef}`,
+        );
       }
       const current = await this.interactionRepository.findByIdempotencyKey(
         context.identityId,
@@ -320,13 +323,18 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
       } else {
         created += 1;
       }
-      context.references.bindImportedReference(interaction.ref, current?.id ?? `portable-interaction:${interaction.ref}`);
+      context.references.bindImportedReference(
+        interaction.ref,
+        current?.id ?? `portable-interaction:${interaction.ref}`,
+      );
     }
     return {
       created,
       updated: 0,
       skipped,
-      warnings: ['Delivery outbox, receipts, dead letters, audit, and device state are not portable.'],
+      warnings: [
+        'Delivery outbox, receipts, dead letters, audit, and device state are not portable.',
+      ],
     };
   }
 
@@ -367,7 +375,9 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
     for (const interaction of target.interactions) {
       const notificationId = idsByRef.get(interaction.notificationRef);
       if (!notificationId) {
-        throw new Error(`notifications@3 Interaction has an unbound Fact reference: ${interaction.notificationRef}`);
+        throw new Error(
+          `notifications@3 Interaction has an unbound Fact reference: ${interaction.notificationRef}`,
+        );
       }
       const idempotencyKey = `${importedNotificationKey(context, interaction.ref)}:interaction`;
       const current = await this.interactionRepository.findByIdempotencyKey(
@@ -387,10 +397,7 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
         actionKey: interaction.actionKey,
         actionKind: interaction.actionKind,
         occurredAt: interaction.occurredAt,
-        commandReceiptId: interaction.commandReceiptId,
         outcome: interaction.outcome,
-        correlationId: interaction.correlationId,
-        causationId: interaction.causationId,
       });
       created += 1;
       context.references.bindImportedReference(interaction.ref, String(createdInteraction.id));
@@ -400,7 +407,9 @@ export class NotificationPortableCapability implements PortableCapability<Notifi
       created,
       updated: 0,
       skipped,
-      warnings: ['Delivery outbox, receipts, dead letters, audit, and device state are not portable.'],
+      warnings: [
+        'Delivery outbox, receipts, dead letters, audit, and device state are not portable.',
+      ],
     };
   }
 }

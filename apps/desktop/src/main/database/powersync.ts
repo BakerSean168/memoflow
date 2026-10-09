@@ -371,7 +371,12 @@ export async function openPowerSyncLocalOnly(dbPath: string): Promise<PowerSyncD
 
     const db = createPowerSyncDatabase(resolvedDbPath);
     console.log('[PowerSync] Waiting for local-only database to become ready...');
-    await db.waitForReady();
+    try {
+      await db.waitForReady();
+    } catch (error) {
+      await db.close();
+      throw error;
+    }
     console.log('[PowerSync] Local-only database is ready');
 
     powerSyncDb = db;
@@ -433,21 +438,20 @@ export async function disablePowerSyncSyncMode(): Promise<void> {
  * Use on app quit to preserve the sync cache for the next cold start.
  */
 export async function shutdownPowerSync(): Promise<void> {
-  if (!powerSyncDb) return;
-
-  try {
-    stopChangeBroadcast();
-    await powerSyncDb.disconnect();
-    console.log('[PowerSync] Shut down gracefully (data preserved)');
-  } catch (error) {
-    console.error('[PowerSync] Error during shutdown:', error);
-  } finally {
-    syncConnected = false;
-    powerSyncDb = null;
-    currentDbPath = null;
-    // Clear concurrency guard to prevent stale in-flight opens from restoring old instances
-    openingPromise = null;
-  }
+  const db = powerSyncDb;
+  if (!db) return;
+  stopChangeBroadcast();
+  await db
+    .disconnect()
+    .catch((error) => console.error('[PowerSync] Disconnect failed during shutdown:', error));
+  syncConnected = false;
+  // Closing releases SQLite and worker resources; disconnect alone leaves them alive.
+  // Keep the handle if close fails so a retry can release it before any other Profile opens.
+  await db.close();
+  powerSyncDb = null;
+  currentDbPath = null;
+  openingPromise = null;
+  console.log('[PowerSync] Shut down gracefully (data preserved)');
 }
 
 /**

@@ -104,6 +104,15 @@ export async function analyzeE2ERetirement(root, contract = null) {
       if (typeof reference.needle !== 'string' || reference.needle === '') continue;
       let offset = source.indexOf(reference.needle);
       while (offset >= 0) {
+        if (
+          reference.suffixPattern &&
+          !new RegExp(reference.suffixPattern, 'u').test(
+            source.slice(offset + reference.needle.length),
+          )
+        ) {
+          offset = source.indexOf(reference.needle, offset + reference.needle.length);
+          continue;
+        }
         const line = source.slice(0, offset).split('\n').length;
         issues.push({
           path: normalizePath(file),

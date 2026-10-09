@@ -1,3 +1,4 @@
+import { withPrismaTransaction } from '@memoflow/database/transaction';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '@memoflow/database/prisma';
 import type { PrismaClient, RoutineInteraction, RoutineOccurrence } from '@memoflow/database';
@@ -42,11 +43,7 @@ function positive(value: number | null | undefined, field: string): number | nul
   return value;
 }
 
-function assertEnum<T extends string>(
-  value: string,
-  allowed: readonly T[],
-  field: string,
-): T {
+function assertEnum<T extends string>(value: string, allowed: readonly T[], field: string): T {
   if (!(allowed as readonly string[]).includes(value)) {
     throw new TypeError(`Invalid ${field}: ${value}`);
   }
@@ -113,15 +110,13 @@ function assertInteractionReplayMatches(
     row.action !== input.action ||
     row.snoozeDurationMs !== snoozeDurationMs
   ) {
-    throw new Error(`Routine interaction idempotency key '${input.idempotencyKey}' was reused for a different command`);
+    throw new Error(
+      `Routine interaction idempotency key '${input.idempotencyKey}' was reused for a different command`,
+    );
   }
 }
 
-function occurrenceWhere(input: {
-  identityId: string;
-  routineId: string;
-  occurrenceKey: string;
-}) {
+function occurrenceWhere(input: { identityId: string; routineId: string; occurrenceKey: string }) {
   return {
     identityId_routineId_occurrenceKey: {
       identityId: input.identityId,
@@ -137,7 +132,9 @@ async function requireOccurrence(
 ): Promise<RoutineOccurrence> {
   const row = await db.routineOccurrence.findUnique({ where: occurrenceWhere(input) });
   if (!row) {
-    throw new Error(`Routine occurrence '${input.occurrenceKey}' was not found for owner '${input.routineId}'`);
+    throw new Error(
+      `Routine occurrence '${input.occurrenceKey}' was not found for owner '${input.routineId}'`,
+    );
   }
   return row;
 }
@@ -153,7 +150,8 @@ async function resolveOnDb(
     'resolutionState',
   );
   if (currentState !== 'Open') {
-    if (currentState === input.state && current.resolutionKind === input.resolutionKind) return current;
+    if (currentState === input.state && current.resolutionKind === input.resolutionKind)
+      return current;
     throw new Error(
       `Routine occurrence '${input.occurrenceKey}' is already resolved as ${currentState}`,
     );
@@ -185,7 +183,10 @@ async function resolveOnDb(
 
 function resolutionForInteraction(
   input: ApplyRoutineInteractionInput,
-): Pick<ResolveRoutineOccurrenceInput, 'state' | 'resolutionKind' | 'resolvedAt' | 'reason'> | null {
+): Pick<
+  ResolveRoutineOccurrenceInput,
+  'state' | 'resolutionKind' | 'resolvedAt' | 'reason'
+> | null {
   if (input.action === 'Completed') {
     return {
       state: 'Satisfied',
@@ -207,7 +208,7 @@ function resolutionForInteraction(
 
 /** Prisma canonical Routine occurrence + interaction truth store (ADR-077 / R4-2201B). */
 export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruthStore {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}
 
   async ensureOpenOccurrence(input: EnsureRoutineOccurrenceInput): Promise<RoutineOccurrenceFact> {
     const identityId = nonEmpty(input.identityId, 'identityId');
@@ -215,8 +216,7 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
     const occurrenceKey = nonEmpty(input.occurrenceKey, 'occurrenceKey');
     const becameDueAt = new Date(Number(input.becameDueAt));
     if (!Number.isFinite(becameDueAt.getTime())) throw new TypeError('becameDueAt must be valid');
-    const scheduledFor =
-      input.scheduledFor == null ? null : new Date(Number(input.scheduledFor));
+    const scheduledFor = input.scheduledFor == null ? null : new Date(Number(input.scheduledFor));
     if (scheduledFor != null && !Number.isFinite(scheduledFor.getTime())) {
       throw new TypeError('scheduledFor must be valid');
     }
@@ -279,7 +279,9 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
     return mapOccurrence(await resolveOnDb(this.prisma, input));
   }
 
-  async applyInteraction(input: ApplyRoutineInteractionInput): Promise<RoutineInteractionApplyReceipt> {
+  async applyInteraction(
+    input: ApplyRoutineInteractionInput,
+  ): Promise<RoutineInteractionApplyReceipt> {
     const idempotencyKey = nonEmpty(input.idempotencyKey, 'idempotencyKey');
     const responseLatencyMs = nonNegative(input.responseLatencyMs, 'responseLatencyMs');
     const snoozeDurationMs = positive(input.snoozeDurationMs, 'snoozeDurationMs');
@@ -301,77 +303,83 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
     }
     const temporaryOverrideJson = serializeRoutineTemporaryOverride(temporaryOverride);
 
-    return this.prisma.$transaction(async (tx) => {
-      const candidateInteractionId = `RoutineInteraction_${randomUUID()}`;
-      // Prisma's upsert can still race on this unique key with the PostgreSQL
-      // adapter, surfacing P2002 instead of converging the losing transaction.
-      // createMany(skipDuplicates) maps to INSERT ... ON CONFLICT DO NOTHING:
-      // PostgreSQL waits for an uncommitted winner, then reports count=0.
-      const inserted = await tx.routineInteraction.createMany({
-        data: [{
-          id: candidateInteractionId,
-          idempotencyKey,
-          identityId: input.identityId,
-          routineId: input.routineId,
-          occurrenceKey: input.occurrenceKey,
-          action: input.action,
-          actedAt: new Date(Number(input.actedAt)),
-          responseLatencyMs,
-          snoozeDurationMs,
-          metadataJson: input.metadata == null ? null : JSON.stringify(input.metadata),
-        }],
-        skipDuplicates: true,
-      });
-      const interaction = await tx.routineInteraction.findUniqueOrThrow({
-        where: { idempotencyKey },
-      });
-      const replayed = inserted.count === 0;
-      if (replayed) {
-        assertInteractionReplayMatches(interaction, input, snoozeDurationMs);
-        // Read occurrence truth after crossing the fence. The explicit
-        // READ COMMITTED transaction isolation gives this statement a fresh
-        // snapshot after the conflicting insert has waited for its winner.
-        const occurrence = await requireOccurrence(tx, input);
+    return withPrismaTransaction(
+      this.prisma,
+      async (tx) => {
+        const candidateInteractionId = `RoutineInteraction_${randomUUID()}`;
+        // Prisma's upsert can still race on this unique key with the PostgreSQL
+        // adapter, surfacing P2002 instead of converging the losing transaction.
+        // createMany(skipDuplicates) maps to INSERT ... ON CONFLICT DO NOTHING:
+        // PostgreSQL waits for an uncommitted winner, then reports count=0.
+        const inserted = await tx.routineInteraction.createMany({
+          data: [
+            {
+              id: candidateInteractionId,
+              idempotencyKey,
+              identityId: input.identityId,
+              routineId: input.routineId,
+              occurrenceKey: input.occurrenceKey,
+              action: input.action,
+              actedAt: new Date(Number(input.actedAt)),
+              responseLatencyMs,
+              snoozeDurationMs,
+              metadataJson: input.metadata == null ? null : JSON.stringify(input.metadata),
+            },
+          ],
+          skipDuplicates: true,
+        });
+        const interaction = await tx.routineInteraction.findUniqueOrThrow({
+          where: { idempotencyKey },
+        });
+        const replayed = inserted.count === 0;
+        if (replayed) {
+          assertInteractionReplayMatches(interaction, input, snoozeDurationMs);
+          // Read occurrence truth after crossing the fence. The explicit
+          // READ COMMITTED transaction isolation gives this statement a fresh
+          // snapshot after the conflicting insert has waited for its winner.
+          const occurrence = await requireOccurrence(tx, input);
+          return {
+            interaction: mapInteraction(interaction),
+            occurrence: mapOccurrence(occurrence),
+            replayed: true,
+          };
+        }
+
+        let occurrence = await requireOccurrence(tx, input);
+        const resolution = resolutionForInteraction(input);
+        if (resolution) {
+          occurrence = await resolveOnDb(tx, { ...input, ...resolution });
+        }
+        if (temporaryOverrideJson != null) {
+          await tx.routineTemporaryOverride.upsert({
+            where: {
+              identityId_routineId: {
+                identityId: input.identityId,
+                routineId: input.routineId,
+              },
+            },
+            create: {
+              identityId: input.identityId,
+              routineId: input.routineId,
+              overrideJson: temporaryOverrideJson,
+            },
+            update: {
+              overrideJson: temporaryOverrideJson,
+              version: { increment: 1 },
+            },
+          });
+        }
+
         return {
           interaction: mapInteraction(interaction),
           occurrence: mapOccurrence(occurrence),
-          replayed: true,
+          replayed: false,
         };
-      }
-
-      let occurrence = await requireOccurrence(tx, input);
-      const resolution = resolutionForInteraction(input);
-      if (resolution) {
-        occurrence = await resolveOnDb(tx, { ...input, ...resolution });
-      }
-      if (temporaryOverrideJson != null) {
-        await tx.routineTemporaryOverride.upsert({
-          where: {
-            identityId_routineId: {
-              identityId: input.identityId,
-              routineId: input.routineId,
-            },
-          },
-          create: {
-            identityId: input.identityId,
-            routineId: input.routineId,
-            overrideJson: temporaryOverrideJson,
-          },
-          update: {
-            overrideJson: temporaryOverrideJson,
-            version: { increment: 1 },
-          },
-        });
-      }
-
-      return {
-        interaction: mapInteraction(interaction),
-        occurrence: mapOccurrence(occurrence),
-        replayed: false,
-      };
-    }, {
-      isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
-    });
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+      },
+    );
   }
 
   async listInteractions(input: {

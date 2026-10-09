@@ -171,12 +171,14 @@ describe('CloudAuthIpcClient', () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: undefined });
     const client = createCloudAuthIpcClient({ invoke } as never);
 
-    await client.beginCloudConnection();
+    await client.beginCloudConnection({ intent: 'add_account' });
     await client.getCurrentCloudConnection();
     await client.getCloudConnectionStatus('attempt-1');
     await client.cancelCloudConnection('attempt-1');
 
-    expect(invoke).toHaveBeenNthCalledWith(1, CloudAuthChannels.CLOUD_CONNECTION_BEGIN);
+    expect(invoke).toHaveBeenNthCalledWith(1, CloudAuthChannels.CLOUD_CONNECTION_BEGIN, {
+      intent: 'add_account',
+    });
     expect(invoke).toHaveBeenNthCalledWith(2, CloudAuthChannels.CLOUD_CONNECTION_CURRENT);
     expect(invoke).toHaveBeenNthCalledWith(3, CloudAuthChannels.CLOUD_CONNECTION_STATUS, {
       attemptId: 'attempt-1',

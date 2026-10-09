@@ -72,7 +72,9 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './electron',
     './mocks',
   ],
-  database: ['./prisma', './environment'],
+  // Transaction composition has no singleton connection side effects; shared owner code
+  // can import it in Desktop without initializing the API's PostgreSQL client.
+  database: ['./prisma', './environment', './transaction'],
   'domain-shared': ['./shared'],
   patterns: ['./scheduler', './repository', './cache', './events', './operations', './lease'],
   utils: [

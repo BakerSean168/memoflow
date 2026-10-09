@@ -109,6 +109,8 @@ export const ProfileAccessChannels = {
   GET_SNAPSHOT: 'profile-access:get-snapshot',
   LIST: 'profile-access:list',
   SELECT: 'profile-access:select',
+  CREATE_GUEST: 'profile-access:create-guest',
+  RENAME: 'profile-access:rename',
   REMOVE: 'profile-access:remove',
   LOCK: 'profile-access:lock',
   PIN_SET: 'profile-access:pin-set',

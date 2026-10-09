@@ -110,3 +110,4 @@ export {
   createRoutineOverrideChangedNotifier,
   createRoutineScheduleChangedNotifier,
 } from '../server/infrastructure/routine-schedule/routine-override-change-notifier';
+export { createRoutineBusinessDataPresence } from '../server/infrastructure/business-data-presence';

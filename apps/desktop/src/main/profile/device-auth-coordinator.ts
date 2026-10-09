@@ -4,6 +4,11 @@ import type {
   DesktopCloudConnectionAttempt,
   DesktopCloudConnectionStatus,
 } from '@memoflow/contracts';
+import {
+  BetterAuthSessionResponseSchema,
+  type DesktopCloudConnectionRequest,
+  type DesktopCloudConnectionResult,
+} from '@memoflow/contracts';
 import { fail, ok, type Result, type ResultError } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
@@ -28,11 +33,6 @@ interface DeviceTokenResponse {
   expires_in: number;
 }
 
-interface BetterAuthSessionResponse {
-  session?: { id: string; expiresAt: string | Date };
-  user?: { id: string; email: string; name: string; emailVerified?: boolean };
-}
-
 interface DeviceAuthErrorPayload {
   error?: string;
   error_description?: string;
@@ -42,6 +42,9 @@ interface DeviceAuthErrorPayload {
 interface InternalAttempt {
   attemptId: string;
   profileId: string;
+  profileGeneration: number;
+  request: DesktopCloudConnectionRequest;
+  result: DesktopCloudConnectionResult | null;
   deviceCode: string;
   userCode: string;
   verificationUrl: string;
@@ -62,11 +65,17 @@ export interface DeviceAuthCoordinatorOptions {
 
 function defaultSleep(milliseconds: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
-    const timer = setTimeout(resolve, milliseconds);
-    signal.addEventListener('abort', () => {
-      clearTimeout(timer);
+    if (signal.aborted) {
       resolve();
-    }, { once: true });
+      return;
+    }
+    const finish = () => {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', finish);
+      resolve();
+    };
+    const timer = setTimeout(finish, milliseconds);
+    signal.addEventListener('abort', finish, { once: true });
   });
 }
 
@@ -75,6 +84,7 @@ function authOrigin(): string {
 }
 
 export class DeviceAuthCoordinator {
+  private beginGeneration = 0;
   private readonly attempts = new Map<string, InternalAttempt>();
   private readonly profileAttempts = new Map<string, string>();
   private readonly fetchImpl: typeof fetch;
@@ -95,11 +105,15 @@ export class DeviceAuthCoordinator {
     this.random = options.random ?? Math.random;
   }
 
-  async begin(): Promise<Result<DesktopCloudConnectionAttempt>> {
+  async begin(
+    request: DesktopCloudConnectionRequest = { intent: 'add_account' },
+  ): Promise<Result<DesktopCloudConnectionAttempt>> {
     const profileId = this.runtime.getActiveProfileId();
     if (!profileId) {
       return fail({ code: 'PROFILE_LOCKED', message: '请先打开本地 Profile' });
     }
+    const generation = ++this.beginGeneration;
+    const profileGeneration = this.runtime.getProfileGeneration();
     const previousAttemptId = this.profileAttempts.get(profileId);
     if (previousAttemptId) {
       this.cancelInternal(previousAttemptId);
@@ -111,15 +125,32 @@ export class DeviceAuthCoordinator {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ client_id: DESKTOP_CLIENT_ID }),
+        signal: AbortSignal.timeout(10_000),
       });
-      const payload = await response.json().catch(() => null) as DeviceCodeResponse | DeviceAuthErrorPayload | null;
+      const payload = (await response.json().catch(() => null)) as
+        DeviceCodeResponse | DeviceAuthErrorPayload | null;
       if (!response.ok || !this.isDeviceCodeResponse(payload)) {
-        return fail(this.toError(payload, 'CLOUD_CONNECTION_REQUEST_FAILED', '无法创建云端连接请求'));
+        return fail(
+          this.toError(payload, 'CLOUD_CONNECTION_REQUEST_FAILED', '无法创建云端连接请求'),
+        );
       }
 
+      if (
+        generation !== this.beginGeneration ||
+        this.runtime.getProfileGeneration() !== profileGeneration ||
+        this.runtime.getActiveProfileId() !== profileId
+      ) {
+        return fail({
+          code: 'CLOUD_CONNECTION_CANCELLED',
+          message: '认证请求已被替换或 Profile 已切换',
+        });
+      }
       const attempt: InternalAttempt = {
         attemptId: crypto.randomUUID(),
         profileId,
+        profileGeneration,
+        request,
+        result: null,
         deviceCode: payload.device_code,
         userCode: payload.user_code,
         verificationUrl: payload.verification_uri_complete,
@@ -171,24 +202,32 @@ export class DeviceAuthCoordinator {
     const attempt = this.getCurrentProfileAttempt(attemptId);
     return attempt
       ? ok(this.toSnapshot(attempt))
-      : fail({ code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND', message: '连接请求不存在或不属于当前 Profile' });
+      : fail({
+          code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND',
+          message: '连接请求不存在或不属于当前 Profile',
+        });
   }
 
   cancel(attemptId: string): Result<void> {
     const attempt = this.getCurrentProfileAttempt(attemptId);
     if (!attempt) {
-      return fail({ code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND', message: '连接请求不存在或不属于当前 Profile' });
+      return fail({
+        code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND',
+        message: '连接请求不存在或不属于当前 Profile',
+      });
     }
     this.cancelInternal(attemptId);
     return ok(undefined);
   }
 
   cancelForProfile(profileId: string): void {
+    this.beginGeneration += 1;
     const attemptId = this.profileAttempts.get(profileId);
     if (attemptId) this.cancelInternal(attemptId);
   }
 
   clearForProfile(profileId: string): void {
+    this.beginGeneration += 1;
     const attemptId = this.profileAttempts.get(profileId);
     if (!attemptId) return;
     this.cancelInternal(attemptId);
@@ -197,6 +236,7 @@ export class DeviceAuthCoordinator {
   }
 
   dispose(): void {
+    this.beginGeneration += 1;
     for (const attemptId of this.attempts.keys()) this.cancelInternal(attemptId);
   }
 
@@ -211,7 +251,10 @@ export class DeviceAuthCoordinator {
         attempt.status = 'expired';
         return;
       }
-      if (this.runtime.getActiveProfileId() !== attempt.profileId) {
+      if (
+        this.runtime.getActiveProfileId() !== attempt.profileId ||
+        this.runtime.getProfileGeneration() !== attempt.profileGeneration
+      ) {
         this.cancelInternal(attempt.attemptId);
         return;
       }
@@ -227,9 +270,13 @@ export class DeviceAuthCoordinator {
             device_code: attempt.deviceCode,
             client_id: DESKTOP_CLIENT_ID,
           }),
-          signal: attempt.abortController.signal,
+          signal: AbortSignal.any([
+            attempt.abortController.signal,
+            AbortSignal.timeout(Math.min(10_000, Math.max(1, attempt.expiresAt - this.now()))),
+          ]),
         });
-        payload = await response.json().catch(() => null) as DeviceTokenResponse | DeviceAuthErrorPayload | null;
+        payload = (await response.json().catch(() => null)) as
+          DeviceTokenResponse | DeviceAuthErrorPayload | null;
       } catch {
         this.increasePollBackoff(attempt);
         continue;
@@ -238,13 +285,17 @@ export class DeviceAuthCoordinator {
       if (response.ok && this.isDeviceTokenResponse(payload)) {
         const token = payload.access_token;
         attempt.deviceCode = '';
+        if (attempt.abortController.signal.aborted) {
+          await this.connection.revoke(token);
+          return;
+        }
         attempt.status = 'connecting_profile';
         let auth: CloudAuthResponse | null;
         try {
           auth = await this.resolveAuthResponse(token, attempt.abortController.signal);
         } catch {
           await this.connection.revoke(token);
-          attempt.status = 'failed';
+          attempt.status = attempt.abortController.signal.aborted ? 'cancelled' : 'failed';
           attempt.error = { code: 'NETWORK_ERROR', message: '无法确认新创建的云端 session' };
           return;
         }
@@ -254,12 +305,32 @@ export class DeviceAuthCoordinator {
           attempt.error = { code: 'AUTH_RESPONSE_INVALID', message: '云端认证响应无效' };
           return;
         }
-        const connected = await this.connection.connect(attempt.profileId, auth, token);
+        if (
+          attempt.abortController.signal.aborted ||
+          this.now() >= attempt.expiresAt ||
+          this.runtime.getActiveProfileId() !== attempt.profileId ||
+          this.runtime.getProfileGeneration() !== attempt.profileGeneration
+        ) {
+          await this.connection.revoke(token);
+          attempt.status = this.now() >= attempt.expiresAt ? 'expired' : 'cancelled';
+          return;
+        }
+        const connected = await this.connection.connect(
+          attempt.profileId,
+          auth,
+          token,
+          attempt.request,
+          AbortSignal.any([
+            attempt.abortController.signal,
+            AbortSignal.timeout(Math.max(1, attempt.expiresAt - this.now())),
+          ]),
+        );
         if (!connected.ok) {
-          attempt.status = 'failed';
+          attempt.status = attempt.abortController.signal.aborted ? 'cancelled' : 'failed';
           attempt.error = connected.error;
           return;
         }
+        attempt.result = connected.data;
         attempt.status = 'connected';
         return;
       }
@@ -296,14 +367,20 @@ export class DeviceAuthCoordinator {
     }
   }
 
-  private async resolveAuthResponse(token: string, signal: AbortSignal): Promise<CloudAuthResponse | null> {
+  private async resolveAuthResponse(
+    token: string,
+    signal: AbortSignal,
+  ): Promise<CloudAuthResponse | null> {
     const response = await this.fetchImpl(`${authOrigin()}/api/auth/get-session`, {
       headers: { authorization: `Bearer ${token}` },
-      signal,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
     });
     if (!response.ok) return null;
-    const payload = await response.json().catch(() => null) as BetterAuthSessionResponse | null;
-    if (!payload?.session || !payload.user) return null;
+    const parsed = BetterAuthSessionResponseSchema.safeParse(
+      await response.json().catch(() => null),
+    );
+    if (!parsed.success) return null;
+    const payload = parsed.data;
     return {
       account: {
         id: payload.user.id,
@@ -321,7 +398,12 @@ export class DeviceAuthCoordinator {
 
   private getCurrentProfileAttempt(attemptId: string): InternalAttempt | null {
     const attempt = this.attempts.get(attemptId);
-    return attempt && this.runtime.getActiveProfileId() === attempt.profileId ? attempt : null;
+    return attempt &&
+      (this.runtime.getActiveProfileId() === attempt.profileId ||
+        (attempt.status === 'connected' &&
+          this.runtime.getActiveProfileId() === attempt.result?.targetProfileId))
+      ? attempt
+      : null;
   }
 
   private cancelInternal(attemptId: string): void {
@@ -343,6 +425,8 @@ export class DeviceAuthCoordinator {
   private toSnapshot(attempt: InternalAttempt): DesktopCloudConnectionAttempt {
     return {
       attemptId: attempt.attemptId,
+      originProfileId: attempt.profileId,
+      result: attempt.result,
       userCode: attempt.userCode,
       verificationUrl: attempt.verificationUrl,
       expiresAt: new Date(attempt.expiresAt).toISOString(),
@@ -354,11 +438,13 @@ export class DeviceAuthCoordinator {
   private isDeviceCodeResponse(payload: unknown): payload is DeviceCodeResponse {
     if (!payload || typeof payload !== 'object') return false;
     const record = payload as Record<string, unknown>;
-    return typeof record.device_code === 'string'
-      && typeof record.user_code === 'string'
-      && typeof record.verification_uri_complete === 'string'
-      && typeof record.expires_in === 'number'
-      && typeof record.interval === 'number';
+    return (
+      typeof record.device_code === 'string' &&
+      typeof record.user_code === 'string' &&
+      typeof record.verification_uri_complete === 'string' &&
+      typeof record.expires_in === 'number' &&
+      typeof record.interval === 'number'
+    );
   }
 
   private isDeviceTokenResponse(payload: unknown): payload is DeviceTokenResponse {
@@ -367,8 +453,12 @@ export class DeviceAuthCoordinator {
     return typeof record.access_token === 'string' && record.token_type === 'Bearer';
   }
 
-  private readErrorCode(payload: DeviceAuthErrorPayload | DeviceTokenResponse | null): string | null {
-    return payload && 'error' in payload && typeof payload.error === 'string' ? payload.error : null;
+  private readErrorCode(
+    payload: DeviceAuthErrorPayload | DeviceTokenResponse | null,
+  ): string | null {
+    return payload && 'error' in payload && typeof payload.error === 'string'
+      ? payload.error
+      : null;
   }
 
   private toError(
@@ -377,13 +467,17 @@ export class DeviceAuthCoordinator {
     fallbackMessage: string,
   ): ResultError {
     const error = payload && 'error' in payload ? payload.error : undefined;
-    const description = payload && 'error_description' in payload ? payload.error_description : undefined;
+    const description =
+      payload && 'error_description' in payload ? payload.error_description : undefined;
     const message = payload && 'message' in payload ? payload.message : undefined;
     return {
       code: typeof error === 'string' ? error.toUpperCase() : fallbackCode,
-      message: typeof description === 'string'
-        ? description
-        : typeof message === 'string' ? message : fallbackMessage,
+      message:
+        typeof description === 'string'
+          ? description
+          : typeof message === 'string'
+            ? message
+            : fallbackMessage,
     };
   }
 }

@@ -153,6 +153,7 @@ export function createScheduleOrchestrationModule(
 
   return {
     projectionRuntime: createCompositeRuntimeContribution(runtimeContributions),
+    reconcileImportedProfile: (identityId) => projectionRepairRuntime.reconcileIdentity(identityId),
     projectionRepairMetrics: projectionRepairRuntime.metrics,
     schedulingPort,
     handlerRegistry,

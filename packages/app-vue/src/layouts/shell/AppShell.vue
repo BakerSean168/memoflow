@@ -17,6 +17,14 @@
  * - 会话侧栏消费 AIChatView defineExpose 的会话状态（单一 chat session）；
  * - 桌面窗控走 useDesktopWindowControls（Web 端不渲染，V2 决策 #6）。
  */
+import {
+  ProfileAccessChannels,
+  DesktopProfileImportChannels,
+  WindowChannels,
+  type ProfileSummary,
+} from '@memoflow/contracts/electron';
+import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
+import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -51,6 +59,8 @@ import { resolvePanelRouteIdentity } from './panel-cache-key';
 import { DialogDraftScopeKey } from './dialog-draft-store';
 import GlobalComposer from './GlobalComposer.vue';
 import CloudConnectionDialog from './CloudConnectionDialog.vue';
+import ProfileImportDialog from './ProfileImportDialog.vue';
+import { z } from 'zod';
 import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
 import {
   COMPOSER_BOTTOM_GAP,
@@ -353,11 +363,83 @@ const logout = inject(LOGOUT_HANDLER_KEY, null);
 const desktopAccess = inject(DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
+const cloudConnectionIntent = ref<'add_account' | 'reauthenticate'>('add_account');
+const desktopBridge = inject(DESKTOP_BRIDGE_KEY, null);
+const desktopProfiles = ref<ProfileSummary[]>([]);
+const profileImportOpen = ref(false);
+const profileImportSource = ref<string>();
+watch(
+  () => desktopAccess.value?.profile?.profileId,
+  async (profileId) => {
+    if (!profileId || !desktopBridge || desktopAccess.value?.profile?.profileKind !== 'registered')
+      return;
+    try {
+      const result = z
+        .object({
+          ok: z.boolean(),
+          data: z.object({ sourceProfileId: z.string().nullable() }).nullable().optional(),
+        })
+        .parse(
+          await desktopBridge.invoke(DesktopProfileImportChannels.CONSUME_PROMPT, {
+            targetProfileId: profileId,
+          }),
+        );
+      if (result.ok && result.data && desktopAccess.value?.profile?.profileId === profileId) {
+        profileImportSource.value = result.data.sourceProfileId ?? undefined;
+        profileImportOpen.value = true;
+      }
+    } catch {
+      /* Optional invitation does not interrupt the signed-in workspace. */
+    }
+  },
+  { immediate: true },
+);
+onMounted(async () => {
+  if (!desktopBridge) return;
+  const result = (await desktopBridge.invoke(ProfileAccessChannels.LIST)) as {
+    ok: boolean;
+    data: ProfileSummary[];
+  };
+  if (result.ok) desktopProfiles.value = result.data;
+});
+const creatingProfile = ref(false);
+const createProfileRequestId = ref(crypto.randomUUID());
+async function createLocalProfile() {
+  if (!desktopBridge || creatingProfile.value) return;
+  creatingProfile.value = true;
+  try {
+    const result = (await desktopBridge.invoke(ProfileAccessChannels.CREATE_GUEST, {
+      requestId: createProfileRequestId.value,
+    })) as { ok: boolean; data?: ProfileSummary; error?: { message: string } };
+    if (!result.ok || !result.data) {
+      toast.error(result.error?.message ?? t('common.operationFailed'));
+      return;
+    }
+    createProfileRequestId.value = crypto.randomUUID();
+    await manageProfiles(result.data.profileId);
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : t('common.operationFailed'));
+  } finally {
+    creatingProfile.value = false;
+  }
+}
+async function manageProfiles(profileId?: string) {
+  closeOverlaySidebar();
+  try {
+    await desktopBridge?.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, profileId);
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : t('common.operationFailed'));
+  }
+}
+function addAccount() {
+  cloudConnectionIntent.value = 'add_account';
+  cloudConnectionOpen.value = true;
+}
 const userName = computed<string | undefined>(
   () =>
+    desktopAccess.value?.profile?.displayName ??
     accountStore.currentAccount?.profile.nickname ??
-    authStore.currentIdentity?.name ??
-    desktopAccess.value?.profile?.displayName,
+    authStore.currentIdentity?.name,
 );
 const shellIdentityKind = computed<'guest' | 'registered-local' | 'cloud'>(() => {
   if (isAuthenticated.value) return 'cloud';
@@ -740,6 +822,9 @@ function openUpdateSettings() {
 function openCloudConnection() {
   closeOverlaySidebar();
   if (isDesktop) {
+    cloudConnectionIntent.value = desktopAccess.value?.profile?.cloudAccountId
+      ? 'reauthenticate'
+      : 'add_account';
     cloudConnectionOpen.value = true;
     return;
   }
@@ -975,6 +1060,8 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
+              :profiles="desktopProfiles"
+              :active-profile-id="desktopAccess?.profile?.profileId"
               :active-conversation-id="activeConversationId"
               :user-name="userName"
               :identity-kind="shellIdentityKind"
@@ -987,6 +1074,11 @@ onBeforeUnmount(() => {
               @open-settings="openSettings"
               @open-account="openAccount"
               @open-cloud-connection="openCloudConnection"
+              @manage-profiles="manageProfiles()"
+              @import-profile="profileImportOpen = true"
+              @switch-profile="manageProfiles"
+              @add-account="addAccount"
+              @create-profile="createLocalProfile"
               @logout="() => void handleLogout()"
             />
           </div>
@@ -1145,6 +1237,8 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
+            :profiles="desktopProfiles"
+            :active-profile-id="desktopAccess?.profile?.profileId"
             :active-conversation-id="activeConversationId"
             :user-name="userName"
             :identity-kind="shellIdentityKind"
@@ -1157,16 +1251,29 @@ onBeforeUnmount(() => {
             @open-settings="openSettings"
             @open-account="openAccount"
             @open-cloud-connection="openCloudConnection"
+            @manage-profiles="manageProfiles()"
+            @import-profile="profileImportOpen = true"
+            @switch-profile="manageProfiles"
+            @add-account="addAccount"
+            @create-profile="createLocalProfile"
             @logout="() => void handleLogout()"
           />
         </div>
       </SheetContent>
     </Sheet>
   </div>
+  <ProfileImportDialog
+    v-if="desktopAccess?.profile?.profileKind === 'registered'"
+    v-model:open="profileImportOpen"
+    :target="desktopAccess.profile"
+    :profiles="desktopProfiles"
+    :initial-source-id="profileImportSource"
+  />
   <CloudConnectionDialog
     v-if="isDesktop"
     v-model:open="cloudConnectionOpen"
     :profile-name="desktopAccess?.profile?.displayName"
+    :intent="cloudConnectionIntent"
   />
 </template>
 

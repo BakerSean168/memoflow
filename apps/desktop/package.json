@@ -90,6 +90,7 @@
     "@eslint/js": "^10.0.1",
     "@eslint/markdown": "^8.0.3",
     "@lucide/vue": "^1.48.0",
+    "@types/better-sqlite3": "^9.6.0",
     "@vitejs/plugin-vue": "6.0.9",
     "auto-launch": "5.0.6",
     "buffer": "6.0.3",

@@ -20,13 +20,20 @@ import {
   RotateCw,
   X,
 } from '@lucide/vue';
-import type { DesktopCloudConnectionAttempt } from '@memoflow/contracts';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import type {
+  DesktopCloudConnectionAttempt,
+  DesktopCloudConnectionRequest,
+} from '@memoflow/contracts';
+import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 import { DESKTOP_BRIDGE_KEY, DESKTOP_CLOUD_AUTH_SERVICE_KEY } from '../../di/keys';
 import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
 
-const props = defineProps<{ open: boolean; profileName?: string }>();
+const props = defineProps<{
+  open: boolean;
+  profileName?: string;
+  intent?: DesktopCloudConnectionRequest['intent'];
+}>();
 const emit = defineEmits<{ (event: 'update:open', value: boolean): void }>();
 
 const { t } = useI18n();
@@ -38,14 +45,18 @@ const loading = ref(false);
 const message = ref<string | null>(null);
 let pollTimer: ReturnType<typeof setTimeout> | null = null;
 
-const isPending = computed(() =>
-  attempt.value !== null
-  && ['requesting_code', 'awaiting_authorization', 'connecting_profile'].includes(attempt.value.status),
+const isPending = computed(
+  () =>
+    attempt.value !== null &&
+    ['requesting_code', 'awaiting_authorization', 'connecting_profile'].includes(
+      attempt.value.status,
+    ),
 );
 const isConnected = computed(() => attempt.value?.status === 'connected');
-const canRetry = computed(() =>
-  attempt.value !== null
-  && ['denied', 'expired', 'cancelled', 'failed'].includes(attempt.value.status),
+const canRetry = computed(
+  () =>
+    attempt.value !== null &&
+    ['denied', 'expired', 'cancelled', 'failed'].includes(attempt.value.status),
 );
 const statusLabel = computed(() => {
   if (!attempt.value) return t('shell.cloudConnection.ready');
@@ -72,7 +83,19 @@ async function hydrateSession(): Promise<void> {
 async function applyAttempt(next: DesktopCloudConnectionAttempt | null): Promise<void> {
   attempt.value = next;
   message.value = next?.error?.message ?? null;
-  if (next?.status === 'connected') await hydrateSession();
+  if (next?.status === 'connected' && next.result) {
+    if (next.result.targetProfileId !== next.originProfileId) {
+      stopPolling();
+      await bridge?.invoke(
+        WindowChannels.TRANSITION_TO_PROFILE_ACCESS,
+        next.result.targetProfileId,
+      );
+      return;
+    }
+    await hydrateSession();
+    if (next.result.activation === 'sync_pending')
+      message.value = t('shell.cloudConnection.syncPending');
+  }
   schedulePoll();
 }
 
@@ -86,7 +109,7 @@ async function restoreAttempt(): Promise<void> {
     message.value = result.error.message;
     return;
   }
-  await applyAttempt(result.data);
+  await applyAttempt(result.data?.status === 'connected' ? null : result.data);
 }
 
 async function refreshAttempt(): Promise<void> {
@@ -104,7 +127,7 @@ async function beginConnection(): Promise<void> {
   if (!service) return;
   loading.value = true;
   message.value = null;
-  const result = await service.beginCloudConnection();
+  const result = await service.beginCloudConnection({ intent: props.intent ?? 'add_account' });
   loading.value = false;
   if (!result.ok) {
     message.value = result.error.message;
@@ -153,7 +176,9 @@ onBeforeUnmount(stopPolling);
       body-class="space-y-5"
     >
       <template #icon>
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted/40">
+        <div
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted/40"
+        >
           <Cloud class="h-4 w-4" />
         </div>
       </template>
@@ -172,7 +197,9 @@ onBeforeUnmount(stopPolling);
         </div>
         <div
           class="flex h-10 w-10 items-center justify-center rounded-full border"
-          :class="isConnected ? 'border-primary bg-primary text-primary-foreground' : 'bg-background'"
+          :class="
+            isConnected ? 'border-primary bg-primary text-primary-foreground' : 'bg-background'
+          "
         >
           <CheckCircle2 v-if="isConnected" class="h-4 w-4" />
           <Cloud v-else class="h-4 w-4" />
@@ -251,7 +278,7 @@ onBeforeUnmount(stopPolling);
           {{ t('common.close') }}
         </Button>
         <Button
-          v-if="!attempt || canRetry"
+          v-if="!attempt || canRetry || isConnected"
           data-testid="cloud-connection-continue"
           :disabled="loading || !service"
           @click="beginConnection"

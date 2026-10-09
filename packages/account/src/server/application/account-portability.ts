@@ -60,6 +60,35 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     await this.validateTarget(payload, context, this.clock.now());
   }
 
+  async planProfileImport(
+    payload: PortableAccountProfileV3,
+    context: PortableCapabilityExecutionContext,
+  ) {
+    const source = this.payloadSchema.parse(payload);
+    const account = await this.requireHostAccount(context.identityId);
+    const current = this.payloadSchema.parse(account.profile.toDTO());
+    const target = { ...source };
+    const preservedFields: string[] = [];
+    // There is no durable provenance for a provisioned nickname. Keep it rather
+    // than guessing from a display name, email prefix, or account creation time.
+    for (const field of [
+      'nickname',
+      'realName',
+      'avatarUrl',
+      'bio',
+      'gender',
+      'birthday',
+    ] as const) {
+      const isDefault =
+        current[field] === null || (field === 'gender' && current[field] === 'PreferNotToSay');
+      if (!isDefault && current[field] !== source[field]) {
+        Object.assign(target, { [field]: current[field] });
+        preservedFields.push(field);
+      }
+    }
+    return { payload: this.payloadSchema.parse(target), preservedFields };
+  }
+
   async dryRun(
     payload: PortableAccountProfileV3,
     context: PortableCapabilityExecutionContext,

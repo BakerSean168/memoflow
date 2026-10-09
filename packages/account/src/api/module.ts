@@ -77,6 +77,7 @@ import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow
 import { createLogger } from '@memoflow/utils/logger';
 import type { AccountModuleInstance } from '../server/infrastructure';
 import { registerAccountRoutes } from './routes';
+import type { BusinessDataSummaryReader } from '../server/application';
 
 const logger = createLogger('AccountApi');
 
@@ -111,6 +112,7 @@ export interface AccountApiModuleDef extends ServerModuleHandle<AccountApiModule
  */
 export interface AccountApiModuleOptions {
   readonly instance: AccountModuleInstance;
+  readonly readDataSummary?: BusinessDataSummaryReader;
 }
 
 /**
@@ -152,6 +154,7 @@ export function createAccountApiModule(options: AccountApiModuleOptions): Accoun
           options.instance.api,
           middleware,
           openApiRegistry,
+          options.readDataSummary,
         );
 
         options.instance.start();
