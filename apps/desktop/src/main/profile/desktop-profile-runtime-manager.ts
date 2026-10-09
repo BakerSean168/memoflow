@@ -63,7 +63,10 @@ export class DesktopProfileRuntimeManager {
   private readonly profileSnapshotService = new ProfileSnapshotService();
   private activeRuntime: ActiveProfileRuntime | null = null;
   private preparedRuntime: PreparedProfileRuntime | null = null;
+  private preparationLock: Promise<PreparedProfileRuntime> | null = null;
   private activationLock: Promise<void> | null = null;
+  private deactivationLock: Promise<void> | null = null;
+  private pendingClose: { profileId: string; preserveSelection: boolean } | null = null;
   private registerModules: ProfileModuleRegistration | null = null;
   private afterActivation: ProfileActivationHook | null = null;
   private beforeDeactivation: ProfileDeactivationHook | null = null;
@@ -208,33 +211,55 @@ export class DesktopProfileRuntimeManager {
     return this.profileRegistry.findByIdentifier(identifier);
   }
 
-  async prepareProfile(
+  prepareProfile(
     localOwnerId: string,
     options?: PrepareProfileOptions,
   ): Promise<PreparedProfileRuntime> {
-    if (this.activationLock) await this.activationLock;
-
-    if (this.activeRuntime?.descriptor.localOwnerId === localOwnerId) return this.activeRuntime;
-    if (this.preparedRuntime?.descriptor.localOwnerId === localOwnerId) return this.preparedRuntime;
-
-    if (this.activeRuntime) await this.deactivateProfile();
-    await this.disposePreparedRuntime();
-
-    const descriptor = await this.profileRegistry.register(
-      localOwnerId,
-      options?.displayName ?? options?.identifier ?? localOwnerId,
-      options?.identifier,
-    );
-    return this.prepareDescriptor(descriptor, options);
+    return this.runPreparation(async () => {
+      if (this.activationLock) await this.activationLock;
+      if (this.activeRuntime?.descriptor.localOwnerId === localOwnerId) return this.activeRuntime;
+      if (this.preparedRuntime?.descriptor.localOwnerId === localOwnerId)
+        return this.preparedRuntime;
+      if (this.activeRuntime) await this.deactivateCurrentProfile({});
+      await this.disposePreparedRuntime();
+      const descriptor = await this.profileRegistry.register(
+        localOwnerId,
+        options?.displayName ?? options?.identifier ?? localOwnerId,
+        options?.identifier,
+      );
+      return this.prepareDescriptor(descriptor, options);
+    });
   }
 
-  async prepareGuestProfile(): Promise<PreparedProfileRuntime> {
-    const guest = await this.profileRegistry.ensureGuest();
-    if (this.activeRuntime?.descriptor.profileId === guest.profileId) return this.activeRuntime;
-    if (this.preparedRuntime?.descriptor.profileId === guest.profileId) return this.preparedRuntime;
-    if (this.activeRuntime) await this.deactivateProfile();
-    await this.disposePreparedRuntime();
-    return this.prepareDescriptor(guest);
+  prepareGuestProfile(): Promise<PreparedProfileRuntime> {
+    return this.runPreparation(async () => {
+      const guest = await this.profileRegistry.ensureGuest();
+      if (this.activationLock) await this.activationLock;
+      if (this.activeRuntime?.descriptor.profileId === guest.profileId) return this.activeRuntime;
+      if (this.preparedRuntime?.descriptor.profileId === guest.profileId)
+        return this.preparedRuntime;
+      if (this.activeRuntime) await this.deactivateCurrentProfile({});
+      await this.disposePreparedRuntime();
+      return this.prepareDescriptor(guest);
+    });
+  }
+
+  private runPreparation(
+    operation: () => Promise<PreparedProfileRuntime>,
+  ): Promise<PreparedProfileRuntime> {
+    const previousPreparation = this.preparationLock;
+    // Only wait for an earlier lock: a later lock must drain this preparation.
+    const previousDeactivation = this.deactivationLock;
+    const task = (async () => {
+      await previousPreparation?.catch(() => undefined);
+      await previousDeactivation;
+      await this.finishDatabaseClose();
+      return operation();
+    })().finally(() => {
+      if (this.preparationLock === task) this.preparationLock = null;
+    });
+    this.preparationLock = task;
+    return task;
   }
 
   async activateStartupProfile(): Promise<PreparedProfileRuntime> {
@@ -303,6 +328,7 @@ export class DesktopProfileRuntimeManager {
   }
 
   async activatePreparedProfile(): Promise<void> {
+    if (this.deactivationLock || this.pendingClose) await this.deactivateProfile();
     if (!this.preparedRuntime) throw new Error('No prepared profile is available for activation');
     if (this.activationLock) {
       await this.activationLock;
@@ -364,8 +390,29 @@ export class DesktopProfileRuntimeManager {
   }
 
   async deactivateProfile(options: { preserveSelection?: boolean } = {}): Promise<void> {
-    if (!this.activeRuntime) return;
-    const profileId = this.activeRuntime.descriptor.profileId;
+    if (this.deactivationLock) return this.deactivationLock;
+    const preparation = this.preparationLock;
+    const task = (async () => {
+      await preparation?.catch(() => undefined);
+      await this.deactivateCurrentProfile(options);
+    })();
+    this.deactivationLock = task;
+    try {
+      await task;
+    } finally {
+      this.deactivationLock = null;
+    }
+  }
+
+  private async deactivateCurrentProfile(options: { preserveSelection?: boolean }): Promise<void> {
+    // A lock must not report success while an earlier activation can still publish.
+    if (this.activationLock) await this.activationLock.catch(() => undefined);
+    const active = this.activeRuntime;
+    if (!active) {
+      await this.disposePreparedRuntime();
+      return;
+    }
+    const profileId = active.descriptor.profileId;
     // Flush profile-local owner truth before any other runtime is torn down.
     // This hook is allowed to veto deactivation: losing a due Routine occurrence
     // is worse than keeping the current Profile active for a retry.
@@ -373,6 +420,10 @@ export class DesktopProfileRuntimeManager {
     // The activation-failure cleanup path remains best-effort above because that
     // path never exposes a successfully active Profile.
     await this.beforeDeactivation?.();
+    // Once the flush has succeeded, this runtime may no longer serve IPC while
+    // its modules and database are being destroyed (including a failed close).
+    this.activeRuntime = null;
+    this.pendingClose = { profileId, preserveSelection: options.preserveSelection === true };
 
     // Stop the bound schedule runtime controller (idempotent; the SAME instance
     // the profile's module handle owns), then clear the reference BEFORE the
@@ -388,7 +439,7 @@ export class DesktopProfileRuntimeManager {
     }
     // Shell-held references were cleared by beforeDeactivation before module
     // teardown, so concurrent IPC cannot resolve a half-destroyed repository.
-    await this.activeRuntime.bootstrapper
+    await active.bootstrapper
       .destroy()
       .catch((error) => logger.error('Failed to destroy profile modules', { error }));
     // NOTE: the closure-request marker is intentionally NOT cleared here —
@@ -396,20 +447,27 @@ export class DesktopProfileRuntimeManager {
     // be reactivated; clearing the marker there would reopen the local
     // new-work gate while the account is still closed. The marker is cleared
     // ONLY when the cloud close FAILS (close handler catch path).
-    await shutdownPowerSync();
-    this.activeRuntime = null;
     this.activeProfileKey?.fill(0);
     this.activeProfileKey = null;
     this.preparedUnlockKey?.fill(0);
     this.preparedUnlockKey = null;
     this.preparedUnlockProfileId = null;
-    if (!options.preserveSelection) {
+    await this.finishDatabaseClose();
+  }
+
+  private async finishDatabaseClose(): Promise<void> {
+    const closing = this.pendingClose;
+    if (!closing) return;
+    await shutdownPowerSync();
+    this.pendingClose = null;
+    if (!closing.preserveSelection) {
       await this.profileRegistry.setActiveProfile(null).catch(() => undefined);
     }
-    logger.info('Local profile deactivated', { profileId });
+    logger.info('Local profile deactivated', { profileId: closing.profileId });
   }
 
   async discardPreparedProfile(): Promise<void> {
+    await this.preparationLock?.catch(() => undefined);
     await this.disposePreparedRuntime();
   }
 
@@ -422,6 +480,8 @@ export class DesktopProfileRuntimeManager {
       throw new Error('Cannot remove active profile');
     if (descriptor.profileId === this.preparedRuntime?.descriptor.profileId)
       throw new Error('Cannot remove prepared profile');
+    if (descriptor.profileId === this.pendingClose?.profileId)
+      throw new Error('Cannot remove a closing profile');
     await this.cloudSessionStore.remove(descriptor.profileId);
     await this.pinStore.remove(descriptor.profileId);
     await this.keyStore.remove(descriptor.profileId);
@@ -458,27 +518,35 @@ export class DesktopProfileRuntimeManager {
         snapshotResult.metadata,
       );
     }
-    const db = await openPowerSyncLocalOnly(profileResolver.dbPath);
-    const recoveredDescriptor = await this.recoverCompletedAdoption(db, descriptor);
-    await this.ensureLocalAccount(db, recoveredDescriptor);
-    const profileAccessContext = new DesktopProfileAccessContext(
-      () =>
-        this.activeRuntime?.descriptor.localOwnerId ??
-        this.preparedRuntime?.descriptor.localOwnerId ??
-        recoveredDescriptor.localOwnerId,
-    );
-    this.preparedRuntime = {
-      descriptor: recoveredDescriptor,
-      profileResolver,
-      db,
-      profileAccessContext,
-    };
-    await this.profileRegistry.markReady(recoveredDescriptor.profileId);
-    logger.info('Profile prepared', {
-      profileId: recoveredDescriptor.profileId,
-      snapshotHydrated: snapshotResult.hydrated,
-    });
-    return this.preparedRuntime;
+    try {
+      const db = await openPowerSyncLocalOnly(profileResolver.dbPath);
+      const recoveredDescriptor = await this.recoverCompletedAdoption(db, descriptor);
+      await this.ensureLocalAccount(db, recoveredDescriptor);
+      const profileAccessContext = new DesktopProfileAccessContext(
+        () =>
+          this.activeRuntime?.descriptor.localOwnerId ??
+          this.preparedRuntime?.descriptor.localOwnerId ??
+          recoveredDescriptor.localOwnerId,
+      );
+      this.preparedRuntime = {
+        descriptor: recoveredDescriptor,
+        profileResolver,
+        db,
+        profileAccessContext,
+      };
+      await this.profileRegistry.markReady(recoveredDescriptor.profileId);
+      logger.info('Profile prepared', {
+        profileId: recoveredDescriptor.profileId,
+        snapshotHydrated: snapshotResult.hydrated,
+      });
+      return this.preparedRuntime;
+    } catch (error) {
+      // Opening/recovery can fail before preparedRuntime is published. Retain
+      // the database owner through cleanup, including a close that needs retry.
+      this.pendingClose = { profileId: descriptor.profileId, preserveSelection: true };
+      await this.disposePreparedRuntime();
+      throw error;
+    }
   }
 
   private async recoverCompletedAdoption(
@@ -531,12 +599,13 @@ export class DesktopProfileRuntimeManager {
   }
 
   private async disposePreparedRuntime(): Promise<void> {
-    if (this.preparedRuntime) {
-      await shutdownPowerSync();
-      this.preparedRuntime = null;
-    }
+    const prepared = this.preparedRuntime;
+    this.preparedRuntime = null;
     this.preparedUnlockKey?.fill(0);
     this.preparedUnlockKey = null;
     this.preparedUnlockProfileId = null;
+    if (prepared)
+      this.pendingClose = { profileId: prepared.descriptor.profileId, preserveSelection: true };
+    await this.finishDatabaseClose();
   }
 }

@@ -1,0 +1,166 @@
+{
+  "generatedAt": "2026-10-09T10:23:33.104Z",
+  "workspace": "/home/dev/projects/memoflow",
+  "branch": "main",
+  "headSha": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "baseRef": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "changeCategories": {
+    "docsGovernanceOnly": false,
+    "codeOrConfig": true,
+    "runtimeDeploySensitive": true,
+    "dockerRebuildRequired": false
+  },
+  "results": {
+    "commandCounts": {
+      "pass": 4,
+      "fail": 0,
+      "planned": 0,
+      "skipped": 0
+    },
+    "allCommandsPassed": true
+  },
+  "dockerServices": {
+    "api": {
+      "name": "memoflow-prod-like-api-1",
+      "state": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "statusLine": "Up 23 seconds (healthy)"
+    },
+    "postgres": {
+      "name": "memoflow-prod-like-postgres-1",
+      "state": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "statusLine": "Up 2 weeks (healthy)"
+    },
+    "powersync": {
+      "name": "memoflow-prod-like-powersync-1",
+      "state": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "statusLine": "Up 12 seconds (healthy)"
+    },
+    "redis": {
+      "name": "memoflow-prod-like-redis-1",
+      "state": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "statusLine": "Up 2 weeks (healthy)"
+    },
+    "web": {
+      "name": "memoflow-prod-like-web-1",
+      "state": "running",
+      "health": "healthy",
+      "exitCode": 0,
+      "statusLine": "Up 12 seconds (healthy)"
+    }
+  },
+  "imageFreshness": {
+    "headSha": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+    "workspaceRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+    "warnings": [],
+    "comparisons": [
+      {
+        "image": "memoflow-api:local",
+        "imageRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "matches": true
+      },
+      {
+        "image": "memoflow-web:local",
+        "imageRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "matches": true
+      }
+    ]
+  },
+  "localDockerRuntime": {
+    "ok": true,
+    "expectedRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+    "services": {
+      "web": {
+        "name": "memoflow-prod-like-web-1",
+        "state": "running",
+        "health": "healthy",
+        "hostPort": 20200,
+        "targetPort": 80,
+        "mappingMatches": true,
+        "listenerOpen": true,
+        "listenerOwner": "docker-published:memoflow-prod-like-web-1",
+        "expectedRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "actualRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "revisionMatches": true
+      },
+      "api": {
+        "name": "memoflow-prod-like-api-1",
+        "state": "running",
+        "health": "healthy",
+        "hostPort": 20201,
+        "targetPort": 3000,
+        "mappingMatches": true,
+        "listenerOpen": true,
+        "listenerOwner": "docker-published:memoflow-prod-like-api-1",
+        "expectedRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "actualRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1-dirty-a56283ff37ae",
+        "revisionMatches": true
+      }
+    },
+    "errors": []
+  },
+  "failureClasses": {
+    "host-tool": 0,
+    "code": 0,
+    "docker-deploy": 0
+  },
+  "verdict": "pass",
+  "blockingIssues": [],
+  "warnings": [],
+  "sourceReport": "reports/local-deploy-validation/latest.json",
+  "sourceReportSha256": "ab7e7b55935de7a0f0d28408afce2a2b0e6d2ac3619d5d4be2e0d2f63bc0ff57",
+  "commands": [
+    {
+      "label": "affected-lint",
+      "cwd": "/home/dev/projects/memoflow",
+      "command": "pnpm nx affected -t lint --base=f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 93987,
+      "error": null,
+      "failureClass": null
+    },
+    {
+      "label": "affected-typecheck",
+      "cwd": "/home/dev/projects/memoflow",
+      "command": "pnpm nx affected -t typecheck --base=f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 133168,
+      "error": null,
+      "failureClass": null
+    },
+    {
+      "label": "affected-test",
+      "cwd": "/home/dev/projects/memoflow",
+      "command": "pnpm nx affected -t test --base=f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 625221,
+      "error": null,
+      "failureClass": null
+    },
+    {
+      "label": "docker-local-up",
+      "cwd": "/home/dev/projects/memoflow",
+      "command": "pnpm docker:local:up",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 728794,
+      "error": null,
+      "failureClass": null
+    }
+  ],
+  "localDockerProductJourney": {
+    "executedForThisChange": false,
+    "historicalBrowserEvidenceExcluded": true,
+    "reason": "The optional browser evidence embedded in the source report belongs to an older revision and is not acceptance evidence for this change."
+  }
+}

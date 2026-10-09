@@ -1,0 +1,39 @@
+{
+  "recordedAt": "2026-10-09T10:40:52.108Z",
+  "platform": "linux",
+  "arch": "x64",
+  "electronVersion": "44.4.5",
+  "package": {
+    "command": "pnpm nx run desktop:package",
+    "exitCode": 0,
+    "elapsedSeconds": 542.353,
+    "nativeModulesRestored": true,
+    "nodeNativeProbeExitCode": 0,
+    "mainSha256": "0bdd9e062324dc8cb49119d5ba6b2327c4b319dda2f4ec2e69fc02ea07692c09",
+    "asarSha256": "223dad7e2904ef151f638301c46268b51f8ab72cec3ef0de984eb62503ba3248",
+    "verifiedRuntimePackages": 79,
+    "packedMainMatchesBuild": true
+  },
+  "smoke": {
+    "command": "MEMOFLOW_PACKAGED_EXECUTABLE=<workspace>/apps/desktop/dist-package/linux-unpacked/memoflow CI=1 apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh",
+    "exitCode": 0,
+    "stats": {
+      "startTime": "2026-10-09T10:36:54.098Z",
+      "duration": 6298.995,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "checks": [
+      "real Secret Service in an isolated temporary session",
+      "renderer app-shell visible",
+      "native titlebar drag/control regions",
+      "ResizeObserver notification does not trigger fatal renderer fallback",
+      "lazy settings and account view visible",
+      "no missing AuthService injection",
+      "graceful process close within 10 seconds"
+    ],
+    "scope": "Linux unpacked production artifact smoke; not a Windows/macOS installer or a startup/CPU/memory benchmark"
+  }
+}

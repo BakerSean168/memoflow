@@ -90,6 +90,11 @@ async function startRenderer() {
   }
 
   const hashPath = getHashPath();
+  if (hashPath === '/custom-notification' || hashPath.startsWith('/custom-notification/')) {
+    const { bootstrapCustomNotification } = await import('./bootstrap/custom-notification');
+    await bootstrapCustomNotification();
+    return;
+  }
   if (isInterventionWindowHashRoute(hashPath)) {
     const { bootstrapInterventionWindow } = await import('./bootstrap/intervention-window');
     await bootstrapInterventionWindow();

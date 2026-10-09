@@ -33,17 +33,22 @@ describe('DeviceAuthCoordinator', () => {
   it('keeps the device secret in main and connects the captured Profile after approval', async () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn().mockResolvedValue(ok({})) };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
-      .mockResolvedValueOnce(json({
-        access_token: 'desktop-bearer-token',
-        token_type: 'Bearer',
-        expires_in: 604800,
-      }))
-      .mockResolvedValueOnce(json({
-        user: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
-        session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
-      }));
+      .mockResolvedValueOnce(
+        json({
+          access_token: 'desktop-bearer-token',
+          token_type: 'Bearer',
+          expires_in: 604800,
+        }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          user: { id: 'account-1', email: 'user@example.com', name: 'User', emailVerified: true },
+          session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
+        }),
+      );
     const openExternal = vi.fn().mockResolvedValue(undefined);
     const coordinator = new DeviceAuthCoordinator(runtime as never, connection as never, {
       fetchImpl: fetchMock,
@@ -66,6 +71,7 @@ describe('DeviceAuthCoordinator', () => {
         session: expect.objectContaining({ id: 'session-1' }),
       }),
       'desktop-bearer-token',
+      expect.any(AbortSignal),
     );
     expect(coordinator.getStatus(begun.data.attemptId)).toMatchObject({
       ok: true,
@@ -82,7 +88,12 @@ describe('DeviceAuthCoordinator', () => {
     const runtime = { getActiveProfileId: vi.fn(() => activeProfileId) };
     const connection = { connect: vi.fn() };
     let releaseSleep: (() => void) | undefined;
-    const sleep = vi.fn(() => new Promise<void>((resolve) => { releaseSleep = resolve; }));
+    const sleep = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseSleep = resolve;
+        }),
+    );
     const fetchMock = vi.fn().mockImplementation(async () => json(deviceCode));
     const coordinator = new DeviceAuthCoordinator(runtime as never, connection as never, {
       fetchImpl: fetchMock,
@@ -111,7 +122,8 @@ describe('DeviceAuthCoordinator', () => {
   ] as const)('maps %s to the %s terminal state', async (errorCode, expectedStatus) => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn() };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
       .mockResolvedValueOnce(json({ error: errorCode, error_description: errorCode }, 400));
     const coordinator = new DeviceAuthCoordinator(runtime as never, connection as never, {
@@ -134,15 +146,20 @@ describe('DeviceAuthCoordinator', () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn().mockResolvedValue(ok({})) };
     const sleep = vi.fn().mockResolvedValue(undefined);
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
       .mockResolvedValueOnce(json({ error: 'authorization_pending' }, 400))
       .mockResolvedValueOnce(json({ error: 'slow_down' }, 400))
-      .mockResolvedValueOnce(json({ access_token: 'token-1', token_type: 'Bearer', expires_in: 60 }))
-      .mockResolvedValueOnce(json({
-        user: { id: 'account-1', email: 'user@example.com', name: 'User' },
-        session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
-      }));
+      .mockResolvedValueOnce(
+        json({ access_token: 'token-1', token_type: 'Bearer', expires_in: 60 }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          user: { id: 'account-1', email: 'user@example.com', name: 'User' },
+          session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
+        }),
+      );
     const coordinator = new DeviceAuthCoordinator(runtime as never, connection as never, {
       fetchImpl: fetchMock,
       openExternal: vi.fn().mockResolvedValue(undefined),
@@ -154,9 +171,7 @@ describe('DeviceAuthCoordinator', () => {
     await waitFor(() => connection.connect.mock.calls.length === 1);
 
     expect(sleep.mock.calls.slice(0, 3).map(([milliseconds]) => milliseconds)).toEqual([
-      5_000,
-      5_000,
-      10_000,
+      5_000, 5_000, 10_000,
     ]);
   });
 
@@ -164,7 +179,8 @@ describe('DeviceAuthCoordinator', () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn().mockResolvedValue(ok({})) };
     const sleep = vi.fn().mockResolvedValue(undefined);
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
       .mockRejectedValueOnce(new Error('offline'))
       .mockResolvedValueOnce(json({ error: 'access_denied' }, 400));
@@ -183,8 +199,7 @@ describe('DeviceAuthCoordinator', () => {
     });
 
     expect(sleep.mock.calls.slice(0, 2).map(([milliseconds]) => milliseconds)).toEqual([
-      5_000,
-      11_000,
+      5_000, 11_000,
     ]);
   });
 
@@ -192,7 +207,8 @@ describe('DeviceAuthCoordinator', () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn() };
     const sleep = vi.fn().mockResolvedValue(undefined);
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
       .mockResolvedValueOnce(json({ error: 'server_error' }, 503))
       .mockResolvedValueOnce(json({ error: 'access_denied' }, 400));
@@ -211,8 +227,7 @@ describe('DeviceAuthCoordinator', () => {
     });
 
     expect(sleep.mock.calls.slice(0, 2).map(([milliseconds]) => milliseconds)).toEqual([
-      5_000,
-      11_000,
+      5_000, 11_000,
     ]);
     expect(connection.connect).not.toHaveBeenCalled();
   });
@@ -220,7 +235,12 @@ describe('DeviceAuthCoordinator', () => {
   it('cancels a pending attempt without polling the token endpoint', async () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     let releaseSleep: (() => void) | undefined;
-    const sleep = vi.fn(() => new Promise<void>((resolve) => { releaseSleep = resolve; }));
+    const sleep = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseSleep = resolve;
+        }),
+    );
     const fetchMock = vi.fn().mockResolvedValue(json(deviceCode));
     const coordinator = new DeviceAuthCoordinator(runtime as never, { connect: vi.fn() } as never, {
       fetchImpl: fetchMock,
@@ -262,7 +282,9 @@ describe('DeviceAuthCoordinator', () => {
   it('expires locally without polling after the remaining lifetime elapses', async () => {
     let now = 1_000;
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
-    const sleep = vi.fn(async (milliseconds: number) => { now += milliseconds; });
+    const sleep = vi.fn(async (milliseconds: number) => {
+      now += milliseconds;
+    });
     const fetchMock = vi.fn().mockResolvedValue(json({ ...deviceCode, expires_in: 2 }));
     const coordinator = new DeviceAuthCoordinator(runtime as never, { connect: vi.fn() } as never, {
       fetchImpl: fetchMock,
@@ -309,13 +331,16 @@ describe('DeviceAuthCoordinator', () => {
   it('revokes an exchanged token when session resolution fails without exposing it', async () => {
     const runtime = { getActiveProfileId: vi.fn(() => 'profile-1') };
     const connection = { connect: vi.fn(), revoke: vi.fn().mockResolvedValue(undefined) };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json(deviceCode))
-      .mockResolvedValueOnce(json({
-        access_token: 'secret-bearer-token',
-        token_type: 'Bearer',
-        expires_in: 60,
-      }))
+      .mockResolvedValueOnce(
+        json({
+          access_token: 'secret-bearer-token',
+          token_type: 'Bearer',
+          expires_in: 60,
+        }),
+      )
       .mockResolvedValueOnce(new Response(null, { status: 401 }));
     const coordinator = new DeviceAuthCoordinator(runtime as never, connection as never, {
       fetchImpl: fetchMock,

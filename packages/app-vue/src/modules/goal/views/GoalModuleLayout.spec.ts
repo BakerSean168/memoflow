@@ -8,6 +8,7 @@ import {
   h,
   KeepAlive,
   nextTick,
+  ref,
   onMounted,
   watch,
   type Ref,
@@ -141,6 +142,38 @@ describe('GoalModuleLayout', () => {
     setActivePinia(createPinia());
     routeMountCount = 0;
     vi.clearAllMocks();
+  });
+
+  it('coalesces database changes while cached and refreshes once when activated', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
+    });
+    await router.push('/goals');
+    await router.isReady();
+    const shown = ref(true);
+    const Other = defineComponent({ render: () => h('div', 'Other tab') });
+    const Host = defineComponent({
+      setup: () => () =>
+        h(KeepAlive, null, { default: () => (shown.value ? h(GoalModuleLayout) : h(Other)) }),
+    });
+    const wrapper = mount(Host, {
+      global: {
+        plugins: [router, i18n],
+        stubs: { GoalPageToolbar: ToolbarStub, GoalDialog: GoalDialogStub },
+      },
+    });
+    await flushPromises();
+    goalMocks.fetchGoals.mockClear();
+    shown.value = false;
+    await nextTick();
+    for (let index = 0; index < 20; index++)
+      window.dispatchEvent(new CustomEvent('db:tables-changed', { detail: { modules: ['goal'] } }));
+    expect(goalMocks.fetchGoals).not.toHaveBeenCalled();
+    shown.value = true;
+    await flushPromises();
+    expect(goalMocks.fetchGoals).toHaveBeenCalledOnce();
+    wrapper.unmount();
   });
 
   it('keeps one toolbar and the same route DOM, focus, and scroll state across panel tiers', async () => {

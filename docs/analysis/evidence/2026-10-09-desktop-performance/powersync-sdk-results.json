@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-10-09T05:57:09.701Z",
+  "runtime": {
+    "node": "24.21.0",
+    "modules": "137",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "versions": {
+    "powersyncNode": "1.1.0",
+    "powersyncCommon": "2.3.0"
+  },
+  "notes": "Empty Schema; no connector or network; temporary databases. Twenty GC rounds with 50ms delay; the harness retains no strong Worker or discarded DB references. This is SDK behavior, not whole-app performance.",
+  "observations": [
+    {
+      "stage": "explicit-after-init",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "explicit-after-disconnect",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "explicit-after-close",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "discarded-after-init-and-disconnect",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "discarded-after-20-gc-rounds",
+      "activeWorkerCount": 6,
+      "databaseObjectStillReachable": true
+    },
+    {
+      "stage": "discarded-after-explicit-close",
+      "activeWorkerCount": 0
+    }
+  ]
+}

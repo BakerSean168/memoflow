@@ -6,6 +6,7 @@ import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 import { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import { createFixedClock } from '@memoflow/time';
+import { openPowerSyncLocalOnly } from '../database/powersync';
 
 const mocks = vi.hoisted(() => ({
   shutdownPowerSync: vi.fn(),
@@ -146,6 +147,140 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(runtime.getActiveProfileId()).toBeNull();
     expect(await registry.getActiveProfileId()).toBe(prepared.descriptor.profileId);
     expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
+  });
+
+  it('withdraws local access after teardown even if the database close fails, and retries the close', async () => {
+    await runtime.prepareGuestProfile();
+    await runtime.activatePreparedProfile();
+    mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
+    await expect(runtime.deactivateProfile()).rejects.toThrow('database close failed');
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(runtime.getActiveProfileAccessContext()).toBeNull();
+    await runtime.deactivateProfile();
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(2);
+    expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('retires a prepared database after failed close before the same Profile can be activated', async () => {
+    const prepared = await runtime.prepareGuestProfile();
+    mocks.shutdownPowerSync.mockRejectedValueOnce(new Error('database close failed'));
+    await expect(runtime.discardPreparedProfile()).rejects.toThrow('database close failed');
+    expect(runtime.getCurrentIdentityId()).toBeNull();
+    await expect(runtime.activatePreparedProfile()).rejects.toThrow('No prepared profile');
+    const replacement = await runtime.prepareGuestProfile();
+    expect(replacement).not.toBe(prepared);
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(2);
+    await runtime.activatePreparedProfile();
+  });
+
+  it('closes a database when preparation fails before publishing its runtime', async () => {
+    mocks.getOptional.mockRejectedValueOnce(new Error('adoption recovery failed'));
+    await expect(runtime.prepareGuestProfile()).rejects.toThrow('adoption recovery failed');
+    expect(runtime.getCurrentIdentityId()).toBeNull();
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
+    await runtime.prepareGuestProfile();
+    await runtime.activatePreparedProfile();
+    expect(runtime.getActiveProfileId()).not.toBeNull();
+  });
+
+  it('finishes a lock only after in-flight activation has been retired', async () => {
+    await runtime.prepareGuestProfile();
+    let finishInit!: () => void;
+    mocks.bootstrapInit.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishInit = resolve;
+        }),
+    );
+    const activation = runtime.activatePreparedProfile();
+    await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
+    let locked = false;
+    const locking = runtime.deactivateProfile().then(() => {
+      locked = true;
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(locked).toBe(false);
+    finishInit();
+    await Promise.all([activation, locking]);
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(mocks.bootstrapDestroy).toHaveBeenCalledOnce();
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
+  });
+
+  it('drains preparation before locking so an earlier selection cannot activate afterward', async () => {
+    const database = {
+      getOptional: mocks.getOptional,
+      execute: mocks.execute,
+      writeTransaction: mocks.writeTransaction,
+    };
+    let finishOpen!: () => void;
+    vi.mocked(openPowerSyncLocalOnly).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishOpen = () => resolve(database as never);
+        }),
+    );
+    const selection = runtime.prepareGuestProfile().then(() => runtime.activatePreparedProfile());
+    const rejectedSelection = expect(selection).rejects.toThrow('No prepared profile');
+    await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
+    let locked = false;
+    const locking = runtime.deactivateProfile().then(() => {
+      locked = true;
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(locked).toBe(false);
+    finishOpen();
+    await locking;
+    await rejectedSelection;
+    expect(runtime.getActiveProfileId()).toBeNull();
+    expect(runtime.getCurrentIdentityId()).toBeNull();
+    expect(mocks.bootstrapInit).not.toHaveBeenCalled();
+    expect(mocks.shutdownPowerSync).toHaveBeenCalledOnce();
+  });
+
+  it('waits for activation started by an earlier selection before preparing the next Profile', async () => {
+    let finishOpen!: () => void;
+    vi.mocked(openPowerSyncLocalOnly).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishOpen = () =>
+            resolve({
+              getOptional: mocks.getOptional,
+              execute: mocks.execute,
+              writeTransaction: mocks.writeTransaction,
+            } as never);
+        }),
+    );
+    let finishInit!: () => void;
+    let bootstrapFinished = false;
+    let closedDuringBootstrap = false;
+    mocks.bootstrapInit.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishInit = () => {
+            bootstrapFinished = true;
+            resolve();
+          };
+        }),
+    );
+    mocks.shutdownPowerSync.mockImplementation(async () => {
+      closedDuringBootstrap ||= !bootstrapFinished;
+    });
+    const firstSelection = runtime
+      .prepareGuestProfile()
+      .then(() => runtime.activatePreparedProfile());
+    await vi.waitFor(() => expect(openPowerSyncLocalOnly).toHaveBeenCalledOnce());
+    const secondPreparation = runtime.prepareProfile('IdentityId_other');
+    finishOpen();
+    await vi.waitFor(() => expect(mocks.bootstrapInit).toHaveBeenCalledOnce());
+    finishInit();
+    const [, next] = await Promise.all([firstSelection, secondPreparation]);
+    expect(closedDuringBootstrap).toBe(false);
+    await runtime.activatePreparedProfile();
+    expect(runtime.getActiveProfileId()).toBe(next.descriptor.profileId);
   });
 
   it('clears shell-held references before the bootstrapper destroys modules', async () => {

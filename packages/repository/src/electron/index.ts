@@ -191,6 +191,11 @@ export function createRepositoryElectronModule(
   options: RepositoryElectronModuleOptions = {},
 ): RepositoryElectronModuleDef {
   let state: ModuleHandleState = 'created';
+  const searches = new Map<number, AbortController>();
+  const cancelSearches = () => {
+    for (const controller of searches.values()) controller.abort();
+    searches.clear();
+  };
 
   return {
     name: 'Repository',
@@ -388,7 +393,7 @@ export function createRepositoryElectronModule(
         const withLocalVault = async <T>(
           operation: (port: LocalVaultElectronPort) => Promise<T>,
         ): Promise<Result<T>> => {
-          if (!localVault) {
+          if (!localVault || state === 'disposed' || state === 'failed') {
             return fail({
               code: 'SERVICE_UNAVAILABLE',
               message: 'Local Vault is only available in the Desktop runtime',
@@ -425,8 +430,23 @@ export function createRepositoryElectronModule(
           withAuthenticatedValue(ctx, () => withLocalVault((port) => port.readNote(request))),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_NOTE_READ);
-        ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SEARCH, (_, request) =>
-          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.searchVault(request))),
+        ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SEARCH, (event, request) =>
+          withAuthenticatedValue(ctx, async () => {
+            const sender = event.sender;
+            searches.get(sender.id)?.abort();
+            const controller = new AbortController();
+            searches.set(sender.id, controller);
+            const cancel = () => controller.abort();
+            sender.once('destroyed', cancel);
+            try {
+              return await withLocalVault((port) =>
+                port.searchVault(request, { signal: controller.signal }),
+              );
+            } finally {
+              sender.removeListener('destroyed', cancel);
+              if (searches.get(sender.id) === controller) searches.delete(sender.id);
+            }
+          }),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_SEARCH);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_OPEN_OBSIDIAN, (_, request) =>
@@ -458,6 +478,7 @@ export function createRepositoryElectronModule(
         logger.info('Repository module registered');
       } catch (error) {
         state = 'failed';
+        cancelSearches();
         for (let i = installed.length - 1; i >= 0; i--) {
           ipcMain.removeHandler(installed[i]);
         }
@@ -472,6 +493,9 @@ export function createRepositoryElectronModule(
             });
           }
         }
+        await options.localVaultPort?.dispose().catch((disposeError) => {
+          logger.warn('Failed to dispose Local Vault', { error: disposeError });
+        });
         throw error;
       }
     },
@@ -480,6 +504,8 @@ export function createRepositoryElectronModule(
       if (state === 'disposed' || state === 'failed') {
         return;
       }
+      state = 'disposed';
+      cancelSearches();
 
       if (options.knowledgeRepositoryAutoSyncScheduler) {
         try {
@@ -495,7 +521,7 @@ export function createRepositoryElectronModule(
       for (const ch of allChannels) {
         ipcMain.removeHandler(ch);
       }
-      state = 'disposed';
+      await options.localVaultPort?.dispose();
       logger.info('Repository module destroyed');
     },
   };

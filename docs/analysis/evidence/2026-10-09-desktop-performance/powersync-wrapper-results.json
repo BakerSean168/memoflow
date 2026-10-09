@@ -1,0 +1,17 @@
+{
+  "recordedAt": "2026-10-09T05:48:01.309Z",
+  "node": "v24.21.0",
+  "source": "apps/desktop/src/main/database/powersync.ts",
+  "sourceSha256": "a7d58e84761851e5aa112dde08479d3ac441f9aa8ee8f32b057833b309d869f4",
+  "scope": "Unmodified production wrapper, fake DB and Electron; protocol counterexamples, not an end-to-end incident or performance measurement.",
+  "shutdownDuringOpen": {
+    "databasePublishedAfterShutdownReturned": true,
+    "closeCalls": 0,
+    "disconnectCalls": 0
+  },
+  "differentPathsDuringOpen": {
+    "createdInstances": 1,
+    "sameDatabaseReturnedToBothCallers": true,
+    "secondCallerReceivedFirstPath": true
+  }
+}

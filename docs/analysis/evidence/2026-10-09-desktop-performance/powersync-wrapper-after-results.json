@@ -1,0 +1,47 @@
+{
+  "recordedAt": "2026-10-09T09:11:25.157Z",
+  "environment": {
+    "node": "v24.21.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "sourceSha256": "8a3f2a2b6c51fcfce4963e115a13c27e97bd6ad4bd9001dd62637523879a1dd6",
+  "sdkVersion": "1.1.0",
+  "scope": "Unmodified production wrapper transpiled with TypeScript; real SDK and schema, temporary DBs, observed real Workers; fake Electron window list and no cloud/network. Linux Node, not a Windows packaged app.",
+  "peakWorkers": 6,
+  "observations": [
+    {
+      "stage": "local-only-open",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "local-only-after-disable-sync",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "after-shutdown",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "reopened-with-data",
+      "activeWorkerCount": 6,
+      "persisted": true
+    },
+    {
+      "stage": "switch-cycle-1-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "switch-cycle-2-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "switch-cycle-3-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "shutdown-during-open",
+      "activeWorkerCount": 0
+    }
+  ]
+}

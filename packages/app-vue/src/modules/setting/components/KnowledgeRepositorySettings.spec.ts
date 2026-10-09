@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, ref, type Ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,7 +10,11 @@ import {
 } from '@memoflow/contracts/electron';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import { fail, ok } from '@memoflow/contracts/result';
-import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
+import {
+  DESKTOP_ACCESS_SNAPSHOT_KEY,
+  DESKTOP_BRIDGE_KEY,
+  REPOSITORY_SERVICE_KEY,
+} from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
 import KnowledgeRepositorySettings from './KnowledgeRepositorySettings.vue';
 
@@ -268,7 +272,10 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
 function mountSettings(
   service: IRepositoryService,
   desktopBridge?: { invoke: ReturnType<typeof vi.fn> },
-  options?: { desktopAccess?: DesktopAccessSnapshot | null },
+  options?: {
+    desktopAccess?: DesktopAccessSnapshot | null;
+    sharedDesktopAccess?: Ref<DesktopAccessSnapshot | null>;
+  },
 ) {
   const pinia = createTestPinia();
   const defaultDesktopAccess: DesktopAccessSnapshot = {
@@ -292,7 +299,10 @@ function mountSettings(
     configurable: true,
     value: {
       invoke: vi.fn(async (channel: string) => {
-        if (channel !== ProfileAccessChannels.GET_SNAPSHOT) {
+        if (
+          channel !== ProfileAccessChannels.GET_SNAPSHOT &&
+          channel !== ProfileAccessChannels.REFRESH_CLOUD_STATE
+        ) {
           throw new Error(`Unexpected IPC channel: ${channel}`);
         }
         return { ok: true, data: desktopAccess };
@@ -304,6 +314,9 @@ function mountSettings(
       plugins: [pinia, i18n],
       provide: {
         [REPOSITORY_SERVICE_KEY as symbol]: service,
+        ...(options?.sharedDesktopAccess
+          ? { [DESKTOP_ACCESS_SNAPSHOT_KEY as symbol]: options.sharedDesktopAccess }
+          : {}),
         ...(desktopBridge ? { [DESKTOP_BRIDGE_KEY as symbol]: desktopBridge } : {}),
       },
       stubs: {
@@ -1318,6 +1331,27 @@ describe('KnowledgeRepositorySettings', () => {
     expect(wrapper.text()).toContain('Guest mode is local-only.');
     expect(wrapper.find('[data-testid="github-repository-connect"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="github-repository-create"]').exists()).toBe(false);
+  });
+
+  it('loads cloud connections when the shared background access check finishes', async () => {
+    const access = ref<DesktopAccessSnapshot | null>({
+      profile: null,
+      unlockState: 'UNLOCKED',
+      cloudState: 'CHECKING',
+      capabilities: { local: true, sync: false, cloudAi: false, repositoryConnection: false },
+    });
+    const service = createService();
+    const wrapper = mountSettings(service, undefined, { sharedDesktopAccess: access });
+    await flushPromises();
+    expect(service.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();
+    access.value = {
+      ...access.value!,
+      cloudState: 'ONLINE',
+      capabilities: { local: true, sync: true, cloudAi: true, repositoryConnection: true },
+    };
+    await flushPromises();
+    expect(service.listKnowledgeRepositoryConnections).toHaveBeenCalledOnce();
+    wrapper.unmount();
   });
 
   it('does not start GitHub App installation for offline-only profiles', async () => {

@@ -1,0 +1,278 @@
+{
+  "recordedAt": "2026-10-09T10:43:58.593764+00:00",
+  "baseRevision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "scope": "Performance implementation source/config/tests and the generated test inventory; unrelated Profile design documentation excluded.",
+  "files": [
+    {
+      "path": "apps/desktop/src/main/capabilities/electron-factories.ts",
+      "sha256": "10a94ef8e14350b0649428678e78167dc928221d4e6a7a96360e2175b55b2d40",
+      "baseSha256": "b3d6e41c73091a9cea594866ee4bee7768bb66e2b52a8e5dc22c6b9c478d1d1f"
+    },
+    {
+      "path": "apps/desktop/src/main/capabilities/ports.ts",
+      "sha256": "0ea20c9d3b3617aabe2cf8efb53a52cc0ee1808c96e238d305880ea48a8140d4",
+      "baseSha256": "20b95f707c8aa7d37bb5207fb0fb05159ef5d4ad4ba3b05f4161f5cf2aa5b531"
+    },
+    {
+      "path": "apps/desktop/src/main/database/__tests__/powersync-lifecycle.spec.ts",
+      "sha256": "6f401da1e5b5a29df6f397015d7fa420a7e8da602f4511c50d69364d42fea844",
+      "baseSha256": null
+    },
+    {
+      "path": "apps/desktop/src/main/database/powersync.ts",
+      "sha256": "162c61f7babbab9bd0b73904c848b407c7a9fc27e967dd2fd34fcebdbd8e4655",
+      "baseSha256": "a7d58e84761851e5aa112dde08479d3ac441f9aa8ee8f32b057833b309d869f4"
+    },
+    {
+      "path": "apps/desktop/src/main/main.ts",
+      "sha256": "64301560936e0dac9dc30e80b8f5477fb6c7a8b4c01defe61560c8c9d60a56b1",
+      "baseSha256": "5b454f1cc21fd254bfc95f7b2a109a8f9c4403d69351ef72c4311df4bec09642"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/__tests__/desktop-knowledge-note-persistence.adapter.spec.ts",
+      "sha256": "d86483ee99fdaf872f661d63ff008ff4beda5ea196b7eaeac95fabd6405d5377",
+      "baseSha256": "64e22ecdd4855fc7649daccdf669918aa162e57aeefdea368223dd7892baecd9"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/__tests__/desktop-knowledge-source.adapter.spec.ts",
+      "sha256": "910b64a781a242e6357ccae730e21f8ebfd49cc57ce59cf60f69539b178204ac",
+      "baseSha256": "b2c42757e392896804624bc81388367b9633837d0eaed7881a4cf8a1c264ce4a"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/desktop-knowledge-source.adapter.ts",
+      "sha256": "47be1e6f24cc59193a934e565938b1adbd0193c938fc7f97844953a54e04aea5",
+      "baseSha256": "0cc8507cb93cf57cd671bae9b7854632ffb683ebdcbaf5ace2462ca0bd78c05f"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-document-ref.resolver.spec.ts",
+      "sha256": "d3caa4bf679cabe81307453081be89e32919bdc9d094443462236daa45d6e476",
+      "baseSha256": "dc17967e09d281785398ec41aa9a10a87f3d630d05d88df8bd9459fa2b9ba87b"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-document-ref.resolver.ts",
+      "sha256": "6c897a35ad238248fe66904d739cdb7eb6e47c3fa68adebf4a8a252f94a1a110",
+      "baseSha256": "5f3c9adc1b0dbfca9e1d0ac1adde5b293d14642dadb4743700d5c436b29a3e25"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-workspace.resolver.spec.ts",
+      "sha256": "5bb3cdd734ac591647d554f73a1cf5308f3dea97c5b155f70197e033e4682ebe",
+      "baseSha256": "92985be6c006a0506b436239050fba2e66406f93b7724cf64a3b3ab8d7291fbd"
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-workspace.resolver.ts",
+      "sha256": "60151146b2278c621b946663ccaf3694936cadf9cb2136dc9f568c5948d81035",
+      "baseSha256": "5046014cc0237064175db17a378319b99463bb79f9374ba5c35bf1755e48e774"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/DesktopProfileRuntimeManager.spec.ts",
+      "sha256": "ff845037275219f51e3b9f2412ef7d2483064e405582bd2859795593f580d634",
+      "baseSha256": "68d54bc82c18469a3c478e8db963a29386297e440f1cee7eebf5e07d8a8c3b6d"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/cloud-auth-ipc.spec.ts",
+      "sha256": "984e6a3eb34db997f153c6a15c2a264081fa79525c085dd1b5b9e7ad04dbfd1b",
+      "baseSha256": "6e08c71bb4302a00cfa8d3f70949d3c1431660e6a78c994e00daae15f91fe191"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/cloud-auth-ipc.ts",
+      "sha256": "074223eb9032c86de7802ad109758bdf2d569882d53af89a4784d72e98e1afbc",
+      "baseSha256": "8023b44dba94ff12738752041c1af78e93b156239cda1c0c60a1009daae863d6"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-cloud-connection-manager.spec.ts",
+      "sha256": "e7284aedaa0184bda096056b3a7041ab50f36b47028cd12785845d1217893f12",
+      "baseSha256": "30c68dc79c0b4e43d501cd38fcd283eb194d53cd0c49aee004bf5bcb497ba0e3"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-cloud-connection-manager.ts",
+      "sha256": "c1cf8e43c2c7fb7200d35278afb17c738cd322d46cd9a4244d8c220a04f8fc7c",
+      "baseSha256": "eeb545f73b0bf9cce3b3484ea68a341e83638810b85d4814a0478cc6c48c8a73"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-cloud-connection-service.spec.ts",
+      "sha256": "25284a89699b272f36395e4cf5c74a28ab00f3ec89c396bbe465765ad9b0edb3",
+      "baseSha256": "39912911adb1f33f5764e038a106e007c1513a06cd5900037801a5182d461507"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-cloud-connection-service.ts",
+      "sha256": "99b7d121e27fd8a8dd6235784939ed3c0a36baf30a348cf7b899c7904ebf8990",
+      "baseSha256": "6f3182dd87daac1f85f597287abf289dd941c882c3ffa31e7cff229433932520"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/desktop-profile-runtime-manager.ts",
+      "sha256": "5d4f7366a49a9899f9a86c041137e45116ee35478e7589e9bfda6ce1d5a7f503",
+      "baseSha256": "c19b8ee771a09297ce5ec272eeedc99ebeeec58291f7f6d4b099a4781bafeac7"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/device-auth-coordinator.spec.ts",
+      "sha256": "d182f3495cefa3259fbe97dcdf252993bb0dcafd834c0ede554171f6270cf5bf",
+      "baseSha256": "c276318b4f9764e2bc727d994829104cdce2c3f2e9fba5cdf1447104b0db24aa"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/device-auth-coordinator.ts",
+      "sha256": "0bcac5b309dc0c4d38a4cebd37bcb7e20b235dcc25d37a8f7a93198326a68cd1",
+      "baseSha256": "2c689518c9c5995c55c1d9893cc6ed40022d9edda505f08fff2ef7e36341bb6c"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/profile-access-ipc.spec.ts",
+      "sha256": "2b9dbaaf86dee791639780f6129580e34bc125e7ec857aa079abfd3667cbedee",
+      "baseSha256": "30ab8701fc801b7af7badb6009711d84d8b8644098f11ab5b3aad453f78d1108"
+    },
+    {
+      "path": "apps/desktop/src/main/profile/profile-access-ipc.ts",
+      "sha256": "7b90121aac53f66059e7d8b6fa91f3feea522c669ef99252a3cf0d4a9d3aa2f4",
+      "baseSha256": "12153b917f877b5273e99b78bdaf0565712ed89c578f3b8150e5c4943d4b146f"
+    },
+    {
+      "path": "apps/desktop/src/main/services/custom-notification.manager.spec.ts",
+      "sha256": "3776d7b970b533d2ada40b673f61d38c961b2083a16fb2027bffd710ba358be8",
+      "baseSha256": null
+    },
+    {
+      "path": "apps/desktop/src/main/services/custom-notification.manager.ts",
+      "sha256": "37786ed2bd4fecf341373fba946f214b3e9f6dc075dad11df0958402ebe1820f",
+      "baseSha256": "09441b5d5be530e4f847db35089f549bc5b74bea657a2b973d48e851e0dc4418"
+    },
+    {
+      "path": "apps/desktop/src/main/services/notification.service.ts",
+      "sha256": "b4e4457d0a5f4a41802b7effb93071a88235ba6384c1586e6137134e2656495d",
+      "baseSha256": "37efb5824f1028200cb6abd43cba764d8b7cbf90b5053f927f15fafe7e5a9df7"
+    },
+    {
+      "path": "apps/desktop/src/renderer/CustomNotificationView.spec.ts",
+      "sha256": "5d3a2adab574da0126e02966a766309e6e330a53574e2101049c9ddc355a48d9",
+      "baseSha256": null
+    },
+    {
+      "path": "apps/desktop/src/renderer/CustomNotificationView.vue",
+      "sha256": "a5fc1559c53845101dc5da8c20b8f52bca766137e9e3270394fd38ae1bf72715",
+      "baseSha256": "b5e7763b2f89fafe0afe26e19a54aeca1331d65d5f0fe2d9be798bac022b5d76"
+    },
+    {
+      "path": "apps/desktop/src/renderer/bootstrap/app.ts",
+      "sha256": "9e2aafe154320cc0cb9caca6bd416bea00cccfc62833a71855b1ffa4e318090b",
+      "baseSha256": "1d5e2d652f2efe569c90fa63b5237126c98f59a1d05aa9abb8c0516e874259fb"
+    },
+    {
+      "path": "apps/desktop/src/renderer/bootstrap/custom-notification.ts",
+      "sha256": "ef5f681afcc8d46a23c9ea9b3e86eeb3c7e1580201fa6bb42f613bf95a1a85e9",
+      "baseSha256": null
+    },
+    {
+      "path": "apps/desktop/src/renderer/custom-notification-electron-bridge-dual.surface.spec.ts",
+      "sha256": "dfb9071a1408b00e59b6161819a0999c3bc821ef3f5180d14ae9c2f0db0e440b",
+      "baseSha256": "99e40f4f3a4532748c7b3205ee4875c5ce89af7a6cc873b09d6029d13d5e939f"
+    },
+    {
+      "path": "apps/desktop/src/renderer/main.ts",
+      "sha256": "2e65500ce0ccc33be8b7024b3155f8d22689db2e0222dcb0794a93571c5dfcbe",
+      "baseSha256": "61bc31d29bafddffc47f3933f0112a3939979215aa849f2401b92dbe435bd993"
+    },
+    {
+      "path": "apps/desktop/src/renderer/platform/di-app.ts",
+      "sha256": "5231788e0abd7a6022aa95b3399140db2bf541a9d25cd86df1867274e88ec9e0",
+      "baseSha256": "13e7ad4689c77572423ce8928f36b1dd77574b2716942808ae1ce9cab667eca7"
+    },
+    {
+      "path": "apps/desktop/test-support/electron.stub.ts",
+      "sha256": "289a5d11893988baceaf68d74a70951fed48d375050c805f686f649f06f96bc3",
+      "baseSha256": "c561e3d55cd7f51f59c943a494a10a4d9f555e589c368fd34b82657a61c369a7"
+    },
+    {
+      "path": "apps/web/e2e/performance/ai-workspace-performance.spec.ts",
+      "sha256": "8d31cfb3000dbc69361ed3cfd6aa6c5de682e3cc91f0ca7dccccec5702163995",
+      "baseSha256": "65bd4f5482291d5a95c463e845cb99e36547e28e493c46b8524dbcf49623d072"
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/CloudConnectionDialog.vue",
+      "sha256": "7bdfc16dc1d951fd4d88f4c2576e69537c1a79f99a802ff2f834ed60cbe6d3de",
+      "baseSha256": "ffefffbaa9ced72e6bdb0a25d9c4a33bd23327e4a75c8d618ea3a25691be1a01"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
+      "sha256": "736c9d29b63de5aa48661acd522580544c4e92a9a315585b459335d8e1c8a6b1",
+      "baseSha256": "3a84b6e3e7939b57f3ddd5d71b0280381efaa89dede0daae02a1ebd4e8db7082"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.vue",
+      "sha256": "f5d0052a41d9f847d3849c461e95defea84071a8e9e9dca7ea2323f0439420ca",
+      "baseSha256": "039e1a42845fdb5d8cde53144248d7153a60fbc70ee81358ba369d71e8a26400"
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/composables/useLocalVault.ts",
+      "sha256": "4b9a4efe3c52e60de75d0ef11841ec515434bc9e73571d304d8a1ccb265e71b9",
+      "baseSha256": "b92e6d015ec4d738aec73e5d1765a5f9fee06657ef47661324de122206f1438b"
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
+      "sha256": "999a4e294df4451d5afd80de8bcb55499e9e4590259f7823618a47c88b8b76ac",
+      "baseSha256": "42b262b86fb4ae9f3a32647eeaa4a2a6f9bef8eaab11e98c084d0c175ecdde9b"
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue",
+      "sha256": "e71f4c37c4fe7d61d9a208b7838c83b966129f913620995eb4b688e2482ade20",
+      "baseSha256": "15cf8cfa750fc711a60ff6e45f11a1985fa663f2d81751dc36937d0a32334626"
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
+      "sha256": "888708ee9a400462564552f73010698ba6b070b5ed3911c4c4333d261a5b028a",
+      "baseSha256": "d524dd2465c7981d006175f3947f452b19182b7d01600c0d39fa79bbe36b4535"
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue",
+      "sha256": "70aa70aadaca5201892dcdba6b8f0f66966cbae11145d777397b3245de3be6d6",
+      "baseSha256": "ee8fc1d79a9bc9e72159a4d4129fe84211db7ca2b7c7b1396969756b138113ac"
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/list-adapter.ts",
+      "sha256": "f2aaf86664175dc083c19387d139bea8bffb0dce92fa1030ae8ce5b07d4b0a8b",
+      "baseSha256": "c54e1123847644f923a6deaf3972935b7c69f99bd9e41b2feb92e3a702452d76"
+    },
+    {
+      "path": "packages/app-vue/src/shared/utils/desktop-profile-access.ts",
+      "sha256": "66a2c5006e67ee151fe260ff0790e5f51aa6335a0355c94bf209836462a19d54",
+      "baseSha256": "3ce036d98015ff2877a106ca065dd094286fda5e11cafe29db7a4b918bb43bce"
+    },
+    {
+      "path": "packages/contracts/src/electron/ipc-channels.ts",
+      "sha256": "ee33efe4c6029c580e4400f7c8400b40004baafcc7a5d40233612a200e9d7a83",
+      "baseSha256": "0c3e641106e5cc0eed1ffbc8e4f2ac366c399f78f73801ab9e7fcbd45e9e85ad"
+    },
+    {
+      "path": "packages/repository/src/electron/index-lifecycle.spec.ts",
+      "sha256": "95858c42aceabb40cba2956d696d5189fa92dd2ee8854f47cb895c2e9d6902b6",
+      "baseSha256": "40de7396519540ba1393f419cb2c8754c888125794e06605a1ebedd3dcd5d3c9"
+    },
+    {
+      "path": "packages/repository/src/electron/index.spec.ts",
+      "sha256": "57c225626a2e9baf73addfe682f87876e3117827a7a21424379e6cd02c918371",
+      "baseSha256": "8eeb8d7e95f710fa0a1970d3268cd16ddd70a456359e7ca3769b703324a4bc6d"
+    },
+    {
+      "path": "packages/repository/src/electron/index.ts",
+      "sha256": "dc86ca2e4deea9c0baa2cd4c809ab82dddd528ee2e73498e4c669f65d3369f7a",
+      "baseSha256": "1c8cfd317097fe826145748284a9c06401e8be4ae7551250c5c2e0199c169f8c"
+    },
+    {
+      "path": "packages/repository/src/electron/local-vault-runtime.spec.ts",
+      "sha256": "3f0d9ae762230a6b025844c7f6b6ee9c6cccd3bb9ea110527b1d2ac837519abd",
+      "baseSha256": "7221c73f770732b90b564963f8f3c26f60259637b80104690aff9a12f564a510"
+    },
+    {
+      "path": "packages/repository/src/electron/local-vault-runtime.ts",
+      "sha256": "6df4fdf0d9acac02c405447fcf1f065607a2b044b69c491ec3b1c6d1b426c0cb",
+      "baseSha256": "bee7179737f1635b49261c4b3becd462722bfd33e5c60ce6a139c8543f1c94a2"
+    },
+    {
+      "path": "packages/repository/tsconfig.json",
+      "sha256": "184b984998b123ebc9257967f47f1fb1a9fc3171f39e87951781bada70783514",
+      "baseSha256": "3e88fc686beb0aeafaf02db8fa82f5b61284983ebf742e43675a1879aa99746c"
+    },
+    {
+      "path": "tools/test-system-v2/test-inventory.json",
+      "sha256": "146a34504c1da92ae84aea2186af577e216edb1b614162660461973175661ffb",
+      "baseSha256": "3560b09b7c263c24fbecc8fb03fec7e41ebea3f2e6174b5e42f4d7205820f5f1"
+    }
+  ],
+  "contentFingerprint": "3b1148e69887f6a9b9c9c8bb390ad087a6b265907df69ec5fa6d402cbf635eec"
+}

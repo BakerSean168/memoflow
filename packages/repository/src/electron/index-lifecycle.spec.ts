@@ -20,6 +20,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
+import { EventEmitter } from 'node:events';
+import { LocalVaultRuntimeError } from './local-vault-runtime';
 
 const mocks = vi.hoisted(() => {
   const handlers = new Map<string, (...args: unknown[]) => unknown>();
@@ -58,6 +60,8 @@ function createHostPorts() {
     detachVault: vi.fn(),
     scanVault: vi.fn(),
     readNote: vi.fn(),
+    findNoteById: vi.fn(),
+    dispose: vi.fn(async () => undefined),
     searchVault: vi.fn(),
     openInObsidian: vi.fn(),
     writeConfirmedNote: vi.fn(),
@@ -153,9 +157,32 @@ describe('createRepositoryElectronModule lifecycle', () => {
     expect(ports.knowledgeRepositoryAutoSyncScheduler.start).toHaveBeenCalledTimes(1);
   });
 
+  it('cancels the previous search from the same renderer when the query is cleared', async () => {
+    await moduleDef.register(context);
+    const sender = Object.assign(new EventEmitter(), { id: 7 });
+    const search = mocks.handlers.get(RepositoryChannels.LOCAL_VAULT_SEARCH)!;
+    ports.localVaultPort.searchVault.mockImplementationOnce(
+      (_request, options) =>
+        new Promise((_resolve, reject) => {
+          options.signal.addEventListener(
+            'abort',
+            () => reject(new LocalVaultRuntimeError('CONFLICT', 'Cancelled')),
+            { once: true },
+          );
+        }),
+    );
+    const pending = search({ sender }, { query: 'previous' });
+    await vi.waitFor(() => expect(ports.localVaultPort.searchVault).toHaveBeenCalledTimes(1));
+    ports.localVaultPort.searchVault.mockResolvedValueOnce({ query: '', results: [] });
+    await expect(search({ sender }, { query: '' })).resolves.toMatchObject({ ok: true });
+    await expect(pending).resolves.toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
+    expect(sender.listenerCount('destroyed')).toBe(0);
+  });
+
   it('throws on register() after destroy()', async () => {
     await moduleDef.register(context);
     await moduleDef.destroy?.();
+    expect(ports.localVaultPort.dispose).toHaveBeenCalledTimes(1);
 
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
   });
@@ -201,6 +228,7 @@ describe('createRepositoryElectronModule lifecycle', () => {
       registeredFirst[0],
     ]);
     expect(ports.knowledgeRepositoryAutoSyncScheduler.start).not.toHaveBeenCalled();
+    expect(ports.localVaultPort.dispose).toHaveBeenCalledTimes(1);
 
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
   });
@@ -213,7 +241,8 @@ describe('createRepositoryElectronModule lifecycle', () => {
     await expect(moduleDef.register(context)).rejects.toThrow('second handler');
     expect(mocks.handlers.size).toBe(0);
     const removeHandlerCallsAfterFailedRegister = mocks.removeHandler.mock.calls.length;
-    const stopCallsAfterFailedRegister = ports.knowledgeRepositoryAutoSyncScheduler.stop.mock.calls.length;
+    const stopCallsAfterFailedRegister =
+      ports.knowledgeRepositoryAutoSyncScheduler.stop.mock.calls.length;
 
     await moduleDef.destroy?.();
 

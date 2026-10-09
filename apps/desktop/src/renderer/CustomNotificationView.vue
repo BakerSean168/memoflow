@@ -13,24 +13,41 @@ interface CustomNotification {
   icon?: string;
   urgency?: 'normal' | 'critical' | 'low';
   data?: Record<string, unknown>;
-  sound?: {
-    enabled: boolean;
-    name?: string | null;
-  } | null;
+  sound?: boolean;
   timeoutId?: number;
+  shownAt?: number;
 }
 
 const notifications = ref<CustomNotification[]>([]);
 const containerRef = ref<HTMLElement | null>(null);
 const now = ref(Date.now());
 let clockInterval: number | null = null;
+let resizeTimer: number | null = null;
+let activeAudio: HTMLAudioElement | null = null;
+let disposed = false;
+const bridge = getElectronBridge();
+if (!bridge) throw new Error('Custom notification requires the preload bridge');
 
 const AUTO_DISMISS_MS = 30_000;
+const MAX_VISIBLE_NOTIFICATIONS = 5;
+
+function synchronizeClock() {
+  const running = notifications.value.length > 0 && document.visibilityState !== 'hidden';
+  if (running && clockInterval === null) {
+    now.value = Date.now();
+    clockInterval = window.setInterval(() => {
+      now.value = Date.now();
+    }, 250);
+  } else if (!running && clockInterval !== null) {
+    window.clearInterval(clockInterval);
+    clockInterval = null;
+  }
+}
 
 const notificationProgress = computed<Record<string, number>>(() => {
   return Object.fromEntries(
     notifications.value.map((notification) => {
-      const createdAt = Number(notification.data?.createdAt ?? now.value);
+      const createdAt = notification.shownAt ?? now.value;
       const elapsed = Math.max(0, now.value - createdAt);
       const remaining = Math.max(0, AUTO_DISMISS_MS - elapsed);
       return [notification.id, remaining / AUTO_DISMISS_MS];
@@ -41,7 +58,7 @@ const notificationProgress = computed<Record<string, number>>(() => {
 const notificationRemainingSeconds = computed<Record<string, number>>(() => {
   return Object.fromEntries(
     notifications.value.map((notification) => {
-      const createdAt = Number(notification.data?.createdAt ?? now.value);
+      const createdAt = notification.shownAt ?? now.value;
       const elapsed = Math.max(0, now.value - createdAt);
       const remaining = Math.max(0, AUTO_DISMISS_MS - elapsed);
       return [notification.id, Math.ceil(remaining / 1000)];
@@ -50,6 +67,7 @@ const notificationRemainingSeconds = computed<Record<string, number>>(() => {
 });
 
 function handleReceiveNotification(data: CustomNotification) {
+  if (disposed) return;
   console.info('[CustomNotificationView] Received notification payload', {
     id: data.id,
     title: data.title,
@@ -58,13 +76,12 @@ function handleReceiveNotification(data: CustomNotification) {
   // If we already have one with this ID, ignore
   if (notifications.value.some((n) => n.id === data.id)) return;
 
-  const soundEnabled = data.sound?.enabled ?? true;
-  if (soundEnabled) {
-    if (data.sound?.name && typeof data.sound.name === 'string') {
-      void playNotificationSound(data.sound.name);
-    } else {
-      void playNotificationSound(notificationSound);
-    }
+  if (data.sound === true) void playNotificationSound(notificationSound);
+  while (notifications.value.length >= MAX_VISIBLE_NOTIFICATIONS) {
+    const oldest = notifications.value[0]!;
+    removeNotification(oldest.id);
+    // Presentation overflow leaves the durable inbox unread.
+    void bridge.invoke(NotificationChannels.CUSTOM_CLOSE, oldest.id).catch(console.warn);
   }
 
   // Add timeout for auto dismiss
@@ -75,16 +92,22 @@ function handleReceiveNotification(data: CustomNotification) {
   notifications.value.push({
     ...data,
     timeoutId,
-    data: {
-      ...data.data,
-      createdAt: data.data?.createdAt ?? Date.now(),
-    },
+    shownAt: Date.now(),
   });
 }
 
 async function playNotificationSound(src: string) {
   try {
+    activeAudio?.pause();
     const audio = new Audio(src);
+    activeAudio = audio;
+    audio.addEventListener(
+      'ended',
+      () => {
+        if (activeAudio === audio) activeAudio = null;
+      },
+      { once: true },
+    );
     audio.volume = 0.6;
     await audio.play();
   } catch (error) {
@@ -97,7 +120,7 @@ function removeNotification(id: string) {
   if (index !== -1) {
     console.info('[CustomNotificationView] Removing notification', { id });
     const n = notifications.value[index];
-    if (n.timeoutId) clearTimeout(n.timeoutId);
+    if (n.timeoutId !== undefined) window.clearTimeout(n.timeoutId);
     notifications.value.splice(index, 1);
   }
 }
@@ -106,6 +129,7 @@ async function acknowledgeNotification(
   notification: CustomNotification,
   source: 'button' | 'timeout',
 ) {
+  if (disposed) return;
   console.info('[CustomNotificationView] Acknowledging notification', {
     id: notification.id,
     source,
@@ -119,27 +143,30 @@ async function acknowledgeNotification(
 
   if (notificationId) {
     try {
-      await getElectronBridge().invoke(NotificationChannels.MARK_READ, notificationId);
+      await bridge.invoke(NotificationChannels.MARK_READ, notificationId);
     } catch (error) {
       console.error('[CustomNotificationView] Failed to mark notification as read', error);
     }
   }
 
-  await getElectronBridge().invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
+  if (!disposed) await bridge.invoke(NotificationChannels.CUSTOM_CLOSE, notification.id);
 }
 
 // Helper to recalculate window bounds after a short delay to account for transitions
 async function updateWindowBounds() {
   await nextTick();
+  if (disposed) return;
+  if (resizeTimer !== null) window.clearTimeout(resizeTimer);
   // Slight delay to allow transition classes to apply/finish if needed
-  setTimeout(() => {
+  resizeTimer = window.setTimeout(() => {
+    resizeTimer = null;
     if (containerRef.value) {
       const height = notifications.value.length > 0 ? containerRef.value.scrollHeight : 0;
       console.info('[CustomNotificationView] Requesting window resize', {
         notificationCount: notifications.value.length,
         height,
       });
-      getElectronBridge().invoke(NotificationChannels.CUSTOM_RESIZE, height);
+      void bridge.invoke(NotificationChannels.CUSTOM_RESIZE, height).catch(console.warn);
     }
   }, 50);
 }
@@ -147,18 +174,19 @@ async function updateWindowBounds() {
 // Watch for changes in the notification list to trigger window resize
 watch(
   () => notifications.value.length,
-  async () => {
-    updateWindowBounds();
+  () => {
+    synchronizeClock();
+    void updateWindowBounds();
   },
-  { immediate: true },
+  { immediate: true, flush: 'sync' },
 );
 
 function handleMouseEnter() {
-  getElectronBridge().invoke(NotificationChannels.CUSTOM_MOUSE_ENTER);
+  void bridge.invoke(NotificationChannels.CUSTOM_MOUSE_ENTER).catch(console.warn);
 }
 
 function handleMouseLeave() {
-  getElectronBridge().invoke(NotificationChannels.CUSTOM_MOUSE_LEAVE);
+  void bridge.invoke(NotificationChannels.CUSTOM_MOUSE_LEAVE).catch(console.warn);
 }
 
 onMounted(() => {
@@ -173,16 +201,15 @@ onMounted(() => {
     appRoot.style.backgroundColor = 'transparent';
   }
 
-  clockInterval = window.setInterval(() => {
-    now.value = Date.now();
-  }, 100);
+  document.addEventListener('visibilitychange', synchronizeClock);
+  synchronizeClock();
 
   console.info('[CustomNotificationView] Mounted', {
     hasElectronApi: !!getElectronBridge(),
   });
   if (getElectronBridge()) {
-    getElectronBridge().on(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
-    getElectronBridge()
+    bridge.on(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
+    bridge
       .invoke(NotificationChannels.CUSTOM_RENDERER_READY)
       .then(() => {
         console.info('[CustomNotificationView] Renderer ready acknowledged by main process');
@@ -194,18 +221,20 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  disposed = true;
+  document.removeEventListener('visibilitychange', synchronizeClock);
+  if (resizeTimer !== null) window.clearTimeout(resizeTimer);
+  activeAudio?.pause();
+  activeAudio = null;
   if (getElectronBridge()) {
-    getElectronBridge().off(
-      NotificationChannels.CUSTOM_RECEIVE,
-      handleReceiveNotification,
-    );
+    bridge.off(NotificationChannels.CUSTOM_RECEIVE, handleReceiveNotification);
   }
   // Clear any remaining timeouts
   notifications.value.forEach((n) => {
-    if (n.timeoutId) clearTimeout(n.timeoutId);
+    if (n.timeoutId !== undefined) window.clearTimeout(n.timeoutId);
   });
   if (clockInterval !== null) {
-    clearInterval(clockInterval);
+    window.clearInterval(clockInterval);
     clockInterval = null;
   }
 });
@@ -226,7 +255,7 @@ onUnmounted(() => {
         @mouseleave="handleMouseLeave"
       >
         <div
-          class="absolute inset-x-0 top-0 h-1 origin-left bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 transition-transform duration-100 ease-linear"
+          class="absolute inset-x-0 top-0 h-1 origin-left bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 transition-transform duration-250 ease-linear"
           :style="{ transform: `scaleX(${notificationProgress[notification.id] ?? 0})` }"
         />
 
@@ -265,10 +294,7 @@ onUnmounted(() => {
             <div class="text-base font-semibold leading-6 text-slate-50">
               {{ notification.title }}
             </div>
-            <div
-              v-if="notification.body"
-              class="mt-2 text-sm leading-6 text-slate-300"
-            >
+            <div v-if="notification.body" class="mt-2 text-sm leading-6 text-slate-300">
               {{ notification.body }}
             </div>
             <div v-else class="mt-2 text-sm leading-6 text-slate-400">

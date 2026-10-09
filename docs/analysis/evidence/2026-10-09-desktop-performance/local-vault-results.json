@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-09T05:40:59.790Z",
+  "revision": "f34eff34f4a5567c57181c4fc5ef0d357a0a8eb1",
+  "environment": {
+    "platform": "linux",
+    "architecture": "x64",
+    "node": "v24.21.0",
+    "cpu": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "logicalCpus": 8,
+    "totalMemoryBytes": 33646964736
+  },
+  "methodology": {
+    "source": "packages/repository/src/electron/local-vault-runtime.ts (direct source import via tsx)",
+    "bytesPerNote": 4096,
+    "searchQuery": "needlealpha",
+    "samples": 5,
+    "filesystem": "Fresh synthetic files, OS cache not evicted; repeated queries are warm.",
+    "counts": "A separate instrumented query counts fs.promises calls; timed samples are uninstrumented.",
+    "scope": "Node/Linux source-level experiment; excludes Electron, renderer, IPC, GPU and Windows."
+  },
+  "search": [
+    {
+      "notes": 100,
+      "firstQueryMs": 288.31341,
+      "resultCount": 1,
+      "repeatedQueryMs": [
+        237.9605630000001,
+        244.80231000000003,
+        261.8401690000003,
+        187.8560809999999,
+        195.03559799999994
+      ],
+      "medianMs": 237.9605630000001,
+      "minMs": 187.8560809999999,
+      "maxMs": 261.8401690000003,
+      "io": {
+        "markdownReads": 200,
+        "bindingReads": 101,
+        "markdownBytes": 819200,
+        "readFile": 301,
+        "stat": 301,
+        "realpath": 401,
+        "access": 101,
+        "readdir": 2
+      },
+      "parserCacheEntries": 100
+    },
+    {
+      "notes": 1000,
+      "firstQueryMs": 1741.107482,
+      "resultCount": 10,
+      "repeatedQueryMs": [
+        1605.2764499999994,
+        1605.2575640000005,
+        1541.8230330000006,
+        2029.7866809999996,
+        1537.4213049999998
+      ],
+      "medianMs": 1605.2575640000005,
+      "minMs": 1537.4213049999998,
+      "maxMs": 2029.7866809999996,
+      "io": {
+        "markdownReads": 2000,
+        "bindingReads": 1001,
+        "markdownBytes": 8192000,
+        "readFile": 3001,
+        "stat": 3001,
+        "realpath": 4001,
+        "access": 1001,
+        "readdir": 6
+      },
+      "parserCacheEntries": 1000
+    },
+    {
+      "notes": 10000,
+      "firstQueryMs": 23795.881045,
+      "resultCount": 100,
+      "repeatedQueryMs": [
+        17453.979614000003,
+        18302.511205999996,
+        16273.972905000002,
+        14164.443556999991,
+        15567.825161
+      ],
+      "medianMs": 16273.972905000002,
+      "minMs": 14164.443556999991,
+      "maxMs": 18302.511205999996,
+      "io": {
+        "markdownReads": 20000,
+        "bindingReads": 10001,
+        "markdownBytes": 81920000,
+        "readFile": 30001,
+        "stat": 30001,
+        "realpath": 40001,
+        "access": 10001,
+        "readdir": 51
+      },
+      "parserCacheEntries": 10000
+    }
+  ],
+  "scanLimit": {
+    "inputNotes": 10001,
+    "returnedNotes": 10000,
+    "responseKeys": [
+      "binding",
+      "health",
+      "notes",
+      "scannedAt"
+    ],
+    "sentinelPresentInScan": false,
+    "sentinelSearchResults": 0,
+    "duplicateIdentityWriteCreated": true,
+    "duplicateWriteError": null
+  },
+  "bindingRace": {
+    "resultCount": 1,
+    "summaryTitle": "Title from A",
+    "matchedLine": "from-vault-b-only",
+    "injection": "Select Vault B immediately before public readNote; scan summaries came from Vault A."
+  },
+  "parserCache": {
+    "uniqueFiles": 1,
+    "versions": 200,
+    "bytesPerVersion": 65536,
+    "gcExposed": true,
+    "snapshots": [
+      {
+        "label": "before",
+        "cacheEntries": 0,
+        "rss": 662818816,
+        "heapTotal": 196042752,
+        "heapUsed": 59259888,
+        "external": 6004157,
+        "arrayBuffers": 3289615
+      },
+      {
+        "label": "after-50-versions",
+        "cacheEntries": 50,
+        "rss": 664522752,
+        "heapTotal": 199712768,
+        "heapUsed": 62531824,
+        "external": 9280997,
+        "arrayBuffers": 6566415
+      },
+      {
+        "label": "after-100-versions",
+        "cacheEntries": 100,
+        "rss": 665047040,
+        "heapTotal": 204431360,
+        "heapUsed": 65892608,
+        "external": 12557797,
+        "arrayBuffers": 9843215
+      },
+      {
+        "label": "after-150-versions",
+        "cacheEntries": 150,
+        "rss": 665309184,
+        "heapTotal": 208887808,
+        "heapUsed": 69220240,
+        "external": 15834597,
+        "arrayBuffers": 13120015
+      },
+      {
+        "label": "after-200-versions",
+        "cacheEntries": 200,
+        "rss": 665964544,
+        "heapTotal": 213082112,
+        "heapUsed": 72552552,
+        "external": 19111397,
+        "arrayBuffers": 16396815
+      },
+      {
+        "label": "after-detach",
+        "cacheEntries": 200,
+        "rss": 665964544,
+        "heapTotal": 213082112,
+        "heapUsed": 72542232,
+        "external": 19111397,
+        "arrayBuffers": 16396815
+      },
+      {
+        "label": "after-explicit-test-only-clear",
+        "cacheEntries": 0,
+        "rss": 665964544,
+        "heapTotal": 196042752,
+        "heapUsed": 59219304,
+        "external": 6004197,
+        "arrayBuffers": 3289615
+      },
+      {
+        "label": "explicit-options-control",
+        "cacheEntries": 0,
+        "rss": 665964544,
+        "heapTotal": 196042752,
+        "heapUsed": 59293112,
+        "external": 6004197,
+        "arrayBuffers": 3289615
+      }
+    ]
+  }
+}

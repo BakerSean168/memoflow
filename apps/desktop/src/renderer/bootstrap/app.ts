@@ -67,14 +67,6 @@ export async function bootstrapMainApp() {
   const router = createAppRouter({
     history: createWebHashHistory(),
     canAccessApp: () => desktopAccessSnapshot?.unlockState === 'UNLOCKED',
-    additionalTopLevelRoutes: [
-      {
-        path: '/custom-notification',
-        name: 'custom-notification',
-        component: () => import('../CustomNotificationView.vue'),
-        meta: { requiresAuth: false, layout: 'empty' },
-      },
-    ],
   });
 
   router.beforeEach(() => {
@@ -95,7 +87,7 @@ export async function bootstrapMainApp() {
   }
 
   app.use(router);
-  app.use(installDesktopAppServices);
+  app.use(installDesktopAppServices, desktopAccessSnapshot);
   initElectronFeatures(app);
   app.mount('#app');
 

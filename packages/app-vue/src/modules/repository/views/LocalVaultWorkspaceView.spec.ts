@@ -1,4 +1,4 @@
-import { defineComponent, h, reactive } from 'vue';
+import { defineComponent, h, reactive, ref, KeepAlive } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,6 +12,7 @@ import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
 import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
 import LocalVaultWorkspaceView from './LocalVaultWorkspaceView.vue';
+import { listAdapterFor } from '../../../shared/keyboard/list-adapter';
 
 const routerMocks = vi.hoisted(() => ({
   replace: vi.fn(async () => undefined),
@@ -152,7 +153,7 @@ function noteDetail(overrides: Partial<LocalVaultNoteDTO> = {}): LocalVaultNoteD
 function createService() {
   const binding = snapshot();
   const summary = noteSummary();
-  const getLocalVaultBinding = vi.fn(async () => ok(binding));
+  const getLocalVaultBinding = vi.fn(async () => ok<LocalVaultBindingSnapshotDTO | null>(binding));
   const scanLocalVault = vi.fn(async () =>
     ok({
       binding: binding.binding,
@@ -161,7 +162,9 @@ function createService() {
       scannedAt: 2,
     }),
   );
-  const readLocalVaultNote = vi.fn(async () => ok(noteDetail()));
+  const readLocalVaultNote = vi.fn(async ({ relativePath }: { relativePath: string }) =>
+    ok(noteDetail({ relativePath })),
+  );
   const searchLocalVault = vi.fn(async (request: { query: string }) =>
     ok({
       query: request.query,
@@ -200,8 +203,19 @@ function createService() {
   };
 }
 
-function mountWorkspace(service: IRepositoryService) {
-  return mount(LocalVaultWorkspaceView, {
+function mountWorkspace(
+  service: IRepositoryService,
+  attachTo?: HTMLElement,
+  shown?: ReturnType<typeof ref<boolean>>,
+) {
+  const component = shown
+    ? defineComponent({
+        setup: () => () =>
+          h(KeepAlive, null, () => (shown.value ? h(LocalVaultWorkspaceView) : null)),
+      })
+    : LocalVaultWorkspaceView;
+  return mount(component, {
+    attachTo,
     global: {
       plugins: [i18n],
       provide: {
@@ -223,6 +237,171 @@ beforeEach(() => {
 });
 
 describe('LocalVaultWorkspaceView', () => {
+  it('loads a Vault bound in settings while an initially unbound workspace was hidden', async () => {
+    const mocks = createService();
+    mocks.getLocalVaultBinding.mockResolvedValueOnce(ok(null));
+    const shown = ref(true);
+    const wrapper = mountWorkspace(mocks.service, undefined, shown);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="local-vault-empty"]').exists()).toBe(true);
+    expect(mocks.scanLocalVault).not.toHaveBeenCalled();
+    shown.value = false;
+    await flushPromises();
+    shown.value = true;
+    await flushPromises();
+    expect(wrapper.find('[data-testid="local-vault-note-notes/architecture.md"]').exists()).toBe(
+      true,
+    );
+    expect(mocks.scanLocalVault).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it.each(['detached', 'unavailable'] as const)(
+    'clears cached content when the hidden Vault becomes %s',
+    async (state) => {
+      const mocks = createService();
+      const shown = ref(true);
+      const wrapper = mountWorkspace(mocks.service, undefined, shown);
+      await flushPromises();
+      await wrapper.get('[data-testid="local-vault-note-notes/architecture.md"]').trigger('click');
+      await flushPromises();
+      expect(wrapper.find('[data-testid="local-vault-preview"]').exists()).toBe(true);
+      shown.value = false;
+      await flushPromises();
+      const unavailable = snapshot();
+      unavailable.health.state = 'Missing';
+      mocks.getLocalVaultBinding.mockResolvedValueOnce(
+        ok(state === 'detached' ? null : unavailable),
+      );
+      mocks.scanLocalVault.mockClear();
+      shown.value = true;
+      await flushPromises();
+      expect(wrapper.find('[data-testid="local-vault-empty"]').exists()).toBe(true);
+      expect(wrapper.find('[data-testid="local-vault-preview"]').exists()).toBe(false);
+      expect(wrapper.find('[data-testid="document-source-status"]').exists()).toBe(false);
+      expect(mocks.scanLocalVault).not.toHaveBeenCalled();
+      wrapper.unmount();
+    },
+  );
+
+  it('clears cached note and search projections when reactivated under a different Vault binding', async () => {
+    const mocks = createService();
+    const shown = ref(true);
+    const wrapper = mountWorkspace(mocks.service, undefined, shown);
+    await flushPromises();
+    await wrapper.get('[data-testid="local-vault-note-notes/architecture.md"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="local-vault-preview"]').exists()).toBe(true);
+    const search = wrapper.get('[data-testid="local-vault-search"]');
+    await search.setValue('architecture');
+    await search.trigger('keyup', { key: 'Enter' });
+    await flushPromises();
+    shown.value = false;
+    await flushPromises();
+    const nextBinding = snapshot();
+    nextBinding.binding.id = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440999' as never;
+    nextBinding.binding.rootPath = '/other-vault';
+    mocks.getLocalVaultBinding.mockResolvedValueOnce(ok(nextBinding));
+    mocks.scanLocalVault.mockResolvedValueOnce(
+      ok({ ...nextBinding, notes: [noteSummary({ title: 'Other Vault note' })], scannedAt: 3 }),
+    );
+    shown.value = true;
+    await flushPromises();
+    expect(wrapper.get('[data-testid="document-source-status"]').text()).toContain('/other-vault');
+    expect(wrapper.find('[data-testid="local-vault-preview"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="local-vault-note-notes/architecture.md"]').text()).toContain(
+      'Other Vault note',
+    );
+    wrapper.unmount();
+  });
+  it('renders a bounded window of 10,000 notes while keyboard navigation reaches the last note', async () => {
+    const mocks = createService();
+    const notes = Array.from({ length: 10_000 }, (_, index) =>
+      noteSummary({ relativePath: `note-${index}.md`, title: `Note ${index}` }),
+    );
+    mocks.scanLocalVault.mockResolvedValueOnce(ok({ ...snapshot(), notes, scannedAt: 2 }));
+    mocks.readLocalVaultNote.mockImplementation(async ({ relativePath }) =>
+      ok(noteDetail({ relativePath })),
+    );
+    const wrapper = mountWorkspace(mocks.service, document.body);
+    try {
+      await flushPromises();
+      const rows = wrapper.findAll('[data-keyboard-item]');
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows.length).toBeLessThan(40);
+      const container = wrapper.get('[data-testid="local-vault-catalog-scroll"]')
+        .element as HTMLElement;
+      Object.defineProperty(container, 'clientHeight', { value: 560, configurable: true });
+      container.scrollTo = (options: ScrollToOptions | number, y?: number) => {
+        container.scrollTop = typeof options === 'number' ? (y ?? 0) : (options.top ?? 0);
+      };
+      const adapter = listAdapterFor(wrapper.get('[data-keyboard-list]').element);
+      expect(adapter).not.toBeNull();
+      adapter!.moveSelection(-1);
+      await flushPromises();
+      expect(adapter!.activeItemId).toBe('note-9999.md');
+      expect(document.activeElement?.getAttribute('data-keyboard-item')).toBe('note-9999.md');
+      expect(wrapper.findAll('[data-keyboard-item]').length).toBeLessThan(40);
+      expect(adapter!.openItem()).toBe(true);
+      await flushPromises();
+      expect(mocks.readLocalVaultNote).toHaveBeenCalledWith({ relativePath: 'note-9999.md' });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+  it('keeps the latest opened note when reads finish in the opposite order', async () => {
+    const mocks = createService();
+    const second = noteSummary({ relativePath: 'Second.md', title: 'Second' });
+    mocks.scanLocalVault.mockResolvedValueOnce(
+      ok({ ...snapshot(), notes: [noteSummary(), second], scannedAt: 2 }),
+    );
+    let resolveFirst!: (value: Awaited<ReturnType<typeof mocks.readLocalVaultNote>>) => void;
+    mocks.readLocalVaultNote.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        }),
+    );
+    mocks.readLocalVaultNote.mockResolvedValueOnce(
+      ok(noteDetail({ ...second, contentMarkdown: '# Second' })),
+    );
+    const wrapper = mountWorkspace(mocks.service);
+    await flushPromises();
+    await wrapper.get('[data-testid="local-vault-note-notes/architecture.md"]').trigger('click');
+    await wrapper.get('[data-testid="local-vault-note-Second.md"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="local-vault-preview"]').text()).toContain('# Second');
+    resolveFirst(ok(noteDetail()));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="local-vault-preview"]').text()).toContain('# Second');
+    wrapper.unmount();
+  });
+
+  it('does not republish a completed search after the query was cleared', async () => {
+    const mocks = createService();
+    let resolveSearch!: (value: Awaited<ReturnType<typeof mocks.searchLocalVault>>) => void;
+    mocks.searchLocalVault.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSearch = resolve;
+        }),
+    );
+    const wrapper = mountWorkspace(mocks.service);
+    await flushPromises();
+    const search = wrapper.get('[data-testid="local-vault-search"]');
+    await search.setValue('previous');
+    await search.trigger('keyup', { key: 'Enter' });
+    await flushPromises();
+    await wrapper.get('[aria-label="Clear"]').trigger('click');
+    resolveSearch(ok({ query: 'previous', results: [] }));
+    await flushPromises();
+    expect(wrapper.find('[data-testid="local-vault-note-notes/architecture.md"]').exists()).toBe(
+      true,
+    );
+    expect(mocks.searchLocalVault).toHaveBeenCalledWith({ query: '' });
+    wrapper.unmount();
+  });
+
   it('uses shared document composition while preserving local-vault and Obsidian actions', async () => {
     const mocks = createService();
     const wrapper = mountWorkspace(mocks.service);

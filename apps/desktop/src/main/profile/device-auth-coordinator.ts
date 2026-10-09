@@ -63,10 +63,14 @@ export interface DeviceAuthCoordinatorOptions {
 function defaultSleep(milliseconds: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
     const timer = setTimeout(resolve, milliseconds);
-    signal.addEventListener('abort', () => {
-      clearTimeout(timer);
-      resolve();
-    }, { once: true });
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
   });
 }
 
@@ -112,9 +116,12 @@ export class DeviceAuthCoordinator {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ client_id: DESKTOP_CLIENT_ID }),
       });
-      const payload = await response.json().catch(() => null) as DeviceCodeResponse | DeviceAuthErrorPayload | null;
+      const payload = (await response.json().catch(() => null)) as
+        DeviceCodeResponse | DeviceAuthErrorPayload | null;
       if (!response.ok || !this.isDeviceCodeResponse(payload)) {
-        return fail(this.toError(payload, 'CLOUD_CONNECTION_REQUEST_FAILED', '无法创建云端连接请求'));
+        return fail(
+          this.toError(payload, 'CLOUD_CONNECTION_REQUEST_FAILED', '无法创建云端连接请求'),
+        );
       }
 
       const attempt: InternalAttempt = {
@@ -171,13 +178,19 @@ export class DeviceAuthCoordinator {
     const attempt = this.getCurrentProfileAttempt(attemptId);
     return attempt
       ? ok(this.toSnapshot(attempt))
-      : fail({ code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND', message: '连接请求不存在或不属于当前 Profile' });
+      : fail({
+          code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND',
+          message: '连接请求不存在或不属于当前 Profile',
+        });
   }
 
   cancel(attemptId: string): Result<void> {
     const attempt = this.getCurrentProfileAttempt(attemptId);
     if (!attempt) {
-      return fail({ code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND', message: '连接请求不存在或不属于当前 Profile' });
+      return fail({
+        code: 'CLOUD_CONNECTION_ATTEMPT_NOT_FOUND',
+        message: '连接请求不存在或不属于当前 Profile',
+      });
     }
     this.cancelInternal(attemptId);
     return ok(undefined);
@@ -229,7 +242,8 @@ export class DeviceAuthCoordinator {
           }),
           signal: attempt.abortController.signal,
         });
-        payload = await response.json().catch(() => null) as DeviceTokenResponse | DeviceAuthErrorPayload | null;
+        payload = (await response.json().catch(() => null)) as
+          DeviceTokenResponse | DeviceAuthErrorPayload | null;
       } catch {
         this.increasePollBackoff(attempt);
         continue;
@@ -254,7 +268,13 @@ export class DeviceAuthCoordinator {
           attempt.error = { code: 'AUTH_RESPONSE_INVALID', message: '云端认证响应无效' };
           return;
         }
-        const connected = await this.connection.connect(attempt.profileId, auth, token);
+        const connected = await this.connection.connect(
+          attempt.profileId,
+          auth,
+          token,
+          attempt.abortController.signal,
+        );
+        if (attempt.abortController.signal.aborted) return;
         if (!connected.ok) {
           attempt.status = 'failed';
           attempt.error = connected.error;
@@ -296,13 +316,16 @@ export class DeviceAuthCoordinator {
     }
   }
 
-  private async resolveAuthResponse(token: string, signal: AbortSignal): Promise<CloudAuthResponse | null> {
+  private async resolveAuthResponse(
+    token: string,
+    signal: AbortSignal,
+  ): Promise<CloudAuthResponse | null> {
     const response = await this.fetchImpl(`${authOrigin()}/api/auth/get-session`, {
       headers: { authorization: `Bearer ${token}` },
       signal,
     });
     if (!response.ok) return null;
-    const payload = await response.json().catch(() => null) as BetterAuthSessionResponse | null;
+    const payload = (await response.json().catch(() => null)) as BetterAuthSessionResponse | null;
     if (!payload?.session || !payload.user) return null;
     return {
       account: {
@@ -354,11 +377,13 @@ export class DeviceAuthCoordinator {
   private isDeviceCodeResponse(payload: unknown): payload is DeviceCodeResponse {
     if (!payload || typeof payload !== 'object') return false;
     const record = payload as Record<string, unknown>;
-    return typeof record.device_code === 'string'
-      && typeof record.user_code === 'string'
-      && typeof record.verification_uri_complete === 'string'
-      && typeof record.expires_in === 'number'
-      && typeof record.interval === 'number';
+    return (
+      typeof record.device_code === 'string' &&
+      typeof record.user_code === 'string' &&
+      typeof record.verification_uri_complete === 'string' &&
+      typeof record.expires_in === 'number' &&
+      typeof record.interval === 'number'
+    );
   }
 
   private isDeviceTokenResponse(payload: unknown): payload is DeviceTokenResponse {
@@ -367,8 +392,12 @@ export class DeviceAuthCoordinator {
     return typeof record.access_token === 'string' && record.token_type === 'Bearer';
   }
 
-  private readErrorCode(payload: DeviceAuthErrorPayload | DeviceTokenResponse | null): string | null {
-    return payload && 'error' in payload && typeof payload.error === 'string' ? payload.error : null;
+  private readErrorCode(
+    payload: DeviceAuthErrorPayload | DeviceTokenResponse | null,
+  ): string | null {
+    return payload && 'error' in payload && typeof payload.error === 'string'
+      ? payload.error
+      : null;
   }
 
   private toError(
@@ -377,13 +406,17 @@ export class DeviceAuthCoordinator {
     fallbackMessage: string,
   ): ResultError {
     const error = payload && 'error' in payload ? payload.error : undefined;
-    const description = payload && 'error_description' in payload ? payload.error_description : undefined;
+    const description =
+      payload && 'error_description' in payload ? payload.error_description : undefined;
     const message = payload && 'message' in payload ? payload.message : undefined;
     return {
       code: typeof error === 'string' ? error.toUpperCase() : fallbackCode,
-      message: typeof description === 'string'
-        ? description
-        : typeof message === 'string' ? message : fallbackMessage,
+      message:
+        typeof description === 'string'
+          ? description
+          : typeof message === 'string'
+            ? message
+            : fallbackMessage,
     };
   }
 }

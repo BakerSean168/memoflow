@@ -1,6 +1,12 @@
 import { ipcMain } from 'electron';
 import { ok, fail } from '@memoflow/contracts/result';
-import { ProfileAccessChannels, type DesktopAccessSnapshot, type ProfileSummary, type RemoveProfileRequest, type SelectProfileRequest } from '@memoflow/contracts/electron';
+import {
+  ProfileAccessChannels,
+  type DesktopAccessSnapshot,
+  type ProfileSummary,
+  type RemoveProfileRequest,
+  type SelectProfileRequest,
+} from '@memoflow/contracts/electron';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
@@ -28,50 +34,66 @@ export function registerProfileAccessIpc(
   cloudConnection: DesktopCloudConnectionManager,
   deviceAuth?: DeviceAuthCoordinator,
 ): void {
-  ipcMain.handle(ProfileAccessChannels.GET_SNAPSHOT, async () => {
+  const readSnapshot = async (): Promise<DesktopAccessSnapshot> => {
     const descriptor = runtime.getActiveProfileDescriptorSync();
-    const cloudState = await cloudConnection.getState(descriptor);
-    const snapshot: DesktopAccessSnapshot = {
-      profile: descriptor ? await toSummary(descriptor, runtime) : null,
-      unlockState: descriptor ? 'UNLOCKED' : 'LOCKED',
-      cloudState,
+    const [cloudState, profile] = await Promise.all([
+      cloudConnection.getState(descriptor),
+      descriptor ? toSummary(descriptor, runtime) : null,
+    ]);
+    const stillActive =
+      descriptor !== null && runtime.getActiveProfileDescriptorSync() === descriptor;
+    const online = stillActive && cloudState === 'ONLINE';
+    return {
+      profile: stillActive ? profile : null,
+      unlockState: stillActive ? 'UNLOCKED' : 'LOCKED',
+      cloudState: stillActive ? cloudState : 'UNBOUND',
       capabilities: {
-        local: descriptor !== null,
-        sync: cloudState === 'ONLINE',
-        cloudAi: cloudState === 'ONLINE',
-        repositoryConnection: cloudState === 'ONLINE',
+        local: stillActive,
+        sync: online,
+        cloudAi: online,
+        repositoryConnection: online,
       },
     };
-    return ok(snapshot);
+  };
+  ipcMain.handle(ProfileAccessChannels.GET_SNAPSHOT, async () => ok(await readSnapshot()));
+  ipcMain.handle(ProfileAccessChannels.REFRESH_CLOUD_STATE, async () => {
+    const descriptor = runtime.getActiveProfileDescriptorSync();
+    if (descriptor) await cloudConnection.restore(descriptor);
+    return ok(await readSnapshot());
   });
 
-  ipcMain.handle(ProfileAccessChannels.LIST, async () => ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))));
+  ipcMain.handle(ProfileAccessChannels.LIST, async () =>
+    ok(await Promise.all((await registry.list()).map((profile) => toSummary(profile, runtime)))),
+  );
 
-  ipcMain.handle(ProfileAccessChannels.SELECT, async (_event, input: string | SelectProfileRequest) => {
-    if (deviceAuth) {
-      const activeProfileId = runtime.getActiveProfileId();
-      if (activeProfileId) deviceAuth.cancelForProfile(activeProfileId);
-    }
-    const profileId = typeof input === 'string' ? input : input.profileId;
-    const profile = (await registry.list()).find((entry) => entry.profileId === profileId);
-    if (!profile) return fail({ code: 'PROFILE_NOT_FOUND', message: 'Profile not found' });
-    const pinRequired = await runtime.hasPin(profileId);
-    const pin = typeof input === 'string' ? undefined : input.pin;
-    if (pinRequired && !pin) {
-      return fail({ code: 'PIN_REQUIRED', message: '此 Profile 需要本地 PIN 解锁' });
-    }
-    if (pinRequired && pin) await runtime.preparePinUnlock(profileId, pin);
-    if (profile.profileKind === 'guest') {
-      await runtime.prepareGuestProfile();
-    } else {
-      await runtime.prepareProfile(profile.localOwnerId, {
-        displayName: profile.displayName,
-        identifier: profile.identifier,
-      });
-    }
-    await runtime.activatePreparedProfile();
-    return ok(null);
-  });
+  ipcMain.handle(
+    ProfileAccessChannels.SELECT,
+    async (_event, input: string | SelectProfileRequest) => {
+      if (deviceAuth) {
+        const activeProfileId = runtime.getActiveProfileId();
+        if (activeProfileId) deviceAuth.cancelForProfile(activeProfileId);
+      }
+      const profileId = typeof input === 'string' ? input : input.profileId;
+      const profile = (await registry.list()).find((entry) => entry.profileId === profileId);
+      if (!profile) return fail({ code: 'PROFILE_NOT_FOUND', message: 'Profile not found' });
+      const pinRequired = await runtime.hasPin(profileId);
+      const pin = typeof input === 'string' ? undefined : input.pin;
+      if (pinRequired && !pin) {
+        return fail({ code: 'PIN_REQUIRED', message: '此 Profile 需要本地 PIN 解锁' });
+      }
+      if (pinRequired && pin) await runtime.preparePinUnlock(profileId, pin);
+      if (profile.profileKind === 'guest') {
+        await runtime.prepareGuestProfile();
+      } else {
+        await runtime.prepareProfile(profile.localOwnerId, {
+          displayName: profile.displayName,
+          identifier: profile.identifier,
+        });
+      }
+      await runtime.activatePreparedProfile();
+      return ok(null);
+    },
+  );
 
   ipcMain.handle(ProfileAccessChannels.REMOVE, async (_event, input: RemoveProfileRequest) => {
     if (runtime.getActiveProfileId() === input.profileId) {

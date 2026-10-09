@@ -75,6 +75,8 @@ describe('RepositoryElectronModule automatic synchronization lifecycle', () => {
       detachVault: vi.fn(),
       scanVault: vi.fn(),
       readNote: vi.fn(),
+      findNoteById: vi.fn(),
+      dispose: vi.fn(async () => undefined),
       searchVault: vi.fn(),
       openInObsidian: vi.fn(),
       writeConfirmedNote: vi.fn(),

@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-09T09:52:32.480Z",
+  "environment": {
+    "node": "v24.21.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "sourceSha256": "162c61f7babbab9bd0b73904c848b407c7a9fc27e967dd2fd34fcebdbd8e4655",
+  "sdkVersion": "1.1.0",
+  "scope": "Unmodified production wrapper transpiled with TypeScript; real SDK and schema, temporary DBs, observed real Workers; fake Electron window list. A loopback HTTP server intentionally stalls credential requests; no real cloud. Linux Node, not a Windows packaged app.",
+  "peakWorkers": 6,
+  "observations": [
+    {
+      "stage": "local-only-open",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "local-only-after-disable-sync",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "after-shutdown",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "reopened-with-data",
+      "activeWorkerCount": 6,
+      "persisted": true
+    },
+    {
+      "stage": "switch-cycle-1-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "switch-cycle-2-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "switch-cycle-3-closed",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "shutdown-during-open",
+      "activeWorkerCount": 0
+    },
+    {
+      "stage": "stalled-credentials-after-disconnect",
+      "activeWorkerCount": 6
+    },
+    {
+      "stage": "stalled-credentials-after-shutdown",
+      "activeWorkerCount": 0
+    }
+  ]
+}
