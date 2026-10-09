@@ -46,10 +46,46 @@ macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得�
 
 ## 工程审查与交付门禁
 
-以 `68398e60fc4...24cb9b4c31f` 做两路只读审查。Standards 两项：首次发送取消窗口、合法 Codex failed turn 被误映射协议错误。Spec 三项：首次发送取消窗口、Claude 身份校验晚于 SDK resume、缺少 run/model 展示快照。对应修复已加入行为测试；后续候选需再次绑定最终 SHA 验证。
+以 `68398e60fc4...24cb9b4c31f` 做两路只读审查。Standards 两项：首次发送取消窗口、合法 Codex failed turn 被误映射协议错误。Spec 三项：首次发送取消窗口、Claude 身份校验晚于 SDK resume、缺少 run/model 展示快照。对应修复已加入行为测试；两路审查已对 `70646c6030b3ee6e1e5b35f9689fbdf009dada7b` 复核，原问题全部关闭，无新增具体阻断项。平台验收和最终 CI 仍需绑定后续候选。
 
 - Goal/Task/Gateway 全套、AI/contracts/Repository/app-vue 串行全套通过。串行重跑避免并发资源竞争，不修改测试超时掩盖问题。
 - 安装依赖 `pnpm install --frozen-lockfile --offline` 通过。
 - Linux package 构建命令曾通过，但发现 ASAR 索引与实际内容不一致，实际启动失败。新增入口完整性校验已能拒绝该包；必须串行重打包并跑 packaged smoke 后才计入通过。
-- 本地 prod-like helper、Windows lane、最终 exact SHA CI、双 lane release evidence、production-selected watcher rollout 仍待执行。
+- 完整 helper 已对 `70646c6030b3ee6e1e5b35f9689fbdf009dada7b` 执行：affected lint 通过；36 个项目的 test 仅 `ci-cd-platform:test` 失败；37 个项目的 typecheck 仅 `test-utils:typecheck` 失败。前者由 JSON5 无关格式化触发，已恢复原配置格式；后者改用现有编译目标支持的全局替换。两项聚焦复验已通过，完整 helper 待重跑。
+- 本地 prod-like API/Web 镜像 revision、宿主端口与监听 owner 均匹配上述 SHA；API/Web/PowerSync 均 healthy，不使用旧容器冒充本次部署。
+- Windows 现有 installed-update workflow 增加相同 packaged runtime smoke；三 driver 的缺 CLI 隔离、配置重启保留/删除都纳入安装包验收。Windows lane、最终 exact SHA CI、双 lane release evidence、production-selected watcher rollout 尚未通过。
+- Claude 现有通道有限重试仍失败；本次原生 `api_error` 记录均为 HTTP 429 / credentials cooling down。未通过真实工具调用，未更换运行时冒充通过。
 - 没有推送 BYOA、创建 BYOA PR、合并 release PR 或发布生产。
+
+## 26 项要求与当前证据
+
+`delivered` 表示对应行为已有源码与可执行测试证据，不等同于版本已发布；`partial` 项仍阻止宣称全方案交付。平台证据、CI 与上线身份在取得后继续补齐。
+
+| AC  | 机制 / 验证接缝                                                          | 当前结果                            |
+| --- | ------------------------------------------------------------------------ | ----------------------------------- |
+| 01  | compose-ai 初始化隔离、Mastra workflow/chat 回归；安装包内置模型入口另验 | delivered                           |
+| 02  | 无连接引导与 AI settings；无自动安装或代付                               | delivered                           |
+| 03  | runtime reference、会话/默认值、view lifecycle 测试                      | delivered                           |
+| 04  | 原生 probe 分类与局部失败；设置页重试                                    | delivered                           |
+| 05  | compose-ai / ai-module-partial-start 故障注入                            | delivered                           |
+| 06  | driver 错误只返回原会话；owner receipt 不自动换 key                      | delivered                           |
+| 07  | typed request/schema、三 driver 请求响应与过期 fixtures                  | delivered                           |
+| 08  | startup deferred cancel、单 turn、partial text、晚到事件测试             | delivered                           |
+| 09  | Codex/Pi 真实同 native ID 恢复；不可恢复状态拒绝；Claude 见 AC21         | delivered（Claude 真实恢复归 AC21） |
+| 10  | MCP 撤销、Profile dispose 等待真实 owner drain                           | delivered                           |
+| 11  | local repository owner/CAS、runtime reference、native fingerprint        | delivered                           |
+| 12  | Desktop Goal/Task owner + loopback MCP，测试不启动云 API                 | delivered                           |
+| 13  | local repository 删除后不复活、混合列表按来源路由、原生历史提示          | delivered                           |
+| 14  | 真实 published schema localOnly、V3 export、guest source blockers        | delivered                           |
+| 15  | Mastra durable workflow 恢复回归；local 会话不进入 hydration             | delivered                           |
+| 16  | 本地写 scope 默认关闭、每次事务重新授权、撤销后重放拒绝                  | delivered                           |
+| 17  | Goal/Task owner 同 key 重放/并发/异输入冲突真实 SQLite                   | delivered                           |
+| 18  | owner/outbox/receipt 同事务；故障回滚及重开数据库查原回执                | delivered                           |
+| 19  | owner expectedVersion、审批输入摘要绑定与失效拒绝                        | delivered                           |
+| 20  | Task Prompt 显式选择、Fixed 一次贡献及 outbox/receipt 回滚               | delivered                           |
+| 21  | Claude SDK fixtures、两阶段身份校验通过；真实通道持续 429                | partial：待可用上游的真实两轮       |
+| 22  | Pi RPC fixtures + 原生两轮工具查询/恢复、临时 extension 清理             | delivered                           |
+| 23  | Vault owner 查询/引用；现有编辑审核入口、绑定/路径/幂等测试              | delivered                           |
+| 24  | run/model 来源快照、未知 token/费用、显式切换新运行时                    | delivered                           |
+| 25  | Windows shim/argv fixtures；Linux 重打包与 Windows lane 待完成           | partial：待两平台安装包证据         |
+| 26  | 共享 Web/API tests、typecheck 通过；本次镜像 prod-like 健康              | delivered                           |

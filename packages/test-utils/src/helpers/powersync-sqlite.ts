@@ -5,7 +5,7 @@ import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 /** Real SQLite using the published Profile schema, with serialized write transactions. */
 export function createPowerSyncSqliteFixture(path = ':memory:') {
   const sql = new DatabaseSync(path);
-  const quoted = (value: string) => `"${value.replaceAll('"', '""')}"`;
+  const quoted = (value: string) => `"${value.replace(/"/g, '""')}"`;
   for (const table of PowerSyncAppSchema.tables) {
     sql.exec(
       `CREATE TABLE IF NOT EXISTS ${quoted(table.name)} (id TEXT PRIMARY KEY, ${table.columns.map((column) => `${quoted(column.name)} ${column.type}`).join(', ')})`,

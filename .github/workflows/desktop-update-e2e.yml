@@ -176,6 +176,21 @@ jobs:
           "base_installer=$($baseInstallers[0].FullName)" >> $env:GITHUB_OUTPUT
           "candidate_feed_dir=$candidateDir" >> $env:GITHUB_OUTPUT
 
+      - name: Run Windows packaged runtime smoke
+        shell: pwsh
+        env:
+          MEMOFLOW_PACKAGED_EXECUTABLE: ${{ steps.fixtures.outputs.candidate_feed_dir }}\win-unpacked\memoflow.exe
+        run: pnpm nx run desktop:test:packaged-smoke --outputStyle=static
+
+      - name: Upload Windows packaged runtime evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-packaged-runtime-windows
+          path: apps/desktop/test-results
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Run installed Windows updater proof
         shell: pwsh
         run: |
