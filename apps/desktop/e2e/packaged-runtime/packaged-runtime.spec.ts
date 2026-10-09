@@ -126,7 +126,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
 
     // Scoped app-vue CSS is a separate library artifact in production builds.
     // Source-based Web fixtures alone cannot catch a missing CSS import here.
-    await expect(mainWindow.locator('.workspace-content-well')).toHaveCSS('margin-top', '4px');
+    // Windows runners can open at the compact Desktop breakpoint. Select the
+    // expected gutter from the viewport, not from the style under test.
+    const viewportWidth = await mainWindow.evaluate(() => window.innerWidth);
+    expect(viewportWidth).toBeGreaterThanOrEqual(768);
+    await expect(mainWindow.locator('.workspace-content-well')).toHaveCSS(
+      'margin-top',
+      viewportWidth <= 1199 ? '3px' : '4px',
+    );
     await expect(mainWindow.locator('.workspace-content-well')).not.toHaveCSS(
       'border-top-left-radius',
       '0px',
