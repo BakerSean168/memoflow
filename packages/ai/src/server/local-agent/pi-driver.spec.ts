@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { PiDriver } from './pi-driver';
 import { NativeRpcTransport } from './native-rpc-transport';
+import { LocalAgentError } from '../../shared/local-agent-error';
 const connection: LocalAgentConnection = {
   id: 'pi',
   driver: 'pi',
@@ -72,6 +73,21 @@ it('reads native models, resumes a session and handles extension UI with scoped 
     await rm(cwd, { recursive: true, force: true });
   }
 });
+it('explains a missing executable without replacing it with a generic configuration error', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'memoflow-pi-missing-'));
+  try {
+    const driver = new PiDriver(
+      { ...connection, homePath: cwd, executablePath: join(cwd, 'missing pi') },
+      cwd,
+    );
+    expect(await driver.probe()).toEqual({
+      status: 'not_installed',
+      message: new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED').message,
+    });
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
 it('reports a nonzero native exit instead of a successful empty turn', async () => {
   const driver = new PiDriver(
     connection,
@@ -85,6 +101,29 @@ it('reports a nonzero native exit instead of a successful empty turn', async () 
       }),
   );
   expect(await driver.probe()).toMatchObject({ status: 'unavailable' });
+});
+it('reports a native authentication failure as requiring login', async () => {
+  const driver = new PiDriver(
+    connection,
+    tmpdir(),
+    (options) =>
+      new NativeRpcTransport({
+        ...options,
+        executable: process.execPath,
+        args: [
+          '-e',
+          `require('readline').createInterface({input:process.stdin}).on('line', line => {
+            const frame = JSON.parse(line);
+            process.stdout.write(JSON.stringify({type:'response', id:frame.id, success:false, error:'401 unauthorized'})+'\\n');
+          });`,
+        ],
+        requestTimeoutMs: 1000,
+      }),
+  );
+  expect(await driver.probe()).toEqual({
+    status: 'login_required',
+    message: new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED').message,
+  });
 });
 it('expires a timed native UI request and rejects a late answer', async () => {
   const cwd = await mkdtemp(join(tmpdir(), 'memoflow-pi-expiry-'));

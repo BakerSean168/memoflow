@@ -13,12 +13,12 @@ updated: 2026-10-09T00:00:00Z
 
 ## 原生支持矩阵
 
-| 入口        | 协议/版本                         | Linux 原生行为                                                                              | Windows                                             | 边界                                                         |
-| ----------- | --------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| 内置 Mastra | 现有 workspace 固定依赖           | 聊天/审批与 Goal、Task、Knowledge 持久恢复测试通过                                          | 安装包验收待执行                                    | 无 CLI 前置；仍需自己的内置模型连接                          |
-| Codex       | app-server，CLI 0.160.1           | 真实 Goal 查询两轮、同 native ID 恢复通过；模型 gpt-6-astra                                 | npm shim/空格 argv fixtures 通过；实机打包待验收    | 账号/config/home 变更校验；不自动跨 Agent 重试               |
-| Claude Code | Agent SDK 0.3.295，用户已安装 CLI | 初始化/目录、流/权限/恢复 fixtures 通过；真实完整两轮尚未通过：配置的上游通道 HTTP 429 冷却 | npm/native executable fixtures 通过；实机打包待验收 | SDK 使用用户 CLI，不打包可选 CLI；恢复前先无 prompt 校验身份 |
-| Pi          | 原生 RPC，CLI 1.0.3               | 真实 Goal 查询两轮、同 session 恢复通过；模型 auto/gpt-6-astra                              | npm shim/空格 argv fixtures 通过；实机打包待验收    | 会话扩展临时注入，退出删除，不改全局 extensions              |
+| 入口        | 协议/版本                         | Linux 原生行为                                                                                | Windows                                             | 边界                                                         |
+| ----------- | --------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| 内置 Mastra | 现有 workspace 固定依赖           | 聊天/审批与 Goal、Task、Knowledge 持久恢复测试通过                                            | 安装包验收待执行                                    | 无 CLI 前置；仍需自己的内置模型连接                          |
+| Codex       | app-server，CLI 0.160.1           | 真实 Goal 查询两轮、同 native ID 恢复通过；模型 gpt-6-astra                                   | npm shim/空格 argv fixtures 通过；实机打包待验收    | 账号/config/home 变更校验；不自动跨 Agent 重试               |
+| Claude Code | Agent SDK 0.3.295，用户已安装 CLI | SDK fixtures 通过；兼容模型完成首轮工具查询并在恢复后再次调用工具，第二轮超时；完整两轮待通过 | npm/native executable fixtures 通过；实机打包待验收 | SDK 使用用户 CLI，不打包可选 CLI；恢复前先无 prompt 校验身份 |
+| Pi          | 原生 RPC，CLI 1.0.3               | 真实 Goal 查询两轮、同 session 恢复通过；模型 auto/gpt-6-astra                                | npm shim/空格 argv fixtures 通过；实机打包待验收    | 会话扩展临时注入，退出删除，不改全局 extensions              |
 
 macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得支持证据。身份检查覆盖已知 native home/config/auth 文件与相关宿主环境；不声称能发现外部 wrapper/key helper 内任意来源的账号变化。带稳定账号 ID 的 OAuth 刷新不应无故失效；没有稳定 ID 的 Pi OAuth 保守失效。
 
@@ -50,12 +50,12 @@ macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得�
 
 - Goal/Task/Gateway 全套、AI/contracts/Repository/app-vue 串行全套通过。串行重跑避免并发资源竞争，不修改测试超时掩盖问题。
 - 安装依赖 `pnpm install --frozen-lockfile --offline` 通过。
-- Linux package 构建命令曾通过，但发现 ASAR 索引与实际内容不一致，实际启动失败。新增入口完整性校验已能拒绝该包；必须串行重打包并跑 packaged smoke 后才计入通过。
-- 完整 helper 已对 `70646c6030b3ee6e1e5b35f9689fbdf009dada7b` 执行：affected lint 通过；36 个项目的 test 仅 `ci-cd-platform:test` 失败；37 个项目的 typecheck 仅 `test-utils:typecheck` 失败。前者由 JSON5 无关格式化触发，已恢复原配置格式；后者改用现有编译目标支持的全局替换。两项聚焦复验已通过，完整 helper 待重跑。
+- Linux package 在冻结文件后重建通过，ASAR 入口完整性与依赖校验通过；真实 Electron 已启动并展示 AI 设置。三 driver 缺 CLI 测试发现 Pi 将明确错误替换成通用文案，已增加真实缺文件 red→green 测试并修复，AI 全套 lint/typecheck/test 通过；完整重启场景待重跑。
+- 完整 helper 已对 `70646c6030b3ee6e1e5b35f9689fbdf009dada7b` 执行：affected lint 通过；36 个项目的 test 仅 `ci-cd-platform:test` 失败；37 个项目的 typecheck 仅 `test-utils:typecheck` 失败。前者由 JSON5 无关格式化触发，已恢复原配置格式；后者改用现有编译目标支持的全局替换。两项聚焦复验已通过。随后 `e19c3f3958035247ed444758de2b4b47d094e5d5` 的完整 helper 再次执行，affected lint/typecheck/test 与 Docker 全部通过，无阻断或警告。
 - 本地 prod-like API/Web 镜像 revision、宿主端口与监听 owner 均匹配上述 SHA；API/Web/PowerSync 均 healthy，不使用旧容器冒充本次部署。
 - Windows 现有 installed-update workflow 增加相同 packaged runtime smoke；三 driver 的缺 CLI 隔离、配置重启保留/删除都纳入安装包验收。Windows lane、最终 exact SHA CI、双 lane release evidence、production-selected watcher rollout 尚未通过。
-- Claude 现有通道有限重试仍失败；本次原生 `api_error` 记录均为 HTTP 429 / credentials cooling down。未通过真实工具调用，未更换运行时冒充通过。
-- 没有推送 BYOA、创建 BYOA PR、合并 release PR 或发布生产。
+- Claude 原生默认 `anyrouter/claude-opus-5-5` 返回 400，通道明确提示模型供应不可用并建议 `gpt-6-astra-cc-format[1m]`。该兼容模型已在 Claude Code 执行器中完成首轮真实 Goal 查询；恢复同一 native session 后再次调用 Goal 工具，但第二轮触及 300 秒上限。原生日志无该轮 API 错误，第二轮工具调用发生在约第 261 秒。随后采用原生支持的进程级低 effort 重试，再次出现 HTTP 429。没有改变用户配置或测试超时，没有将部分成功记为完整两轮通过。
+- [PR #439](https://github.com/BakerSean168/memoflow/pull/439) 已创建并关联当前 T3 线程。初始提交 `e19c3f3958035247ed444758de2b4b47d094e5d5` 的 exact-head CI run `37995994699` 已全部通过；初始 Windows/Linux run `37996045674` 因修正已知 smoke 问题而取消，不算通过。后续候选需重新取得精确 SHA 证据。release PR #436 未合并，prod 未变更。
 
 ## 26 项要求与当前证据
 

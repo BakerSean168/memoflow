@@ -213,7 +213,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     await expect(localSettings).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
     await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
     for (const driver of ['codex', 'claude', 'pi']) {
-      await localSettings.getByLabel('Agent', { exact: true }).selectOption(driver);
+      await localSettings.getByRole('combobox').selectOption(driver);
       await localSettings
         .getByLabel('连接名称', { exact: true })
         .fill(`Packaged unavailable ${driver}`);

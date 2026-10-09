@@ -128,12 +128,16 @@ export class PiDriver {
             message: new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED').message,
           };
     } catch (error) {
+      const failure =
+        error instanceof LocalAgentError ? error : new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
       return {
         status:
-          error instanceof LocalAgentError && error.code === 'LOCAL_AGENT_NOT_INSTALLED'
+          failure.code === 'LOCAL_AGENT_NOT_INSTALLED'
             ? 'not_installed'
-            : 'unavailable',
-        message: new LocalAgentError('LOCAL_AGENT_UNAVAILABLE').message,
+            : failure.code === 'LOCAL_AGENT_LOGIN_REQUIRED'
+              ? 'login_required'
+              : 'unavailable',
+        message: failure.message,
       };
     } finally {
       await this.close();
