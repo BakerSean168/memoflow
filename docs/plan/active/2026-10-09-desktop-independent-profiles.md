@@ -9,7 +9,7 @@ updated: 2026-10-09T00:00:00Z
 
 2026-10-09 续办：用户已要求继续实施剩余功能。DP-1401～1901 进入实施；继续使用本隔离工作区，以第 4 节验收矩阵逐项收口。上一阶段证据保留在第 11 节，不作为新增导入路径的验证结果。
 
-**当前状态：DP-1001～1801 源码已实现；DP-1901 的 Linux 自动化、本地部署与本轮文档验证已完成。** 隔离工作区 `memoflow-profiles` / 分支 `feat/desktop-independent-profiles`，不修改主工作区的性能任务。跨平台、真实生产 OAuth、全 owner 网络同步和主工作区集成尚未验收，不能据源码完成宣布全部 AC 通过。设计依据为 [ADR-119](../../architecture/adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)。
+**当前状态：DP-1001～1801 源码已实现；DP-1901 的 Linux 自动化、本地部署与本轮文档验证已完成。** 隔离工作区 `memoflow-profiles` / 分支 `feat/desktop-independent-profiles`，已整合 main 的桌面性能与 keymap/style 改动，合并阶段验证见第 14 节。跨平台、真实生产 OAuth、全 owner 网络同步尚未验收，不能据源码完成宣布全部 AC 通过。设计依据为 [ADR-119](../../architecture/adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)。
 
 ## 1. 产品结果和验收来源
 
@@ -238,7 +238,7 @@ Windows、Linux 是必须明确记录的目标；macOS 若无实机则标未验�
 
 AC-01 完整任务级跨 Profile 旅程、AC-05 真实邮箱/GitHub 同身份、AC-16 进程强杀、AC-18 全 owner 真实网络下载、AC-26 长 AI stream 全 owner 故障矩阵、AC-28 磁盘满/大容量压力以及 Windows/macOS 不在当前已通过范围。SQLite/HTTP fixture/故障注入的证据必须注明层级，不能扩大成生产端到端证明。
 
-主工作区性能改动尚未集成；未提交、未建 PR、未合并、未发布。计划继续保留 active，直到剩余集成和平台验收完成。
+上述证据取得时尚未整合 main；后续提交与整合状态见第 14 节。计划继续保留 active，直到剩余真实网络和平台验收完成。
 
 ## 13. 本轮最终本地验证结论
 
@@ -250,4 +250,12 @@ API、Web、PowerSync、PostgreSQL、Redis 均 healthy。API/Web 镜像 revision
 
 宽范围验收发现并修复了无副作用事务入口的源码/产物类型映射不一致、已不再需要的 Goal transaction cast 白名单和 API composition 旧断言。前两份失败报告保留为历史，不代替上述最终通过报告。
 
-本轮授权的功能实现及 Linux 本地验证已交付。计划保留 active，仅因第 12 节列出的真实网络、跨平台和主工作区集成验收尚未完成；不因此把所有 28 个 AC 标为已通过。未提交、未创建 PR、未合并或发布。
+本轮授权的功能实现及 Linux 本地验证已交付。计划保留 active，仅因第 12 节列出的真实网络和跨平台验收尚未完成；不因此把所有 28 个 AC 标为已通过。提交与合并验证见第 14 节。
+
+## 14. main 整合与合并验证
+
+用户明确要求合并到 main。功能提交为 `6cf191bb5e1`，整合提交 `752ca0f957f` 纳入 `a33d7b26526`（Desktop 性能）与 `2561a35be42`（keymap/style）。主工作区另有 BYOA/助手设计文档，本次不纳入功能提交。
+
+冲突按两边行为合并：保留 Profile 串行生命周期、精确 ID、PIN 和独立云端身份；复用 main 的 PowerSync instance 状态机、关闭失败重试、异步云端检查、取消/drain、Vault 缓存和通知清理。认证事务在持有生命周期队列之后进入 cloud transition，避免停用回调等待排在自身后面的认证；提交后取消不撤销已采用会话。旧 prepare/activate 分离接口的性能回归测试迁至原子 open 接口。
+
+已通过定向检查：Desktop 类型检查；4 文件 51 项生命周期/认证测试；IPC 8 文件 52 项和主进程 9 文件 37 项边界测试；Linux Electron E2E 4 项（57.8 秒）；隔离真实 PostgreSQL 4 文件 13 项（22.97 秒）。后续最终本地部署报告与 PR exact-head CI 是合并依据，前一轮 `f34eff34f4a-dirty-*` 报告不覆盖组合代码。此处不声明生产发布或跨平台验收。
