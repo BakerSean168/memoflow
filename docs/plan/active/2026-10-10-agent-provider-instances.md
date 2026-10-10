@@ -564,7 +564,7 @@ Config 不应该为了演示三步而做无意义重复表单；没有必填配�
 
 ## 19. 接管实施与发布前验收记录（2026-10-10）
 
-变更基线：`b53be3f692d1994c6ec125d329417eadb2c10223`；增量代码对应 PR #444 的接管提交（以 Git 历史和 PR 当前 head 为准）。运行环境为 GCP Linux，Node/Nx/pnpm 使用仓库既有版本。以下证据在提交前工作树执行；最终静态检查记录由 `reports/local-deploy-validation/latest.json` 与 `latest.md` 生成。没有生产迁移、生产部署、真实用户凭据探活或付费模型调用。
+变更基线：`b53be3f692d1994c6ec125d329417eadb2c10223`；接管实现提交：`a85c90b88245c5bafa55ba1975dec01ce2d8a4fd`，对应 PR #444。运行环境为 GCP Linux，Node/Nx/pnpm 使用仓库既有版本。集成/包装态证据在实现提交前的工作树执行，产物仅用于本地验收、未作为发布产物；最终 affected 检查在上述实现提交执行，记录由 `reports/local-deploy-validation/latest.json` 与 `latest.md` 生成。没有生产迁移、生产部署、真实用户凭据探活或付费模型调用。
 
 ### A：存储与旧数据
 
@@ -591,7 +591,9 @@ Config 不应该为了演示三步而做无意义重复表单；没有必填配�
 
 ### D：交付门禁
 
-维护测试清单，执行最终 affected lint/typecheck/test、治理和构建验证。结果及阻塞继续记录于本节。专用工作树以外的未提交修改未触碰。PR 保持 Draft；只有第 14 节全部发布前门禁具备相应证据后才可判断 Ready for Review。合并和生产发布不在本次授权范围。
+测试清单已刷新为 1378 文件。实现提交 `a85c90b8824` 的最终 affected 检查：lint **37 项目通过**；typecheck **34 项目 + 32 构建依赖通过**；test **34 项目 + 4 依赖通过**。对应 `reports/local-deploy-validation/latest.json` 的命令计数为 pass=3、fail=0、skipped=1；Docker 因缺少 `.env.production.local` 跳过，总判定 **inconclusive / readyForPr=false**。没有借用共享 staging/生产配置。Nx 提示已有 `http-client:build` flaky 历史，当前命令退出 0；不把此提示当作失败或隐藏。
+
+`memoflow:governance-check` 最终通过：export/public surface、原始事件总线、mitt RPC、调度分层和测试清单检查均通过。专用工作树以外的未提交修改未触碰。PR 保持 Draft；只有第 14 节全部发布前门禁具备相应证据后才可判断 Ready for Review。合并和生产发布不在本次授权范围。
 
 ### 第 14 节矩阵逐项结论
 
@@ -647,3 +649,5 @@ node tools/agent-skills/validate-local-deploy/scripts/run-validation.mjs --works
 初轮 2 项：引用删除保护的竞态违反会话 owner 约束；Knowledge 入口未复用模型目录/能力校验。修复后通过既有 MastraAIRuntime → ModelResolver 验证所选模型，生产装配共享原策略，显式 Agent 缺少验证器时拒绝。限定复审两项关闭，无新增阻断；真实目录可能读取 SecretVault，不应声称所有能力失败都不访问凭据。
 
 初轮 Standards 2 项（最高 P1）、Spec 2 项（最高 P1），其中 SQLite 问题为两轴共享发现；修复复审两轴均无遗留发现。新增行为测试先运行确认失败，再修复至 84/84 通过。后续 DOM ID 小增量经 Standards 限定复审无新增发现，27/27 设置测试和真实包装态 smoke 通过。
+
+本地部署验证规范：[`validate-local-deploy/SKILL.md`](../../../tools/agent-skills/validate-local-deploy/SKILL.md) 明确要求 “mark the report as inconclusive and block PR readiness” （缺少必需 Docker 前置条件时）。因此即使代码检查通过，本轮仍保持 Draft；Windows/凭据/历史环境门禁另外按上表记录。
