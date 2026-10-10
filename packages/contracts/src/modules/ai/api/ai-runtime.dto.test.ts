@@ -13,6 +13,25 @@ import {
 } from './ai-runtime.dto';
 
 describe('AI vNext runtime contracts', () => {
+  it('accepts only explicit supported permission names without widening native configuration', () => {
+    const input = { type: 'message', conversationId: 'c', content: 'Read this', surface: 'web' };
+    for (const permissionMode of ['supervised', 'read-only', 'auto-approve'])
+      expect(
+        AssistantRuntimeClientCommandSchema.safeParse({ ...input, permissionMode }).success,
+      ).toBe(true);
+    for (const permissionMode of ['fullAccess', 'ignore-security', { yolo: true }])
+      expect(
+        AssistantRuntimeClientCommandSchema.safeParse({ ...input, permissionMode }).success,
+      ).toBe(false);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...input,
+        permissionMode: 'auto-approve',
+        writeScopes: ['*'],
+      }).success,
+    ).toBe(false);
+  });
+
   it.each(['goal.create', 'task.create', 'knowledge.capture'] as const)(
     'binds recovery receipts and failure operations to %s',
     (kind) => {

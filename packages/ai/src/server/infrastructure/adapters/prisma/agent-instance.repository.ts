@@ -42,12 +42,17 @@ async function checkedConnection(
   owner: string,
   connectionId: string,
   modelId: string,
+  verifiedVersion?: number,
 ): Promise<void> {
   const connection = await tx.aiProviderConfig.findFirst({
     where: { id: connectionId, identityId: owner, deletedAt: null, isActive: true },
-    select: { defaultModel: true, availableModels: true },
+    select: { defaultModel: true, availableModels: true, version: true },
   });
   if (!connection) throw new AgentRegistryError('NOT_FOUND');
+  if (verifiedVersion !== undefined) {
+    if (connection.version !== verifiedVersion) throw new AgentRegistryError('CONFLICT');
+    return;
+  }
   let available: unknown;
   try {
     available = JSON.parse(connection.availableModels);
@@ -260,6 +265,7 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
     expectedRevision: number,
     binding: AgentInstanceModelBinding,
     remove: boolean,
+    verifiedProviderVersion?: number,
   ): Promise<AgentInstance> {
     const parsed = AgentInstanceSchema.parse(instance);
     const parsedBinding = remove ? binding : AgentInstanceModelBindingSchema.parse(binding);
@@ -269,7 +275,13 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
     try {
       return await this.prisma.$transaction(async (tx) => {
         if (!remove)
-          await checkedConnection(tx, owner, parsedBinding.connectionId, parsedBinding.modelId);
+          await checkedConnection(
+            tx,
+            owner,
+            parsedBinding.connectionId,
+            parsedBinding.modelId,
+            verifiedProviderVersion,
+          );
         const record = await tx.aiAgentInstance.findUnique({
           where: { identityId_instanceId: { identityId: owner, instanceId: parsed.instanceId } },
         });

@@ -34,20 +34,30 @@ export function memoFlowToolCategory(toolName: string): ToolCategory {
 }
 
 /** Native resolution permits yolo/grants and inherited keys; neither can widen this allowlist. */
-export async function applyMemoFlowSessionToolPolicy(session: {
-  resolveToolApproval(toolName: string): PermissionPolicy;
-  state: { set(updates: Record<string, unknown>): Promise<void> };
-}): Promise<void> {
+export async function applyMemoFlowSessionToolPolicy(
+  session: {
+    resolveToolApproval(toolName: string): PermissionPolicy;
+    state: { set(updates: Record<string, unknown>): Promise<void> };
+  },
+  mode: 'supervised' | 'read-only' = 'supervised',
+): Promise<void> {
+  if (mode !== 'supervised' && mode !== 'read-only')
+    throw new Error('Unsupported Mastra permission mode');
+  const permissionFor = (name: string): PermissionPolicy => {
+    const rule = memoFlowToolPolicy(name);
+    if (!rule || (mode === 'read-only' && rule.category !== 'read')) return 'deny';
+    return rule.permission;
+  };
   await session.state.set({
     yolo: false,
     permissionRules: {
       categories: { other: 'deny' },
       tools: Object.fromEntries(
-        Object.entries(MEMOFLOW_PRODUCT_TOOL_POLICY).map(([name, rule]) => [name, rule.permission]),
+        Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).map((name) => [name, permissionFor(name)]),
       ),
     },
   });
-  session.resolveToolApproval = (toolName) => memoFlowToolPolicy(toolName)?.permission ?? 'deny';
+  session.resolveToolApproval = permissionFor;
 }
 
 export function assertMemoFlowToolClassification(tools: Record<string, { id: string }>): void {

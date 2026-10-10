@@ -1,4 +1,22 @@
 export default {
+  composer: {
+    "agent": "Agent",
+    "model": "Model",
+    "permissions": "Permissions",
+    "chooseAgent": "Choose Agent",
+    "chooseModel": "Choose model",
+    "configure": "Configure Agent",
+    "notConfigured": "Not configured",
+    "disabled": "Disabled",
+    "supervised": "Supervised",
+    "supervisedHint": "Ask before actions that require permission. Existing owner scopes still apply.",
+    "read-only": "Read only",
+    "readOnlyHint": "This chat may read MemoFlow context but cannot execute data-changing tools or start write workflows.",
+    "auto-approve": "Auto-approve",
+    "autoApproveHint": "Approve this native Agent's permission requests for this turn. This does not grant new MemoFlow scopes or bypass its sandbox.",
+    "unsupportedPermission": "This Agent does not support that permission mode.",
+    "readOnlyWorkflow": "Read-only chat will discuss your request without starting a write workflow.",
+  },
   agentSwitchNewConversation:
     'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',
   local: {

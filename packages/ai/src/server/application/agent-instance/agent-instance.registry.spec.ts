@@ -109,6 +109,16 @@ describe('Agent registry with real SQLite persistence', () => {
       modelId: 'model-1',
     });
     expect(saved).toMatchObject({ instanceId: 'mastra', revision: 1 });
+    await expect(
+      registry.assertModelBinding('owner-a', 'mastra', id, 'model-2'),
+    ).resolves.toBeUndefined();
+    await expect(
+      registry.assertModelBinding('owner-a', 'mastra', 'never-bound-connection', 'model-2'),
+    ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
+    await expect(
+      registry.assertModelBinding('owner-b', 'mastra', id, 'model-2'),
+    ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
+
     const reloaded = new AgentInstanceRegistry(new AgentInstancePowerSyncRepository(db), 'desktop');
     expect((await reloaded.list('owner-a')).bindings).toEqual([
       { instanceId: 'mastra', connectionId: id, modelId: 'model-1' },
@@ -188,9 +198,9 @@ describe('Agent registry with real SQLite persistence', () => {
     await expect(
       registry.assertTurnSelection({ ...valid, providerId: 'provider-other' }),
     ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
-    await expect(
-      registry.assertTurnSelection({ ...valid, modelId: 'model-other' }),
-    ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
+    await expect(registry.assertTurnSelection({ ...valid, modelId: '' })).rejects.toMatchObject({
+      code: 'AI_CONFIGURATION_REQUIRED',
+    });
     await expect(
       registry.assertTurnSelection({ ...valid, agentInstanceId: 'mastra' }),
     ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
@@ -246,6 +256,53 @@ describe('Agent registry with real SQLite persistence', () => {
     expect(await db.getAll('SELECT instance_id FROM ai_agent_conversation_bindings')).toEqual([
       { instance_id: 'mastra-anyrouter' },
     ]);
+  });
+
+  it('changes an instance default using trusted live validation without changing shared Provider state', async () => {
+    const { db } = setup('desktop');
+    await db.execute(
+      'INSERT INTO ai_provider_configs (id, identity_id, default_model, available_models, is_active, version) VALUES (?, ?, ?, ?, ?, ?)',
+      ['live-service', 'owner', 'model-1', '[]', 1, 1],
+    );
+    const validated = new AgentInstanceRegistry(
+      new AgentInstancePowerSyncRepository(db),
+      'desktop',
+      async (_owner, _providerId, modelId) => {
+        if (modelId !== 'model-2') throw new Error('Model is not in the live catalogue');
+        return 1;
+      },
+    );
+    await validated.execute('owner', {
+      action: 'bind',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      connectionId: 'live-service',
+      modelId: 'model-2',
+    });
+    expect((await validated.list('owner')).bindings).toContainEqual({
+      instanceId: 'mastra',
+      connectionId: 'live-service',
+      modelId: 'model-2',
+    });
+    expect(
+      await db.getOptional('SELECT default_model, version FROM ai_provider_configs WHERE id = ?', [
+        'live-service',
+      ]),
+    ).toEqual({ default_model: 'model-1', version: 1 });
+    await db.execute('UPDATE ai_provider_configs SET version = 2 WHERE id = ?', ['live-service']);
+    await expect(
+      validated.execute('owner', {
+        action: 'bind',
+        instanceId: 'mastra',
+        expectedRevision: 1,
+        connectionId: 'live-service',
+        modelId: 'model-2',
+      }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(
+      (await validated.list('owner')).instances.find((entry) => entry.instanceId === 'mastra')
+        ?.revision,
+    ).toBe(1);
   });
 
   it('projects legacy default-slug connection as canonical default rather than duplicating it', async () => {

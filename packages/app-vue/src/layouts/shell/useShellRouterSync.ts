@@ -49,11 +49,10 @@ export async function returnFromSettingsScene(
       await router.push(store.activeTab.route).catch(() => {});
       return;
     }
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back();
-      return;
-    }
-    await router.push('/').catch(() => {});
+    // A deep-linked or reloaded Settings page has no trustworthy SPA origin.
+    // Browser history may point at another document/account, causing a reload
+    // and hiding stale mounted-chat state. Return within this application.
+    await router.replace('/').catch(() => {});
     return;
   }
 

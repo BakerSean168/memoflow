@@ -2,6 +2,8 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 export function executionContext(requestContext: {
   getRaw(key: string): unknown;
 }): ExecutionContext {
+  if (requestContext.getRaw('permissionMode') === 'read-only')
+    throw new Error('Read-only Assistant cannot execute MemoFlow data mutations');
   const raw = requestContext.getRaw('executionContext');
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new Error('MemoFlow product command requires canonical executionContext');

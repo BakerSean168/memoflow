@@ -7,7 +7,7 @@
  * does not pay for every module up front.
  */
 
-import type { App } from 'vue';
+import { ref, type App } from 'vue';
 import type { ExecuteNotificationActionReq } from '@memoflow/contracts/notification';
 import { createCloudAuthHttpClient, createExternalAgentHttpClient } from '@memoflow/cloud-auth';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
@@ -25,6 +25,7 @@ import {
   DATA_PORTABILITY_SERVICE_KEY,
   AI_CLIENT_KEY,
   AI_AGENT_REGISTRY_KEY,
+  AI_CONFIGURATION_REVISION_KEY,
   AI_ASSISTANT_RUNTIME_KEY,
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
@@ -142,6 +143,7 @@ export function installAppServices(app: App): void {
   app.provide(DATA_PORTABILITY_SERVICE_KEY, dataPortabilityService);
   app.provide(AI_CLIENT_KEY, aiClient);
   app.provide(AI_AGENT_REGISTRY_KEY, agentRegistryClient);
+  app.provide(AI_CONFIGURATION_REVISION_KEY, ref(0));
   app.provide(AI_ASSISTANT_RUNTIME_KEY, aiAssistantRuntime);
   app.provide(AI_RUNTIME_USAGE_KEY, aiRuntimeUsage);
   app.provide(AI_WORKFLOW_RUNTIME_KEY, aiWorkflowRuntime);

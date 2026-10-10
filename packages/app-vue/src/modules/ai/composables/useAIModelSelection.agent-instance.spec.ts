@@ -5,6 +5,7 @@ import { createI18n } from 'vue-i18n';
 import {
   AgentRegistrySnapshotSchema,
   type AgentConversationSelection,
+  type AIModelInfo,
 } from '@memoflow/contracts/ai';
 import { useAIModelSelection } from './useAIModelSelection';
 
@@ -47,6 +48,7 @@ function mounted(input: {
       ],
     }),
   );
+  const catalogs = ref<Record<string, AIModelInfo[]>>({});
   let selection!: ReturnType<typeof useAIModelSelection>;
   const Root = defineComponent({
     setup() {
@@ -54,7 +56,9 @@ function mounted(input: {
         providers,
         chatConversationId,
         readConversationSelection: input.readConversationSelection,
-        ...(input.withRegistry === false ? {} : { agentRegistrySnapshot: registry }),
+        ...(input.withRegistry === false
+          ? {}
+          : { agentRegistrySnapshot: registry, modelCatalogs: catalogs }),
       });
       return () => h('div');
     },
@@ -70,10 +74,49 @@ function mounted(input: {
       ],
     },
   });
-  return { wrapper, selection, registry, chatConversationId, providers };
+  return { wrapper, selection, registry, catalogs, chatConversationId, providers };
 }
 
 describe('model selection bound to explicit Mastra Agent instances', () => {
+  it('selects an empty Agent independently and never silently switches to a configured one', async () => {
+    const { wrapper, selection } = mounted({
+      instances: [instance('mastra'), instance('work')],
+      bindings: [{ instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' }],
+    });
+    expect(selection.selectAgent('work')).toBe('selected');
+    expect(selection.selectedAgentId.value).toBe('work');
+    expect(selection.selectedModelKey.value).toBe('');
+    selection.syncSelectedModel('agent:mastra::provider-1::model-default');
+    expect(selection.selectedModelKey.value).toBe('');
+    expect(selection.canSendMessage.value).toBe(false);
+    wrapper.unmount();
+  });
+  it('offers verified inventory models only from the selected Agent connection', async () => {
+    const { wrapper, selection, catalogs } = mounted({});
+    catalogs.value = {
+      'provider-1': [
+        { id: 'model-default', name: 'Default' },
+        { id: 'model-custom', name: 'Custom' },
+      ],
+    };
+    await nextTick();
+    selection.selectAgent('mastra-anyrouter');
+    expect(selection.selectedAgentModels.value.map((model) => model.modelId)).toEqual([
+      'model-custom',
+      'model-default',
+    ]);
+    expect(
+      selection.selectedAgentModels.value.every(
+        (model) => model.agentInstanceId === 'mastra-anyrouter',
+      ),
+    ).toBe(true);
+    expect(selection.selectModel('agent:mastra-anyrouter::provider-1::model-default')).toBe(
+      'selected',
+    );
+    expect(selection.selectedAgentId.value).toBe('mastra-anyrouter');
+    wrapper.unmount();
+  });
+
   it('groups only allowed models by Agent identity and never exposes unbound provider models', async () => {
     const { wrapper, selection, registry } = mounted({});
     expect(selection.allModelOptions.value.map((item) => item.key)).toEqual([
