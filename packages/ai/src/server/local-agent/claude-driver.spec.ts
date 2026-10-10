@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
 import { nativeIdentity } from './native-identity';
@@ -147,6 +148,81 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
   expect(initializationCalls).toEqual([undefined, 'native']);
   expect(driver.respond('stale', { type: 'permission', decision: 'approve_once' })).toBe(false);
 });
+it('gates MemoFlow MCP tool calls before SDK allow rules and requires approval for writes', async () => {
+  const requests: string[] = [];
+  const decisions: string[] = [];
+  const factory: ClaudeQueryFactory = ({ prompt, options }) => ({
+    async initializationResult() {
+      return {
+        account: { email: 'test@example.test', tokenSource: 'oauth' },
+        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+      };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {
+      for await (const _message of prompt) {
+        yield { type: 'system', session_id: 'native' };
+        // A bare wildcard grants every MCP tool without consulting canUseTool.
+        expect(options.allowedTools).toEqual([]);
+        const hook = options.hooks?.PreToolUse?.[0]?.hooks[0];
+        expect(hook).toBeDefined();
+        const check = (name: string) =>
+          hook!(
+            {
+              hook_event_name: 'PreToolUse',
+              tool_name: name,
+              tool_input: { name: 'test' },
+            } as unknown as HookInput,
+            'tool',
+            { signal: new AbortController().signal },
+          );
+        expect(await check('mcp__memoflow__goal_search')).toMatchObject({
+          hookSpecificOutput: { permissionDecision: 'allow' },
+        });
+        expect(await check('mcp__memoflow__task_plan_get')).toMatchObject({
+          hookSpecificOutput: { permissionDecision: 'allow' },
+        });
+        expect(await check('mcp__memoflow__unknown_new_tool')).toMatchObject({
+          hookSpecificOutput: { permissionDecision: 'deny' },
+        });
+        expect(await check('Bash')).toEqual({});
+        const allowed = await check('mcp__memoflow__goal_create');
+        decisions.push(
+          (allowed.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ?? '',
+        );
+        const denied = await check('mcp__memoflow__goal_update');
+        decisions.push(
+          (denied.hookSpecificOutput as { permissionDecision?: string })?.permissionDecision ?? '',
+        );
+        yield { type: 'result', subtype: 'success', session_id: 'native' };
+        break;
+      }
+    },
+  });
+  const driver = new ClaudeDriver(connection, '/tmp', factory);
+  for await (const event of driver.run({
+    modelId: 'sonnet',
+    content: 'Hello',
+    mcp: { url: 'http://127.0.0.1/mcp', token: 'token' },
+  })) {
+    if (event.type === 'request') {
+      expect(event.request.type).toBe('permission');
+      requests.push(event.request.title);
+      expect(
+        driver.respond(event.request.requestId, {
+          type: 'permission',
+          decision: requests.length === 1 ? 'approve_once' : 'decline',
+        }),
+      ).toBe(true);
+    }
+  }
+  expect(requests).toHaveLength(2);
+  expect(requests[0]).toContain('mcp__memoflow__goal_create');
+  expect(requests[1]).toContain('mcp__memoflow__goal_update');
+  expect(decisions).toEqual(['allow', 'deny']);
+});
+
 it('retires a permission card when the native request signal expires', async () => {
   let expiredId = '';
   const signal = new AbortController();

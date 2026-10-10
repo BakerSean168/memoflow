@@ -2,7 +2,7 @@
 tags: [analysis, ai, desktop, byoa, acceptance]
 description: ADR-120/121 的实现证据、支持矩阵及尚未通过的交付门禁。
 created: 2026-10-09T00:00:00Z
-updated: 2026-10-09T00:00:00Z
+updated: 2026-10-10T00:00:00Z
 ---
 
 # 本地 BYOA 验收证据
@@ -55,6 +55,8 @@ macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得�
 - 本地 prod-like API/Web 镜像 revision、宿主端口与监听 owner 均匹配上述 SHA；API/Web/PowerSync 均 healthy，不使用旧容器冒充本次部署。
 - Windows 现有 installed-update workflow 增加相同 packaged runtime smoke；三 driver 的缺 CLI 隔离、配置重启保留/删除都纳入安装包验收。`25159e214617738a6fd9318b3e8b268a2f7c40bd` 的 CI run `37998253107` 全部通过。平台 run `37998353514` 的 Linux AppImage N→N+1 通过；Windows 实际启动在 1024px 响应式断点，原有 smoke 写死 4px 导致失败，已改为根据 viewport 验证已存在的 3px/4px 设计值。Windows 新候选、双 lane release evidence 和 production-selected watcher rollout 仍待完成。
 - Claude 原生默认 `anyrouter/claude-opus-5-5` 返回 400，通道明确提示模型供应不可用并建议 `gpt-6-astra-cc-format[1m]`。该兼容模型已在 Claude Code 执行器中完成首轮真实 Goal 查询；恢复同一 native session 后再次调用 Goal 工具，但第二轮触及 300 秒上限。原生日志无该轮 API 错误，第二轮工具调用发生在约第 261 秒。随后采用原生支持的进程级低 effort 重试，再次出现 HTTP 429。约 45 分钟冷却后最后一次有限重试仍出现 10 条原生 HTTP 429 记录及明确 cooling down 终态。没有改变用户配置或测试超时，没有将部分成功记为完整两轮通过。
+- 2026-10-10 GCP Dev 追加隔离测试：既有 `claude-4router` 命令调用 `claude-opus-5` 单轮成功；该命令自身的 `--resume` 连续 `ALPHA` → `BETA` 成功、native session 不变。同配置下 `ClaudeDriver` / Agent SDK **不连接 MCP**的两轮真实对话也全部完成。但是 Desktop 原验收经现有 4Router 通道执行时，第一轮真实 `goal_search` 完成；第二轮同 native session 再次调用 `goal_search`，MCP tool_result 已写入 Claude 本地 session transcript，之后约 300 秒没有 assistant 终态，最终 `assistant.run.cancelled`。证明 `429` 不是唯一问题；疑点已缩小到 SDK 恢复后 MCP 工具结果至上游继续生成的环节，未确认根因。原有两轮硬门禁维持不变，未调高时限或以无 MCP 的恢复测试替代。
+- 同次检查发现 Agent SDK 报 `CLAUDE_SDK_CAN_USE_TOOL_SHADOWED`：原 `allowedTools: ['mcp__memoflow__*']` 直接跳过 `canUseTool` 回调。已移除通配预授权，增加 PreToolUse 白名单分类：只读自动允许、写操作逐次用户审批、未知 MemoFlow 工具拒绝；底层 server Scope/事务校验照常保留。新增覆盖只读、写入允许与拒绝、未知工具的单元测试，Claude adapter 5 项通过，`ai:typecheck` 和 `ai:lint` 通过（lint 仅既有其他文件 warning）。待新提交 exact-head CI 和真实原生完整两轮通过后方可合并。
 - [PR #439](https://github.com/BakerSean168/memoflow/pull/439) 已创建并关联当前 T3 线程。初始提交 `e19c3f3958035247ed444758de2b4b47d094e5d5` 的 exact-head CI run `37995994699` 已全部通过；初始 Windows/Linux run `37996045674` 因修正已知 smoke 问题而取消，不算通过。后续候选需重新取得精确 SHA 证据。release PR #436 未合并，prod 未变更。
 
 ## 26 项要求与当前证据
@@ -83,7 +85,7 @@ macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得�
 | 18  | owner/outbox/receipt 同事务；故障回滚及重开数据库查原回执                                                 | delivered                           |
 | 19  | owner expectedVersion、审批输入摘要绑定与失效拒绝                                                         | delivered                           |
 | 20  | Task Prompt 显式选择、Fixed 一次贡献及 outbox/receipt 回滚                                                | delivered                           |
-| 21  | Claude SDK fixtures、两阶段身份校验通过；真实通道持续 429                                                 | partial：待可用上游的真实两轮       |
+| 21  | SDK fixture/身份、无 MCP 两轮真实恢复通过；4Router MCP 恢复后第二轮工具结果无终态，曾有 AnyRouter 429     | partial：待真实 MCP 两轮            |
 | 22  | Pi RPC fixtures + 原生两轮工具查询/恢复、临时 extension 清理                                              | delivered                           |
 | 23  | Vault owner 查询/引用；现有编辑审核入口、绑定/路径/幂等测试                                               | delivered                           |
 | 24  | run/model 来源快照、未知 token/费用、显式切换新运行时                                                     | delivered                           |
