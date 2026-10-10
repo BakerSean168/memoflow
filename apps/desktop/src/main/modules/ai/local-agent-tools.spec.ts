@@ -130,25 +130,29 @@ for (const driver of ['codex', 'claude', 'pi'] as const)
         const connection = await runtime.saveConnection(owner, {
           driver,
           name: `Real ${driver} acceptance`,
-          executablePath: driver,
+          executablePath:
+            driver === 'claude' ? (process.env.MEMOFLOW_CLAUDE_EXECUTABLE ?? driver) : driver,
           enabled: true,
           writeScopes: [],
         });
         const status = await runtime.probeConnection(owner, connection.id);
         expect(status.status).toBe('ready');
-        if (status.status !== 'ready') throw new Error('Installed Codex unavailable');
-        const model =
-          status.models.find(
-            (m) =>
-              m.id ===
-              (process.env[`MEMOFLOW_${driver.toUpperCase()}_MODEL`] ??
-                (driver === 'codex'
-                  ? 'gpt-6-astra'
-                  : driver === 'claude'
-                    ? 'sonnet'
-                    : 'openai-codex/gpt-6-astra')),
-          ) ?? status.models[0];
-        if (!model) throw new Error('No native model');
+        if (status.status !== 'ready') throw new Error(`Installed ${driver} unavailable`);
+        const requestedModel =
+          process.env[`MEMOFLOW_${driver.toUpperCase()}_MODEL`] ??
+          (driver === 'codex'
+            ? 'gpt-6-astra'
+            : driver === 'claude'
+              ? 'sonnet'
+              : 'openai-codex/gpt-6-astra');
+        // Never silently test the first catalog entry when an explicit Ollama
+        // model (or any other native model) is missing. That used to allow
+        // a supposedly free acceptance run to invoke an unrelated channel.
+        const model = status.models.find((candidate) => candidate.id === requestedModel);
+        if (!model)
+          throw new Error(
+            `Requested ${driver} model ${requestedModel} is unavailable in the native catalog`,
+          );
         const conversation = await runtime.createConversation(owner, {
           connectionId: connection.id,
           modelId: model.id,

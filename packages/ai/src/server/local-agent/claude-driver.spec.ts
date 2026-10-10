@@ -79,9 +79,16 @@ it('resumes the SDK session, injects MCP, answers native permission and streams 
       initializationCalls.push(options.resume);
       if (options.resume)
         expect(options.mcpServers).toMatchObject({
-          memoflow: { url: 'http://127.0.0.1/mcp', headers: { Authorization: 'Bearer token' } },
+          memoflow: {
+            url: 'http://127.0.0.1/mcp',
+            headers: { Authorization: '${MEMOFLOW_MCP_AUTHORIZATION}' },
+          },
         });
       else expect(options.mcpServers).toEqual({});
+      if (options.resume) {
+        expect(options.env?.MEMOFLOW_MCP_AUTHORIZATION).toBe('Bearer token');
+        expect(JSON.stringify(options.mcpServers)).not.toContain('Bearer token');
+      } else expect(options.env?.MEMOFLOW_MCP_AUTHORIZATION).toBeUndefined();
       return {
         account: { email: 'test@example.test', tokenSource: 'oauth' },
         models: [{ value: 'sonnet', displayName: 'Sonnet' }],

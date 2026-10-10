@@ -135,6 +135,10 @@ export class ClaudeDriver {
           ...(this.connection.homePath ? { CLAUDE_CONFIG_DIR: this.connection.homePath } : {}),
           ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
           CLAUDE_CODE_AUTO_CONNECT_IDE: '0',
+          // Claude Agent SDK serializes MCP server declarations into a child
+          // process argument. Resolve the bearer at execution time instead of
+          // putting the session credential into that process argument.
+          ...(input?.mcp ? { MEMOFLOW_MCP_AUTHORIZATION: `Bearer ${input.mcp.token}` } : {}),
         },
         strictMcpConfig: true,
         mcpServers: input?.mcp
@@ -142,7 +146,7 @@ export class ClaudeDriver {
               memoflow: {
                 type: 'http',
                 url: input.mcp.url,
-                headers: { Authorization: `Bearer ${input.mcp.token}` },
+                headers: { Authorization: '${MEMOFLOW_MCP_AUTHORIZATION}' },
               },
             }
           : {},
