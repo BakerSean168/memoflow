@@ -153,7 +153,11 @@ for (const driver of ['codex', 'claude', 'pi', 'dsh'] as const)
           driver,
           name: `Real ${driver} acceptance`,
           executablePath:
-            driver === 'claude' ? (process.env.MEMOFLOW_CLAUDE_EXECUTABLE ?? driver) : driver,
+            driver === 'claude'
+              ? (process.env.MEMOFLOW_CLAUDE_EXECUTABLE ?? driver)
+              : driver === 'dsh'
+                ? (process.env.MEMOFLOW_DSH_EXECUTABLE ?? driver)
+                : driver,
           enabled: true,
           writeScopes: [],
           ...(dshHome ? { homePath: dshHome } : {}),

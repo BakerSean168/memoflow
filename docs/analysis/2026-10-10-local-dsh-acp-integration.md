@@ -14,13 +14,12 @@ DSH is a named fourth Agent option in desktop Local Agent Settings. The homePath
 
 ### Boundaries and caveats
 
-- The generic ACP protocol framing is reusable. DSH's launch flags and model catalog mapping remain driver-specific; additional ACP Agent discovery/installers and capability registries are **not** implemented here.
-- Native MCP write tools still require the existing MemoFlow write-scopes and transactional authorization, regardless of what the Agent requests. Non-MemoFlow tool permission is an explicit one-time user decision, not a durable grant.
-- ACP native list/resume are supported by DSH's runtime, but UI load/delete management is **not** advertised. No cloud export of native session checkpoints or DSH credentials.
-- The live GCP DSH profile routes through the operator's model gateway. It was **not** used for inference here. All current DSH protocol tests use an isolated fake Agent and an authenticated real MemoFlow MCP Goal backing store. No AnyRouter/4Router/commercial inference was made.
-- A real Ollama Free test requires a **separately configured DSH_HOME** that contains only an Ollama Cloud route, and `MEMOFLOW_DSH_MODEL` must exactly match `JSON.stringify(['ollama', 'gpt-oss:20b'])` or another Ollama starter model present in that ACP catalog. The opt-in real-CLI test explicitly refuses to run without an absolute `MEMOFLOW_DSH_HOME` and an `ollama` route; the normal test run always skips live CLIs.
-- ACP initialization without prompting is not evidence of a working authenticated model route. Ollama free model access and usage limits are account specific. No auto probing or periodic inference calls have been added.
-- The system still does not prove real DSH/Claude two-turn model inference on Ollama; this is a release gate and not a claim of full acceptance.
+- The generic ACP protocol framing is reusable. DSH's launch flags and model catalog mapping remain driver-specific; additional ACP Agent installers or capability registries are not implemented.
+- Native MCP write tools still require the existing MemoFlow write-scopes and transactional authorization. Non-MemoFlow tool permission remains an explicit one-time user decision.
+- DSH ACP native list/resume are supported, but UI load/delete of DSH checkpoints is not advertised. There is no cloud export of native sessions or credentials.
+- The existing GCP DSH/T3 Code profiles use the operator's commercial model gateway. **Neither was used for this live test.** Protocol fixtures additionally exercise a fake ACP child and a real authenticated MemoFlow Goal backing store.
+- **2026-10-10 GCP Dev live acceptance:** DSH 0.2.0-rc.2 was launched from its official CLI with a fresh temporary DSH_HOME, no inherited commercial provider credentials, default provider/model forced to `ollama` / `gpt-oss:20b`, and the API endpoint fixed to `https://ollama.com/v1`. A 0600 Ollama key file was used without passing the key in any CLI argument or repository file. ACP produced `mcp__memoflow__goal_search` activities in **both turns**, two `assistant.run.completed` events, and retained the same native session ID. The real Desktop test file **passed** (1 file, 32.17 s), and the launcher exited 0 with a no-commercial-fallback marker. The temporary profile was deleted after the run.
+- This is a successful real DSH inference acceptance for **one Linux/Ollama Cloud model route**, not proof of arbitrary third-party ACP agents, other provider stability, a Windows DSH inference session, or production deployment. Free account quotas are controlled by Ollama; no periodic inference/probing was added.
 
 ### Verification commands (GCP Dev, DSH worktree)
 
@@ -32,7 +31,7 @@ pnpm exec nx run app-vue:typecheck --skip-nx-cache
 pnpm exec nx run desktop:typecheck --skip-nx-cache
 ```
 
-The Desktop test includes a **real stdio ACP child process -> real MemoFlow MCP localhost endpoint -> real owned Goal database query -> persisted two-turn native session** test with zero LLM calls. Real DSH CLI 2-turn is opt-in with `MEMOFLOW_REAL_DSH=1`, `MEMOFLOW_DSH_HOME=/absolute/isolated/home`, `MEMOFLOW_DSH_MODEL='["ollama","gpt-oss:20b"]'`, and a locally provisioned Ollama-only DSH profile. Do not run it against the existing operator T3 DSH commercial model-gateway wrapper or default DSH_HOME.
+The Desktop test includes a **real stdio ACP child process -> real MemoFlow MCP localhost endpoint -> real owned Goal database query -> persisted two-turn native session** fixture with zero LLM calls. The verified real DSH test is opt-in through `node scripts/acceptance/ollama-dsh-mcp.mjs` (GCP Dev) after placing a real Ollama Cloud key in `~/.config/memoflow/ollama-cloud.key` with mode 0600, or setting `MEMOFLOW_OLLAMA_KEY_FILE` to an absolute path to such a file. The launcher automatically builds an Ollama-only ephemeral DSH_HOME and requires an official DSH binary; `--check` reads no key and makes no model requests. For manual advanced tests, `MEMOFLOW_REAL_DSH=1`, `MEMOFLOW_DSH_HOME=/absolute/isolated/home`, and `MEMOFLOW_DSH_MODEL='["ollama","gpt-oss:20b"]'` are required. Never run the acceptance against the operator's default commercial DSH/T3 profile.
 
 ### Source references
 
