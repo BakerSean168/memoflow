@@ -33,4 +33,8 @@ updated: 2026-10-10T00:00:00Z
 - desktop:package 通过，ASAR 校验 80 个运行时包。使用仓库现有 run-linux-packaged-smoke-with-keyring.sh 完成真实 Electron smoke：1/1 通过，30.5 秒；Codex/Claude/Pi/DSH 缺 CLI 的保存、探测、完整进程重启保留和移除均通过。
 - 首次仅用 Xvfb 运行时，Linux 安全存储不可用导致 Profile 初始化退出；Playwright 的清理错误掩盖了原错误。最小启动复现及日志定位后，按现有隔离 Keyring 验收车道重跑成功，产品安全存储约束保持有效。
 
+## PR CI 补充验证
+
+PR #442 首轮完整 CI 发现四张聊天壳层基线仍使用旧输入框，以及一条共享设置组件测试仍要求 Providers 使用旧卡片布局。人工检查截图差异后，只更新四张聊天基线；调整旧布局断言，保留状态、弹窗与 owner 边界检查，Provider 行为由 AISettings.spec.ts 覆盖。视觉矩阵连续两轮比较通过（各 57/57），设置组件测试 10/10 通过，零像素差异阈值保持不变。
+
 本轮未取得 Windows 新 UI 实机证据；既有 v0.17.0 BYOA 平台验收不冒充本轮 UI 的验收。

@@ -132,15 +132,14 @@ describe('settings presentation primitives', () => {
     expect(dialogShell).toContain(':class="bodyClass"');
   });
 
-  it('converges AI and Knowledge owner sections on shared settings presentation grammar', () => {
+  it('keeps shared status and dialog semantics in Providers and Knowledge owner surfaces', () => {
     const ai = readFileSync(resolve(settingsRoot, 'AISettings.vue'), 'utf8');
     const knowledge = readFileSync(
       resolve(settingsRoot, 'KnowledgeRepositorySettings.vue'),
       'utf8',
     );
 
-    expect(ai).toContain('<SettingsSection');
-    expect(ai).toContain('<SettingsObjectCard');
+    // Providers uses the dedicated list/detail layout; owner behavior is covered by AISettings.spec.ts.
     expect(ai).toContain('<SettingsStatusBlock');
     expect(ai).toContain('<SettingsDialogShell');
     expect(ai).toContain('useAI()');
