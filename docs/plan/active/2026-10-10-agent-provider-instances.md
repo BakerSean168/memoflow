@@ -636,6 +636,13 @@ node tools/agent-skills/validate-local-deploy/scripts/run-validation.mjs --works
 
 独立 Nx 构建/E2E/验证任务串行运行，避免不同进程清理共享 dist 造成伪失败。本机验证 helper 如缺少专用 prod-like env，Docker 项为 inconclusive；不得借用共享 staging/生产配置来伪造通过。
 
+### E：prod-like Web Nginx 权限修复与浏览器检查（2026-10-10）
+
+- **故障发现：** GCP Dev prod-like（Web `20200`、API `20201`、PowerSync `20202`）迁移完成，API/PowerSync healthy，但 Web 健康检查持续 403。Nginx 日志：`open() "/usr/share/nginx/html/index.html" failed (13: Permission denied)`。构建源产物中 `index.html` 为 0600、`assets/` 目录为 2700；Web 镜像原有 `COPY dist/apps/web` 保留了不可由非 root Nginx 工作进程读取/遍历的权限。
+- **修复：** `Dockerfile.web` 在静态资源 COPY 后新增 `RUN chmod -R a+rX /usr/share/nginx/html`。只替换 prod-like Web 容器，未重启 API/PostgreSQL/PowerSync，未触碰 canonical Staging；修复后静态首页权限 0644、资产目录可遍历，Web/API/PowerSync 均 **healthy**，Web GET / 和 API GET /healthz 均为 **200**。
+- **真实浏览器：** GCP Chromium/Playwright 分别以 1440×900 和 390×844 打开 prod-like Web。两种宽度均 **HTTP 200**、Vue root 已挂载、页面标题“知行 MemoFlow”、正常渲染登录表单、6 项初始脚本/样式资源、`pageerror`/失败请求均为 0。
+- **限制：** 本轮浏览器仅验证匿名登录页、静态资源与应用启动；不声称已完成注册用户的 Providers/Agent Instance 全业务操作或真实厂商推理。需要在发布后另行验证 canonical Staging exact revision、认证交互以及桌面发行版；不能用 prod-like 镜像标签作为 canonical Staging 版本证据。
+
 ## 20. 接管增量独立代码审查
 
 固定点为接管基线 `b53be3f692d1994c6ec125d329417eadb2c10223`。两名只读代理分别对照工程规范及本方案审查未提交增量，并对修复复审；代理未运行构建，测试证据由主代理执行。
