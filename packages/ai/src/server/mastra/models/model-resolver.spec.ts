@@ -121,6 +121,83 @@ describe('MastraModelResolver', () => {
     );
   });
 
+  it('checks an exact Agent instance model binding before touching credentials or provider resolution', async () => {
+    const provider = createAIProviderConfigServerDTO({
+      id: 'provider-selected' as never,
+      identityId: 'identity-1' as never,
+      defaultModel: 'default-model',
+    });
+    const findByIdForIdentity = vi.fn(async () => provider);
+    const secretVault = createAIProviderSecretVaultStub();
+    const readSecret = vi.spyOn(secretVault, 'resolve');
+    const assertModelBinding = vi.fn(async () => {
+      throw new Error('not associated with this Agent');
+    });
+    const resolver = new MastraModelResolver(
+      createAIProviderConfigRepositoryStub({ findByIdForIdentity }),
+      secretVault,
+      inertFetch,
+      { modelCatalog: catalogPort(['allowed-model']), agentRegistry: { assertModelBinding } },
+    );
+    await expect(
+      resolver.resolve({
+        identityId: 'identity-1',
+        agentInstanceId: 'mastra-anyrouter',
+        providerId: 'provider-selected',
+        modelId: 'allowed-model',
+      }),
+    ).rejects.toMatchObject({ category: 'configuration_required' });
+    expect(assertModelBinding).toHaveBeenCalledWith(
+      'identity-1',
+      'mastra-anyrouter',
+      'provider-selected',
+      'allowed-model',
+    );
+    expect(findByIdForIdentity).not.toHaveBeenCalled();
+    expect(readSecret).not.toHaveBeenCalled();
+    expect(inertFetch).not.toHaveBeenCalled();
+  });
+
+  it('resolves a verified instance-bound model without changing the provider secret path', async () => {
+    const provider = createAIProviderConfigServerDTO({
+      id: 'provider-selected' as never,
+      identityId: 'identity-1' as never,
+      defaultModel: 'default-model',
+    });
+    const assertModelBinding = vi.fn(async () => undefined);
+    const resolver = new MastraModelResolver(
+      createAIProviderConfigRepositoryStub({
+        findByIdForIdentity: async () => provider,
+      }),
+      createAIProviderSecretVaultStub(),
+      inertFetch,
+      { modelCatalog: catalogPort(['allowed-model']), agentRegistry: { assertModelBinding } },
+    );
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      agentInstanceId: 'mastra-anyrouter',
+      providerId: 'provider-selected',
+      modelId: 'allowed-model',
+    });
+    expect(resolved).toMatchObject({
+      providerId: 'provider-selected',
+      modelId: 'allowed-model',
+    });
+    expect(assertModelBinding).toHaveBeenCalledOnce();
+  });
+
+  it('refuses explicit Agent identities when the authoritative registry is unavailable', async () => {
+    const { resolver } = createResolver({});
+    await expect(
+      resolver.resolve({
+        identityId: 'identity-1',
+        agentInstanceId: 'mastra-anyrouter',
+        providerId: 'provider-selected',
+        modelId: 'allowed-model',
+      }),
+    ).rejects.toMatchObject({ category: 'configuration_required' });
+  });
+
   it('fails closed when the provider credential is revoked during a resolved run', async () => {
     const provider = createAIProviderConfigServerDTO({ defaultModel: 'model-override' });
     const secretVault = createAIProviderSecretVaultStub();

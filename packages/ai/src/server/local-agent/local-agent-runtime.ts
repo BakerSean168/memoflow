@@ -5,6 +5,8 @@ import type {
   AssistantRuntimeMessageView,
   LocalAgentConnection,
   LocalAgentConnectionInput,
+  LocalAgentDriver,
+  LocalAgentStatus,
   LocalAgentConversationCreate,
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
@@ -129,22 +131,77 @@ export class LocalAgentRuntime {
       if (run.identityId === identityId && run.connectionId === id) this.cancel(run);
     await this.persist(() => this.options.store.deleteConnection(identityId, id));
   }
-  async probeConnection(identityId: string, id: string) {
+  /** Probe an existing saved instance without mutating its configuration. */
+  async probeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
+    return this.runProbe(() =>
+      this.persist(() => this.options.store.getConnection(identityId, id)),
+    );
+  }
+
+  /**
+   * T3-style implicit default probe: no persisted LocalAgentConnection is needed.
+   * All executable paths come from this trusted host registry, never renderer arguments.
+   * The temporary identity cannot start a conversation or grant a business tool scope.
+   */
+  async probeDefaultDriver(_identityId: string, kind: LocalAgentDriver): Promise<LocalAgentStatus> {
+    const defaults: Record<LocalAgentDriver, string> = {
+      codex: 'codex',
+      claude: 'claude',
+      pi: 'pi',
+      dsh: 'dsh',
+    };
+    if (!Object.prototype.hasOwnProperty.call(defaults, kind))
+      throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    return this.runProbe(async () => ({
+      id: `implicit:${kind}`,
+      driver: kind,
+      name: kind,
+      executablePath: defaults[kind],
+      enabled: true,
+      writeScopes: [],
+      revision: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    }));
+  }
+
+  private async runProbe(
+    loadConnection: () => Promise<LocalAgentConnection>,
+  ): Promise<LocalAgentStatus> {
     this.assertActive();
     if (this.pendingProbes + this.runs.size >= 4) throw new LocalAgentError('CONFLICT');
     this.pendingProbes++;
     let driver: Driver | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     try {
-      const connection = await this.persist(() => this.options.store.getConnection(identityId, id));
+      const connection = await loadConnection();
       this.assertActive();
       await mkdir(this.options.cwd, { recursive: true });
       this.assertActive();
       driver = this.driver(connection);
       this.probes.add(driver);
-      const status = await driver.probe();
-      this.assertActive();
-      return status;
+      const activeDriver = driver;
+      const timedOut = new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => {
+          try {
+            activeDriver.cancel();
+          } catch {
+            /* best effort */
+          }
+          reject(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'));
+        }, 30_000);
+      });
+      try {
+        const status = await Promise.race([activeDriver.probe(), timedOut]);
+        this.assertActive();
+        return status;
+      } catch (cause) {
+        if (cause instanceof LocalAgentError && cause.code === 'LOCAL_AGENT_UNAVAILABLE')
+          return { status: 'unavailable', message: cause.message };
+        throw cause;
+      }
     } finally {
+      if (timeout) clearTimeout(timeout);
       try {
         await driver?.close();
       } finally {
@@ -438,6 +495,7 @@ export class LocalAgentRuntime {
     this.disposing ??= (async () => {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);
+      for (const probe of this.probes) probe.cancel();
       await this.options.bridge?.dispose();
       await Promise.allSettled(
         [...this.probes, ...runs.flatMap((run) => (run.driver ? [run.driver] : []))].map((driver) =>

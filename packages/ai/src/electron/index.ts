@@ -92,6 +92,7 @@ import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AITransportModuleInstance } from '../server/infrastructure';
 import { toAITransportFailure } from '../server/transport';
+import { AgentInstanceController } from '../server/transport/agent-instance.controller';
 import { withAuthenticatedValue } from './authenticated-ipc';
 
 const logger = createLogger('AIElectron');
@@ -330,6 +331,21 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         );
         installed.push(AIChannels.CONVERSATION_DELETE);
 
+        ipcMain.handle(AIChannels.AGENT_INSTANCE, async (_, command) =>
+          withAuthenticatedValue(ctx, (requestContext) => {
+            const controller = new AgentInstanceController(aiModule.agentRegistry);
+            if (
+              command &&
+              typeof command === 'object' &&
+              'action' in command &&
+              command.action === 'list'
+            )
+              return controller.list(requestContext);
+            return controller.execute(command, requestContext);
+          }),
+        );
+        installed.push(AIChannels.AGENT_INSTANCE);
+
         ipcMain.handle(AIChannels.LOCAL_AGENT, async (_, command) =>
           withAuthenticatedValue<unknown>(ctx, async (requestContext) => {
             const runtime = aiModule.localAgentRuntime;
@@ -367,6 +383,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   return ok(null);
                 case 'probe_connection':
                   return ok(await runtime.probeConnection(owner, input.id));
+                case 'probe_default':
+                  return ok(await runtime.probeDefaultDriver(owner, input.driver));
                 case 'list_conversations':
                   return ok(await runtime.listConversations(owner));
                 case 'create_conversation':
@@ -440,6 +458,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   content: messageCommand.content,
                   providerId: messageCommand.providerId,
                   modelId: messageCommand.modelId,
+                  agentInstanceId: messageCommand.agentInstanceId,
                   locale: messageCommand.locale,
                   attachments: messageCommand.attachments,
                   selectedEntities: messageCommand.selectedEntities,

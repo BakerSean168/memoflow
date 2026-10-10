@@ -4,13 +4,17 @@ import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import {
   AIProviderConfigClientDTOSchema,
+  AgentInstanceSchema,
+  AgentRegistryCommandSchema,
+  type AgentInstance,
+  type AgentInstanceModelBinding,
   LocalAgentConnectionSchema,
   type LocalAgentConnectionInput,
   type LocalAgentStatus,
   type AIProviderConfigClientDTO,
 } from '@memoflow/contracts/ai';
 import { ok, fail, type Result } from '@memoflow/contracts/result';
-import { AI_LOCAL_AGENT_KEY, AI_CLIENT_KEY } from '../../../di/keys';
+import { AI_LOCAL_AGENT_KEY, AI_CLIENT_KEY, AI_AGENT_REGISTRY_KEY } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import AISettings from './AISettings.vue';
 import AIFooterComposer from '../../ai/components/AIFooterComposer.vue';
@@ -37,7 +41,7 @@ function provider(id: string, name: string, isDefault = false) {
   });
 }
 
-async function setup(withNative = false, empty = false) {
+async function setup(withNative = false, empty = false, withRegistry = false) {
   let records = [
     provider('11111111-1111-4111-8111-111111111111', 'First', true),
     provider('22222222-2222-4222-8222-222222222222', 'Second'),
@@ -113,12 +117,81 @@ async function setup(withNative = false, empty = false) {
     deleteConnection: vi.fn(async (id: string) => {
       nativeRecords = nativeRecords.filter((item) => item.id !== id);
     }),
+    probeDefaultDriver: vi.fn(async (): Promise<LocalAgentStatus> => ({
+      status: 'ready',
+      version: 'native-default',
+      models: [{ id: 'default-model', name: 'Default native model' }],
+    })),
     probeConnection: vi.fn(async (): Promise<LocalAgentStatus> => ({
       status: 'ready' as const,
       version: '1.0',
       models: [{ id: 'native-model', name: 'Native Model' }],
     })),
   };
+  let instanceRecords: AgentInstance[] = [
+    AgentInstanceSchema.parse({
+      instanceId: 'mastra',
+      driver: 'mastra',
+      name: 'Mastra',
+      accentColor: '#6469da',
+      enabled: true,
+      revision: 0,
+      createdAt: 0,
+      updatedAt: 0,
+    }),
+  ];
+  let bindingRecords: AgentInstanceModelBinding[] = [];
+  const registryClient = {
+    list: vi.fn(async () => ({
+      instances: [...instanceRecords],
+      bindings: [...bindingRecords],
+    })),
+    execute: vi.fn(async (raw: unknown) => {
+      const cmd = AgentRegistryCommandSchema.parse(raw);
+      if (cmd.action === 'create') {
+        if (instanceRecords.some((item) => item.instanceId === cmd.instance.instanceId))
+          throw new Error('CONFLICT');
+        const next = AgentInstanceSchema.parse({
+          ...cmd.instance,
+          revision: 1,
+          createdAt: 10,
+          updatedAt: 10,
+        });
+        instanceRecords = [...instanceRecords, next];
+        return next;
+      }
+      if (cmd.action === 'list')
+        return { instances: [...instanceRecords], bindings: [...bindingRecords] };
+      const prior = instanceRecords.find((item) => item.instanceId === cmd.instanceId);
+      if (!prior || prior.revision !== cmd.expectedRevision) throw new Error('CONFLICT');
+      if (cmd.action === 'remove') {
+        instanceRecords = instanceRecords.filter((item) => item.instanceId !== cmd.instanceId);
+        bindingRecords = bindingRecords.filter((item) => item.instanceId !== cmd.instanceId);
+        return null;
+      }
+      const next = AgentInstanceSchema.parse({
+        ...prior,
+        ...(cmd.action === 'update' ? cmd.patch : {}),
+        revision: prior.revision + 1,
+      });
+      instanceRecords = instanceRecords.map((item) =>
+        item.instanceId === cmd.instanceId ? next : item,
+      );
+      if (cmd.action === 'bind')
+        bindingRecords = [
+          ...bindingRecords.filter(
+            (item) => item.instanceId !== cmd.instanceId || item.connectionId !== cmd.connectionId,
+          ),
+          { instanceId: cmd.instanceId, connectionId: cmd.connectionId, modelId: cmd.modelId },
+        ];
+      if (cmd.action === 'unbind')
+        bindingRecords = bindingRecords.filter(
+          (item) => item.instanceId !== cmd.instanceId || item.connectionId !== cmd.connectionId,
+        );
+      return next;
+    }),
+  };
+
   const wrapper = mount(AISettings, {
     global: {
       stubs: { teleport: true, DialogContent: { template: '<div><slot /></div>' } },
@@ -126,11 +199,12 @@ async function setup(withNative = false, empty = false) {
       provide: {
         [AI_CLIENT_KEY as symbol]: client,
         ...(withNative ? { [AI_LOCAL_AGENT_KEY as symbol]: localClient } : {}),
+        ...(withRegistry ? { [AI_AGENT_REGISTRY_KEY as symbol]: registryClient } : {}),
       },
     },
   });
   await flushPromises();
-  return { wrapper, client, localClient };
+  return { wrapper, client, localClient, registryClient };
 }
 
 describe('Providers settings interactions', () => {
@@ -427,6 +501,83 @@ describe('Provider creation and composer integration', () => {
   });
 });
 
+describe('credential-free Mastra registry UI', () => {
+  it('creates and reloads a real Mastra instance on Web before choosing a model service', async () => {
+    const { wrapper, client, registryClient, localClient } = await setup(false, true, true);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-mastra-needs-config"]').text()).toContain(
+      'No model services',
+    );
+    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid^="ai-provider-catalog-"]')).toHaveLength(1);
+    expect(wrapper.find('[data-testid="ai-provider-catalog-codex"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-provider-catalog-mastra"]').trigger('click');
+    await wrapper.get('#ai-instance-name').setValue('Mastra AnyRouter');
+    await wrapper.get('#ai-instance-slug').setValue('mastra-anyrouter');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    await wrapper.get('[data-testid="ai-agent-instance-save"]').trigger('click');
+    await flushPromises();
+    expect(registryClient.execute).toHaveBeenCalledWith({
+      action: 'create',
+      instance: {
+        driver: 'mastra',
+        instanceId: 'mastra-anyrouter',
+        name: 'Mastra AnyRouter',
+        accentColor: '#6469da',
+        enabled: true,
+      },
+    });
+    expect(
+      wrapper
+        .get('[data-testid="ai-provider-select-agent:mastra-anyrouter"]')
+        .attributes('aria-current'),
+    ).toBe('true');
+    expect(wrapper.get('#ai-mastra-agent-id').element.value).toBe('mastra-anyrouter');
+    expect(client.updateProvider).not.toHaveBeenCalled();
+    expect(localClient.listConnections).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra-anyrouter"]').exists()).toBe(
+      true,
+    );
+    expect(registryClient.list).toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('binds an existing verified model-service connection to an Agent, without copying credentials', async () => {
+    const { wrapper, registryClient, client } = await setup(false, false, true);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(1);
+    await wrapper
+      .get('[data-testid="ai-mastra-service-select"]')
+      .setValue('11111111-1111-4111-8111-111111111111');
+    await wrapper.get('[data-testid="ai-mastra-bind-existing"]').trigger('click');
+    await flushPromises();
+    expect(registryClient.execute).toHaveBeenCalledWith({
+      action: 'bind',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      connectionId: '11111111-1111-4111-8111-111111111111',
+      modelId: 'model-1',
+    });
+    expect(wrapper.get('[data-testid="ai-mastra-instance-detail"]').text()).toContain('model-1');
+    expect(client.updateProvider).not.toHaveBeenCalled();
+    await wrapper
+      .get('[data-testid="ai-mastra-unbind-11111111-1111-4111-8111-111111111111"]')
+      .trigger('click');
+    await flushPromises();
+    expect(registryClient.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'unbind',
+        instanceId: 'mastra',
+        expectedRevision: 1,
+      }),
+    );
+    wrapper.unmount();
+  });
+});
+
 describe('Agent defaults and wizard capabilities', () => {
   it('shows unconfigured Mastra on Web, with only Mastra in Agent selection', async () => {
     const { wrapper, client, localClient } = await setup(false, true);
@@ -442,7 +593,7 @@ describe('Agent defaults and wizard capabilities', () => {
     await wrapper.get('#ai-instance-name').setValue('Work Mastra');
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
     expect(wrapper.get('[data-testid="ai-mastra-config"]').text()).toContain(
-      'saved after credential verification',
+      'Select a model API service for Mastra.',
     );
     await wrapper.get('[data-testid="ai-provider-catalog-openai"]').trigger('click');
     expect(wrapper.find('#ai-provider-api-key').exists()).toBe(true);
@@ -450,11 +601,16 @@ describe('Agent defaults and wizard capabilities', () => {
     expect(localClient.listConnections).not.toHaveBeenCalled();
     wrapper.unmount();
   });
-  it('synthesizes four Desktop slots, never probes on open, and materializes one slot without duplication', async () => {
+  it('synthesizes four Desktop slots, probes without saving, and materializes one slot without duplication', async () => {
     const { wrapper, localClient } = await setup(true, true);
     expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
     expect(localClient.probeConnection).not.toHaveBeenCalled();
+    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(4);
+    expect(localClient.saveConnection).not.toHaveBeenCalled();
     await wrapper.get('[data-testid="ai-provider-select-slot:codex"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
+      'Default native model',
+    );
     expect(wrapper.get('#ai-native-id').attributes('readonly')).toBeDefined();
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     await flushPromises();

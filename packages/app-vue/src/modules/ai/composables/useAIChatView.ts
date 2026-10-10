@@ -8,7 +8,7 @@ import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
 } from '@memoflow/contracts/repository';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AgentRegistrySnapshot } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
@@ -37,6 +37,7 @@ import {
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
+  AI_AGENT_REGISTRY_KEY,
   AI_LOCAL_AGENT_KEY,
   REPOSITORY_SERVICE_KEY,
   AI_RUNTIME_USAGE_KEY,
@@ -75,6 +76,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
+  const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
+  const agentRegistrySnapshot = ref<AgentRegistrySnapshot | null>(null);
+  async function loadAgentRegistry() {
+    if (!agentRegistryClient) return;
+    try {
+      agentRegistrySnapshot.value = await agentRegistryClient.list();
+    } catch {
+      // Fail closed: never expose global legacy providers as another Agent's models.
+      agentRegistrySnapshot.value = null;
+    }
+  }
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
   const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
   async function saveLocalNote(content: string) {
@@ -216,6 +228,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
+    ...(agentRegistryClient ? { agentRegistrySnapshot } : {}),
     chatConversationId: chatSession.chatConversationId,
   });
 
@@ -593,6 +606,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   onMounted(async () => {
     await localChoices.refresh();
+    await loadAgentRegistry();
     await initializeChatView({
       initRepository: loadRecentKnowledgeNotes,
       loadProviders,

@@ -24,6 +24,7 @@ import {
   SETTING_SERVICE_KEY,
   DATA_PORTABILITY_SERVICE_KEY,
   AI_CLIENT_KEY,
+  AI_AGENT_REGISTRY_KEY,
   AI_ASSISTANT_RUNTIME_KEY,
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
@@ -101,6 +102,11 @@ const aiClient = createLazyService(async () => {
   return createAIHttpClient(resultHttpClient);
 });
 
+const agentRegistryClient = createLazyService(async () => {
+  const { createAgentRegistryHttpClient } = await import('@memoflow/ai/client');
+  return createAgentRegistryHttpClient(resultHttpClient);
+});
+
 const aiAssistantRuntime = createLazyService(async () => {
   const { createAssistantRuntimeHttpClient } = await import('@memoflow/ai/client');
   return createAssistantRuntimeHttpClient(resultHttpClient);
@@ -135,6 +141,7 @@ export function installAppServices(app: App): void {
   app.provide(SETTING_SERVICE_KEY, settingService);
   app.provide(DATA_PORTABILITY_SERVICE_KEY, dataPortabilityService);
   app.provide(AI_CLIENT_KEY, aiClient);
+  app.provide(AI_AGENT_REGISTRY_KEY, agentRegistryClient);
   app.provide(AI_ASSISTANT_RUNTIME_KEY, aiAssistantRuntime);
   app.provide(AI_RUNTIME_USAGE_KEY, aiRuntimeUsage);
   app.provide(AI_WORKFLOW_RUNTIME_KEY, aiWorkflowRuntime);

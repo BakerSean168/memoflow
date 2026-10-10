@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { AssistantRuntimeKindSchema, LocalAgentActivitySchema } from './local-agent.dto';
+import {
+  AssistantRuntimeKindSchema,
+  LocalAgentActivitySchema,
+  AgentInstanceSlugSchema,
+} from './local-agent.dto';
 /**
  * MemoFlow AI vNext cross-boundary contracts.
  *
@@ -110,6 +114,8 @@ export const AssistantRuntimeClientCommandSchema = z
         surface: AIRuntimeSurfaceSchema,
         providerId: z.string().min(1).optional(),
         modelId: z.string().min(1).optional(),
+        /** Stable Mastra instance chosen in the composer (never API vendor ID). */
+        agentInstanceId: AgentInstanceSlugSchema.optional(),
         locale: z.enum(['zh-CN', 'en-US']).optional(),
         attachments: z.array(AssistantRuntimeAttachmentSchema).max(4).default([]),
         selectedEntities: z.array(AssistantRuntimeSelectedEntitySchema).max(12).default([]),

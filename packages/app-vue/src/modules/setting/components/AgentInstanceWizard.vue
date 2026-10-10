@@ -44,7 +44,7 @@
             :maxlength="driver === 'mastra' ? 100 : 120"
           />
         </div>
-        <template v-if="driver !== 'mastra'">
+        <template v-if="driver !== 'mastra' || registryEnabled">
           <div class="space-y-2">
             <Label for="ai-instance-slug">{{ t('setting.agentInstances.instanceId') }}</Label
             ><Input id="ai-instance-slug" v-model="slug" maxlength="64" />
@@ -65,24 +65,49 @@
         </p>
       </div>
       <div v-else-if="driver === 'mastra'" class="space-y-4" data-testid="ai-mastra-config">
-        <p class="text-sm text-muted-foreground">
-          {{ t('setting.agentInstances.mastraConfigHint') }}
-        </p>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <button
-            v-for="service in catalog"
-            :key="service.id"
+        <template v-if="registryEnabled">
+          <p class="text-sm text-muted-foreground">
+            {{ t('setting.agentInstances.saveBeforeConfigHint') }}
+          </p>
+          <Button
             type="button"
-            class="rounded-xl bg-muted/50 p-4 text-left hover:bg-muted"
-            :data-testid="`ai-provider-catalog-${service.id}`"
-            @click="$emit('configureMastra', service, name.trim())"
+            data-testid="ai-agent-instance-save"
+            :disabled="busy || !validIdentity"
+            @click="
+              $emit('createMastra', {
+                driver: 'mastra',
+                instanceId: slug,
+                name: name.trim(),
+                accentColor: accent,
+                enabled: true,
+              })
+            "
+            >{{ t('setting.ai.saveConfiguration') }}</Button
           >
-            {{ service.name }}
-          </button>
-        </div>
-        <p v-if="!catalog.length" role="status">
-          {{ t('setting.agentInstances.catalogUnavailable') }}
-        </p>
+          <p v-if="error" role="alert" class="text-sm text-destructive">
+            {{ t('aiAssistant.local.actionFailed') }}
+          </p>
+        </template>
+        <template v-else>
+          <p class="text-sm text-muted-foreground">
+            {{ t('setting.agentInstances.mastraConfigHint') }}
+          </p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button
+              v-for="service in catalog"
+              :key="service.id"
+              type="button"
+              class="rounded-xl bg-muted/50 p-4 text-left hover:bg-muted"
+              :data-testid="`ai-provider-catalog-${service.id}`"
+              @click="$emit('configureMastra', service, name.trim())"
+            >
+              {{ service.name }}
+            </button>
+          </div>
+          <p v-if="!catalog.length" role="status">
+            {{ t('setting.agentInstances.catalogUnavailable') }}
+          </p>
+        </template>
       </div>
       <KeepAlive>
         <LocalAgentSettings
@@ -126,6 +151,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Dialog, Input, Label } from '@memoflow/ui-vue-shadcn';
 import {
   AgentInstanceSlugSchema,
+  type CreateAgentInstance,
   type AIProviderCatalogEntryDTO,
   type LocalAgentConnectionInput,
   type LocalAgentDriver,
@@ -135,6 +161,7 @@ import LocalAgentSettings from './LocalAgentSettings.vue';
 const props = defineProps<{
   open: boolean;
   native: boolean;
+  registryEnabled?: boolean;
   catalog: AIProviderCatalogEntryDTO[];
   existingSlugs: string[];
   busy: boolean;
@@ -144,6 +171,7 @@ defineEmits<{
   close: [];
   saveLocal: [input: LocalAgentConnectionInput];
   configureMastra: [service: AIProviderCatalogEntryDTO, name: string];
+  createMastra: [input: CreateAgentInstance];
 }>();
 const { t } = useI18n();
 const step = ref(0);
@@ -166,7 +194,7 @@ const validIdentity = computed(
   () =>
     Boolean(name.value.trim()) &&
     name.value.trim().length <= (driver.value === 'mastra' ? 100 : 120) &&
-    (driver.value === 'mastra' ||
+    ((driver.value === 'mastra' && !props.registryEnabled) ||
       (AgentInstanceSlugSchema.safeParse(slug.value).success &&
         !props.existingSlugs.includes(slug.value.trim()))),
 );

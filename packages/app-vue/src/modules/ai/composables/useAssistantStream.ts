@@ -404,7 +404,13 @@ export function useAssistantStream(input: {
           surface: options.surface,
           ...(choice.runtimeKind === 'local_agent'
             ? { runtimeKind: 'local_agent', modelId: choice.modelId }
-            : { providerId: selectedModel!.providerId, modelId: selectedModel!.modelId }),
+            : {
+                providerId: selectedModel!.providerId,
+                modelId: selectedModel!.modelId,
+                ...(selectedModel!.agentInstanceId
+                  ? { agentInstanceId: selectedModel!.agentInstanceId }
+                  : {}),
+              }),
           attachments: pendingAttachments,
           selectedEntities: pendingEntities,
         },

@@ -775,6 +775,25 @@ const task_goal_outbox = new Table({
 // Schema Export
 // ──────────────────────────────────────────────
 
+// Unified Agent instance registry is Profile-local; no credentials or checkpoints are stored.
+const ai_agent_instances = new Table(
+  { identity_id: column.text, record_json: column.text },
+  { localOnly: true },
+);
+const ai_agent_conversation_bindings = new Table(
+  { identity_id: column.text, conversation_id: column.text, instance_id: column.text },
+  { localOnly: true },
+);
+const ai_agent_instance_bindings = new Table(
+  {
+    identity_id: column.text,
+    instance_id: column.text,
+    connection_id: column.text,
+    record_json: column.text,
+  },
+  { localOnly: true },
+);
+
 // Desktop Agent records are device/Profile-local. They are not native checkpoints.
 const ai_local_agent_connections = new Table(
   { identity_id: column.text, record_json: column.text },
@@ -841,6 +860,9 @@ export const PowerSyncAppSchema = new Schema({
   notification_preferences,
   // AI
   ai_conversations,
+  ai_agent_instances,
+  ai_agent_instance_bindings,
+  ai_agent_conversation_bindings,
   ai_local_agent_connections,
   ai_local_conversations,
   ai_local_conversation_items,

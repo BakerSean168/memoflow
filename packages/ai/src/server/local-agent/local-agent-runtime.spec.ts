@@ -172,6 +172,93 @@ describe('local Agent conversation execution', () => {
     expect(started).toBe(4);
     await runtime.dispose();
   });
+  it('probes the implicit native driver without persisting a connection or running inference', async () => {
+    const db = createLocalAgentSqlite();
+    databases.push(db);
+    const store = new LocalAgentRepository(db);
+    const getConnection = vi.spyOn(store, 'getConnection');
+    const createConnection = vi.spyOn(store, 'createConnection');
+    const observed: { driver: string; executablePath: string; writeScopes: string[] }[] = [];
+    const close = vi.fn(async () => {});
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: (connection) => {
+        observed.push(connection);
+        return {
+          async probe() {
+            return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+          },
+          async *run(): AsyncGenerator<NativeAgentEvent> {
+            throw new Error('Probe must not run native inference');
+          },
+          respond: () => false,
+          cancel() {},
+          close,
+        };
+      },
+    });
+    for (const driver of ['codex', 'claude', 'pi', 'dsh'] as const) {
+      await expect(runtime.probeDefaultDriver('owner', driver)).resolves.toMatchObject({
+        status: 'ready',
+        models: [{ id: 'model' }],
+      });
+    }
+    expect(observed.map((item) => item.executablePath)).toEqual(['codex', 'claude', 'pi', 'dsh']);
+    expect(observed.every((item) => item.writeScopes.length === 0)).toBe(true);
+    expect(getConnection).not.toHaveBeenCalled();
+    expect(createConnection).not.toHaveBeenCalled();
+    expect(await store.listConnections('owner')).toHaveLength(0);
+    expect(close).toHaveBeenCalledTimes(4);
+    await runtime.dispose();
+  });
+
+  it('isolates unsaved probes from a closed Profile and rejects unknown drivers', async () => {
+    const db = createLocalAgentSqlite();
+    databases.push(db);
+    const store = new LocalAgentRepository(db);
+    let release!: () => void;
+    let started!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    const wait = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const close = vi.fn(async () => {});
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async probe() {
+          started();
+          await wait;
+          return { status: 'ready' as const, models: [] };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('not expected');
+        },
+        respond: () => false,
+        cancel() {
+          release();
+        },
+        close,
+      }),
+    });
+    await expect(runtime.probeDefaultDriver('owner', 'mastra' as never)).rejects.toMatchObject({
+      code: 'LOCAL_AGENT_UNAVAILABLE',
+    });
+    const pending = runtime.probeDefaultDriver('owner', 'codex');
+    await entered;
+    const rejection = expect(pending).rejects.toMatchObject({
+      code: 'LOCAL_AGENT_PERMISSION_DENIED',
+    });
+    await runtime.dispose();
+    await rejection;
+    expect(close).toHaveBeenCalled();
+    expect(await store.listConnections('owner')).toHaveLength(0);
+  });
+
   it('disposes native resources even when the consumer has paused at a yielded event', async () => {
     const { store, conversation } = await setup();
     let closed = false;

@@ -147,6 +147,8 @@ export type ProviderListItem = {
 
 export type ChatModelOption = {
   key: string;
+  /** Set for an Agent-bound model, absent for historical provider-only selections. */
+  agentInstanceId?: string;
   providerId: string;
   providerName: string;
   modelId: string;

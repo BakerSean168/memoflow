@@ -3211,6 +3211,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4638,6 +4648,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6618,6 +6636,14 @@
     },
     {
       "path": "packages/contracts/src/modules/account/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/agent-instance.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -12493,7 +12519,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 104
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13047,14 +13073,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 104
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 285
+      "fileCount": 286
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13075,7 +13101,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 94
+      "fileCount": 95
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13355,6 +13381,7 @@
       "packages/ai/src/infrastructure-client/adapters/__tests__/ai-transport-types.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
+      "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
@@ -13800,7 +13827,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1193,
+    "unit": 1196,
     "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,

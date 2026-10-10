@@ -44,6 +44,8 @@ model Account {
   aiExecutionRecords              AiExecutionRecord[]
   aiKnowledgeIndexEntries         AiKnowledgeIndexEntry[]
   aiProviderConfigs               AiProviderConfig[]
+  aiAgentInstances                AiAgentInstance[]
+  aiAgentInstanceBindings         AiAgentInstanceBinding[]
   aiProviderOnboardingSessions     AiProviderOnboardingSession[]
   aiProviderSecrets                AiProviderSecret[]
 

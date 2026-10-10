@@ -37,6 +37,8 @@ import {
 } from '../agents';
 import { createMemoFlowProductTools } from '../tools/product-tools';
 import type { MastraModelResolver } from '../models';
+import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
+import { AIExecutionError } from '../../../shared/ai-execution-error';
 import {
   AssistantSelectedContextHydrator,
   setAIContextRequestContext,
@@ -65,6 +67,8 @@ import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
 export interface MastraAIRuntimeDependencies {
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
+  /** Host-authoritative turn claim: one stable Mastra Agent identity per new conversation. */
+  readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>;
   readonly conversationShellSource: AssistantConversationShellSource;
   /** Host-bound canonical Goal/Task/Reminder application mutations for ADR-052. */
   readonly goalPlanMutationPort: GoalPlanMutationPort;
@@ -351,9 +355,28 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (input.context && input.context.identityId !== input.identityId) {
       throw new Error('Mastra Assistant execution context identity mismatch');
     }
+    if (this.deps.agentRegistry) {
+      try {
+        await this.deps.agentRegistry.assertTurnSelection({
+          owner: input.identityId,
+          conversationId: input.conversationId,
+          agentInstanceId: input.agentInstanceId,
+          providerId: input.providerId,
+          modelId: input.modelId,
+        });
+      } catch {
+        throw new AIExecutionError(
+          'configuration_required',
+          'Selected Agent instance is unavailable or its model is not bound',
+        );
+      }
+    } else if (input.agentInstanceId) {
+      throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
+    }
     const startedAt = Date.now();
     const resolvedModel = await this.deps.modelResolver.resolve({
       identityId: input.identityId,
+      agentInstanceId: input.agentInstanceId,
       providerId: input.providerId,
       modelId: input.modelId,
       executionRequirement: {
@@ -367,6 +390,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);
+    if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');

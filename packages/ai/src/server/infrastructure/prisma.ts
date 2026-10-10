@@ -6,6 +6,8 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import { AgentInstancePrismaRepository } from './adapters/prisma/agent-instance.repository';
+import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import type { IAIConversationRepository } from '../domain/repositories/i-ai-conversation-repository';
 import type { IAIProviderConfigRepository } from '../domain/repositories/i-ai-provider-config-repository';
 import type {
@@ -27,6 +29,7 @@ import {
 } from './adapters/prisma';
 
 export interface AIPrismaRepositorySet {
+  readonly agentInstanceRepository: IAgentInstanceRepository;
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly knowledgeIndexRepository: IKnowledgeIndexRepository;
@@ -38,6 +41,7 @@ export interface AIPrismaRepositorySet {
 
 export function createAIPrismaRepositories(db: PrismaClient): AIPrismaRepositorySet {
   return {
+    agentInstanceRepository: new AgentInstancePrismaRepository(db),
     conversationRepository: new AIConversationPrismaRepository(db),
     providerConfigRepository: new AIProviderConfigPrismaRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPrismaRepository(db),

@@ -226,6 +226,35 @@ describe('registerAIRuntimeRoutes', () => {
     expect(res.end).toHaveBeenCalledTimes(1);
   });
 
+  it('forwards the selected Agent instance and exact model but never renderer identity', async () => {
+    const stub = runtimeStub();
+    const router = registerAIRuntimeRoutes(stub.runtime, { auth });
+    const handler = getRouteHandler(router, 'post', '/assistant/sse');
+    const { res } = response();
+    await handler(
+      request({
+        ...messageCommand,
+        agentInstanceId: 'mastra-anyrouter',
+        providerId: 'connection-1',
+        modelId: 'model-1',
+      }) as never,
+      res as never,
+    );
+    expect(stub.dispatchMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        identityId: 'identity-1',
+        agentInstanceId: 'mastra-anyrouter',
+        providerId: 'connection-1',
+        modelId: 'model-1',
+      }),
+    );
+    expect(stub.dispatchMessage).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        identityId: 'fake-identity',
+      }),
+    );
+  });
+
   it('preserves stable capability failure codes and redacts provider diagnostics in SSE', async () => {
     const dispatchMessage = vi.fn(async function* () {
       throw new AIExecutionError(

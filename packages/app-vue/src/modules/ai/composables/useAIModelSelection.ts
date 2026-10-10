@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Ref } from 'vue';
+import type { AgentRegistrySnapshot } from '@memoflow/contracts/ai';
 import type { ChatModelOption, PersistedConversationModelMap, ProviderListItem } from './types';
 
 const LAST_MODEL_STORAGE_KEY = 'ai:last-model-key';
@@ -8,6 +9,8 @@ const CONVERSATION_MODEL_STORAGE_KEY = 'ai:conversation-model-map';
 
 export interface UseAIModelSelectionOptions {
   providers: Ref<ProviderListItem[]>;
+  /** When available, the Agent Registry is authoritative for new conversation choices. */
+  agentRegistrySnapshot?: Ref<AgentRegistrySnapshot | null>;
   chatConversationId: Ref<string>;
 }
 
@@ -15,7 +18,7 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
   const { t } = useI18n();
   const selectedModelKey = ref('');
 
-  const modelGroups = computed(() =>
+  const legacyGroups = computed(() =>
     options.providers.value
       .map((provider) => {
         const fallbackModels =
@@ -38,6 +41,62 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
       })
       .filter((group) => group.models.length > 0),
   );
+
+  /** New conversations only expose models explicitly bound to enabled Mastra agents. */
+  const modelGroups = computed(() => {
+    if (!options.agentRegistrySnapshot) return legacyGroups.value;
+    const snapshot = options.agentRegistrySnapshot.value;
+    if (!snapshot) return [];
+    const providers = new Map(options.providers.value.map((provider) => [provider.id, provider]));
+    const boundGroups = snapshot.instances
+      .filter((instance) => instance.driver === 'mastra' && instance.enabled)
+      .flatMap((instance) =>
+        snapshot.bindings
+          .filter((binding) => binding.instanceId === instance.instanceId)
+          .flatMap((binding) => {
+            const provider = providers.get(binding.connectionId);
+            if (!provider) return [];
+            const model = provider.availableModels?.find((entry) => entry.id === binding.modelId);
+            const providerName = `${instance.name} · ${provider.name || t('common.unknown')}`;
+            return [
+              {
+                providerId: `agent:${instance.instanceId}:${binding.connectionId}`,
+                providerName,
+                models: [
+                  {
+                    key: `agent:${instance.instanceId}::${binding.connectionId}::${binding.modelId}`,
+                    agentInstanceId: instance.instanceId,
+                    providerId: provider.id,
+                    providerName,
+                    modelId: binding.modelId,
+                    modelName: model?.name || binding.modelId,
+                  },
+                ],
+              },
+            ];
+          }),
+      );
+    // Historical provider-only choice is exposed only for the exact existing
+    // conversation map entry. Never offer global legacy defaults to new chats.
+    const conversationId = options.chatConversationId.value;
+    const legacyKey = conversationId ? readConversationModelStorage()[conversationId] : '';
+    const legacyModel =
+      legacyKey && !legacyKey.startsWith('agent:')
+        ? legacyGroups.value
+            .flatMap((group) => group.models)
+            .find((model) => model.key === legacyKey)
+        : undefined;
+    return legacyModel
+      ? [
+          ...boundGroups,
+          {
+            providerId: `legacy:${legacyModel.providerId}`,
+            providerName: `${legacyModel.providerName} · Legacy`,
+            models: [legacyModel],
+          },
+        ]
+      : boundGroups;
+  });
 
   const allModelOptions = computed(() => modelGroups.value.flatMap((group) => group.models));
   const selectedModel = computed<ChatModelOption | null>(
@@ -106,6 +165,14 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
       return;
     }
 
+    const conversationId = options.chatConversationId.value;
+    if (options.agentRegistrySnapshot && conversationId) {
+      const saved = readConversationModelStorage()[conversationId];
+      if (!saved || !allModelOptions.value.some((item) => item.key === saved)) {
+        selectedModelKey.value = '';
+        return;
+      }
+    }
     const preferredCandidates = [preferredModelKey, selectedModelKey.value].filter(
       (item): item is string => Boolean(item),
     );
@@ -119,15 +186,14 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
     }
 
     const defaultProvider =
-      options.providers.value.find((item) => item.isDefault) ||
-      options.providers.value[0] ||
-      null;
+      options.providers.value.find((item) => item.isDefault) || options.providers.value[0] || null;
 
     const defaultOption =
       (defaultProvider?.defaultModel
         ? allModelOptions.value.find(
             (item) =>
-              item.providerId === defaultProvider.id && item.modelId === defaultProvider.defaultModel,
+              item.providerId === defaultProvider.id &&
+              item.modelId === defaultProvider.defaultModel,
           )
         : null) ||
       allModelOptions.value.find((item) => item.providerId === defaultProvider?.id) ||
@@ -143,7 +209,7 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
   }
 
   watch(
-    () => allModelOptions.value.map((item) => item.key).join('|'),
+    [() => allModelOptions.value.map((item) => item.key).join('|'), options.chatConversationId],
     () => {
       syncSelectedModel(getPersistedModelKey(options.chatConversationId.value || undefined));
     },

@@ -61,7 +61,7 @@
         >
           <h4 class="text-sm font-semibold">Models</h4>
           <Button
-            v-if="connection"
+            v-if="connection || canProbe"
             type="button"
             variant="link"
             size="sm"
@@ -108,7 +108,7 @@
       >
       <div class="flex gap-2">
         <Button
-          v-if="connection"
+          v-if="connection || canProbe"
           type="button"
           variant="outline"
           size="sm"
@@ -143,6 +143,7 @@ const props = defineProps<{
   identity?: Pick<LocalAgentConnectionInput, 'name' | 'instanceSlug' | 'accentColor'>;
   driver: LocalAgentDriver;
   status?: LocalAgentStatus;
+  canProbe?: boolean;
   busy: boolean;
   error: boolean;
 }>();

@@ -539,6 +539,12 @@ Config 不应该为了演示三步而做无意义重复表单；没有必填配�
 ## 17. 本文完成情况与下一步
 
 - **已完成：** 对照最新 T3 2026-10-10 版的默认实例、Codex/Claude 检测、Config/Auth 分离；审查 MemoFlow PR #444、现有 Prisma/PowerSync/SecretVault/LocalAgent/Mastra DTO 与 Resolver；确认统一模型和分阶段落地策略。
-- **当前仅有：** #444 的第一批 UI/Native slice，**不是**本文的 V2 Registry 或可持久化的空 Mastra 实例。
-- **尚未实施：** P0–P5 新工作包；本文不宣称上线、完整浏览器/Windows 实测或跨设备密钥同步。
-- **下一动作：** 从 P0 的 Characterization 与 P1 的统一 Contract/Registry/Repo 开始。**先打通无凭据 Mastra 实例真实保存，再接右侧模型服务和 Native 默认槽直接探测**；按每阶段退出门禁提供证据。
+- **2026-10-10 新增实现（尚未发布）：** 统一 AgentInstance/Zod/Registry、默认实例合成、稳定 ID + Revision/Owner CAS；Web PostgreSQL（仅 Mastra）和 Desktop Profile localOnly SQLite 的真实持久化与模型绑定表；原生旧 UUID/会话兼容投影；认证 HTTP / Desktop IPC 与共用 Vue Provider 页面接线。
+- **Mastra 创建与模型连接：** 新增实例 `mastra-anyrouter` 无需任何 API Key 即可创建、保存和重新加载；右侧可关联已有已验证模型服务、新建模型服务（继续原有 SecretVault 验证），以及解绑/更换连接凭据。API Key 不出现在 AgentInstance DTO/Repo；被 Agent 引用的模型连接拒绝直接删除。
+- **Desktop 默认探测：** 非持久化默认 Codex/Claude/Pi/DSH 可通过宿主安全 IPC `probe_default` 进行短生命周期原生只读探测；不先保存 Connection UUID，不发聊天推理；支持手动刷新、初始异步检查、资源取消/关闭、旧 Profile 失效保护。
+- **第一轮验证记录：** 契约测试 9 项、真实 SQLite Registry 6 项、Native Runtime 9 项、Providers Vue + Onboarding surface + Locale 38 项通过，AI Delete Provider 引用保护独立测试 4 项通过；Web/Desktop、Contracts/AI/App Vue/API 联合类型检查通过；Prisma schema validate 通过；生产数据库迁移**未执行**。
+- **2026-10-10 后续 P4 实施（未发布）：** 新会话 composer 只列出已启用 Mastra 实例的已绑定模型；每个模型选择带独立 `agentInstanceId`，可共用底层 API 服务，但不能越权引用未绑定模型。Web SSE 与 Desktop IPC 原样转发经过 Zod 验证的实例 ID、由宿主注入 Identity；Mastra Runtime 在执行前校验实例绑定并对会话进行 owner-scoped 首次 claim，随后所有消息必须沿原实例执行。内部动态 ModelResolver 再验证一次实例/Provider/Model 绑定，强制 fail-closed；无实例 ID 的历史会话继续沿原旧版 `providerId/modelId` 路由执行，已 claim 的会话遗漏实例参数不得回退。
+- **会话持久化与生命周期：** PostgreSQL `ai_agent_conversation_bindings`（复合 Owner 外键与会话唯一约束）及 Desktop localOnly SQLite 持久化，重载后继续校验；被会话引用的 Mastra 实例禁止删除并返回冲突。支持当前 Agent 内绑定模型间选择；切换不同 Agent 需新建会话而非在同一会话偷换身份。
+- **新增验证证据（本轮）：** AI Runtime/Registry/Resolver/Web SSE 路由定向 46/46 通过，Contracts 定向 28/28 通过，Vue 模型选择与 Provider 设置 30/30 通过；Registry SQLite 用例覆盖会话 claim、owner、disabled、跨实例/跨模型防回退；Resolver 用例覆盖对 SecretVault/provider 访问前的拒绝；新增 Agent ID Web SSE 转发用例通过。五核心包（Contracts/AI/App Vue/API/Desktop）联合 typecheck 与构建通过；Prisma schema validate/generate 通过，修改文件 ESLint 与 git diff --check 通过。治理清单已刷新，governance-check 最终回归记录在 PR/CI 中。生产迁移/真实推理未执行。
+- **尚未达成：** 旧 Mastra 模型服务自动迁移映射；Web 真实 PostgreSQL/Playwright、Desktop 安装包/Windows、已安装 CLI 的真实登录状态探测、数据库迁移重入/回滚实测；未处理已绑定会话内切换不同 Agent 的新会话 UI 提醒；工作流 Goal/Task/Knowledge 的独立模型选择仍沿历史 `providerId/modelId` 使用，未全面采用 Agent Instance 权威策略。**这些为发布前必须评估/补齐的 P4/P5 门禁，不能因单元测试通过便宣称完整 V2。**
+- **下一动作：** 先在隔离 PostgreSQL 环境演练 additive migration 与 Web 认证 API；完成 Agent 切换会话 UX、所有直接模型消费入口收敛到 Agent 身份；最后进行 Web/Windows 真实端到端验收后决定 PR 合并/发布。

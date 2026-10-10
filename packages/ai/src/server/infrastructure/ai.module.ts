@@ -58,6 +58,8 @@ import { createLogger } from '@memoflow/utils/logger';
 import { AI_PROVIDER_CATALOG } from '@memoflow/contracts/ai';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../mastra/runtime';
 import type { LocalAgentRuntime } from '../local-agent/local-agent-runtime';
+import { AgentInstanceRegistry } from '../application/agent-instance/agent-instance.registry';
+import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import { assembleCapabilities } from '../shared/assemble-capabilities';
 import { OpenAICompatibleChatExecutionAdapter } from './adapters/openai-compatible-chat-execution.adapter';
 import { OpenAICompatibleAnalyticsQueryAdapter } from './adapters/openai-compatible-analytics-query.adapter';
@@ -143,6 +145,8 @@ const logger = createLogger('AIModule');
  * - never hide these dependencies behind a singleton container
  */
 export interface AIModuleDependencies {
+  /** Independent AgentInstance owner storage; no model-service credentials. */
+  readonly agentInstanceRepository?: IAgentInstanceRepository;
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly providerSecretVault: IAIProviderSecretVault;
@@ -309,6 +313,7 @@ export interface AIModuleServices {
  * are removed — Mastra is the only runtime.
  */
 export interface AIModuleInstance {
+  readonly agentRegistry?: AgentInstanceRegistry | null;
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   /** AI-owner V3 portability for product Conversation shells. */
@@ -336,6 +341,7 @@ export type AITransportModuleInstance = Pick<
   | 'evaluationOperations'
   | 'mastraRuntime'
   | 'localAgentRuntime'
+  | 'agentRegistry'
   | 'workflowRuntime'
   | 'start'
   | 'dispose'
@@ -480,7 +486,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
 
   const providerServices: AIProviderServices = {
     update: new UpdateAIProviderUseCase(providerConfigRepository),
-    delete: new DeleteAIProviderUseCase(providerConfigRepository, dependencies.providerSecretVault),
+    delete: new DeleteAIProviderUseCase(providerConfigRepository, dependencies.providerSecretVault, dependencies.agentInstanceRepository),
     get: new GetAIProviderUseCase(providerConfigRepository),
     list: new ListAIProvidersUseCase(providerConfigRepository),
     testConnection: new TestAIProviderConnectionUseCase(
@@ -781,6 +787,12 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
     localAgentRuntime: dependencies.localAgentRuntime ?? null,
+    agentRegistry: dependencies.agentInstanceRepository
+      ? new AgentInstanceRegistry(
+          dependencies.agentInstanceRepository,
+          dependencies.localAgentRuntime ? 'desktop' : 'web',
+        )
+      : null,
     workflowRuntime: dependencies.workflowRuntime ?? null,
     start(): Promise<void> | void {
       if (started) {
