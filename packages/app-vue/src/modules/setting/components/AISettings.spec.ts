@@ -1,38 +1,43 @@
-import { h } from 'vue';
-import { mount, flushPromises } from '@vue/test-utils';
+import { ref } from 'vue';
+import { mount, flushPromises, type VueWrapper } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  AIProviderConfigClientDTOSchema,
   AgentInstanceSchema,
   AgentRegistryCommandSchema,
+  AIProviderConfigClientDTOSchema,
+  LocalAgentConnectionSchema,
   type AgentInstance,
   type AgentInstanceModelBinding,
-  LocalAgentConnectionSchema,
-  type LocalAgentConnectionInput,
-  type LocalAgentStatus,
   type AIProviderConfigClientDTO,
+  type LocalAgentConnection,
+  type LocalAgentStatus,
+  type ProbeAIProviderConnectionRes,
 } from '@memoflow/contracts/ai';
-import { ok, fail, type Result } from '@memoflow/contracts/result';
-import { AI_LOCAL_AGENT_KEY, AI_CLIENT_KEY, AI_AGENT_REGISTRY_KEY } from '../../../di/keys';
+import { ok } from '@memoflow/contracts/result';
+import {
+  AI_LOCAL_AGENT_KEY,
+  AI_CLIENT_KEY,
+  AI_AGENT_REGISTRY_KEY,
+  AI_CONFIGURATION_REVISION_KEY,
+} from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import AISettings from './AISettings.vue';
-import AIFooterComposer from '../../ai/components/AIFooterComposer.vue';
-import AILocalRuntimePicker from '../../ai/components/AILocalRuntimePicker.vue';
+import MastraAgentSettings from './MastraAgentSettings.vue';
 
-vi.mock('vue-sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-
-function provider(id: string, name: string, isDefault = false) {
+const wrappers: VueWrapper[] = [];
+afterEach(() => wrappers.splice(0).forEach((wrapper) => wrapper.unmount()));
+function provider(id = '11111111-1111-4111-8111-111111111111', name = 'Saved service') {
   return AIProviderConfigClientDTOSchema.parse({
     id,
     identityId: '33333333-3333-4333-8333-333333333333',
     name,
     providerDefinitionId: 'openai',
     baseUrl: 'https://api.example.com/v1',
-    credentialRef: 'opaque-secret-handle',
+    credentialRef: 'opaque-host-secret',
     defaultModel: 'model-1',
     isActive: true,
-    isDefault,
+    isDefault: false,
     priority: 1,
     version: 1,
     createdAt: 1,
@@ -40,691 +45,541 @@ function provider(id: string, name: string, isDefault = false) {
     deletedAt: null,
   });
 }
-
-async function setup(withNative = false, empty = false, withRegistry = false) {
-  let records = [
-    provider('11111111-1111-4111-8111-111111111111', 'First', true),
-    provider('22222222-2222-4222-8222-222222222222', 'Second'),
-  ];
-  if (empty) records = [];
-  const client = {
-    listProviders: vi.fn(async () => ok(records)),
-    getProviderCatalog: vi.fn(async () =>
-      ok([
+function instance(id: string, driver: 'mastra' | 'codex' | 'claude' | 'pi' | 'dsh' = 'mastra') {
+  return AgentInstanceSchema.parse({
+    instanceId: id,
+    driver,
+    name: driver === 'claude' ? 'Claude Code' : driver === 'mastra' ? 'Mastra' : driver,
+    accentColor: '#6469da',
+    enabled: true,
+    revision: 0,
+    createdAt: 0,
+    updatedAt: 0,
+  });
+}
+function probeResult(): ProbeAIProviderConnectionRes {
+  return {
+    onboardingId: 'single-use-onboarding-handle',
+    expiresAt: Date.now() + 60000,
+    catalogId: 'custom',
+    baseUrl: 'https://api.example.com/v1',
+    credential: { status: 'valid' },
+    discovery: { status: 'available', source: 'provider_api' },
+    models: [
+      { id: 'model-1', name: 'Model One' },
+      { id: 'model-2', name: 'Model Two' },
+    ],
+    warnings: [],
+  };
+}
+async function setup(
+  options: { native?: boolean; bound?: boolean; extra?: boolean; noRegistry?: boolean } = {},
+) {
+  let instances: AgentInstance[] = [instance('mastra')];
+  if (options.native)
+    instances.push(
+      ...(['codex', 'claude', 'pi', 'dsh'] as const).map((driver) => instance(driver, driver)),
+    );
+  if (options.extra)
+    instances.push({ ...instance('mastra-other'), name: 'Other Agent', revision: 1 });
+  let providers: AIProviderConfigClientDTO[] = options.bound ? [provider()] : [];
+  let bindings: AgentInstanceModelBinding[] = options.bound
+    ? [
         {
-          id: 'openai',
-          name: 'OpenAI',
-          description: 'Model service',
-          defaultBaseUrl: 'https://api.openai.com/v1',
-          baseUrlEditable: false,
-          recommendedModelIds: [],
+          instanceId: 'mastra',
+          connectionId: '11111111-1111-4111-8111-111111111111',
+          modelId: 'model-1',
         },
-      ]),
+      ]
+    : [];
+  let native: LocalAgentConnection[] = [];
+  const epoch = ref(0);
+  const client = {
+    listProviders: vi.fn(async () => ok([...providers])),
+    getProviderCatalog: vi.fn(async () => ok([])),
+    updateProvider: vi.fn(async () => ok(provider())),
+    deleteProvider: vi.fn(async () => ok(undefined)),
+    testProvider: vi.fn(async () => ok({ ok: true })),
+    probeProviderConnection: vi.fn(async () => ok(probeResult())),
+    probeProviderReplacement: vi.fn(async () => ok(probeResult())),
+    testProviderOnboardingModel: vi.fn(async () =>
+      ok({ ok: true, modelId: 'manual-model', latencyMs: 1 }),
     ),
-    updateProvider: vi.fn(
-      async (
-        id: string,
-        patch: { name?: string; isActive?: boolean },
-      ): Promise<Result<AIProviderConfigClientDTO>> => {
-        records = records.map((record) =>
-          String(record.id) === id ? { ...record, ...patch, version: record.version + 1 } : record,
-        );
-        return ok(records.find((record) => String(record.id) === id)!);
-      },
-    ),
-    refreshProviderModels: vi.fn(async (id: string) =>
+    commitProviderOnboarding: vi.fn(async () => {
+      const next = provider('22222222-2222-4222-8222-222222222222');
+      providers.push(next);
+      return ok(next);
+    }),
+    commitProviderReplacement: vi.fn(async () => {
+      providers = providers.map((item) => ({ ...item, version: item.version + 1 }));
+      return ok(providers[0]);
+    }),
+    refreshProviderModels: vi.fn(async () =>
       ok({
-        providerId: id,
-        models: [{ id: 'model-1', name: 'Model One' }],
-        fetchedAt: 1,
+        providerId: '11111111-1111-4111-8111-111111111111',
+        models: [
+          { id: 'model-1', name: 'Model One' },
+          { id: 'model-2', name: 'Model Two' },
+        ],
+        fetchedAt: Date.now(),
       }),
     ),
-    testProvider: vi.fn(async () => ok({ ok: true })),
   };
-  let nativeRecords = ['codex', 'claude', 'pi', 'dsh'].map((driver) =>
-    LocalAgentConnectionSchema.parse({
-      id: driver,
-      driver,
-      name: driver,
-      executablePath: driver,
-      enabled: true,
-      writeScopes: [],
-      revision: 7,
-      createdAt: 1,
-      updatedAt: 1,
-    }),
-  );
-  if (empty) nativeRecords = [];
   const localClient = {
-    listConnections: vi.fn(async () => nativeRecords),
-    saveConnection: vi.fn(
-      async (input: LocalAgentConnectionInput, id?: string, revision?: number) => {
-        const old = nativeRecords.find((item) => item.id === id);
-        if (old && old.revision !== revision) throw new Error('Conflict');
-        const saved = LocalAgentConnectionSchema.parse({
-          ...input,
-          id: id ?? 'new-native',
-          revision: (old?.revision ?? 0) + 1,
-          createdAt: 1,
-          updatedAt: 2,
-        });
-        nativeRecords = old
-          ? nativeRecords.map((item) => (item.id === id ? saved : item))
-          : [...nativeRecords, saved];
-        return saved;
-      },
-    ),
-    deleteConnection: vi.fn(async (id: string) => {
-      nativeRecords = nativeRecords.filter((item) => item.id !== id);
-    }),
+    listConnections: vi.fn(async () => [...native]),
+    saveConnection: vi.fn(),
     probeDefaultDriver: vi.fn(async (): Promise<LocalAgentStatus> => ({
-      status: 'ready',
-      version: 'native-default',
-      models: [{ id: 'default-model', name: 'Default native model' }],
+      status: 'not_installed',
+      message: 'Not installed',
     })),
     probeConnection: vi.fn(async (): Promise<LocalAgentStatus> => ({
-      status: 'ready' as const,
-      version: '1.0',
+      status: 'ready',
       models: [{ id: 'native-model', name: 'Native Model' }],
+      version: '1.0',
     })),
   };
-  let instanceRecords: AgentInstance[] = [
-    AgentInstanceSchema.parse({
-      instanceId: 'mastra',
-      driver: 'mastra',
-      name: 'Mastra',
-      accentColor: '#6469da',
-      enabled: true,
-      revision: 0,
-      createdAt: 0,
-      updatedAt: 0,
-    }),
-  ];
-  let bindingRecords: AgentInstanceModelBinding[] = [];
-  const registryClient = {
-    list: vi.fn(async () => ({
-      instances: [...instanceRecords],
-      bindings: [...bindingRecords],
-    })),
+  const registry = {
+    list: vi.fn(async () => ({ instances: [...instances], bindings: [...bindings] })),
     execute: vi.fn(async (raw: unknown) => {
-      const cmd = AgentRegistryCommandSchema.parse(raw);
-      if (cmd.action === 'create') {
-        if (instanceRecords.some((item) => item.instanceId === cmd.instance.instanceId))
+      const command = AgentRegistryCommandSchema.parse(raw);
+      if (command.action === 'list') return { instances: [...instances], bindings: [...bindings] };
+      if (command.action === 'conversation_selection') return null;
+      if (command.action === 'create') {
+        if (instances.some((item) => item.instanceId === command.instance.instanceId))
           throw new Error('CONFLICT');
-        const next = AgentInstanceSchema.parse({
-          ...cmd.instance,
+        const saved = AgentInstanceSchema.parse({
+          ...command.instance,
           revision: 1,
-          createdAt: 10,
-          updatedAt: 10,
+          createdAt: 1,
+          updatedAt: 1,
         });
-        instanceRecords = [...instanceRecords, next];
-        return next;
+        if (saved.driver !== 'mastra') saved.legacyConnectionId = `native-${saved.instanceId}`;
+        instances.push(saved);
+        if (saved.driver !== 'mastra')
+          native.push(
+            LocalAgentConnectionSchema.parse({
+              id: saved.legacyConnectionId,
+              driver: saved.driver,
+              instanceSlug: saved.instanceId,
+              name: saved.name,
+              executablePath: saved.nativeConfig?.executablePath ?? saved.driver,
+              homePath: saved.nativeConfig?.homePath,
+              enabled: saved.enabled,
+              writeScopes: saved.nativeConfig?.writeScopes ?? [],
+              revision: 1,
+              createdAt: 1,
+              updatedAt: 1,
+            }),
+          );
+        return saved;
       }
-      if (cmd.action === 'list')
-        return { instances: [...instanceRecords], bindings: [...bindingRecords] };
-      const prior = instanceRecords.find((item) => item.instanceId === cmd.instanceId);
-      if (!prior || prior.revision !== cmd.expectedRevision) throw new Error('CONFLICT');
-      if (cmd.action === 'remove') {
-        instanceRecords = instanceRecords.filter((item) => item.instanceId !== cmd.instanceId);
-        bindingRecords = bindingRecords.filter((item) => item.instanceId !== cmd.instanceId);
+      const old = instances.find((item) => item.instanceId === command.instanceId);
+      if (!old || old.revision !== command.expectedRevision) throw new Error('CONFLICT');
+      if (command.action === 'remove') {
+        instances = instances.filter((item) => item.instanceId !== command.instanceId);
+        bindings = bindings.filter((item) => item.instanceId !== command.instanceId);
+        native = native.filter((item) => item.id !== old.legacyConnectionId);
         return null;
       }
       const next = AgentInstanceSchema.parse({
-        ...prior,
-        ...(cmd.action === 'update' ? cmd.patch : {}),
-        revision: prior.revision + 1,
+        ...old,
+        ...(command.action === 'update' ? command.patch : {}),
+        revision: old.revision + 1,
       });
-      instanceRecords = instanceRecords.map((item) =>
-        item.instanceId === cmd.instanceId ? next : item,
-      );
-      if (cmd.action === 'bind')
-        bindingRecords = [
-          ...bindingRecords.filter(
-            (item) => item.instanceId !== cmd.instanceId || item.connectionId !== cmd.connectionId,
+      if (next.driver !== 'mastra') {
+        next.legacyConnectionId ??= `native-${next.instanceId}`;
+        const record = LocalAgentConnectionSchema.parse({
+          id: next.legacyConnectionId,
+          driver: next.driver,
+          instanceSlug: next.instanceId,
+          name: next.name,
+          executablePath: next.nativeConfig?.executablePath ?? next.driver,
+          homePath: next.nativeConfig?.homePath,
+          enabled: next.enabled,
+          writeScopes: next.nativeConfig?.writeScopes ?? [],
+          revision: next.revision,
+          createdAt: 1,
+          updatedAt: 1,
+        });
+        native = [...native.filter((item) => item.id !== record.id), record];
+      }
+      instances = instances.map((item) => (item.instanceId === command.instanceId ? next : item));
+      if (command.action === 'bind')
+        bindings = [
+          ...bindings.filter(
+            (item) =>
+              item.instanceId !== command.instanceId || item.connectionId !== command.connectionId,
           ),
-          { instanceId: cmd.instanceId, connectionId: cmd.connectionId, modelId: cmd.modelId },
+          {
+            instanceId: command.instanceId,
+            connectionId: command.connectionId,
+            modelId: command.modelId,
+          },
         ];
-      if (cmd.action === 'unbind')
-        bindingRecords = bindingRecords.filter(
-          (item) => item.instanceId !== cmd.instanceId || item.connectionId !== cmd.connectionId,
+      if (command.action === 'unbind')
+        bindings = bindings.filter(
+          (item) =>
+            item.instanceId !== command.instanceId || item.connectionId !== command.connectionId,
         );
       return next;
     }),
   };
-
   const wrapper = mount(AISettings, {
     global: {
       stubs: { teleport: true, DialogContent: { template: '<div><slot /></div>' } },
       plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
       provide: {
         [AI_CLIENT_KEY as symbol]: client,
-        ...(withNative ? { [AI_LOCAL_AGENT_KEY as symbol]: localClient } : {}),
-        ...(withRegistry ? { [AI_AGENT_REGISTRY_KEY as symbol]: registryClient } : {}),
+        [AI_CONFIGURATION_REVISION_KEY as symbol]: epoch,
+        ...(options.native ? { [AI_LOCAL_AGENT_KEY as symbol]: localClient } : {}),
+        ...(!options.noRegistry ? { [AI_AGENT_REGISTRY_KEY as symbol]: registry } : {}),
       },
     },
   });
+  wrappers.push(wrapper);
   await flushPromises();
-  return { wrapper, client, localClient, registryClient };
+  await flushPromises();
+  return { wrapper, client, registry, localClient, epoch };
+}
+async function openIdentity(wrapper: VueWrapper, driver = 'mastra') {
+  await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+  await flushPromises();
+  await wrapper.get(`[data-testid="ai-provider-catalog-${driver}"]`).trigger('click');
+  await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+  await flushPromises();
+}
+async function configure(wrapper: VueWrapper) {
+  await wrapper.get('[data-testid="ai-endpoint"]').setValue('https://api.example.com/v1');
+  await wrapper.get('[data-testid="ai-api-key"]').setValue('sk-private-fixture');
+  await wrapper.get('[data-testid="ai-connection-verify"]').trigger('click');
+  await flushPromises();
 }
 
-describe('Providers settings interactions', () => {
-  it('keeps an unsaved name draft when a recheck reloads unchanged metadata', async () => {
-    const { wrapper } = await setup();
-    await wrapper.get('#ai-saved-provider-name').setValue('Draft');
-    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
-    await flushPromises();
-    expect((wrapper.get('#ai-saved-provider-name').element as HTMLInputElement).value).toBe(
-      'Draft',
-    );
-    wrapper.unmount();
-  });
-
-  it('discards a model refresh that arrives after the provider configuration changes', async () => {
-    const { wrapper, client } = await setup();
-    let finish!: (value: Awaited<ReturnType<typeof client.refreshProviderModels>>) => void;
-    client.refreshProviderModels.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          finish = resolve;
-        }),
-    );
-    await wrapper.get('[data-testid="ai-saved-provider-models"] button').trigger('click');
-    await wrapper.get('[role="switch"][aria-label="Enable First"]').trigger('click');
-    await flushPromises();
-    finish(
-      ok({
-        providerId: '11111111-1111-4111-8111-111111111111',
-        models: [{ id: 'late-model', name: 'Late Model' }],
-        fetchedAt: 1,
-      }),
-    );
-    await flushPromises();
-    expect(wrapper.get('[data-testid="ai-saved-provider-models"]').text()).not.toContain(
-      'Late Model',
-    );
-    wrapper.unmount();
-  });
-
-  it('selects the actual provider, saves its name and keeps the same selection after reload', async () => {
-    const { wrapper, client } = await setup();
-    await wrapper
-      .get('[data-testid="ai-provider-select-22222222-2222-4222-8222-222222222222"]')
-      .trigger('click');
-    await wrapper.get('#ai-saved-provider-name').setValue('Renamed');
-    await wrapper.get('[data-testid="ai-provider-save-metadata"]').trigger('click');
-    await flushPromises();
-    expect(client.updateProvider).toHaveBeenCalledWith('22222222-2222-4222-8222-222222222222', {
-      name: 'Renamed',
-    });
-    expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain('Renamed');
-    expect(
-      wrapper
-        .get('[data-testid="ai-provider-select-22222222-2222-4222-8222-222222222222"]')
-        .attributes('aria-current'),
-    ).toBe('true');
-    wrapper.unmount();
-  });
-
-  it('persists enabled state through the owner rather than changing a display-only switch', async () => {
-    const { wrapper, client } = await setup();
-    const row = wrapper.get(
-      '[data-testid="ai-provider-select-22222222-2222-4222-8222-222222222222"]',
-    ).element.parentElement!;
-    await wrapper.get(`[role="switch"][aria-label="Enable Second"]`).trigger('click');
-    await flushPromises();
-    expect(client.updateProvider).toHaveBeenCalledWith('22222222-2222-4222-8222-222222222222', {
-      isActive: false,
-    });
-    expect(row.textContent).toContain('Inactive');
-    wrapper.unmount();
-  });
-
-  it('rechecks catalog reads without paid connection tests or exposing credential handles', async () => {
-    const { wrapper, client } = await setup();
-    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
-    await flushPromises();
-    expect(client.refreshProviderModels.mock.calls.map(([id]) => id)).toEqual([
-      '11111111-1111-4111-8111-111111111111',
-      '22222222-2222-4222-8222-222222222222',
-    ]);
-    expect(client.testProvider).not.toHaveBeenCalled();
-    expect(wrapper.get('[data-testid="ai-saved-provider-models"]').text()).toContain('Model One');
-    expect(wrapper.text()).not.toContain('opaque-secret-handle');
-    expect(wrapper.find('input[placeholder="Search providers…"]').exists()).toBe(false);
-    wrapper.unmount();
-  });
-
-  it('keeps the draft when save fails and never reports a failed update as persisted', async () => {
-    const { wrapper, client } = await setup();
-    client.updateProvider.mockResolvedValueOnce(
-      fail({ code: 'CONFLICT', message: 'Changed elsewhere' }),
-    );
-    await wrapper.get('#ai-saved-provider-name').setValue('Draft');
-    await wrapper.get('[data-testid="ai-provider-save-metadata"]').trigger('click');
-    await flushPromises();
-    expect((wrapper.get('#ai-saved-provider-name').element as HTMLInputElement).value).toBe(
-      'Draft',
-    );
-    expect(
-      wrapper.get('[data-testid="ai-provider-select-11111111-1111-4111-8111-111111111111"]').text(),
-    ).toContain('First');
-    wrapper.unmount();
-  });
-});
-
-describe('Unified native Providers', () => {
-  it('keeps native wizard labels associated with its own inputs', async () => {
-    const { wrapper } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    const inputs = wrapper.findAll('input[id]');
-    const ids = inputs.map((input) => input.attributes('id'));
-    expect(new Set(ids).size).toBe(ids.length);
-    const wizard = wrapper.get('[data-testid="ai-agent-wizard"]');
-    for (const label of wizard.findAll('label[for]')) {
-      expect(
-        wizard.findAll('input').some((input) => input.attributes('id') === label.attributes('for')),
-      ).toBe(true);
-    }
-    wrapper.unmount();
-  });
-
-  it('rejects a whitespace-only native name before invoking the owner', async () => {
-    const { wrapper, localClient } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-native-name"]').setValue('   ');
-    expect(wrapper.get('[data-testid="ai-native-save"]').attributes('disabled')).toBeDefined();
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
-    expect(localClient.saveConnection).not.toHaveBeenCalled();
-    wrapper.unmount();
-  });
-  it('shows API connections and all four native drivers in one list with one detail', async () => {
-    const { wrapper } = await setup(true);
-    expect(wrapper.findAll('[data-testid="ai-provider-list"] [role="listitem"]')).toHaveLength(10);
-    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
-      expect(wrapper.find(`[data-testid="ai-provider-select-slot:${driver}"]`).exists()).toBe(true);
-    }
-    await wrapper.get('[data-testid="ai-provider-select-local:claude"]').trigger('click');
-    expect(wrapper.findAll('[data-testid="ai-provider-detail"]')).toHaveLength(1);
-    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
-      'claude',
-    );
-    expect(wrapper.find('#ai-saved-provider-url').exists()).toBe(false);
-    wrapper.unmount();
-  });
-  it('saves native configuration with its current revision and never calls API update', async () => {
-    const { wrapper, localClient, client } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-native-name"]').setValue('Personal Codex');
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
-    await flushPromises();
-    expect(localClient.saveConnection).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Personal Codex', driver: 'codex', writeScopes: [] }),
-      'codex',
-      7,
-    );
-    expect(client.updateProvider).not.toHaveBeenCalled();
-    expect(wrapper.get('[data-testid="ai-provider-select-local:codex"]').text()).toContain(
-      'Personal Codex',
-    );
-    wrapper.unmount();
-  });
-  it('keeps native draft and shows an error when a revision save fails', async () => {
-    const { wrapper, localClient } = await setup(true);
-    localClient.saveConnection.mockRejectedValueOnce(new Error('Conflict'));
-    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-native-name"]').setValue('Unsaved');
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
-    await flushPromises();
-    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
-      'Unsaved',
-    );
-    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
-    wrapper.unmount();
-  });
-  it('toggles a native provider through the native owner with no write-scope expansion', async () => {
-    const { wrapper, localClient, client } = await setup(true);
-    await wrapper.get('[role="switch"][aria-label="Enable codex"]').trigger('click');
-    await flushPromises();
-    expect(localClient.saveConnection).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: false, writeScopes: [] }),
-      'codex',
-      7,
-    );
-    expect(client.updateProvider).not.toHaveBeenCalled();
-    wrapper.unmount();
-  });
-  it('rechecks native login and catalog without sending any inference request', async () => {
-    const { wrapper, localClient, client } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
-    await flushPromises();
-    expect(localClient.probeConnection).toHaveBeenCalledTimes(4);
-    expect(client.testProvider).not.toHaveBeenCalled();
-    await wrapper.get('[data-testid="ai-provider-select-local:dsh"]').trigger('click');
-    expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain('Native Model');
-    wrapper.unmount();
-  });
-  it('removes a native association and selects an existing provider', async () => {
-    const { wrapper, localClient } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-select-local:pi"]').trigger('click');
-    const remove = wrapper
-      .findAll('[data-testid="ai-provider-detail"] button')
-      .find((button) => button.text() === 'Delete')!;
-    await remove.trigger('click');
-    await flushPromises();
-    expect(localClient.deleteConnection).toHaveBeenCalledWith('pi');
-    expect(wrapper.find('[data-testid="ai-provider-select-local:pi"]').exists()).toBe(false);
-    expect(wrapper.find('#ai-saved-provider-name').exists()).toBe(true);
-    wrapper.unmount();
-  });
-});
-
-describe('Provider creation and composer integration', () => {
-  it('creates a native provider from the same add menu with no provider search', async () => {
-    const { wrapper, localClient } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await flushPromises();
-    expect(
-      wrapper
-        .findAll('[data-testid^="ai-provider-catalog-"]')
-        .filter((item) =>
-          ['codex', 'claude', 'pi', 'dsh'].some((driver) =>
-            item.attributes('data-testid')?.endsWith(driver),
-          ),
-        ),
-    ).toHaveLength(4);
-    await wrapper.get('[data-testid="ai-provider-catalog-dsh"]').trigger('click');
-    await wrapper.get('#ai-instance-name').setValue('DSH Personal');
-    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    await wrapper
-      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-provider-detail"]')
-      .trigger('submit');
-    await flushPromises();
-    expect(localClient.saveConnection).toHaveBeenCalledWith(
-      expect.objectContaining({
-        driver: 'dsh',
-        name: 'DSH Personal',
-        enabled: true,
-        writeScopes: [],
-      }),
-    );
-    expect(wrapper.find('[data-testid="ai-provider-select-local:new-native"]').exists()).toBe(true);
-    wrapper.unmount();
-  });
-  it('does not steal selection when a native save finishes after switching provider', async () => {
-    const { wrapper, localClient } = await setup(true);
-    const implementation = localClient.saveConnection.getMockImplementation()!;
-    let release!: () => void;
-    localClient.saveConnection.mockImplementationOnce(async (...args) => {
-      await new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      return implementation(...args);
-    });
-    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('[data-testid="ai-native-name"]').setValue('Saved elsewhere');
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
-    await wrapper.get('[data-testid="ai-provider-select-local:pi"]').trigger('click');
-    release();
-    await flushPromises();
-    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
-      'pi',
-    );
-    expect(
-      wrapper.get('[data-testid="ai-provider-select-local:pi"]').attributes('aria-current'),
-    ).toBe('true');
-    wrapper.unmount();
-  });
-  it('places native provider and model selection inside the input bottom rail and keeps exact model IDs', async () => {
-    const onSelect = vi.fn();
-    const wrapper = mount(AIFooterComposer, {
-      props: { modelValue: '', loading: false, canSend: false, modelGroups: [], localAgent: true },
-      slots: {
-        'provider-options': () =>
-          h(AILocalRuntimePicker, {
-            choice: { runtimeKind: 'local_agent', connectionId: 'codex', modelId: 'native-model' },
-            connections: [
-              LocalAgentConnectionSchema.parse({
-                id: 'codex',
-                driver: 'codex',
-                name: 'Codex',
-                executablePath: 'codex',
-                enabled: true,
-                writeScopes: [],
-                revision: 1,
-                createdAt: 1,
-                updatedAt: 1,
-              }),
-            ],
-            models: [
-              { id: 'native-model', name: 'Native Model' },
-              { id: 'opaque/model[1m]', name: 'Second Model' },
-            ],
-            status: { status: 'ready', models: [] },
-            loading: false,
-            disabled: false,
-            onSelect,
-          }),
-      },
-      global: {
-        plugins: [
-          createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
-        ],
-      },
-    });
-    const rail = wrapper.get('[data-testid="ai-composer-options"]');
-    expect(rail.get('[data-testid="ai-local-runtime-picker"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ai-chat-empty-models"]').exists()).toBe(false);
-    await rail.get('select[aria-label="Model"]').setValue('opaque/model[1m]');
-    expect(onSelect).toHaveBeenCalledWith({
-      runtimeKind: 'local_agent',
-      connectionId: 'codex',
-      modelId: 'opaque/model[1m]',
-    });
-    wrapper.unmount();
-  });
-});
-
-describe('credential-free Mastra registry UI', () => {
-  it('creates and reloads a real Mastra instance on Web before choosing a model service', async () => {
-    const { wrapper, client, registryClient, localClient } = await setup(false, true, true);
+describe('T3-style Agent settings and direct endpoint configuration', () => {
+  it('shows a real default Mastra with both row and detail enable switches and no vendor catalogue', async () => {
+    const { wrapper, client, localClient } = await setup();
     expect(wrapper.findAll('[role="listitem"]')).toHaveLength(1);
-    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="ai-mastra-needs-config"]').text()).toContain(
-      'No model services',
-    );
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await flushPromises();
-    expect(wrapper.findAll('[data-testid^="ai-provider-catalog-"]')).toHaveLength(1);
-    expect(wrapper.find('[data-testid="ai-provider-catalog-codex"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="ai-provider-catalog-mastra"]').trigger('click');
-    await wrapper.get('#ai-instance-name').setValue('Mastra AnyRouter');
-    await wrapper.get('#ai-instance-slug').setValue('mastra-anyrouter');
+    expect(wrapper.find('[data-testid="ai-provider-toggle-mastra"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-provider-detail-toggle"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-endpoint"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-api-key"]').attributes('type')).toBe('password');
+    expect(client.getProviderCatalog).not.toHaveBeenCalled();
+    expect(localClient.listConnections).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toMatch(/OpenRouter|DeepSeek|Gemini/);
+  });
+  it('saves an unconfigured named Mastra and keeps the selection after recheck without credentials', async () => {
+    const { wrapper, registry, client, epoch } = await setup();
+    await openIdentity(wrapper);
+    await wrapper.get('[data-testid="ai-instance-name"]').setValue('Mastra Work');
+    await wrapper.get('[data-testid="ai-instance-slug"]').setValue('mastra-work');
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    expect(
+      wrapper.find('[data-testid="ai-agent-wizard"] [data-testid="ai-api-key"]').exists(),
+    ).toBe(false);
     await wrapper.get('[data-testid="ai-agent-instance-save"]').trigger('click');
     await flushPromises();
-    expect(registryClient.execute).toHaveBeenCalledWith({
+    expect(registry.execute).toHaveBeenCalledWith({
       action: 'create',
-      instance: {
+      instance: expect.objectContaining({
         driver: 'mastra',
-        instanceId: 'mastra-anyrouter',
-        name: 'Mastra AnyRouter',
-        accentColor: '#6469da',
-        enabled: true,
-      },
+        instanceId: 'mastra-work',
+        name: 'Mastra Work',
+      }),
     });
     expect(
       wrapper
-        .get('[data-testid="ai-provider-select-agent:mastra-anyrouter"]')
+        .get('[data-testid="ai-provider-select-agent:mastra-work"]')
         .attributes('aria-current'),
     ).toBe('true');
-    expect(wrapper.get('#ai-mastra-agent-id').element.value).toBe('mastra-anyrouter');
-    expect(client.updateProvider).not.toHaveBeenCalled();
-    expect(localClient.listConnections).not.toHaveBeenCalled();
+    expect(wrapper.get('[data-testid="ai-mastra-agent-id"]').element).toHaveProperty(
+      'value',
+      'mastra-work',
+    );
+    expect(client.probeProviderConnection).not.toHaveBeenCalled();
+    expect(epoch.value).toBeGreaterThan(0);
     await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
     await flushPromises();
-    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra-anyrouter"]').exists()).toBe(
-      true,
-    );
-    expect(registryClient.list).toHaveBeenCalled();
-    wrapper.unmount();
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra-work"]').exists()).toBe(true);
   });
-
-  it('binds an existing verified model-service connection to an Agent, without copying credentials', async () => {
-    const { wrapper, registryClient, client } = await setup(false, false, true);
-    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(1);
-    await wrapper
-      .get('[data-testid="ai-mastra-service-select"]')
-      .setValue('11111111-1111-4111-8111-111111111111');
-    await wrapper.get('[data-testid="ai-mastra-bind-existing"]').trigger('click');
-    await flushPromises();
-    expect(registryClient.execute).toHaveBeenCalledWith({
-      action: 'bind',
-      instanceId: 'mastra',
-      expectedRevision: 0,
-      connectionId: '11111111-1111-4111-8111-111111111111',
-      modelId: 'model-1',
-    });
-    expect(wrapper.get('[data-testid="ai-mastra-instance-detail"]').text()).toContain('model-1');
-    expect(client.updateProvider).not.toHaveBeenCalled();
-    await wrapper
-      .get('[data-testid="ai-mastra-unbind-11111111-1111-4111-8111-111111111111"]')
-      .trigger('click');
-    await flushPromises();
-    expect(registryClient.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action: 'unbind',
-        instanceId: 'mastra',
-        expectedRevision: 1,
-      }),
-    );
-    wrapper.unmount();
-  });
-});
-
-describe('Agent defaults and wizard capabilities', () => {
-  it('shows unconfigured Mastra on Web, with only Mastra in Agent selection', async () => {
-    const { wrapper, client, localClient } = await setup(false, true);
-    expect(wrapper.get('[data-testid="ai-provider-list"]').text()).toContain('Mastra');
-    expect(wrapper.get('[data-testid="ai-mastra-needs-config"]').text()).toContain(
-      'Needs model configuration',
-    );
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await flushPromises();
-    expect(wrapper.findAll('[data-testid^="ai-provider-catalog-"]')).toHaveLength(1);
-    expect(wrapper.find('[data-testid="ai-provider-catalog-openai"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="ai-provider-catalog-mastra"]').trigger('click');
-    await wrapper.get('#ai-instance-name').setValue('Work Mastra');
-    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    expect(wrapper.get('[data-testid="ai-mastra-config"]').text()).toContain(
-      'Select a model API service for Mastra.',
-    );
-    await wrapper.get('[data-testid="ai-provider-catalog-openai"]').trigger('click');
-    expect(wrapper.find('#ai-provider-api-key').exists()).toBe(true);
-    expect(client.updateProvider).not.toHaveBeenCalled();
-    expect(localClient.listConnections).not.toHaveBeenCalled();
-    wrapper.unmount();
-  });
-  it('synthesizes four Desktop slots, probes without saving, and materializes one slot without duplication', async () => {
-    const { wrapper, localClient } = await setup(true, true);
-    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
-    expect(localClient.probeConnection).not.toHaveBeenCalled();
-    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(4);
-    expect(localClient.saveConnection).not.toHaveBeenCalled();
-    await wrapper.get('[data-testid="ai-provider-select-slot:codex"]').trigger('click');
-    expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
-      'Default native model',
-    );
-    expect(wrapper.get('[data-testid="ai-native-id"]').attributes('readonly')).toBeDefined();
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
-    await flushPromises();
-    expect(localClient.saveConnection).toHaveBeenCalledWith(
-      expect.objectContaining({ instanceSlug: 'codex-default', driver: 'codex' }),
-      undefined,
-      undefined,
-    );
-    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
-    expect(wrapper.find('[data-testid="ai-provider-select-slot:codex"]').exists()).toBe(false);
-    expect(
-      wrapper.get('[data-testid="ai-provider-select-local:new-native"]').attributes('aria-current'),
-    ).toBe('true');
-    expect(localClient.probeConnection).not.toHaveBeenCalled();
-    wrapper.unmount();
-  });
-  it('keeps the built-in Codex slot when a second named Codex instance is created', async () => {
-    const { wrapper, localClient } = await setup(true, true);
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await flushPromises();
-    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
-    await wrapper.get('#ai-instance-name').setValue('Codex Work');
-    await wrapper.get('#ai-instance-slug').setValue('codex-work');
-    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    await wrapper
-      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-provider-detail"]')
-      .trigger('submit');
-    await flushPromises();
-    expect(localClient.saveConnection).toHaveBeenCalledWith(
-      expect.objectContaining({ driver: 'codex', instanceSlug: 'codex-work' }),
-    );
-    expect(wrapper.find('[data-testid="ai-provider-select-slot:codex"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-provider-select-local:new-native"]').exists()).toBe(true);
-    expect(wrapper.findAll('[data-testid="ai-provider-list"] [role="listitem"]')).toHaveLength(6);
-    wrapper.unmount();
-  });
-  it('blocks duplicate identity and preserves identity while navigating back from Config', async () => {
-    const { wrapper, localClient } = await setup(true);
-    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
-    await flushPromises();
-    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
-    await wrapper.get('#ai-instance-slug').setValue('codex');
+  it('rejects duplicate IDs, keeps identity/config drafts when going back and uses one footer', async () => {
+    const { wrapper, registry } = await setup({ native: true });
+    await openIdentity(wrapper, 'codex');
+    await wrapper.get('[data-testid="ai-instance-slug"]').setValue('codex');
     expect(
       wrapper.get('[data-testid="ai-instance-continue"]').attributes('disabled'),
     ).toBeDefined();
-    await wrapper.get('#ai-instance-slug').setValue('codex-work');
-    await wrapper.get('#ai-instance-name').setValue('Work');
+    await wrapper.get('[data-testid="ai-instance-slug"]').setValue('codex-work');
+    await wrapper.get('[data-testid="ai-instance-name"]').setValue('Codex Work');
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    await wrapper
-      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-native-home"]')
-      .setValue('/work/home');
+    await wrapper.get('[data-testid="ai-instance-home"]').setValue('/work/account');
     await wrapper
       .get('[data-testid="ai-agent-wizard"]')
       .findAll('button')
-      .find((item) => item.text() === 'Back')!
+      .find((button) => button.text() === 'Back')!
       .trigger('click');
-    expect((wrapper.get('#ai-instance-slug').element as HTMLInputElement).value).toBe('codex-work');
+    expect(wrapper.get('[data-testid="ai-instance-name"]').element).toHaveProperty(
+      'value',
+      'Codex Work',
+    );
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    expect(
-      (
-        wrapper.get('[data-testid="ai-agent-wizard"] [data-testid="ai-native-home"]')
-          .element as HTMLInputElement
-      ).value,
-    ).toBe('/work/home');
-    expect(localClient.saveConnection).not.toHaveBeenCalled();
-    wrapper.unmount();
+    expect(wrapper.get('[data-testid="ai-instance-home"]').element).toHaveProperty(
+      'value',
+      '/work/account',
+    );
+    await wrapper.get('[data-testid="ai-agent-instance-save"]').trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'create',
+      instance: expect.objectContaining({
+        driver: 'codex',
+        instanceId: 'codex-work',
+        nativeConfig: expect.objectContaining({ homePath: '/work/account', writeScopes: [] }),
+      }),
+    });
+    expect(wrapper.find('[data-testid="ai-provider-select-agent:codex"]').exists()).toBe(true);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(6);
   });
-  it.each(['not_installed', 'login_required', 'unavailable', 'ready'] as const)(
-    'displays explicit native %s status',
-    async (status) => {
-      const { wrapper, localClient } = await setup(true);
-      localClient.probeConnection.mockResolvedValueOnce(
-        status === 'ready'
-          ? { status, models: [{ id: 'model', name: 'Model' }], version: '1' }
-          : { status, message: status },
-      );
-      await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-      await wrapper
-        .get('[data-testid="ai-provider-detail"]')
-        .findAll('button')
-        .find((item) => item.text().includes('Check'))!
-        .trigger('click');
-      await flushPromises();
-      expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
-        status === 'ready' ? 'Model' : status,
-      );
-      wrapper.unmount();
-    },
-  );
+  it('keeps each field label associated with its own wizard input, never the background form', async () => {
+    const { wrapper } = await setup({ native: true });
+    await openIdentity(wrapper, 'codex');
+    const wizard = wrapper.get('[data-testid="ai-agent-wizard"]');
+    const ids = wizard.findAll('input[id]').map((input) => input.attributes('id'));
+    for (const id of ids) expect(wrapper.findAll(`input[id="${id}"]`)).toHaveLength(1);
+    for (const label of wizard.findAll('label[for]'))
+      expect(wizard.find(`input[id="${label.attributes('for')}"]`).exists()).toBe(true);
+  });
+  it('lets the implicit Mastra default be disabled and re-enabled with Revision 0 materialization', async () => {
+    const { wrapper, registry, epoch } = await setup();
+    await wrapper.get('[data-testid="ai-provider-toggle-mastra"]').trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'update',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      patch: { enabled: false },
+    });
+    expect(wrapper.get('[data-testid="ai-provider-detail-toggle"]').attributes('data-state')).toBe(
+      'unchecked',
+    );
+    await wrapper.get('[data-testid="ai-provider-detail-toggle"]').trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenLastCalledWith({
+      action: 'update',
+      instanceId: 'mastra',
+      expectedRevision: 1,
+      patch: { enabled: true },
+    });
+    expect(epoch.value).toBe(2);
+  });
+  it('shows all native defaults, probes without saving, and persists their toggles through the registry', async () => {
+    const { wrapper, registry, localClient } = await setup({ native: true });
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
+    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(4);
+    expect(registry.execute).not.toHaveBeenCalled();
+    for (const id of ['mastra', 'codex', 'claude', 'pi', 'dsh'])
+      expect(wrapper.find(`[data-testid="ai-provider-toggle-${id}"]`).exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-provider-toggle-codex"]').trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'update',
+      instanceId: 'codex',
+      expectedRevision: 0,
+      patch: { enabled: false },
+    });
+    expect(localClient.saveConnection).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-provider-detail-toggle"]').attributes('data-state')).toBe(
+      'unchecked',
+    );
+  });
+  it('rejects an empty native name, preserves write scopes and current native identity during save', async () => {
+    const { wrapper, registry } = await setup({ native: true });
+    await wrapper.get('[data-testid="ai-provider-select-agent:claude"]').trigger('click');
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('  ');
+    expect(wrapper.get('[data-testid="ai-native-save"]').attributes('disabled')).toBeDefined();
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('My Claude');
+    await wrapper.get('[data-testid="ai-native-home"]').setValue('/account/work');
+    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'update',
+      instanceId: 'claude',
+      expectedRevision: 0,
+      patch: expect.objectContaining({
+        name: 'My Claude',
+        nativeConfig: expect.objectContaining({ writeScopes: [], homePath: '/account/work' }),
+      }),
+    });
+  });
+  it('retains unsaved form drafts when metadata did not change on recheck', async () => {
+    const { wrapper } = await setup();
+    await wrapper.get('[data-testid="ai-mastra-agent-name"]').setValue('My draft');
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-mastra-agent-name"]').element).toHaveProperty(
+      'value',
+      'My draft',
+    );
+  });
+  it('shows revision failure without claiming success or changing selection', async () => {
+    const { wrapper, registry } = await setup();
+    registry.execute.mockRejectedValueOnce(new Error('CONFLICT'));
+    await wrapper.get('[data-testid="ai-mastra-agent-name"]').setValue('Failed draft');
+    await wrapper.get('[data-testid="ai-mastra-agent-name"]').trigger('blur');
+    await flushPromises();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-mastra-agent-name"]').element).toHaveProperty(
+      'value',
+      'Failed draft',
+    );
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:mastra"]').text()).toContain(
+      'Mastra',
+    );
+  });
+  it('directly verifies Endpoint and Key without vendor selection or a second modal', async () => {
+    const { wrapper, client, registry, epoch } = await setup();
+    await configure(wrapper);
+    expect(client.probeProviderConnection).toHaveBeenCalledWith({
+      catalogId: 'custom',
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: 'sk-private-fixture',
+    });
+    expect(wrapper.get('[data-testid="ai-api-key"]').element).toHaveProperty('value', '');
+    expect(wrapper.html()).not.toContain('sk-private-fixture');
+    expect(wrapper.html()).not.toContain('single-use-onboarding-handle');
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    expect(client.commitProviderOnboarding).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onboardingId: 'single-use-onboarding-handle',
+        defaultModelId: 'model-1',
+      }),
+    );
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'bind',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      connectionId: '22222222-2222-4222-8222-222222222222',
+      modelId: 'model-1',
+    });
+    expect(epoch.value).toBeGreaterThan(0);
+    expect(client.getProviderCatalog).not.toHaveBeenCalled();
+  });
+  it('uses the identity-bound replacement path and never reveals the saved key', async () => {
+    const { wrapper, client } = await setup({ bound: true });
+    expect(wrapper.html()).not.toContain('opaque-host-secret');
+    expect(wrapper.get('[data-testid="ai-api-key"]').element).toHaveProperty('value', '');
+    await configure(wrapper);
+    expect(client.probeProviderReplacement).toHaveBeenCalledWith(
+      '11111111-1111-4111-8111-111111111111',
+      expect.objectContaining({ catalogId: 'custom', apiKey: 'sk-private-fixture' }),
+    );
+    expect(client.probeProviderConnection).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    expect(client.commitProviderReplacement).toHaveBeenCalledWith(
+      '11111111-1111-4111-8111-111111111111',
+      { onboardingId: 'single-use-onboarding-handle', defaultModelId: 'model-1' },
+    );
+    expect(client.commitProviderOnboarding).not.toHaveBeenCalled();
+  });
+  it('verifies and commits every subsequent credential rotation instead of reusing a stale committed handle', async () => {
+    const { wrapper, client } = await setup({ bound: true });
+    await configure(wrapper);
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-api-key"]').setValue('sk-next-fixture');
+    expect(
+      wrapper.get('[data-testid="ai-mastra-connection-save"]').attributes('disabled'),
+    ).toBeDefined();
+    await wrapper.get('[data-testid="ai-connection-verify"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    expect(client.commitProviderReplacement).toHaveBeenCalledTimes(2);
+    expect(wrapper.html()).not.toContain('sk-next-fixture');
+    expect(client.commitProviderOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('invalidates a verified handle after endpoint edits and never automatically performs a model test', async () => {
+    const { wrapper, client } = await setup();
+    await configure(wrapper);
+    expect(
+      wrapper.get('[data-testid="ai-mastra-connection-save"]').attributes('disabled'),
+    ).toBeUndefined();
+    await wrapper.get('[data-testid="ai-endpoint"]').setValue('https://other.example.com/v1');
+    expect(
+      wrapper.get('[data-testid="ai-mastra-connection-save"]').attributes('disabled'),
+    ).toBeDefined();
+    expect(client.testProviderOnboardingModel).not.toHaveBeenCalled();
+  });
+  it('requires an explicit warned test for a manually entered unadvertised model', async () => {
+    const { wrapper, client } = await setup();
+    client.probeProviderConnection.mockResolvedValueOnce(
+      ok({
+        ...probeResult(),
+        models: [],
+        credential: { status: 'requires_model_test' },
+        discovery: { status: 'unsupported', source: 'manual' },
+      }),
+    );
+    await configure(wrapper);
+    await wrapper.get('[data-testid="ai-manual-model"]').setValue('manual-model');
+    expect(wrapper.text()).toContain('may use provider credits');
+    expect(client.testProviderOnboardingModel).not.toHaveBeenCalled();
+    expect(
+      wrapper.get('[data-testid="ai-mastra-connection-save"]').attributes('disabled'),
+    ).toBeDefined();
+    await wrapper.get('[data-testid="ai-manual-model-test"]').trigger('click');
+    await flushPromises();
+    expect(client.testProviderOnboardingModel).toHaveBeenCalledWith({
+      onboardingId: 'single-use-onboarding-handle',
+      modelId: 'manual-model',
+    });
+    expect(
+      wrapper.get('[data-testid="ai-mastra-connection-save"]').attributes('disabled'),
+    ).toBeUndefined();
+  });
+  it('can retry binding after a successful credential commit without creating duplicate model connections', async () => {
+    const { wrapper, client, registry } = await setup();
+    await configure(wrapper);
+    registry.execute.mockRejectedValueOnce(new Error('CONFLICT'));
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-mastra-connection-save"]').trigger('click');
+    await flushPromises();
+    expect(client.commitProviderOnboarding).toHaveBeenCalledOnce();
+    expect(registry.execute).toHaveBeenCalledTimes(2);
+  });
+  it('does not render a fake saved instance when the registry is unavailable', async () => {
+    const { wrapper } = await setup({ noRegistry: true });
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(0);
+    expect(wrapper.get('[data-testid="ai-provider-add"]').attributes('disabled')).toBeDefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('unavailable');
+  });
+  it('discards an in-flight probe when the selected Agent detail is destroyed', async () => {
+    const { wrapper, client, registry } = await setup({ extra: true });
+    let resolve!: (value: ReturnType<typeof ok<ProbeAIProviderConnectionRes>>) => void;
+    client.probeProviderConnection.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    await wrapper.get('[data-testid="ai-endpoint"]').setValue('https://api.example.com/v1');
+    await wrapper.get('[data-testid="ai-api-key"]').setValue('sk-private-fixture');
+    await wrapper.get('[data-testid="ai-connection-verify"]').trigger('click');
+    await wrapper.get('[data-testid="ai-provider-select-agent:mastra-other"]').trigger('click');
+    resolve(ok(probeResult()));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-mastra-agent-id"]').element).toHaveProperty(
+      'value',
+      'mastra-other',
+    );
+    expect(wrapper.get('[data-testid="ai-api-key"]').element).toHaveProperty('value', '');
+    expect(registry.execute).not.toHaveBeenCalled();
+    expect(wrapper.findComponent(MastraAgentSettings).exists()).toBe(true);
+  });
 });

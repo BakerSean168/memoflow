@@ -349,6 +349,7 @@ export function useAssistantStream(input: {
     let assistantDraftId = '';
     let streamController: AbortController | null = null;
     let conversationId = '';
+    const permissionMode = options.getPermissionMode?.() ?? 'supervised';
 
     try {
       const pendingAttachments = composerAttachments.value.map((attachment) => ({
@@ -402,6 +403,7 @@ export function useAssistantStream(input: {
           conversationId,
           content: pendingUserMessage,
           surface: options.surface,
+          permissionMode,
           ...(choice.runtimeKind === 'local_agent'
             ? { runtimeKind: 'local_agent', modelId: choice.modelId }
             : {

@@ -17,6 +17,8 @@ export interface IAgentInstanceRepository {
     expectedRevision: number,
     binding: AgentInstanceModelBinding,
     remove: boolean,
+    /** Trusted host validation; fenced against provider revision before committing. */
+    verifiedProviderVersion?: number,
   ): Promise<AgentInstance>;
   hasConnectionBindings(owner: string, connectionId: string): Promise<boolean>;
   hasConversationBindings(owner: string, instanceId: string): Promise<boolean>;

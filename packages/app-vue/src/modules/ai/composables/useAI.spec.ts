@@ -1,5 +1,5 @@
-import { defineComponent, h } from 'vue';
-import { mount } from '@vue/test-utils';
+import { defineComponent, h, ref } from 'vue';
+import { mount, flushPromises } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   AICapabilities,
@@ -9,7 +9,7 @@ import type {
   TestAIProviderRes,
 } from '@memoflow/contracts/ai';
 import { ok } from '@memoflow/contracts/result';
-import { AI_CLIENT_KEY } from '../../../di/keys';
+import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '../../../di/keys';
 import { useAI } from './useAI';
 
 type AIClientStub = {
@@ -27,7 +27,6 @@ function createProvider(
     identityId: 'identity-1' as AIProviderConfigClientDTO['identityId'],
     name: 'Primary Provider',
     providerDefinitionId: 'openai',
-    providerDefinitionId: 'openai',
     baseUrl: 'https://api.example.com/v1',
     credentialRef: 'credential-test',
     defaultModel: 'gpt-4.1-mini',
@@ -42,9 +41,7 @@ function createProvider(
   };
 }
 
-function createCapabilities(
-  overrides: Partial<AICapabilities> = {},
-): AICapabilities {
+function createCapabilities(overrides: Partial<AICapabilities> = {}): AICapabilities {
   return {
     runtimeMode: 'mastra',
     supportsChat: true,
@@ -113,7 +110,10 @@ describe('useAI', () => {
   });
 
   it('keeps provider results strongly typed at the composable seam', async () => {
-    const providers = [createProvider(), createProvider({ id: 'provider-2' as AIProviderConfigClientDTO['id'], isDefault: false })];
+    const providers = [
+      createProvider(),
+      createProvider({ id: 'provider-2' as AIProviderConfigClientDTO['id'], isDefault: false }),
+    ];
     const { composable, client } = mountComposable({
       listProviders: vi.fn().mockResolvedValue(ok(providers)),
     });
@@ -154,5 +154,96 @@ describe('useAI', () => {
     expect(client.testProvider).toHaveBeenCalledWith(request);
     expect(loadedTestResult).toEqual(providerTestResult);
     expect(expanded).toEqual(expandKnowledgeResult);
+  });
+});
+
+describe('app-scoped provider invalidation', () => {
+  it('refreshes an already mounted chat reader after Settings commits without reloading the page', async () => {
+    const epoch = ref(0);
+    let records: AIProviderConfigClientDTO[] = [];
+    const created = createProvider();
+    const client = {
+      listProviders: vi.fn(async () => ok(records)),
+      commitProviderOnboarding: vi.fn(async () => {
+        records = [created];
+        return ok(created);
+      }),
+    };
+    let chat!: ReturnType<typeof useAI>;
+    let settings!: ReturnType<typeof useAI>;
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          chat = useAI();
+          settings = useAI();
+          return () => h('div');
+        },
+      }),
+      {
+        global: {
+          provide: {
+            [AI_CLIENT_KEY as symbol]: client,
+            [AI_CONFIGURATION_REVISION_KEY as symbol]: epoch,
+          },
+        },
+      },
+    );
+    const uid = wrapper.vm.$.uid;
+    await chat.loadProviders();
+    expect(chat.hasProviders.value).toBe(false);
+    await settings.commitProviderOnboarding({
+      onboardingId: 'valid-single-use-handle',
+      name: 'Work',
+      defaultModelId: 'model',
+    });
+    await flushPromises();
+    expect(epoch.value).toBe(1);
+    expect(chat.providers.value).toEqual([created]);
+    expect(wrapper.vm.$.uid).toBe(uid);
+    wrapper.unmount();
+  });
+  it('never lets an older empty response overwrite a newer configuration', async () => {
+    const epoch = ref(0);
+    let finish!: (value: ReturnType<typeof ok<AIProviderConfigClientDTO[]>>) => void;
+    const client = {
+      listProviders: vi
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise((done) => {
+              finish = done;
+            }),
+        )
+        .mockResolvedValue(ok([createProvider()])),
+    };
+    let chat!: ReturnType<typeof useAI>;
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          chat = useAI();
+          return () => h('div');
+        },
+      }),
+      {
+        global: {
+          provide: {
+            [AI_CLIENT_KEY as symbol]: client,
+            [AI_CONFIGURATION_REVISION_KEY as symbol]: epoch,
+          },
+        },
+      },
+    );
+    const old = chat.loadProviders();
+    epoch.value++;
+    await flushPromises();
+    expect(chat.hasProviders.value).toBe(true);
+    finish(ok([]));
+    await old;
+    expect(chat.hasProviders.value).toBe(true);
+    wrapper.unmount();
+    const calls = client.listProviders.mock.calls.length;
+    epoch.value++;
+    await flushPromises();
+    expect(client.listProviders).toHaveBeenCalledTimes(calls);
   });
 });

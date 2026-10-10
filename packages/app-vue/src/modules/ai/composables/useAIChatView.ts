@@ -1,6 +1,15 @@
 import { useAIWorkflowReconciliation } from './useAIWorkflowReconciliation';
 import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  inject,
+  nextTick,
+  onActivated,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -8,7 +17,12 @@ import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
 } from '@memoflow/contracts/repository';
-import type { AIWorkflowRunView, AgentRegistrySnapshot } from '@memoflow/contracts/ai';
+import type {
+  AIWorkflowRunView,
+  AgentRegistrySnapshot,
+  AIChatPermissionMode,
+  AIModelInfo,
+} from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
@@ -38,6 +52,7 @@ import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
   AI_AGENT_REGISTRY_KEY,
+  AI_CONFIGURATION_REVISION_KEY,
   AI_LOCAL_AGENT_KEY,
   REPOSITORY_SERVICE_KEY,
   AI_RUNTIME_USAGE_KEY,
@@ -70,7 +85,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
-  const { service, providers, loadProviders } = useAI();
+  const { service, providers, loadProviders, refreshProviderModels } = useAI();
   const assistantRuntime = useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
   const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
@@ -78,13 +93,69 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
   const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
   const agentRegistrySnapshot = ref<AgentRegistrySnapshot | null>(null);
+  const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
+  const permissionMode = ref<AIChatPermissionMode>('supervised');
+  const modelCatalogs = ref<Record<string, AIModelInfo[]>>({});
+  const modelCatalogLoading = ref(false);
+  const catalogRequests = new Map<string, Promise<AIModelInfo[]>>();
+  function requestCatalog(connectionId: string) {
+    let request = catalogRequests.get(connectionId);
+    if (!request) {
+      request = Promise.resolve()
+        .then(() => refreshProviderModels(connectionId))
+        .then((result) => result.models)
+        .catch(() => {
+          catalogRequests.delete(connectionId);
+          return [];
+        });
+      catalogRequests.set(connectionId, request);
+    }
+    return request;
+  }
+  let registryGeneration = 0;
+  let disposed = false;
   async function loadAgentRegistry() {
     if (!agentRegistryClient) return;
+    const generation = ++registryGeneration;
     try {
-      agentRegistrySnapshot.value = await agentRegistryClient.list();
+      const next = await agentRegistryClient.list();
+      if (disposed || generation !== registryGeneration) return;
+      agentRegistrySnapshot.value = next;
+      modelCatalogLoading.value = true;
+      const connectionIds = [
+        ...new Set(
+          next.bindings
+            .filter((binding) =>
+              next.instances.some(
+                (instance) => instance.instanceId === binding.instanceId && instance.enabled,
+              ),
+            )
+            .map((binding) => binding.connectionId),
+        ),
+      ];
+      const entries: Array<[string, AIModelInfo[]]> = [];
+      for (
+        let i = 0;
+        i < connectionIds.length && !disposed && generation === registryGeneration;
+        i += 2
+      )
+        entries.push(
+          ...(await Promise.all(
+            connectionIds
+              .slice(i, i + 2)
+              .map(async (id): Promise<[string, AIModelInfo[]]> => [id, await requestCatalog(id)]),
+          )),
+        );
+      if (!disposed && generation === registryGeneration)
+        modelCatalogs.value = Object.fromEntries(entries);
     } catch {
       // Fail closed: never expose global legacy providers as another Agent's models.
-      agentRegistrySnapshot.value = null;
+      if (!disposed && generation === registryGeneration) {
+        agentRegistrySnapshot.value = null;
+        modelCatalogs.value = {};
+      }
+    } finally {
+      if (!disposed && generation === registryGeneration) modelCatalogLoading.value = false;
     }
   }
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
@@ -217,6 +288,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     service,
     runtime: assistantRuntime,
     localAgent,
+    getPermissionMode: () => permissionMode.value,
     getDefaultRuntimeChoice: () => localChoices.defaultChoice.value,
     usageRuntime: runtimeUsage,
     surface: assistantSurface,
@@ -228,7 +300,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
-    ...(agentRegistryClient ? { agentRegistrySnapshot } : {}),
+    ...(agentRegistryClient ? { agentRegistrySnapshot, modelCatalogs } : {}),
     chatConversationId: chatSession.chatConversationId,
     ...(agentRegistryClient?.conversationSelection
       ? {
@@ -236,6 +308,142 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         }
       : {}),
   });
+
+  const composerAgents = computed(() => {
+    const entries = agentRegistrySnapshot.value?.instances ?? [];
+    return entries.map((instance) => ({
+      id:
+        instance.driver === 'mastra'
+          ? `agent:${instance.instanceId}`
+          : `local:${instance.legacyConnectionId ?? instance.instanceId}`,
+      name: instance.name,
+      driver: instance.driver,
+      enabled: instance.enabled,
+      configured:
+        instance.driver === 'mastra'
+          ? Boolean(
+              agentRegistrySnapshot.value?.bindings.some(
+                (binding) => binding.instanceId === instance.instanceId,
+              ),
+            )
+          : Boolean(instance.legacyConnectionId),
+    }));
+  });
+  const selectedComposerAgent = computed(() => {
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent') return `local:${choice.connectionId}`;
+    const id =
+      modelSelection.selectedAgentId.value ||
+      modelSelection.selectedModel.value?.agentInstanceId ||
+      agentRegistrySnapshot.value?.instances.find(
+        (entry) => entry.driver === 'mastra' && entry.enabled,
+      )?.instanceId;
+    return id ? `agent:${id}` : '';
+  });
+  const composerModels = computed(() => {
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent')
+      return localChoices.models.value.map((model) => ({
+        key: model.id,
+        providerId: choice.connectionId,
+        providerName: 'Native Agent',
+        modelId: model.id,
+        modelName: model.name,
+      }));
+    return modelSelection.selectedAgentModels.value;
+  });
+  const composerModelKey = computed(() =>
+    chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
+      ? chatSession.runtimeChoice.value.modelId
+      : modelSelection.selectedModelKey.value,
+  );
+  async function refreshConfiguration() {
+    catalogRequests.clear();
+    await Promise.allSettled([loadProviders(), loadAgentRegistry(), localChoices.refresh()]);
+  }
+  if (configurationRevision) {
+    watch(configurationRevision, () => {
+      catalogRequests.clear();
+      void Promise.allSettled([loadAgentRegistry(), localChoices.refresh()]);
+    });
+  }
+  watch(
+    () => route.path,
+    (path, previous) => {
+      if (previous?.startsWith('/settings') && !path.startsWith('/settings'))
+        void refreshConfiguration();
+    },
+  );
+  onActivated(() => {
+    void refreshConfiguration();
+  });
+  watch(
+    () => chatSession.runtimeChoice.value.runtimeKind,
+    () => {
+      permissionMode.value = 'supervised';
+    },
+  );
+  watch(chatSession.chatConversationId, (next, previous) => {
+    if (previous && next !== previous) permissionMode.value = 'supervised';
+  });
+  async function selectComposerAgent(key: string) {
+    if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
+    if (key === selectedComposerAgent.value) return;
+    if (key.startsWith('local:')) {
+      const id = key.slice(6);
+      const connection = localChoices.connections.value.find(
+        (entry) => entry.id === id && entry.enabled,
+      );
+      if (!connection) {
+        await router.push('/settings?tab=ai');
+        return;
+      }
+      startNewConversation();
+      chatSession.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: id,
+        modelId: '',
+      };
+      permissionMode.value = 'supervised';
+      return;
+    }
+    const id = key.slice(6);
+    const eligible = agentRegistrySnapshot.value?.instances.some(
+      (entry) => entry.instanceId === id && entry.driver === 'mastra' && entry.enabled,
+    );
+    if (!eligible) return;
+    const wasNative = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
+    const result = wasNative ? 'new_conversation_required' : modelSelection.selectAgent(id);
+    if (result === 'new_conversation_required') {
+      startNewConversation();
+      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+      modelSelection.selectAgent(id);
+      toast.info(t('aiAssistant.agentSwitchNewConversation'));
+    }
+    permissionMode.value = 'supervised';
+  }
+  function selectComposerModel(key: string) {
+    if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent') {
+      if (localChoices.models.value.some((model) => model.id === key))
+        chatSession.runtimeChoice.value = { ...choice, modelId: key };
+      return;
+    }
+    if (modelSelection.selectModel(key) === 'new_conversation_required') {
+      if (!modelSelection.allModelOptions.value.some((model) => model.key === key)) return;
+      startNewConversation(toolMode.value);
+      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+      modelSelection.selectModel(key);
+      toast.info(t('aiAssistant.agentSwitchNewConversation'));
+    }
+  }
+  function selectPermission(mode: AIChatPermissionMode) {
+    if (chatSession.chatLoading.value) return;
+    const native = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
+    if (mode === 'supervised' || (native ? mode === 'auto-approve' : mode === 'read-only'))
+      permissionMode.value = mode;
+  }
 
   async function maybeRenameCurrentConversation(name: string) {
     const nextName = name.trim();
@@ -606,6 +814,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   );
 
   onBeforeUnmount(() => {
+    disposed = true;
+    registryGeneration++;
     referenceableKnowledgeNotes.cancel();
   });
 
@@ -716,6 +926,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       },
     },
     model: {
+      composerAgents,
+      selectedComposerAgent,
+      composerModels,
+      composerModelKey,
+      modelCatalogLoading,
+      permissionMode,
+      selectComposerAgent,
+      selectComposerModel,
+      selectPermission,
       selectedModelKey: modelSelection.selectedModelKey,
       modelGroups: modelSelection.modelGroups,
       canSendMessage,
@@ -741,7 +960,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       currentConversationLabel,
       currentToolLabel,
       exitToolMode,
-      openSettings: () => void router.push('/settings'),
+      openSettings: () => void router.push('/settings?tab=ai'),
     },
   };
 }

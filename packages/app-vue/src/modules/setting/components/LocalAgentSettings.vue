@@ -1,145 +1,8 @@
-<template>
-  <form
-    class="flex min-w-0 flex-col rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] p-5"
-    data-testid="ai-provider-detail"
-    @submit.prevent="save"
-  >
-    <header
-      class="flex items-center justify-between gap-3 border-b border-[hsl(var(--border-subtle))] pb-4"
-    >
-      <h3 class="truncate text-base font-semibold">{{ connection?.name ?? names[driver] }}</h3>
-      <span class="text-xs text-muted-foreground" role="status">{{ statusLabel }}</span>
-    </header>
-    <div class="space-y-5 py-5">
-      <div class="space-y-2">
-        <Label :for="`${formId}-name`">{{ t('setting.ai.displayName') }}</Label
-        ><Input
-          :id="`${formId}-name`"
-          data-testid="ai-native-name"
-          v-model="form.name"
-          required
-          :maxlength="120"
-          :disabled="busy"
-        />
-      </div>
-      <div class="space-y-2">
-        <Label :for="`${formId}-id`">{{ t('setting.agentInstances.instanceId') }}</Label>
-        <Input
-          :id="`${formId}-id`"
-          data-testid="ai-native-id"
-          :model-value="connection?.instanceSlug ?? connection?.id ?? identity?.instanceSlug ?? ''"
-          readonly
-        />
-      </div>
-      <div class="space-y-2">
-        <Label :for="`${formId}-executable`">{{ t('aiAssistant.local.executable') }}</Label
-        ><Input
-          :id="`${formId}-executable`"
-          data-testid="ai-native-executable"
-          v-model="form.executablePath"
-          required
-          :maxlength="4096"
-          :disabled="busy"
-        />
-      </div>
-      <div class="space-y-2">
-        <Label :for="`${formId}-home`">{{ t('aiAssistant.local.home') }}</Label
-        ><Input
-          :id="`${formId}-home`"
-          data-testid="ai-native-home"
-          v-model="form.homePath"
-          :maxlength="4096"
-          :disabled="busy"
-        />
-      </div>
-      <fieldset class="space-y-2 text-sm">
-        <legend class="mb-2 font-medium">{{ t('aiAssistant.local.writeScopes') }}</legend>
-        <label v-for="scope in scopes" :key="scope" class="flex items-center gap-2"
-          ><input v-model="form.writeScopes" type="checkbox" :value="scope" :disabled="busy" />{{
-            t(
-              scope === 'goals:write'
-                ? 'aiAssistant.local.goalWrites'
-                : 'aiAssistant.local.taskWrites',
-            )
-          }}</label
-        >
-      </fieldset>
-      <div class="space-y-2">
-        <div
-          class="flex items-center justify-between border-b border-[hsl(var(--border-subtle))] pb-2"
-        >
-          <h4 class="text-sm font-semibold">Models</h4>
-          <Button
-            v-if="connection || canProbe"
-            type="button"
-            variant="link"
-            size="sm"
-            :disabled="busy"
-            @click="$emit('check')"
-            >{{ t('setting.ai.refreshModels') }}</Button
-          >
-        </div>
-        <div
-          v-for="model in models"
-          :key="model.id"
-          class="truncate rounded-lg bg-muted/50 px-3 py-3 text-sm"
-        >
-          {{ model.name }}
-        </div>
-        <p v-if="!models.length" class="py-3 text-xs text-muted-foreground">
-          {{ t('setting.ai.modelInventoryHint') }}
-        </p>
-      </div>
-      <p class="text-xs text-muted-foreground">{{ t('aiAssistant.local.removalHint') }}</p>
-      <p v-if="error" role="alert" class="text-sm text-destructive">
-        {{ t('aiAssistant.local.actionFailed') }}
-      </p>
-    </div>
-    <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
-      <Button
-        v-if="connection"
-        type="button"
-        variant="ghost"
-        size="sm"
-        class="text-destructive"
-        :disabled="busy"
-        @click="$emit('remove')"
-        >{{ t('setting.ai.deleteProvider') }}</Button
-      >
-      <Button
-        v-else
-        type="button"
-        variant="ghost"
-        size="sm"
-        :disabled="busy"
-        @click="$emit('cancel')"
-        >{{ t('aiAssistant.local.cancel') }}</Button
-      >
-      <div class="flex gap-2">
-        <Button
-          v-if="connection || canProbe"
-          type="button"
-          variant="outline"
-          size="sm"
-          :disabled="busy"
-          @click="$emit('check')"
-          >{{ t('aiAssistant.local.check') }}</Button
-        >
-        <Button
-          type="submit"
-          size="sm"
-          :disabled="busy || !validatedInput.success"
-          data-testid="ai-native-save"
-          >{{ t('setting.ai.saveConfiguration') }}</Button
-        >
-      </div>
-    </div>
-  </form>
-</template>
 <script setup lang="ts">
-import { computed, reactive, watch, useId } from 'vue';
+import { computed, reactive, useId, watch } from 'vue';
+import { RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Input, Label } from '@memoflow/ui-vue-shadcn';
+import { Button, Input, Switch } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
   type LocalAgentConnection,
@@ -147,10 +10,13 @@ import {
   type LocalAgentDriver,
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
+import { SettingsPropertyRow } from '../../../components/shared/settings';
+import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
   identity?: Pick<LocalAgentConnectionInput, 'name' | 'instanceSlug' | 'accentColor'>;
   driver: LocalAgentDriver;
+  enabled?: boolean;
   status?: LocalAgentStatus;
   canProbe?: boolean;
   busy: boolean;
@@ -158,13 +24,14 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   save: [input: LocalAgentConnectionInput];
+  toggle: [enabled: boolean];
   check: [];
   remove: [];
   cancel: [];
 }>();
 const { t } = useI18n();
-const formId = `ai-native-${useId()}`;
-const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DeepSeek Harness (DSH)' };
+const uid = `ai-native-${useId()}`;
+const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DSH' };
 const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
   driver: props.driver,
@@ -175,35 +42,215 @@ const form = reactive<LocalAgentConnectionInput>({
   writeScopes: [],
 });
 watch(
-  () => [props.connection?.id, props.connection?.revision, props.driver],
+  () => [props.connection?.id, props.connection?.revision, props.driver, props.enabled],
   () => {
-    const connection = props.connection;
+    const current = props.connection;
     Object.assign(form, {
       driver: props.driver,
-      name: connection?.name ?? props.identity?.name ?? names[props.driver],
-      instanceSlug: connection?.instanceSlug ?? props.identity?.instanceSlug,
-      accentColor: connection?.accentColor ?? props.identity?.accentColor,
-      executablePath: connection?.executablePath ?? props.driver,
-      homePath: connection?.homePath ?? '',
-      enabled: connection?.enabled ?? true,
-      writeScopes: [...(connection?.writeScopes ?? [])],
+      name: current?.name ?? props.identity?.name ?? names[props.driver],
+      instanceSlug: current?.instanceSlug ?? props.identity?.instanceSlug,
+      accentColor: current?.accentColor ?? props.identity?.accentColor,
+      executablePath: current?.executablePath ?? props.driver,
+      homePath: current?.homePath ?? '',
+      enabled: props.enabled ?? current?.enabled ?? true,
+      writeScopes: [...(current?.writeScopes ?? [])],
     });
   },
   { immediate: true },
 );
 const models = computed(() => (props.status?.status === 'ready' ? props.status.models : []));
 const statusLabel = computed(() =>
-  props.status?.status === 'ready'
-    ? t('aiAssistant.local.ready', { count: props.status.models.length })
-    : (props.status?.message ?? t('setting.agentInstances.unchecked')),
+  !form.enabled
+    ? t('setting.ai.inactiveProvider')
+    : props.status?.status === 'ready'
+      ? t('aiAssistant.local.ready', { count: props.status.models.length })
+      : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
-const validatedInput = computed(() =>
+const validated = computed(() =>
   LocalAgentConnectionInputSchema.safeParse({
     ...form,
     homePath: form.homePath?.trim() || undefined,
   }),
 );
 function save() {
-  if (validatedInput.value.success) emit('save', validatedInput.value.data);
+  if (validated.value.success) emit('save', validated.value.data);
 }
 </script>
+
+<template>
+  <form
+    data-testid="ai-provider-detail"
+    class="min-w-0 space-y-6 p-1 sm:p-2"
+    @submit.prevent="save"
+  >
+    <header class="flex items-center justify-between gap-4 px-3 py-2">
+      <div class="flex min-w-0 items-center gap-3">
+        <AgentDriverIcon
+          :driver="driver"
+          class="size-5"
+          :style="{ color: identity?.accentColor }"
+        />
+        <div class="min-w-0">
+          <h3 class="truncate text-base font-semibold">
+            {{ connection?.name ?? identity?.name ?? names[driver] }}
+          </h3>
+          <p class="mt-1 text-xs text-muted-foreground" role="status">{{ statusLabel }}</p>
+        </div>
+      </div>
+      <Switch
+        :model-value="form.enabled"
+        :disabled="busy"
+        :aria-label="t('setting.ai.enableProvider', { name: form.name })"
+        data-testid="ai-provider-detail-toggle"
+        @update:model-value="emit('toggle', $event)"
+      />
+    </header>
+    <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+      <SettingsPropertyRow
+        :label="t('setting.ai.displayName')"
+        :description="t('setting.agentInstances.nameHint')"
+        :html-for="`${uid}-name`"
+        ><Input
+          :id="`${uid}-name`"
+          v-model="form.name"
+          data-testid="ai-native-name"
+          required
+          :maxlength="120"
+          :disabled="busy"
+          class="h-8 rounded-lg text-sm"
+      /></SettingsPropertyRow>
+      <SettingsPropertyRow
+        :label="t('setting.agentInstances.instanceId')"
+        :description="t('setting.agentInstances.idReadonlyHint')"
+        :html-for="`${uid}-id`"
+        ><Input
+          :id="`${uid}-id`"
+          :model-value="identity?.instanceSlug ?? connection?.instanceSlug ?? connection?.id ?? ''"
+          data-testid="ai-native-id"
+          readonly
+          class="h-8 rounded-lg text-xs text-muted-foreground"
+      /></SettingsPropertyRow>
+    </div>
+    <section class="space-y-3">
+      <h4 class="px-3 text-xs font-medium text-muted-foreground">
+        {{ t('aiAssistant.local.runtime') }}
+      </h4>
+      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+        <SettingsPropertyRow
+          :label="t('aiAssistant.local.executable')"
+          :description="t('setting.agentInstances.binaryHint')"
+          :html-for="`${uid}-executable`"
+          ><Input
+            :id="`${uid}-executable`"
+            v-model="form.executablePath"
+            data-testid="ai-native-executable"
+            required
+            :maxlength="4096"
+            :disabled="busy"
+            class="h-8 rounded-lg text-xs"
+        /></SettingsPropertyRow>
+        <SettingsPropertyRow
+          :label="t('aiAssistant.local.home')"
+          :description="t('setting.agentInstances.homeHint')"
+          :html-for="`${uid}-home`"
+          ><Input
+            :id="`${uid}-home`"
+            v-model="form.homePath"
+            data-testid="ai-native-home"
+            :maxlength="4096"
+            :disabled="busy"
+            class="h-8 rounded-lg text-xs"
+        /></SettingsPropertyRow>
+      </div>
+    </section>
+    <section class="space-y-3">
+      <h4 class="px-3 text-xs font-medium text-muted-foreground">
+        {{ t('aiAssistant.local.writeScopes') }}
+      </h4>
+      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+        <p class="mb-3 text-xs leading-5 text-muted-foreground">
+          {{ t('setting.agentInstances.nativePermissionHint') }}
+        </p>
+        <fieldset class="flex flex-wrap gap-x-5 gap-y-3">
+          <legend class="sr-only">{{ t('aiAssistant.local.writeScopes') }}</legend>
+          <label v-for="scope in scopes" :key="scope" class="flex items-center gap-2 text-xs"
+            ><input
+              v-model="form.writeScopes"
+              type="checkbox"
+              :value="scope"
+              :disabled="busy"
+              class="accent-primary"
+            />{{
+              t(
+                scope === 'goals:write'
+                  ? 'aiAssistant.local.goalWrites'
+                  : 'aiAssistant.local.taskWrites',
+              )
+            }}</label
+          >
+        </fieldset>
+      </div>
+    </section>
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-3">
+        <h4 class="text-xs font-medium text-muted-foreground">
+          {{ t('setting.agentInstances.models') }}
+        </h4>
+        <Button
+          v-if="connection || canProbe"
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="h-6 px-1 text-xs"
+          :disabled="busy || !form.enabled"
+          @click="emit('check')"
+          ><RefreshCw class="mr-1.5 size-3" />{{ t('setting.ai.refreshModels') }}</Button
+        >
+      </div>
+      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+        <p v-if="!models.length" class="text-xs leading-5 text-muted-foreground">
+          {{ t('setting.ai.modelInventoryHint') }}
+        </p>
+        <div
+          v-for="model in models"
+          :key="model.id"
+          class="truncate border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
+        >
+          {{ model.name }}
+        </div>
+      </div>
+    </section>
+    <p v-if="error" role="alert" class="px-3 text-xs text-destructive">
+      {{ t('aiAssistant.local.actionFailed') }}
+    </p>
+    <footer class="flex items-center justify-between gap-3 px-3">
+      <Button
+        v-if="connection"
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="text-destructive"
+        :disabled="busy"
+        @click="emit('remove')"
+        >{{ t('setting.ai.deleteProvider') }}</Button
+      ><span v-else />
+      <div class="flex gap-2">
+        <Button
+          v-if="connection || canProbe"
+          type="button"
+          variant="outline"
+          size="sm"
+          :disabled="busy || !form.enabled"
+          @click="emit('check')"
+          >{{ t('aiAssistant.local.check') }}</Button
+        ><Button
+          type="submit"
+          size="sm"
+          :disabled="busy || !validated.success"
+          data-testid="ai-native-save"
+          >{{ t('setting.ai.saveConfiguration') }}</Button
+        >
+      </div>
+    </footer>
+  </form>
+</template>

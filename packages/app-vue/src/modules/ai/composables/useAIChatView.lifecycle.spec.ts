@@ -6,7 +6,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/contracts/ai';
 import AIChatView from '../views/AIChatView.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
-import { SHELL_COMPOSER_MOUNT_KEY } from '../../../di/keys';
+import {
+  SHELL_COMPOSER_MOUNT_KEY,
+  AI_CONFIGURATION_REVISION_KEY,
+  AI_AGENT_REGISTRY_KEY,
+} from '../../../di/keys';
 
 const fixture = await vi.hoisted(async () => {
   const { ref, computed } = await import('vue');
@@ -41,6 +45,8 @@ const fixture = await vi.hoisted(async () => {
   };
   return {
     getRun: vi.fn(),
+    providers: ref<import('@memoflow/contracts/ai').AIProviderConfigClientDTO[]>([]),
+    loadProviders: vi.fn(async () => undefined),
     session,
     openGoal,
     openTask,
@@ -93,8 +99,13 @@ const fixture = await vi.hoisted(async () => {
 });
 
 vi.mock('./useAI', async () => {
-  const { ref } = await import('vue');
-  return { useAI: () => ({ service: {}, providers: ref([]), loadProviders: vi.fn() }) };
+  return {
+    useAI: () => ({
+      service: {},
+      providers: fixture.providers,
+      loadProviders: fixture.loadProviders,
+    }),
+  };
 });
 vi.mock('../../goal/composables/useGoal', async () => {
   const { ref } = await import('vue');
@@ -136,7 +147,7 @@ afterEach(() => {
   window.confirm = initialConfirm;
 });
 
-async function mountView() {
+async function mountView(extraProvide: Record<symbol, unknown> = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/goals/:id', component: { template: '<div />' } }],
@@ -157,7 +168,7 @@ async function mountView() {
           fallbackWarn: false,
         }),
       ],
-      provide: { [SHELL_COMPOSER_MOUNT_KEY as symbol]: { value: null } },
+      provide: { [SHELL_COMPOSER_MOUNT_KEY as symbol]: { value: null }, ...extraProvide },
     },
   });
   disposeViews.push(() => wrapper.unmount());
@@ -179,6 +190,67 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.knowledge.knowledgeCaptureRun.value = null;
     fixture.session.chatConversationId.value = null;
     fixture.session.runtimeChoice.value = { runtimeKind: 'builtin' };
+  });
+
+  it('refreshes the persistent composer after settings invalidates the app configuration', async () => {
+    const { ref } = await import('vue');
+    const revision = ref(0);
+    fixture.providers.value = [];
+    const instance = {
+      instanceId: 'mastra',
+      driver: 'mastra',
+      name: 'Work Agent',
+      enabled: true,
+      accentColor: '#6469da',
+      revision: 0,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    let state = {
+      instances: [instance],
+      bindings: [] as Array<{ instanceId: string; connectionId: string; modelId: string }>,
+    };
+    const registry = { list: vi.fn(async () => state) };
+    const { wrapper } = await mountView({
+      [AI_CONFIGURATION_REVISION_KEY as symbol]: revision,
+      [AI_AGENT_REGISTRY_KEY as symbol]: registry,
+    });
+    await flushPromises();
+    expect(wrapper.vm.canSendMessage).toBe(false);
+    const uid = wrapper.vm.$.uid;
+    fixture.providers.value = [
+      {
+        id: 'p1',
+        identityId: 'owner',
+        name: 'Service',
+        providerDefinitionId: 'custom',
+        baseUrl: 'https://example.test/v1',
+        credentialRef: 'ref',
+        isActive: true,
+        isDefault: false,
+        priority: 1,
+        version: 1,
+        defaultModel: 'model',
+        createdAt: 0,
+        updatedAt: 0,
+        deletedAt: null,
+      },
+    ] as never;
+    state = {
+      instances: [instance],
+      bindings: [{ instanceId: 'mastra', connectionId: 'p1', modelId: 'model' }],
+    };
+    revision.value++;
+    await flushPromises();
+    expect(registry.list.mock.calls.length).toBeGreaterThan(1);
+    expect(wrapper.vm.canSendMessage).toBe(true);
+    expect(wrapper.vm.selectedModelKey).toBe('agent:mastra::p1::model');
+    expect(wrapper.vm.$.uid).toBe(uid);
+    revision.value++;
+    state = { instances: [{ ...instance, enabled: false }], bindings: state.bindings };
+    await flushPromises();
+    expect(wrapper.vm.canSendMessage).toBe(false);
+    fixture.providers.value = [];
   });
 
   it('keeps the conversation and composer draft when changing the same Agent model', async () => {

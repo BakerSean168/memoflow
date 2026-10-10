@@ -223,6 +223,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       await mainWindow.getByTestId('ai-provider-add').click();
       const wizard = mainWindow.getByTestId('ai-agent-wizard');
       await wizard.getByTestId(`ai-provider-catalog-${driver}`).click();
+      await wizard.getByTestId('ai-instance-continue').click();
       await wizard.getByLabel('显示名称', { exact: true }).fill(`Packaged unavailable ${driver}`);
       await wizard.getByTestId('ai-instance-continue').click();
       await wizard
@@ -234,15 +235,18 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
             process.platform === 'win32' ? `${driver}.exe` : driver,
           ),
         );
-      await expect(wizard.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
-      await expect(wizard.getByLabel('创建、修改和完成任务', { exact: true })).not.toBeChecked();
-      await wizard.getByTestId('ai-native-save').click();
+      await expect(wizard.getByLabel('创建和修改目标', { exact: true })).toHaveCount(0);
+      await wizard.getByTestId('ai-agent-instance-save').click();
       await expect(wizard).toHaveCount(0);
       const row = localSettings
         .getByTestId('ai-provider-list')
         .getByRole('listitem')
         .filter({ hasText: `Packaged unavailable ${driver}` });
       await expect(row).toBeVisible();
+      await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
+      await expect(
+        localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
+      ).not.toBeChecked();
       await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
       await expect(localSettings.getByRole('status')).toContainText('could not be started', {
         timeout: 30_000,

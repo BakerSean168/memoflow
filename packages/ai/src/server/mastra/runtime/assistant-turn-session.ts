@@ -8,6 +8,7 @@ import {
 import {
   AssistantToolNameSchema,
   type AssistantRuntimeApprovalCommand,
+  type AIChatPermissionMode,
   type AssistantRuntimeAttachment,
   type AssistantRuntimeEvent,
   type AssistantRuntimeSelectedEntity,
@@ -56,6 +57,7 @@ export type AssistantTurnInput = {
   providerId?: string;
   modelId?: string;
   agentInstanceId?: string;
+  permissionMode?: AIChatPermissionMode;
   locale?: 'zh-CN' | 'en-US';
   attachments?: readonly AssistantRuntimeAttachment[];
   selectedEntities?: readonly AssistantRuntimeSelectedEntity[];

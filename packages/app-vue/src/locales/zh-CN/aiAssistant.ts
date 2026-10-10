@@ -1,4 +1,22 @@
 export default {
+  composer: {
+    "agent": "Agent",
+    "model": "模型",
+    "permissions": "权限",
+    "chooseAgent": "选择 Agent",
+    "chooseModel": "选择模型",
+    "configure": "配置 Agent",
+    "notConfigured": "未配置模型",
+    "disabled": "已停用",
+    "supervised": "需要确认",
+    "supervisedHint": "需要权限的操作逐次确认，现有账号及业务授权限制仍然生效。",
+    "read-only": "只读",
+    "readOnlyHint": "本轮对话仅读取 MemoFlow 上下文，不执行修改数据的工具，也不启动写入工作流。",
+    "auto-approve": "自动批准",
+    "autoApproveHint": "本轮自动批准原生 Agent 发出的权限请求，但不会扩大 MemoFlow 业务授权或绕过原生沙盒。",
+    "unsupportedPermission": "当前 Agent 不支持这种权限模式。",
+    "readOnlyWorkflow": "只读对话只讨论当前请求，不启动写入工作流。",
+  },
   agentSwitchNewConversation: '已为所选 Agent 新建会话。原会话仍保留原 Agent。',
   local: {
     toolHistory: 'Agent 工具记录',

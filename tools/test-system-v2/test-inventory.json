@@ -4487,6 +4487,14 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/AIContextPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13096,7 +13104,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 286
+      "fileCount": 287
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13843,7 +13851,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1196,
+    "unit": 1197,
     "integration": 47,
     "smoke": 3,
     "boundary-ipc": 8,

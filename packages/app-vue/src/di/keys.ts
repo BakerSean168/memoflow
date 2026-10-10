@@ -69,6 +69,9 @@ export const DATA_PORTABILITY_SERVICE_KEY: InjectionKey<IDataPortabilityService>
   Symbol('DataPortabilityService');
 export const AI_LOCAL_AGENT_KEY: InjectionKey<LocalAgentClient> = Symbol('AILocalAgent');
 export const AI_AGENT_REGISTRY_KEY: InjectionKey<AgentRegistryClient> = Symbol('AIAgentRegistry');
+/** Per-app invalidation epoch. Contains no account data, credentials or global singleton. */
+export const AI_CONFIGURATION_REVISION_KEY: InjectionKey<Ref<number>> =
+  Symbol('AIConfigurationRevision');
 export const AI_CLIENT_KEY: InjectionKey<IAIClient> = Symbol('AIClient');
 export const AI_ASSISTANT_RUNTIME_KEY: InjectionKey<IAssistantRuntimeService> =
   Symbol('AIAssistantRuntime');
