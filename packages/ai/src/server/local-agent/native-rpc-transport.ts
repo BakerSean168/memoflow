@@ -15,7 +15,7 @@ const frameSchema = z.union([
 ]);
 export type NativeServerRequest = { id: string | number; method: string; params?: unknown };
 export interface NativeProcessOptions {
-  protocol?: 'codex' | 'pi';
+  protocol?: 'codex' | 'pi' | 'acp';
   executable: string;
   args: readonly string[];
   cwd: string;
@@ -47,7 +47,7 @@ export class NativeRpcTransport {
   constructor(private readonly options: NativeProcessOptions) {
     const launch = resolveNativeExecutable(
       options.executable,
-      options.protocol === 'pi' ? 'pi' : 'codex',
+      options.protocol === 'pi' ? 'pi' : options.protocol === 'acp' ? 'dsh' : 'codex',
       { env: options.env },
     );
     this.child = spawn(launch.executable, [...launch.args, ...options.args], {
@@ -73,7 +73,11 @@ export class NativeRpcTransport {
     this.child.stderr.resume();
   }
 
-  request(method: string, params: unknown): Promise<unknown> {
+  request(
+    method: string,
+    params: unknown,
+    timeoutMs = this.options.requestTimeoutMs ?? 30_000,
+  ): Promise<unknown> {
     if (this.failure || this.closing)
       return Promise.reject(this.failure ?? new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'));
     if (this.pending.size >= 64) return Promise.reject(new LocalAgentError('CONFLICT'));
@@ -83,12 +87,12 @@ export class NativeRpcTransport {
       const timer = setTimeout(() => {
         this.pending.delete(id);
         reject(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'));
-      }, this.options.requestTimeoutMs ?? 30_000);
+      }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
       this.write(
         this.options.protocol === 'pi'
           ? { ...z.record(z.string(), z.unknown()).parse(params), id, type: method }
-          : { id, method, params },
+          : { ...(this.options.protocol === 'acp' ? { jsonrpc: '2.0' } : {}), id, method, params },
       );
     });
   }
@@ -96,14 +100,22 @@ export class NativeRpcTransport {
     this.write(
       this.options.protocol === 'pi'
         ? { ...z.record(z.string(), z.unknown()).parse(params ?? {}), type: method }
-        : { method, ...(params === undefined ? {} : { params }) },
+        : {
+            ...(this.options.protocol === 'acp' ? { jsonrpc: '2.0' } : {}),
+            method,
+            ...(params === undefined ? {} : { params }),
+          },
     );
   }
   respond(id: string | number, result: unknown): void {
-    this.write({ id, result });
+    this.write({ ...(this.options.protocol === 'acp' ? { jsonrpc: '2.0' } : {}), id, result });
   }
   rejectRequest(id: string | number): void {
-    this.write({ id, error: { code: -32601, message: 'Unsupported or expired request' } });
+    this.write({
+      ...(this.options.protocol === 'acp' ? { jsonrpc: '2.0' } : {}),
+      id,
+      error: { code: -32601, message: 'Unsupported or expired request' },
+    });
   }
 
   private write(value: unknown) {
@@ -131,6 +143,11 @@ export class NativeRpcTransport {
         if (!line.trim()) continue;
         if (Buffer.byteLength(line) > MAX_FRAME_BYTES) throw new Error('Frame limit');
         const raw: unknown = JSON.parse(line);
+        if (
+          this.options.protocol === 'acp' &&
+          z.object({ jsonrpc: z.literal('2.0') }).safeParse(raw).success === false
+        )
+          throw new Error('Invalid ACP JSON-RPC version');
         if (this.options.protocol === 'pi') {
           const frame = z.object({ type: z.string() }).passthrough().parse(raw);
           if (frame.type === 'response') {

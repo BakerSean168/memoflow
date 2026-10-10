@@ -3781,6 +3781,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3822,6 +3832,16 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/native-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/native-rpc-transport-acp.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12465,7 +12485,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 101
+      "fileCount": 103
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13019,7 +13039,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 101
+      "fileCount": 103
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13384,11 +13404,13 @@
       "packages/ai/src/server/local-agent/claude-driver.spec.ts",
       "packages/ai/src/server/local-agent/codex-app-server-transport.spec.ts",
       "packages/ai/src/server/local-agent/codex-driver.spec.ts",
+      "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
       "packages/ai/src/server/local-agent/local-agent-runtime.spec.ts",
       "packages/ai/src/server/local-agent/local-tool-bridge.spec.ts",
       "packages/ai/src/server/local-agent/native-executable.spec.ts",
       "packages/ai/src/server/local-agent/native-failure.spec.ts",
       "packages/ai/src/server/local-agent/native-identity.spec.ts",
+      "packages/ai/src/server/local-agent/native-rpc-transport-acp.spec.ts",
       "packages/ai/src/server/local-agent/pi-driver.spec.ts",
       "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
@@ -13770,7 +13792,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1190,
+    "unit": 1192,
     "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,

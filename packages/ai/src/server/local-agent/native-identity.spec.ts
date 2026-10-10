@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { nativeIdentity } from './native-identity';
@@ -30,6 +30,21 @@ it('fences changed provider configuration or accounts while tolerating identifie
       JSON.stringify({ tokens: { account_id: 'account-b', access_token: 'second' } }),
     );
     expect(await nativeIdentity('codex', home, { email: 'a@example.test' })).not.toBe(first);
+  } finally {
+    await rm(home, { recursive: true, force: true });
+  }
+});
+
+it('fences DSH ACP sessions when their native Profile configuration changes', async () => {
+  const home = await mkdtemp(join(tmpdir(), 'memoflow-dsh-profile-'));
+  try {
+    const profile = join(home, 'profiles', 'acp');
+    await mkdir(profile, { recursive: true });
+    await writeFile(join(profile, 'cordis.yml'), '- dsh-acp');
+    const first = await nativeIdentity('dsh', home);
+    expect(await nativeIdentity('dsh', home)).toBe(first);
+    await writeFile(join(profile, 'cordis.patch.yml'), 'some-profile-config: new-model-route');
+    expect(await nativeIdentity('dsh', home)).not.toBe(first);
   } finally {
     await rm(home, { recursive: true, force: true });
   }

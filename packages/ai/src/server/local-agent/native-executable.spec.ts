@@ -46,3 +46,24 @@ it('preserves an explicitly selected POSIX wrapper and leaves its arguments sepa
     sdkPath: '/home/test/Agent wrapper',
   });
 });
+
+it('uses an installed DSH npm binary instead of executing the Windows cmd shim', () => {
+  const root = 'C:\\Users\\Test\\AppData\\Roaming\\npm';
+  const files = new Set([
+    `${root}\\dsh.cmd`,
+    `${root}\\node_modules\\@deepseek-ai\\dsh\\lib\\bin.js`,
+  ]);
+  expect(
+    resolveNativeExecutable('dsh', 'dsh', {
+      platform: 'win32',
+      env: { PATH: root },
+      isFile: (path) => files.has(path),
+      nodeExecutable: 'C:\\MemoFlow\\MemoFlow.exe',
+    }),
+  ).toEqual({
+    executable: 'C:\\MemoFlow\\MemoFlow.exe',
+    args: [`${root}\\node_modules\\@deepseek-ai\\dsh\\lib\\bin.js`],
+    env: { ELECTRON_RUN_AS_NODE: '1' },
+    sdkPath: `${root}\\node_modules\\@deepseek-ai\\dsh\\lib\\bin.js`,
+  });
+});

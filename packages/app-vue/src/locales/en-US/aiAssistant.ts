@@ -29,7 +29,7 @@ export default {
     answer: 'Send answer',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:
-      'Use an installed and signed-in Codex, Claude Code or Pi on this device. The built-in assistant remains available through your model connections.',
+      'Use a locally installed and configured Codex, Claude Code, Pi, or DeepSeek Harness (DSH). The built-in assistant remains available through your model connections.',
     disabled: 'Disabled',
     check: 'Check login and models',
     edit: 'Edit',
