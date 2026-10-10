@@ -15,10 +15,10 @@ updated: 2026-10-10T00:00:00Z
 
 | 入口        | 协议/版本                         | Linux 原生行为                                                                                | Windows                                               | 边界                                                         |
 | ----------- | --------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| 内置 Mastra | 现有 workspace 固定依赖           | 聊天/审批与 Goal、Task、Knowledge 持久恢复测试通过                                            | Linux 安装包内置模型入口通过；Windows 待通过          | 无 CLI 前置；仍需自己的内置模型连接                          |
-| Codex       | app-server，CLI 0.160.1           | 真实 Goal 查询两轮、同 native ID 恢复通过；模型 gpt-6-astra                                   | npm shim/空格 argv fixtures 通过；Windows 包待通过    | 账号/config/home 变更校验；不自动跨 Agent 重试               |
-| Claude Code | Agent SDK 0.3.295，用户已安装 CLI | SDK fixtures 通过；Ollama Cloud gpt-oss:20b 真实 MCP Goal 查询两轮、同 native ID 恢复通过；此前 4Router 第二轮超时记录保留 | npm/native executable fixtures 通过；Windows 包待通过 | SDK 使用用户 CLI，不打包可选 CLI；恢复前先无 prompt 校验身份 |
-| Pi          | 原生 RPC，CLI 1.0.3               | 真实 Goal 查询两轮、同 session 恢复通过；模型 auto/gpt-6-astra                                | npm shim/空格 argv fixtures 通过；Windows 包待通过    | 会话扩展临时注入，退出删除，不改全局 extensions              |
+| 内置 Mastra | 现有 workspace 固定依赖           | 聊天/审批与 Goal、Task、Knowledge 持久恢复测试通过                                            | Linux/Windows 安装后内置入口 smoke 通过；真实模型依账号配置          | 无 CLI 前置；仍需自己的内置模型连接                          |
+| Codex       | app-server，CLI 0.160.1           | 真实 Goal 查询两轮、同 native ID 恢复通过；模型 gpt-6-astra                                   | npm shim/空格 argv fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测    | 账号/config/home 变更校验；不自动跨 Agent 重试               |
+| Claude Code | Agent SDK 0.3.295，用户已安装 CLI | SDK fixtures 通过；Ollama Cloud gpt-oss:20b 真实 MCP Goal 查询两轮、同 native ID 恢复通过；此前 4Router 第二轮超时记录保留 | npm/native executable fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测 | SDK 使用用户 CLI，不打包可选 CLI；恢复前先无 prompt 校验身份 |
+| Pi          | 原生 RPC，CLI 1.0.3               | 真实 Goal 查询两轮、同 session 恢复通过；模型 auto/gpt-6-astra                                | npm shim/空格 argv fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测    | 会话扩展临时注入，退出删除，不改全局 extensions              |
 
 macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得支持证据。身份检查覆盖已知 native home/config/auth 文件与相关宿主环境；不声称能发现外部 wrapper/key helper 内任意来源的账号变化。带稳定账号 ID 的 OAuth 刷新不应无故失效；没有稳定 ID 的 Pi OAuth 保守失效。
 
@@ -89,10 +89,12 @@ macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得�
 | 22  | Pi RPC fixtures + 原生两轮工具查询/恢复、临时 extension 清理                                              | delivered                           |
 | 23  | Vault owner 查询/引用；现有编辑审核入口、绑定/路径/幂等测试                                               | delivered                           |
 | 24  | run/model 来源快照、未知 token/费用、显式切换新运行时                                                     | delivered                           |
-| 25  | Windows shim/argv fixtures；Linux package/完整 smoke 与 AppImage 更新通过；Windows 修正响应式断言后待重跑 | partial：待两平台安装包证据         |
+| 25  | Windows shim/argv fixtures；Linux AppImage 与 Windows NSIS N→N+1 实际安装更新 smoke 均通过，真实 Windows 原生推理未测 | delivered（安装包范围） |
 | 26  | 共享 Web/API tests、typecheck 通过；本次镜像 prod-like 健康                                               | delivered                           |
 
 ## 2026-10-10: Ollama Free-only verification path (no commercial relay)
+
+- 2026-10-10 功能提交 `5a965d96972f3578089245a3c561b1755102efc4` 的 Windows NSIS 与 Linux AppImage N→N+1 安装更新证据：[run 38020495312](https://github.com/BakerSean168/memoflow/actions/runs/38020495312) 双 lane 均 `success`。这验证打包、安装更新与相关 smoke，并非 Windows 上真实第三方 CLI 推理。AC25 在打包范围内升级为 delivered。
 
 - New explicit test launcher: `node scripts/acceptance/ollama-claude-mcp.mjs --check` validates official executable and selected model without making any inference call. It is **not** a functional acceptance.
 - Set `OLLAMA_API_KEY` in the invoking process **or**, preferably on a development host, supply `MEMOFLOW_OLLAMA_KEY_FILE=/absolute/path` pointing at a locally created owner-only (`chmod 600`) file containing the key. Never paste a token into GitHub, a shell command, an Agent Fabric remote-exec argument or a test log. Provision credentials locally through an authenticated secret manager/TTY. The AI assistant is not authorized to obtain the key from commercial relay settings.
