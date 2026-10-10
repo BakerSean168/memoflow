@@ -63,6 +63,14 @@ export type {
   GoalDeletionTransactionContext,
   GoalRelationCleanupPort,
 } from './server/application';
+
+export { createGoalPowerSyncPageQuery } from './server/infrastructure/adapters/powersync/goal-page-reader';
+export { createGoalPowerSyncMeasurementReader } from './server/infrastructure/adapters/powersync/goal-measurement-reader';
+
+export {
+  createGoalPowerSyncAgentMutations,
+  GoalAgentMutationError,
+} from './server/infrastructure/adapters/powersync/goal-agent-mutations';
 export { createGoalBusinessDataPresence } from './server/infrastructure/business-data-presence';
 export {
   createGoalPrismaPortableCapability,

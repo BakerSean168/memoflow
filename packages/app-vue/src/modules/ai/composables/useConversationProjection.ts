@@ -1,4 +1,9 @@
-import type { AIRuntimeUsage } from '@memoflow/contracts/ai';
+import {
+  LocalAgentActivitySchema,
+  AssistantRuntimeMessageViewSchema,
+  type AIRuntimeUsage,
+  type AssistantRuntimeChoice,
+} from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -18,6 +23,8 @@ export function useConversationProjection(input: {
   const { options, abortActiveStream, clearComposerContext, startNewConversation } = input;
   const { t } = useI18n();
   const chatConversationId = ref('');
+  const runtimeChoice = ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' });
+  const historyIncomplete = ref(false);
   const chatTimeline = ref<ChatItem[]>([]);
   const conversationTitle = ref('');
   const conversationListLoading = ref(false);
@@ -37,7 +44,14 @@ export function useConversationProjection(input: {
   }
 
   function normalizeChatItem(
-    item: { id?: unknown; role?: unknown; content?: unknown; attachments?: unknown },
+    item: {
+      id?: unknown;
+      role?: unknown;
+      content?: unknown;
+      attachments?: unknown;
+      nativeActivities?: unknown;
+      localAgentSource?: unknown;
+    },
     index: number,
   ): ChatItem {
     const attachments = Array.isArray(item.attachments)
@@ -60,6 +74,11 @@ export function useConversationProjection(input: {
       role: normalizeChatRole(item.role),
       content: typeof item.content === 'string' ? item.content : '',
       ...(attachments.length ? { attachments } : {}),
+      nativeActivities: LocalAgentActivitySchema.array().max(256).safeParse(item.nativeActivities)
+        .data,
+      localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
+        item.localAgentSource,
+      ).data,
       status: 'success',
     };
   }
@@ -80,8 +99,16 @@ export function useConversationProjection(input: {
   ) {
     conversationListLoading.value = true;
     try {
-      const result = unwrap(await loadService.listConversations({ page: 1, pageSize: 24 }));
-      conversationList.value = result.data ?? [];
+      const [builtin, local] = await Promise.allSettled([
+        loadService.listConversations({ page: 1, pageSize: 24 }).then(unwrap),
+        options.localAgent?.listConversations() ?? Promise.resolve([]),
+      ]);
+      conversationList.value = [
+        ...(builtin.status === 'fulfilled' ? (builtin.value.data ?? []) : []),
+        ...(local.status === 'fulfilled' ? local.value : []),
+      ].sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0));
+      if (builtin.status === 'rejected' || local.status === 'rejected')
+        toast.error(t('aiAssistant.dialogs.chat.loadFailed'));
 
       if (listOptions?.preserveSelection !== false && chatConversationId.value) {
         const currentConversation = conversationList.value.find(
@@ -97,7 +124,13 @@ export function useConversationProjection(input: {
   }
 
   async function refreshRuntimeHistory(conversationId: string): Promise<void> {
-    const history = await options.runtime.listMessages(conversationId);
+    const kind = runtimeChoice.value.runtimeKind;
+    const history =
+      kind === 'local_agent'
+        ? await options.runtime.listMessages(conversationId, kind)
+        : await options.runtime.listMessages(conversationId);
+    if (runtimeChoice.value.runtimeKind !== kind) return;
+    historyIncomplete.value = history.incomplete ?? false;
     if (chatConversationId.value !== conversationId) return;
     chatTimeline.value = history.messages.map((message, index) =>
       normalizeChatItem(message, index),
@@ -105,6 +138,10 @@ export function useConversationProjection(input: {
   }
 
   async function refreshRuntimeUsage(conversationId: string): Promise<void> {
+    if (runtimeChoice.value.runtimeKind === 'local_agent') {
+      lastRuntimeUsage.value = null;
+      return;
+    }
     try {
       const usage = await options.usageRuntime.get({ conversationId });
       if (chatConversationId.value !== conversationId) return;
@@ -128,17 +165,21 @@ export function useConversationProjection(input: {
   ) {
     abortActiveStream();
     clearComposerContext();
+    runtimeChoice.value =
+      item.runtimeKind === 'local_agent'
+        ? { runtimeKind: 'local_agent', connectionId: item.connectionId, modelId: item.modelId }
+        : { runtimeKind: 'builtin' };
     chatConversationId.value = item.id;
     conversationTitle.value = item.name || t('aiAssistant.dialogs.chat.defaultConversationName');
     updateLastActiveConversation(String(item.id));
-    syncModel(getConversationModelKey(String(item.id)));
+    if (item.runtimeKind !== 'local_agent') syncModel(getConversationModelKey(String(item.id)));
 
     try {
       await Promise.all([
         refreshRuntimeHistory(String(item.id)),
         refreshRuntimeUsage(String(item.id)),
       ]);
-      options.restoreWorkflowState?.(String(item.id));
+      if (item.runtimeKind !== 'local_agent') options.restoreWorkflowState?.(String(item.id));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.loadFailed'));
     }
@@ -154,8 +195,14 @@ export function useConversationProjection(input: {
       // Delete authoritative Mastra memory first. If the legacy shell delete
       // subsequently fails, the still-existing shell/transcript can bootstrap
       // the thread again; the reverse order could leave an invisible orphan.
-      await options.runtime.deleteConversation(id);
-      unwrap(await loadService.deleteConversation(id as DeleteConversationId));
+      const kind =
+        conversationList.value.find((item) => item.id === id)?.runtimeKind ??
+        (chatConversationId.value === id ? runtimeChoice.value.runtimeKind : 'builtin');
+      if (kind === 'local_agent') await options.runtime.deleteConversation(id, kind);
+      else {
+        await options.runtime.deleteConversation(id);
+        unwrap(await loadService.deleteConversation(id as DeleteConversationId));
+      }
       onClearWorkflow(id);
       onClearModel(id);
       if (chatConversationId.value === id) startNewConversation();
@@ -167,13 +214,32 @@ export function useConversationProjection(input: {
     }
   }
 
-  async function ensureConversationCreated(loadService: AIChatService, conversationName: string) {
+  async function ensureConversationCreated(
+    loadService: AIChatService,
+    conversationName: string,
+    signal?: AbortSignal,
+  ) {
+    signal?.throwIfAborted();
     if (chatConversationId.value) return chatConversationId.value;
+    const choice = runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent') {
+      if (!options.localAgent) throw new Error('Local Agents require Desktop');
+      const conversation = await options.localAgent.createConversation({
+        connectionId: choice.connectionId,
+        modelId: choice.modelId,
+        name: conversationName,
+      });
+      signal?.throwIfAborted();
+      chatConversationId.value = conversation.id;
+      updateLastActiveConversation(conversation.id);
+      return conversation.id;
+    }
     const conversation = unwrap(
       await loadService.createConversation({
         name: conversationName,
       }),
     );
+    signal?.throwIfAborted();
     chatConversationId.value = String(conversation.id);
     updateLastActiveConversation(String(conversation.id));
     options.onConversationCreated?.(String(conversation.id));
@@ -181,6 +247,8 @@ export function useConversationProjection(input: {
   }
 
   return {
+    runtimeChoice,
+    historyIncomplete,
     chatConversationId,
     chatTimeline,
     conversationTitle,

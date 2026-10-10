@@ -4,26 +4,44 @@ tags:
   - ai
   - path-map
   - mastra
-description: MemoFlow AI vNext 当前运行路径地图——Mastra 是唯一 Assistant/Workflow runtime
+description: MemoFlow AI 运行路径：内置 Mastra 与 Desktop 本地 Agent 的会话归属和业务工具边界
 created: 2026-07-26T00:00:00
-updated: 2026-09-18T00:00:00+00:00
+updated: 2026-10-09T00:00:00+00:00
 ---
 
 # AI 运行路径地图
 
-> ADR-050 / ADR-051 / ADR-052 与 AI-9612 已完成目标态切换。**TypeScript + Mastra 是唯一核心 AI execution runtime。**
+> ADR-120/121 将 Mastra 权威限定于内置助手和工作流；Desktop 可选本地 Agent，每个会话只有一个执行状态所有者。
 > Python `apps/ai-service`、Agent Host、LangGraph bridge、TurnEngine、ProposalKernel、AgentRun checkpoint 双轨均已退役。
 
 ## 当前权威路径
 
 | 路径                             | Client / Transport                                                              | Runtime authority                                    | Product authority                          |
 | -------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------ |
-| Open chat                        | `AssistantRuntimeClient` → `/ai/runtime/assistant/*` / `ai:runtime:assistant:*` | `MastraAIRuntime` + Mastra thread/memory             | Conversation shell + provider config       |
+| 内置 Open chat                   | `AssistantRuntimeClient` → `/ai/runtime/assistant/*` / `ai:runtime:assistant:*` | `MastraAIRuntime` + Mastra thread/memory             | Conversation shell + provider config       |
 | Goal / Task / Knowledge workflow | `WorkflowRuntimeClient` → `/ai/runtime/workflow/*` / `ai:runtime:workflow:*`    | `MastraAIRuntime` + durable Mastra workflow snapshot | Goal / Task / Repository application ports |
 | Usage / cost                     | `RuntimeUsageClient` → `/ai/runtime/usage` / `ai:runtime:usage:get`             | indexed `ai_execution_records` bounded projection    | Host-injected identity boundary            |
 | Eval / release gate              | `ai:eval:replay` + canonical report adapter                                     | TypeScript eval runner                               | `reports/apps/ai/evals`                    |
 
-## 1. Open chat
+## Desktop 本地 Agent
+
+```text
+AIChatView → AssistantRuntimeIpcClient
+  → runtimeKind + 当前 Profile 会话校验
+    → LocalAgentRuntime
+      → Codex app-server / Claude Agent SDK / Pi RPC
+      → 原生 thread/session 恢复
+      → assistant.* 展示事件
+      → Profile localOnly 会话、绑定、消息/工具展示快照
+```
+
+`LocalAgentToolBridge` 按运行签发 loopback MCP 凭据。Goal/Task 读取复用 Gateway descriptors 和 owner queries；写入经 owner use case、外层事务、expectedVersion、持久 receipt 与事务内授权。Knowledge 读取现有 Vault source port；保存通过用户确认的 Repository 编辑面，不开放任意文件写入。
+
+Profile teardown 先撤销工具权限、关闭原生资源，再等待正在使用 owner DB 的调用完成。删除 MemoFlow 关联不会清理原生 home。原生历史恢复不进入 Mastra hydration，不上传或 V3 导出；Profile guest copy 遇到未支持的本地记录会阻止源清理。
+
+模型由各 Agent 原生目录提供，不通过推理探活。每轮使用的模型保存为展示快照；原生用量缺失显示未知。仅在用户选择本地连接时启动 driver。账号、原生目录或关键配置变化导致旧绑定失效，不自动换账号恢复。
+
+## 1. 内置 Open chat
 
 ```text
 AIChatView / useAIChatSession
@@ -105,18 +123,18 @@ Canonical report root：`reports/apps/ai/evals`。
 
 ## 5. Host composition
 
-API 与 Desktop 都只创建一个 `MastraAIRuntime`，并将同一对象同时作为：
+API 与 Desktop 的内置路径均创建一个 `MastraAIRuntime`，并将同一对象同时作为：
 
 - `mastraRuntime`（Assistant）；
 - `workflowRuntime`（durable Workflow）；
 - execution-log producer；
 - durable usage read consumer。
 
-API 使用 PostgreSQL-backed Mastra storage；Desktop 使用 profile-local LibSQL storage。两端共享 contracts/client 语义，不共享 framework private types。
+API 使用 PostgreSQL-backed Mastra storage；Desktop 使用 profile-local LibSQL storage。两端共享 contracts/client 语义，不共享 framework private types。Desktop 额外组合 Profile 所有的 `LocalAgentRuntime`；HTTP 明确拒绝 `local_agent`，Web 不加载 native driver。
 
 ## 6. 反回退锁
 
-- `ai-vnext-no-legacy.surface.spec.ts`：旧 Python/AgentHost/dual-runtime 文件、transport token、AgentAction DAG、deploy env 不得回归。
+- `ai-vnext-no-legacy.surface.spec.ts`：旧 Python/AgentHost/重复 checkpoint 文件、transport token、AgentAction DAG、deploy env 不得回归；已采纳的本地会话 adapter 不属于历史双写引擎。
 - `architecture-surface-audit.mjs` 的 `AI_MASTRA_RUNTIME_AUTHORITY`：锁 `MastraAIRuntime`、API/Desktop composition root 与 retired files。
 - package/public-surface audits：禁止重新把 concrete legacy runtime adapter 暴露到 public root。
 - HTTP/IPC parity tests：锁 host-owned identity、runtime usage、Assistant/Workflow transport。

@@ -8,9 +8,7 @@
         "symbol": "GoalDependencyReadPort",
         "file": "packages/contracts/src/modules/reliable-messaging/ports.ts"
       },
-      "consumerDirs": [
-        "packages/goal/src/server/application"
-      ],
+      "consumerDirs": ["packages/goal/src/server/application"],
       "providers": [
         {
           "file": "packages/task/src/server/infrastructure/adapters/prisma/prisma-task-binding-read-port.ts",
@@ -24,31 +22,19 @@
       "injections": [
         {
           "file": "apps/api/src/runtime/compose-goal.ts",
-          "refs": [
-            "taskBindingReadPort",
-            "GoalDependencyReadPort"
-          ]
+          "refs": ["taskBindingReadPort", "GoalDependencyReadPort"]
         },
         {
           "file": "apps/api/src/server.ts",
-          "refs": [
-            "new PrismaTaskBindingReadPort(",
-            "taskBindingReadPort"
-          ]
+          "refs": ["new PrismaTaskBindingReadPort(", "taskBindingReadPort"]
         },
         {
           "file": "apps/desktop/src/main/runtime/compose-goal.ts",
-          "refs": [
-            "taskBindingReadPort",
-            "GoalDependencyReadPort"
-          ]
+          "refs": ["taskBindingReadPort", "GoalDependencyReadPort"]
         },
         {
           "file": "apps/desktop/src/main/main.ts",
-          "refs": [
-            "new PowerSyncTaskBindingReadPort(",
-            "taskBindingReadPort"
-          ]
+          "refs": ["new PowerSyncTaskBindingReadPort(", "taskBindingReadPort"]
         }
       ]
     },
@@ -58,9 +44,7 @@
         "symbol": "IAnalyticsReadPort",
         "file": "packages/ai/src/server/application/ports/analytics-read.port.ts"
       },
-      "consumerDirs": [
-        "packages/ai/src/server/application"
-      ],
+      "consumerDirs": ["packages/ai/src/server/application"],
       "providers": [
         {
           "file": "apps/api/src/modules/ai/controlled-analytics-read.adapter.ts",
@@ -74,24 +58,15 @@
       "injections": [
         {
           "file": "apps/api/src/runtime/compose-ai.ts",
-          "refs": [
-            "new ControlledAnalyticsReadAdapter(",
-            "analyticsReadPort"
-          ]
+          "refs": ["new ControlledAnalyticsReadAdapter(", "analyticsReadPort"]
         },
         {
           "file": "apps/desktop/src/main/runtime/compose-ai.ts",
-          "refs": [
-            "analyticsReadPort",
-            "IAnalyticsReadPort"
-          ]
+          "refs": ["analyticsReadPort", "IAnalyticsReadPort"]
         },
         {
           "file": "apps/desktop/src/main/main.ts",
-          "refs": [
-            "new DesktopAnalyticsReadAdapter(",
-            "analyticsReadPort"
-          ]
+          "refs": ["new DesktopAnalyticsReadAdapter(", "analyticsReadPort"]
         }
       ]
     },
@@ -101,9 +76,7 @@
         "symbol": "IKnowledgeSourcePort",
         "file": "packages/ai/src/server/application/ports/knowledge-source.port.ts"
       },
-      "consumerDirs": [
-        "packages/ai/src/server/application"
-      ],
+      "consumerDirs": ["packages/ai/src/server/application"],
       "providers": [
         {
           "file": "apps/api/src/modules/ai/repository-knowledge-source.adapter.ts",
@@ -117,24 +90,15 @@
       "injections": [
         {
           "file": "apps/api/src/runtime/compose-ai.ts",
-          "refs": [
-            "new RepositoryKnowledgeSourceAdapter(",
-            "knowledgeSourcePort"
-          ]
+          "refs": ["new RepositoryKnowledgeSourceAdapter(", "knowledgeSourcePort"]
         },
         {
           "file": "apps/desktop/src/main/runtime/compose-ai.ts",
-          "refs": [
-            "knowledgeSourcePort",
-            "IKnowledgeSourcePort"
-          ]
+          "refs": ["knowledgeSourcePort", "IKnowledgeSourcePort"]
         },
         {
           "file": "apps/desktop/src/main/main.ts",
-          "refs": [
-            "new DesktopKnowledgeSourceAdapter(",
-            "knowledgeSourcePort"
-          ]
+          "refs": ["new DesktopKnowledgeSourceAdapter(", "knowledgeSourcePort"]
         }
       ]
     }
@@ -146,14 +110,8 @@
       "packages/contracts/src/modules/reliable-messaging/operation-receipt.ts",
       "packages/contracts/src/modules/reliable-messaging/projection.ts"
     ],
-    "canonicalTypes": [
-      "BusinessOperationReceipt",
-      "ProjectionOperation"
-    ],
-    "validators": [
-      "assertValidBusinessOperationReceipt",
-      "assertValidProjectionOperation"
-    ],
+    "canonicalTypes": ["BusinessOperationReceipt", "ProjectionOperation"],
+    "validators": ["assertValidBusinessOperationReceipt", "assertValidProjectionOperation"],
     "receiptAdapters": [
       "packages/goal/src/server/infrastructure/adapters/prisma/prisma-goal-reliable-operation.adapter.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-reliable-operation.adapter.ts",
@@ -180,7 +138,7 @@
       {
         "file": "apps/api/src/runtime/compose-ai.ts",
         "requiredRefs": [
-          "const mastraRuntime = new MastraAIRuntime({",
+          "mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
           "usageReadPort: repositorySet.executionRecordPort"
@@ -189,7 +147,7 @@
       {
         "file": "apps/desktop/src/main/runtime/compose-ai.ts",
         "requiredRefs": [
-          "const mastraRuntime = new MastraAIRuntime({",
+          "mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
           "usageReadPort: executionRecordPort"

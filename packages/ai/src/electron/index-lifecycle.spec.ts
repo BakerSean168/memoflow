@@ -20,6 +20,7 @@ vi.mock('electron', () => ({
 import { createAIElectronModule } from './index';
 
 const CURRENT_CHANNELS = [
+  AIChannels.LOCAL_AGENT,
   AIChannels.CAPABILITIES_GET,
   AIChannels.PROVIDER_CATALOG_GET,
   AIChannels.PROVIDER_ONBOARDING_PROBE,
@@ -166,6 +167,15 @@ describe('createAIElectronModule lifecycle', () => {
     const result = await handler(undefined, undefined);
     expect(result).toMatchObject({ ok: true });
     expect(fake.providerManagement.listProviders).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not route local conversation history into Mastra when local execution is unavailable', async () => {
+    await moduleDef.register(createFakeContext());
+    const result = await mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_HISTORY)!(undefined, {
+      runtimeKind: 'local_agent',
+      conversationId: 'native-local-conversation',
+    });
+    expect(result).toMatchObject({ ok: false, error: { code: 'SERVICE_UNAVAILABLE' } });
   });
 
   it('routes Provider onboarding IPC through authenticated identity-bound application methods', async () => {

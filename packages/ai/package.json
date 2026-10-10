@@ -38,6 +38,8 @@
   "scripts": {},
   "dependencies": {
     "@ai-sdk/openai-compatible-v6": "npm:@ai-sdk/openai-compatible@2.0.62",
+    "@anthropic-ai/claude-agent-sdk": "0.3.295",
+    "@anthropic-ai/sdk": "0.133.0",
     "@mastra/core": "1.70.0",
     "@mastra/libsql": "1.23.2",
     "@mastra/memory": "1.32.0",
@@ -49,6 +51,8 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
     "@opentelemetry/api": "^1.9.1",
     "express": "^5.2.1",
     "undici": "^8.11.2",

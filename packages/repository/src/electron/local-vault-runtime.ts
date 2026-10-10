@@ -663,6 +663,9 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     scope: VaultReadScope,
     request: ConfirmedLocalVaultWriteReq,
   ): Promise<ConfirmedLocalVaultWriteRes> {
+    if (request.expectedBindingId && request.expectedBindingId !== scope.binding.id) {
+      throw new LocalVaultRuntimeError('CONFLICT', 'The reviewed Vault is no longer selected');
+    }
     if (!request.proposalId.trim() || !request.requestId.trim() || request.proposalRevision < 1) {
       throw new LocalVaultRuntimeError(
         'VALIDATION_ERROR',

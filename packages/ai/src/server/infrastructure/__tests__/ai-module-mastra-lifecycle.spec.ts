@@ -19,7 +19,7 @@ function fakeMastraRuntime(
 }
 
 describe('createAIModule Mastra lifecycle', () => {
-  it('awaits Mastra init after synchronous module contributions and disposes it with the module', async () => {
+  it('starts shared services without initializing the optional built-in runtime and still owns disposal', async () => {
     const calls: string[] = [];
     const contribution: AIModuleRuntimeContribution = {
       start: vi.fn(() => calls.push('contribution:start')),
@@ -39,21 +39,16 @@ describe('createAIModule Mastra lifecycle', () => {
     });
 
     await instance.start();
-    expect(calls.slice(0, 2)).toEqual(['contribution:start', 'mastra:init']);
+    expect(calls).toEqual(['contribution:start']);
     expect(instance.mastraRuntime).toBe(mastra.runtime);
 
     await instance.dispose();
-    expect(calls).toEqual([
-      'contribution:start',
-      'mastra:init',
-      'contribution:stop',
-      'mastra:dispose',
-    ]);
-    expect(mastra.init).toHaveBeenCalledTimes(1);
+    expect(calls).toEqual(['contribution:start', 'contribution:stop', 'mastra:dispose']);
+    expect(mastra.init).not.toHaveBeenCalled();
     expect(mastra.dispose).toHaveBeenCalledTimes(1);
   });
 
-  it('rolls back started contributions and disposes Mastra when init rejects', async () => {
+  it('keeps provider setup available when built-in initialization would fail', async () => {
     const originalError = new Error('mastra init failed');
     const contribution: AIModuleRuntimeContribution = {
       start: vi.fn(() => {}),
@@ -69,10 +64,12 @@ describe('createAIModule Mastra lifecycle', () => {
       mastraRuntime: mastra.runtime,
     });
 
-    await expect(instance.start()).rejects.toBe(originalError);
+    await instance.start();
+    expect((await instance.providerManagement.getProviderCatalog()).ok).toBe(true);
     expect(contribution.start).toHaveBeenCalledTimes(1);
-    expect(contribution.stop).toHaveBeenCalledTimes(1);
-    expect(mastra.dispose).toHaveBeenCalledTimes(1);
+    expect(contribution.stop).not.toHaveBeenCalled();
+    expect(mastra.init).not.toHaveBeenCalled();
+    expect(mastra.dispose).not.toHaveBeenCalled();
 
     await instance.dispose();
     expect(contribution.stop).toHaveBeenCalledTimes(1);

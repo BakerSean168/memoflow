@@ -126,7 +126,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
 
     // Scoped app-vue CSS is a separate library artifact in production builds.
     // Source-based Web fixtures alone cannot catch a missing CSS import here.
-    await expect(mainWindow.locator('.workspace-content-well')).toHaveCSS('margin-top', '4px');
+    // Windows runners can open at the compact Desktop breakpoint. Select the
+    // expected gutter from the viewport, not from the style under test.
+    const viewportWidth = await mainWindow.evaluate(() => window.innerWidth);
+    expect(viewportWidth).toBeGreaterThanOrEqual(768);
+    await expect(mainWindow.locator('.workspace-content-well')).toHaveCSS(
+      'margin-top',
+      viewportWidth <= 1199 ? '3px' : '4px',
+    );
     await expect(mainWindow.locator('.workspace-content-well')).not.toHaveCSS(
       'border-top-left-radius',
       '0px',
@@ -204,6 +211,48 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       'Desktop account/privacy settings must not mount Web-only password auth without the capability',
     ).toEqual([]);
 
+    // Exercise the packaged host/IPC/database route with no usable native CLI.
+    // Saving a connection must not require installation or break builtin setup.
+    await mainWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=ai';
+    });
+    const localSettings = mainWindow.getByTestId('ai-local-settings');
+    await expect(localSettings).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
+    await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
+    for (const driver of ['codex', 'claude', 'pi']) {
+      await localSettings.getByRole('combobox').selectOption(driver);
+      await localSettings
+        .getByLabel('连接名称', { exact: true })
+        .fill(`Packaged unavailable ${driver}`);
+      await localSettings
+        .getByLabel('程序路径或命令', { exact: true })
+        .fill(
+          path.join(
+            runtimeRoot,
+            'not installed',
+            process.platform === 'win32' ? `${driver}.exe` : driver,
+          ),
+        );
+      await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
+      await expect(
+        localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
+      ).not.toBeChecked();
+      await localSettings.getByRole('button', { name: '保存连接', exact: true }).click();
+      const row = localSettings
+        .locator(':scope > div')
+        .filter({ hasText: `Packaged unavailable ${driver} · ${driver}` });
+      await expect(row).toBeVisible();
+      await row.getByRole('button', { name: '检查登录与模型', exact: true }).click();
+      await expect(row.getByRole('status')).toContainText('could not be started', {
+        timeout: 30_000,
+      });
+      await expect(mainWindow.getByTestId('ai-provider-add')).toBeEnabled();
+    }
+    await testInfo.attach('packaged-local-agent-settings.png', {
+      body: await mainWindow.screenshot(),
+      contentType: 'image/png',
+    });
+
     await mainWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=shortcuts';
     });
@@ -230,6 +279,19 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     electronApp = await electron.launch(launchOptions);
     const restartedWindow = await electronApp.firstWindow({ timeout: 45_000 });
     await expect(restartedWindow.getByTestId('app-shell')).toBeVisible({ timeout: 45_000 });
+    await restartedWindow.evaluate(() => {
+      window.location.hash = '#/settings?tab=ai';
+    });
+    const restoredLocalSettings = restartedWindow.getByTestId('ai-local-settings');
+    for (const driver of ['codex', 'claude', 'pi']) {
+      const row = restoredLocalSettings
+        .locator(':scope > div')
+        .filter({ hasText: `Packaged unavailable ${driver} · ${driver}` });
+      await expect(row).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
+      await row.getByRole('button', { name: '移除连接', exact: true }).click();
+      await expect(row).toHaveCount(0);
+    }
+    await expect(restartedWindow.getByTestId('ai-provider-add')).toBeEnabled();
     await restartedWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=shortcuts';
     });

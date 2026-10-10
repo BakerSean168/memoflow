@@ -3,10 +3,10 @@ import {
   AssistantRuntimeApprovalCommandSchema,
   AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeCancelResultSchema,
-  AssistantRuntimeClientCommandSchema,
+  AssistantRuntimeClientCommandSchema as AnyAssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
   AssistantRuntimeEventSchema,
-  AssistantRuntimeHistoryClientRequestSchema,
+  AssistantRuntimeHistoryClientRequestSchema as AnyAssistantRuntimeHistoryClientRequestSchema,
   AssistantRuntimeHistoryViewSchema,
   AIRuntimeUsageQueryClientRequestSchema,
   AIRuntimeUsageSummarySchema,
@@ -29,6 +29,17 @@ import {
   readAiExpressEnvelopeMeta,
 } from '../../shared/express-execution-context';
 import { toAITransportFailure } from '../../server/transport';
+
+// HTTP hosts only own built-in conversations; a Desktop reference never falls back.
+const AssistantRuntimeClientCommandSchema = AnyAssistantRuntimeClientCommandSchema.refine(
+  (command) => command.type === 'tool_approval' || command.runtimeKind !== 'local_agent',
+  'Local Agent execution requires Desktop',
+);
+const AssistantRuntimeHistoryClientRequestSchema =
+  AnyAssistantRuntimeHistoryClientRequestSchema.refine(
+    (request) => request.runtimeKind !== 'local_agent',
+    'Local Agent history belongs to its Desktop Profile',
+  );
 
 interface PlatformMiddleware {
   readonly auth: RequestHandler;

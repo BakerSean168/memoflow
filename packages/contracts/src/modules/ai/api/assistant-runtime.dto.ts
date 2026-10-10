@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AssistantRuntimeKindSchema, LocalAgentActivitySchema } from './local-agent.dto';
 /**
  * MemoFlow AI vNext cross-boundary contracts.
  *
@@ -103,6 +104,7 @@ export const AssistantRuntimeClientCommandSchema = z
     z
       .object({
         type: z.literal('message'),
+        runtimeKind: AssistantRuntimeKindSchema.optional(),
         conversationId: z.string().min(1),
         content: z.string().max(200_000),
         surface: AIRuntimeSurfaceSchema,
@@ -117,6 +119,7 @@ export const AssistantRuntimeClientCommandSchema = z
     z
       .object({
         type: z.literal('cancel_run'),
+        runtimeKind: AssistantRuntimeKindSchema.optional(),
         runId: z.string().min(1),
         identityId: z.never().optional(),
       })
@@ -152,6 +155,7 @@ export type AssistantRuntimeClientCommand = z.infer<typeof AssistantRuntimeClien
 
 export const AssistantRuntimeHistoryClientRequestSchema = z
   .object({
+    runtimeKind: AssistantRuntimeKindSchema.optional(),
     conversationId: z.string().min(1),
     identityId: z.never().optional(),
   })
@@ -177,6 +181,15 @@ export const AssistantRuntimeMessageViewSchema = z
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
     attachments: z.array(AssistantRuntimeMessageAttachmentViewSchema).max(4).default([]),
+    nativeActivities: z.array(LocalAgentActivitySchema).max(256).optional(),
+    localAgentSource: z
+      .object({
+        connectionId: z.string().min(1).max(512),
+        modelId: z.string().min(1).max(512),
+        runId: z.string().min(1).max(512),
+      })
+      .strict()
+      .optional(),
     createdAt: z.number().int().nonnegative(),
   })
   .strict();
@@ -186,6 +199,7 @@ export const AssistantRuntimeHistoryViewSchema = z
   .object({
     conversationId: z.string().min(1),
     messages: z.array(AssistantRuntimeMessageViewSchema),
+    incomplete: z.boolean().optional(),
   })
   .strict();
 export type AssistantRuntimeHistoryView = z.infer<typeof AssistantRuntimeHistoryViewSchema>;

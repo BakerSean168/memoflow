@@ -20,6 +20,7 @@ import { createSettingIpcClient } from '@memoflow/setting/client';
 import {
   createAIIpcClient,
   createAssistantRuntimeIpcClient,
+  createLocalAgentIpcClient,
   createRuntimeUsageIpcClient,
   createWorkflowRuntimeIpcClient,
 } from '@memoflow/ai/client';
@@ -37,6 +38,7 @@ import {
   NOTIFICATION_SERVICE_KEY,
   SETTING_SERVICE_KEY,
   AI_CLIENT_KEY,
+  AI_LOCAL_AGENT_KEY,
   AI_ASSISTANT_RUNTIME_KEY,
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
@@ -109,6 +111,7 @@ export function installDesktopAppServices(
 
   app.provide(SETTING_SERVICE_KEY, createSettingIpcClient(resultIpcClient));
 
+  app.provide(AI_LOCAL_AGENT_KEY, createLocalAgentIpcClient(resultIpcClient));
   app.provide(AI_CLIENT_KEY, createAIIpcClient(resultIpcClient));
   app.provide(AI_ASSISTANT_RUNTIME_KEY, createAssistantRuntimeIpcClient(resultIpcClient));
   app.provide(AI_RUNTIME_USAGE_KEY, createRuntimeUsageIpcClient(resultIpcClient));

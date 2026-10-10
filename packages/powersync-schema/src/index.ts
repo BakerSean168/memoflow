@@ -574,6 +574,10 @@ const desktop_delivery_acks = new Table(
  */
 const goal_operation_receipts = new Table(
   {
+    connection_id: column.text,
+    capability: column.text,
+    input_digest: column.text,
+    result_json: column.text,
     idempotency_key: column.text,
     operation_id: column.text,
     identity_id: column.text,
@@ -738,6 +742,19 @@ const ai_knowledge_index_entries_local = new Table(
   { localOnly: true },
 );
 
+const task_agent_mutation_receipts = new Table(
+  {
+    identity_id: column.text,
+    connection_id: column.text,
+    capability: column.text,
+    idempotency_key: column.text,
+    input_digest: column.text,
+    result_json: column.text,
+    created_at: column.text,
+  },
+  { localOnly: true },
+);
+
 const task_goal_outbox = new Table({
   identity_id: column.text,
   task_occurrence_id: column.text,
@@ -757,6 +774,25 @@ const task_goal_outbox = new Table({
 // ──────────────────────────────────────────────
 // Schema Export
 // ──────────────────────────────────────────────
+
+// Desktop Agent records are device/Profile-local. They are not native checkpoints.
+const ai_local_agent_connections = new Table(
+  { identity_id: column.text, record_json: column.text },
+  { localOnly: true },
+);
+const ai_local_conversations = new Table(
+  { identity_id: column.text, record_json: column.text },
+  { localOnly: true },
+);
+const ai_local_conversation_items = new Table(
+  {
+    identity_id: column.text,
+    conversation_id: column.text,
+    created_at: column.integer,
+    record_json: column.text,
+  },
+  { localOnly: true },
+);
 
 export const PowerSyncAppSchema = new Schema({
   // Account
@@ -779,6 +815,7 @@ export const PowerSyncAppSchema = new Schema({
   task_plans,
   task_occurrences,
   task_plan_history,
+  task_agent_mutation_receipts,
   // Schedule
   schedules,
   scheduling_reconcile_operations,
@@ -804,6 +841,9 @@ export const PowerSyncAppSchema = new Schema({
   notification_preferences,
   // AI
   ai_conversations,
+  ai_local_agent_connections,
+  ai_local_conversations,
+  ai_local_conversation_items,
   ai_execution_records,
   ai_provider_configs,
   ai_provider_onboarding_sessions,

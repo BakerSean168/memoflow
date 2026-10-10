@@ -630,6 +630,18 @@ describe('LocalVaultRuntime', () => {
 
   it('refuses overwrite and write paths containing symlinked directories', async () => {
     await selectVault();
+    await expect(
+      runtime.writeConfirmedNote({
+        expectedBindingId: 'other-vault',
+        relativePath: 'Wrong.md',
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(DOCUMENT_ID),
+        contentMarkdown: '# Wrong destination',
+        proposalId: 'wrong',
+        proposalRevision: 1,
+        requestId: 'wrong',
+      }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(fs.existsSync(path.join(vault, 'Wrong.md'))).toBe(false);
     await fs.promises.writeFile(path.join(vault, 'Existing.md'), '# Existing');
     const outsideDirectory = path.join(root, 'outside');
     await fs.promises.mkdir(outsideDirectory);

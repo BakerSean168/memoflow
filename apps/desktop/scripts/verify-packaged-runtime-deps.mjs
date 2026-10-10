@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
 import * as asar from '@electron/asar';
 import {
   electronExternalWorkspacePackages,
@@ -212,6 +213,23 @@ if (packagedAsars.length === 0) {
 
 for (const asarPath of packagedAsars) {
   const files = new Set(asar.listPackage(asarPath).map(normalizePath));
+  // File inventory alone can pass a corrupt archive when build outputs changed
+  // between ASAR's size scan and content copy. Verify executable entry bytes.
+  function verifiedEntry(entry) {
+    const stat = asar.statFile(asarPath, entry);
+    const bytes = asar.extractFile(asarPath, entry);
+    if (
+      stat.integrity?.algorithm !== 'SHA256' ||
+      createHash('sha256').update(bytes).digest('hex') !== stat.integrity.hash
+    )
+      throw new Error(`Packaged entry integrity mismatch: ${entry} in ${asarPath}`);
+    return bytes;
+  }
+  const appPackage = JSON.parse(verifiedEntry('package.json').toString('utf8'));
+  if (typeof appPackage.main !== 'string' || !files.has(normalizePath(appPackage.main)))
+    throw new Error(`Packaged app has no valid main entry in ${asarPath}`);
+  verifiedEntry(appPackage.main);
+  verifiedEntry('dist-renderer/index.html');
   const unpackedRoot = `${asarPath}.unpacked`;
   const unpackedFiles = collectPackedFiles(unpackedRoot);
   const missingPackages = [...seenPackages]

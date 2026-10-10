@@ -85,6 +85,7 @@ import {
   MastraAIRuntime,
   MastraModelResolver,
   ProviderWebResearchAdapter,
+  LocalAgentRuntime,
 } from '@memoflow/ai';
 import { createAIElectronModule } from '@memoflow/ai/electron';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
@@ -136,6 +137,7 @@ const dependencies = {
   goalKnowledgeService,
   knowledgeDocumentRefResolver,
   mastraStorage,
+  localAgent: { cwd: '/profiles/profile-1/storage/local-agents', isActive: () => true },
 };
 
 beforeEach(() => {
@@ -162,6 +164,15 @@ beforeEach(() => {
 });
 
 describe('Desktop composeAI Mastra-only ownership', () => {
+  it('keeps the Profile-local Agent capability available when builtin storage creation fails', () => {
+    vi.mocked(createMastraStorage).mockImplementationOnce(() => {
+      throw new Error('storage unavailable');
+    });
+    expect(() => composeAI(dependencies)).not.toThrow();
+    const input = vi.mocked(createAIModule).mock.calls[0][0];
+    expect(input.localAgentRuntime).toBeInstanceOf(LocalAgentRuntime);
+    expect(input.mastraRuntime).toBeUndefined();
+  });
   it('builds one profile-local LibSQL Mastra runtime with canonical workflow mutation ports and execution logging', () => {
     composeAI(dependencies);
 

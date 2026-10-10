@@ -15,6 +15,7 @@ import type {
   DesktopNotificationPreferencePatch,
 } from '@memoflow/contracts/electron';
 import type { ElectronBridge } from '@memoflow/ipc-client';
+import type { LocalAgentClient } from '@memoflow/ai/client';
 import type { AIRuntimeSurface } from '@memoflow/contracts/ai';
 import type { Result } from '@memoflow/contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
@@ -66,6 +67,7 @@ export const DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<DesktopNot
 export const SETTING_SERVICE_KEY: InjectionKey<ISettingService> = Symbol('SettingService');
 export const DATA_PORTABILITY_SERVICE_KEY: InjectionKey<IDataPortabilityService> =
   Symbol('DataPortabilityService');
+export const AI_LOCAL_AGENT_KEY: InjectionKey<LocalAgentClient> = Symbol('AILocalAgent');
 export const AI_CLIENT_KEY: InjectionKey<IAIClient> = Symbol('AIClient');
 export const AI_ASSISTANT_RUNTIME_KEY: InjectionKey<IAssistantRuntimeService> =
   Symbol('AIAssistantRuntime');

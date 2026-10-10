@@ -160,6 +160,7 @@ function mountComposable(
   runtime: ReturnType<typeof createRuntimeStub>,
   surface: 'web' | 'desktop' = 'web',
   usageRuntime: ReturnType<typeof createUsageRuntimeStub> = createUsageRuntimeStub(),
+  extra: Partial<UseAIChatSessionOptions> = {},
 ) {
   let composable!: ReturnType<typeof useAIChatSession>;
   const options: UseAIChatSessionOptions = {
@@ -168,6 +169,7 @@ function mountComposable(
     usageRuntime,
     surface,
     getDefaultConversationName: () => 'New chat',
+    ...extra,
   };
   mount(
     defineComponent({
@@ -195,6 +197,103 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it.each(['stop', 'new', 'select'] as const)(
+    'fences a pending native creation after %s',
+    async (action) => {
+      const service = createServiceStub();
+      const runtime = createRuntimeStub();
+      let resolve!: (value: unknown) => void;
+      const localAgent = {
+        createConversation: vi.fn(
+          () =>
+            new Promise((r) => {
+              resolve = r;
+            }),
+        ),
+      };
+      const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+        localAgent: localAgent as never,
+      });
+      session.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: 'codex',
+        modelId: 'native-model',
+      };
+      session.chatMessage.value = 'Do not send after cancellation';
+      const pending = session.handleSendChat(service as never, null, 'New chat', () => {});
+      await nextTick();
+      if (action === 'stop') session.stopGenerating();
+      else if (action === 'new') session.startNewConversation();
+      else
+        await session.selectConversation(
+          { id: 'other-chat', name: 'Other' },
+          service as never,
+          () => {},
+          () => '',
+        );
+      expect(session.chatLoading.value).toBe(false);
+      const selected = session.chatConversationId.value;
+      resolve({ id: 'late-native-chat' });
+      await pending;
+      expect(session.chatConversationId.value).toBe(selected);
+      expect(runtime.streamMessage).not.toHaveBeenCalled();
+      expect(session.chatLoading.value).toBe(false);
+    },
+  );
+  it('keeps native creation/history/deletion separate from builtin shells and workflow recovery', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const usage = createUsageRuntimeStub();
+    const native = {
+      id: 'native-chat',
+      runtimeKind: 'local_agent' as const,
+      connectionId: 'codex',
+      modelId: 'native-model',
+      name: 'Native chat',
+      driver: 'codex' as const,
+      createdAt: 1,
+      updatedAt: 2,
+    };
+    const localAgent = {
+      createConversation: vi.fn(async () => native),
+      listConversations: vi.fn(async () => [native]),
+    };
+    const restoreWorkflowState = vi.fn();
+    const session = mountComposable(service, runtime, 'desktop', usage, {
+      localAgent: localAgent as never,
+      restoreWorkflowState,
+    });
+    session.runtimeChoice.value = {
+      runtimeKind: 'local_agent',
+      connectionId: 'codex',
+      modelId: 'native-model',
+    };
+    session.chatMessage.value = 'Read my goals';
+    await session.handleSendChat(service as never, null, 'Native chat', () => {});
+    expect(localAgent.createConversation).toHaveBeenCalledWith({
+      connectionId: 'codex',
+      modelId: 'native-model',
+      name: 'Native chat',
+    });
+    expect(service.createConversation).not.toHaveBeenCalled();
+    expect(runtime.streamMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        runtimeKind: 'local_agent',
+        conversationId: 'native-chat',
+        modelId: 'native-model',
+      }),
+      expect.anything(),
+      expect.anything(),
+    );
+    expect(usage.get).not.toHaveBeenCalled();
+    await session.loadConversationList(service as never);
+    await session.selectConversation(native, service as never, vi.fn(), () => '');
+    expect(runtime.listMessages).toHaveBeenCalledWith('native-chat', 'local_agent');
+    expect(restoreWorkflowState).not.toHaveBeenCalled();
+    await session.deleteConversation('native-chat', service as never, vi.fn(), vi.fn());
+    expect(runtime.deleteConversation).toHaveBeenCalledWith('native-chat', 'local_agent');
+    expect(service.deleteConversation).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();

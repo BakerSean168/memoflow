@@ -1,6 +1,6 @@
 import { useAIWorkflowReconciliation } from './useAIWorkflowReconciliation';
 import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -14,6 +14,7 @@ import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
+import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
 import { useAIGoalWorkflow } from './useAIGoalWorkflow';
@@ -36,10 +37,15 @@ import {
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
+  AI_LOCAL_AGENT_KEY,
+  REPOSITORY_SERVICE_KEY,
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
   ASSISTANT_SURFACE_KEY,
 } from '../../../di/keys';
+import { useKnowledgeNativeSurfaceRegistration } from '../../../layouts/shell/useKnowledgeNativeSurface';
+import { openLocalAgentNoteReview } from '../../repository/composables/localAgentNoteReview';
+import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import type {
   AIWorkspaceRecentGoal,
   AIWorkspaceRecentKnowledgeNote,
@@ -68,6 +74,30 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
+  const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
+  const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
+  const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
+  async function saveLocalNote(content: string) {
+    if (!localAgent || !repository || !knowledgeNativeSurface) return;
+    try {
+      const binding = unwrapOrThrowError(await repository.getLocalVaultBinding());
+      if (!binding || binding.health.state !== 'Available')
+        throw new Error('Select an available local Vault first');
+      await openLocalAgentNoteReview({
+        content,
+        surface: knowledgeNativeSurface,
+        bindingId: binding.binding.id,
+        currentBindingId: async () =>
+          unwrapOrThrowError(await repository.getLocalVaultBinding())?.binding.id ?? null,
+        persist: async (request) =>
+          unwrapOrThrowError(await repository.writeConfirmedLocalVaultNote(request)),
+        onSaved: requestOpenKnowledgeNote,
+        onError: () => toast.error(t('aiAssistant.local.noteSaveFailed')),
+      });
+    } catch {
+      toast.error(t('aiAssistant.local.noteSaveFailed'));
+    }
+  }
   const { goals, fetchGoals } = useGoal();
   const task = useTask();
   const recentKnowledgeNotes = useRecentKnowledgeNotes();
@@ -172,11 +202,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const chatSession = useAIChatSession({
     service,
     runtime: assistantRuntime,
+    localAgent,
+    getDefaultRuntimeChoice: () => localChoices.defaultChoice.value,
     usageRuntime: runtimeUsage,
     surface: assistantSurface,
     getDefaultConversationName,
     onConversationCreated: persistWorkflowAndModel,
   });
+
+  const localChoices = useLocalAssistantChoices(localAgent, chatSession.runtimeChoice);
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
@@ -267,6 +301,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   });
 
   async function restoreWorkflowState(conversationId: string) {
+    if (chatSession.runtimeChoice.value.runtimeKind === 'local_agent') return;
     const persisted = persistence.restoreWorkflowState(conversationId);
     if (!persisted) return;
 
@@ -469,9 +504,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const canSendMessage = computed(
     () =>
-      modelSelection.canSendMessage.value &&
       !chatSession.chatLoading.value &&
-      modelSelection.selectedModel.value !== null,
+      (chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
+        ? localChoices.canSend.value
+        : modelSelection.canSendMessage.value && modelSelection.selectedModel.value !== null),
   );
   function canLeaveWorkflowReview(): boolean {
     return canLeaveAIWorkflowReview(
@@ -500,7 +536,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         modelSelection.syncSelectedModel,
         modelSelection.getPersistedModelKey,
       );
-      await restoreWorkflowState(item.id);
+      if (item.runtimeKind === 'local_agent') {
+        resetWorkflowArtifacts();
+        toolMode.value = 'chat';
+      } else await restoreWorkflowState(item.id);
       syncSurfaceContext();
     } finally {
       persistence.suspendWorkflowPersistence.value = false;
@@ -550,8 +589,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     referenceableKnowledgeNotes.cancel();
   });
 
-  onMounted(() =>
-    initializeChatView({
+  onMounted(async () => {
+    await localChoices.refresh();
+    await initializeChatView({
       initRepository: loadRecentKnowledgeNotes,
       loadProviders,
       loadConversationList: loadWorkspaceLists,
@@ -566,11 +606,14 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       toastError: (msg: string) => toast.error(msg),
       translate: t,
       nextTick,
-    }),
-  );
+    });
+  });
 
   return {
     session: {
+      runtimeChoice: chatSession.runtimeChoice,
+      historyIncomplete: chatSession.historyIncomplete,
+      respondNativeRequest: chatSession.respondNativeRequest,
       chatMessage: chatSession.chatMessage,
       chatLoading: chatSession.chatLoading,
       chatConversationId: chatSession.chatConversationId,
@@ -625,6 +668,31 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         ),
       stopGenerating: () => chatSession.stopGenerating(),
       decideToolApproval: chatSession.decideToolApproval,
+    },
+    localAssistant: {
+      ...localChoices,
+      canSaveNote: Boolean(repository && knowledgeNativeSurface),
+      saveNote: saveLocalNote,
+      async select(choice: import('@memoflow/contracts/ai').AssistantRuntimeChoice) {
+        if (chatSession.chatLoading.value) return;
+        if (!canLeaveWorkflowReview()) return;
+        const previous = chatSession.runtimeChoice.value;
+        if (!(
+          previous.runtimeKind === 'local_agent' &&
+          choice.runtimeKind === 'local_agent' &&
+          previous.connectionId === choice.connectionId
+        ))
+          startNewConversation();
+        chatSession.runtimeChoice.value = choice;
+      },
+      async setDefault() {
+        try {
+          await localChoices.saveDefault();
+          toast.success(t('aiAssistant.local.defaultSaved'));
+        } catch {
+          toast.error(t('aiAssistant.local.actionFailed'));
+        }
+      },
     },
     model: {
       selectedModelKey: modelSelection.selectedModelKey,

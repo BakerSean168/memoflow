@@ -11,7 +11,7 @@
  * compatible handle via `createAIElectronModule`. Stream/session handling stays
  * in the Electron transport file.
  *
- * AI-VNEXT-07: Mastra is the only runtime. The Python AIService adapters and
+ * ADR-120: Mastra owns built-in conversations and workflows; local Agents are optional. The Python AIService adapters and
  * ai-service runtime config are removed.
  */
 
@@ -33,6 +33,8 @@ import {
   ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
+  LocalAgentRuntime,
+  LocalAgentRepository,
   MastraModelResolver,
   ProviderWebResearchAdapter,
   type MastraStorageConfig,
@@ -42,6 +44,7 @@ import {
   type AIModuleInstance,
 } from '@memoflow/ai';
 import { createAIElectronModule, type AIElectronModuleDef } from '@memoflow/ai/electron';
+import { createDesktopLocalAgentTools } from '../modules/ai/local-agent-tools';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { DesktopTaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
@@ -66,6 +69,7 @@ export interface ComposeAIElectronDependencies {
   readonly notificationInbox: NotificationInboxPort;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
+  readonly localAgent: { cwd: string; isActive: () => boolean };
 }
 
 /**
@@ -100,35 +104,57 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     dependencies.taskApplicationPort,
     dependencies.labelService,
   );
-  const mastraRuntime = new MastraAIRuntime({
-    storage: createMastraStorage(dependencies.mastraStorage),
-    modelResolver: new MastraModelResolver(providerConfigRepository, providerSecretVault),
-    conversationShellSource: new ConversationShellSource(conversationRepository),
-    goalPlanMutationPort,
-    taskPlanMutationPort: taskPlanMutationAdapter,
-    knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(
-      dependencies.knowledgeNotePersistence,
-    ),
-    knowledgeSourcePort: dependencies.knowledgeSourcePort,
-    webResearchPort: new ProviderWebResearchAdapter(providerConfigRepository, providerSecretVault),
-    executionRecordPort,
-    usageReadPort: executionRecordPort,
-    routineCommandPort: new DesktopRoutineAICommandAdapter(dependencies.routineCommandPort),
-    plannerReadPort: new DesktopPlannerAIReadAdapter(
-      dependencies.scheduleEventApi,
-      dependencies.taskApplicationPort,
+  let mastraRuntime: MastraAIRuntime | undefined;
+  try {
+    mastraRuntime = new MastraAIRuntime({
+      storage: createMastraStorage(dependencies.mastraStorage),
+      modelResolver: new MastraModelResolver(providerConfigRepository, providerSecretVault),
+      conversationShellSource: new ConversationShellSource(conversationRepository),
+      goalPlanMutationPort,
+      taskPlanMutationPort: taskPlanMutationAdapter,
+      knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(
+        dependencies.knowledgeNotePersistence,
+      ),
+      knowledgeSourcePort: dependencies.knowledgeSourcePort,
+      webResearchPort: new ProviderWebResearchAdapter(
+        providerConfigRepository,
+        providerSecretVault,
+      ),
+      executionRecordPort,
+      usageReadPort: executionRecordPort,
+      routineCommandPort: new DesktopRoutineAICommandAdapter(dependencies.routineCommandPort),
+      plannerReadPort: new DesktopPlannerAIReadAdapter(
+        dependencies.scheduleEventApi,
+        dependencies.taskApplicationPort,
+        dependencies.userTimeContextPort,
+      ),
+      notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationInbox),
+      selectedEntityContextReadPort: new DesktopSelectedEntityContextReadAdapter(
+        dependencies.goalApplicationPort,
+        dependencies.taskApplicationPort,
+      ),
+      analyticsReadPort: dependencies.analyticsReadPort,
+      contextAssembler,
+    });
+  } catch {
+    // Optional builtin storage may be unavailable. IPC reports this runtime as
+    // unavailable while provider settings and local Agents remain usable.
+  }
+  const localStore = new LocalAgentRepository(dependencies.db);
+  const localAgentRuntime = new LocalAgentRuntime({
+    store: localStore,
+    bridge: createDesktopLocalAgentTools(
+      dependencies.db,
+      localStore,
+      dependencies.localAgent.isActive,
       dependencies.userTimeContextPort,
+      dependencies.knowledgeSourcePort,
     ),
-    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationInbox),
-    selectedEntityContextReadPort: new DesktopSelectedEntityContextReadAdapter(
-      dependencies.goalApplicationPort,
-      dependencies.taskApplicationPort,
-    ),
-    analyticsReadPort: dependencies.analyticsReadPort,
-    contextAssembler,
+    ...dependencies.localAgent,
   });
 
   const instance = createAIModule({
+    localAgentRuntime,
     conversationRepository,
     providerConfigRepository,
     providerSecretVault,

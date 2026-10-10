@@ -2,8 +2,12 @@ import type { Ref } from 'vue';
 import type {
   AIContextEntityType,
   AssistantRuntimeEvent,
+  AssistantRuntimeMessageView,
   AssistantRuntimeAttachment,
   ConversationListRes,
+  LocalAgentConversation,
+  LocalAgentRequest,
+  LocalAgentActivity,
   GoalPlanDraft,
   GoalPlanKnowledge,
   GoalPlanTask,
@@ -113,9 +117,22 @@ export type ChatItem = {
     { activityType: 'tool' }
   >;
   approvals?: ChatToolApproval[];
+  nativeActivity?: { toolCallId: string; label: string };
+  nativeActivities?: LocalAgentActivity[];
+  localAgentSource?: AssistantRuntimeMessageView['localAgentSource'];
+  nativeRequests?: ChatNativeRequest[];
 };
 
-export type ConversationSummary = ConversationListRes['data'][number];
+export type ChatNativeRequest = {
+  request: LocalAgentRequest;
+  conversationId: string;
+  runId: string;
+  status: 'pending' | 'sending' | 'answered' | 'expired';
+  errorMessage?: string;
+};
+
+export type ConversationSummary =
+  (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' }) | LocalAgentConversation;
 
 export type ProviderListItem = {
   id: string;

@@ -36,6 +36,18 @@ _Avoid_：把已退役的 ReminderTemplate 当作新接入的业务对象。
 
 ## 外部接入
 
+**助手执行方式（Assistant Runtime Choice）**：用户为一次助手会话选择的执行来源，可以是 MemoFlow 内置助手或已连接的本地 Agent。
+_Avoid_：与模型名称、模型服务连接或 MemoFlow 云端账号混用。
+
+**内置助手（Built-in Assistant）**：随 MemoFlow 提供、无需另行安装 Agent 的助手选项；使用用户可用的模型服务连接。
+_Avoid_：把无需安装理解为无需模型凭据、免费或离线推理。
+
+**本地 Agent 连接（Local Agent Connection）**：当前 Desktop Profile 使用本机某个 Agent 配置实例的连接设置；它不授予访问其他 Profile 的权利。
+_Avoid_：与外部客户端获得的 External Agent Connection 或模型 API 的 AI Provider Connection 混用。
+
+**模型服务连接（AI Provider Connection）**：MemoFlow 内置 AI 使用某个模型服务及其凭据的连接配置。
+_Avoid_：把完整 Agent 的登录、会话和工具执行能力视为一个模型 API 地址。
+
 **MemoFlow Agent Capability**：由真实业务 owner 提供、可被 Agent 调用的一项明确业务操作。
 _Avoid_：把 capability 当作新的业务真值 owner。
 

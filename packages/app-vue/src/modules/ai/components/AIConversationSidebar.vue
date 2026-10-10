@@ -77,6 +77,9 @@
           <MessageSquare class="h-4 w-4 shrink-0" />
           <span class="min-w-0 flex-1 truncate">
             {{ item.name || t('common.untitled') }}
+            <span class="ml-1 text-[10px] text-muted-foreground">{{
+              item.runtimeKind === 'local_agent' ? item.driver : t('aiAssistant.local.builtin')
+            }}</span>
           </span>
         </button>
         <Button

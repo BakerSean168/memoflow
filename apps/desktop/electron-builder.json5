@@ -29,6 +29,8 @@
     "dist-renderer/**/*",
     "dist-electron/**/*",
     "package.json",
+    // BYOA launches the user's CLI; the SDK's optional bundled CLI is unused.
+    "!node_modules/@anthropic-ai/claude-agent-sdk-*/**/*",
     {
       "from": "node_modules/is-stream",
       "to": "node_modules/winston/node_modules/is-stream",
@@ -51,6 +53,10 @@
     }
   ],
   "extraResources": [
+    {
+      "from": "../../packages/ai/src/server/local-agent/THIRD_PARTY_NOTICES.md",
+      "to": "licenses/local-agent-adapters.md"
+    },
     {
       "from": "../../node_modules/bindings",
       "to": "node_modules/bindings"

@@ -1,4 +1,5 @@
 import { extractStructuredResultError } from '@memoflow/contracts/result';
+import { LocalAgentError, LOCAL_AGENT_FAILURES } from './local-agent-error';
 import { isAIExecutionError, type AIExecutionErrorKind } from './ai-execution-error';
 
 /** Public AI failure codes accepted at the runtime boundary. */
@@ -50,6 +51,8 @@ export function toAIPublicFailure(
   error: unknown,
   options: AIPublicFailureOptions,
 ): AIPublicFailure {
+  if (error instanceof LocalAgentError)
+    return { code: error.code, message: LOCAL_AGENT_FAILURES[error.code] };
   if (isAIExecutionError(error)) {
     const code = mapAIExecutionCategory(error.category);
     return createPublicFailure(

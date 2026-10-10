@@ -57,6 +57,7 @@ import type {
 import { createLogger } from '@memoflow/utils/logger';
 import { AI_PROVIDER_CATALOG } from '@memoflow/contracts/ai';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../mastra/runtime';
+import type { LocalAgentRuntime } from '../local-agent/local-agent-runtime';
 import { assembleCapabilities } from '../shared/assemble-capabilities';
 import { OpenAICompatibleChatExecutionAdapter } from './adapters/openai-compatible-chat-execution.adapter';
 import { OpenAICompatibleAnalyticsQueryAdapter } from './adapters/openai-compatible-analytics-query.adapter';
@@ -163,6 +164,7 @@ export interface AIModuleDependencies {
    * this module only owns its lifecycle.
    */
   readonly mastraRuntime?: MastraAIRuntime;
+  readonly localAgentRuntime?: LocalAgentRuntime;
   /**
    * Canonical vNext Workflow runtime seam. Batch C provides the first concrete
    * Mastra implementation; transports already fail closed when it is absent.
@@ -318,6 +320,7 @@ export interface AIModuleInstance {
   readonly evaluationOperations: AIEvaluationOperationsPort;
   /** Mastra-native Assistant execution surface. */
   readonly mastraRuntime: MastraAIRuntime | null;
+  readonly localAgentRuntime?: LocalAgentRuntime | null;
   /** Canonical Workflow execution surface; null until a Mastra workflow runtime is composed. */
   readonly workflowRuntime: AIWorkflowRuntimePort | null;
   start(): Promise<void> | void;
@@ -332,6 +335,7 @@ export type AITransportModuleInstance = Pick<
   | 'knowledge'
   | 'evaluationOperations'
   | 'mastraRuntime'
+  | 'localAgentRuntime'
   | 'workflowRuntime'
   | 'start'
   | 'dispose'
@@ -776,6 +780,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     knowledge,
     evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
+    localAgentRuntime: dependencies.localAgentRuntime ?? null,
     workflowRuntime: dependencies.workflowRuntime ?? null,
     start(): Promise<void> | void {
       if (started) {
@@ -803,50 +808,25 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       }
 
       started = true;
-      if (!dependencies.mastraRuntime) {
-        return;
-      }
-
-      return dependencies.mastraRuntime.init().catch(async (error) => {
-        for (const startedContribution of [...startedContributions].reverse()) {
-          try {
-            startedContribution.stop();
-          } catch (stopError) {
-            logger.error(
-              'AIModule: contribution stop failed during Mastra init rollback',
-              stopError,
-            );
-          }
-        }
-        started = false;
-        try {
-          await dependencies.mastraRuntime?.dispose();
-        } catch (disposeError) {
-          logger.error('AIModule: Mastra dispose failed during init rollback', disposeError);
-        }
-        await providerSafeFetch.close().catch((closeError) => {
-          logger.error(
-            'AIModule: provider egress transport close failed during init rollback',
-            closeError,
-          );
-        });
-        throw error;
-      });
+      // Every Mastra chat/history/workflow entry already awaits its own init().
+      // Initialize there so an unavailable optional runtime cannot take down
+      // provider setup, business services, or Desktop local Agent connections.
     },
     async dispose(): Promise<void> {
       if (!started) {
         return;
       }
 
-      for (const contribution of [...runtimeContributions].reverse()) {
-        contribution.stop();
-      }
-
       started = false;
       try {
-        await dependencies.mastraRuntime?.dispose();
+        await dependencies.localAgentRuntime?.dispose();
       } finally {
-        await providerSafeFetch.close();
+        for (const contribution of [...runtimeContributions].reverse()) contribution.stop();
+        try {
+          await dependencies.mastraRuntime?.dispose();
+        } finally {
+          await providerSafeFetch.close();
+        }
       }
     },
   };

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue';
+import { inject, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
+import { routerKey } from 'vue-router';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 
 const props = withDefaults(
@@ -11,7 +13,42 @@ const props = withDefaults(
 );
 
 const STREAM_MARKDOWN_RENDER_MS = 120;
+const router = inject(routerKey, undefined);
+function openReference(event: MouseEvent) {
+  if (
+    !router ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const target = event.target instanceof Element ? event.target.closest('a') : null;
+  const href = target?.getAttribute('href');
+  if (!href) return;
+  const noteId = /^\/repository\?note=([A-Za-z0-9_-]+)$/.exec(href)?.[1];
+  if (
+    !/^\/(goals|tasks)\/[A-Za-z0-9_-]+$/.test(href) &&
+    !KnowledgeDocumentIdSchema.safeParse(noteId).success
+  )
+    return;
+  event.preventDefault();
+  void router.push(href);
+}
 const rendered = ref(renderSafeMarkdown(props.content));
+const contentElement = ref<HTMLElement | null>(null);
+// v-html creates native links. Bind to those semantic controls after each
+// render so keyboard activation works without making the text container clickable.
+watchEffect(
+  (onCleanup) => {
+    void rendered.value;
+    const links = [...(contentElement.value?.querySelectorAll('a') ?? [])];
+    links.forEach((link) => link.addEventListener('click', openReference));
+    onCleanup(() => links.forEach((link) => link.removeEventListener('click', openReference)));
+  },
+  { flush: 'post' },
+);
 let pendingContent = props.content;
 let renderTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -44,6 +81,7 @@ onBeforeUnmount(cancelRenderTimer);
 
 <template>
   <div
+    ref="contentElement"
     class="ai-message-content min-w-0 text-sm leading-7 text-foreground"
     data-testid="ai-message-markdown"
     v-html="rendered"

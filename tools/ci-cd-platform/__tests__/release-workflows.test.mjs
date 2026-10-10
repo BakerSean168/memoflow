@@ -127,6 +127,12 @@ test('Windows Desktop release promotion is gated by a real installed N to N+1 up
   assert.match(updateE2E, /profileRegistrySemanticSha256Before/u);
   assert.match(updateE2E, /preservationSentinelSha256Before/u);
   assert.match(updateE2E, /actions\/upload-artifact@[0-9a-f]{40}/u);
+  const packagedSmoke = workflowStep(updateE2E, 'Run Windows packaged runtime smoke');
+  assert.match(packagedSmoke, /MEMOFLOW_PACKAGED_EXECUTABLE:/u);
+  assert.match(packagedSmoke, /steps\.fixtures\.outputs\.candidate_feed_dir/u);
+  assert.match(packagedSmoke, /win-unpacked\\memoflow\.exe/u);
+  assert.match(packagedSmoke, /pnpm nx run desktop:test:packaged-smoke/u);
+  assert.match(updateE2E, /path: apps\/desktop\/test-results/u);
 
   assert.match(runner, /MEMOFLOW_DESKTOP_UPDATE_E2E = '1'/u);
   assert.match(runner, /python -ErrorAction Stop/u);
@@ -184,7 +190,10 @@ test('desktop release aggregation selects only platform assets from mixed run ar
     'desktop-update-rollout-evidence',
   ];
 
-  assert.deepEqual(artifacts.filter((name) => matchesGlob(name, pattern)), platforms);
+  assert.deepEqual(
+    artifacts.filter((name) => matchesGlob(name, pattern)),
+    platforms,
+  );
 });
 
 test('desktop packaging has one stable product identity and one native rebuild owner', async () => {
