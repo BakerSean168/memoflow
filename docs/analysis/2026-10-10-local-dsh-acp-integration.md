@@ -21,6 +21,14 @@ DSH is a named fourth Agent option in desktop Local Agent Settings. The homePath
 - **2026-10-10 GCP Dev live acceptance:** DSH 0.2.0-rc.2 was launched from its official CLI with a fresh temporary DSH_HOME, no inherited commercial provider credentials, default provider/model forced to `ollama` / `gpt-oss:20b`, and the API endpoint fixed to `https://ollama.com/v1`. A 0600 Ollama key file was used without passing the key in any CLI argument or repository file. ACP produced `mcp__memoflow__goal_search` activities in **both turns**, two `assistant.run.completed` events, and retained the same native session ID. The real Desktop test file **passed** (1 file, 32.17 s), and the launcher exited 0 with a no-commercial-fallback marker. The temporary profile was deleted after the run.
 - This is a successful real DSH inference acceptance for **one Linux/Ollama Cloud model route**, not proof of arbitrary third-party ACP agents, other provider stability, a Windows DSH inference session, or production deployment. Free account quotas are controlled by Ollama; no periodic inference/probing was added.
 
+### Integration review snapshot (2026-10-10)
+
+- Parent MemoFlow Local BYOA PR #439 was **squash-merged into main** at b4867368406c2d163d712206579800bb91ba37dc after its exact-head 19/19 CI passed (run 38022164159). The parent main and pre-merge feature branch trees were byte-identical.
+- This DSH branch was transplanted onto that precise main tree, keeping the original 17-file DSH-only delta unchanged (identical Git patch hash before and after transplant). PR #441 now targets main directly.
+- DSH local verification already passed: AI build and AI/app-vue/Desktop typechecks; 11 Local Agent spec files / 48 tests; Desktop ACP synthetic two-turn Goal integration (2 passed, 4 opt-in skipped); and AI/Desktop lint with 0 errors (5+2 pre-existing warnings).
+- The older Windows/Linux installed-update success on DSH (run 38020365759) predates the latest live-acceptance script and **cannot** be represented as exact-head coverage. The retargeted PR requires new exact-head CI and installed-update evidence before merge.
+- All these checks concern source and packaged-runtime readiness. Neither merging to main nor the synthetic update fixture constitutes a public app release, a Windows real-provider inference test, or a production deployment.
+
 ### Verification commands (GCP Dev, DSH worktree)
 
 ```bash
