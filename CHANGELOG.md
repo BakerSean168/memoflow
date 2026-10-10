@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.0](https://github.com/BakerSean168/memoflow/compare/v0.17.0...v0.18.0) (2026-10-10)
+
+
+### Features
+
+* **ai:** unified Agent instances for Web and Desktop ([#444](https://github.com/BakerSean168/memoflow/issues/444)) ([5dbf577](https://github.com/BakerSean168/memoflow/commit/5dbf577ee2680c3e522510c1606d161cc711c11b))
+* **ui:** unify Providers settings and T3 composer controls ([#442](https://github.com/BakerSean168/memoflow/issues/442)) ([e905a4d](https://github.com/BakerSean168/memoflow/commit/e905a4d10c2a06a20991c5eea620c33d0bc8b01d))
+
 ## [0.17.0](https://github.com/BakerSean168/memoflow/compare/v0.16.0...v0.17.0) (2026-10-10)
 
 
