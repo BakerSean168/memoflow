@@ -171,20 +171,6 @@
       />
 
       <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
-        <AILocalRuntimePicker
-          v-if="localAssistant.available"
-          :choice="runtimeChoice"
-          :connections="localAssistant.connections.value"
-          :models="localAssistant.models.value"
-          :status="localAssistant.status.value"
-          :loading="localAssistant.loading.value"
-          :error="localAssistant.error.value"
-          :disabled="chatLoading"
-          @select="localAssistant.select"
-          @refresh="localAssistant.probe"
-          @set-default="localAssistant.setDefault"
-          @settings="openAISettings"
-        />
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
@@ -207,7 +193,24 @@
           @remove-attachment="removeComposerAttachment"
           @toggle-context-entity="toggleExplicitContextEntity"
           @remove-context-entity="removeContextEntity"
-        />
+        >
+          <template #provider-options>
+            <AILocalRuntimePicker
+              v-if="localAssistant.available"
+              :choice="runtimeChoice"
+              :connections="localAssistant.connections.value"
+              :models="localAssistant.models.value"
+              :status="localAssistant.status.value"
+              :loading="localAssistant.loading.value"
+              :error="localAssistant.error.value"
+              :disabled="chatLoading"
+              @select="localAssistant.select"
+              @refresh="localAssistant.probe"
+              @set-default="localAssistant.setDefault"
+              @settings="openAISettings"
+            />
+          </template>
+        </AIFooterComposer>
       </Teleport>
     </section>
 

@@ -8,10 +8,10 @@
       <slot name="action-rail" />
 
       <div
-        class="relative rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))]"
+        class="relative rounded-[24px] border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))]"
         :class="[
           semanticElevationClass('floating'),
-          density === 'comfortable' ? 'px-3 pb-2.5 pt-3' : 'px-2 pb-2 pt-2.5',
+          density === 'comfortable' ? 'px-4 pb-3 pt-4' : 'px-3 pb-2.5 pt-3',
           dragging ? 'border-primary/60 bg-muted/20' : '',
         ]"
         data-testid="ai-composer-surface"
@@ -131,7 +131,8 @@
           ref="composerTextarea"
           :value="modelValue"
           rows="1"
-          class="block min-h-[32px] w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0"
+          class="block w-full resize-none border-0 bg-transparent px-1 py-1 text-[13.5px] leading-6 text-foreground shadow-none outline-none placeholder:text-[hsl(var(--foreground-subtle))] focus-visible:ring-0"
+          :class="density === 'comfortable' ? 'min-h-[64px]' : 'min-h-[40px]'"
           :style="{ maxHeight: `${textareaMaxPx}px` }"
           :disabled="!canType"
           :placeholder="t('aiAssistant.dialogs.chat.messagePlaceholder')"
@@ -146,8 +147,50 @@
           @compositionend="handleCompositionEnd"
         />
 
-        <div class="mt-1.5 flex items-center gap-1.5">
-          <div class="flex min-w-0 flex-1 items-center gap-1">
+        <div class="mt-3 flex items-center gap-2">
+          <div
+            class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+            data-testid="ai-composer-options"
+          >
+            <slot name="provider-options" />
+            <div v-if="!localAgent && modelGroups.length" class="min-w-0">
+              <Select
+                :model-value="selectedModelKey"
+                @update:model-value="$emit('select-model', String($event))"
+              >
+                <SelectTrigger
+                  class="h-7 w-auto min-w-0 max-w-[15rem] rounded-md border-0 bg-transparent px-2 text-xs text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
+                  :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
+                  data-testid="ai-chat-model-selector"
+                >
+                  <Bot class="mr-1.5 size-4 shrink-0" aria-hidden="true" />
+                  <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup v-for="group in modelGroups" :key="group.providerId">
+                    <SelectLabel>{{ group.providerName }}</SelectLabel>
+                    <SelectItem v-for="model in group.models" :key="model.key" :value="model.key">
+                      {{ model.modelName }}
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              v-else-if="!localAgent"
+              variant="ghost"
+              class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+              data-testid="ai-chat-empty-models"
+              :title="t('aiAssistant.chatPage.emptyModelsHint')"
+              @click="$emit('open-settings')"
+            >
+              <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
+              <span v-if="density !== 'icon'" class="text-xs">
+                {{ t('aiAssistant.chatPage.emptyModelsInline') }}
+              </span>
+            </Button>
+          </div>
+          <div class="flex shrink-0 items-center gap-2" data-testid="ai-composer-actions">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
                 <Button
@@ -158,7 +201,7 @@
                   :title="t('aiAssistant.chatPage.attachments.addContext')"
                   :aria-label="t('aiAssistant.chatPage.attachments.addContext')"
                 >
-                  <Plus class="h-4 w-4" />
+                  <Paperclip class="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" class="w-60">
@@ -258,73 +301,31 @@
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <span
-              v-if="dragging && density !== 'icon'"
-              class="truncate px-1 text-xs text-muted-foreground"
+            <Button
+              v-if="loading"
+              variant="outline"
+              size="icon"
+              class="h-8 w-8 shrink-0 rounded-full p-0 shadow-none"
+              data-testid="ai-chat-stop-generating"
+              :title="t('aiAssistant.dialogs.chat.stopGenerating')"
+              :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
+              @click="$emit('stop')"
             >
-              {{ t('aiAssistant.chatPage.attachments.dropHere') }}
-            </span>
-          </div>
-
-          <div v-if="!localAgent && modelGroups.length" class="min-w-0 shrink-0">
-            <Select
-              :model-value="selectedModelKey"
-              @update:model-value="$emit('select-model', String($event))"
+              <Square class="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              v-else
+              size="icon"
+              class="h-8 w-8 shrink-0 rounded-full p-0 shadow-none"
+              :disabled="!canSubmit"
+              data-testid="ai-chat-send-message"
+              :title="t('aiAssistant.dialogs.chat.sendMessage')"
+              :aria-label="t('aiAssistant.dialogs.chat.sendMessage')"
+              @click="$emit('send')"
             >
-              <SelectTrigger
-                class="h-7 w-auto min-w-[7rem] max-w-[12rem] rounded-md border-0 bg-transparent px-2 text-[11px] text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
-                :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
-              >
-                <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup v-for="group in modelGroups" :key="group.providerId">
-                  <SelectLabel>{{ group.providerName }}</SelectLabel>
-                  <SelectItem v-for="model in group.models" :key="model.key" :value="model.key">
-                    {{ model.modelName }}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              <ArrowUp class="h-4 w-4" />
+            </Button>
           </div>
-          <Button
-            v-else-if="!localAgent"
-            variant="ghost"
-            class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-            data-testid="ai-chat-empty-models"
-            :title="t('aiAssistant.chatPage.emptyModelsHint')"
-            @click="$emit('open-settings')"
-          >
-            <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
-            <span v-if="density !== 'icon'" class="text-xs">
-              {{ t('aiAssistant.chatPage.emptyModelsInline') }}
-            </span>
-          </Button>
-
-          <Button
-            v-if="loading"
-            variant="outline"
-            size="icon"
-            class="h-8 w-8 shrink-0 rounded-lg p-0 shadow-none"
-            data-testid="ai-chat-stop-generating"
-            :title="t('aiAssistant.dialogs.chat.stopGenerating')"
-            :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
-            @click="$emit('stop')"
-          >
-            <Square class="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            v-else
-            size="icon"
-            class="h-8 w-8 shrink-0 rounded-lg p-0 shadow-none"
-            :disabled="!canSubmit"
-            data-testid="ai-chat-send-message"
-            :title="t('aiAssistant.dialogs.chat.sendMessage')"
-            :aria-label="t('aiAssistant.dialogs.chat.sendMessage')"
-            @click="$emit('send')"
-          >
-            <ArrowUp class="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>
@@ -335,11 +336,11 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import {
   ArrowUp,
+  Bot,
   Check,
   FileText,
   ListChecks,
   Paperclip,
-  Plus,
   Settings2,
   Square,
   Target,

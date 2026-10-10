@@ -465,7 +465,7 @@ export default {
       noSavedConversations: '还没有保存的会话。',
       conversationName: '会话名称',
       conversationPlaceholder: '会话名称',
-      messagePlaceholder: '描述你想完成的事情，或直接提问…',
+      messagePlaceholder: "输入问题，或用 {'@'} 引用目标、任务和笔记…",
       provider: '提供方',
       providerPlaceholder: '选择提供方',
       model: '模型',

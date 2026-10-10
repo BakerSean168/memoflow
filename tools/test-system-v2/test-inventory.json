@@ -5381,6 +5381,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13046,7 +13054,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 284
+      "fileCount": 285
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13792,7 +13800,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1192,
+    "unit": 1193,
     "integration": 45,
     "smoke": 3,
     "boundary-ipc": 8,

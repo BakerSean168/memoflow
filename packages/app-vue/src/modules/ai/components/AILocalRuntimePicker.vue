@@ -1,81 +1,90 @@
 <template>
   <div
-    class="flex flex-wrap items-center gap-2 px-3 py-2 text-xs"
+    class="flex min-w-0 flex-wrap items-center gap-1 text-xs"
     data-testid="ai-local-runtime-picker"
   >
-    <label class="flex items-center gap-2">
-      {{ t('aiAssistant.local.runtime') }}
-      <select
-        class="max-w-48 rounded-md border bg-background p-1.5"
-        :value="connectionId"
-        :disabled="disabled"
-        @change="selectConnection"
-      >
-        <option value="builtin">{{ t('aiAssistant.local.builtin') }}</option>
-        <option
-          v-for="connection in connections"
-          :key="connection.id"
-          :value="connection.id"
-          :disabled="!connection.enabled"
-        >
-          {{ connection.name }} · {{ connection.driver }}
-        </option>
-        <option v-if="missingConnection" :value="connectionId" disabled>
-          {{ t('aiAssistant.local.missingConnection') }}
-        </option>
-      </select>
-    </label>
-    <template v-if="choice.runtimeKind === 'local_agent'">
-      <label class="flex items-center gap-2">
-        {{ t('aiAssistant.local.model') }}
-        <select
-          class="max-w-56 rounded-md border bg-background p-1.5"
-          :value="choice.modelId"
-          :disabled="disabled || loading"
-          @change="selectModel"
-        >
-          <option value="" disabled>{{ t('aiAssistant.local.chooseModel') }}</option>
-          <option
-            v-if="choice.modelId && !models.some((m) => m.id === choice.modelId)"
-            :value="choice.modelId"
-          >
-            {{ choice.modelId }} · {{ t('aiAssistant.local.unavailable') }}
-          </option>
-          <option v-for="model in models" :key="model.id" :value="model.id">
-            {{ model.name }}
-          </option>
-        </select>
-      </label>
-      <button
-        type="button"
-        class="rounded border px-2 py-1"
-        :disabled="loading || disabled"
-        @click="$emit('refresh', connectionId)"
-      >
-        {{ t('aiAssistant.local.refresh') }}
-      </button>
-      <span v-if="loading" role="status">{{ t('aiAssistant.local.checking') }}</span>
-      <span v-else-if="status && status.status !== 'ready'" role="status">{{
-        status.message
-      }}</span>
-      <span class="text-muted-foreground">{{ t('aiAssistant.local.usageUnknown') }}</span>
-    </template>
-    <button
-      type="button"
-      class="rounded border px-2 py-1"
-      :disabled="disabled || (choice.runtimeKind === 'local_agent' && !choice.modelId)"
-      @click="$emit('set-default')"
+    <select
+      class="max-w-40 rounded-md border-0 bg-transparent px-1 py-1.5 hover:bg-muted"
+      :aria-label="t('aiAssistant.provider')"
+      :value="connectionId"
+      :disabled="disabled"
+      @change="selectConnection"
     >
-      {{ t('aiAssistant.local.setDefault') }}
-    </button>
-    <button type="button" class="underline" @click="$emit('settings')">
-      {{ t('aiAssistant.local.connections') }}
-    </button>
-    <span v-if="error" role="alert">{{ t('aiAssistant.local.actionFailed') }}</span>
+      <option value="builtin">{{ t('aiAssistant.local.builtin') }}</option>
+      <option
+        v-for="connection in connections"
+        :key="connection.id"
+        :value="connection.id"
+        :disabled="!connection.enabled"
+      >
+        {{ connection.name }}
+      </option>
+      <option v-if="missingConnection" :value="connectionId" disabled>
+        {{ t('aiAssistant.local.missingConnection') }}
+      </option>
+    </select>
+    <select
+      v-if="choice.runtimeKind === 'local_agent'"
+      class="max-w-48 rounded-md border-0 bg-transparent px-1 py-1.5 hover:bg-muted"
+      :aria-label="t('aiAssistant.local.model')"
+      :value="choice.modelId"
+      :disabled="disabled || loading"
+      @change="selectModel"
+    >
+      <option value="" disabled>{{ t('aiAssistant.local.chooseModel') }}</option>
+      <option
+        v-if="choice.modelId && !models.some((model) => model.id === choice.modelId)"
+        :value="choice.modelId"
+      >
+        {{ choice.modelId }} · {{ t('aiAssistant.local.unavailable') }}
+      </option>
+      <option v-for="model in models" :key="model.id" :value="model.id">{{ model.name }}</option>
+    </select>
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child
+        ><Button
+          variant="ghost"
+          size="icon"
+          class="size-6"
+          :aria-label="t('aiAssistant.local.runtime')"
+          ><Ellipsis class="size-3.5" /></Button
+      ></DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem
+          v-if="choice.runtimeKind === 'local_agent'"
+          :disabled="loading || disabled"
+          @click="$emit('refresh', connectionId)"
+          >{{ t('aiAssistant.local.refresh') }}</DropdownMenuItem
+        >
+        <DropdownMenuItem
+          :disabled="disabled || (choice.runtimeKind === 'local_agent' && !choice.modelId)"
+          @click="$emit('set-default')"
+          >{{ t('aiAssistant.local.setDefault') }}</DropdownMenuItem
+        >
+        <DropdownMenuItem @click="$emit('settings')">Providers</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+    <span v-if="loading" role="status" class="text-muted-foreground">{{
+      t('aiAssistant.local.checking')
+    }}</span>
+    <span v-else-if="status && status.status !== 'ready'" role="status" class="text-destructive">{{
+      status.message
+    }}</span>
+    <span v-if="error" role="alert" class="text-destructive">{{
+      t('aiAssistant.local.actionFailed')
+    }}</span>
   </div>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Ellipsis } from '@lucide/vue';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
 import type {
   AssistantRuntimeChoice,
