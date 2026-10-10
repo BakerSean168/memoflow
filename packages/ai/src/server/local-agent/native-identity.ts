@@ -11,6 +11,8 @@ const files: Record<LocalAgentDriver, readonly string[]> = {
   codex: ['config.toml', 'auth.json'],
   claude: ['settings.json', '.credentials.json'],
   pi: ['models.json', 'auth.json'],
+  // Hash only the ACP profile's locally owned configuration. Never persist it.
+  dsh: ['cordis.patch.yml', 'profiles/acp/cordis.yml', 'profiles/acp/cordis.patch.yml'],
 };
 async function boundedRead(path: string): Promise<string | null> {
   try {
@@ -84,7 +86,9 @@ export async function nativeIdentity(
       ? (process.env.CODEX_HOME ?? join(homedir(), '.codex'))
       : driver === 'claude'
         ? (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude'))
-        : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')));
+        : driver === 'dsh'
+          ? (process.env.DSH_HOME ?? join(homedir(), '.dsh'))
+          : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')));
   const hash = createHash('sha256').update(JSON.stringify([driver, directory, account]));
   for (const name of files[driver]) {
     const value = await boundedRead(join(directory, name));
@@ -99,7 +103,9 @@ export async function nativeIdentity(
   }
   for (const name of driver === 'claude'
     ? ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL']
-    : ['OPENAI_API_KEY', 'OPENAI_BASE_URL'])
+    : driver === 'dsh'
+      ? ['DSH_HOME']
+      : ['OPENAI_API_KEY', 'OPENAI_BASE_URL'])
     hash.update(JSON.stringify([name, process.env[name] ?? null]));
   return hash.digest('hex');
 }

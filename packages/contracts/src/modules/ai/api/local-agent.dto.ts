@@ -20,7 +20,7 @@ export const AssistantRuntimeChoiceSchema = z.discriminatedUnion('runtimeKind', 
 ]);
 export type AssistantRuntimeChoice = z.infer<typeof AssistantRuntimeChoiceSchema>;
 
-export const LocalAgentDriverSchema = z.enum(['codex', 'claude', 'pi']);
+export const LocalAgentDriverSchema = z.enum(['codex', 'claude', 'pi', 'dsh']);
 export type LocalAgentDriver = z.infer<typeof LocalAgentDriverSchema>;
 export const LocalAgentActivitySchema = z
   .object({

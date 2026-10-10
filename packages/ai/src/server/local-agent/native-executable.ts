@@ -14,6 +14,7 @@ const npmEntries: Record<LocalAgentDriver, string[]> = {
     'node_modules/@earendil-works/pi-coding-agent/dist/cli.js',
     'node_modules/@mariozechner/pi-coding-agent/dist/cli.js',
   ],
+  dsh: ['node_modules/@deepseek-ai/dsh/lib/bin.js'],
 };
 
 /** Resolve known npm launchers to files; never execute or interpret a shell shim. */

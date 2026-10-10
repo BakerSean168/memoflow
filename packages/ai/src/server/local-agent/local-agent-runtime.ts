@@ -14,6 +14,7 @@ import { LocalAgentConversationSchema, LocalAgentActivitySchema } from '@memoflo
 import { CodexDriver } from './codex-driver';
 import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';
+import { DshDriver } from './dsh-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 
@@ -89,6 +90,7 @@ export class LocalAgentRuntime {
     if (connection.driver === 'codex') return new CodexDriver(connection, this.options.cwd);
     if (connection.driver === 'claude') return new ClaudeDriver(connection, this.options.cwd);
     if (connection.driver === 'pi') return new PiDriver(connection, this.options.cwd);
+    if (connection.driver === 'dsh') return new DshDriver(connection, this.options.cwd);
     throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
   }
   async listConnections(identityId: string) {

@@ -51,6 +51,14 @@ describe('selectable assistant runtime contracts', () => {
     expect(
       LocalAgentConnectionInputSchema.safeParse({
         ...connection,
+        driver: 'dsh',
+        name: 'DeepSeek Harness (DSH)',
+        executablePath: 'dsh',
+      }).success,
+    ).toBe(true);
+    expect(
+      LocalAgentConnectionInputSchema.safeParse({
+        ...connection,
         args: ['--dangerously-bypass-approvals-and-sandbox'],
       }).success,
     ).toBe(false);

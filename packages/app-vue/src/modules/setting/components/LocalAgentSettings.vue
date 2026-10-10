@@ -44,6 +44,7 @@
           <option value="codex">Codex</option>
           <option value="claude">Claude Code</option>
           <option value="pi">Pi</option>
+          <option value="dsh">DeepSeek Harness (DSH)</option>
         </select></label
       >
       <label class="space-y-1 text-sm"
@@ -117,7 +118,14 @@ watch(
   (driver, previous) => {
     if (form.executablePath === previous) form.executablePath = driver;
     if (form.name.toLowerCase() === previous)
-      form.name = driver === 'pi' ? 'Pi' : driver === 'claude' ? 'Claude' : 'Codex';
+      form.name =
+        driver === 'dsh'
+          ? 'DeepSeek Harness (DSH)'
+          : driver === 'pi'
+            ? 'Pi'
+            : driver === 'claude'
+              ? 'Claude Code'
+              : 'Codex';
   },
 );
 async function action(work: () => Promise<void>) {

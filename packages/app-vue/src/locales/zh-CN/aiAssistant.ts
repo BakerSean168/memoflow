@@ -28,7 +28,7 @@ export default {
     answer: '提交回答',
     incompleteHistory: '这段历史不完整，未完成的操作不会自动重放。',
     description:
-      '使用本机已安装并登录的 Codex、Claude Code 或 Pi。内置助手继续使用你配置的模型连接。',
+      '使用本机已安装并配置的 Codex、Claude Code、Pi 或 DeepSeek Harness (DSH)。内置助手继续使用你配置的模型连接。',
     disabled: '已停用',
     check: '检查登录与模型',
     edit: '编辑',
