@@ -12,9 +12,10 @@
     </header>
     <div class="space-y-5 py-5">
       <div class="space-y-2">
-        <Label for="ai-native-name">{{ t('setting.ai.displayName') }}</Label
+        <Label :for="`${formId}-name`">{{ t('setting.ai.displayName') }}</Label
         ><Input
-          id="ai-native-name"
+          :id="`${formId}-name`"
+          data-testid="ai-native-name"
           v-model="form.name"
           required
           :maxlength="120"
@@ -22,9 +23,19 @@
         />
       </div>
       <div class="space-y-2">
-        <Label for="ai-native-executable">{{ t('aiAssistant.local.executable') }}</Label
+        <Label :for="`${formId}-id`">{{ t('setting.agentInstances.instanceId') }}</Label>
+        <Input
+          :id="`${formId}-id`"
+          data-testid="ai-native-id"
+          :model-value="connection?.instanceSlug ?? connection?.id ?? identity?.instanceSlug ?? ''"
+          readonly
+        />
+      </div>
+      <div class="space-y-2">
+        <Label :for="`${formId}-executable`">{{ t('aiAssistant.local.executable') }}</Label
         ><Input
-          id="ai-native-executable"
+          :id="`${formId}-executable`"
+          data-testid="ai-native-executable"
           v-model="form.executablePath"
           required
           :maxlength="4096"
@@ -32,8 +43,14 @@
         />
       </div>
       <div class="space-y-2">
-        <Label for="ai-native-home">{{ t('aiAssistant.local.home') }}</Label
-        ><Input id="ai-native-home" v-model="form.homePath" :maxlength="4096" :disabled="busy" />
+        <Label :for="`${formId}-home`">{{ t('aiAssistant.local.home') }}</Label
+        ><Input
+          :id="`${formId}-home`"
+          data-testid="ai-native-home"
+          v-model="form.homePath"
+          :maxlength="4096"
+          :disabled="busy"
+        />
       </div>
       <fieldset class="space-y-2 text-sm">
         <legend class="mb-2 font-medium">{{ t('aiAssistant.local.writeScopes') }}</legend>
@@ -53,7 +70,7 @@
         >
           <h4 class="text-sm font-semibold">Models</h4>
           <Button
-            v-if="connection"
+            v-if="connection || canProbe"
             type="button"
             variant="link"
             size="sm"
@@ -100,7 +117,7 @@
       >
       <div class="flex gap-2">
         <Button
-          v-if="connection"
+          v-if="connection || canProbe"
           type="button"
           variant="outline"
           size="sm"
@@ -120,7 +137,7 @@
   </form>
 </template>
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, watch, useId } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Input, Label } from '@memoflow/ui-vue-shadcn';
 import {
@@ -132,8 +149,10 @@ import {
 } from '@memoflow/contracts/ai';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
+  identity?: Pick<LocalAgentConnectionInput, 'name' | 'instanceSlug' | 'accentColor'>;
   driver: LocalAgentDriver;
   status?: LocalAgentStatus;
+  canProbe?: boolean;
   busy: boolean;
   error: boolean;
 }>();
@@ -144,6 +163,7 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 const { t } = useI18n();
+const formId = `ai-native-${useId()}`;
 const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DeepSeek Harness (DSH)' };
 const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
@@ -160,7 +180,9 @@ watch(
     const connection = props.connection;
     Object.assign(form, {
       driver: props.driver,
-      name: connection?.name ?? names[props.driver],
+      name: connection?.name ?? props.identity?.name ?? names[props.driver],
+      instanceSlug: connection?.instanceSlug ?? props.identity?.instanceSlug,
+      accentColor: connection?.accentColor ?? props.identity?.accentColor,
       executablePath: connection?.executablePath ?? props.driver,
       homePath: connection?.homePath ?? '',
       enabled: connection?.enabled ?? true,
@@ -173,7 +195,7 @@ const models = computed(() => (props.status?.status === 'ready' ? props.status.m
 const statusLabel = computed(() =>
   props.status?.status === 'ready'
     ? t('aiAssistant.local.ready', { count: props.status.models.length })
-    : (props.status?.message ?? t('setting.ai.savedProvider')),
+    : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
 const validatedInput = computed(() =>
   LocalAgentConnectionInputSchema.safeParse({

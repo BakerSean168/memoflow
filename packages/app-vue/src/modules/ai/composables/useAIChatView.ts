@@ -8,7 +8,7 @@ import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
 } from '@memoflow/contracts/repository';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AgentRegistrySnapshot } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
@@ -37,6 +37,7 @@ import {
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
+  AI_AGENT_REGISTRY_KEY,
   AI_LOCAL_AGENT_KEY,
   REPOSITORY_SERVICE_KEY,
   AI_RUNTIME_USAGE_KEY,
@@ -75,6 +76,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
+  const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
+  const agentRegistrySnapshot = ref<AgentRegistrySnapshot | null>(null);
+  async function loadAgentRegistry() {
+    if (!agentRegistryClient) return;
+    try {
+      agentRegistrySnapshot.value = await agentRegistryClient.list();
+    } catch {
+      // Fail closed: never expose global legacy providers as another Agent's models.
+      agentRegistrySnapshot.value = null;
+    }
+  }
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
   const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
   async function saveLocalNote(content: string) {
@@ -216,7 +228,13 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
+    ...(agentRegistryClient ? { agentRegistrySnapshot } : {}),
     chatConversationId: chatSession.chatConversationId,
+    ...(agentRegistryClient?.conversationSelection
+      ? {
+          readConversationSelection: (id: string) => agentRegistryClient.conversationSelection!(id),
+        }
+      : {}),
   });
 
   async function maybeRenameCurrentConversation(name: string) {
@@ -593,6 +611,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   onMounted(async () => {
     await localChoices.refresh();
+    await loadAgentRegistry();
     await initializeChatView({
       initRepository: loadRecentKnowledgeNotes,
       loadProviders,
@@ -700,7 +719,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       selectedModelKey: modelSelection.selectedModelKey,
       modelGroups: modelSelection.modelGroups,
       canSendMessage,
-      selectModel: (key: string) => modelSelection.selectModel(key),
+      selectModel(key: string) {
+        if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
+        const fromNative = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
+        if (fromNative || modelSelection.selectModel(key) === 'new_conversation_required') {
+          if (!modelSelection.allModelOptions.value.some((model) => model.key === key)) return;
+          startNewConversation(toolMode.value);
+          chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+          modelSelection.selectModel(key);
+          toast.info(t('aiAssistant.agentSwitchNewConversation'));
+        }
+      },
     },
     goalWorkflow,
     knowledgeQaWorkflow,

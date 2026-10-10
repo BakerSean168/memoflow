@@ -1,3 +1,4 @@
+import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { CreateTaskPlanSchema } from '../../task';
 import {
@@ -196,6 +197,7 @@ export type AIWorkflowResumeCommand = z.infer<typeof AIWorkflowResumeCommandSche
 
 const WorkflowStartBaseShape = {
   conversationId: z.string().min(1),
+  agentInstanceId: AgentInstanceSlugSchema.optional(),
   providerId: z.string().min(1).optional(),
   modelId: z.string().min(1).optional(),
   locale: z.enum(['zh-CN', 'en-US']).optional(),

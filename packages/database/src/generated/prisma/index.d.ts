@@ -34,6 +34,25 @@ export type AiExecutionRecord = $Result.DefaultSelection<Prisma.$AiExecutionReco
  */
 export type AiProviderConfig = $Result.DefaultSelection<Prisma.$AiProviderConfigPayload>
 /**
+ * Model AiAgentInstance
+ * *
+ *  * An Agent's identity/configuration is independent from model-service credential onboarding.
+ *  * Web only persists Mastra; Desktop uses localOnly PowerSync for the same domain contract.
+ */
+export type AiAgentInstance = $Result.DefaultSelection<Prisma.$AiAgentInstancePayload>
+/**
+ * Model AiAgentInstanceBinding
+ *
+ */
+export type AiAgentInstanceBinding = $Result.DefaultSelection<Prisma.$AiAgentInstanceBindingPayload>
+/**
+ * Model AiAgentConversationBinding
+ * *
+ *  * The first explicitly selected Agent claims its conversation.
+ *  * Historical conversations without a claim keep their legacy provider/model behavior.
+ */
+export type AiAgentConversationBinding = $Result.DefaultSelection<Prisma.$AiAgentConversationBindingPayload>
+/**
  * Model AiProviderOnboardingSession
  *
  */
@@ -50,6 +69,11 @@ export type AiProviderSecret = $Result.DefaultSelection<Prisma.$AiProviderSecret
  *
  */
 export type AiKnowledgeIndexEntry = $Result.DefaultSelection<Prisma.$AiKnowledgeIndexEntryPayload>
+/**
+ * Model AiAgentRegistryMigration
+ *
+ */
+export type AiAgentRegistryMigration = $Result.DefaultSelection<Prisma.$AiAgentRegistryMigrationPayload>
 /**
  * Model CloudAuthUser
  *
@@ -625,6 +649,36 @@ export class PrismaClient<
   get aiProviderConfig(): Prisma.AiProviderConfigDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.aiAgentInstance`: Exposes CRUD operations for the **AiAgentInstance** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAgentInstances
+    * const aiAgentInstances = await prisma.aiAgentInstance.findMany()
+    * ```
+    */
+  get aiAgentInstance(): Prisma.AiAgentInstanceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAgentInstanceBinding`: Exposes CRUD operations for the **AiAgentInstanceBinding** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAgentInstanceBindings
+    * const aiAgentInstanceBindings = await prisma.aiAgentInstanceBinding.findMany()
+    * ```
+    */
+  get aiAgentInstanceBinding(): Prisma.AiAgentInstanceBindingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAgentConversationBinding`: Exposes CRUD operations for the **AiAgentConversationBinding** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAgentConversationBindings
+    * const aiAgentConversationBindings = await prisma.aiAgentConversationBinding.findMany()
+    * ```
+    */
+  get aiAgentConversationBinding(): Prisma.AiAgentConversationBindingDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.aiProviderOnboardingSession`: Exposes CRUD operations for the **AiProviderOnboardingSession** model.
     * Example usage:
     * ```ts
@@ -653,6 +707,16 @@ export class PrismaClient<
     * ```
     */
   get aiKnowledgeIndexEntry(): Prisma.AiKnowledgeIndexEntryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAgentRegistryMigration`: Exposes CRUD operations for the **AiAgentRegistryMigration** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAgentRegistryMigrations
+    * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany()
+    * ```
+    */
+  get aiAgentRegistryMigration(): Prisma.AiAgentRegistryMigrationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cloudAuthUser`: Exposes CRUD operations for the **CloudAuthUser** model.
@@ -1874,9 +1938,13 @@ export namespace Prisma {
     AiConversation: 'AiConversation',
     AiExecutionRecord: 'AiExecutionRecord',
     AiProviderConfig: 'AiProviderConfig',
+    AiAgentInstance: 'AiAgentInstance',
+    AiAgentInstanceBinding: 'AiAgentInstanceBinding',
+    AiAgentConversationBinding: 'AiAgentConversationBinding',
     AiProviderOnboardingSession: 'AiProviderOnboardingSession',
     AiProviderSecret: 'AiProviderSecret',
     AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
+    AiAgentRegistryMigration: 'AiAgentRegistryMigration',
     CloudAuthUser: 'CloudAuthUser',
     CloudAuthSession: 'CloudAuthSession',
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
@@ -1969,7 +2037,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2269,6 +2337,228 @@ export namespace Prisma {
           }
         }
       }
+      AiAgentInstance: {
+        payload: Prisma.$AiAgentInstancePayload<ExtArgs>
+        fields: Prisma.AiAgentInstanceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAgentInstanceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAgentInstanceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          findFirst: {
+            args: Prisma.AiAgentInstanceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAgentInstanceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          findMany: {
+            args: Prisma.AiAgentInstanceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>[]
+          }
+          create: {
+            args: Prisma.AiAgentInstanceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          createMany: {
+            args: Prisma.AiAgentInstanceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAgentInstanceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>[]
+          }
+          delete: {
+            args: Prisma.AiAgentInstanceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          update: {
+            args: Prisma.AiAgentInstanceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAgentInstanceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAgentInstanceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAgentInstanceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAgentInstanceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstancePayload>
+          }
+          aggregate: {
+            args: Prisma.AiAgentInstanceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAgentInstance>
+          }
+          groupBy: {
+            args: Prisma.AiAgentInstanceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentInstanceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAgentInstanceCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentInstanceCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiAgentInstanceBinding: {
+        payload: Prisma.$AiAgentInstanceBindingPayload<ExtArgs>
+        fields: Prisma.AiAgentInstanceBindingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAgentInstanceBindingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAgentInstanceBindingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAgentInstanceBindingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAgentInstanceBindingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          findMany: {
+            args: Prisma.AiAgentInstanceBindingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>[]
+          }
+          create: {
+            args: Prisma.AiAgentInstanceBindingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          createMany: {
+            args: Prisma.AiAgentInstanceBindingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAgentInstanceBindingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAgentInstanceBindingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          update: {
+            args: Prisma.AiAgentInstanceBindingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAgentInstanceBindingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAgentInstanceBindingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAgentInstanceBindingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAgentInstanceBindingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentInstanceBindingPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAgentInstanceBindingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAgentInstanceBinding>
+          }
+          groupBy: {
+            args: Prisma.AiAgentInstanceBindingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentInstanceBindingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAgentInstanceBindingCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentInstanceBindingCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiAgentConversationBinding: {
+        payload: Prisma.$AiAgentConversationBindingPayload<ExtArgs>
+        fields: Prisma.AiAgentConversationBindingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAgentConversationBindingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAgentConversationBindingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAgentConversationBindingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAgentConversationBindingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          findMany: {
+            args: Prisma.AiAgentConversationBindingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>[]
+          }
+          create: {
+            args: Prisma.AiAgentConversationBindingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          createMany: {
+            args: Prisma.AiAgentConversationBindingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAgentConversationBindingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAgentConversationBindingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          update: {
+            args: Prisma.AiAgentConversationBindingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAgentConversationBindingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAgentConversationBindingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAgentConversationBindingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAgentConversationBindingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentConversationBindingPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAgentConversationBindingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAgentConversationBinding>
+          }
+          groupBy: {
+            args: Prisma.AiAgentConversationBindingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentConversationBindingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAgentConversationBindingCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentConversationBindingCountAggregateOutputType> | number
+          }
+        }
+      }
       AiProviderOnboardingSession: {
         payload: Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>
         fields: Prisma.AiProviderOnboardingSessionFieldRefs
@@ -2488,6 +2778,80 @@ export namespace Prisma {
           count: {
             args: Prisma.AiKnowledgeIndexEntryCountArgs<ExtArgs>
             result: $Utils.Optional<AiKnowledgeIndexEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiAgentRegistryMigration: {
+        payload: Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>
+        fields: Prisma.AiAgentRegistryMigrationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAgentRegistryMigrationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAgentRegistryMigrationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          findMany: {
+            args: Prisma.AiAgentRegistryMigrationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          create: {
+            args: Prisma.AiAgentRegistryMigrationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          createMany: {
+            args: Prisma.AiAgentRegistryMigrationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAgentRegistryMigrationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          update: {
+            args: Prisma.AiAgentRegistryMigrationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAgentRegistryMigrationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAgentRegistryMigrationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAgentRegistryMigrationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAgentRegistryMigrationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAgentRegistryMigration>
+          }
+          groupBy: {
+            args: Prisma.AiAgentRegistryMigrationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentRegistryMigrationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAgentRegistryMigrationCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentRegistryMigrationCountAggregateOutputType> | number
           }
         }
       }
@@ -8316,9 +8680,13 @@ export namespace Prisma {
     aiConversation?: AiConversationOmit
     aiExecutionRecord?: AiExecutionRecordOmit
     aiProviderConfig?: AiProviderConfigOmit
+    aiAgentInstance?: AiAgentInstanceOmit
+    aiAgentInstanceBinding?: AiAgentInstanceBindingOmit
+    aiAgentConversationBinding?: AiAgentConversationBindingOmit
     aiProviderOnboardingSession?: AiProviderOnboardingSessionOmit
     aiProviderSecret?: AiProviderSecretOmit
     aiKnowledgeIndexEntry?: AiKnowledgeIndexEntryOmit
+    aiAgentRegistryMigration?: AiAgentRegistryMigrationOmit
     cloudAuthUser?: CloudAuthUserOmit
     cloudAuthSession?: CloudAuthSessionOmit
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
@@ -8503,6 +8871,8 @@ export namespace Prisma {
     aiExecutionRecords: number
     aiKnowledgeIndexEntries: number
     aiProviderConfigs: number
+    aiAgentInstances: number
+    aiAgentInstanceBindings: number
     aiProviderOnboardingSessions: number
     aiProviderSecrets: number
     taskPlanHistory: number
@@ -8543,6 +8913,8 @@ export namespace Prisma {
     aiExecutionRecords?: boolean | AccountCountOutputTypeCountAiExecutionRecordsArgs
     aiKnowledgeIndexEntries?: boolean | AccountCountOutputTypeCountAiKnowledgeIndexEntriesArgs
     aiProviderConfigs?: boolean | AccountCountOutputTypeCountAiProviderConfigsArgs
+    aiAgentInstances?: boolean | AccountCountOutputTypeCountAiAgentInstancesArgs
+    aiAgentInstanceBindings?: boolean | AccountCountOutputTypeCountAiAgentInstanceBindingsArgs
     aiProviderOnboardingSessions?: boolean | AccountCountOutputTypeCountAiProviderOnboardingSessionsArgs
     aiProviderSecrets?: boolean | AccountCountOutputTypeCountAiProviderSecretsArgs
     taskPlanHistory?: boolean | AccountCountOutputTypeCountTaskPlanHistoryArgs
@@ -8758,6 +9130,20 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
+  export type AccountCountOutputTypeCountAiAgentInstancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAiAgentInstanceBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceBindingWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
   export type AccountCountOutputTypeCountAiProviderOnboardingSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AiProviderOnboardingSessionWhereInput
   }
@@ -8823,6 +9209,77 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountKnowledgeWriteRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeWriteRequestWhereInput
+  }
+
+
+  /**
+   * Count Type AiProviderConfigCountOutputType
+   */
+
+  export type AiProviderConfigCountOutputType = {
+    agentBindings: number
+  }
+
+  export type AiProviderConfigCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    agentBindings?: boolean | AiProviderConfigCountOutputTypeCountAgentBindingsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AiProviderConfigCountOutputType without action
+   */
+  export type AiProviderConfigCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiProviderConfigCountOutputType
+     */
+    select?: AiProviderConfigCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AiProviderConfigCountOutputType without action
+   */
+  export type AiProviderConfigCountOutputTypeCountAgentBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceBindingWhereInput
+  }
+
+
+  /**
+   * Count Type AiAgentInstanceCountOutputType
+   */
+
+  export type AiAgentInstanceCountOutputType = {
+    bindings: number
+    conversations: number
+  }
+
+  export type AiAgentInstanceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    bindings?: boolean | AiAgentInstanceCountOutputTypeCountBindingsArgs
+    conversations?: boolean | AiAgentInstanceCountOutputTypeCountConversationsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AiAgentInstanceCountOutputType without action
+   */
+  export type AiAgentInstanceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceCountOutputType
+     */
+    select?: AiAgentInstanceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentInstanceCountOutputType without action
+   */
+  export type AiAgentInstanceCountOutputTypeCountBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceBindingWhereInput
+  }
+
+  /**
+   * AiAgentInstanceCountOutputType without action
+   */
+  export type AiAgentInstanceCountOutputTypeCountConversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentConversationBindingWhereInput
   }
 
 
@@ -9908,6 +10365,8 @@ export namespace Prisma {
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
+    aiAgentInstances?: boolean | Account$aiAgentInstancesArgs<ExtArgs>
+    aiAgentInstanceBindings?: boolean | Account$aiAgentInstanceBindingsArgs<ExtArgs>
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     aiProviderSecrets?: boolean | Account$aiProviderSecretsArgs<ExtArgs>
     taskPlanHistory?: boolean | Account$taskPlanHistoryArgs<ExtArgs>
@@ -9981,6 +10440,8 @@ export namespace Prisma {
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
+    aiAgentInstances?: boolean | Account$aiAgentInstancesArgs<ExtArgs>
+    aiAgentInstanceBindings?: boolean | Account$aiAgentInstanceBindingsArgs<ExtArgs>
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     aiProviderSecrets?: boolean | Account$aiProviderSecretsArgs<ExtArgs>
     taskPlanHistory?: boolean | Account$taskPlanHistoryArgs<ExtArgs>
@@ -10032,6 +10493,8 @@ export namespace Prisma {
       aiExecutionRecords: Prisma.$AiExecutionRecordPayload<ExtArgs>[]
       aiKnowledgeIndexEntries: Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>[]
       aiProviderConfigs: Prisma.$AiProviderConfigPayload<ExtArgs>[]
+      aiAgentInstances: Prisma.$AiAgentInstancePayload<ExtArgs>[]
+      aiAgentInstanceBindings: Prisma.$AiAgentInstanceBindingPayload<ExtArgs>[]
       aiProviderOnboardingSessions: Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>[]
       aiProviderSecrets: Prisma.$AiProviderSecretPayload<ExtArgs>[]
       taskPlanHistory: Prisma.$TaskPlanHistoryPayload<ExtArgs>[]
@@ -10473,6 +10936,8 @@ export namespace Prisma {
     aiExecutionRecords<T extends Account$aiExecutionRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiExecutionRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiKnowledgeIndexEntries<T extends Account$aiKnowledgeIndexEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiKnowledgeIndexEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderConfigs<T extends Account$aiProviderConfigsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiAgentInstances<T extends Account$aiAgentInstancesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiAgentInstancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiAgentInstanceBindings<T extends Account$aiAgentInstanceBindingsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiAgentInstanceBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderOnboardingSessions<T extends Account$aiProviderOnboardingSessionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderOnboardingSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderSecrets<T extends Account$aiProviderSecretsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderSecretsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderSecretPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskPlanHistory<T extends Account$taskPlanHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskPlanHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11586,6 +12051,54 @@ export namespace Prisma {
   }
 
   /**
+   * Account.aiAgentInstances
+   */
+  export type Account$aiAgentInstancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    where?: AiAgentInstanceWhereInput
+    orderBy?: AiAgentInstanceOrderByWithRelationInput | AiAgentInstanceOrderByWithRelationInput[]
+    cursor?: AiAgentInstanceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAgentInstanceScalarFieldEnum | AiAgentInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * Account.aiAgentInstanceBindings
+   */
+  export type Account$aiAgentInstanceBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    where?: AiAgentInstanceBindingWhereInput
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
    * Account.aiProviderOnboardingSessions
    */
   export type Account$aiProviderOnboardingSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12067,6 +12580,7 @@ export namespace Prisma {
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
+    agentBinding?: boolean | AiConversation$agentBindingArgs<ExtArgs>
   }, ExtArgs["result"]["aiConversation"]>
 
   export type AiConversationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12107,6 +12621,7 @@ export namespace Prisma {
   export type AiConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "status" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiConversation"]>
   export type AiConversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
+    agentBinding?: boolean | AiConversation$agentBindingArgs<ExtArgs>
   }
   export type AiConversationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -12119,6 +12634,7 @@ export namespace Prisma {
     name: "AiConversation"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
+      agentBinding: Prisma.$AiAgentConversationBindingPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12524,6 +13040,7 @@ export namespace Prisma {
   export interface Prisma__AiConversationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    agentBinding<T extends AiConversation$agentBindingArgs<ExtArgs> = {}>(args?: Subset<T, AiConversation$agentBindingArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12959,6 +13476,25 @@ export namespace Prisma {
      * Limit how many AiConversations to delete.
      */
     limit?: number
+  }
+
+  /**
+   * AiConversation.agentBinding
+   */
+  export type AiConversation$agentBindingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    where?: AiAgentConversationBindingWhereInput
   }
 
   /**
@@ -14520,6 +15056,8 @@ export namespace Prisma {
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
+    agentBindings?: boolean | AiProviderConfig$agentBindingsArgs<ExtArgs>
+    _count?: boolean | AiProviderConfigCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["aiProviderConfig"]>
 
   export type AiProviderConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -14581,6 +15119,8 @@ export namespace Prisma {
   export type AiProviderConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "providerDefinitionId" | "baseUrl" | "credentialRef" | "defaultModel" | "availableModels" | "isActive" | "isDefault" | "priority" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiProviderConfig"]>
   export type AiProviderConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
+    agentBindings?: boolean | AiProviderConfig$agentBindingsArgs<ExtArgs>
+    _count?: boolean | AiProviderConfigCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AiProviderConfigIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -14593,6 +15133,7 @@ export namespace Prisma {
     name: "AiProviderConfig"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
+      agentBindings: Prisma.$AiAgentInstanceBindingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -15005,6 +15546,7 @@ export namespace Prisma {
   export interface Prisma__AiProviderConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    agentBindings<T extends AiProviderConfig$agentBindingsArgs<ExtArgs> = {}>(args?: Subset<T, AiProviderConfig$agentBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15450,6 +15992,30 @@ export namespace Prisma {
   }
 
   /**
+   * AiProviderConfig.agentBindings
+   */
+  export type AiProviderConfig$agentBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    where?: AiAgentInstanceBindingWhereInput
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
    * AiProviderConfig without action
    */
   export type AiProviderConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -15465,6 +16031,3411 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiProviderConfigInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAgentInstance
+   */
+
+  export type AggregateAiAgentInstance = {
+    _count: AiAgentInstanceCountAggregateOutputType | null
+    _avg: AiAgentInstanceAvgAggregateOutputType | null
+    _sum: AiAgentInstanceSumAggregateOutputType | null
+    _min: AiAgentInstanceMinAggregateOutputType | null
+    _max: AiAgentInstanceMaxAggregateOutputType | null
+  }
+
+  export type AiAgentInstanceAvgAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiAgentInstanceSumAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiAgentInstanceMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    instanceId: string | null
+    driver: string | null
+    name: string | null
+    accentColor: string | null
+    enabled: boolean | null
+    legacyConnectionId: string | null
+    revision: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiAgentInstanceMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    instanceId: string | null
+    driver: string | null
+    name: string | null
+    accentColor: string | null
+    enabled: boolean | null
+    legacyConnectionId: string | null
+    revision: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiAgentInstanceCountAggregateOutputType = {
+    id: number
+    identityId: number
+    instanceId: number
+    driver: number
+    name: number
+    accentColor: number
+    enabled: number
+    nativeConfig: number
+    legacyConnectionId: number
+    revision: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiAgentInstanceAvgAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiAgentInstanceSumAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiAgentInstanceMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    driver?: true
+    name?: true
+    accentColor?: true
+    enabled?: true
+    legacyConnectionId?: true
+    revision?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiAgentInstanceMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    driver?: true
+    name?: true
+    accentColor?: true
+    enabled?: true
+    legacyConnectionId?: true
+    revision?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiAgentInstanceCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    driver?: true
+    name?: true
+    accentColor?: true
+    enabled?: true
+    nativeConfig?: true
+    legacyConnectionId?: true
+    revision?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiAgentInstanceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentInstance to aggregate.
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstances to fetch.
+     */
+    orderBy?: AiAgentInstanceOrderByWithRelationInput | AiAgentInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAgentInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAgentInstances
+    **/
+    _count?: true | AiAgentInstanceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: AiAgentInstanceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: AiAgentInstanceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAgentInstanceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAgentInstanceMaxAggregateInputType
+  }
+
+  export type GetAiAgentInstanceAggregateType<T extends AiAgentInstanceAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAgentInstance]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAgentInstance[P]>
+      : GetScalarType<T[P], AggregateAiAgentInstance[P]>
+  }
+
+
+
+
+  export type AiAgentInstanceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceWhereInput
+    orderBy?: AiAgentInstanceOrderByWithAggregationInput | AiAgentInstanceOrderByWithAggregationInput[]
+    by: AiAgentInstanceScalarFieldEnum[] | AiAgentInstanceScalarFieldEnum
+    having?: AiAgentInstanceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAgentInstanceCountAggregateInputType | true
+    _avg?: AiAgentInstanceAvgAggregateInputType
+    _sum?: AiAgentInstanceSumAggregateInputType
+    _min?: AiAgentInstanceMinAggregateInputType
+    _max?: AiAgentInstanceMaxAggregateInputType
+  }
+
+  export type AiAgentInstanceGroupByOutputType = {
+    id: string
+    identityId: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor: string | null
+    enabled: boolean
+    nativeConfig: JsonValue | null
+    legacyConnectionId: string | null
+    revision: number
+    createdAt: Date
+    updatedAt: Date
+    _count: AiAgentInstanceCountAggregateOutputType | null
+    _avg: AiAgentInstanceAvgAggregateOutputType | null
+    _sum: AiAgentInstanceSumAggregateOutputType | null
+    _min: AiAgentInstanceMinAggregateOutputType | null
+    _max: AiAgentInstanceMaxAggregateOutputType | null
+  }
+
+  type GetAiAgentInstanceGroupByPayload<T extends AiAgentInstanceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAgentInstanceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAgentInstanceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAgentInstanceGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAgentInstanceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAgentInstanceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    driver?: boolean
+    name?: boolean
+    accentColor?: boolean
+    enabled?: boolean
+    nativeConfig?: boolean
+    legacyConnectionId?: boolean
+    revision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    bindings?: boolean | AiAgentInstance$bindingsArgs<ExtArgs>
+    conversations?: boolean | AiAgentInstance$conversationsArgs<ExtArgs>
+    _count?: boolean | AiAgentInstanceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstance"]>
+
+  export type AiAgentInstanceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    driver?: boolean
+    name?: boolean
+    accentColor?: boolean
+    enabled?: boolean
+    nativeConfig?: boolean
+    legacyConnectionId?: boolean
+    revision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstance"]>
+
+  export type AiAgentInstanceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    driver?: boolean
+    name?: boolean
+    accentColor?: boolean
+    enabled?: boolean
+    nativeConfig?: boolean
+    legacyConnectionId?: boolean
+    revision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstance"]>
+
+  export type AiAgentInstanceSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    driver?: boolean
+    name?: boolean
+    accentColor?: boolean
+    enabled?: boolean
+    nativeConfig?: boolean
+    legacyConnectionId?: boolean
+    revision?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiAgentInstanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "instanceId" | "driver" | "name" | "accentColor" | "enabled" | "nativeConfig" | "legacyConnectionId" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["aiAgentInstance"]>
+  export type AiAgentInstanceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    bindings?: boolean | AiAgentInstance$bindingsArgs<ExtArgs>
+    conversations?: boolean | AiAgentInstance$conversationsArgs<ExtArgs>
+    _count?: boolean | AiAgentInstanceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AiAgentInstanceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiAgentInstanceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiAgentInstancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAgentInstance"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+      bindings: Prisma.$AiAgentInstanceBindingPayload<ExtArgs>[]
+      conversations: Prisma.$AiAgentConversationBindingPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      instanceId: string
+      driver: string
+      name: string
+      accentColor: string | null
+      enabled: boolean
+      nativeConfig: Prisma.JsonValue | null
+      legacyConnectionId: string | null
+      revision: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aiAgentInstance"]>
+    composites: {}
+  }
+
+  type AiAgentInstanceGetPayload<S extends boolean | null | undefined | AiAgentInstanceDefaultArgs> = $Result.GetResult<Prisma.$AiAgentInstancePayload, S>
+
+  type AiAgentInstanceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAgentInstanceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAgentInstanceCountAggregateInputType | true
+    }
+
+  export interface AiAgentInstanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAgentInstance'], meta: { name: 'AiAgentInstance' } }
+    /**
+     * Find zero or one AiAgentInstance that matches the filter.
+     * @param {AiAgentInstanceFindUniqueArgs} args - Arguments to find a AiAgentInstance
+     * @example
+     * // Get one AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAgentInstanceFindUniqueArgs>(args: SelectSubset<T, AiAgentInstanceFindUniqueArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAgentInstance that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAgentInstanceFindUniqueOrThrowArgs} args - Arguments to find a AiAgentInstance
+     * @example
+     * // Get one AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAgentInstanceFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAgentInstanceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentInstance that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceFindFirstArgs} args - Arguments to find a AiAgentInstance
+     * @example
+     * // Get one AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAgentInstanceFindFirstArgs>(args?: SelectSubset<T, AiAgentInstanceFindFirstArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentInstance that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceFindFirstOrThrowArgs} args - Arguments to find a AiAgentInstance
+     * @example
+     * // Get one AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAgentInstanceFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAgentInstanceFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAgentInstances that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAgentInstances
+     * const aiAgentInstances = await prisma.aiAgentInstance.findMany()
+     *
+     * // Get first 10 AiAgentInstances
+     * const aiAgentInstances = await prisma.aiAgentInstance.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAgentInstanceWithIdOnly = await prisma.aiAgentInstance.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAgentInstanceFindManyArgs>(args?: SelectSubset<T, AiAgentInstanceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAgentInstance.
+     * @param {AiAgentInstanceCreateArgs} args - Arguments to create a AiAgentInstance.
+     * @example
+     * // Create one AiAgentInstance
+     * const AiAgentInstance = await prisma.aiAgentInstance.create({
+     *   data: {
+     *     // ... data to create a AiAgentInstance
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAgentInstanceCreateArgs>(args: SelectSubset<T, AiAgentInstanceCreateArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAgentInstances.
+     * @param {AiAgentInstanceCreateManyArgs} args - Arguments to create many AiAgentInstances.
+     * @example
+     * // Create many AiAgentInstances
+     * const aiAgentInstance = await prisma.aiAgentInstance.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAgentInstanceCreateManyArgs>(args?: SelectSubset<T, AiAgentInstanceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAgentInstances and returns the data saved in the database.
+     * @param {AiAgentInstanceCreateManyAndReturnArgs} args - Arguments to create many AiAgentInstances.
+     * @example
+     * // Create many AiAgentInstances
+     * const aiAgentInstance = await prisma.aiAgentInstance.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAgentInstances and only return the `id`
+     * const aiAgentInstanceWithIdOnly = await prisma.aiAgentInstance.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAgentInstanceCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAgentInstanceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAgentInstance.
+     * @param {AiAgentInstanceDeleteArgs} args - Arguments to delete one AiAgentInstance.
+     * @example
+     * // Delete one AiAgentInstance
+     * const AiAgentInstance = await prisma.aiAgentInstance.delete({
+     *   where: {
+     *     // ... filter to delete one AiAgentInstance
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAgentInstanceDeleteArgs>(args: SelectSubset<T, AiAgentInstanceDeleteArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAgentInstance.
+     * @param {AiAgentInstanceUpdateArgs} args - Arguments to update one AiAgentInstance.
+     * @example
+     * // Update one AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAgentInstanceUpdateArgs>(args: SelectSubset<T, AiAgentInstanceUpdateArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAgentInstances.
+     * @param {AiAgentInstanceDeleteManyArgs} args - Arguments to filter AiAgentInstances to delete.
+     * @example
+     * // Delete a few AiAgentInstances
+     * const { count } = await prisma.aiAgentInstance.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAgentInstanceDeleteManyArgs>(args?: SelectSubset<T, AiAgentInstanceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentInstances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAgentInstances
+     * const aiAgentInstance = await prisma.aiAgentInstance.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAgentInstanceUpdateManyArgs>(args: SelectSubset<T, AiAgentInstanceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentInstances and returns the data updated in the database.
+     * @param {AiAgentInstanceUpdateManyAndReturnArgs} args - Arguments to update many AiAgentInstances.
+     * @example
+     * // Update many AiAgentInstances
+     * const aiAgentInstance = await prisma.aiAgentInstance.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAgentInstances and only return the `id`
+     * const aiAgentInstanceWithIdOnly = await prisma.aiAgentInstance.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAgentInstanceUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAgentInstanceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAgentInstance.
+     * @param {AiAgentInstanceUpsertArgs} args - Arguments to update or create a AiAgentInstance.
+     * @example
+     * // Update or create a AiAgentInstance
+     * const aiAgentInstance = await prisma.aiAgentInstance.upsert({
+     *   create: {
+     *     // ... data to create a AiAgentInstance
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAgentInstance we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAgentInstanceUpsertArgs>(args: SelectSubset<T, AiAgentInstanceUpsertArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAgentInstances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceCountArgs} args - Arguments to filter AiAgentInstances to count.
+     * @example
+     * // Count the number of AiAgentInstances
+     * const count = await prisma.aiAgentInstance.count({
+     *   where: {
+     *     // ... the filter for the AiAgentInstances we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAgentInstanceCountArgs>(
+      args?: Subset<T, AiAgentInstanceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAgentInstanceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAgentInstance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAgentInstanceAggregateArgs>(args: Subset<T, AiAgentInstanceAggregateArgs>): Prisma.PrismaPromise<GetAiAgentInstanceAggregateType<T>>
+
+    /**
+     * Group by AiAgentInstance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAgentInstanceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAgentInstanceGroupByArgs['orderBy'] }
+        : { orderBy?: AiAgentInstanceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAgentInstanceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAgentInstanceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAgentInstance model
+   */
+  readonly fields: AiAgentInstanceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAgentInstance.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAgentInstanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    bindings<T extends AiAgentInstance$bindingsArgs<ExtArgs> = {}>(args?: Subset<T, AiAgentInstance$bindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    conversations<T extends AiAgentInstance$conversationsArgs<ExtArgs> = {}>(args?: Subset<T, AiAgentInstance$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAgentInstance model
+   */
+  interface AiAgentInstanceFieldRefs {
+    readonly id: FieldRef<"AiAgentInstance", 'String'>
+    readonly identityId: FieldRef<"AiAgentInstance", 'String'>
+    readonly instanceId: FieldRef<"AiAgentInstance", 'String'>
+    readonly driver: FieldRef<"AiAgentInstance", 'String'>
+    readonly name: FieldRef<"AiAgentInstance", 'String'>
+    readonly accentColor: FieldRef<"AiAgentInstance", 'String'>
+    readonly enabled: FieldRef<"AiAgentInstance", 'Boolean'>
+    readonly nativeConfig: FieldRef<"AiAgentInstance", 'Json'>
+    readonly legacyConnectionId: FieldRef<"AiAgentInstance", 'String'>
+    readonly revision: FieldRef<"AiAgentInstance", 'Int'>
+    readonly createdAt: FieldRef<"AiAgentInstance", 'DateTime'>
+    readonly updatedAt: FieldRef<"AiAgentInstance", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAgentInstance findUnique
+   */
+  export type AiAgentInstanceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstance to fetch.
+     */
+    where: AiAgentInstanceWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstance findUniqueOrThrow
+   */
+  export type AiAgentInstanceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstance to fetch.
+     */
+    where: AiAgentInstanceWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstance findFirst
+   */
+  export type AiAgentInstanceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstance to fetch.
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstances to fetch.
+     */
+    orderBy?: AiAgentInstanceOrderByWithRelationInput | AiAgentInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentInstances.
+     */
+    cursor?: AiAgentInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstances.
+     */
+    distinct?: AiAgentInstanceScalarFieldEnum | AiAgentInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstance findFirstOrThrow
+   */
+  export type AiAgentInstanceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstance to fetch.
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstances to fetch.
+     */
+    orderBy?: AiAgentInstanceOrderByWithRelationInput | AiAgentInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentInstances.
+     */
+    cursor?: AiAgentInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstances.
+     */
+    distinct?: AiAgentInstanceScalarFieldEnum | AiAgentInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstance findMany
+   */
+  export type AiAgentInstanceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstances to fetch.
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstances to fetch.
+     */
+    orderBy?: AiAgentInstanceOrderByWithRelationInput | AiAgentInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAgentInstances.
+     */
+    cursor?: AiAgentInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstances.
+     */
+    distinct?: AiAgentInstanceScalarFieldEnum | AiAgentInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstance create
+   */
+  export type AiAgentInstanceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiAgentInstance.
+     */
+    data: XOR<AiAgentInstanceCreateInput, AiAgentInstanceUncheckedCreateInput>
+  }
+
+  /**
+   * AiAgentInstance createMany
+   */
+  export type AiAgentInstanceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAgentInstances.
+     */
+    data: AiAgentInstanceCreateManyInput | AiAgentInstanceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentInstance createManyAndReturn
+   */
+  export type AiAgentInstanceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAgentInstances.
+     */
+    data: AiAgentInstanceCreateManyInput | AiAgentInstanceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentInstance update
+   */
+  export type AiAgentInstanceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiAgentInstance.
+     */
+    data: XOR<AiAgentInstanceUpdateInput, AiAgentInstanceUncheckedUpdateInput>
+    /**
+     * Choose, which AiAgentInstance to update.
+     */
+    where: AiAgentInstanceWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstance updateMany
+   */
+  export type AiAgentInstanceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAgentInstances.
+     */
+    data: XOR<AiAgentInstanceUpdateManyMutationInput, AiAgentInstanceUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentInstances to update
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * Limit how many AiAgentInstances to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentInstance updateManyAndReturn
+   */
+  export type AiAgentInstanceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAgentInstances.
+     */
+    data: XOR<AiAgentInstanceUpdateManyMutationInput, AiAgentInstanceUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentInstances to update
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * Limit how many AiAgentInstances to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentInstance upsert
+   */
+  export type AiAgentInstanceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiAgentInstance to update in case it exists.
+     */
+    where: AiAgentInstanceWhereUniqueInput
+    /**
+     * In case the AiAgentInstance found by the `where` argument doesn't exist, create a new AiAgentInstance with this data.
+     */
+    create: XOR<AiAgentInstanceCreateInput, AiAgentInstanceUncheckedCreateInput>
+    /**
+     * In case the AiAgentInstance was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAgentInstanceUpdateInput, AiAgentInstanceUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAgentInstance delete
+   */
+  export type AiAgentInstanceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+    /**
+     * Filter which AiAgentInstance to delete.
+     */
+    where: AiAgentInstanceWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstance deleteMany
+   */
+  export type AiAgentInstanceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentInstances to delete
+     */
+    where?: AiAgentInstanceWhereInput
+    /**
+     * Limit how many AiAgentInstances to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentInstance.bindings
+   */
+  export type AiAgentInstance$bindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    where?: AiAgentInstanceBindingWhereInput
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstance.conversations
+   */
+  export type AiAgentInstance$conversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    where?: AiAgentConversationBindingWhereInput
+    orderBy?: AiAgentConversationBindingOrderByWithRelationInput | AiAgentConversationBindingOrderByWithRelationInput[]
+    cursor?: AiAgentConversationBindingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAgentConversationBindingScalarFieldEnum | AiAgentConversationBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstance without action
+   */
+  export type AiAgentInstanceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstance
+     */
+    select?: AiAgentInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstance
+     */
+    omit?: AiAgentInstanceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAgentInstanceBinding
+   */
+
+  export type AggregateAiAgentInstanceBinding = {
+    _count: AiAgentInstanceBindingCountAggregateOutputType | null
+    _min: AiAgentInstanceBindingMinAggregateOutputType | null
+    _max: AiAgentInstanceBindingMaxAggregateOutputType | null
+  }
+
+  export type AiAgentInstanceBindingMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    instanceId: string | null
+    connectionId: string | null
+    modelId: string | null
+  }
+
+  export type AiAgentInstanceBindingMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    instanceId: string | null
+    connectionId: string | null
+    modelId: string | null
+  }
+
+  export type AiAgentInstanceBindingCountAggregateOutputType = {
+    id: number
+    identityId: number
+    instanceId: number
+    connectionId: number
+    modelId: number
+    _all: number
+  }
+
+
+  export type AiAgentInstanceBindingMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    connectionId?: true
+    modelId?: true
+  }
+
+  export type AiAgentInstanceBindingMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    connectionId?: true
+    modelId?: true
+  }
+
+  export type AiAgentInstanceBindingCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    instanceId?: true
+    connectionId?: true
+    modelId?: true
+    _all?: true
+  }
+
+  export type AiAgentInstanceBindingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentInstanceBinding to aggregate.
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstanceBindings to fetch.
+     */
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstanceBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstanceBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAgentInstanceBindings
+    **/
+    _count?: true | AiAgentInstanceBindingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAgentInstanceBindingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAgentInstanceBindingMaxAggregateInputType
+  }
+
+  export type GetAiAgentInstanceBindingAggregateType<T extends AiAgentInstanceBindingAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAgentInstanceBinding]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAgentInstanceBinding[P]>
+      : GetScalarType<T[P], AggregateAiAgentInstanceBinding[P]>
+  }
+
+
+
+
+  export type AiAgentInstanceBindingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentInstanceBindingWhereInput
+    orderBy?: AiAgentInstanceBindingOrderByWithAggregationInput | AiAgentInstanceBindingOrderByWithAggregationInput[]
+    by: AiAgentInstanceBindingScalarFieldEnum[] | AiAgentInstanceBindingScalarFieldEnum
+    having?: AiAgentInstanceBindingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAgentInstanceBindingCountAggregateInputType | true
+    _min?: AiAgentInstanceBindingMinAggregateInputType
+    _max?: AiAgentInstanceBindingMaxAggregateInputType
+  }
+
+  export type AiAgentInstanceBindingGroupByOutputType = {
+    id: string
+    identityId: string
+    instanceId: string
+    connectionId: string
+    modelId: string
+    _count: AiAgentInstanceBindingCountAggregateOutputType | null
+    _min: AiAgentInstanceBindingMinAggregateOutputType | null
+    _max: AiAgentInstanceBindingMaxAggregateOutputType | null
+  }
+
+  type GetAiAgentInstanceBindingGroupByPayload<T extends AiAgentInstanceBindingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAgentInstanceBindingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAgentInstanceBindingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAgentInstanceBindingGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAgentInstanceBindingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAgentInstanceBindingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    connectionId?: boolean
+    modelId?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstanceBinding"]>
+
+  export type AiAgentInstanceBindingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    connectionId?: boolean
+    modelId?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstanceBinding"]>
+
+  export type AiAgentInstanceBindingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    connectionId?: boolean
+    modelId?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentInstanceBinding"]>
+
+  export type AiAgentInstanceBindingSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    instanceId?: boolean
+    connectionId?: boolean
+    modelId?: boolean
+  }
+
+  export type AiAgentInstanceBindingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "instanceId" | "connectionId" | "modelId", ExtArgs["result"]["aiAgentInstanceBinding"]>
+  export type AiAgentInstanceBindingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }
+  export type AiAgentInstanceBindingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }
+  export type AiAgentInstanceBindingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+    modelService?: boolean | AiProviderConfigDefaultArgs<ExtArgs>
+  }
+
+  export type $AiAgentInstanceBindingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAgentInstanceBinding"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+      instance: Prisma.$AiAgentInstancePayload<ExtArgs>
+      modelService: Prisma.$AiProviderConfigPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      instanceId: string
+      connectionId: string
+      modelId: string
+    }, ExtArgs["result"]["aiAgentInstanceBinding"]>
+    composites: {}
+  }
+
+  type AiAgentInstanceBindingGetPayload<S extends boolean | null | undefined | AiAgentInstanceBindingDefaultArgs> = $Result.GetResult<Prisma.$AiAgentInstanceBindingPayload, S>
+
+  type AiAgentInstanceBindingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAgentInstanceBindingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAgentInstanceBindingCountAggregateInputType | true
+    }
+
+  export interface AiAgentInstanceBindingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAgentInstanceBinding'], meta: { name: 'AiAgentInstanceBinding' } }
+    /**
+     * Find zero or one AiAgentInstanceBinding that matches the filter.
+     * @param {AiAgentInstanceBindingFindUniqueArgs} args - Arguments to find a AiAgentInstanceBinding
+     * @example
+     * // Get one AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAgentInstanceBindingFindUniqueArgs>(args: SelectSubset<T, AiAgentInstanceBindingFindUniqueArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAgentInstanceBinding that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAgentInstanceBindingFindUniqueOrThrowArgs} args - Arguments to find a AiAgentInstanceBinding
+     * @example
+     * // Get one AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAgentInstanceBindingFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAgentInstanceBindingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentInstanceBinding that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingFindFirstArgs} args - Arguments to find a AiAgentInstanceBinding
+     * @example
+     * // Get one AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAgentInstanceBindingFindFirstArgs>(args?: SelectSubset<T, AiAgentInstanceBindingFindFirstArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentInstanceBinding that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingFindFirstOrThrowArgs} args - Arguments to find a AiAgentInstanceBinding
+     * @example
+     * // Get one AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAgentInstanceBindingFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAgentInstanceBindingFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAgentInstanceBindings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAgentInstanceBindings
+     * const aiAgentInstanceBindings = await prisma.aiAgentInstanceBinding.findMany()
+     *
+     * // Get first 10 AiAgentInstanceBindings
+     * const aiAgentInstanceBindings = await prisma.aiAgentInstanceBinding.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAgentInstanceBindingWithIdOnly = await prisma.aiAgentInstanceBinding.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAgentInstanceBindingFindManyArgs>(args?: SelectSubset<T, AiAgentInstanceBindingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAgentInstanceBinding.
+     * @param {AiAgentInstanceBindingCreateArgs} args - Arguments to create a AiAgentInstanceBinding.
+     * @example
+     * // Create one AiAgentInstanceBinding
+     * const AiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.create({
+     *   data: {
+     *     // ... data to create a AiAgentInstanceBinding
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAgentInstanceBindingCreateArgs>(args: SelectSubset<T, AiAgentInstanceBindingCreateArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAgentInstanceBindings.
+     * @param {AiAgentInstanceBindingCreateManyArgs} args - Arguments to create many AiAgentInstanceBindings.
+     * @example
+     * // Create many AiAgentInstanceBindings
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAgentInstanceBindingCreateManyArgs>(args?: SelectSubset<T, AiAgentInstanceBindingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAgentInstanceBindings and returns the data saved in the database.
+     * @param {AiAgentInstanceBindingCreateManyAndReturnArgs} args - Arguments to create many AiAgentInstanceBindings.
+     * @example
+     * // Create many AiAgentInstanceBindings
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAgentInstanceBindings and only return the `id`
+     * const aiAgentInstanceBindingWithIdOnly = await prisma.aiAgentInstanceBinding.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAgentInstanceBindingCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAgentInstanceBindingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAgentInstanceBinding.
+     * @param {AiAgentInstanceBindingDeleteArgs} args - Arguments to delete one AiAgentInstanceBinding.
+     * @example
+     * // Delete one AiAgentInstanceBinding
+     * const AiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.delete({
+     *   where: {
+     *     // ... filter to delete one AiAgentInstanceBinding
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAgentInstanceBindingDeleteArgs>(args: SelectSubset<T, AiAgentInstanceBindingDeleteArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAgentInstanceBinding.
+     * @param {AiAgentInstanceBindingUpdateArgs} args - Arguments to update one AiAgentInstanceBinding.
+     * @example
+     * // Update one AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAgentInstanceBindingUpdateArgs>(args: SelectSubset<T, AiAgentInstanceBindingUpdateArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAgentInstanceBindings.
+     * @param {AiAgentInstanceBindingDeleteManyArgs} args - Arguments to filter AiAgentInstanceBindings to delete.
+     * @example
+     * // Delete a few AiAgentInstanceBindings
+     * const { count } = await prisma.aiAgentInstanceBinding.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAgentInstanceBindingDeleteManyArgs>(args?: SelectSubset<T, AiAgentInstanceBindingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentInstanceBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAgentInstanceBindings
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAgentInstanceBindingUpdateManyArgs>(args: SelectSubset<T, AiAgentInstanceBindingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentInstanceBindings and returns the data updated in the database.
+     * @param {AiAgentInstanceBindingUpdateManyAndReturnArgs} args - Arguments to update many AiAgentInstanceBindings.
+     * @example
+     * // Update many AiAgentInstanceBindings
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAgentInstanceBindings and only return the `id`
+     * const aiAgentInstanceBindingWithIdOnly = await prisma.aiAgentInstanceBinding.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAgentInstanceBindingUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAgentInstanceBindingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAgentInstanceBinding.
+     * @param {AiAgentInstanceBindingUpsertArgs} args - Arguments to update or create a AiAgentInstanceBinding.
+     * @example
+     * // Update or create a AiAgentInstanceBinding
+     * const aiAgentInstanceBinding = await prisma.aiAgentInstanceBinding.upsert({
+     *   create: {
+     *     // ... data to create a AiAgentInstanceBinding
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAgentInstanceBinding we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAgentInstanceBindingUpsertArgs>(args: SelectSubset<T, AiAgentInstanceBindingUpsertArgs<ExtArgs>>): Prisma__AiAgentInstanceBindingClient<$Result.GetResult<Prisma.$AiAgentInstanceBindingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAgentInstanceBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingCountArgs} args - Arguments to filter AiAgentInstanceBindings to count.
+     * @example
+     * // Count the number of AiAgentInstanceBindings
+     * const count = await prisma.aiAgentInstanceBinding.count({
+     *   where: {
+     *     // ... the filter for the AiAgentInstanceBindings we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAgentInstanceBindingCountArgs>(
+      args?: Subset<T, AiAgentInstanceBindingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAgentInstanceBindingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAgentInstanceBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAgentInstanceBindingAggregateArgs>(args: Subset<T, AiAgentInstanceBindingAggregateArgs>): Prisma.PrismaPromise<GetAiAgentInstanceBindingAggregateType<T>>
+
+    /**
+     * Group by AiAgentInstanceBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentInstanceBindingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAgentInstanceBindingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAgentInstanceBindingGroupByArgs['orderBy'] }
+        : { orderBy?: AiAgentInstanceBindingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAgentInstanceBindingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAgentInstanceBindingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAgentInstanceBinding model
+   */
+  readonly fields: AiAgentInstanceBindingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAgentInstanceBinding.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAgentInstanceBindingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    instance<T extends AiAgentInstanceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiAgentInstanceDefaultArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    modelService<T extends AiProviderConfigDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiProviderConfigDefaultArgs<ExtArgs>>): Prisma__AiProviderConfigClient<$Result.GetResult<Prisma.$AiProviderConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAgentInstanceBinding model
+   */
+  interface AiAgentInstanceBindingFieldRefs {
+    readonly id: FieldRef<"AiAgentInstanceBinding", 'String'>
+    readonly identityId: FieldRef<"AiAgentInstanceBinding", 'String'>
+    readonly instanceId: FieldRef<"AiAgentInstanceBinding", 'String'>
+    readonly connectionId: FieldRef<"AiAgentInstanceBinding", 'String'>
+    readonly modelId: FieldRef<"AiAgentInstanceBinding", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAgentInstanceBinding findUnique
+   */
+  export type AiAgentInstanceBindingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstanceBinding to fetch.
+     */
+    where: AiAgentInstanceBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstanceBinding findUniqueOrThrow
+   */
+  export type AiAgentInstanceBindingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstanceBinding to fetch.
+     */
+    where: AiAgentInstanceBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstanceBinding findFirst
+   */
+  export type AiAgentInstanceBindingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstanceBinding to fetch.
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstanceBindings to fetch.
+     */
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentInstanceBindings.
+     */
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstanceBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstanceBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstanceBindings.
+     */
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstanceBinding findFirstOrThrow
+   */
+  export type AiAgentInstanceBindingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstanceBinding to fetch.
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstanceBindings to fetch.
+     */
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentInstanceBindings.
+     */
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstanceBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstanceBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstanceBindings.
+     */
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstanceBinding findMany
+   */
+  export type AiAgentInstanceBindingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentInstanceBindings to fetch.
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentInstanceBindings to fetch.
+     */
+    orderBy?: AiAgentInstanceBindingOrderByWithRelationInput | AiAgentInstanceBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAgentInstanceBindings.
+     */
+    cursor?: AiAgentInstanceBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentInstanceBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentInstanceBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentInstanceBindings.
+     */
+    distinct?: AiAgentInstanceBindingScalarFieldEnum | AiAgentInstanceBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentInstanceBinding create
+   */
+  export type AiAgentInstanceBindingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiAgentInstanceBinding.
+     */
+    data: XOR<AiAgentInstanceBindingCreateInput, AiAgentInstanceBindingUncheckedCreateInput>
+  }
+
+  /**
+   * AiAgentInstanceBinding createMany
+   */
+  export type AiAgentInstanceBindingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAgentInstanceBindings.
+     */
+    data: AiAgentInstanceBindingCreateManyInput | AiAgentInstanceBindingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentInstanceBinding createManyAndReturn
+   */
+  export type AiAgentInstanceBindingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAgentInstanceBindings.
+     */
+    data: AiAgentInstanceBindingCreateManyInput | AiAgentInstanceBindingCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentInstanceBinding update
+   */
+  export type AiAgentInstanceBindingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiAgentInstanceBinding.
+     */
+    data: XOR<AiAgentInstanceBindingUpdateInput, AiAgentInstanceBindingUncheckedUpdateInput>
+    /**
+     * Choose, which AiAgentInstanceBinding to update.
+     */
+    where: AiAgentInstanceBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstanceBinding updateMany
+   */
+  export type AiAgentInstanceBindingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAgentInstanceBindings.
+     */
+    data: XOR<AiAgentInstanceBindingUpdateManyMutationInput, AiAgentInstanceBindingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentInstanceBindings to update
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * Limit how many AiAgentInstanceBindings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentInstanceBinding updateManyAndReturn
+   */
+  export type AiAgentInstanceBindingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAgentInstanceBindings.
+     */
+    data: XOR<AiAgentInstanceBindingUpdateManyMutationInput, AiAgentInstanceBindingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentInstanceBindings to update
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * Limit how many AiAgentInstanceBindings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentInstanceBinding upsert
+   */
+  export type AiAgentInstanceBindingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiAgentInstanceBinding to update in case it exists.
+     */
+    where: AiAgentInstanceBindingWhereUniqueInput
+    /**
+     * In case the AiAgentInstanceBinding found by the `where` argument doesn't exist, create a new AiAgentInstanceBinding with this data.
+     */
+    create: XOR<AiAgentInstanceBindingCreateInput, AiAgentInstanceBindingUncheckedCreateInput>
+    /**
+     * In case the AiAgentInstanceBinding was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAgentInstanceBindingUpdateInput, AiAgentInstanceBindingUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAgentInstanceBinding delete
+   */
+  export type AiAgentInstanceBindingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+    /**
+     * Filter which AiAgentInstanceBinding to delete.
+     */
+    where: AiAgentInstanceBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentInstanceBinding deleteMany
+   */
+  export type AiAgentInstanceBindingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentInstanceBindings to delete
+     */
+    where?: AiAgentInstanceBindingWhereInput
+    /**
+     * Limit how many AiAgentInstanceBindings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentInstanceBinding without action
+   */
+  export type AiAgentInstanceBindingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentInstanceBinding
+     */
+    select?: AiAgentInstanceBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentInstanceBinding
+     */
+    omit?: AiAgentInstanceBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentInstanceBindingInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAgentConversationBinding
+   */
+
+  export type AggregateAiAgentConversationBinding = {
+    _count: AiAgentConversationBindingCountAggregateOutputType | null
+    _min: AiAgentConversationBindingMinAggregateOutputType | null
+    _max: AiAgentConversationBindingMaxAggregateOutputType | null
+  }
+
+  export type AiAgentConversationBindingMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    conversationId: string | null
+    instanceId: string | null
+    providerId: string | null
+    modelId: string | null
+  }
+
+  export type AiAgentConversationBindingMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    conversationId: string | null
+    instanceId: string | null
+    providerId: string | null
+    modelId: string | null
+  }
+
+  export type AiAgentConversationBindingCountAggregateOutputType = {
+    id: number
+    identityId: number
+    conversationId: number
+    instanceId: number
+    providerId: number
+    modelId: number
+    _all: number
+  }
+
+
+  export type AiAgentConversationBindingMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    conversationId?: true
+    instanceId?: true
+    providerId?: true
+    modelId?: true
+  }
+
+  export type AiAgentConversationBindingMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    conversationId?: true
+    instanceId?: true
+    providerId?: true
+    modelId?: true
+  }
+
+  export type AiAgentConversationBindingCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    conversationId?: true
+    instanceId?: true
+    providerId?: true
+    modelId?: true
+    _all?: true
+  }
+
+  export type AiAgentConversationBindingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentConversationBinding to aggregate.
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentConversationBindings to fetch.
+     */
+    orderBy?: AiAgentConversationBindingOrderByWithRelationInput | AiAgentConversationBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAgentConversationBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentConversationBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentConversationBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAgentConversationBindings
+    **/
+    _count?: true | AiAgentConversationBindingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAgentConversationBindingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAgentConversationBindingMaxAggregateInputType
+  }
+
+  export type GetAiAgentConversationBindingAggregateType<T extends AiAgentConversationBindingAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAgentConversationBinding]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAgentConversationBinding[P]>
+      : GetScalarType<T[P], AggregateAiAgentConversationBinding[P]>
+  }
+
+
+
+
+  export type AiAgentConversationBindingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentConversationBindingWhereInput
+    orderBy?: AiAgentConversationBindingOrderByWithAggregationInput | AiAgentConversationBindingOrderByWithAggregationInput[]
+    by: AiAgentConversationBindingScalarFieldEnum[] | AiAgentConversationBindingScalarFieldEnum
+    having?: AiAgentConversationBindingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAgentConversationBindingCountAggregateInputType | true
+    _min?: AiAgentConversationBindingMinAggregateInputType
+    _max?: AiAgentConversationBindingMaxAggregateInputType
+  }
+
+  export type AiAgentConversationBindingGroupByOutputType = {
+    id: string
+    identityId: string
+    conversationId: string
+    instanceId: string
+    providerId: string | null
+    modelId: string | null
+    _count: AiAgentConversationBindingCountAggregateOutputType | null
+    _min: AiAgentConversationBindingMinAggregateOutputType | null
+    _max: AiAgentConversationBindingMaxAggregateOutputType | null
+  }
+
+  type GetAiAgentConversationBindingGroupByPayload<T extends AiAgentConversationBindingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAgentConversationBindingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAgentConversationBindingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAgentConversationBindingGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAgentConversationBindingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAgentConversationBindingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    conversationId?: boolean
+    instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentConversationBinding"]>
+
+  export type AiAgentConversationBindingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    conversationId?: boolean
+    instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentConversationBinding"]>
+
+  export type AiAgentConversationBindingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    conversationId?: boolean
+    instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAgentConversationBinding"]>
+
+  export type AiAgentConversationBindingSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    conversationId?: boolean
+    instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
+  }
+
+  export type AiAgentConversationBindingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "conversationId" | "instanceId" | "providerId" | "modelId", ExtArgs["result"]["aiAgentConversationBinding"]>
+  export type AiAgentConversationBindingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }
+  export type AiAgentConversationBindingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }
+  export type AiAgentConversationBindingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
+    instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
+  }
+
+  export type $AiAgentConversationBindingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAgentConversationBinding"
+    objects: {
+      conversation: Prisma.$AiConversationPayload<ExtArgs>
+      instance: Prisma.$AiAgentInstancePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      conversationId: string
+      instanceId: string
+      providerId: string | null
+      modelId: string | null
+    }, ExtArgs["result"]["aiAgentConversationBinding"]>
+    composites: {}
+  }
+
+  type AiAgentConversationBindingGetPayload<S extends boolean | null | undefined | AiAgentConversationBindingDefaultArgs> = $Result.GetResult<Prisma.$AiAgentConversationBindingPayload, S>
+
+  type AiAgentConversationBindingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAgentConversationBindingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAgentConversationBindingCountAggregateInputType | true
+    }
+
+  export interface AiAgentConversationBindingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAgentConversationBinding'], meta: { name: 'AiAgentConversationBinding' } }
+    /**
+     * Find zero or one AiAgentConversationBinding that matches the filter.
+     * @param {AiAgentConversationBindingFindUniqueArgs} args - Arguments to find a AiAgentConversationBinding
+     * @example
+     * // Get one AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAgentConversationBindingFindUniqueArgs>(args: SelectSubset<T, AiAgentConversationBindingFindUniqueArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAgentConversationBinding that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAgentConversationBindingFindUniqueOrThrowArgs} args - Arguments to find a AiAgentConversationBinding
+     * @example
+     * // Get one AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAgentConversationBindingFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAgentConversationBindingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentConversationBinding that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingFindFirstArgs} args - Arguments to find a AiAgentConversationBinding
+     * @example
+     * // Get one AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAgentConversationBindingFindFirstArgs>(args?: SelectSubset<T, AiAgentConversationBindingFindFirstArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentConversationBinding that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingFindFirstOrThrowArgs} args - Arguments to find a AiAgentConversationBinding
+     * @example
+     * // Get one AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAgentConversationBindingFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAgentConversationBindingFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAgentConversationBindings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAgentConversationBindings
+     * const aiAgentConversationBindings = await prisma.aiAgentConversationBinding.findMany()
+     *
+     * // Get first 10 AiAgentConversationBindings
+     * const aiAgentConversationBindings = await prisma.aiAgentConversationBinding.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAgentConversationBindingWithIdOnly = await prisma.aiAgentConversationBinding.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAgentConversationBindingFindManyArgs>(args?: SelectSubset<T, AiAgentConversationBindingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAgentConversationBinding.
+     * @param {AiAgentConversationBindingCreateArgs} args - Arguments to create a AiAgentConversationBinding.
+     * @example
+     * // Create one AiAgentConversationBinding
+     * const AiAgentConversationBinding = await prisma.aiAgentConversationBinding.create({
+     *   data: {
+     *     // ... data to create a AiAgentConversationBinding
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAgentConversationBindingCreateArgs>(args: SelectSubset<T, AiAgentConversationBindingCreateArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAgentConversationBindings.
+     * @param {AiAgentConversationBindingCreateManyArgs} args - Arguments to create many AiAgentConversationBindings.
+     * @example
+     * // Create many AiAgentConversationBindings
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAgentConversationBindingCreateManyArgs>(args?: SelectSubset<T, AiAgentConversationBindingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAgentConversationBindings and returns the data saved in the database.
+     * @param {AiAgentConversationBindingCreateManyAndReturnArgs} args - Arguments to create many AiAgentConversationBindings.
+     * @example
+     * // Create many AiAgentConversationBindings
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAgentConversationBindings and only return the `id`
+     * const aiAgentConversationBindingWithIdOnly = await prisma.aiAgentConversationBinding.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAgentConversationBindingCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAgentConversationBindingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAgentConversationBinding.
+     * @param {AiAgentConversationBindingDeleteArgs} args - Arguments to delete one AiAgentConversationBinding.
+     * @example
+     * // Delete one AiAgentConversationBinding
+     * const AiAgentConversationBinding = await prisma.aiAgentConversationBinding.delete({
+     *   where: {
+     *     // ... filter to delete one AiAgentConversationBinding
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAgentConversationBindingDeleteArgs>(args: SelectSubset<T, AiAgentConversationBindingDeleteArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAgentConversationBinding.
+     * @param {AiAgentConversationBindingUpdateArgs} args - Arguments to update one AiAgentConversationBinding.
+     * @example
+     * // Update one AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAgentConversationBindingUpdateArgs>(args: SelectSubset<T, AiAgentConversationBindingUpdateArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAgentConversationBindings.
+     * @param {AiAgentConversationBindingDeleteManyArgs} args - Arguments to filter AiAgentConversationBindings to delete.
+     * @example
+     * // Delete a few AiAgentConversationBindings
+     * const { count } = await prisma.aiAgentConversationBinding.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAgentConversationBindingDeleteManyArgs>(args?: SelectSubset<T, AiAgentConversationBindingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentConversationBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAgentConversationBindings
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAgentConversationBindingUpdateManyArgs>(args: SelectSubset<T, AiAgentConversationBindingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentConversationBindings and returns the data updated in the database.
+     * @param {AiAgentConversationBindingUpdateManyAndReturnArgs} args - Arguments to update many AiAgentConversationBindings.
+     * @example
+     * // Update many AiAgentConversationBindings
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAgentConversationBindings and only return the `id`
+     * const aiAgentConversationBindingWithIdOnly = await prisma.aiAgentConversationBinding.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAgentConversationBindingUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAgentConversationBindingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAgentConversationBinding.
+     * @param {AiAgentConversationBindingUpsertArgs} args - Arguments to update or create a AiAgentConversationBinding.
+     * @example
+     * // Update or create a AiAgentConversationBinding
+     * const aiAgentConversationBinding = await prisma.aiAgentConversationBinding.upsert({
+     *   create: {
+     *     // ... data to create a AiAgentConversationBinding
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAgentConversationBinding we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAgentConversationBindingUpsertArgs>(args: SelectSubset<T, AiAgentConversationBindingUpsertArgs<ExtArgs>>): Prisma__AiAgentConversationBindingClient<$Result.GetResult<Prisma.$AiAgentConversationBindingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAgentConversationBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingCountArgs} args - Arguments to filter AiAgentConversationBindings to count.
+     * @example
+     * // Count the number of AiAgentConversationBindings
+     * const count = await prisma.aiAgentConversationBinding.count({
+     *   where: {
+     *     // ... the filter for the AiAgentConversationBindings we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAgentConversationBindingCountArgs>(
+      args?: Subset<T, AiAgentConversationBindingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAgentConversationBindingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAgentConversationBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAgentConversationBindingAggregateArgs>(args: Subset<T, AiAgentConversationBindingAggregateArgs>): Prisma.PrismaPromise<GetAiAgentConversationBindingAggregateType<T>>
+
+    /**
+     * Group by AiAgentConversationBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentConversationBindingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAgentConversationBindingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAgentConversationBindingGroupByArgs['orderBy'] }
+        : { orderBy?: AiAgentConversationBindingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAgentConversationBindingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAgentConversationBindingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAgentConversationBinding model
+   */
+  readonly fields: AiAgentConversationBindingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAgentConversationBinding.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAgentConversationBindingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    conversation<T extends AiConversationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiConversationDefaultArgs<ExtArgs>>): Prisma__AiConversationClient<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    instance<T extends AiAgentInstanceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiAgentInstanceDefaultArgs<ExtArgs>>): Prisma__AiAgentInstanceClient<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAgentConversationBinding model
+   */
+  interface AiAgentConversationBindingFieldRefs {
+    readonly id: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly identityId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly conversationId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly instanceId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly providerId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly modelId: FieldRef<"AiAgentConversationBinding", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAgentConversationBinding findUnique
+   */
+  export type AiAgentConversationBindingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentConversationBinding to fetch.
+     */
+    where: AiAgentConversationBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentConversationBinding findUniqueOrThrow
+   */
+  export type AiAgentConversationBindingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentConversationBinding to fetch.
+     */
+    where: AiAgentConversationBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentConversationBinding findFirst
+   */
+  export type AiAgentConversationBindingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentConversationBinding to fetch.
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentConversationBindings to fetch.
+     */
+    orderBy?: AiAgentConversationBindingOrderByWithRelationInput | AiAgentConversationBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentConversationBindings.
+     */
+    cursor?: AiAgentConversationBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentConversationBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentConversationBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentConversationBindings.
+     */
+    distinct?: AiAgentConversationBindingScalarFieldEnum | AiAgentConversationBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentConversationBinding findFirstOrThrow
+   */
+  export type AiAgentConversationBindingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentConversationBinding to fetch.
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentConversationBindings to fetch.
+     */
+    orderBy?: AiAgentConversationBindingOrderByWithRelationInput | AiAgentConversationBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentConversationBindings.
+     */
+    cursor?: AiAgentConversationBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentConversationBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentConversationBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentConversationBindings.
+     */
+    distinct?: AiAgentConversationBindingScalarFieldEnum | AiAgentConversationBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentConversationBinding findMany
+   */
+  export type AiAgentConversationBindingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAgentConversationBindings to fetch.
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentConversationBindings to fetch.
+     */
+    orderBy?: AiAgentConversationBindingOrderByWithRelationInput | AiAgentConversationBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAgentConversationBindings.
+     */
+    cursor?: AiAgentConversationBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentConversationBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentConversationBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentConversationBindings.
+     */
+    distinct?: AiAgentConversationBindingScalarFieldEnum | AiAgentConversationBindingScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentConversationBinding create
+   */
+  export type AiAgentConversationBindingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiAgentConversationBinding.
+     */
+    data: XOR<AiAgentConversationBindingCreateInput, AiAgentConversationBindingUncheckedCreateInput>
+  }
+
+  /**
+   * AiAgentConversationBinding createMany
+   */
+  export type AiAgentConversationBindingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAgentConversationBindings.
+     */
+    data: AiAgentConversationBindingCreateManyInput | AiAgentConversationBindingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentConversationBinding createManyAndReturn
+   */
+  export type AiAgentConversationBindingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAgentConversationBindings.
+     */
+    data: AiAgentConversationBindingCreateManyInput | AiAgentConversationBindingCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentConversationBinding update
+   */
+  export type AiAgentConversationBindingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiAgentConversationBinding.
+     */
+    data: XOR<AiAgentConversationBindingUpdateInput, AiAgentConversationBindingUncheckedUpdateInput>
+    /**
+     * Choose, which AiAgentConversationBinding to update.
+     */
+    where: AiAgentConversationBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentConversationBinding updateMany
+   */
+  export type AiAgentConversationBindingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAgentConversationBindings.
+     */
+    data: XOR<AiAgentConversationBindingUpdateManyMutationInput, AiAgentConversationBindingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentConversationBindings to update
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * Limit how many AiAgentConversationBindings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentConversationBinding updateManyAndReturn
+   */
+  export type AiAgentConversationBindingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAgentConversationBindings.
+     */
+    data: XOR<AiAgentConversationBindingUpdateManyMutationInput, AiAgentConversationBindingUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentConversationBindings to update
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * Limit how many AiAgentConversationBindings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAgentConversationBinding upsert
+   */
+  export type AiAgentConversationBindingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiAgentConversationBinding to update in case it exists.
+     */
+    where: AiAgentConversationBindingWhereUniqueInput
+    /**
+     * In case the AiAgentConversationBinding found by the `where` argument doesn't exist, create a new AiAgentConversationBinding with this data.
+     */
+    create: XOR<AiAgentConversationBindingCreateInput, AiAgentConversationBindingUncheckedCreateInput>
+    /**
+     * In case the AiAgentConversationBinding was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAgentConversationBindingUpdateInput, AiAgentConversationBindingUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAgentConversationBinding delete
+   */
+  export type AiAgentConversationBindingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
+    /**
+     * Filter which AiAgentConversationBinding to delete.
+     */
+    where: AiAgentConversationBindingWhereUniqueInput
+  }
+
+  /**
+   * AiAgentConversationBinding deleteMany
+   */
+  export type AiAgentConversationBindingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentConversationBindings to delete
+     */
+    where?: AiAgentConversationBindingWhereInput
+    /**
+     * Limit how many AiAgentConversationBindings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentConversationBinding without action
+   */
+  export type AiAgentConversationBindingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentConversationBinding
+     */
+    select?: AiAgentConversationBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentConversationBinding
+     */
+    omit?: AiAgentConversationBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAgentConversationBindingInclude<ExtArgs> | null
   }
 
 
@@ -19002,6 +22973,954 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiKnowledgeIndexEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAgentRegistryMigration
+   */
+
+  export type AggregateAiAgentRegistryMigration = {
+    _count: AiAgentRegistryMigrationCountAggregateOutputType | null
+    _min: AiAgentRegistryMigrationMinAggregateOutputType | null
+    _max: AiAgentRegistryMigrationMaxAggregateOutputType | null
+  }
+
+  export type AiAgentRegistryMigrationMinAggregateOutputType = {
+    id: string | null
+  }
+
+  export type AiAgentRegistryMigrationMaxAggregateOutputType = {
+    id: string | null
+  }
+
+  export type AiAgentRegistryMigrationCountAggregateOutputType = {
+    id: number
+    _all: number
+  }
+
+
+  export type AiAgentRegistryMigrationMinAggregateInputType = {
+    id?: true
+  }
+
+  export type AiAgentRegistryMigrationMaxAggregateInputType = {
+    id?: true
+  }
+
+  export type AiAgentRegistryMigrationCountAggregateInputType = {
+    id?: true
+    _all?: true
+  }
+
+  export type AiAgentRegistryMigrationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentRegistryMigration to aggregate.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAgentRegistryMigrations
+    **/
+    _count?: true | AiAgentRegistryMigrationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAgentRegistryMigrationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAgentRegistryMigrationMaxAggregateInputType
+  }
+
+  export type GetAiAgentRegistryMigrationAggregateType<T extends AiAgentRegistryMigrationAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAgentRegistryMigration]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAgentRegistryMigration[P]>
+      : GetScalarType<T[P], AggregateAiAgentRegistryMigration[P]>
+  }
+
+
+
+
+  export type AiAgentRegistryMigrationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentRegistryMigrationWhereInput
+    orderBy?: AiAgentRegistryMigrationOrderByWithAggregationInput | AiAgentRegistryMigrationOrderByWithAggregationInput[]
+    by: AiAgentRegistryMigrationScalarFieldEnum[] | AiAgentRegistryMigrationScalarFieldEnum
+    having?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAgentRegistryMigrationCountAggregateInputType | true
+    _min?: AiAgentRegistryMigrationMinAggregateInputType
+    _max?: AiAgentRegistryMigrationMaxAggregateInputType
+  }
+
+  export type AiAgentRegistryMigrationGroupByOutputType = {
+    id: string
+    _count: AiAgentRegistryMigrationCountAggregateOutputType | null
+    _min: AiAgentRegistryMigrationMinAggregateOutputType | null
+    _max: AiAgentRegistryMigrationMaxAggregateOutputType | null
+  }
+
+  type GetAiAgentRegistryMigrationGroupByPayload<T extends AiAgentRegistryMigrationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAgentRegistryMigrationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAgentRegistryMigrationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAgentRegistryMigrationGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAgentRegistryMigrationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAgentRegistryMigrationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectScalar = {
+    id?: boolean
+  }
+
+  export type AiAgentRegistryMigrationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id", ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type $AiAgentRegistryMigrationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAgentRegistryMigration"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+    }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+    composites: {}
+  }
+
+  type AiAgentRegistryMigrationGetPayload<S extends boolean | null | undefined | AiAgentRegistryMigrationDefaultArgs> = $Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload, S>
+
+  type AiAgentRegistryMigrationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAgentRegistryMigrationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAgentRegistryMigrationCountAggregateInputType | true
+    }
+
+  export interface AiAgentRegistryMigrationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAgentRegistryMigration'], meta: { name: 'AiAgentRegistryMigration' } }
+    /**
+     * Find zero or one AiAgentRegistryMigration that matches the filter.
+     * @param {AiAgentRegistryMigrationFindUniqueArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAgentRegistryMigrationFindUniqueArgs>(args: SelectSubset<T, AiAgentRegistryMigrationFindUniqueArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAgentRegistryMigration that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAgentRegistryMigrationFindUniqueOrThrowArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAgentRegistryMigrationFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentRegistryMigration that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindFirstArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAgentRegistryMigrationFindFirstArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindFirstArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentRegistryMigration that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindFirstOrThrowArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAgentRegistryMigrationFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAgentRegistryMigrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAgentRegistryMigrations
+     * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany()
+     *
+     * // Get first 10 AiAgentRegistryMigrations
+     * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAgentRegistryMigrationFindManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationCreateArgs} args - Arguments to create a AiAgentRegistryMigration.
+     * @example
+     * // Create one AiAgentRegistryMigration
+     * const AiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.create({
+     *   data: {
+     *     // ... data to create a AiAgentRegistryMigration
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAgentRegistryMigrationCreateArgs>(args: SelectSubset<T, AiAgentRegistryMigrationCreateArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAgentRegistryMigrations.
+     * @param {AiAgentRegistryMigrationCreateManyArgs} args - Arguments to create many AiAgentRegistryMigrations.
+     * @example
+     * // Create many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAgentRegistryMigrationCreateManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAgentRegistryMigrations and returns the data saved in the database.
+     * @param {AiAgentRegistryMigrationCreateManyAndReturnArgs} args - Arguments to create many AiAgentRegistryMigrations.
+     * @example
+     * // Create many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAgentRegistryMigrations and only return the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAgentRegistryMigrationCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationDeleteArgs} args - Arguments to delete one AiAgentRegistryMigration.
+     * @example
+     * // Delete one AiAgentRegistryMigration
+     * const AiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.delete({
+     *   where: {
+     *     // ... filter to delete one AiAgentRegistryMigration
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAgentRegistryMigrationDeleteArgs>(args: SelectSubset<T, AiAgentRegistryMigrationDeleteArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationUpdateArgs} args - Arguments to update one AiAgentRegistryMigration.
+     * @example
+     * // Update one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAgentRegistryMigrationUpdateArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAgentRegistryMigrations.
+     * @param {AiAgentRegistryMigrationDeleteManyArgs} args - Arguments to filter AiAgentRegistryMigrations to delete.
+     * @example
+     * // Delete a few AiAgentRegistryMigrations
+     * const { count } = await prisma.aiAgentRegistryMigration.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAgentRegistryMigrationDeleteManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentRegistryMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAgentRegistryMigrationUpdateManyArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentRegistryMigrations and returns the data updated in the database.
+     * @param {AiAgentRegistryMigrationUpdateManyAndReturnArgs} args - Arguments to update many AiAgentRegistryMigrations.
+     * @example
+     * // Update many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAgentRegistryMigrations and only return the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAgentRegistryMigrationUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationUpsertArgs} args - Arguments to update or create a AiAgentRegistryMigration.
+     * @example
+     * // Update or create a AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.upsert({
+     *   create: {
+     *     // ... data to create a AiAgentRegistryMigration
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAgentRegistryMigration we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAgentRegistryMigrationUpsertArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpsertArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAgentRegistryMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationCountArgs} args - Arguments to filter AiAgentRegistryMigrations to count.
+     * @example
+     * // Count the number of AiAgentRegistryMigrations
+     * const count = await prisma.aiAgentRegistryMigration.count({
+     *   where: {
+     *     // ... the filter for the AiAgentRegistryMigrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAgentRegistryMigrationCountArgs>(
+      args?: Subset<T, AiAgentRegistryMigrationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAgentRegistryMigrationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAgentRegistryMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAgentRegistryMigrationAggregateArgs>(args: Subset<T, AiAgentRegistryMigrationAggregateArgs>): Prisma.PrismaPromise<GetAiAgentRegistryMigrationAggregateType<T>>
+
+    /**
+     * Group by AiAgentRegistryMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAgentRegistryMigrationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAgentRegistryMigrationGroupByArgs['orderBy'] }
+        : { orderBy?: AiAgentRegistryMigrationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAgentRegistryMigrationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAgentRegistryMigrationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAgentRegistryMigration model
+   */
+  readonly fields: AiAgentRegistryMigrationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAgentRegistryMigration.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAgentRegistryMigrationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAgentRegistryMigration model
+   */
+  interface AiAgentRegistryMigrationFieldRefs {
+    readonly id: FieldRef<"AiAgentRegistryMigration", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAgentRegistryMigration findUnique
+   */
+  export type AiAgentRegistryMigrationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration findUniqueOrThrow
+   */
+  export type AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration findFirst
+   */
+  export type AiAgentRegistryMigrationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration findFirstOrThrow
+   */
+  export type AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration findMany
+   */
+  export type AiAgentRegistryMigrationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigrations to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration create
+   */
+  export type AiAgentRegistryMigrationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AiAgentRegistryMigration.
+     */
+    data: XOR<AiAgentRegistryMigrationCreateInput, AiAgentRegistryMigrationUncheckedCreateInput>
+  }
+
+  /**
+   * AiAgentRegistryMigration createMany
+   */
+  export type AiAgentRegistryMigrationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAgentRegistryMigrations.
+     */
+    data: AiAgentRegistryMigrationCreateManyInput | AiAgentRegistryMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentRegistryMigration createManyAndReturn
+   */
+  export type AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAgentRegistryMigrations.
+     */
+    data: AiAgentRegistryMigrationCreateManyInput | AiAgentRegistryMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentRegistryMigration update
+   */
+  export type AiAgentRegistryMigrationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AiAgentRegistryMigration.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateInput, AiAgentRegistryMigrationUncheckedUpdateInput>
+    /**
+     * Choose, which AiAgentRegistryMigration to update.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration updateMany
+   */
+  export type AiAgentRegistryMigrationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAgentRegistryMigrations.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateManyMutationInput, AiAgentRegistryMigrationUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentRegistryMigrations to update
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration updateManyAndReturn
+   */
+  export type AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAgentRegistryMigrations.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateManyMutationInput, AiAgentRegistryMigrationUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentRegistryMigrations to update
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration upsert
+   */
+  export type AiAgentRegistryMigrationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AiAgentRegistryMigration to update in case it exists.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * In case the AiAgentRegistryMigration found by the `where` argument doesn't exist, create a new AiAgentRegistryMigration with this data.
+     */
+    create: XOR<AiAgentRegistryMigrationCreateInput, AiAgentRegistryMigrationUncheckedCreateInput>
+    /**
+     * In case the AiAgentRegistryMigration was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAgentRegistryMigrationUpdateInput, AiAgentRegistryMigrationUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAgentRegistryMigration delete
+   */
+  export type AiAgentRegistryMigrationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter which AiAgentRegistryMigration to delete.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration deleteMany
+   */
+  export type AiAgentRegistryMigrationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentRegistryMigrations to delete
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration without action
+   */
+  export type AiAgentRegistryMigrationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
   }
 
 
@@ -109565,6 +114484,47 @@ export namespace Prisma {
   export type AiProviderConfigScalarFieldEnum = (typeof AiProviderConfigScalarFieldEnum)[keyof typeof AiProviderConfigScalarFieldEnum]
 
 
+  export const AiAgentInstanceScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    instanceId: 'instanceId',
+    driver: 'driver',
+    name: 'name',
+    accentColor: 'accentColor',
+    enabled: 'enabled',
+    nativeConfig: 'nativeConfig',
+    legacyConnectionId: 'legacyConnectionId',
+    revision: 'revision',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiAgentInstanceScalarFieldEnum = (typeof AiAgentInstanceScalarFieldEnum)[keyof typeof AiAgentInstanceScalarFieldEnum]
+
+
+  export const AiAgentInstanceBindingScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    instanceId: 'instanceId',
+    connectionId: 'connectionId',
+    modelId: 'modelId'
+  };
+
+  export type AiAgentInstanceBindingScalarFieldEnum = (typeof AiAgentInstanceBindingScalarFieldEnum)[keyof typeof AiAgentInstanceBindingScalarFieldEnum]
+
+
+  export const AiAgentConversationBindingScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    conversationId: 'conversationId',
+    instanceId: 'instanceId',
+    providerId: 'providerId',
+    modelId: 'modelId'
+  };
+
+  export type AiAgentConversationBindingScalarFieldEnum = (typeof AiAgentConversationBindingScalarFieldEnum)[keyof typeof AiAgentConversationBindingScalarFieldEnum]
+
+
   export const AiProviderOnboardingSessionScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -109624,6 +114584,13 @@ export namespace Prisma {
   };
 
   export type AiKnowledgeIndexEntryScalarFieldEnum = (typeof AiKnowledgeIndexEntryScalarFieldEnum)[keyof typeof AiKnowledgeIndexEntryScalarFieldEnum]
+
+
+  export const AiAgentRegistryMigrationScalarFieldEnum: {
+    id: 'id'
+  };
+
+  export type AiAgentRegistryMigrationScalarFieldEnum = (typeof AiAgentRegistryMigrationScalarFieldEnum)[keyof typeof AiAgentRegistryMigrationScalarFieldEnum]
 
 
   export const CloudAuthUserScalarFieldEnum: {
@@ -111155,6 +116122,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
     aiProviderConfigs?: AiProviderConfigListRelationFilter
+    aiAgentInstances?: AiAgentInstanceListRelationFilter
+    aiAgentInstanceBindings?: AiAgentInstanceBindingListRelationFilter
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     aiProviderSecrets?: AiProviderSecretListRelationFilter
     taskPlanHistory?: TaskPlanHistoryListRelationFilter
@@ -111203,6 +116172,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordOrderByRelationAggregateInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryOrderByRelationAggregateInput
     aiProviderConfigs?: AiProviderConfigOrderByRelationAggregateInput
+    aiAgentInstances?: AiAgentInstanceOrderByRelationAggregateInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingOrderByRelationAggregateInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionOrderByRelationAggregateInput
     aiProviderSecrets?: AiProviderSecretOrderByRelationAggregateInput
     taskPlanHistory?: TaskPlanHistoryOrderByRelationAggregateInput
@@ -111254,6 +116225,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
     aiProviderConfigs?: AiProviderConfigListRelationFilter
+    aiAgentInstances?: AiAgentInstanceListRelationFilter
+    aiAgentInstanceBindings?: AiAgentInstanceBindingListRelationFilter
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     aiProviderSecrets?: AiProviderSecretListRelationFilter
     taskPlanHistory?: TaskPlanHistoryListRelationFilter
@@ -111303,6 +116276,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    agentBinding?: XOR<AiAgentConversationBindingNullableScalarRelationFilter, AiAgentConversationBindingWhereInput> | null
   }
 
   export type AiConversationOrderByWithRelationInput = {
@@ -111315,10 +116289,12 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
+    agentBinding?: AiAgentConversationBindingOrderByWithRelationInput
   }
 
   export type AiConversationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    identityId_id?: AiConversationIdentityIdIdCompoundUniqueInput
     AND?: AiConversationWhereInput | AiConversationWhereInput[]
     OR?: AiConversationWhereInput[]
     NOT?: AiConversationWhereInput | AiConversationWhereInput[]
@@ -111330,7 +116306,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id">
+    agentBinding?: XOR<AiAgentConversationBindingNullableScalarRelationFilter, AiAgentConversationBindingWhereInput> | null
+  }, "id" | "identityId_id">
 
   export type AiConversationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -111499,6 +116476,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiProviderConfig"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiProviderConfig"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    agentBindings?: AiAgentInstanceBindingListRelationFilter
   }
 
   export type AiProviderConfigOrderByWithRelationInput = {
@@ -111518,11 +116496,13 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
+    agentBindings?: AiAgentInstanceBindingOrderByRelationAggregateInput
   }
 
   export type AiProviderConfigWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     identityId_name?: AiProviderConfigIdentityIdNameCompoundUniqueInput
+    identityId_id?: AiProviderConfigIdentityIdIdCompoundUniqueInput
     AND?: AiProviderConfigWhereInput | AiProviderConfigWhereInput[]
     OR?: AiProviderConfigWhereInput[]
     NOT?: AiProviderConfigWhereInput | AiProviderConfigWhereInput[]
@@ -111541,7 +116521,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiProviderConfig"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiProviderConfig"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId_name">
+    agentBindings?: AiAgentInstanceBindingListRelationFilter
+  }, "id" | "identityId_name" | "identityId_id">
 
   export type AiProviderConfigOrderByWithAggregationInput = {
     id?: SortOrder
@@ -111585,6 +116566,231 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AiProviderConfig"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiProviderConfig"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"AiProviderConfig"> | Date | string | null
+  }
+
+  export type AiAgentInstanceWhereInput = {
+    AND?: AiAgentInstanceWhereInput | AiAgentInstanceWhereInput[]
+    OR?: AiAgentInstanceWhereInput[]
+    NOT?: AiAgentInstanceWhereInput | AiAgentInstanceWhereInput[]
+    id?: StringFilter<"AiAgentInstance"> | string
+    identityId?: StringFilter<"AiAgentInstance"> | string
+    instanceId?: StringFilter<"AiAgentInstance"> | string
+    driver?: StringFilter<"AiAgentInstance"> | string
+    name?: StringFilter<"AiAgentInstance"> | string
+    accentColor?: StringNullableFilter<"AiAgentInstance"> | string | null
+    enabled?: BoolFilter<"AiAgentInstance"> | boolean
+    nativeConfig?: JsonNullableFilter<"AiAgentInstance">
+    legacyConnectionId?: StringNullableFilter<"AiAgentInstance"> | string | null
+    revision?: IntFilter<"AiAgentInstance"> | number
+    createdAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    bindings?: AiAgentInstanceBindingListRelationFilter
+    conversations?: AiAgentConversationBindingListRelationFilter
+  }
+
+  export type AiAgentInstanceOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    driver?: SortOrder
+    name?: SortOrder
+    accentColor?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    nativeConfig?: SortOrderInput | SortOrder
+    legacyConnectionId?: SortOrderInput | SortOrder
+    revision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+    bindings?: AiAgentInstanceBindingOrderByRelationAggregateInput
+    conversations?: AiAgentConversationBindingOrderByRelationAggregateInput
+  }
+
+  export type AiAgentInstanceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_instanceId?: AiAgentInstanceIdentityIdInstanceIdCompoundUniqueInput
+    AND?: AiAgentInstanceWhereInput | AiAgentInstanceWhereInput[]
+    OR?: AiAgentInstanceWhereInput[]
+    NOT?: AiAgentInstanceWhereInput | AiAgentInstanceWhereInput[]
+    identityId?: StringFilter<"AiAgentInstance"> | string
+    instanceId?: StringFilter<"AiAgentInstance"> | string
+    driver?: StringFilter<"AiAgentInstance"> | string
+    name?: StringFilter<"AiAgentInstance"> | string
+    accentColor?: StringNullableFilter<"AiAgentInstance"> | string | null
+    enabled?: BoolFilter<"AiAgentInstance"> | boolean
+    nativeConfig?: JsonNullableFilter<"AiAgentInstance">
+    legacyConnectionId?: StringNullableFilter<"AiAgentInstance"> | string | null
+    revision?: IntFilter<"AiAgentInstance"> | number
+    createdAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    bindings?: AiAgentInstanceBindingListRelationFilter
+    conversations?: AiAgentConversationBindingListRelationFilter
+  }, "id" | "identityId_instanceId">
+
+  export type AiAgentInstanceOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    driver?: SortOrder
+    name?: SortOrder
+    accentColor?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    nativeConfig?: SortOrderInput | SortOrder
+    legacyConnectionId?: SortOrderInput | SortOrder
+    revision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiAgentInstanceCountOrderByAggregateInput
+    _avg?: AiAgentInstanceAvgOrderByAggregateInput
+    _max?: AiAgentInstanceMaxOrderByAggregateInput
+    _min?: AiAgentInstanceMinOrderByAggregateInput
+    _sum?: AiAgentInstanceSumOrderByAggregateInput
+  }
+
+  export type AiAgentInstanceScalarWhereWithAggregatesInput = {
+    AND?: AiAgentInstanceScalarWhereWithAggregatesInput | AiAgentInstanceScalarWhereWithAggregatesInput[]
+    OR?: AiAgentInstanceScalarWhereWithAggregatesInput[]
+    NOT?: AiAgentInstanceScalarWhereWithAggregatesInput | AiAgentInstanceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAgentInstance"> | string
+    identityId?: StringWithAggregatesFilter<"AiAgentInstance"> | string
+    instanceId?: StringWithAggregatesFilter<"AiAgentInstance"> | string
+    driver?: StringWithAggregatesFilter<"AiAgentInstance"> | string
+    name?: StringWithAggregatesFilter<"AiAgentInstance"> | string
+    accentColor?: StringNullableWithAggregatesFilter<"AiAgentInstance"> | string | null
+    enabled?: BoolWithAggregatesFilter<"AiAgentInstance"> | boolean
+    nativeConfig?: JsonNullableWithAggregatesFilter<"AiAgentInstance">
+    legacyConnectionId?: StringNullableWithAggregatesFilter<"AiAgentInstance"> | string | null
+    revision?: IntWithAggregatesFilter<"AiAgentInstance"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"AiAgentInstance"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiAgentInstance"> | Date | string
+  }
+
+  export type AiAgentInstanceBindingWhereInput = {
+    AND?: AiAgentInstanceBindingWhereInput | AiAgentInstanceBindingWhereInput[]
+    OR?: AiAgentInstanceBindingWhereInput[]
+    NOT?: AiAgentInstanceBindingWhereInput | AiAgentInstanceBindingWhereInput[]
+    id?: StringFilter<"AiAgentInstanceBinding"> | string
+    identityId?: StringFilter<"AiAgentInstanceBinding"> | string
+    instanceId?: StringFilter<"AiAgentInstanceBinding"> | string
+    connectionId?: StringFilter<"AiAgentInstanceBinding"> | string
+    modelId?: StringFilter<"AiAgentInstanceBinding"> | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
+    modelService?: XOR<AiProviderConfigScalarRelationFilter, AiProviderConfigWhereInput>
+  }
+
+  export type AiAgentInstanceBindingOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    connectionId?: SortOrder
+    modelId?: SortOrder
+    account?: AccountOrderByWithRelationInput
+    instance?: AiAgentInstanceOrderByWithRelationInput
+    modelService?: AiProviderConfigOrderByWithRelationInput
+  }
+
+  export type AiAgentInstanceBindingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_instanceId_connectionId?: AiAgentInstanceBindingIdentityIdInstanceIdConnectionIdCompoundUniqueInput
+    AND?: AiAgentInstanceBindingWhereInput | AiAgentInstanceBindingWhereInput[]
+    OR?: AiAgentInstanceBindingWhereInput[]
+    NOT?: AiAgentInstanceBindingWhereInput | AiAgentInstanceBindingWhereInput[]
+    identityId?: StringFilter<"AiAgentInstanceBinding"> | string
+    instanceId?: StringFilter<"AiAgentInstanceBinding"> | string
+    connectionId?: StringFilter<"AiAgentInstanceBinding"> | string
+    modelId?: StringFilter<"AiAgentInstanceBinding"> | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
+    modelService?: XOR<AiProviderConfigScalarRelationFilter, AiProviderConfigWhereInput>
+  }, "id" | "identityId_instanceId_connectionId">
+
+  export type AiAgentInstanceBindingOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    connectionId?: SortOrder
+    modelId?: SortOrder
+    _count?: AiAgentInstanceBindingCountOrderByAggregateInput
+    _max?: AiAgentInstanceBindingMaxOrderByAggregateInput
+    _min?: AiAgentInstanceBindingMinOrderByAggregateInput
+  }
+
+  export type AiAgentInstanceBindingScalarWhereWithAggregatesInput = {
+    AND?: AiAgentInstanceBindingScalarWhereWithAggregatesInput | AiAgentInstanceBindingScalarWhereWithAggregatesInput[]
+    OR?: AiAgentInstanceBindingScalarWhereWithAggregatesInput[]
+    NOT?: AiAgentInstanceBindingScalarWhereWithAggregatesInput | AiAgentInstanceBindingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAgentInstanceBinding"> | string
+    identityId?: StringWithAggregatesFilter<"AiAgentInstanceBinding"> | string
+    instanceId?: StringWithAggregatesFilter<"AiAgentInstanceBinding"> | string
+    connectionId?: StringWithAggregatesFilter<"AiAgentInstanceBinding"> | string
+    modelId?: StringWithAggregatesFilter<"AiAgentInstanceBinding"> | string
+  }
+
+  export type AiAgentConversationBindingWhereInput = {
+    AND?: AiAgentConversationBindingWhereInput | AiAgentConversationBindingWhereInput[]
+    OR?: AiAgentConversationBindingWhereInput[]
+    NOT?: AiAgentConversationBindingWhereInput | AiAgentConversationBindingWhereInput[]
+    id?: StringFilter<"AiAgentConversationBinding"> | string
+    identityId?: StringFilter<"AiAgentConversationBinding"> | string
+    conversationId?: StringFilter<"AiAgentConversationBinding"> | string
+    instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
+    instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
+  }
+
+  export type AiAgentConversationBindingOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    conversationId?: SortOrder
+    instanceId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
+    conversation?: AiConversationOrderByWithRelationInput
+    instance?: AiAgentInstanceOrderByWithRelationInput
+  }
+
+  export type AiAgentConversationBindingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_conversationId?: AiAgentConversationBindingIdentityIdConversationIdCompoundUniqueInput
+    AND?: AiAgentConversationBindingWhereInput | AiAgentConversationBindingWhereInput[]
+    OR?: AiAgentConversationBindingWhereInput[]
+    NOT?: AiAgentConversationBindingWhereInput | AiAgentConversationBindingWhereInput[]
+    identityId?: StringFilter<"AiAgentConversationBinding"> | string
+    conversationId?: StringFilter<"AiAgentConversationBinding"> | string
+    instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
+    instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
+  }, "id" | "identityId_conversationId">
+
+  export type AiAgentConversationBindingOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    conversationId?: SortOrder
+    instanceId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
+    _count?: AiAgentConversationBindingCountOrderByAggregateInput
+    _max?: AiAgentConversationBindingMaxOrderByAggregateInput
+    _min?: AiAgentConversationBindingMinOrderByAggregateInput
+  }
+
+  export type AiAgentConversationBindingScalarWhereWithAggregatesInput = {
+    AND?: AiAgentConversationBindingScalarWhereWithAggregatesInput | AiAgentConversationBindingScalarWhereWithAggregatesInput[]
+    OR?: AiAgentConversationBindingScalarWhereWithAggregatesInput[]
+    NOT?: AiAgentConversationBindingScalarWhereWithAggregatesInput | AiAgentConversationBindingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
+    identityId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
+    conversationId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
+    instanceId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableWithAggregatesFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableWithAggregatesFilter<"AiAgentConversationBinding"> | string | null
   }
 
   export type AiProviderOnboardingSessionWhereInput = {
@@ -111891,6 +117097,38 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string | null
+  }
+
+  export type AiAgentRegistryMigrationWhereInput = {
+    AND?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    OR?: AiAgentRegistryMigrationWhereInput[]
+    NOT?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    id?: StringFilter<"AiAgentRegistryMigration"> | string
+  }
+
+  export type AiAgentRegistryMigrationOrderByWithRelationInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    OR?: AiAgentRegistryMigrationWhereInput[]
+    NOT?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+  }, "id">
+
+  export type AiAgentRegistryMigrationOrderByWithAggregationInput = {
+    id?: SortOrder
+    _count?: AiAgentRegistryMigrationCountOrderByAggregateInput
+    _max?: AiAgentRegistryMigrationMaxOrderByAggregateInput
+    _min?: AiAgentRegistryMigrationMinOrderByAggregateInput
+  }
+
+  export type AiAgentRegistryMigrationScalarWhereWithAggregatesInput = {
+    AND?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput | AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    OR?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    NOT?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput | AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAgentRegistryMigration"> | string
   }
 
   export type CloudAuthUserWhereInput = {
@@ -118884,6 +124122,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -118931,6 +124171,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -118978,6 +124220,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -119025,6 +124269,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -119072,6 +124318,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutAiConversationsInput
+    agentBinding?: AiAgentConversationBindingCreateNestedOneWithoutConversationInput
   }
 
   export type AiConversationUncheckedCreateInput = {
@@ -119083,6 +124330,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBinding?: AiAgentConversationBindingUncheckedCreateNestedOneWithoutConversationInput
   }
 
   export type AiConversationUpdateInput = {
@@ -119094,6 +124342,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutAiConversationsNestedInput
+    agentBinding?: AiAgentConversationBindingUpdateOneWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateInput = {
@@ -119105,6 +124354,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBinding?: AiAgentConversationBindingUncheckedUpdateOneWithoutConversationNestedInput
   }
 
   export type AiConversationCreateManyInput = {
@@ -119294,6 +124544,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutAiProviderConfigsInput
+    agentBindings?: AiAgentInstanceBindingCreateNestedManyWithoutModelServiceInput
   }
 
   export type AiProviderConfigUncheckedCreateInput = {
@@ -119312,6 +124563,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutModelServiceInput
   }
 
   export type AiProviderConfigUpdateInput = {
@@ -119330,6 +124582,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutAiProviderConfigsNestedInput
+    agentBindings?: AiAgentInstanceBindingUpdateManyWithoutModelServiceNestedInput
   }
 
   export type AiProviderConfigUncheckedUpdateInput = {
@@ -119348,6 +124601,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutModelServiceNestedInput
   }
 
   export type AiProviderConfigCreateManyInput = {
@@ -119401,6 +124655,229 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentInstanceCreateInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiAgentInstancesInput
+    bindings?: AiAgentInstanceBindingCreateNestedManyWithoutInstanceInput
+    conversations?: AiAgentConversationBindingCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceUncheckedCreateInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutInstanceInput
+    conversations?: AiAgentConversationBindingUncheckedCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstancesNestedInput
+    bindings?: AiAgentInstanceBindingUpdateManyWithoutInstanceNestedInput
+    conversations?: AiAgentConversationBindingUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceNestedInput
+    conversations?: AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceCreateManyInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAgentInstanceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAgentInstanceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAgentInstanceBindingCreateInput = {
+    id?: string
+    modelId: string
+    account: AccountCreateNestedOneWithoutAiAgentInstanceBindingsInput
+    instance: AiAgentInstanceCreateNestedOneWithoutBindingsInput
+    modelService: AiProviderConfigCreateNestedOneWithoutAgentBindingsInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    connectionId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstanceBindingsNestedInput
+    instance?: AiAgentInstanceUpdateOneRequiredWithoutBindingsNestedInput
+    modelService?: AiProviderConfigUpdateOneRequiredWithoutAgentBindingsNestedInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingCreateManyInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    connectionId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentConversationBindingCreateInput = {
+    id?: string
+    providerId?: string | null
+    modelId?: string | null
+    conversation: AiConversationCreateNestedOneWithoutAgentBindingInput
+    instance: AiAgentInstanceCreateNestedOneWithoutConversationsInput
+  }
+
+  export type AiAgentConversationBindingUncheckedCreateInput = {
+    id?: string
+    identityId: string
+    conversationId: string
+    instanceId: string
+    providerId?: string | null
+    modelId?: string | null
+  }
+
+  export type AiAgentConversationBindingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    conversation?: AiConversationUpdateOneRequiredWithoutAgentBindingNestedInput
+    instance?: AiAgentInstanceUpdateOneRequiredWithoutConversationsNestedInput
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AiAgentConversationBindingCreateManyInput = {
+    id?: string
+    identityId: string
+    conversationId: string
+    instanceId: string
+    providerId?: string | null
+    modelId?: string | null
+  }
+
+  export type AiAgentConversationBindingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AiProviderOnboardingSessionCreateInput = {
@@ -119762,6 +125239,34 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentRegistryMigrationCreateInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedCreateInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationCreateManyInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
   }
 
   export type CloudAuthUserCreateInput = {
@@ -127803,6 +133308,18 @@ export namespace Prisma {
     none?: AiProviderConfigWhereInput
   }
 
+  export type AiAgentInstanceListRelationFilter = {
+    every?: AiAgentInstanceWhereInput
+    some?: AiAgentInstanceWhereInput
+    none?: AiAgentInstanceWhereInput
+  }
+
+  export type AiAgentInstanceBindingListRelationFilter = {
+    every?: AiAgentInstanceBindingWhereInput
+    some?: AiAgentInstanceBindingWhereInput
+    none?: AiAgentInstanceBindingWhereInput
+  }
+
   export type AiProviderOnboardingSessionListRelationFilter = {
     every?: AiProviderOnboardingSessionWhereInput
     some?: AiProviderOnboardingSessionWhereInput
@@ -127976,6 +133493,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type AiAgentInstanceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiAgentInstanceBindingOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type AiProviderOnboardingSessionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -128127,6 +133652,16 @@ export namespace Prisma {
   export type AccountScalarRelationFilter = {
     is?: AccountWhereInput
     isNot?: AccountWhereInput
+  }
+
+  export type AiAgentConversationBindingNullableScalarRelationFilter = {
+    is?: AiAgentConversationBindingWhereInput | null
+    isNot?: AiAgentConversationBindingWhereInput | null
+  }
+
+  export type AiConversationIdentityIdIdCompoundUniqueInput = {
+    identityId: string
+    id: string
   }
 
   export type AiConversationCountOrderByAggregateInput = {
@@ -128353,6 +133888,11 @@ export namespace Prisma {
     name: string
   }
 
+  export type AiProviderConfigIdentityIdIdCompoundUniqueInput = {
+    identityId: string
+    id: string
+  }
+
   export type AiProviderConfigCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
@@ -128423,6 +133963,198 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type AiAgentConversationBindingListRelationFilter = {
+    every?: AiAgentConversationBindingWhereInput
+    some?: AiAgentConversationBindingWhereInput
+    none?: AiAgentConversationBindingWhereInput
+  }
+
+  export type AiAgentConversationBindingOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiAgentInstanceIdentityIdInstanceIdCompoundUniqueInput = {
+    identityId: string
+    instanceId: string
+  }
+
+  export type AiAgentInstanceCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    driver?: SortOrder
+    name?: SortOrder
+    accentColor?: SortOrder
+    enabled?: SortOrder
+    nativeConfig?: SortOrder
+    legacyConnectionId?: SortOrder
+    revision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAgentInstanceAvgOrderByAggregateInput = {
+    revision?: SortOrder
+  }
+
+  export type AiAgentInstanceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    driver?: SortOrder
+    name?: SortOrder
+    accentColor?: SortOrder
+    enabled?: SortOrder
+    legacyConnectionId?: SortOrder
+    revision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAgentInstanceMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    driver?: SortOrder
+    name?: SortOrder
+    accentColor?: SortOrder
+    enabled?: SortOrder
+    legacyConnectionId?: SortOrder
+    revision?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAgentInstanceSumOrderByAggregateInput = {
+    revision?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type AiAgentInstanceScalarRelationFilter = {
+    is?: AiAgentInstanceWhereInput
+    isNot?: AiAgentInstanceWhereInput
+  }
+
+  export type AiProviderConfigScalarRelationFilter = {
+    is?: AiProviderConfigWhereInput
+    isNot?: AiProviderConfigWhereInput
+  }
+
+  export type AiAgentInstanceBindingIdentityIdInstanceIdConnectionIdCompoundUniqueInput = {
+    identityId: string
+    instanceId: string
+    connectionId: string
+  }
+
+  export type AiAgentInstanceBindingCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    connectionId?: SortOrder
+    modelId?: SortOrder
+  }
+
+  export type AiAgentInstanceBindingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    connectionId?: SortOrder
+    modelId?: SortOrder
+  }
+
+  export type AiAgentInstanceBindingMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    instanceId?: SortOrder
+    connectionId?: SortOrder
+    modelId?: SortOrder
+  }
+
+  export type AiConversationScalarRelationFilter = {
+    is?: AiConversationWhereInput
+    isNot?: AiConversationWhereInput
+  }
+
+  export type AiAgentConversationBindingIdentityIdConversationIdCompoundUniqueInput = {
+    identityId: string
+    conversationId: string
+  }
+
+  export type AiAgentConversationBindingCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    conversationId?: SortOrder
+    instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
+  }
+
+  export type AiAgentConversationBindingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    conversationId?: SortOrder
+    instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
+  }
+
+  export type AiAgentConversationBindingMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    conversationId?: SortOrder
+    instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
   }
 
   export type AiProviderOnboardingSessionCountOrderByAggregateInput = {
@@ -128505,29 +134237,6 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type AiKnowledgeIndexEntryKnowledgeSpaceIdKnowledgeDocumentIdCompoundUniqueInput = {
     knowledgeSpaceId: string
@@ -128600,31 +134309,17 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
+  export type AiAgentRegistryMigrationCountOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationMaxOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationMinOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type CloudAuthSessionListRelationFilter = {
@@ -133103,6 +138798,20 @@ export namespace Prisma {
     connect?: AiProviderConfigWhereUniqueInput | AiProviderConfigWhereUniqueInput[]
   }
 
+  export type AiAgentInstanceCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput> | AiAgentInstanceCreateWithoutAccountInput[] | AiAgentInstanceUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutAccountInput | AiAgentInstanceCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAgentInstanceCreateManyAccountInputEnvelope
+    connect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+  }
+
+  export type AiAgentInstanceBindingCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput> | AiAgentInstanceBindingCreateWithoutAccountInput[] | AiAgentInstanceBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutAccountInput | AiAgentInstanceBindingCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAgentInstanceBindingCreateManyAccountInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+  }
+
   export type AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput = {
     create?: XOR<AiProviderOnboardingSessionCreateWithoutAccountInput, AiProviderOnboardingSessionUncheckedCreateWithoutAccountInput> | AiProviderOnboardingSessionCreateWithoutAccountInput[] | AiProviderOnboardingSessionUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiProviderOnboardingSessionCreateOrConnectWithoutAccountInput | AiProviderOnboardingSessionCreateOrConnectWithoutAccountInput[]
@@ -133366,6 +139075,20 @@ export namespace Prisma {
     connectOrCreate?: AiProviderConfigCreateOrConnectWithoutAccountInput | AiProviderConfigCreateOrConnectWithoutAccountInput[]
     createMany?: AiProviderConfigCreateManyAccountInputEnvelope
     connect?: AiProviderConfigWhereUniqueInput | AiProviderConfigWhereUniqueInput[]
+  }
+
+  export type AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput> | AiAgentInstanceCreateWithoutAccountInput[] | AiAgentInstanceUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutAccountInput | AiAgentInstanceCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAgentInstanceCreateManyAccountInputEnvelope
+    connect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput> | AiAgentInstanceBindingCreateWithoutAccountInput[] | AiAgentInstanceBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutAccountInput | AiAgentInstanceBindingCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAgentInstanceBindingCreateManyAccountInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
   }
 
   export type AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput = {
@@ -133844,6 +139567,34 @@ export namespace Prisma {
     update?: AiProviderConfigUpdateWithWhereUniqueWithoutAccountInput | AiProviderConfigUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: AiProviderConfigUpdateManyWithWhereWithoutAccountInput | AiProviderConfigUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: AiProviderConfigScalarWhereInput | AiProviderConfigScalarWhereInput[]
+  }
+
+  export type AiAgentInstanceUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput> | AiAgentInstanceCreateWithoutAccountInput[] | AiAgentInstanceUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutAccountInput | AiAgentInstanceCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAgentInstanceUpsertWithWhereUniqueWithoutAccountInput | AiAgentInstanceUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAgentInstanceCreateManyAccountInputEnvelope
+    set?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    disconnect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    delete?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    connect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    update?: AiAgentInstanceUpdateWithWhereUniqueWithoutAccountInput | AiAgentInstanceUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAgentInstanceUpdateManyWithWhereWithoutAccountInput | AiAgentInstanceUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAgentInstanceScalarWhereInput | AiAgentInstanceScalarWhereInput[]
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput> | AiAgentInstanceBindingCreateWithoutAccountInput[] | AiAgentInstanceBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutAccountInput | AiAgentInstanceBindingCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutAccountInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAgentInstanceBindingCreateManyAccountInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutAccountInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutAccountInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
   }
 
   export type AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput = {
@@ -134374,6 +140125,34 @@ export namespace Prisma {
     deleteMany?: AiProviderConfigScalarWhereInput | AiProviderConfigScalarWhereInput[]
   }
 
+  export type AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput> | AiAgentInstanceCreateWithoutAccountInput[] | AiAgentInstanceUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutAccountInput | AiAgentInstanceCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAgentInstanceUpsertWithWhereUniqueWithoutAccountInput | AiAgentInstanceUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAgentInstanceCreateManyAccountInputEnvelope
+    set?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    disconnect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    delete?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    connect?: AiAgentInstanceWhereUniqueInput | AiAgentInstanceWhereUniqueInput[]
+    update?: AiAgentInstanceUpdateWithWhereUniqueWithoutAccountInput | AiAgentInstanceUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAgentInstanceUpdateManyWithWhereWithoutAccountInput | AiAgentInstanceUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAgentInstanceScalarWhereInput | AiAgentInstanceScalarWhereInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput> | AiAgentInstanceBindingCreateWithoutAccountInput[] | AiAgentInstanceBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutAccountInput | AiAgentInstanceBindingCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutAccountInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAgentInstanceBindingCreateManyAccountInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutAccountInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutAccountInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+  }
+
   export type AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<AiProviderOnboardingSessionCreateWithoutAccountInput, AiProviderOnboardingSessionUncheckedCreateWithoutAccountInput> | AiProviderOnboardingSessionCreateWithoutAccountInput[] | AiProviderOnboardingSessionUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiProviderOnboardingSessionCreateOrConnectWithoutAccountInput | AiProviderOnboardingSessionCreateOrConnectWithoutAccountInput[]
@@ -134520,6 +140299,18 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
+  export type AiAgentConversationBindingCreateNestedOneWithoutConversationInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutConversationInput
+    connect?: AiAgentConversationBindingWhereUniqueInput
+  }
+
+  export type AiAgentConversationBindingUncheckedCreateNestedOneWithoutConversationInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutConversationInput
+    connect?: AiAgentConversationBindingWhereUniqueInput
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -134534,6 +140325,26 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiConversationsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiConversationsInput, AccountUpdateWithoutAiConversationsInput>, AccountUncheckedUpdateWithoutAiConversationsInput>
+  }
+
+  export type AiAgentConversationBindingUpdateOneWithoutConversationNestedInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutConversationInput
+    upsert?: AiAgentConversationBindingUpsertWithoutConversationInput
+    disconnect?: AiAgentConversationBindingWhereInput | boolean
+    delete?: AiAgentConversationBindingWhereInput | boolean
+    connect?: AiAgentConversationBindingWhereUniqueInput
+    update?: XOR<XOR<AiAgentConversationBindingUpdateToOneWithWhereWithoutConversationInput, AiAgentConversationBindingUpdateWithoutConversationInput>, AiAgentConversationBindingUncheckedUpdateWithoutConversationInput>
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateOneWithoutConversationNestedInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutConversationInput
+    upsert?: AiAgentConversationBindingUpsertWithoutConversationInput
+    disconnect?: AiAgentConversationBindingWhereInput | boolean
+    delete?: AiAgentConversationBindingWhereInput | boolean
+    connect?: AiAgentConversationBindingWhereUniqueInput
+    update?: XOR<XOR<AiAgentConversationBindingUpdateToOneWithWhereWithoutConversationInput, AiAgentConversationBindingUpdateWithoutConversationInput>, AiAgentConversationBindingUncheckedUpdateWithoutConversationInput>
   }
 
   export type AccountCreateNestedOneWithoutAiExecutionRecordsInput = {
@@ -134576,6 +140387,20 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
+  export type AiAgentInstanceBindingCreateNestedManyWithoutModelServiceInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput> | AiAgentInstanceBindingCreateWithoutModelServiceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput | AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyModelServiceInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateNestedManyWithoutModelServiceInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput> | AiAgentInstanceBindingCreateWithoutModelServiceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput | AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyModelServiceInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+  }
+
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
   }
@@ -134586,6 +140411,202 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiProviderConfigsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiProviderConfigsInput, AccountUpdateWithoutAiProviderConfigsInput>, AccountUncheckedUpdateWithoutAiProviderConfigsInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithoutModelServiceNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput> | AiAgentInstanceBindingCreateWithoutModelServiceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput | AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutModelServiceInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutModelServiceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyModelServiceInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutModelServiceInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutModelServiceInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutModelServiceInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutModelServiceInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutModelServiceNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput> | AiAgentInstanceBindingCreateWithoutModelServiceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput | AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutModelServiceInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutModelServiceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyModelServiceInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutModelServiceInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutModelServiceInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutModelServiceInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutModelServiceInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+  }
+
+  export type AccountCreateNestedOneWithoutAiAgentInstancesInput = {
+    create?: XOR<AccountCreateWithoutAiAgentInstancesInput, AccountUncheckedCreateWithoutAiAgentInstancesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiAgentInstancesInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AiAgentInstanceBindingCreateNestedManyWithoutInstanceInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput> | AiAgentInstanceBindingCreateWithoutInstanceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput | AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyInstanceInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+  }
+
+  export type AiAgentConversationBindingCreateNestedManyWithoutInstanceInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput> | AiAgentConversationBindingCreateWithoutInstanceInput[] | AiAgentConversationBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutInstanceInput | AiAgentConversationBindingCreateOrConnectWithoutInstanceInput[]
+    createMany?: AiAgentConversationBindingCreateManyInstanceInputEnvelope
+    connect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateNestedManyWithoutInstanceInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput> | AiAgentInstanceBindingCreateWithoutInstanceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput | AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyInstanceInputEnvelope
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+  }
+
+  export type AiAgentConversationBindingUncheckedCreateNestedManyWithoutInstanceInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput> | AiAgentConversationBindingCreateWithoutInstanceInput[] | AiAgentConversationBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutInstanceInput | AiAgentConversationBindingCreateOrConnectWithoutInstanceInput[]
+    createMany?: AiAgentConversationBindingCreateManyInstanceInputEnvelope
+    connect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiAgentInstancesNestedInput = {
+    create?: XOR<AccountCreateWithoutAiAgentInstancesInput, AccountUncheckedCreateWithoutAiAgentInstancesInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiAgentInstancesInput
+    upsert?: AccountUpsertWithoutAiAgentInstancesInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiAgentInstancesInput, AccountUpdateWithoutAiAgentInstancesInput>, AccountUncheckedUpdateWithoutAiAgentInstancesInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithoutInstanceNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput> | AiAgentInstanceBindingCreateWithoutInstanceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput | AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutInstanceInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutInstanceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyInstanceInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutInstanceInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutInstanceInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutInstanceInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutInstanceInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+  }
+
+  export type AiAgentConversationBindingUpdateManyWithoutInstanceNestedInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput> | AiAgentConversationBindingCreateWithoutInstanceInput[] | AiAgentConversationBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutInstanceInput | AiAgentConversationBindingCreateOrConnectWithoutInstanceInput[]
+    upsert?: AiAgentConversationBindingUpsertWithWhereUniqueWithoutInstanceInput | AiAgentConversationBindingUpsertWithWhereUniqueWithoutInstanceInput[]
+    createMany?: AiAgentConversationBindingCreateManyInstanceInputEnvelope
+    set?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    disconnect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    delete?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    connect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    update?: AiAgentConversationBindingUpdateWithWhereUniqueWithoutInstanceInput | AiAgentConversationBindingUpdateWithWhereUniqueWithoutInstanceInput[]
+    updateMany?: AiAgentConversationBindingUpdateManyWithWhereWithoutInstanceInput | AiAgentConversationBindingUpdateManyWithWhereWithoutInstanceInput[]
+    deleteMany?: AiAgentConversationBindingScalarWhereInput | AiAgentConversationBindingScalarWhereInput[]
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceNestedInput = {
+    create?: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput> | AiAgentInstanceBindingCreateWithoutInstanceInput[] | AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput | AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput[]
+    upsert?: AiAgentInstanceBindingUpsertWithWhereUniqueWithoutInstanceInput | AiAgentInstanceBindingUpsertWithWhereUniqueWithoutInstanceInput[]
+    createMany?: AiAgentInstanceBindingCreateManyInstanceInputEnvelope
+    set?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    disconnect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    delete?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    connect?: AiAgentInstanceBindingWhereUniqueInput | AiAgentInstanceBindingWhereUniqueInput[]
+    update?: AiAgentInstanceBindingUpdateWithWhereUniqueWithoutInstanceInput | AiAgentInstanceBindingUpdateWithWhereUniqueWithoutInstanceInput[]
+    updateMany?: AiAgentInstanceBindingUpdateManyWithWhereWithoutInstanceInput | AiAgentInstanceBindingUpdateManyWithWhereWithoutInstanceInput[]
+    deleteMany?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceNestedInput = {
+    create?: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput> | AiAgentConversationBindingCreateWithoutInstanceInput[] | AiAgentConversationBindingUncheckedCreateWithoutInstanceInput[]
+    connectOrCreate?: AiAgentConversationBindingCreateOrConnectWithoutInstanceInput | AiAgentConversationBindingCreateOrConnectWithoutInstanceInput[]
+    upsert?: AiAgentConversationBindingUpsertWithWhereUniqueWithoutInstanceInput | AiAgentConversationBindingUpsertWithWhereUniqueWithoutInstanceInput[]
+    createMany?: AiAgentConversationBindingCreateManyInstanceInputEnvelope
+    set?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    disconnect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    delete?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    connect?: AiAgentConversationBindingWhereUniqueInput | AiAgentConversationBindingWhereUniqueInput[]
+    update?: AiAgentConversationBindingUpdateWithWhereUniqueWithoutInstanceInput | AiAgentConversationBindingUpdateWithWhereUniqueWithoutInstanceInput[]
+    updateMany?: AiAgentConversationBindingUpdateManyWithWhereWithoutInstanceInput | AiAgentConversationBindingUpdateManyWithWhereWithoutInstanceInput[]
+    deleteMany?: AiAgentConversationBindingScalarWhereInput | AiAgentConversationBindingScalarWhereInput[]
+  }
+
+  export type AccountCreateNestedOneWithoutAiAgentInstanceBindingsInput = {
+    create?: XOR<AccountCreateWithoutAiAgentInstanceBindingsInput, AccountUncheckedCreateWithoutAiAgentInstanceBindingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiAgentInstanceBindingsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AiAgentInstanceCreateNestedOneWithoutBindingsInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutBindingsInput, AiAgentInstanceUncheckedCreateWithoutBindingsInput>
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutBindingsInput
+    connect?: AiAgentInstanceWhereUniqueInput
+  }
+
+  export type AiProviderConfigCreateNestedOneWithoutAgentBindingsInput = {
+    create?: XOR<AiProviderConfigCreateWithoutAgentBindingsInput, AiProviderConfigUncheckedCreateWithoutAgentBindingsInput>
+    connectOrCreate?: AiProviderConfigCreateOrConnectWithoutAgentBindingsInput
+    connect?: AiProviderConfigWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiAgentInstanceBindingsNestedInput = {
+    create?: XOR<AccountCreateWithoutAiAgentInstanceBindingsInput, AccountUncheckedCreateWithoutAiAgentInstanceBindingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiAgentInstanceBindingsInput
+    upsert?: AccountUpsertWithoutAiAgentInstanceBindingsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiAgentInstanceBindingsInput, AccountUpdateWithoutAiAgentInstanceBindingsInput>, AccountUncheckedUpdateWithoutAiAgentInstanceBindingsInput>
+  }
+
+  export type AiAgentInstanceUpdateOneRequiredWithoutBindingsNestedInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutBindingsInput, AiAgentInstanceUncheckedCreateWithoutBindingsInput>
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutBindingsInput
+    upsert?: AiAgentInstanceUpsertWithoutBindingsInput
+    connect?: AiAgentInstanceWhereUniqueInput
+    update?: XOR<XOR<AiAgentInstanceUpdateToOneWithWhereWithoutBindingsInput, AiAgentInstanceUpdateWithoutBindingsInput>, AiAgentInstanceUncheckedUpdateWithoutBindingsInput>
+  }
+
+  export type AiProviderConfigUpdateOneRequiredWithoutAgentBindingsNestedInput = {
+    create?: XOR<AiProviderConfigCreateWithoutAgentBindingsInput, AiProviderConfigUncheckedCreateWithoutAgentBindingsInput>
+    connectOrCreate?: AiProviderConfigCreateOrConnectWithoutAgentBindingsInput
+    upsert?: AiProviderConfigUpsertWithoutAgentBindingsInput
+    connect?: AiProviderConfigWhereUniqueInput
+    update?: XOR<XOR<AiProviderConfigUpdateToOneWithWhereWithoutAgentBindingsInput, AiProviderConfigUpdateWithoutAgentBindingsInput>, AiProviderConfigUncheckedUpdateWithoutAgentBindingsInput>
+  }
+
+  export type AiConversationCreateNestedOneWithoutAgentBindingInput = {
+    create?: XOR<AiConversationCreateWithoutAgentBindingInput, AiConversationUncheckedCreateWithoutAgentBindingInput>
+    connectOrCreate?: AiConversationCreateOrConnectWithoutAgentBindingInput
+    connect?: AiConversationWhereUniqueInput
+  }
+
+  export type AiAgentInstanceCreateNestedOneWithoutConversationsInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutConversationsInput, AiAgentInstanceUncheckedCreateWithoutConversationsInput>
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutConversationsInput
+    connect?: AiAgentInstanceWhereUniqueInput
+  }
+
+  export type AiConversationUpdateOneRequiredWithoutAgentBindingNestedInput = {
+    create?: XOR<AiConversationCreateWithoutAgentBindingInput, AiConversationUncheckedCreateWithoutAgentBindingInput>
+    connectOrCreate?: AiConversationCreateOrConnectWithoutAgentBindingInput
+    upsert?: AiConversationUpsertWithoutAgentBindingInput
+    connect?: AiConversationWhereUniqueInput
+    update?: XOR<XOR<AiConversationUpdateToOneWithWhereWithoutAgentBindingInput, AiConversationUpdateWithoutAgentBindingInput>, AiConversationUncheckedUpdateWithoutAgentBindingInput>
+  }
+
+  export type AiAgentInstanceUpdateOneRequiredWithoutConversationsNestedInput = {
+    create?: XOR<AiAgentInstanceCreateWithoutConversationsInput, AiAgentInstanceUncheckedCreateWithoutConversationsInput>
+    connectOrCreate?: AiAgentInstanceCreateOrConnectWithoutConversationsInput
+    upsert?: AiAgentInstanceUpsertWithoutConversationsInput
+    connect?: AiAgentInstanceWhereUniqueInput
+    update?: XOR<XOR<AiAgentInstanceUpdateToOneWithWhereWithoutConversationsInput, AiAgentInstanceUpdateWithoutConversationsInput>, AiAgentInstanceUncheckedUpdateWithoutConversationsInput>
   }
 
   export type AccountCreateNestedOneWithoutAiProviderOnboardingSessionsInput = {
@@ -139605,6 +145626,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBinding?: AiAgentConversationBindingCreateNestedOneWithoutConversationInput
   }
 
   export type AiConversationUncheckedCreateWithoutAccountInput = {
@@ -139615,6 +145637,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBinding?: AiAgentConversationBindingUncheckedCreateNestedOneWithoutConversationInput
   }
 
   export type AiConversationCreateOrConnectWithoutAccountInput = {
@@ -139748,6 +145771,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBindings?: AiAgentInstanceBindingCreateNestedManyWithoutModelServiceInput
   }
 
   export type AiProviderConfigUncheckedCreateWithoutAccountInput = {
@@ -139765,6 +145789,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    agentBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutModelServiceInput
   }
 
   export type AiProviderConfigCreateOrConnectWithoutAccountInput = {
@@ -139774,6 +145799,72 @@ export namespace Prisma {
 
   export type AiProviderConfigCreateManyAccountInputEnvelope = {
     data: AiProviderConfigCreateManyAccountInput | AiProviderConfigCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiAgentInstanceCreateWithoutAccountInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bindings?: AiAgentInstanceBindingCreateNestedManyWithoutInstanceInput
+    conversations?: AiAgentConversationBindingCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceUncheckedCreateWithoutAccountInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutInstanceInput
+    conversations?: AiAgentConversationBindingUncheckedCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceCreateOrConnectWithoutAccountInput = {
+    where: AiAgentInstanceWhereUniqueInput
+    create: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceCreateManyAccountInputEnvelope = {
+    data: AiAgentInstanceCreateManyAccountInput | AiAgentInstanceCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiAgentInstanceBindingCreateWithoutAccountInput = {
+    id?: string
+    modelId: string
+    instance: AiAgentInstanceCreateNestedOneWithoutBindingsInput
+    modelService: AiProviderConfigCreateNestedOneWithoutAgentBindingsInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateWithoutAccountInput = {
+    id?: string
+    instanceId: string
+    connectionId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingCreateOrConnectWithoutAccountInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    create: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceBindingCreateManyAccountInputEnvelope = {
+    data: AiAgentInstanceBindingCreateManyAccountInput | AiAgentInstanceBindingCreateManyAccountInput[]
     skipDuplicates?: boolean
   }
 
@@ -141242,6 +147333,67 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"AiProviderConfig"> | Date | string | null
   }
 
+  export type AiAgentInstanceUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiAgentInstanceWhereUniqueInput
+    update: XOR<AiAgentInstanceUpdateWithoutAccountInput, AiAgentInstanceUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiAgentInstanceCreateWithoutAccountInput, AiAgentInstanceUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiAgentInstanceWhereUniqueInput
+    data: XOR<AiAgentInstanceUpdateWithoutAccountInput, AiAgentInstanceUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceUpdateManyWithWhereWithoutAccountInput = {
+    where: AiAgentInstanceScalarWhereInput
+    data: XOR<AiAgentInstanceUpdateManyMutationInput, AiAgentInstanceUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceScalarWhereInput = {
+    AND?: AiAgentInstanceScalarWhereInput | AiAgentInstanceScalarWhereInput[]
+    OR?: AiAgentInstanceScalarWhereInput[]
+    NOT?: AiAgentInstanceScalarWhereInput | AiAgentInstanceScalarWhereInput[]
+    id?: StringFilter<"AiAgentInstance"> | string
+    identityId?: StringFilter<"AiAgentInstance"> | string
+    instanceId?: StringFilter<"AiAgentInstance"> | string
+    driver?: StringFilter<"AiAgentInstance"> | string
+    name?: StringFilter<"AiAgentInstance"> | string
+    accentColor?: StringNullableFilter<"AiAgentInstance"> | string | null
+    enabled?: BoolFilter<"AiAgentInstance"> | boolean
+    nativeConfig?: JsonNullableFilter<"AiAgentInstance">
+    legacyConnectionId?: StringNullableFilter<"AiAgentInstance"> | string | null
+    revision?: IntFilter<"AiAgentInstance"> | number
+    createdAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAgentInstance"> | Date | string
+  }
+
+  export type AiAgentInstanceBindingUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    update: XOR<AiAgentInstanceBindingUpdateWithoutAccountInput, AiAgentInstanceBindingUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiAgentInstanceBindingCreateWithoutAccountInput, AiAgentInstanceBindingUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    data: XOR<AiAgentInstanceBindingUpdateWithoutAccountInput, AiAgentInstanceBindingUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithWhereWithoutAccountInput = {
+    where: AiAgentInstanceBindingScalarWhereInput
+    data: XOR<AiAgentInstanceBindingUpdateManyMutationInput, AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiAgentInstanceBindingScalarWhereInput = {
+    AND?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+    OR?: AiAgentInstanceBindingScalarWhereInput[]
+    NOT?: AiAgentInstanceBindingScalarWhereInput | AiAgentInstanceBindingScalarWhereInput[]
+    id?: StringFilter<"AiAgentInstanceBinding"> | string
+    identityId?: StringFilter<"AiAgentInstanceBinding"> | string
+    instanceId?: StringFilter<"AiAgentInstanceBinding"> | string
+    connectionId?: StringFilter<"AiAgentInstanceBinding"> | string
+    modelId?: StringFilter<"AiAgentInstanceBinding"> | string
+  }
+
   export type AiProviderOnboardingSessionUpsertWithWhereUniqueWithoutAccountInput = {
     where: AiProviderOnboardingSessionWhereUniqueInput
     update: XOR<AiProviderOnboardingSessionUpdateWithoutAccountInput, AiProviderOnboardingSessionUncheckedUpdateWithoutAccountInput>
@@ -141647,6 +147799,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -141693,6 +147847,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -141708,6 +147864,25 @@ export namespace Prisma {
   export type AccountCreateOrConnectWithoutAiConversationsInput = {
     where: AccountWhereUniqueInput
     create: XOR<AccountCreateWithoutAiConversationsInput, AccountUncheckedCreateWithoutAiConversationsInput>
+  }
+
+  export type AiAgentConversationBindingCreateWithoutConversationInput = {
+    id?: string
+    providerId?: string | null
+    modelId?: string | null
+    instance: AiAgentInstanceCreateNestedOneWithoutConversationsInput
+  }
+
+  export type AiAgentConversationBindingUncheckedCreateWithoutConversationInput = {
+    id?: string
+    instanceId: string
+    providerId?: string | null
+    modelId?: string | null
+  }
+
+  export type AiAgentConversationBindingCreateOrConnectWithoutConversationInput = {
+    where: AiAgentConversationBindingWhereUniqueInput
+    create: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
   }
 
   export type AccountUpsertWithoutAiConversationsInput = {
@@ -141755,6 +147930,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -141801,6 +147978,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -141811,6 +147990,31 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AiAgentConversationBindingUpsertWithoutConversationInput = {
+    update: XOR<AiAgentConversationBindingUpdateWithoutConversationInput, AiAgentConversationBindingUncheckedUpdateWithoutConversationInput>
+    create: XOR<AiAgentConversationBindingCreateWithoutConversationInput, AiAgentConversationBindingUncheckedCreateWithoutConversationInput>
+    where?: AiAgentConversationBindingWhereInput
+  }
+
+  export type AiAgentConversationBindingUpdateToOneWithWhereWithoutConversationInput = {
+    where?: AiAgentConversationBindingWhereInput
+    data: XOR<AiAgentConversationBindingUpdateWithoutConversationInput, AiAgentConversationBindingUncheckedUpdateWithoutConversationInput>
+  }
+
+  export type AiAgentConversationBindingUpdateWithoutConversationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    instance?: AiAgentInstanceUpdateOneRequiredWithoutConversationsNestedInput
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateWithoutConversationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountCreateWithoutAiExecutionRecordsInput = {
@@ -141847,6 +148051,8 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -141893,6 +148099,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -141955,6 +148163,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -142001,6 +148211,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -142047,6 +148259,8 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -142093,6 +148307,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -142108,6 +148324,29 @@ export namespace Prisma {
   export type AccountCreateOrConnectWithoutAiProviderConfigsInput = {
     where: AccountWhereUniqueInput
     create: XOR<AccountCreateWithoutAiProviderConfigsInput, AccountUncheckedCreateWithoutAiProviderConfigsInput>
+  }
+
+  export type AiAgentInstanceBindingCreateWithoutModelServiceInput = {
+    id?: string
+    modelId: string
+    account: AccountCreateNestedOneWithoutAiAgentInstanceBindingsInput
+    instance: AiAgentInstanceCreateNestedOneWithoutBindingsInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput = {
+    id?: string
+    instanceId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingCreateOrConnectWithoutModelServiceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    create: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput>
+  }
+
+  export type AiAgentInstanceBindingCreateManyModelServiceInputEnvelope = {
+    data: AiAgentInstanceBindingCreateManyModelServiceInput | AiAgentInstanceBindingCreateManyModelServiceInput[]
+    skipDuplicates?: boolean
   }
 
   export type AccountUpsertWithoutAiProviderConfigsInput = {
@@ -142155,6 +148394,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -142201,6 +148442,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -142211,6 +148454,837 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AiAgentInstanceBindingUpsertWithWhereUniqueWithoutModelServiceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    update: XOR<AiAgentInstanceBindingUpdateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedUpdateWithoutModelServiceInput>
+    create: XOR<AiAgentInstanceBindingCreateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedCreateWithoutModelServiceInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateWithWhereUniqueWithoutModelServiceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    data: XOR<AiAgentInstanceBindingUpdateWithoutModelServiceInput, AiAgentInstanceBindingUncheckedUpdateWithoutModelServiceInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithWhereWithoutModelServiceInput = {
+    where: AiAgentInstanceBindingScalarWhereInput
+    data: XOR<AiAgentInstanceBindingUpdateManyMutationInput, AiAgentInstanceBindingUncheckedUpdateManyWithoutModelServiceInput>
+  }
+
+  export type AccountCreateWithoutAiAgentInstancesInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiAgentInstancesInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiAgentInstancesInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiAgentInstancesInput, AccountUncheckedCreateWithoutAiAgentInstancesInput>
+  }
+
+  export type AiAgentInstanceBindingCreateWithoutInstanceInput = {
+    id?: string
+    modelId: string
+    account: AccountCreateNestedOneWithoutAiAgentInstanceBindingsInput
+    modelService: AiProviderConfigCreateNestedOneWithoutAgentBindingsInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput = {
+    id?: string
+    connectionId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingCreateOrConnectWithoutInstanceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    create: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput>
+  }
+
+  export type AiAgentInstanceBindingCreateManyInstanceInputEnvelope = {
+    data: AiAgentInstanceBindingCreateManyInstanceInput | AiAgentInstanceBindingCreateManyInstanceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiAgentConversationBindingCreateWithoutInstanceInput = {
+    id?: string
+    providerId?: string | null
+    modelId?: string | null
+    conversation: AiConversationCreateNestedOneWithoutAgentBindingInput
+  }
+
+  export type AiAgentConversationBindingUncheckedCreateWithoutInstanceInput = {
+    id?: string
+    conversationId: string
+    providerId?: string | null
+    modelId?: string | null
+  }
+
+  export type AiAgentConversationBindingCreateOrConnectWithoutInstanceInput = {
+    where: AiAgentConversationBindingWhereUniqueInput
+    create: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput>
+  }
+
+  export type AiAgentConversationBindingCreateManyInstanceInputEnvelope = {
+    data: AiAgentConversationBindingCreateManyInstanceInput | AiAgentConversationBindingCreateManyInstanceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AccountUpsertWithoutAiAgentInstancesInput = {
+    update: XOR<AccountUpdateWithoutAiAgentInstancesInput, AccountUncheckedUpdateWithoutAiAgentInstancesInput>
+    create: XOR<AccountCreateWithoutAiAgentInstancesInput, AccountUncheckedCreateWithoutAiAgentInstancesInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiAgentInstancesInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiAgentInstancesInput, AccountUncheckedUpdateWithoutAiAgentInstancesInput>
+  }
+
+  export type AccountUpdateWithoutAiAgentInstancesInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiAgentInstancesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AiAgentInstanceBindingUpsertWithWhereUniqueWithoutInstanceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    update: XOR<AiAgentInstanceBindingUpdateWithoutInstanceInput, AiAgentInstanceBindingUncheckedUpdateWithoutInstanceInput>
+    create: XOR<AiAgentInstanceBindingCreateWithoutInstanceInput, AiAgentInstanceBindingUncheckedCreateWithoutInstanceInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateWithWhereUniqueWithoutInstanceInput = {
+    where: AiAgentInstanceBindingWhereUniqueInput
+    data: XOR<AiAgentInstanceBindingUpdateWithoutInstanceInput, AiAgentInstanceBindingUncheckedUpdateWithoutInstanceInput>
+  }
+
+  export type AiAgentInstanceBindingUpdateManyWithWhereWithoutInstanceInput = {
+    where: AiAgentInstanceBindingScalarWhereInput
+    data: XOR<AiAgentInstanceBindingUpdateManyMutationInput, AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceInput>
+  }
+
+  export type AiAgentConversationBindingUpsertWithWhereUniqueWithoutInstanceInput = {
+    where: AiAgentConversationBindingWhereUniqueInput
+    update: XOR<AiAgentConversationBindingUpdateWithoutInstanceInput, AiAgentConversationBindingUncheckedUpdateWithoutInstanceInput>
+    create: XOR<AiAgentConversationBindingCreateWithoutInstanceInput, AiAgentConversationBindingUncheckedCreateWithoutInstanceInput>
+  }
+
+  export type AiAgentConversationBindingUpdateWithWhereUniqueWithoutInstanceInput = {
+    where: AiAgentConversationBindingWhereUniqueInput
+    data: XOR<AiAgentConversationBindingUpdateWithoutInstanceInput, AiAgentConversationBindingUncheckedUpdateWithoutInstanceInput>
+  }
+
+  export type AiAgentConversationBindingUpdateManyWithWhereWithoutInstanceInput = {
+    where: AiAgentConversationBindingScalarWhereInput
+    data: XOR<AiAgentConversationBindingUpdateManyMutationInput, AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceInput>
+  }
+
+  export type AiAgentConversationBindingScalarWhereInput = {
+    AND?: AiAgentConversationBindingScalarWhereInput | AiAgentConversationBindingScalarWhereInput[]
+    OR?: AiAgentConversationBindingScalarWhereInput[]
+    NOT?: AiAgentConversationBindingScalarWhereInput | AiAgentConversationBindingScalarWhereInput[]
+    id?: StringFilter<"AiAgentConversationBinding"> | string
+    identityId?: StringFilter<"AiAgentConversationBinding"> | string
+    conversationId?: StringFilter<"AiAgentConversationBinding"> | string
+    instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+  }
+
+  export type AccountCreateWithoutAiAgentInstanceBindingsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiAgentInstanceBindingsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiAgentInstanceBindingsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiAgentInstanceBindingsInput, AccountUncheckedCreateWithoutAiAgentInstanceBindingsInput>
+  }
+
+  export type AiAgentInstanceCreateWithoutBindingsInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiAgentInstancesInput
+    conversations?: AiAgentConversationBindingCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceUncheckedCreateWithoutBindingsInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    conversations?: AiAgentConversationBindingUncheckedCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceCreateOrConnectWithoutBindingsInput = {
+    where: AiAgentInstanceWhereUniqueInput
+    create: XOR<AiAgentInstanceCreateWithoutBindingsInput, AiAgentInstanceUncheckedCreateWithoutBindingsInput>
+  }
+
+  export type AiProviderConfigCreateWithoutAgentBindingsInput = {
+    id: string
+    name: string
+    providerDefinitionId: string
+    baseUrl: string
+    credentialRef: string
+    defaultModel?: string | null
+    availableModels?: string
+    isActive?: boolean
+    isDefault?: boolean
+    priority?: number
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    account: AccountCreateNestedOneWithoutAiProviderConfigsInput
+  }
+
+  export type AiProviderConfigUncheckedCreateWithoutAgentBindingsInput = {
+    id: string
+    identityId: string
+    name: string
+    providerDefinitionId: string
+    baseUrl: string
+    credentialRef: string
+    defaultModel?: string | null
+    availableModels?: string
+    isActive?: boolean
+    isDefault?: boolean
+    priority?: number
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type AiProviderConfigCreateOrConnectWithoutAgentBindingsInput = {
+    where: AiProviderConfigWhereUniqueInput
+    create: XOR<AiProviderConfigCreateWithoutAgentBindingsInput, AiProviderConfigUncheckedCreateWithoutAgentBindingsInput>
+  }
+
+  export type AccountUpsertWithoutAiAgentInstanceBindingsInput = {
+    update: XOR<AccountUpdateWithoutAiAgentInstanceBindingsInput, AccountUncheckedUpdateWithoutAiAgentInstanceBindingsInput>
+    create: XOR<AccountCreateWithoutAiAgentInstanceBindingsInput, AccountUncheckedCreateWithoutAiAgentInstanceBindingsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiAgentInstanceBindingsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiAgentInstanceBindingsInput, AccountUncheckedUpdateWithoutAiAgentInstanceBindingsInput>
+  }
+
+  export type AccountUpdateWithoutAiAgentInstanceBindingsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiAgentInstanceBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AiAgentInstanceUpsertWithoutBindingsInput = {
+    update: XOR<AiAgentInstanceUpdateWithoutBindingsInput, AiAgentInstanceUncheckedUpdateWithoutBindingsInput>
+    create: XOR<AiAgentInstanceCreateWithoutBindingsInput, AiAgentInstanceUncheckedCreateWithoutBindingsInput>
+    where?: AiAgentInstanceWhereInput
+  }
+
+  export type AiAgentInstanceUpdateToOneWithWhereWithoutBindingsInput = {
+    where?: AiAgentInstanceWhereInput
+    data: XOR<AiAgentInstanceUpdateWithoutBindingsInput, AiAgentInstanceUncheckedUpdateWithoutBindingsInput>
+  }
+
+  export type AiAgentInstanceUpdateWithoutBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstancesNestedInput
+    conversations?: AiAgentConversationBindingUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceUncheckedUpdateWithoutBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    conversations?: AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiProviderConfigUpsertWithoutAgentBindingsInput = {
+    update: XOR<AiProviderConfigUpdateWithoutAgentBindingsInput, AiProviderConfigUncheckedUpdateWithoutAgentBindingsInput>
+    create: XOR<AiProviderConfigCreateWithoutAgentBindingsInput, AiProviderConfigUncheckedCreateWithoutAgentBindingsInput>
+    where?: AiProviderConfigWhereInput
+  }
+
+  export type AiProviderConfigUpdateToOneWithWhereWithoutAgentBindingsInput = {
+    where?: AiProviderConfigWhereInput
+    data: XOR<AiProviderConfigUpdateWithoutAgentBindingsInput, AiProviderConfigUncheckedUpdateWithoutAgentBindingsInput>
+  }
+
+  export type AiProviderConfigUpdateWithoutAgentBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    providerDefinitionId?: StringFieldUpdateOperationsInput | string
+    baseUrl?: StringFieldUpdateOperationsInput | string
+    credentialRef?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
+    availableModels?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    account?: AccountUpdateOneRequiredWithoutAiProviderConfigsNestedInput
+  }
+
+  export type AiProviderConfigUncheckedUpdateWithoutAgentBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    providerDefinitionId?: StringFieldUpdateOperationsInput | string
+    baseUrl?: StringFieldUpdateOperationsInput | string
+    credentialRef?: StringFieldUpdateOperationsInput | string
+    defaultModel?: NullableStringFieldUpdateOperationsInput | string | null
+    availableModels?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    priority?: IntFieldUpdateOperationsInput | number
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiConversationCreateWithoutAgentBindingInput = {
+    id: string
+    name: string
+    status: string
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    account: AccountCreateNestedOneWithoutAiConversationsInput
+  }
+
+  export type AiConversationUncheckedCreateWithoutAgentBindingInput = {
+    id: string
+    identityId: string
+    name: string
+    status: string
+    version?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type AiConversationCreateOrConnectWithoutAgentBindingInput = {
+    where: AiConversationWhereUniqueInput
+    create: XOR<AiConversationCreateWithoutAgentBindingInput, AiConversationUncheckedCreateWithoutAgentBindingInput>
+  }
+
+  export type AiAgentInstanceCreateWithoutConversationsInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiAgentInstancesInput
+    bindings?: AiAgentInstanceBindingCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceUncheckedCreateWithoutConversationsInput = {
+    id?: string
+    identityId: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutInstanceInput
+  }
+
+  export type AiAgentInstanceCreateOrConnectWithoutConversationsInput = {
+    where: AiAgentInstanceWhereUniqueInput
+    create: XOR<AiAgentInstanceCreateWithoutConversationsInput, AiAgentInstanceUncheckedCreateWithoutConversationsInput>
+  }
+
+  export type AiConversationUpsertWithoutAgentBindingInput = {
+    update: XOR<AiConversationUpdateWithoutAgentBindingInput, AiConversationUncheckedUpdateWithoutAgentBindingInput>
+    create: XOR<AiConversationCreateWithoutAgentBindingInput, AiConversationUncheckedCreateWithoutAgentBindingInput>
+    where?: AiConversationWhereInput
+  }
+
+  export type AiConversationUpdateToOneWithWhereWithoutAgentBindingInput = {
+    where?: AiConversationWhereInput
+    data: XOR<AiConversationUpdateWithoutAgentBindingInput, AiConversationUncheckedUpdateWithoutAgentBindingInput>
+  }
+
+  export type AiConversationUpdateWithoutAgentBindingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    account?: AccountUpdateOneRequiredWithoutAiConversationsNestedInput
+  }
+
+  export type AiConversationUncheckedUpdateWithoutAgentBindingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentInstanceUpsertWithoutConversationsInput = {
+    update: XOR<AiAgentInstanceUpdateWithoutConversationsInput, AiAgentInstanceUncheckedUpdateWithoutConversationsInput>
+    create: XOR<AiAgentInstanceCreateWithoutConversationsInput, AiAgentInstanceUncheckedCreateWithoutConversationsInput>
+    where?: AiAgentInstanceWhereInput
+  }
+
+  export type AiAgentInstanceUpdateToOneWithWhereWithoutConversationsInput = {
+    where?: AiAgentInstanceWhereInput
+    data: XOR<AiAgentInstanceUpdateWithoutConversationsInput, AiAgentInstanceUncheckedUpdateWithoutConversationsInput>
+  }
+
+  export type AiAgentInstanceUpdateWithoutConversationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstancesNestedInput
+    bindings?: AiAgentInstanceBindingUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceUncheckedUpdateWithoutConversationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceNestedInput
   }
 
   export type AccountCreateWithoutAiProviderOnboardingSessionsInput = {
@@ -142248,6 +149322,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -142294,6 +149370,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -142356,6 +149434,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -142402,6 +149482,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -142448,6 +149530,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -142494,6 +149578,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -142556,6 +149642,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -142602,6 +149690,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -142647,6 +149737,8 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -142693,6 +149785,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -142755,6 +149849,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -142801,6 +149897,8 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -143249,6 +150347,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -143295,6 +150395,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -143686,6 +150788,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -143732,6 +150836,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -144386,6 +151492,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -144432,6 +151540,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -144633,6 +151743,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -144679,6 +151791,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -145585,6 +152699,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -145631,6 +152747,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -145742,6 +152860,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -145788,6 +152908,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -146136,6 +153258,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -146182,6 +153306,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -146282,6 +153408,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -146328,6 +153456,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -146406,6 +153536,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -146452,6 +153584,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -146594,6 +153728,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -146640,6 +153776,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -146778,6 +153916,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -146824,6 +153964,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -146975,6 +154117,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -147021,6 +154165,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147302,6 +154448,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -147348,6 +154496,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -147474,6 +154624,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -147520,6 +154672,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147567,6 +154721,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -147613,6 +154769,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -147742,6 +154900,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -147788,6 +154948,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -148114,6 +155276,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -148160,6 +155324,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -148295,6 +155461,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -148341,6 +155509,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150149,6 +157319,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -150195,6 +157367,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -150257,6 +157431,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -150303,6 +157479,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150349,6 +157527,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -150395,6 +157575,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -150457,6 +157639,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -150503,6 +157687,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150549,6 +157735,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -150595,6 +157783,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -150814,6 +158004,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -150860,6 +158052,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150980,6 +158174,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -151026,6 +158222,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -151088,6 +158286,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -151134,6 +158334,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -151180,6 +158382,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -151226,6 +158430,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -151315,6 +158521,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -151361,6 +158569,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -151423,6 +158633,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -151469,6 +158681,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -151595,6 +158809,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -151641,6 +158857,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -151763,6 +158981,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -151809,6 +159029,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -151906,6 +159128,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -151952,6 +159176,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -152014,6 +159240,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -152060,6 +159288,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -152147,6 +159377,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -152193,6 +159425,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -152308,6 +159542,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -152354,6 +159590,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -152493,6 +159731,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -152539,6 +159779,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -152601,6 +159843,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -152647,6 +159891,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -152817,6 +160063,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -152863,6 +160111,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153065,6 +160315,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -153111,6 +160363,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -153216,6 +160470,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -153262,6 +160518,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153309,6 +160567,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -153355,6 +160615,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -153417,6 +160679,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -153463,6 +160727,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153695,6 +160961,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -153741,6 +161009,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -154093,6 +161363,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -154139,6 +161411,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155093,6 +162367,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -155139,6 +162415,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -155246,6 +162524,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -155292,6 +162572,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155388,6 +162670,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -155434,6 +162718,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -155496,6 +162782,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -155542,6 +162830,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155588,6 +162878,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -155634,6 +162926,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -155740,6 +163034,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -155786,6 +163082,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155848,6 +163146,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -155894,6 +163194,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -156021,6 +163323,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -156067,6 +163371,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -156184,6 +163490,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -156230,6 +163538,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -156292,6 +163602,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -156338,6 +163650,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -156384,6 +163698,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -156430,6 +163746,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -156492,6 +163810,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -156538,6 +163858,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -156584,6 +163906,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -156630,6 +163954,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -156829,6 +164155,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -156875,6 +164203,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -157023,6 +164353,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -157069,6 +164401,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -157193,6 +164527,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -157239,6 +164575,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -157354,6 +164692,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -157400,6 +164740,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -157524,6 +164866,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -157570,6 +164914,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -157683,6 +165029,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -157729,6 +165077,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -157825,6 +165175,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -157871,6 +165223,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -157958,6 +165312,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
@@ -158004,6 +165360,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
@@ -158097,6 +165455,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
@@ -158143,6 +165503,8 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
@@ -158540,6 +165902,27 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+  }
+
+  export type AiAgentInstanceCreateManyAccountInput = {
+    id?: string
+    instanceId: string
+    driver: string
+    name: string
+    accentColor?: string | null
+    enabled?: boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: string | null
+    revision?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAgentInstanceBindingCreateManyAccountInput = {
+    id?: string
+    instanceId: string
+    connectionId: string
+    modelId: string
   }
 
   export type AiProviderOnboardingSessionCreateManyAccountInput = {
@@ -159715,6 +167098,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBinding?: AiAgentConversationBindingUpdateOneWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateWithoutAccountInput = {
@@ -159725,6 +167109,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBinding?: AiAgentConversationBindingUncheckedUpdateOneWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateManyWithoutAccountInput = {
@@ -159881,6 +167266,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBindings?: AiAgentInstanceBindingUpdateManyWithoutModelServiceNestedInput
   }
 
   export type AiProviderConfigUncheckedUpdateWithoutAccountInput = {
@@ -159898,6 +167284,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agentBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutModelServiceNestedInput
   }
 
   export type AiProviderConfigUncheckedUpdateManyWithoutAccountInput = {
@@ -159915,6 +167302,73 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentInstanceUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bindings?: AiAgentInstanceBindingUpdateManyWithoutInstanceNestedInput
+    conversations?: AiAgentConversationBindingUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceNestedInput
+    conversations?: AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceNestedInput
+  }
+
+  export type AiAgentInstanceUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    driver?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    accentColor?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    nativeConfig?: NullableJsonNullValueInput | InputJsonValue
+    legacyConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    revision?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAgentInstanceBindingUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+    instance?: AiAgentInstanceUpdateOneRequiredWithoutBindingsNestedInput
+    modelService?: AiProviderConfigUpdateOneRequiredWithoutAgentBindingsNestedInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
   }
 
   export type AiProviderOnboardingSessionUpdateWithoutAccountInput = {
@@ -160446,6 +167900,84 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentInstanceBindingCreateManyModelServiceInput = {
+    id?: string
+    instanceId: string
+    modelId: string
+  }
+
+  export type AiAgentInstanceBindingUpdateWithoutModelServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstanceBindingsNestedInput
+    instance?: AiAgentInstanceUpdateOneRequiredWithoutBindingsNestedInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateWithoutModelServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutModelServiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    instanceId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingCreateManyInstanceInput = {
+    id?: string
+    connectionId: string
+    modelId: string
+  }
+
+  export type AiAgentConversationBindingCreateManyInstanceInput = {
+    id?: string
+    conversationId: string
+    providerId?: string | null
+    modelId?: string | null
+  }
+
+  export type AiAgentInstanceBindingUpdateWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+    account?: AccountUpdateOneRequiredWithoutAiAgentInstanceBindingsNestedInput
+    modelService?: AiProviderConfigUpdateOneRequiredWithoutAgentBindingsNestedInput
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentInstanceBindingUncheckedUpdateManyWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    modelId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentConversationBindingUpdateWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    conversation?: AiConversationUpdateOneRequiredWithoutAgentBindingNestedInput
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CloudAuthSessionCreateManyUserInput = {

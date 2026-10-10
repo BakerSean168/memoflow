@@ -128,6 +128,7 @@ export function registerAIRuntimeRoutes(
         content: parsed.data.content,
         providerId: parsed.data.providerId,
         modelId: parsed.data.modelId,
+        agentInstanceId: parsed.data.agentInstanceId,
         locale: parsed.data.locale,
         attachments: parsed.data.attachments,
         selectedEntities: parsed.data.selectedEntities,

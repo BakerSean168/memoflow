@@ -156,6 +156,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
     },
     {
       executable: process.execPath,
+      args: [resolve(runtimeScripts, 'prepare-ai-agent-registry.js')],
+      cwd: databaseRoot,
+      label: 'prepare Agent Registry V2 and legacy Mastra cutover',
+    },
+    {
+      executable: process.execPath,
       args: [resolve(runtimeScripts, 'prepare-ai-provider-default-invariant.js')],
       cwd: databaseRoot,
       label: 'prepare AI provider default invariant',

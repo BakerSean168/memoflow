@@ -1,3 +1,6 @@
+import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
+import { AIExecutionError } from '../../../shared/ai-execution-error';
+import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
 import {
   MASTRA_RESOURCE_ID_KEY,
   MASTRA_THREAD_ID_KEY,
@@ -41,6 +44,7 @@ import {
 type DurableWorkflowDependencies = {
   readonly storage: Pick<MastraCompositeStore, 'getStore'>;
   readonly history: Pick<AssistantHistoryService, 'appendUserTurn'>;
+  readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>;
   readonly usageReadPort?: IAIUsageReadPort;
   readonly goalCreateWorkflow: ReturnType<typeof createGoalCreateWorkflow>;
   readonly taskCreateWorkflow: ReturnType<typeof createTaskCreateWorkflow>;
@@ -54,11 +58,43 @@ type DurableWorkflowDependencies = {
 export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   constructor(private readonly deps: DurableWorkflowDependencies) {}
 
+  private async assertWorkflowSelection(
+    context: ExecutionContext,
+    input: {
+      conversationId: string;
+      agentInstanceId?: string;
+      providerId?: string;
+      modelId?: string;
+    },
+  ): Promise<void> {
+    if (!this.deps.agentRegistry) {
+      if (input.agentInstanceId)
+        throw new AIExecutionError('configuration_required', 'Agent Registry unavailable');
+      return;
+    }
+    try {
+      await this.deps.agentRegistry.assertTurnSelection({
+        owner: context.identityId,
+        conversationId: input.conversationId,
+        agentInstanceId: input.agentInstanceId,
+        providerId: input.providerId,
+        modelId: input.modelId,
+      });
+    } catch (cause) {
+      if (!(cause instanceof AgentRegistryError)) throw cause;
+      throw new AIExecutionError(
+        'configuration_required',
+        'Selected Agent instance is unavailable or its model is not bound',
+      );
+    }
+  }
+
   private async workflowRequestContext(
     context: ExecutionContext,
     input: {
       conversationId: string;
       locale?: 'zh-CN' | 'en-US';
+      agentInstanceId?: string;
       providerId?: string;
       modelId?: string;
     },
@@ -66,6 +102,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
+    if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
     if (input.providerId) requestContext.setRaw('providerId', input.providerId);
     if (input.modelId) requestContext.setRaw('modelId', input.modelId);
     // The current entry context is supplied on every start/resume. Credentials
@@ -116,6 +153,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       throw new Error(`AI_WORKFLOW_KIND_UNSUPPORTED:${requestedKind}`);
     }
     const workflowInput = this.workflowInputFromRequest(input);
+    await this.assertWorkflowSelection(input.context, workflowInput);
     if (input.request.kind === 'goal.create') {
       const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
       const workflowTurn = input.request.workflowTurn;
@@ -206,6 +244,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     }
 
     const workflowInput = this.workflowInputFromRequest(input);
+    await this.assertWorkflowSelection(input.context, workflowInput);
     if (input.request.kind === 'goal.create') {
       const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
       if (input.request.workflowTurn) {
@@ -272,6 +311,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       identityId: input.context.identityId,
       conversationId: input.request.conversationId,
       locale: input.request.locale ?? 'zh-CN',
+      agentInstanceId: input.request.agentInstanceId,
       providerId: input.request.providerId,
       modelId: input.request.modelId,
     };
@@ -304,13 +344,6 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     ) {
       throw new Error('AI_WORKFLOW_KIND_UNSUPPORTED');
     }
-    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
-      await this.deps.history.appendUserTurn({
-        identityId: input.context.identityId,
-        conversationId: before.conversationId,
-        content: input.request.workflowTurn,
-      });
-    }
 
     const store = await this.workflowStore();
     const workflowName =
@@ -327,6 +360,15 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     }
     const workflowInput = workflowInputFromSnapshot(workflowName, row.snapshot);
+    await this.assertWorkflowSelection(input.context, workflowInput);
+    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
+      await this.deps.history.appendUserTurn({
+        identityId: input.context.identityId,
+        conversationId: before.conversationId,
+        content: input.request.workflowTurn,
+      });
+    }
+
     const workflow =
       before.kind === 'goal.create'
         ? this.deps.goalCreateWorkflow
@@ -389,13 +431,6 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     ) {
       throw new Error('AI_WORKFLOW_KIND_UNSUPPORTED');
     }
-    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
-      await this.deps.history.appendUserTurn({
-        identityId: input.context.identityId,
-        conversationId: before.conversationId,
-        content: input.request.workflowTurn,
-      });
-    }
 
     const store = await this.workflowStore();
     const workflowName =
@@ -412,6 +447,15 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     }
     const workflowInput = workflowInputFromSnapshot(workflowName, row.snapshot);
+    await this.assertWorkflowSelection(input.context, workflowInput);
+    if (input.request.command.type === 'answer' && input.request.workflowTurn) {
+      await this.deps.history.appendUserTurn({
+        identityId: input.context.identityId,
+        conversationId: before.conversationId,
+        content: input.request.workflowTurn,
+      });
+    }
+
     const workflow =
       before.kind === 'goal.create'
         ? this.deps.goalCreateWorkflow

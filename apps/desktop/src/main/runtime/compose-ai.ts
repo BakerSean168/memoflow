@@ -36,6 +36,7 @@ import {
   LocalAgentRuntime,
   LocalAgentRepository,
   MastraModelResolver,
+  AgentInstanceRegistry,
   ProviderWebResearchAdapter,
   type MastraStorageConfig,
   type IAnalyticsReadPort,
@@ -86,6 +87,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     conversationRepository,
     providerConfigRepository,
     providerSecretVault,
+    agentInstanceRepository,
     knowledgeIndexRepository,
     executionRecordPort,
     providerOnboardingSessionRepository,
@@ -104,11 +106,18 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     dependencies.taskApplicationPort,
     dependencies.labelService,
   );
+  const agentRegistry = new AgentInstanceRegistry(agentInstanceRepository, 'desktop');
   let mastraRuntime: MastraAIRuntime | undefined;
   try {
     mastraRuntime = new MastraAIRuntime({
       storage: createMastraStorage(dependencies.mastraStorage),
-      modelResolver: new MastraModelResolver(providerConfigRepository, providerSecretVault),
+      agentRegistry,
+      modelResolver: new MastraModelResolver(
+        providerConfigRepository,
+        providerSecretVault,
+        undefined,
+        { agentRegistry },
+      ),
       conversationShellSource: new ConversationShellSource(conversationRepository),
       goalPlanMutationPort,
       taskPlanMutationPort: taskPlanMutationAdapter,
@@ -154,6 +163,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
   });
 
   const instance = createAIModule({
+    agentInstanceRepository,
     localAgentRuntime,
     conversationRepository,
     providerConfigRepository,

@@ -12,6 +12,7 @@ import { expect, test, type Page, type Route } from '@playwright/test';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
+import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
 
 const e2ePassword = 'Test123456!';
 const conversationId = 'conv-e2e-mastra-open-chat-1';
@@ -68,6 +69,7 @@ async function installMastraOpenChatMocks(
   page: Page,
   options: MastraOpenChatMockOptions = {},
 ): Promise<MastraOpenChatCapture> {
+  await installMastraRegistryMock(page, providerId, modelId);
   const capture: MastraOpenChatCapture = {
     messageCommands: [],
     historyRequests: [],
@@ -317,6 +319,7 @@ test.describe('AI Mastra open-chat product cutover', () => {
     expect(capture.messageCommands[0]).toEqual(
       expect.objectContaining({
         type: 'message',
+        agentInstanceId: 'mastra',
         conversationId,
         content: 'Use the canonical Mastra runtime.',
         surface: 'web',

@@ -61,6 +61,8 @@ model Account {
   aiExecutionRecords            AiExecutionRecord[]
   aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
   aiProviderConfigs             AiProviderConfig[]
+  aiAgentInstances              AiAgentInstance[]
+  aiAgentInstanceBindings       AiAgentInstanceBinding[]
   aiProviderOnboardingSessions  AiProviderOnboardingSession[]
   aiProviderSecrets             AiProviderSecret[]
 
@@ -92,8 +94,10 @@ model AiConversation {
   updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  account      Account                     @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  agentBinding AiAgentConversationBinding?
 
+  @@unique([identityId, id])
   @@index([identityId])
   @@index([status])
   @@index([createdAt])
@@ -147,14 +151,76 @@ model AiProviderConfig {
   updatedAt            DateTime  @updatedAt @map("updated_at")
   deletedAt            DateTime? @map("deleted_at")
 
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  account       Account                  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  agentBindings AiAgentInstanceBinding[]
 
   @@unique([identityId, name])
+  @@unique([identityId, id])
   @@index([identityId])
   @@index([isDefault])
   @@index([isActive])
   @@index([priority])
   @@map("ai_provider_configs")
+}
+
+/**
+ * An Agent's identity/configuration is independent from model-service credential onboarding.
+ * Web only persists Mastra; Desktop uses localOnly PowerSync for the same domain contract.
+ */
+model AiAgentInstance {
+  id                 String                       @id @default(uuid())
+  identityId         String                       @map("identity_id")
+  instanceId         String                       @map("instance_id")
+  driver             String
+  name               String
+  accentColor        String?                      @map("accent_color")
+  enabled            Boolean                      @default(true)
+  nativeConfig       Json?                        @map("native_config")
+  legacyConnectionId String?                      @map("legacy_connection_id")
+  revision           Int                          @default(1)
+  createdAt          DateTime                     @default(now()) @map("created_at")
+  updatedAt          DateTime                     @updatedAt @map("updated_at")
+  account            Account                      @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  bindings           AiAgentInstanceBinding[]
+  conversations      AiAgentConversationBinding[]
+
+  @@unique([identityId, instanceId])
+  @@index([identityId])
+  @@map("ai_agent_instances")
+}
+
+model AiAgentInstanceBinding {
+  id           String           @id @default(uuid())
+  identityId   String           @map("identity_id")
+  instanceId   String           @map("instance_id")
+  connectionId String           @map("connection_id")
+  modelId      String           @map("model_id")
+  account      Account          @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  instance     AiAgentInstance  @relation(fields: [identityId, instanceId], references: [identityId, instanceId], onDelete: Cascade)
+  modelService AiProviderConfig @relation(fields: [identityId, connectionId], references: [identityId, id], onDelete: Restrict)
+
+  @@unique([identityId, instanceId, connectionId])
+  @@index([identityId, connectionId])
+  @@map("ai_agent_instance_bindings")
+}
+
+/**
+ * The first explicitly selected Agent claims its conversation.
+ * Historical conversations without a claim keep their legacy provider/model behavior.
+ */
+model AiAgentConversationBinding {
+  id             String          @id @default(uuid())
+  identityId     String          @map("identity_id")
+  conversationId String          @map("conversation_id")
+  instanceId     String          @map("instance_id")
+  providerId     String?         @map("provider_id")
+  modelId        String?         @map("model_id")
+  conversation   AiConversation  @relation(fields: [identityId, conversationId], references: [identityId, id], onDelete: Cascade)
+  instance       AiAgentInstance @relation(fields: [identityId, instanceId], references: [identityId, instanceId], onDelete: Restrict)
+
+  @@unique([identityId, conversationId])
+  @@index([identityId, instanceId])
+  @@map("ai_agent_conversation_bindings")
 }
 
 model AiProviderOnboardingSession {
@@ -235,6 +301,13 @@ model AiKnowledgeIndexEntry {
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
+}
+
+// Durable one-time cutover marker survives subsequent Prisma reconciliation.
+model AiAgentRegistryMigration {
+  id String @id
+
+  @@map("ai_agent_registry_migrations")
 }
 
 // Better Auth cloud identity source.

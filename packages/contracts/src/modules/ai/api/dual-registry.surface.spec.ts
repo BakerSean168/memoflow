@@ -314,8 +314,8 @@ import { describe, expect, it } from 'vitest';
 
     it('dto type is z.infer alias without local dual schema body', () => {
       expect(knowledge).toContain('Residual 755');
-      expect(knowledge).toContain(
-        "KnowledgeCitationSchema,\n  QueryKnowledgeResSchema,\n} from './response-schemas'",
+      expect(knowledge).toMatch(
+        /import\s*\{\s*KnowledgeCitationSchema,\s*QueryKnowledgeResSchema,?\s*\}\s*from\s*'\.\/response-schemas'/u,
       );
       expect(knowledge).toContain(
         'export type KnowledgeCitation = z.infer<typeof KnowledgeCitationSchema>',

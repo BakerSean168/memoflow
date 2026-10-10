@@ -55,6 +55,7 @@ export type AssistantTurnInput = {
   content: string;
   providerId?: string;
   modelId?: string;
+  agentInstanceId?: string;
   locale?: 'zh-CN' | 'en-US';
   attachments?: readonly AssistantRuntimeAttachment[];
   selectedEntities?: readonly AssistantRuntimeSelectedEntity[];

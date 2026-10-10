@@ -191,6 +191,8 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(MastraModelResolver).toHaveBeenCalledWith(
       repositories.providerConfigRepository,
       repositories.providerSecretVault,
+      undefined,
+      { agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }) },
     );
     expect(ProviderWebResearchAdapter).toHaveBeenCalledWith(
       repositories.providerConfigRepository,
@@ -223,6 +225,7 @@ describe('API composeAI Mastra-only ownership', () => {
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
+      agentRegistry: expect.objectContaining({ assertTurnSelection: expect.any(Function) }),
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
       conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,

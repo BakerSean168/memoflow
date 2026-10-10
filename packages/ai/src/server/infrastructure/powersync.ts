@@ -7,6 +7,8 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import { AgentInstancePowerSyncRepository } from './adapters/powersync/agent-instance.repository';
+import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import type {
   IAIExecutionRecordPort,
   IAIUsageReadPort,
@@ -28,6 +30,7 @@ import type { IAIConversationRepository } from '../domain/repositories/i-ai-conv
 import type { IAIProviderConfigRepository } from '../domain/repositories/i-ai-provider-config-repository';
 
 export interface AIPowerSyncRepositorySet {
+  readonly agentInstanceRepository: IAgentInstanceRepository;
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly knowledgeIndexRepository: IKnowledgeIndexRepository;
@@ -41,6 +44,7 @@ export function createAIPowerSyncRepositories(db: IElectronDatabase): AIPowerSyn
   const providerOnboardingSessionRepository = new PowerSyncAIProviderOnboardingSessionRepository(db);
   const providerSecretVault = new PowerSyncAIProviderSecretVault(db);
   return {
+    agentInstanceRepository: new AgentInstancePowerSyncRepository(db),
     conversationRepository: new PowerSyncAIConversationRepository(db),
     providerConfigRepository: new PowerSyncAIProviderConfigRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPowerSyncRepository(db),

@@ -2,6 +2,7 @@ export * from './ai-capabilities.routes';
 export * from './ai-analytics-query.routes';
 export * from './ai-evaluation-report.routes';
 export * from './ai-provider.routes';
+export * from './ai-agent-instances.routes';
 export * from './ai-provider-onboarding.routes';
 export * from './ai-chat.routes';
 export * from './ai-knowledge-query.routes';

@@ -1,3 +1,4 @@
+import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible-v6';
 import type { MastraModelConfig } from '@mastra/core/llm';
 import {
@@ -28,6 +29,7 @@ import {
   type ProviderFetch,
 } from '../../infrastructure/security/provider-safe-fetch';
 import { AIExecutionError } from '../../../shared/ai-execution-error';
+import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
 import { normalizeOpenAICompatibleModelId } from '../../shared/openai-compatible-normalize';
 
 export interface ResolvedAIModel {
@@ -164,13 +166,14 @@ function createCredentialCheckedProviderFetch(input: {
       throw new AIExecutionError('provider_unavailable', 'AI provider is unavailable');
     }
 
-    const currentCredential = await resolveProviderCredential(
-      input.secretVault,
-      input.identityId,
-      { credentialRef: input.credentialRef },
-    );
+    const currentCredential = await resolveProviderCredential(input.secretVault, input.identityId, {
+      credentialRef: input.credentialRef,
+    });
     if (currentCredential !== input.credential) {
-      throw new AIExecutionError('provider_unavailable', 'AI provider credential changed during execution');
+      throw new AIExecutionError(
+        'provider_unavailable',
+        'AI provider credential changed during execution',
+      );
     }
 
     return input.providerFetch(request, init);
@@ -208,6 +211,7 @@ export class MastraModelResolver {
   private readonly capabilitySnapshots: IAIModelCapabilitySnapshotPort;
   private readonly now: () => number;
   private readonly catalogTtlMs: number;
+  private readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertModelBinding'>;
   private readonly catalogCache = new Map<
     string,
     { readonly snapshot: AIModelCatalogSnapshot; readonly expiresAt: number }
@@ -222,20 +226,42 @@ export class MastraModelResolver {
       readonly capabilitySnapshots?: IAIModelCapabilitySnapshotPort;
       readonly now?: () => number;
       readonly catalogTtlMs?: number;
+      readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertModelBinding'>;
     } = {},
   ) {
     this.modelCatalog = options.modelCatalog ?? createDefaultModelCatalog(providerFetch);
     this.capabilitySnapshots = options.capabilitySnapshots ?? DEFAULT_CAPABILITY_SNAPSHOT_PORT;
     this.now = options.now ?? Date.now;
     this.catalogTtlMs = options.catalogTtlMs ?? DEFAULT_CATALOG_TTL_MS;
+    this.agentRegistry = options.agentRegistry;
   }
 
   async resolve(input: {
     identityId: string;
+    agentInstanceId?: string | null;
     providerId?: string | null;
     modelId?: string | null;
     executionRequirement?: AIExecutionRequirement;
   }): Promise<ResolvedAIModel> {
+    if (input.agentInstanceId) {
+      if (!this.agentRegistry) {
+        throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
+      }
+      try {
+        await this.agentRegistry.assertModelBinding(
+          input.identityId,
+          input.agentInstanceId,
+          input.providerId,
+          input.modelId,
+        );
+      } catch (cause) {
+        if (!(cause instanceof AgentRegistryError)) throw cause;
+        throw new AIExecutionError(
+          'configuration_required',
+          'Selected Agent instance does not have access to this model',
+        );
+      }
+    }
     const provider = await resolveActiveProviderConfig(
       this.providers,
       input.identityId,

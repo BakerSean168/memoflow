@@ -17,6 +17,9 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY dist/apps/web /usr/share/nginx/html
+# Web build artifacts can inherit restrictive umask (0600 files, 2700 dirs).
+# The Nginx worker (non-root) must be able to read all public static assets.
+RUN chmod -R a+rX /usr/share/nginx/html
 
 EXPOSE 80
 

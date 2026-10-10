@@ -1,4 +1,5 @@
 export default {
+  agentSwitchNewConversation: '已为所选 Agent 新建会话。原会话仍保留原 Agent。',
   local: {
     toolHistory: 'Agent 工具记录',
     goalWrites: '创建和修改目标',

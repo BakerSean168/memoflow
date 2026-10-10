@@ -24,6 +24,7 @@ import { createAIProviderSecretVaultStub } from '../../../testing/ai-test-suppor
 import type { GoalPlanMutationPort } from '../workflows';
 import type { AIExecutionRecordInput } from '../../application/ports';
 import { MastraAIRuntime } from './mastra-ai.runtime';
+import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
 
 const TEST_USER_TIME_CONTEXT_PORT = {
   getUserTimeContext: async () => createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
@@ -137,7 +138,10 @@ function taskMutationPort(): ReturnType<typeof vi.fn> {
   return vi.fn(async (request) => ok({ taskId: String(request.id) }));
 }
 
-async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`)) {
+async function createRuntime(
+  file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`),
+  agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>,
+) {
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
   const createTaskPlan = taskMutationPort();
@@ -159,6 +163,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     vi.fn() as unknown as typeof fetch,
   );
   const runtime = new MastraAIRuntime({
+    agentRegistry,
     storage,
     modelResolver,
     conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
@@ -1675,4 +1680,81 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       requestId: first.requestId,
     });
   });
+});
+
+describe('workflow Agent identity authority', () => {
+  it('claims Goal to the selected Agent, persists its identity and revalidates on resume', async () => {
+    const assertTurnSelection = vi.fn(async () => {});
+    const { runtime } = await createRuntime(undefined, { assertTurnSelection });
+    const request = {
+      kind: 'goal.create' as const,
+      conversationId: 'bound-goal',
+      agentInstanceId: 'mastra-work',
+      providerId: 'p',
+      modelId: 'm',
+      input: { idea: 'Ship a release' },
+    };
+    const started = await runtime.start({ context: context('owner', 'start'), request });
+    expect(assertTurnSelection).toHaveBeenCalledWith({
+      owner: 'owner',
+      conversationId: 'bound-goal',
+      agentInstanceId: 'mastra-work',
+      providerId: 'p',
+      modelId: 'm',
+    });
+    expect(vi.mocked(runtime.goalPlanner.plan).mock.calls[0]?.[1].getRaw('agentInstanceId')).toBe(
+      'mastra-work',
+    );
+    assertTurnSelection.mockRejectedValueOnce(new Error('disabled'));
+    await expect(
+      runtime.resume({
+        context: context('owner', 'resume'),
+        request: { runId: started.runId, command: { type: 'approve' } },
+      }),
+    ).rejects.toThrow();
+    expect(assertTurnSelection).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects an invalid Task selection before running the planner or creating a workflow', async () => {
+    const assertTurnSelection = vi.fn(async () => {
+      throw new Error('unbound');
+    });
+    const { runtime } = await createRuntime(undefined, { assertTurnSelection });
+    await expect(
+      runtime.startDetached({
+        context: context('owner', 'start'),
+        request: {
+          kind: 'task.create',
+          conversationId: 'bound-task',
+          agentInstanceId: 'mastra-work',
+          providerId: 'p',
+          modelId: 'm',
+          input: { idea: 'Write report' },
+        },
+      }),
+    ).rejects.toThrow();
+    expect(runtime.taskPlanner.plan).not.toHaveBeenCalled();
+    expect(await runtime.list({ identityId: 'owner', conversationId: 'bound-task' })).toEqual([]);
+  });
+});
+
+it('preserves unknown Registry failures before starting a workflow', async () => {
+  const cause = new Error('storage unavailable');
+  const { runtime } = await createRuntime(undefined, {
+    assertTurnSelection: vi.fn().mockRejectedValue(cause),
+  });
+  await expect(
+    runtime.startDetached({
+      context: context('owner', 'start'),
+      request: {
+        kind: 'task.create',
+        conversationId: 'chat',
+        agentInstanceId: 'mastra',
+        providerId: 'p',
+        modelId: 'm',
+        input: { idea: 'Write report' },
+      },
+    }),
+  ).rejects.toBe(cause);
+  expect(runtime.taskPlanner.plan).not.toHaveBeenCalled();
 });

@@ -3,6 +3,7 @@ import {
   AssistantConversationRefSchema,
   AssistantRuntimeChoiceSchema,
   LocalAgentConnectionInputSchema,
+  LocalAgentClientCommandSchema,
   LocalAgentRequestResponseSchema,
 } from './local-agent.dto';
 import { AssistantToolNameSchema } from './assistant-runtime.dto';
@@ -97,5 +98,62 @@ describe('selectable assistant runtime contracts', () => {
       }).success,
     ).toBe(true);
     expect(LocalAgentRequestResponseSchema.safeParse({ approved: true }).success).toBe(false);
+  });
+});
+
+describe('implicit default native probe commands', () => {
+  it('accepts only a known driver and never renderer-controlled executable, identity or secrets', () => {
+    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
+      expect(LocalAgentClientCommandSchema.parse({ action: 'probe_default', driver })).toEqual({
+        action: 'probe_default',
+        driver,
+      });
+    }
+    expect(
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'probe_default',
+        driver: 'mastra',
+      }).success,
+    ).toBe(false);
+    for (const extra of [
+      { executablePath: '/tmp/malicious' },
+      { homePath: '/root' },
+      { identityId: 'another-owner' },
+      { apiKey: 'secret' },
+      { args: ['--run'] },
+    ]) {
+      expect(
+        LocalAgentClientCommandSchema.safeParse({
+          action: 'probe_default',
+          driver: 'codex',
+          ...extra,
+        }).success,
+      ).toBe(false);
+    }
+  });
+});
+
+describe('local instance identity', () => {
+  it('accepts optional identity metadata and rejects unsafe slugs, colors and secrets', () => {
+    const base = { driver: 'codex', name: 'Personal', executablePath: 'codex', enabled: true };
+    expect(LocalAgentConnectionInputSchema.safeParse(base).success).toBe(true);
+    expect(
+      LocalAgentConnectionInputSchema.safeParse({
+        ...base,
+        instanceSlug: 'codex-personal',
+        accentColor: '#6469da',
+      }).success,
+    ).toBe(true);
+    for (const instanceSlug of ['Personal', '../codex', 'a b', '-codex', 'a--b']) {
+      expect(LocalAgentConnectionInputSchema.safeParse({ ...base, instanceSlug }).success).toBe(
+        false,
+      );
+    }
+    expect(
+      LocalAgentConnectionInputSchema.safeParse({ ...base, accentColor: 'url(secret)' }).success,
+    ).toBe(false);
+    expect(LocalAgentConnectionInputSchema.safeParse({ ...base, apiKey: 'secret' }).success).toBe(
+      false,
+    );
   });
 });

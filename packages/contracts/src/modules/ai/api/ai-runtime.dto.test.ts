@@ -119,6 +119,38 @@ describe('AI vNext runtime contracts', () => {
         .success,
     ).toBe(false);
   });
+  it('accepts a stable Agent instance ID on new chat messages, but never accepts identity or arbitrary runtime configuration', () => {
+    const command = {
+      type: 'message',
+      conversationId: 'conversation-1',
+      surface: 'web',
+      content: 'new chat',
+      agentInstanceId: 'mastra-anyrouter',
+      providerId: 'provider-1',
+      modelId: 'model-1',
+    };
+    expect(AssistantRuntimeClientCommandSchema.parse(command)).toMatchObject(command);
+    for (const extra of [
+      { agentInstanceId: 'Bad Mixed Case' },
+      { agentInstanceId: 'codex/../../../tmp' },
+      { agentInstanceId: '' },
+      { agentInstanceId: 'a'.repeat(65) },
+      { identityId: 'foreign-account' },
+      { apiKey: 'must-never-cross-transport' },
+      { agentNativeOptions: { executablePath: 'sh' } },
+    ]) {
+      expect(AssistantRuntimeClientCommandSchema.safeParse({ ...command, ...extra }).success).toBe(
+        false,
+      );
+    }
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...command,
+        agentInstanceId: undefined,
+      }).success,
+    ).toBe(true); // historic provider-only commands remain compatible
+  });
+
   it('rejects client identity injection for assistant commands', () => {
     const result = AssistantRuntimeClientCommandSchema.safeParse({
       type: 'message',

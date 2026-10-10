@@ -91,6 +91,7 @@ export class KnowledgeCapturePlannerWorker implements KnowledgeCapturePlannerPor
           throw new Error('Knowledge Capture Planner requires authenticated identityId');
         const resolved = await modelResolver.resolve({
           identityId,
+          agentInstanceId: stringContext(requestContext, 'agentInstanceId'),
           providerId: stringContext(requestContext, 'providerId'),
           modelId: stringContext(requestContext, 'modelId'),
           executionRequirement: {

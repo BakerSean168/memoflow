@@ -27,6 +27,7 @@ import {
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  AgentInstanceRegistry,
   ProviderWebResearchAdapter,
   type IAIActivityReadPort,
   type IAITaskDashboardReadPort,
@@ -146,11 +147,15 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     dependencies.taskApplicationPort,
     dependencies.labelService,
   );
+  const agentRegistry = new AgentInstanceRegistry(repositorySet.agentInstanceRepository, 'web');
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
+    agentRegistry,
     modelResolver: new MastraModelResolver(
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
+      undefined,
+      { agentRegistry },
     ),
     conversationShellSource: new ConversationShellSource(repositorySet.conversationRepository),
     goalPlanMutationPort,
@@ -176,6 +181,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 
   const instance = createAIModule({
+    agentInstanceRepository: repositorySet.agentInstanceRepository,
     conversationRepository: repositorySet.conversationRepository,
     providerConfigRepository: repositorySet.providerConfigRepository,
     providerSecretVault: repositorySet.providerSecretVault,

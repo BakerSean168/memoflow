@@ -1,4 +1,6 @@
 export default {
+  agentSwitchNewConversation:
+    'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',
   local: {
     toolHistory: 'Agent tool activity',
     goalWrites: 'Create and update goals',

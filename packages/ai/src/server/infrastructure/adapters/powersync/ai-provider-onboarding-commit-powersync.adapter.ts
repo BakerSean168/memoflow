@@ -128,6 +128,12 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
           ],
         );
 
+        // V2-created services remain independent from Agents; only historical
+        // services need automatic import when a Profile hydrates old records.
+        await tx.execute(
+          'INSERT OR IGNORE INTO ai_agent_model_service_migrations (id, identity_id, connection_id) VALUES (?, ?, ?)',
+          [JSON.stringify([input.identityId, row.id]), input.identityId, row.id],
+        );
         return 'COMMITTED' as const;
       });
     } catch (error) {
@@ -165,7 +171,11 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
           return 'SESSION_UNAVAILABLE' as const;
         }
 
-        const current = await tx.getOptional<{ id: string; version: number; credential_ref: string }>(
+        const current = await tx.getOptional<{
+          id: string;
+          version: number;
+          credential_ref: string;
+        }>(
           `SELECT id, version, credential_ref FROM ai_provider_configs
            WHERE id = ? AND identity_id = ? AND deleted_at IS NULL
            LIMIT 1`,

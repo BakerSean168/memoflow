@@ -57,6 +57,28 @@ describe('DeleteAIProviderUseCase', () => {
     expect(repository.delete).toHaveBeenCalledOnce();
   });
 
+  it('refuses to revoke or delete a model service still bound to a Mastra instance', async () => {
+    const provider = createAIProviderConfigServerDTO();
+    const repository = {
+      findByIdForIdentity: vi.fn(async () => provider),
+      delete: vi.fn(async () => undefined),
+    };
+    const secretVault = { revoke: vi.fn(async () => undefined) };
+    const agentInstances = { hasConnectionBindings: vi.fn(async () => true) };
+    const useCase = new DeleteAIProviderUseCase(
+      repository as never,
+      secretVault as never,
+      agentInstances as never,
+    );
+    await expect(useCase.execute('identity-1', String(provider.id))).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'CONFLICT' },
+    });
+    expect(agentInstances.hasConnectionBindings).toHaveBeenCalledWith('identity-1', String(provider.id));
+    expect(repository.delete).not.toHaveBeenCalled();
+    expect(secretVault.revoke).not.toHaveBeenCalled();
+  });
+
   it('does not revoke or delete a connection owned by another identity', async () => {
     const provider = {
       ...createAIProviderConfigServerDTO(),

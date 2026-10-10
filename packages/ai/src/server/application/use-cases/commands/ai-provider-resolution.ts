@@ -1,9 +1,15 @@
+import { AgentRegistryError } from '../../agent-instance/agent-instance.repository';
+import type { AgentInstanceRegistry } from '../../agent-instance/agent-instance.registry';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';
 import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { ChatExecutionProviderConfig, IAIProviderSecretVault } from '../../ports';
+import type {
+  ChatExecutionProviderConfig,
+  IAIProviderSecretVault,
+  IAIModelSelectionValidationPort,
+} from '../../ports';
 
 /**
  * Resolve the provider config that should be used for an AI operation.
@@ -112,4 +118,55 @@ export async function resolveProviderCredential(
       cause,
     });
   }
+}
+
+/** Reuse Registry authority for conversation-bound and standalone Knowledge operations. */
+export async function assertKnowledgeAgentSelection(
+  registry: Pick<AgentInstanceRegistry, 'assertModelBinding' | 'assertTurnSelection'> | undefined,
+  owner: string,
+  input: {
+    agentInstanceId?: string;
+    conversationId?: string;
+    providerId?: string;
+    modelId?: string;
+  },
+  modelSelectionValidation?: IAIModelSelectionValidationPort,
+): Promise<void> {
+  if (!registry) {
+    if (input.agentInstanceId)
+      throw new AIExecutionError('configuration_required', 'Agent Registry unavailable');
+  }
+  if (registry)
+    try {
+      if (input.conversationId) {
+        await registry.assertTurnSelection({
+          owner,
+          conversationId: input.conversationId,
+          agentInstanceId: input.agentInstanceId,
+          providerId: input.providerId,
+          modelId: input.modelId,
+        });
+      } else if (input.agentInstanceId) {
+        await registry.assertModelBinding(
+          owner,
+          input.agentInstanceId,
+          input.providerId,
+          input.modelId,
+        );
+      }
+    } catch (cause) {
+      if (!(cause instanceof AgentRegistryError)) throw cause;
+      throw new AIExecutionError(
+        'configuration_required',
+        'Selected Agent instance is unavailable or its model is not bound',
+      );
+    }
+  if (input.agentInstanceId && !modelSelectionValidation)
+    throw new AIExecutionError('configuration_required', 'Model selection policy unavailable');
+  await modelSelectionValidation?.assertModelSelection({
+    identityId: owner,
+    agentInstanceId: input.agentInstanceId,
+    providerId: input.providerId,
+    modelId: input.modelId,
+  });
 }

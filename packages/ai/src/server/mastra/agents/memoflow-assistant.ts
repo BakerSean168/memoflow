@@ -57,6 +57,7 @@ export function createMemoFlowAssistant(input: {
       if (!identityId) throw new Error('MemoFlow Assistant requires authenticated identityId');
       const resolved = await input.modelResolver.resolve({
         identityId,
+        agentInstanceId: stringContext(requestContext, 'agentInstanceId'),
         providerId: stringContext(requestContext, 'providerId'),
         modelId: stringContext(requestContext, 'modelId'),
         executionRequirement: {

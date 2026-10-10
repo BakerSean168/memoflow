@@ -41,6 +41,7 @@ import {
   registerAIAnalyticsQueryRoutes,
   registerAIEvaluationReportRoutes,
   registerAIProviderRoutes,
+  registerAIAgentInstanceRoutes,
   registerAIProviderOnboardingRoutes,
   registerAIChatRoutes,
   registerAIKnowledgeQueryRoutes,
@@ -50,6 +51,7 @@ import { AICapabilitiesController } from '../server/transport/ai-capabilities.co
 import { AIAnalyticsQueryController } from '../server/transport/ai-analytics-query.controller';
 import { AIEvaluationReportController } from '../server/transport/ai-evaluation-report.controller';
 import { AIProviderConfigController } from '../server/transport/ai-provider-config.controller';
+import { AgentInstanceController } from '../server/transport/agent-instance.controller';
 import { AIChatController } from '../server/transport/ai-chat.controller';
 import { AIKnowledgeQueryController } from '../server/transport/ai-knowledge-query.controller';
 
@@ -126,6 +128,7 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
         const providerController = new AIProviderConfigController(
           options.instance.providerManagement,
         );
+        const agentInstanceController = new AgentInstanceController(options.instance.agentRegistry);
         const chatController = new AIChatController(options.instance.assistantConversation);
 
         // Routes always register — unavailable capabilities return SERVICE_UNAVAILABLE
@@ -148,6 +151,11 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
         );
         const providerRoutes = registerAIProviderRoutes(
           providerController,
+          middleware,
+          openApiRegistry,
+        );
+        const agentInstanceRoutes = registerAIAgentInstanceRoutes(
+          agentInstanceController,
           middleware,
           openApiRegistry,
         );
@@ -187,6 +195,7 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
         const stackLen = router.stack.length;
         try {
           router.use('/ai/providers', providerRoutes);
+          router.use('/ai/agent-instances', agentInstanceRoutes);
           router.use('/ai', providerOnboardingRoutes);
           router.use('/ai', capabilityRoutes);
           router.use('/ai/chat', chatRoutes);

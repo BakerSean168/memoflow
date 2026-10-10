@@ -34,6 +34,8 @@ export type {
   ProviderModelCatalogInput,
 } from './provider-model-catalog.port';
 export type {
+  AIModelSelectionInput,
+  IAIModelSelectionValidationPort,
   AIModelCapabilitySnapshotInput,
   AIModelCatalogSnapshotInput,
   IAIModelCapabilitySnapshotPort,

@@ -276,6 +276,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         conversationId: options.chatConversationId.value,
         input: { idea },
         ...(workflowTurn?.trim() ? { workflowTurn: workflowTurn.trim() } : {}),
+        agentInstanceId: selectedModel.agentInstanceId,
         providerId: selectedModel.providerId,
         modelId: selectedModel.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',

@@ -37,10 +37,21 @@ const nativePath = z
   .min(1)
   .max(4096)
   .refine((value) => !/[\0\r\n]/u.test(value), 'Invalid native path');
+export const AgentInstanceSlugSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/u);
 /** Trusted settings input; never accepts secrets, arbitrary argv or environment. */
 export const LocalAgentConnectionInputSchema = z
   .object({
     driver: LocalAgentDriverSchema,
+    instanceSlug: AgentInstanceSlugSchema.optional(),
+    accentColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/u)
+      .optional(),
     name: z.string().trim().min(1).max(120),
     executablePath: nativePath,
     homePath: nativePath.optional(),
@@ -165,6 +176,8 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     .strict(),
   z.object({ action: z.literal('delete_connection'), id }).strict(),
   z.object({ action: z.literal('probe_connection'), id }).strict(),
+  /** Desktop-only implicit driver probe. No connection ID or untrusted executable arguments. */
+  z.object({ action: z.literal('probe_default'), driver: LocalAgentDriverSchema }).strict(),
   z.object({ action: z.literal('list_conversations') }).strict(),
   z
     .object({

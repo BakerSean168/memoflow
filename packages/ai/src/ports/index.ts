@@ -25,6 +25,8 @@ export type {
   IAIProviderModelCatalogPort,
   ProviderModelCatalogInput,
   IAIModelCapabilitySnapshotPort,
+  IAIModelSelectionValidationPort,
+  AIModelSelectionInput,
   IAIModelCatalogPort,
   AIModelCapabilitySnapshotInput,
   AIModelCatalogSnapshotInput,

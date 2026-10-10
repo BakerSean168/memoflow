@@ -10,6 +10,7 @@ import {
   type LocalAgentClientCommand,
   type LocalAgentConnection,
   type LocalAgentConnectionInput,
+  type LocalAgentDriver,
   type LocalAgentConversation,
   type LocalAgentConversationCreate,
   type LocalAgentRequestResponse,
@@ -31,6 +32,8 @@ export interface LocalAgentClient {
   ): Promise<LocalAgentConnection>;
   deleteConnection(id: string): Promise<void>;
   probeConnection(id: string): Promise<LocalAgentStatus>;
+  /** Read-only, unsaved default driver check; available only on Desktop. */
+  probeDefaultDriver(driver: LocalAgentDriver): Promise<LocalAgentStatus>;
   listConversations(): Promise<LocalAgentConversation[]>;
   createConversation(conversation: LocalAgentConversationCreate): Promise<LocalAgentConversation>;
   respond(response: LocalAgentRequestResponse): Promise<boolean>;
@@ -60,6 +63,8 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       await invoke({ action: 'delete_connection', id }, z.null());
     },
     probeConnection: (id) => invoke({ action: 'probe_connection', id }, LocalAgentStatusSchema),
+    probeDefaultDriver: (driver) =>
+      invoke({ action: 'probe_default', driver }, LocalAgentStatusSchema),
     listConversations: () =>
       invoke({ action: 'list_conversations' }, z.array(LocalAgentConversationSchema).max(1000)),
     createConversation: (conversation) =>

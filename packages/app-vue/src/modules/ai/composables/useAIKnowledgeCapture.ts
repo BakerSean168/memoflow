@@ -183,6 +183,7 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
         kind: 'knowledge.capture',
         conversationId: options.chatConversationId.value,
         input: { topic },
+        agentInstanceId: options.selectedModel.value.agentInstanceId,
         providerId: options.selectedModel.value.providerId,
         modelId: options.selectedModel.value.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',

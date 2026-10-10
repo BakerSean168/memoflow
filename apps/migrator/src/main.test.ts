@@ -47,6 +47,7 @@ describe('migrator interface', () => {
       'reconcile Prisma schema',
       'ensure GoalRecord authorship constraint',
       'prepare AI provider onboarding sessions',
+      'prepare Agent Registry V2 and legacy Mastra cutover',
       'prepare AI provider default invariant',
       'ensure Task goal-binding constraint',
       'bootstrap AI knowledge index',

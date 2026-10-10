@@ -180,3 +180,8 @@ export {
   type RuntimeUsageClient,
 } from './runtime-usage';
 export { createLocalAgentIpcClient, type LocalAgentClient } from './local-agent';
+export {
+  createAgentRegistryHttpClient,
+  createAgentRegistryIpcClient,
+  type AgentRegistryClient,
+} from './agent-instance';
