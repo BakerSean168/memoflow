@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.17.0](https://github.com/BakerSean168/memoflow/compare/v0.16.0...v0.17.0) (2026-10-10)
+
+
+### Features
+
+* **desktop:** add local BYOA runtimes alongside builtin Mastra ([#439](https://github.com/BakerSean168/memoflow/issues/439)) ([b486736](https://github.com/BakerSean168/memoflow/commit/b4867368406c2d163d712206579800bb91ba37dc))
+* **desktop:** first-class DSH Agent via shared ACP runtime ([#441](https://github.com/BakerSean168/memoflow/issues/441)) ([41416cf](https://github.com/BakerSean168/memoflow/commit/41416cf078a30f24882e0cc8da70e92a5929875c))
+* **desktop:** independent profiles and verified guest copy import ([#438](https://github.com/BakerSean168/memoflow/issues/438)) ([68398e6](https://github.com/BakerSean168/memoflow/commit/68398e60fc4123250a2691fb5ddf7e3eb096661e))
+
+
+### Bug Fixes
+
+* **desktop:** restore keymap IPC and shared visual styles ([#435](https://github.com/BakerSean168/memoflow/issues/435)) ([2561a35](https://github.com/BakerSean168/memoflow/commit/2561a35be42a59d357853eea03c23e99f9114039))
+
+
+### Performance Improvements
+
+* **desktop:** bound runtime resources and cache vault reads ([#437](https://github.com/BakerSean168/memoflow/issues/437)) ([a33d7b2](https://github.com/BakerSean168/memoflow/commit/a33d7b265260dd60455dc133e1e47b4c80069658))
+
 ## [0.16.0](https://github.com/BakerSean168/memoflow/compare/v0.15.2...v0.16.0) (2026-10-08)
 
 
