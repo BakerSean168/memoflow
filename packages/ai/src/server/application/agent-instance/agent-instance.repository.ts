@@ -1,4 +1,5 @@
 import type {
+  AgentConversationSelection,
   AgentInstance,
   AgentInstanceModelBinding,
   AgentRegistrySnapshot,
@@ -21,11 +22,17 @@ export interface IAgentInstanceRepository {
   hasConversationBindings(owner: string, instanceId: string): Promise<boolean>;
   /** Stable owner-scoped turn binding, null for historical/legacy conversations. */
   getConversationInstance(owner: string, conversationId: string): Promise<string | null>;
+  getConversationSelection(
+    owner: string,
+    conversationId: string,
+  ): Promise<AgentConversationSelection | null>;
   /** Idempotent for the same identity; conflicting instance IDs must fail closed. */
   claimConversationInstance(
     owner: string,
     conversationId: string,
     instanceId: string,
+    providerId?: string,
+    modelId?: string,
   ): Promise<void>;
 }
 export class AgentRegistryError extends Error {

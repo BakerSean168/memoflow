@@ -18,6 +18,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/express-auth-closure.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -7463,6 +7471,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/ai-agent-registry.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/database/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/ai-provider-default-invariant.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12926,7 +12942,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -12940,7 +12956,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/goal/vitest.integration.config.ts",
@@ -13828,7 +13844,7 @@
   "unexpected": [],
   "counts": {
     "unit": 1196,
-    "integration": 45,
+    "integration": 47,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,

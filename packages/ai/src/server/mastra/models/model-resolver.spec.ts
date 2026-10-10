@@ -13,6 +13,7 @@ import {
   createAIProviderConfigServerDTO,
   createAIProviderSecretVaultStub,
 } from '../../../testing/ai-test-support';
+import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { MastraModelResolver } from './model-resolver';
 import { normalizeOpenAICompatibleModelId } from '../../shared/openai-compatible-normalize';
 
@@ -131,7 +132,7 @@ describe('MastraModelResolver', () => {
     const secretVault = createAIProviderSecretVaultStub();
     const readSecret = vi.spyOn(secretVault, 'resolve');
     const assertModelBinding = vi.fn(async () => {
-      throw new Error('not associated with this Agent');
+      throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
     });
     const resolver = new MastraModelResolver(
       createAIProviderConfigRepositoryStub({ findByIdForIdentity }),

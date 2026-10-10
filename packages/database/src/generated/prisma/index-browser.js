@@ -205,7 +205,9 @@ exports.Prisma.AiAgentConversationBindingScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   conversationId: 'conversationId',
-  instanceId: 'instanceId'
+  instanceId: 'instanceId',
+  providerId: 'providerId',
+  modelId: 'modelId'
 };
 
 exports.Prisma.AiProviderOnboardingSessionScalarFieldEnum = {
@@ -258,6 +260,10 @@ exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
+};
+
+exports.Prisma.AiAgentRegistryMigrationScalarFieldEnum = {
+  id: 'id'
 };
 
 exports.Prisma.CloudAuthUserScalarFieldEnum = {
@@ -1400,6 +1406,7 @@ exports.Prisma.ModelName = {
   AiProviderOnboardingSession: 'AiProviderOnboardingSession',
   AiProviderSecret: 'AiProviderSecret',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
+  AiAgentRegistryMigration: 'AiAgentRegistryMigration',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',

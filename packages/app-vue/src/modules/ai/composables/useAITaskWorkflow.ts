@@ -194,6 +194,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
         kind: 'task.create',
         conversationId: options.chatConversationId.value,
         input: { idea, ...(goalId ? { goalId } : {}) },
+        agentInstanceId: options.selectedModel.value.agentInstanceId,
         providerId: options.selectedModel.value.providerId,
         modelId: options.selectedModel.value.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',

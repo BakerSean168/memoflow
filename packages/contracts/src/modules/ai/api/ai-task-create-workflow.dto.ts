@@ -1,3 +1,4 @@
+import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { TaskGoalLinkSchema, TaskPlanScheduleSchema, TaskReminderConfigSchema } from '../../task';
@@ -30,6 +31,7 @@ export const TaskCreateWorkflowInputSchema = TaskCreateClientInputSchema.extend(
   identityId: z.string().min(1),
   conversationId: z.string().min(1),
   locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
+  agentInstanceId: AgentInstanceSlugSchema.optional(),
   providerId: z.string().min(1).optional(),
   modelId: z.string().min(1).optional(),
 }).strict();

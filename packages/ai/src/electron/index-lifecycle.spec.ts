@@ -20,6 +20,7 @@ vi.mock('electron', () => ({
 import { createAIElectronModule } from './index';
 
 const CURRENT_CHANNELS = [
+  AIChannels.AGENT_INSTANCE,
   AIChannels.LOCAL_AGENT,
   AIChannels.CAPABILITIES_GET,
   AIChannels.PROVIDER_CATALOG_GET,

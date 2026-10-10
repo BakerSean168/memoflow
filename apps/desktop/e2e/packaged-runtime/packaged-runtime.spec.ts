@@ -221,11 +221,11 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
     for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
       await mainWindow.getByTestId('ai-provider-add').click();
-      await mainWindow.getByTestId(`ai-provider-catalog-${driver}`).click();
-      await localSettings
-        .getByLabel('显示名称', { exact: true })
-        .fill(`Packaged unavailable ${driver}`);
-      await localSettings
+      const wizard = mainWindow.getByTestId('ai-agent-wizard');
+      await wizard.getByTestId(`ai-provider-catalog-${driver}`).click();
+      await wizard.getByLabel('显示名称', { exact: true }).fill(`Packaged unavailable ${driver}`);
+      await wizard.getByTestId('ai-instance-continue').click();
+      await wizard
         .getByLabel('程序路径或命令', { exact: true })
         .fill(
           path.join(
@@ -234,11 +234,10 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
             process.platform === 'win32' ? `${driver}.exe` : driver,
           ),
         );
-      await expect(localSettings.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
-      await expect(
-        localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
-      ).not.toBeChecked();
-      await localSettings.getByTestId('ai-native-save').click();
+      await expect(wizard.getByLabel('创建和修改目标', { exact: true })).not.toBeChecked();
+      await expect(wizard.getByLabel('创建、修改和完成任务', { exact: true })).not.toBeChecked();
+      await wizard.getByTestId('ai-native-save').click();
+      await expect(wizard).toHaveCount(0);
       const row = localSettings
         .getByTestId('ai-provider-list')
         .getByRole('listitem')

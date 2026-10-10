@@ -230,6 +230,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     providers: providerList,
     ...(agentRegistryClient ? { agentRegistrySnapshot } : {}),
     chatConversationId: chatSession.chatConversationId,
+    ...(agentRegistryClient?.conversationSelection
+      ? {
+          readConversationSelection: (id: string) => agentRegistryClient.conversationSelection!(id),
+        }
+      : {}),
   });
 
   async function maybeRenameCurrentConversation(name: string) {
@@ -714,7 +719,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       selectedModelKey: modelSelection.selectedModelKey,
       modelGroups: modelSelection.modelGroups,
       canSendMessage,
-      selectModel: (key: string) => modelSelection.selectModel(key),
+      selectModel(key: string) {
+        if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
+        const fromNative = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
+        if (fromNative || modelSelection.selectModel(key) === 'new_conversation_required') {
+          if (!modelSelection.allModelOptions.value.some((model) => model.key === key)) return;
+          startNewConversation(toolMode.value);
+          chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+          modelSelection.selectModel(key);
+          toast.info(t('aiAssistant.agentSwitchNewConversation'));
+        }
+      },
     },
     goalWorkflow,
     knowledgeQaWorkflow,

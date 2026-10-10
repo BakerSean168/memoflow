@@ -546,5 +546,104 @@ Config 不应该为了演示三步而做无意义重复表单；没有必填配�
 - **2026-10-10 后续 P4 实施（未发布）：** 新会话 composer 只列出已启用 Mastra 实例的已绑定模型；每个模型选择带独立 `agentInstanceId`，可共用底层 API 服务，但不能越权引用未绑定模型。Web SSE 与 Desktop IPC 原样转发经过 Zod 验证的实例 ID、由宿主注入 Identity；Mastra Runtime 在执行前校验实例绑定并对会话进行 owner-scoped 首次 claim，随后所有消息必须沿原实例执行。内部动态 ModelResolver 再验证一次实例/Provider/Model 绑定，强制 fail-closed；无实例 ID 的历史会话继续沿原旧版 `providerId/modelId` 路由执行，已 claim 的会话遗漏实例参数不得回退。
 - **会话持久化与生命周期：** PostgreSQL `ai_agent_conversation_bindings`（复合 Owner 外键与会话唯一约束）及 Desktop localOnly SQLite 持久化，重载后继续校验；被会话引用的 Mastra 实例禁止删除并返回冲突。支持当前 Agent 内绑定模型间选择；切换不同 Agent 需新建会话而非在同一会话偷换身份。
 - **新增验证证据（本轮）：** AI Runtime/Registry/Resolver/Web SSE 路由定向 46/46 通过，Contracts 定向 28/28 通过，Vue 模型选择与 Provider 设置 30/30 通过；Registry SQLite 用例覆盖会话 claim、owner、disabled、跨实例/跨模型防回退；Resolver 用例覆盖对 SecretVault/provider 访问前的拒绝；新增 Agent ID Web SSE 转发用例通过。五核心包（Contracts/AI/App Vue/API/Desktop）联合 typecheck 与构建通过；Prisma schema validate/generate 通过，修改文件 ESLint 与 git diff --check 通过。治理清单已刷新，governance-check 最终回归记录在 PR/CI 中。生产迁移/真实推理未执行。
-- **尚未达成：** 旧 Mastra 模型服务自动迁移映射；Web 真实 PostgreSQL/Playwright、Desktop 安装包/Windows、已安装 CLI 的真实登录状态探测、数据库迁移重入/回滚实测；未处理已绑定会话内切换不同 Agent 的新会话 UI 提醒；工作流 Goal/Task/Knowledge 的独立模型选择仍沿历史 `providerId/modelId` 使用，未全面采用 Agent Instance 权威策略。**这些为发布前必须评估/补齐的 P4/P5 门禁，不能因单元测试通过便宣称完整 V2。**
-- **下一动作：** 先在隔离 PostgreSQL 环境演练 additive migration 与 Web 认证 API；完成 Agent 切换会话 UX、所有直接模型消费入口收敛到 Agent 身份；最后进行 Web/Windows 真实端到端验收后决定 PR 合并/发布。
+- **接管后的实施和证据：** 见第 19 节。第 17 节前述测试为接管基线，不代表当前提交或完整发布验收。
+- **下一动作：** 关闭第 19 节剩余真实环境门禁，再重新核对当前 PR head 的 CI。保持 Draft，不合并、不发布。
+
+## 18. Codex 接管审查与剩余工作（2026-10-10）
+
+基线：`b53be3f692d1994c6ec125d329417eadb2c10223`，PR #444；专用工作树干净。普通 main 工作树有既有修改，未触碰。远程 main 已到 `e905a4d10c2a06a20991c5eea620c33d0bc8b01d`，PR 可合并；需在最终提交后重新确认 exact-head CI。
+
+| 工作包 | 已有实现                                                        | 接管确认的缺口 / 所需证据                                                                                         |
+| ------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| A 存储 | Prisma/SQLite Registry、CAS、复合 Owner FK；Native 旧 UUID 投影 | Mastra 无回填；手写 SQL 未接入 migrator/db-push；真实 PG 重入/失败/回滚；Native 删除和映射冲突需复核              |
+| B 入口 | SSE/IPC 聊天实例传递，Resolver 和 conversation claim            | UI 跨实例选择会覆盖旧选择；Goal/Task/Capture 未携带实例；Knowledge QA 丢失所选模型；历史恢复依赖本机 localStorage |
+| C 集成 | 静态及定向单元测试                                              | 隔离真实 API/PG/SecretVault/Browser；Desktop Profile 和实际 CLI；Windows 包装态                                   |
+| D 交付 | Draft PR、已有 CI 与测试清单                                    | 新改动检验、治理、文档证据、推送；真实环境缺项保留 Draft                                                          |
+
+工程约束：Provider/SecretVault 仍拥有模型服务及凭据；Registry 拥有实例和绑定；会话已有 owner 不变。新契约沿现有 Zod HTTP/IPC schema。数据回填、CAS 和完成标记必须在同一数据库事务内；重入不得复活用户删除/解绑内容。跨 Owner 和失效模型应在访问凭据/执行前拒绝。旧会话不批量 claim。测试只用隔离数据库及测试凭据；真实付费推理及 Windows 验收分别记录授权/环境阻塞。
+
+## 19. 接管实施与发布前验收记录（2026-10-10）
+
+变更基线：`b53be3f692d1994c6ec125d329417eadb2c10223`；增量代码对应 PR #444 的接管提交（以 Git 历史和 PR 当前 head 为准）。运行环境为 GCP Linux，Node/Nx/pnpm 使用仓库既有版本。以下证据在提交前工作树执行；最终静态检查记录由 `reports/local-deploy-validation/latest.json` 与 `latest.md` 生成。没有生产迁移、生产部署、真实用户凭据探活或付费模型调用。
+
+### A：存储与旧数据
+
+- Web 回填接入 migrator 和 db-push，事务内 advisory lock + 完成标记；确定性映射旧 Provider 到 Mastra，不改 Provider ID、CredentialRef、默认模型或历史会话。重复运行不会复活删除/解绑的实例。非法遗留值整体回滚，映射冲突拒绝，不猜测归属。
+- Desktop 原生 UUID 的唯一配置真值仍为 LocalAgentRepository；localOnly 映射表保存稳定实例 ID，重名映射确定性分配。Mastra 采用逐连接导入标记，覆盖 PowerSync 延迟到达；新建 V2 服务标记为已处理。Native 删除具有 Revision CAS 和历史引用保护。
+- 隔离 PostgreSQL 迁移测试 **3/3**：重入、失败事务回滚、复合 Owner 外键、additive schema 回退，验证原 Provider/凭据引用/历史不变。真实 Prisma Repository 测试 **1/1**：并发 CAS、首次会话 claim、跨 Owner、重载选择、引用删除保护。测试创建随机命名专用数据库并仅删除自己创建的数据库。
+- 回滚证据限于隔离旧数据恢复及 additive schema 演练；没有验证带 V2 新增数据的生产降级，也没有修改生产数据。
+
+### B：执行入口与交互
+
+- 跨 Agent 选择创建新会话并显示中英文提示；历史会话通过认证 HTTP/IPC 读取宿主持久化 Agent/Provider/Model 选择，本机 localStorage 不再是唯一来源。读取失败或选择失效时阻止发送。
+- Goal/Task/Knowledge Capture 在创建及恢复时校验持久化 Agent 身份；Knowledge QA/Expansion 校验绑定并保留所选模型，再复用既有 Mastra ModelResolver 的目录/能力校验。身份拒绝发生在凭据解析和执行前；目录校验沿用现有凭据读取机制，失败时不开始 Knowledge 检索或推理。
+- 模型服务替换后只更新用户正在配置的实例绑定；修正未配置状态和默认 Native 槽位展示。包装态实测发现向导和背景详情表单 ID 重复，已改为 Vue useId 独立 ID；新增标签归属回归先失败后 27/27 设置测试通过。
+- 定向证据：AI 审查修复定向 **84/84**、此前 Vue **110/110**、Contracts **21/21**；migrator **3/3**。真实 SQLite 测试覆盖旧 UUID、重名、延迟模型服务导入、CAS、删除保护和选择恢复。上述统计为各定向命令结果，不应累计为独立覆盖总数。
+
+### C：真实集成
+
+- 仓库 Playwright `web:e2e:ai-provider -- --grep '\[P0\]'`：**2/2**，真实 Web/API/PostgreSQL/SecretVault、新注册账号、空实例保存刷新、绑定、自定义 HTTPS fixture 的凭据验证/轮换、响应式布局、禁用实例，以及 Native Web 驱动拒绝、过期 revision 和跨账号拒绝。数据库使用随机专用名称，测试结束后清理。
+- HTTPS provider 是测试 fixture；浏览器结果不代表真实厂商流式推理或完整聊天推理通过。有历史数据账号的浏览器升级恢复仍需专项证据。
+- 使用真实 LocalAgentRuntime 对当前 Linux 安装环境只读探测，未保存默认连接（持久化连接数 **0**）：Codex **ready / 7 models**，Claude Code **login_required / 0**，Pi **ready / 22**，DSH **ready / 5**。耗时约 1.1s / 2.1s / 0.8s / 4.4s。只检查安装/认证/模型能力，没有推理请求。
+- Goal/聊天 Playwright 回归 **16/16**：真实认证 API 和隔离 PG，执行部分使用 runtime fixture；覆盖目标/任务确认、重试、取消、Knowledge QA/Capture、聊天 SSE、移动端及重载，不代表厂商推理验收。
+- Linux `desktop:package` 通过，安装产物检查 **80** 个运行时包；隔离 keyring/HOME/Profile 的 `desktop:test:packaged-smoke` **1/1**：renderer/IPC/SQLite 启动，四个 Native 未安装路径实例保存和探测，整进程重启后恢复、删除，以及键盘设置持久化。初轮发现旧向导脚本及重复 DOM ID，修复后重新打包通过。Node 原生依赖在包装态测试后恢复并确认 SQLite 可用。
+- 未完成：Windows 安装包 PATH/HOME/定位及刷新；旧 Desktop Profile 升级、真实会话恢复及 Profile/账号切换；Claude 登录后探测；真实厂商认证推理；实机探测超时/取消/进程退出的完整场景。单元 fixture 证据不能替代这些项目。
+
+### D：交付门禁
+
+维护测试清单，执行最终 affected lint/typecheck/test、治理和构建验证。结果及阻塞继续记录于本节。专用工作树以外的未提交修改未触碰。PR 保持 Draft；只有第 14 节全部发布前门禁具备相应证据后才可判断 Ready for Review。合并和生产发布不在本次授权范围。
+
+### 第 14 节矩阵逐项结论
+
+| 项目              | 当前证据与结论                                                                 |
+| ----------------- | ------------------------------------------------------------------------------ |
+| WEB-01 / WEB-02   | 真 API/PG 浏览器空实例、保存刷新、绑定/凭据替换通过；真实厂商推理未验收        |
+| WEB-03            | 认证 API 浏览器测试拒绝 Native driver，通过                                    |
+| WEB-04            | 真实 Prisma 两实例共享连接、引用删除保护通过；完整浏览器解绑循环未验收         |
+| WEB-05            | Registry/Resolver 失效拒绝单元通过；完整真实厂商失效场景未验收                 |
+| WEB-06            | 隔离迁移重入/失败/回退与保真通过；历史账号浏览器升级未验收                     |
+| DESK-01 / DESK-03 | SQLite + Vue 与 Linux 新 Profile 整进程重启通过；旧 Profile/会话恢复未验收     |
+| DESK-02           | Linux 四真实 CLI 默认探测与包装态未安装路径通过；Windows 未验收                |
+| DESK-04 / DESK-05 | 单元身份/晚到事件防护；实机账号和 Profile 切换未验收                           |
+| MODEL-01          | Registry/Resolver/选择单元与浏览器绑定通过；真实推理未验收                     |
+| MODEL-02          | 真实 HTTPS fixture 密钥轮换通过；撤销/下架全场景实机未验收                     |
+| CHAT-01           | 宿主恢复选择和旧 Provider-only 路由单元通过；历史账号浏览器未验收              |
+| SEC-01            | Owner/CAS 真实 PG/API 通过；SSRF 沿现有 onboarding 机制，需结合最终回归结果    |
+| SEC-02            | SecretVault fixture 轮换、不回显密钥通过；完整 Windows IPC/DevTools 实机未验收 |
+| OPS-01            | 超时/取消由现有 runtime 单元覆盖；完整进程/包装态实机未验收                    |
+| E2E-01            | 新账号 Web 保存/刷新与 Linux 新 Profile 重启通过；历史账号/旧 Profile 缺证据   |
+
+基线 CI run `38053555920` 最终失败：IPC/Repository/宿主装配断言未包含新增 Registry；Goal/聊天 E2E fixture 未提供实例绑定。接管修正对应 fixtures 并添加请求 Agent ID 断言；新 head 仍需独立 CI 成功，基线其它成功 job 不替代新提交证据。
+
+### 可复跑的定向命令
+
+隔离 PostgreSQL 的命令须提供测试专用 `TEST_DATABASE_URL`；测试内部另建 UUID 数据库，不能使用生产数据库 URL。Web/ORM 测试的 API 全局 setup 也必须指向测试专用数据库，避免共享账号数据。
+
+```bash
+pnpm nx run database:test:integration -- ai-agent-registry.integration.test.ts
+pnpm nx run api:test:integration -- agent-instance-registry.integration.test.ts
+pnpm nx run ai:test -- agent-instance.registry.spec.ts local-agent.repository.spec.ts mastra-workflow.runtime.spec.ts ai-query-services.test.ts model-resolver.spec.ts
+pnpm nx run app-vue:test -- useAIModelSelection.agent-instance.spec.ts useAIGoalWorkflow.spec.ts useAITaskWorkflow.spec.ts useAIKnowledgeCapture.spec.ts AISettings.spec.ts
+pnpm nx run web:e2e:ai-provider -- --grep '\[P0\]'
+pnpm nx run web:e2e -- ai/goal-workflow.spec.ts ai/multi-engine-host.spec.ts
+pnpm nx run desktop:package
+MEMOFLOW_PACKAGED_EXECUTABLE="$PWD/apps/desktop/dist-package/linux-unpacked/memoflow" bash apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh
+pnpm nx run memoflow:governance-check
+node tools/agent-skills/validate-local-deploy/scripts/run-validation.mjs --workspace "$PWD" --base-ref origin/main
+```
+
+独立 Nx 构建/E2E/验证任务串行运行，避免不同进程清理共享 dist 造成伪失败。本机验证 helper 如缺少专用 prod-like env，Docker 项为 inconclusive；不得借用共享 staging/生产配置来伪造通过。
+
+## 20. 接管增量独立代码审查
+
+固定点为接管基线 `b53be3f692d1994c6ec125d329417eadb2c10223`。两名只读代理分别对照工程规范及本方案审查未提交增量，并对修复复审；代理未运行构建，测试证据由主代理执行。
+
+### Standards
+
+初轮 2 项：SQLite 删除预检查与 claim 事务存在竞争；未知 Registry 错误被改写为配置错误。修复后引用检查、存在和 Revision 检查在写事务内完成；两个事务顺序均新增回归。运行时只转换明确的 AgentRegistryError，未知错误保持原异常身份。限定复审两项关闭，无遗留发现。
+
+### Spec
+
+初轮 2 项：引用删除保护的竞态违反会话 owner 约束；Knowledge 入口未复用模型目录/能力校验。修复后通过既有 MastraAIRuntime → ModelResolver 验证所选模型，生产装配共享原策略，显式 Agent 缺少验证器时拒绝。限定复审两项关闭，无新增阻断；真实目录可能读取 SecretVault，不应声称所有能力失败都不访问凭据。
+
+初轮 Standards 2 项（最高 P1）、Spec 2 项（最高 P1），其中 SQLite 问题为两轴共享发现；修复复审两轴均无遗留发现。新增行为测试先运行确认失败，再修复至 84/84 通过。后续 DOM ID 小增量经 Standards 限定复审无新增发现，27/27 设置测试和真实包装态 smoke 通过。

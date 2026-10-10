@@ -1,5 +1,17 @@
 import type { AIModelCapabilitySnapshot, AIModelCatalogSnapshot } from '@memoflow/contracts/ai';
 
+export interface AIModelSelectionInput {
+  readonly identityId: string;
+  readonly agentInstanceId?: string;
+  readonly providerId?: string;
+  readonly modelId?: string;
+}
+
+/** Reuse the host's model catalog/capability policy without performing inference. */
+export interface IAIModelSelectionValidationPort {
+  assertModelSelection(input: AIModelSelectionInput): Promise<void>;
+}
+
 /** Input required to build a connection-owned model catalog projection. */
 export interface AIModelCatalogSnapshotInput {
   readonly providerConnectionId: string;

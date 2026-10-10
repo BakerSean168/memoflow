@@ -99,6 +99,8 @@ export type {
   IAIActivityReadPort,
   AIActivityItem,
   IAIModelCapabilitySnapshotPort,
+  IAIModelSelectionValidationPort,
+  AIModelSelectionInput,
   IAIModelCatalogPort,
   AIModelCapabilitySnapshotInput,
   AIModelCatalogSnapshotInput,

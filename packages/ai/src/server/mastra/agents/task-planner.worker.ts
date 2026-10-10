@@ -81,6 +81,7 @@ export class TaskPlannerWorker implements TaskPlannerPort {
         if (!identityId) throw new Error('Task Planner requires authenticated identityId');
         const resolved = await modelResolver.resolve({
           identityId,
+          agentInstanceId: stringContext(requestContext, 'agentInstanceId'),
           providerId: stringContext(requestContext, 'providerId'),
           modelId: stringContext(requestContext, 'modelId'),
           executionRequirement: {

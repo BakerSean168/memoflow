@@ -34,7 +34,7 @@ describe('Agent registry with real SQLite persistence', () => {
     ).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
   it('keeps all default identities and uses CAS 0 to edit an implicit default', async () => {
-    const { registry } = setup();
+    const { db, registry } = setup();
     expect((await registry.list('a')).instances.map((item) => item.instanceId)).toEqual([
       'mastra',
       'codex',
@@ -52,6 +52,11 @@ describe('Agent registry with real SQLite persistence', () => {
       expectedRevision: 0,
       patch: { name: 'Personal', enabled: false },
     });
+    expect(
+      (await new LocalAgentRepository(db).listConnections('a')).find(
+        (entry) => entry.instanceSlug === 'codex',
+      ),
+    ).toMatchObject({ name: 'Personal', enabled: false });
     expect(
       (await registry.list('a')).instances.filter((item) => item.instanceId === 'codex'),
     ).toEqual([expect.objectContaining({ name: 'Personal', enabled: false, revision: 1 })]);
@@ -128,6 +133,33 @@ describe('Agent registry with real SQLite persistence', () => {
     });
     expect((await reloaded.list('owner-a')).bindings).toEqual([]);
   });
+  it('protects a claim committed after the deletion precheck', async () => {
+    const { db, registry } = setup();
+    const repository = new AgentInstancePowerSyncRepository(db);
+    await registry.execute('owner', { action: 'create', instance });
+    expect(await repository.hasConversationBindings('owner', instance.instanceId)).toBe(false);
+    await repository.claimConversationInstance('owner', 'racing-chat', instance.instanceId);
+    await expect(repository.remove('owner', instance.instanceId, 1)).rejects.toMatchObject({
+      code: 'CONFLICT',
+    });
+    expect(
+      (await registry.list('owner')).instances.some(
+        (row) => row.instanceId === instance.instanceId,
+      ),
+    ).toBe(true);
+  });
+
+  it('rejects a claim committed after deletion without creating an orphan', async () => {
+    const { db, registry } = setup();
+    const repository = new AgentInstancePowerSyncRepository(db);
+    await registry.execute('owner', { action: 'create', instance });
+    await repository.remove('owner', instance.instanceId, 1);
+    await expect(
+      repository.claimConversationInstance('owner', 'racing-chat', instance.instanceId),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect(await repository.getConversationInstance('owner', 'racing-chat')).toBeNull();
+  });
+
   it('claims a new conversation to one enabled Mastra instance and refuses cross-agent fallback', async () => {
     const { db, registry } = setup('desktop');
     await db.execute(
@@ -164,6 +196,19 @@ describe('Agent registry with real SQLite persistence', () => {
     ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
     await registry.assertTurnSelection(valid);
     await registry.assertTurnSelection(valid);
+    expect(
+      await registry.execute('owner', { action: 'conversation_selection', conversationId: 'new' }),
+    ).toEqual({
+      agentInstanceId: 'mastra-anyrouter',
+      providerId: 'provider-1',
+      modelId: 'model-1',
+    });
+    expect(
+      await registry.execute('someone', {
+        action: 'conversation_selection',
+        conversationId: 'new',
+      }),
+    ).toBeNull();
     const reopened = new AgentInstanceRegistry(new AgentInstancePowerSyncRepository(db), 'desktop');
     expect(
       await new AgentInstancePowerSyncRepository(db).getConversationInstance('owner', 'new'),
@@ -288,5 +333,108 @@ describe('Agent registry with real SQLite persistence', () => {
         patch: { name: 'Intrusion' },
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+  it('removes an unreferenced native instance with CAS but protects its existing conversation', async () => {
+    const { db, registry } = setup();
+    const local = new LocalAgentRepository(db);
+    const created = await local.createConnection('owner', {
+      driver: 'codex',
+      name: 'Work',
+      instanceSlug: 'codex-work',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: [],
+    });
+    await registry.execute('owner', {
+      action: 'remove',
+      instanceId: 'codex-work',
+      expectedRevision: 1,
+    });
+    expect(await local.listConnections('owner')).toEqual([]);
+    const protectedConnection = await local.createConnection('owner', {
+      driver: 'codex',
+      name: 'Work',
+      instanceSlug: 'codex-work',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: [],
+    });
+    await local.createConversation('owner', {
+      connectionId: protectedConnection.id,
+      modelId: 'm',
+      name: 'Keep',
+    });
+    await expect(
+      registry.execute('owner', {
+        action: 'remove',
+        instanceId: 'codex-work',
+        expectedRevision: 1,
+      }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect((await local.listConnections('owner'))[0]?.id).toBe(protectedConnection.id);
+    expect(protectedConnection.id).not.toBe(created.id);
+  });
+
+  it('projects colliding old default slugs into distinct stable identities without losing UUIDs', async () => {
+    const { db, registry } = setup();
+    const local = new LocalAgentRepository(db);
+    const input = {
+      driver: 'codex' as const,
+      name: 'Same',
+      executablePath: 'codex',
+      enabled: true,
+      writeScopes: [],
+    };
+    const first = await local.createConnection('owner', { ...input, instanceSlug: 'codex' });
+    const second = await local.createConnection('owner', {
+      ...input,
+      instanceSlug: 'codex-default',
+    });
+    const snapshot = await registry.list('owner');
+    const native = snapshot.instances.filter((entry) => entry.legacyConnectionId);
+    expect(native).toHaveLength(2);
+    expect(new Set(native.map((entry) => entry.instanceId)).size).toBe(2);
+    expect(native.find((entry) => entry.instanceId === 'codex')?.legacyConnectionId).toBe(first.id);
+    expect(native.map((entry) => entry.legacyConnectionId).sort()).toEqual(
+      [first.id, second.id].sort(),
+    );
+    expect(await registry.list('owner')).toEqual(snapshot);
+    const secondIdentity = native.find(
+      (entry) => entry.legacyConnectionId === second.id,
+    )?.instanceId;
+    await registry.execute('owner', { action: 'remove', instanceId: 'codex', expectedRevision: 1 });
+    expect(
+      (await registry.list('owner')).instances.find(
+        (entry) => entry.legacyConnectionId === second.id,
+      )?.instanceId,
+    ).toBe(secondIdentity);
+  });
+
+  it('imports late-synced legacy Mastra services once without changing old providers or conversations', async () => {
+    const { db, registry } = setup();
+    await registry.list('owner');
+    await db.execute(
+      'INSERT INTO ai_provider_configs (id, identity_id, name, default_model, is_default) VALUES (?, ?, ?, ?, ?)',
+      ['old-provider', 'owner', 'Original', 'old-model', 1],
+    );
+    const imported = await registry.list('owner');
+    expect(imported.instances.find((entry) => entry.instanceId === 'mastra')).toMatchObject({
+      revision: 1,
+    });
+    expect(imported.bindings).toEqual([
+      { instanceId: 'mastra', connectionId: 'old-provider', modelId: 'old-model' },
+    ]);
+    await registry.execute('owner', {
+      action: 'unbind',
+      instanceId: 'mastra',
+      expectedRevision: 1,
+      connectionId: 'old-provider',
+    });
+    expect((await registry.list('owner')).bindings).toEqual([]);
+    expect((await registry.list('someone')).bindings).toEqual([]);
+    expect(await db.getAll('SELECT id,name,default_model FROM ai_provider_configs')).toEqual([
+      { id: 'old-provider', name: 'Original', default_model: 'old-model' },
+    ]);
+    expect(await db.getAll('SELECT * FROM ai_agent_conversation_bindings')).toEqual([]);
   });
 });

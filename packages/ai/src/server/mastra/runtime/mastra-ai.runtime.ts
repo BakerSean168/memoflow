@@ -1,3 +1,4 @@
+import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime';
 import { applyMemoFlowSessionToolPolicy, memoFlowToolCategory } from '../tools/product-tool-policy';
 import { AgentController } from '@mastra/core/agent-controller';
@@ -20,6 +21,7 @@ import {
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   AIUsageSummary,
+  AIModelSelectionInput,
   IAIExecutionRecordPort,
   IAIUsageReadPort,
   IAIRoutineCommandPort,
@@ -206,6 +208,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       agentControllers: { assistant: this.controller },
     });
     this.durableWorkflows = new MastraDurableWorkflowRuntime({
+      agentRegistry: deps.agentRegistry,
       storage: deps.storage,
       history: this.history,
       usageReadPort: deps.usageReadPort,
@@ -213,6 +216,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       taskCreateWorkflow: this.taskCreateWorkflow,
       knowledgeCaptureWorkflow: this.knowledgeCaptureWorkflow,
     });
+  }
+
+  async assertModelSelection(input: AIModelSelectionInput): Promise<void> {
+    await this.deps.modelResolver.resolve(input);
   }
 
   async init(): Promise<void> {
@@ -364,7 +371,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           providerId: input.providerId,
           modelId: input.modelId,
         });
-      } catch {
+      } catch (cause) {
+        if (!(cause instanceof AgentRegistryError)) throw cause;
         throw new AIExecutionError(
           'configuration_required',
           'Selected Agent instance is unavailable or its model is not bound',

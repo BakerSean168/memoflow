@@ -1,15 +1,16 @@
+import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { AiProviderConfigId } from '../../../primitives';
 import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
-import {
-  KnowledgeCitationSchema,
-  QueryKnowledgeResSchema,
-} from './response-schemas';
+import { KnowledgeCitationSchema, QueryKnowledgeResSchema } from './response-schemas';
 
 export const QueryKnowledgeSchema = z.object({
   query: z.string().trim().min(3).max(2000),
   providerId: brandedId<AiProviderConfigId>().optional(),
+  agentInstanceId: AgentInstanceSlugSchema.optional(),
+  conversationId: z.string().min(1).optional(),
+  modelId: z.string().min(1).max(512).optional(),
   maxResources: z.number().int().min(1).max(20).optional(),
 });
 

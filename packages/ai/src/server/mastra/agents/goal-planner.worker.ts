@@ -188,6 +188,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
         if (!identityId) throw new Error('Goal Planner requires authenticated identityId');
         const resolved = await modelResolver.resolve({
           identityId,
+          agentInstanceId: stringContext(requestContext, 'agentInstanceId'),
           providerId: stringContext(requestContext, 'providerId'),
           modelId: stringContext(requestContext, 'modelId'),
           executionRequirement: {

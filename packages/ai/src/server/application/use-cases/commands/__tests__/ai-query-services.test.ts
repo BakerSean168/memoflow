@@ -1,3 +1,6 @@
+import { AIExecutionError } from '../../../../../shared/ai-execution-error';
+import { AgentRegistryError } from '../../../agent-instance/agent-instance.repository';
+import { assertKnowledgeAgentSelection } from '../ai-provider-resolution';
 import { describe, expect, it, vi } from 'vitest';
 import {
   type ExpandKnowledgeReq,
@@ -921,3 +924,106 @@ describe('AI knowledge auto-index runtime', () => {
     );
   });
 });
+
+describe('Knowledge Agent selection authority', () => {
+  it('rejects an unbound Agent before reading provider credentials or querying notes', async () => {
+    const providers = createAIProviderConfigRepositoryStub();
+    const vault = createAIProviderSecretVaultStub();
+    const queryPort = new StubKnowledgeQueryPort();
+    const sync = new SyncRelevantKnowledgeUseCase(
+      new StubKnowledgeSourcePort(),
+      new StubKnowledgeIndexRepository(),
+      new StubKnowledgeIngestionPort(),
+    );
+    const assertModelBinding = vi.fn(async () => {
+      throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
+    });
+    const assertTurnSelection = vi.fn(async () => {
+      throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
+    });
+    const service = new QueryKnowledgeUseCase(providers, sync, queryPort, undefined, vault, {
+      assertModelBinding,
+      assertTurnSelection,
+    });
+    const resolve = vi.spyOn(vault, 'resolve');
+    const result = await service.execute(
+      {
+        query: 'Find notes',
+        providerId: 'p' as never,
+        modelId: 'selected-model',
+        agentInstanceId: 'mastra-work',
+        conversationId: 'chat',
+      },
+      { identityId: 'owner' },
+    );
+    expect(result).toMatchObject({ ok: false, error: { code: 'AI_CONFIGURATION_REQUIRED' } });
+    expect(assertTurnSelection).toHaveBeenCalledWith({
+      owner: 'owner',
+      conversationId: 'chat',
+      agentInstanceId: 'mastra-work',
+      providerId: 'p',
+      modelId: 'selected-model',
+    });
+    expect(resolve).not.toHaveBeenCalled();
+  });
+});
+
+it('preserves unknown Registry failures for the existing Knowledge failure boundary', async () => {
+  const cause = new Error('storage unavailable');
+  await expect(
+    assertKnowledgeAgentSelection(
+      { assertModelBinding: vi.fn().mockRejectedValue(cause), assertTurnSelection: vi.fn() },
+      'owner',
+      { agentInstanceId: 'mastra', providerId: 'p', modelId: 'm' },
+    ),
+  ).rejects.toBe(cause);
+});
+
+it.each([QueryKnowledgeUseCase, ExpandKnowledgeUseCase])(
+  'rejects unsupported Knowledge models through the canonical selection policy (%s)',
+  async (Service) => {
+    const providers = createAIProviderConfigRepositoryStub();
+    const vault = createAIProviderSecretVaultStub();
+    const source = new StubKnowledgeSourcePort();
+    const queryPort = new StubKnowledgeQueryPort();
+    const sync = new SyncRelevantKnowledgeUseCase(
+      source,
+      new StubKnowledgeIndexRepository(),
+      new StubKnowledgeIngestionPort(),
+    );
+    const assertModelSelection = vi
+      .fn()
+      .mockRejectedValue(new AIExecutionError('capability_unsupported', 'Chat is unsupported'));
+    const service = new Service(
+      providers,
+      sync,
+      queryPort,
+      undefined,
+      vault,
+      { assertModelBinding: vi.fn(), assertTurnSelection: vi.fn() },
+      { assertModelSelection },
+    );
+    const resolve = vi.spyOn(vault, 'resolve');
+    const query = vi.spyOn(queryPort, 'query');
+    const result = await service.execute(
+      {
+        query: 'Find notes',
+        instruction: 'Expand notes',
+        agentInstanceId: 'mastra',
+        providerId: 'p' as never,
+        modelId: 'selected-model',
+      },
+      { identityId: 'owner' },
+    );
+    expect(result).toMatchObject({ ok: false, error: { code: 'AI_CAPABILITY_UNSUPPORTED' } });
+    expect(assertModelSelection).toHaveBeenCalledWith({
+      identityId: 'owner',
+      agentInstanceId: 'mastra',
+      providerId: 'p',
+      modelId: 'selected-model',
+    });
+    expect(resolve).not.toHaveBeenCalled();
+    expect(source.listRelevantNotes).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
+  },
+);

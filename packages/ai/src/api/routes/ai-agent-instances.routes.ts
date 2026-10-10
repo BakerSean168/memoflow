@@ -7,6 +7,7 @@ import {
   errorResponse,
 } from '@memoflow/utils/result';
 import {
+  AgentConversationSelectionSchema,
   AgentInstanceSchema,
   AgentRegistrySnapshotSchema,
   AgentRegistryCommandSchema,
@@ -20,6 +21,7 @@ interface PlatformMiddleware {
 const AgentRegistryResultSchema = z.union([
   AgentInstanceSchema,
   AgentRegistrySnapshotSchema,
+  AgentConversationSelectionSchema,
   z.null(),
 ]);
 

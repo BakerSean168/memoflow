@@ -486,7 +486,11 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
 
   const providerServices: AIProviderServices = {
     update: new UpdateAIProviderUseCase(providerConfigRepository),
-    delete: new DeleteAIProviderUseCase(providerConfigRepository, dependencies.providerSecretVault, dependencies.agentInstanceRepository),
+    delete: new DeleteAIProviderUseCase(
+      providerConfigRepository,
+      dependencies.providerSecretVault,
+      dependencies.agentInstanceRepository,
+    ),
     get: new GetAIProviderUseCase(providerConfigRepository),
     list: new ListAIProvidersUseCase(providerConfigRepository),
     testConnection: new TestAIProviderConnectionUseCase(
@@ -576,6 +580,12 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
         }
       : null;
 
+  const agentRegistry = dependencies.agentInstanceRepository
+    ? new AgentInstanceRegistry(
+        dependencies.agentInstanceRepository,
+        dependencies.localAgentRuntime ? 'desktop' : 'web',
+      )
+    : null;
   const knowledgeQueryServices: AIKnowledgeQueryServices = hasKnowledgeIndexStack
     ? {
         isAvailable: true,
@@ -590,6 +600,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           knowledgeQueryPort,
           dependencies.executionRecordPort,
           dependencies.providerSecretVault,
+          agentRegistry ?? undefined,
+          dependencies.mastraRuntime,
         ),
         expand: new ExpandKnowledgeUseCase(
           providerConfigRepository,
@@ -602,6 +614,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           knowledgeQueryPort,
           dependencies.executionRecordPort,
           dependencies.providerSecretVault,
+          agentRegistry ?? undefined,
+          dependencies.mastraRuntime,
         ),
         reindex: new ReindexKnowledgeUseCase(
           providerConfigRepository,
@@ -787,12 +801,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
     localAgentRuntime: dependencies.localAgentRuntime ?? null,
-    agentRegistry: dependencies.agentInstanceRepository
-      ? new AgentInstanceRegistry(
-          dependencies.agentInstanceRepository,
-          dependencies.localAgentRuntime ? 'desktop' : 'web',
-        )
-      : null,
+    agentRegistry,
     workflowRuntime: dependencies.workflowRuntime ?? null,
     start(): Promise<void> | void {
       if (started) {

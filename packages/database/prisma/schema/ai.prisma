@@ -134,6 +134,8 @@ model AiAgentConversationBinding {
   identityId     String @map("identity_id")
   conversationId String @map("conversation_id")
   instanceId     String @map("instance_id")
+  providerId     String? @map("provider_id")
+  modelId        String? @map("model_id")
   conversation   AiConversation @relation(fields: [identityId, conversationId], references: [identityId, id], onDelete: Cascade)
   instance       AiAgentInstance @relation(fields: [identityId, instanceId], references: [identityId, instanceId], onDelete: Restrict)
 
@@ -221,4 +223,10 @@ model AiKnowledgeIndexEntry {
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
+}
+
+// Durable one-time cutover marker survives subsequent Prisma reconciliation.
+model AiAgentRegistryMigration {
+  id String @id
+  @@map("ai_agent_registry_migrations")
 }

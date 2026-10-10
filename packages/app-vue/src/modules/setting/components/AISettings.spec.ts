@@ -313,10 +313,28 @@ describe('Providers settings interactions', () => {
 });
 
 describe('Unified native Providers', () => {
+  it('keeps native wizard labels associated with its own inputs', async () => {
+    const { wrapper } = await setup(true);
+    await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
+    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    const inputs = wrapper.findAll('input[id]');
+    const ids = inputs.map((input) => input.attributes('id'));
+    expect(new Set(ids).size).toBe(ids.length);
+    const wizard = wrapper.get('[data-testid="ai-agent-wizard"]');
+    for (const label of wizard.findAll('label[for]')) {
+      expect(
+        wizard.findAll('input').some((input) => input.attributes('id') === label.attributes('for')),
+      ).toBe(true);
+    }
+    wrapper.unmount();
+  });
+
   it('rejects a whitespace-only native name before invoking the owner', async () => {
     const { wrapper, localClient } = await setup(true);
     await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('#ai-native-name').setValue('   ');
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('   ');
     expect(wrapper.get('[data-testid="ai-native-save"]').attributes('disabled')).toBeDefined();
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     expect(localClient.saveConnection).not.toHaveBeenCalled();
@@ -324,17 +342,22 @@ describe('Unified native Providers', () => {
   });
   it('shows API connections and all four native drivers in one list with one detail', async () => {
     const { wrapper } = await setup(true);
-    expect(wrapper.findAll('[data-testid="ai-provider-list"] [role="listitem"]')).toHaveLength(6);
+    expect(wrapper.findAll('[data-testid="ai-provider-list"] [role="listitem"]')).toHaveLength(10);
+    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
+      expect(wrapper.find(`[data-testid="ai-provider-select-slot:${driver}"]`).exists()).toBe(true);
+    }
     await wrapper.get('[data-testid="ai-provider-select-local:claude"]').trigger('click');
     expect(wrapper.findAll('[data-testid="ai-provider-detail"]')).toHaveLength(1);
-    expect((wrapper.get('#ai-native-name').element as HTMLInputElement).value).toBe('claude');
+    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
+      'claude',
+    );
     expect(wrapper.find('#ai-saved-provider-url').exists()).toBe(false);
     wrapper.unmount();
   });
   it('saves native configuration with its current revision and never calls API update', async () => {
     const { wrapper, localClient, client } = await setup(true);
     await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('#ai-native-name').setValue('Personal Codex');
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('Personal Codex');
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     await flushPromises();
     expect(localClient.saveConnection).toHaveBeenCalledWith(
@@ -352,10 +375,12 @@ describe('Unified native Providers', () => {
     const { wrapper, localClient } = await setup(true);
     localClient.saveConnection.mockRejectedValueOnce(new Error('Conflict'));
     await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('#ai-native-name').setValue('Unsaved');
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('Unsaved');
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     await flushPromises();
-    expect((wrapper.get('#ai-native-name').element as HTMLInputElement).value).toBe('Unsaved');
+    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
+      'Unsaved',
+    );
     expect(wrapper.find('[role="alert"]').exists()).toBe(true);
     wrapper.unmount();
   });
@@ -439,12 +464,14 @@ describe('Provider creation and composer integration', () => {
       return implementation(...args);
     });
     await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
-    await wrapper.get('#ai-native-name').setValue('Saved elsewhere');
+    await wrapper.get('[data-testid="ai-native-name"]').setValue('Saved elsewhere');
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     await wrapper.get('[data-testid="ai-provider-select-local:pi"]').trigger('click');
     release();
     await flushPromises();
-    expect((wrapper.get('#ai-native-name').element as HTMLInputElement).value).toBe('pi');
+    expect((wrapper.get('[data-testid="ai-native-name"]').element as HTMLInputElement).value).toBe(
+      'pi',
+    );
     expect(
       wrapper.get('[data-testid="ai-provider-select-local:pi"]').attributes('aria-current'),
     ).toBe('true');
@@ -611,7 +638,7 @@ describe('Agent defaults and wizard capabilities', () => {
     expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
       'Default native model',
     );
-    expect(wrapper.get('#ai-native-id').attributes('readonly')).toBeDefined();
+    expect(wrapper.get('[data-testid="ai-native-id"]').attributes('readonly')).toBeDefined();
     await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
     await flushPromises();
     expect(localClient.saveConnection).toHaveBeenCalledWith(
@@ -659,7 +686,9 @@ describe('Agent defaults and wizard capabilities', () => {
     await wrapper.get('#ai-instance-slug').setValue('codex-work');
     await wrapper.get('#ai-instance-name').setValue('Work');
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
-    await wrapper.get('[data-testid="ai-agent-wizard"] #ai-native-home').setValue('/work/home');
+    await wrapper
+      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-native-home"]')
+      .setValue('/work/home');
     await wrapper
       .get('[data-testid="ai-agent-wizard"]')
       .findAll('button')
@@ -668,8 +697,10 @@ describe('Agent defaults and wizard capabilities', () => {
     expect((wrapper.get('#ai-instance-slug').element as HTMLInputElement).value).toBe('codex-work');
     await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
     expect(
-      (wrapper.get('[data-testid="ai-agent-wizard"] #ai-native-home').element as HTMLInputElement)
-        .value,
+      (
+        wrapper.get('[data-testid="ai-agent-wizard"] [data-testid="ai-native-home"]')
+          .element as HTMLInputElement
+      ).value,
     ).toBe('/work/home');
     expect(localClient.saveConnection).not.toHaveBeenCalled();
     wrapper.unmount();

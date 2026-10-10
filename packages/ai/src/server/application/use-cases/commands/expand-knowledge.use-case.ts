@@ -1,3 +1,5 @@
+import { toAIPublicFailure } from '../../../../shared/ai-public-failure';
+import type { AgentInstanceRegistry } from '../../agent-instance/agent-instance.registry';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
@@ -8,6 +10,7 @@ import type { IAIProviderConfigRepository } from '../../../domain/repositories/i
 import type {
   KnowledgeExpansionResult,
   IAIExecutionRecordPort,
+  IAIModelSelectionValidationPort,
   IAIProviderSecretVault,
   IKnowledgeQueryPort,
 } from '../../ports';
@@ -18,6 +21,7 @@ import {
   withAICostEstimate,
 } from './ai-observability';
 import {
+  assertKnowledgeAgentSelection,
   resolveActiveProviderConfig,
   resolveProviderCredential,
   toChatExecutionProviderConfig,
@@ -35,6 +39,11 @@ export class ExpandKnowledgeUseCase {
     private readonly knowledgeQueryPort: IKnowledgeQueryPort,
     private readonly executionRecordPort?: IAIExecutionRecordPort,
     private readonly secretVault?: IAIProviderSecretVault,
+    private readonly agentRegistry?: Pick<
+      AgentInstanceRegistry,
+      'assertModelBinding' | 'assertTurnSelection'
+    >,
+    private readonly modelSelectionValidation?: IAIModelSelectionValidationPort,
   ) {}
 
   async execute(
@@ -49,13 +58,24 @@ export class ExpandKnowledgeUseCase {
     } = {};
 
     try {
+      await assertKnowledgeAgentSelection(
+        this.agentRegistry,
+        cx.identityId,
+        request,
+        this.modelSelectionValidation,
+      );
       const provider = await resolveActiveProviderConfig(
         this.providerConfigRepository,
         cx.identityId,
         request.providerId,
       );
-      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const credential = await resolveProviderCredential(
+        this.requireSecretVault(),
+        cx.identityId,
+        provider,
+      );
       const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
+        modelOverride: request.modelId,
         temperature: 0.2,
       });
       providerMetadata = {
@@ -121,7 +141,11 @@ export class ExpandKnowledgeUseCase {
         requestId,
       });
       const enriched = attachRequestIdToError(err, requestId);
-      return error('INTERNAL_ERROR', enriched.message);
+      const failure = toAIPublicFailure(enriched, {
+        fallbackCode: 'INTERNAL_ERROR',
+        fallbackMessage: 'Knowledge operation failed',
+      });
+      return error(failure.code, failure.message);
     }
   }
 

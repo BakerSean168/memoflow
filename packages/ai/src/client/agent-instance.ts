@@ -1,7 +1,9 @@
 import {
   AgentRegistryCommandSchema,
   AgentRegistrySnapshotSchema,
+  AgentConversationSelectionSchema,
   AgentInstanceSchema,
+  type AgentConversationSelection,
   type AgentInstance,
   type AgentRegistryCommand,
   type AgentRegistrySnapshot,
@@ -18,12 +20,15 @@ import type { z } from 'zod';
  */
 export interface AgentRegistryClient {
   list(): Promise<AgentRegistrySnapshot>;
+  conversationSelection?(conversationId: string): Promise<AgentConversationSelection | null>;
   execute(
     command: Exclude<AgentRegistryCommand, { action: 'list' }>,
-  ): Promise<AgentInstance | AgentRegistrySnapshot | null>;
+  ): Promise<AgentInstance | AgentRegistrySnapshot | AgentConversationSelection | null>;
 }
 
-const resultSchema = AgentInstanceSchema.or(AgentRegistrySnapshotSchema).nullable();
+const resultSchema = AgentInstanceSchema.or(AgentRegistrySnapshotSchema)
+  .or(AgentConversationSelectionSchema)
+  .nullable();
 function checked<T>(value: unknown, schema: z.ZodType<T>): T {
   return schema.parse(value);
 }
@@ -34,6 +39,12 @@ export function createAgentRegistryHttpClient(http: IResultHttpClient): AgentReg
       return checked(
         unwrapOrThrowError(await http.get('/ai/agent-instances')),
         AgentRegistrySnapshotSchema,
+      );
+    },
+    async conversationSelection(conversationId) {
+      return checked(
+        await this.execute({ action: 'conversation_selection', conversationId }),
+        AgentConversationSelectionSchema.nullable(),
       );
     },
     async execute(command) {
@@ -53,6 +64,12 @@ export function createAgentRegistryIpcClient(ipc: IResultIpcClient): AgentRegist
       return checked(
         unwrapOrThrowError(await ipc.invoke(AIChannels.AGENT_INSTANCE, { action: 'list' })),
         AgentRegistrySnapshotSchema,
+      );
+    },
+    async conversationSelection(conversationId) {
+      return checked(
+        await this.execute({ action: 'conversation_selection', conversationId }),
+        AgentConversationSelectionSchema.nullable(),
       );
     },
     async execute(command) {

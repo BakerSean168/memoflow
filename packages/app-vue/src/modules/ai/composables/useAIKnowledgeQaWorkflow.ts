@@ -65,6 +65,9 @@ export function useAIKnowledgeQaWorkflow(options: UseAIKnowledgeQaWorkflowOption
       const result = unwrap(
         await options.service.queryKnowledge({
           query: question,
+          agentInstanceId: options.selectedModel.value.agentInstanceId,
+          conversationId: options.chatConversationId.value || undefined,
+          modelId: options.selectedModel.value.modelId,
           providerId: options.selectedModel.value.providerId as never,
           maxResources: 8,
         }),

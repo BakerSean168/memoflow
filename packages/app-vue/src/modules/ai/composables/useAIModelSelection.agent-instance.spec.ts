@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { defineComponent, h, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { AgentRegistrySnapshotSchema } from '@memoflow/contracts/ai';
+import {
+  AgentRegistrySnapshotSchema,
+  type AgentConversationSelection,
+} from '@memoflow/contracts/ai';
 import { useAIModelSelection } from './useAIModelSelection';
 
 afterEach(() => localStorage.clear());
@@ -31,6 +34,7 @@ function mounted(input: {
   instances?: ReturnType<typeof instance>[];
   bindings?: Array<{ instanceId: string; connectionId: string; modelId: string }>;
   withRegistry?: boolean;
+  readConversationSelection?: (id: string) => Promise<AgentConversationSelection | null>;
 }) {
   const chatConversationId = ref(input.currentConversation ?? '');
   const providers = ref([provider]);
@@ -49,6 +53,7 @@ function mounted(input: {
       selection = useAIModelSelection({
         providers,
         chatConversationId,
+        readConversationSelection: input.readConversationSelection,
         ...(input.withRegistry === false ? {} : { agentRegistrySnapshot: registry }),
       });
       return () => h('div');
@@ -145,6 +150,61 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
       'provider-1::model-custom',
     ]);
     expect(selection.selectedModel.value?.agentInstanceId).toBeUndefined();
+    wrapper.unmount();
+  });
+  it('requires a new conversation before selecting another Agent and keeps the old selection intact', () => {
+    localStorage.setItem(
+      'ai:conversation-model-map',
+      JSON.stringify({ bound: 'agent:mastra::provider-1::model-default' }),
+    );
+    const { wrapper, selection } = mounted({ currentConversation: 'bound' });
+    expect(selection.selectModel('agent:mastra-anyrouter::provider-1::model-custom')).toBe(
+      'new_conversation_required',
+    );
+    expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra');
+    expect(JSON.parse(localStorage.getItem('ai:conversation-model-map') || '{}').bound).toBe(
+      'agent:mastra::provider-1::model-default',
+    );
+    expect(selection.selectModel('unknown')).toBe('unavailable');
+    wrapper.unmount();
+  });
+  it('restores the exact host selection after losing browser-local state and keeps authority while loading', async () => {
+    const { wrapper, selection } = mounted({
+      currentConversation: 'restored',
+      readConversationSelection: async () => ({
+        agentInstanceId: 'mastra-anyrouter',
+        providerId: 'provider-1',
+        modelId: 'model-custom',
+      }),
+    });
+    expect(selection.canSendMessage.value).toBe(false);
+    expect(selection.selectModel('agent:mastra::provider-1::model-default')).toBe('unavailable');
+    await nextTick();
+    expect(selection.selectedModel.value).toMatchObject({
+      agentInstanceId: 'mastra-anyrouter',
+      modelId: 'model-custom',
+    });
+    expect(selection.canSendMessage.value).toBe(true);
+    expect(selection.selectModel('agent:mastra::provider-1::model-default')).toBe(
+      'new_conversation_required',
+    );
+    wrapper.unmount();
+  });
+
+  it('disables sends if the host selection cannot be loaded even with a valid local model cache', async () => {
+    localStorage.setItem(
+      'ai:conversation-model-map',
+      JSON.stringify({ restored: 'agent:mastra::provider-1::model-default' }),
+    );
+    const { wrapper, selection } = mounted({
+      currentConversation: 'restored',
+      readConversationSelection: async () => {
+        throw new Error('offline');
+      },
+    });
+    await nextTick();
+    expect(selection.canSendMessage.value).toBe(false);
+    expect(selection.selectModel('agent:mastra::provider-1::model-default')).toBe('unavailable');
     wrapper.unmount();
   });
 });

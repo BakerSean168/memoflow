@@ -1,5 +1,8 @@
+import { LocalAgentError } from '../../shared/local-agent-error';
+import { toAIPublicFailure } from '../../shared/ai-public-failure';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import {
+  type AgentConversationSelection,
   AgentRegistryCommandSchema,
   type AgentInstance,
   type AgentRegistrySnapshot,
@@ -24,7 +27,7 @@ export class AgentInstanceController {
   async execute(
     input: unknown,
     cx: ExecutionContext,
-  ): Promise<Result<AgentInstance | AgentRegistrySnapshot | null>> {
+  ): Promise<Result<AgentInstance | AgentRegistrySnapshot | AgentConversationSelection | null>> {
     if (!this.registry)
       return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Agent registry is unavailable' });
     const command = AgentRegistryCommandSchema.safeParse(input);
@@ -40,6 +43,13 @@ export class AgentInstanceController {
     if (cause instanceof AgentRegistryError) {
       const code = cause.code === 'AI_CONFIGURATION_REQUIRED' ? 'VALIDATION_ERROR' : cause.code;
       return fail({ code, message: cause.message });
+    }
+    if (cause instanceof LocalAgentError) {
+      const failure = toAIPublicFailure(cause, {
+        fallbackCode: 'INTERNAL_ERROR',
+        fallbackMessage: 'Agent registry operation failed',
+      });
+      return fail({ code: failure.code, message: failure.message });
     }
     return fail({ code: 'INTERNAL_ERROR', message: 'Agent registry operation failed' });
   }

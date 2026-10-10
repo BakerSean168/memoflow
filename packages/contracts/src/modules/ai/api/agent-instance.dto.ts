@@ -63,12 +63,24 @@ export const AgentRegistrySnapshotSchema = z
   })
   .strict();
 export type AgentRegistrySnapshot = z.infer<typeof AgentRegistrySnapshotSchema>;
+export const AgentConversationSelectionSchema = z
+  .object({
+    agentInstanceId: AgentInstanceSlugSchema,
+    providerId: z.string().min(1).nullable(),
+    modelId: z.string().min(1).nullable(),
+  })
+  .strict();
+export type AgentConversationSelection = z.infer<typeof AgentConversationSelectionSchema>;
+
 const cas = {
   instanceId: AgentInstanceSlugSchema,
   expectedRevision: z.number().int().nonnegative(),
 };
 export const AgentRegistryCommandSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('list') }).strict(),
+  z
+    .object({ action: z.literal('conversation_selection'), conversationId: z.string().min(1) })
+    .strict(),
   z.object({ action: z.literal('create'), instance: CreateAgentInstanceSchema }).strict(),
   z.object({ action: z.literal('update'), ...cas, patch: UpdateAgentInstanceSchema }).strict(),
   z.object({ action: z.literal('remove'), ...cas }).strict(),

@@ -1,3 +1,4 @@
+import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
 
@@ -32,6 +33,7 @@ export const KnowledgeCaptureWorkflowInputSchema = KnowledgeCaptureClientInputSc
   identityId: z.string().min(1),
   conversationId: z.string().min(1),
   locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
+  agentInstanceId: AgentInstanceSlugSchema.optional(),
   providerId: z.string().min(1).optional(),
   modelId: z.string().min(1).optional(),
 }).strict();

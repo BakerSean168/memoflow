@@ -2,6 +2,7 @@ import {
   AgentRegistryCommandSchema,
   AgentInstanceSchema,
   AgentRegistrySnapshotSchema,
+  type AgentConversationSelection,
   type AgentDriverKind,
   type AgentInstance,
   type AgentRegistryCommand,
@@ -44,9 +45,11 @@ export class AgentInstanceRegistry {
   async execute(
     owner: string,
     command: AgentRegistryCommand,
-  ): Promise<AgentRegistrySnapshot | AgentInstance | null> {
+  ): Promise<AgentRegistrySnapshot | AgentInstance | AgentConversationSelection | null> {
     const input = AgentRegistryCommandSchema.parse(command);
     if (input.action === 'list') return this.list(owner);
+    if (input.action === 'conversation_selection')
+      return this.repository.getConversationSelection(owner, input.conversationId);
     if (input.action === 'create') {
       this.assertDriver(input.instance.driver);
       if (
@@ -150,7 +153,13 @@ export class AgentInstanceRegistry {
       return;
     }
     await this.assertModelBinding(owner, agentInstanceId, providerId, modelId);
-    await this.repository.claimConversationInstance(owner, conversationId, agentInstanceId);
+    await this.repository.claimConversationInstance(
+      owner,
+      conversationId,
+      agentInstanceId,
+      providerId ?? undefined,
+      modelId ?? undefined,
+    );
   }
 
   private assertDriver(driver: AgentDriverKind) {

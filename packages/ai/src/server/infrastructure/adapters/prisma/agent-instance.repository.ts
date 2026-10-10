@@ -1,5 +1,7 @@
 import type { Prisma, PrismaClient, AiAgentInstance as PrismaAgent } from '@memoflow/database';
 import {
+  AgentConversationSelectionSchema,
+  type AgentConversationSelection,
   AgentInstanceSchema,
   AgentInstanceModelBindingSchema,
   type AgentInstance,
@@ -161,10 +163,16 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
   }
 
   async remove(owner: string, instanceId: string, expectedRevision: number): Promise<void> {
-    const deleted = await this.prisma.aiAgentInstance.deleteMany({
-      where: { identityId: owner, instanceId, revision: expectedRevision },
-    });
-    if (deleted.count !== 1) throw new AgentRegistryError('CONFLICT');
+    try {
+      const deleted = await this.prisma.aiAgentInstance.deleteMany({
+        where: { identityId: owner, instanceId, revision: expectedRevision },
+      });
+      if (deleted.count !== 1) throw new AgentRegistryError('CONFLICT');
+    } catch (cause) {
+      if (cause && typeof cause === 'object' && 'code' in cause && cause.code === 'P2003')
+        throw new AgentRegistryError('CONFLICT');
+      throw cause;
+    }
   }
 
   async hasConversationBindings(owner: string, instanceId: string): Promise<boolean> {
@@ -182,22 +190,56 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
     });
     return row?.instanceId ?? null;
   }
+  async getConversationSelection(
+    owner: string,
+    conversationId: string,
+  ): Promise<AgentConversationSelection | null> {
+    const row = await this.prisma.aiAgentConversationBinding.findUnique({
+      where: { identityId_conversationId: { identityId: owner, conversationId } },
+      select: { instanceId: true, providerId: true, modelId: true },
+    });
+    return row
+      ? AgentConversationSelectionSchema.parse({
+          agentInstanceId: row.instanceId,
+          providerId: row.providerId,
+          modelId: row.modelId,
+        })
+      : null;
+  }
   async claimConversationInstance(
     owner: string,
     conversationId: string,
     instanceId: string,
+    providerId?: string,
+    modelId?: string,
   ): Promise<void> {
     try {
-      const row = await this.prisma.aiAgentConversationBinding.upsert({
-        where: { identityId_conversationId: { identityId: owner, conversationId } },
-        create: { identityId: owner, conversationId, instanceId },
-        update: {},
+      await this.prisma.$transaction(async (tx) => {
+        const row = await tx.aiAgentConversationBinding.upsert({
+          where: { identityId_conversationId: { identityId: owner, conversationId } },
+          create: { identityId: owner, conversationId, instanceId },
+          update: {},
+        });
+        if (row.instanceId !== instanceId) throw new AgentRegistryError('CONFLICT');
+        if (providerId && modelId)
+          await tx.aiAgentConversationBinding.update({
+            where: { id: row.id },
+            data: { providerId, modelId },
+          });
       });
-      if (row.instanceId !== instanceId) throw new AgentRegistryError('CONFLICT');
     } catch (cause) {
       if (isUniqueViolation(cause)) {
         const claimed = await this.getConversationInstance(owner, conversationId);
-        if (claimed === instanceId) return;
+        if (claimed === instanceId) {
+          if (providerId && modelId) {
+            const updated = await this.prisma.aiAgentConversationBinding.updateMany({
+              where: { identityId: owner, conversationId, instanceId },
+              data: { providerId, modelId },
+            });
+            if (updated.count !== 1) throw new AgentRegistryError('CONFLICT');
+          }
+          return;
+        }
         throw new AgentRegistryError('CONFLICT');
       }
       throw cause;

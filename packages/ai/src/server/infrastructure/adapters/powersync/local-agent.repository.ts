@@ -189,11 +189,22 @@ export class LocalAgentRepository {
       return next;
     });
   }
-  async deleteConnection(owner: string, id: string): Promise<void> {
-    await this.db.execute(
-      'DELETE FROM ai_local_agent_connections WHERE id = ? AND identity_id = ?',
-      [id, owner],
-    );
+  async deleteConnection(owner: string, id: string, expectedRevision?: number): Promise<void> {
+    await this.db.writeTransaction(async (tx) => {
+      const connection = await this.getConnection(owner, id, tx);
+      if (expectedRevision !== undefined && connection.revision !== expectedRevision)
+        throw new LocalAgentError('CONFLICT');
+      const conversations = await tx.getAll<unknown>(
+        'SELECT record_json FROM ai_local_conversations WHERE identity_id = ?',
+        [owner],
+      );
+      if (conversations.some((row) => decode(row, StoredConversationSchema).connectionId === id))
+        throw new LocalAgentError('CONFLICT');
+      await tx.execute('DELETE FROM ai_local_agent_connections WHERE id = ? AND identity_id = ?', [
+        id,
+        owner,
+      ]);
+    });
   }
   async createConversation(
     owner: string,

@@ -11,6 +11,7 @@ export default defineConfig({
     'scripts/prepare-notification-preference-hierarchy.ts',
     'scripts/prepare-vnext-unique-constraints.ts',
     'scripts/prepare-ai-provider-onboarding-sessions.ts',
+    'scripts/prepare-ai-agent-registry.ts',
     'scripts/prepare-ai-provider-default-invariant.ts',
     'scripts/prepare-knowledge-stable-document-identity-cutover.ts',
     'scripts/ensure-task-goal-binding-constraint.ts',

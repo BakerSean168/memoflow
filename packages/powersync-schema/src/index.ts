@@ -775,13 +775,31 @@ const task_goal_outbox = new Table({
 // Schema Export
 // ──────────────────────────────────────────────
 
+// Per-connection import ledger handles delayed PowerSync hydration without resurrecting removed bindings.
+const ai_agent_model_service_migrations = new Table(
+  { identity_id: column.text, connection_id: column.text },
+  { localOnly: true },
+);
+
+// Immutable UUID-to-instance mapping only; native config remains in LocalAgentRepository.
+const ai_agent_native_mappings = new Table(
+  { identity_id: column.text, connection_id: column.text, instance_id: column.text },
+  { localOnly: true },
+);
+
 // Unified Agent instance registry is Profile-local; no credentials or checkpoints are stored.
 const ai_agent_instances = new Table(
   { identity_id: column.text, record_json: column.text },
   { localOnly: true },
 );
 const ai_agent_conversation_bindings = new Table(
-  { identity_id: column.text, conversation_id: column.text, instance_id: column.text },
+  {
+    identity_id: column.text,
+    conversation_id: column.text,
+    instance_id: column.text,
+    provider_id: column.text,
+    model_id: column.text,
+  },
   { localOnly: true },
 );
 const ai_agent_instance_bindings = new Table(
@@ -860,6 +878,8 @@ export const PowerSyncAppSchema = new Schema({
   notification_preferences,
   // AI
   ai_conversations,
+  ai_agent_model_service_migrations,
+  ai_agent_native_mappings,
   ai_agent_instances,
   ai_agent_instance_bindings,
   ai_agent_conversation_bindings,

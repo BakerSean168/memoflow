@@ -70,6 +70,11 @@ export type AiProviderSecret = $Result.DefaultSelection<Prisma.$AiProviderSecret
  */
 export type AiKnowledgeIndexEntry = $Result.DefaultSelection<Prisma.$AiKnowledgeIndexEntryPayload>
 /**
+ * Model AiAgentRegistryMigration
+ *
+ */
+export type AiAgentRegistryMigration = $Result.DefaultSelection<Prisma.$AiAgentRegistryMigrationPayload>
+/**
  * Model CloudAuthUser
  *
  */
@@ -702,6 +707,16 @@ export class PrismaClient<
     * ```
     */
   get aiKnowledgeIndexEntry(): Prisma.AiKnowledgeIndexEntryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAgentRegistryMigration`: Exposes CRUD operations for the **AiAgentRegistryMigration** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAgentRegistryMigrations
+    * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany()
+    * ```
+    */
+  get aiAgentRegistryMigration(): Prisma.AiAgentRegistryMigrationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cloudAuthUser`: Exposes CRUD operations for the **CloudAuthUser** model.
@@ -1929,6 +1944,7 @@ export namespace Prisma {
     AiProviderOnboardingSession: 'AiProviderOnboardingSession',
     AiProviderSecret: 'AiProviderSecret',
     AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
+    AiAgentRegistryMigration: 'AiAgentRegistryMigration',
     CloudAuthUser: 'CloudAuthUser',
     CloudAuthSession: 'CloudAuthSession',
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
@@ -2021,7 +2037,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2762,6 +2778,80 @@ export namespace Prisma {
           count: {
             args: Prisma.AiKnowledgeIndexEntryCountArgs<ExtArgs>
             result: $Utils.Optional<AiKnowledgeIndexEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiAgentRegistryMigration: {
+        payload: Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>
+        fields: Prisma.AiAgentRegistryMigrationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAgentRegistryMigrationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAgentRegistryMigrationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          findMany: {
+            args: Prisma.AiAgentRegistryMigrationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          create: {
+            args: Prisma.AiAgentRegistryMigrationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          createMany: {
+            args: Prisma.AiAgentRegistryMigrationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAgentRegistryMigrationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          update: {
+            args: Prisma.AiAgentRegistryMigrationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAgentRegistryMigrationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAgentRegistryMigrationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAgentRegistryMigrationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAgentRegistryMigrationPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAgentRegistryMigrationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAgentRegistryMigration>
+          }
+          groupBy: {
+            args: Prisma.AiAgentRegistryMigrationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentRegistryMigrationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAgentRegistryMigrationCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAgentRegistryMigrationCountAggregateOutputType> | number
           }
         }
       }
@@ -8596,6 +8686,7 @@ export namespace Prisma {
     aiProviderOnboardingSession?: AiProviderOnboardingSessionOmit
     aiProviderSecret?: AiProviderSecretOmit
     aiKnowledgeIndexEntry?: AiKnowledgeIndexEntryOmit
+    aiAgentRegistryMigration?: AiAgentRegistryMigrationOmit
     cloudAuthUser?: CloudAuthUserOmit
     cloudAuthSession?: CloudAuthSessionOmit
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
@@ -18279,6 +18370,8 @@ export namespace Prisma {
     identityId: string | null
     conversationId: string | null
     instanceId: string | null
+    providerId: string | null
+    modelId: string | null
   }
 
   export type AiAgentConversationBindingMaxAggregateOutputType = {
@@ -18286,6 +18379,8 @@ export namespace Prisma {
     identityId: string | null
     conversationId: string | null
     instanceId: string | null
+    providerId: string | null
+    modelId: string | null
   }
 
   export type AiAgentConversationBindingCountAggregateOutputType = {
@@ -18293,6 +18388,8 @@ export namespace Prisma {
     identityId: number
     conversationId: number
     instanceId: number
+    providerId: number
+    modelId: number
     _all: number
   }
 
@@ -18302,6 +18399,8 @@ export namespace Prisma {
     identityId?: true
     conversationId?: true
     instanceId?: true
+    providerId?: true
+    modelId?: true
   }
 
   export type AiAgentConversationBindingMaxAggregateInputType = {
@@ -18309,6 +18408,8 @@ export namespace Prisma {
     identityId?: true
     conversationId?: true
     instanceId?: true
+    providerId?: true
+    modelId?: true
   }
 
   export type AiAgentConversationBindingCountAggregateInputType = {
@@ -18316,6 +18417,8 @@ export namespace Prisma {
     identityId?: true
     conversationId?: true
     instanceId?: true
+    providerId?: true
+    modelId?: true
     _all?: true
   }
 
@@ -18396,6 +18499,8 @@ export namespace Prisma {
     identityId: string
     conversationId: string
     instanceId: string
+    providerId: string | null
+    modelId: string | null
     _count: AiAgentConversationBindingCountAggregateOutputType | null
     _min: AiAgentConversationBindingMinAggregateOutputType | null
     _max: AiAgentConversationBindingMaxAggregateOutputType | null
@@ -18420,6 +18525,8 @@ export namespace Prisma {
     identityId?: boolean
     conversationId?: boolean
     instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
     conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
     instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["aiAgentConversationBinding"]>
@@ -18429,6 +18536,8 @@ export namespace Prisma {
     identityId?: boolean
     conversationId?: boolean
     instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
     conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
     instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["aiAgentConversationBinding"]>
@@ -18438,6 +18547,8 @@ export namespace Prisma {
     identityId?: boolean
     conversationId?: boolean
     instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
     conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
     instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["aiAgentConversationBinding"]>
@@ -18447,9 +18558,11 @@ export namespace Prisma {
     identityId?: boolean
     conversationId?: boolean
     instanceId?: boolean
+    providerId?: boolean
+    modelId?: boolean
   }
 
-  export type AiAgentConversationBindingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "conversationId" | "instanceId", ExtArgs["result"]["aiAgentConversationBinding"]>
+  export type AiAgentConversationBindingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "conversationId" | "instanceId" | "providerId" | "modelId", ExtArgs["result"]["aiAgentConversationBinding"]>
   export type AiAgentConversationBindingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
     instance?: boolean | AiAgentInstanceDefaultArgs<ExtArgs>
@@ -18474,6 +18587,8 @@ export namespace Prisma {
       identityId: string
       conversationId: string
       instanceId: string
+      providerId: string | null
+      modelId: string | null
     }, ExtArgs["result"]["aiAgentConversationBinding"]>
     composites: {}
   }
@@ -18903,6 +19018,8 @@ export namespace Prisma {
     readonly identityId: FieldRef<"AiAgentConversationBinding", 'String'>
     readonly conversationId: FieldRef<"AiAgentConversationBinding", 'String'>
     readonly instanceId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly providerId: FieldRef<"AiAgentConversationBinding", 'String'>
+    readonly modelId: FieldRef<"AiAgentConversationBinding", 'String'>
   }
 
 
@@ -22856,6 +22973,954 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiKnowledgeIndexEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAgentRegistryMigration
+   */
+
+  export type AggregateAiAgentRegistryMigration = {
+    _count: AiAgentRegistryMigrationCountAggregateOutputType | null
+    _min: AiAgentRegistryMigrationMinAggregateOutputType | null
+    _max: AiAgentRegistryMigrationMaxAggregateOutputType | null
+  }
+
+  export type AiAgentRegistryMigrationMinAggregateOutputType = {
+    id: string | null
+  }
+
+  export type AiAgentRegistryMigrationMaxAggregateOutputType = {
+    id: string | null
+  }
+
+  export type AiAgentRegistryMigrationCountAggregateOutputType = {
+    id: number
+    _all: number
+  }
+
+
+  export type AiAgentRegistryMigrationMinAggregateInputType = {
+    id?: true
+  }
+
+  export type AiAgentRegistryMigrationMaxAggregateInputType = {
+    id?: true
+  }
+
+  export type AiAgentRegistryMigrationCountAggregateInputType = {
+    id?: true
+    _all?: true
+  }
+
+  export type AiAgentRegistryMigrationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentRegistryMigration to aggregate.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAgentRegistryMigrations
+    **/
+    _count?: true | AiAgentRegistryMigrationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAgentRegistryMigrationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAgentRegistryMigrationMaxAggregateInputType
+  }
+
+  export type GetAiAgentRegistryMigrationAggregateType<T extends AiAgentRegistryMigrationAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAgentRegistryMigration]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAgentRegistryMigration[P]>
+      : GetScalarType<T[P], AggregateAiAgentRegistryMigration[P]>
+  }
+
+
+
+
+  export type AiAgentRegistryMigrationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAgentRegistryMigrationWhereInput
+    orderBy?: AiAgentRegistryMigrationOrderByWithAggregationInput | AiAgentRegistryMigrationOrderByWithAggregationInput[]
+    by: AiAgentRegistryMigrationScalarFieldEnum[] | AiAgentRegistryMigrationScalarFieldEnum
+    having?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAgentRegistryMigrationCountAggregateInputType | true
+    _min?: AiAgentRegistryMigrationMinAggregateInputType
+    _max?: AiAgentRegistryMigrationMaxAggregateInputType
+  }
+
+  export type AiAgentRegistryMigrationGroupByOutputType = {
+    id: string
+    _count: AiAgentRegistryMigrationCountAggregateOutputType | null
+    _min: AiAgentRegistryMigrationMinAggregateOutputType | null
+    _max: AiAgentRegistryMigrationMaxAggregateOutputType | null
+  }
+
+  type GetAiAgentRegistryMigrationGroupByPayload<T extends AiAgentRegistryMigrationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAgentRegistryMigrationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAgentRegistryMigrationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAgentRegistryMigrationGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAgentRegistryMigrationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAgentRegistryMigrationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+  }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type AiAgentRegistryMigrationSelectScalar = {
+    id?: boolean
+  }
+
+  export type AiAgentRegistryMigrationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id", ExtArgs["result"]["aiAgentRegistryMigration"]>
+
+  export type $AiAgentRegistryMigrationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAgentRegistryMigration"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+    }, ExtArgs["result"]["aiAgentRegistryMigration"]>
+    composites: {}
+  }
+
+  type AiAgentRegistryMigrationGetPayload<S extends boolean | null | undefined | AiAgentRegistryMigrationDefaultArgs> = $Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload, S>
+
+  type AiAgentRegistryMigrationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAgentRegistryMigrationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAgentRegistryMigrationCountAggregateInputType | true
+    }
+
+  export interface AiAgentRegistryMigrationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAgentRegistryMigration'], meta: { name: 'AiAgentRegistryMigration' } }
+    /**
+     * Find zero or one AiAgentRegistryMigration that matches the filter.
+     * @param {AiAgentRegistryMigrationFindUniqueArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAgentRegistryMigrationFindUniqueArgs>(args: SelectSubset<T, AiAgentRegistryMigrationFindUniqueArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAgentRegistryMigration that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAgentRegistryMigrationFindUniqueOrThrowArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAgentRegistryMigrationFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentRegistryMigration that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindFirstArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAgentRegistryMigrationFindFirstArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindFirstArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAgentRegistryMigration that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindFirstOrThrowArgs} args - Arguments to find a AiAgentRegistryMigration
+     * @example
+     * // Get one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAgentRegistryMigrationFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAgentRegistryMigrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAgentRegistryMigrations
+     * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany()
+     *
+     * // Get first 10 AiAgentRegistryMigrations
+     * const aiAgentRegistryMigrations = await prisma.aiAgentRegistryMigration.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAgentRegistryMigrationFindManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationCreateArgs} args - Arguments to create a AiAgentRegistryMigration.
+     * @example
+     * // Create one AiAgentRegistryMigration
+     * const AiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.create({
+     *   data: {
+     *     // ... data to create a AiAgentRegistryMigration
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAgentRegistryMigrationCreateArgs>(args: SelectSubset<T, AiAgentRegistryMigrationCreateArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAgentRegistryMigrations.
+     * @param {AiAgentRegistryMigrationCreateManyArgs} args - Arguments to create many AiAgentRegistryMigrations.
+     * @example
+     * // Create many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAgentRegistryMigrationCreateManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAgentRegistryMigrations and returns the data saved in the database.
+     * @param {AiAgentRegistryMigrationCreateManyAndReturnArgs} args - Arguments to create many AiAgentRegistryMigrations.
+     * @example
+     * // Create many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAgentRegistryMigrations and only return the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAgentRegistryMigrationCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationDeleteArgs} args - Arguments to delete one AiAgentRegistryMigration.
+     * @example
+     * // Delete one AiAgentRegistryMigration
+     * const AiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.delete({
+     *   where: {
+     *     // ... filter to delete one AiAgentRegistryMigration
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAgentRegistryMigrationDeleteArgs>(args: SelectSubset<T, AiAgentRegistryMigrationDeleteArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationUpdateArgs} args - Arguments to update one AiAgentRegistryMigration.
+     * @example
+     * // Update one AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAgentRegistryMigrationUpdateArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAgentRegistryMigrations.
+     * @param {AiAgentRegistryMigrationDeleteManyArgs} args - Arguments to filter AiAgentRegistryMigrations to delete.
+     * @example
+     * // Delete a few AiAgentRegistryMigrations
+     * const { count } = await prisma.aiAgentRegistryMigration.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAgentRegistryMigrationDeleteManyArgs>(args?: SelectSubset<T, AiAgentRegistryMigrationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentRegistryMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAgentRegistryMigrationUpdateManyArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAgentRegistryMigrations and returns the data updated in the database.
+     * @param {AiAgentRegistryMigrationUpdateManyAndReturnArgs} args - Arguments to update many AiAgentRegistryMigrations.
+     * @example
+     * // Update many AiAgentRegistryMigrations
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAgentRegistryMigrations and only return the `id`
+     * const aiAgentRegistryMigrationWithIdOnly = await prisma.aiAgentRegistryMigration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAgentRegistryMigrationUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAgentRegistryMigration.
+     * @param {AiAgentRegistryMigrationUpsertArgs} args - Arguments to update or create a AiAgentRegistryMigration.
+     * @example
+     * // Update or create a AiAgentRegistryMigration
+     * const aiAgentRegistryMigration = await prisma.aiAgentRegistryMigration.upsert({
+     *   create: {
+     *     // ... data to create a AiAgentRegistryMigration
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAgentRegistryMigration we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAgentRegistryMigrationUpsertArgs>(args: SelectSubset<T, AiAgentRegistryMigrationUpsertArgs<ExtArgs>>): Prisma__AiAgentRegistryMigrationClient<$Result.GetResult<Prisma.$AiAgentRegistryMigrationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAgentRegistryMigrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationCountArgs} args - Arguments to filter AiAgentRegistryMigrations to count.
+     * @example
+     * // Count the number of AiAgentRegistryMigrations
+     * const count = await prisma.aiAgentRegistryMigration.count({
+     *   where: {
+     *     // ... the filter for the AiAgentRegistryMigrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAgentRegistryMigrationCountArgs>(
+      args?: Subset<T, AiAgentRegistryMigrationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAgentRegistryMigrationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAgentRegistryMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAgentRegistryMigrationAggregateArgs>(args: Subset<T, AiAgentRegistryMigrationAggregateArgs>): Prisma.PrismaPromise<GetAiAgentRegistryMigrationAggregateType<T>>
+
+    /**
+     * Group by AiAgentRegistryMigration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAgentRegistryMigrationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAgentRegistryMigrationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAgentRegistryMigrationGroupByArgs['orderBy'] }
+        : { orderBy?: AiAgentRegistryMigrationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAgentRegistryMigrationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAgentRegistryMigrationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAgentRegistryMigration model
+   */
+  readonly fields: AiAgentRegistryMigrationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAgentRegistryMigration.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAgentRegistryMigrationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAgentRegistryMigration model
+   */
+  interface AiAgentRegistryMigrationFieldRefs {
+    readonly id: FieldRef<"AiAgentRegistryMigration", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAgentRegistryMigration findUnique
+   */
+  export type AiAgentRegistryMigrationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration findUniqueOrThrow
+   */
+  export type AiAgentRegistryMigrationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration findFirst
+   */
+  export type AiAgentRegistryMigrationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration findFirstOrThrow
+   */
+  export type AiAgentRegistryMigrationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigration to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration findMany
+   */
+  export type AiAgentRegistryMigrationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAgentRegistryMigrations to fetch.
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAgentRegistryMigrations to fetch.
+     */
+    orderBy?: AiAgentRegistryMigrationOrderByWithRelationInput | AiAgentRegistryMigrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAgentRegistryMigrations.
+     */
+    cursor?: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAgentRegistryMigrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAgentRegistryMigrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAgentRegistryMigrations.
+     */
+    distinct?: AiAgentRegistryMigrationScalarFieldEnum | AiAgentRegistryMigrationScalarFieldEnum[]
+  }
+
+  /**
+   * AiAgentRegistryMigration create
+   */
+  export type AiAgentRegistryMigrationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AiAgentRegistryMigration.
+     */
+    data: XOR<AiAgentRegistryMigrationCreateInput, AiAgentRegistryMigrationUncheckedCreateInput>
+  }
+
+  /**
+   * AiAgentRegistryMigration createMany
+   */
+  export type AiAgentRegistryMigrationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAgentRegistryMigrations.
+     */
+    data: AiAgentRegistryMigrationCreateManyInput | AiAgentRegistryMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentRegistryMigration createManyAndReturn
+   */
+  export type AiAgentRegistryMigrationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAgentRegistryMigrations.
+     */
+    data: AiAgentRegistryMigrationCreateManyInput | AiAgentRegistryMigrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAgentRegistryMigration update
+   */
+  export type AiAgentRegistryMigrationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AiAgentRegistryMigration.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateInput, AiAgentRegistryMigrationUncheckedUpdateInput>
+    /**
+     * Choose, which AiAgentRegistryMigration to update.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration updateMany
+   */
+  export type AiAgentRegistryMigrationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAgentRegistryMigrations.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateManyMutationInput, AiAgentRegistryMigrationUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentRegistryMigrations to update
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration updateManyAndReturn
+   */
+  export type AiAgentRegistryMigrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAgentRegistryMigrations.
+     */
+    data: XOR<AiAgentRegistryMigrationUpdateManyMutationInput, AiAgentRegistryMigrationUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAgentRegistryMigrations to update
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration upsert
+   */
+  export type AiAgentRegistryMigrationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AiAgentRegistryMigration to update in case it exists.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+    /**
+     * In case the AiAgentRegistryMigration found by the `where` argument doesn't exist, create a new AiAgentRegistryMigration with this data.
+     */
+    create: XOR<AiAgentRegistryMigrationCreateInput, AiAgentRegistryMigrationUncheckedCreateInput>
+    /**
+     * In case the AiAgentRegistryMigration was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAgentRegistryMigrationUpdateInput, AiAgentRegistryMigrationUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAgentRegistryMigration delete
+   */
+  export type AiAgentRegistryMigrationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+    /**
+     * Filter which AiAgentRegistryMigration to delete.
+     */
+    where: AiAgentRegistryMigrationWhereUniqueInput
+  }
+
+  /**
+   * AiAgentRegistryMigration deleteMany
+   */
+  export type AiAgentRegistryMigrationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAgentRegistryMigrations to delete
+     */
+    where?: AiAgentRegistryMigrationWhereInput
+    /**
+     * Limit how many AiAgentRegistryMigrations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAgentRegistryMigration without action
+   */
+  export type AiAgentRegistryMigrationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAgentRegistryMigration
+     */
+    select?: AiAgentRegistryMigrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAgentRegistryMigration
+     */
+    omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
   }
 
 
@@ -113452,7 +114517,9 @@ export namespace Prisma {
     id: 'id',
     identityId: 'identityId',
     conversationId: 'conversationId',
-    instanceId: 'instanceId'
+    instanceId: 'instanceId',
+    providerId: 'providerId',
+    modelId: 'modelId'
   };
 
   export type AiAgentConversationBindingScalarFieldEnum = (typeof AiAgentConversationBindingScalarFieldEnum)[keyof typeof AiAgentConversationBindingScalarFieldEnum]
@@ -113517,6 +114584,13 @@ export namespace Prisma {
   };
 
   export type AiKnowledgeIndexEntryScalarFieldEnum = (typeof AiKnowledgeIndexEntryScalarFieldEnum)[keyof typeof AiKnowledgeIndexEntryScalarFieldEnum]
+
+
+  export const AiAgentRegistryMigrationScalarFieldEnum: {
+    id: 'id'
+  };
+
+  export type AiAgentRegistryMigrationScalarFieldEnum = (typeof AiAgentRegistryMigrationScalarFieldEnum)[keyof typeof AiAgentRegistryMigrationScalarFieldEnum]
 
 
   export const CloudAuthUserScalarFieldEnum: {
@@ -115663,6 +116737,8 @@ export namespace Prisma {
     identityId?: StringFilter<"AiAgentConversationBinding"> | string
     conversationId?: StringFilter<"AiAgentConversationBinding"> | string
     instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
     conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
     instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
   }
@@ -115672,6 +116748,8 @@ export namespace Prisma {
     identityId?: SortOrder
     conversationId?: SortOrder
     instanceId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
     conversation?: AiConversationOrderByWithRelationInput
     instance?: AiAgentInstanceOrderByWithRelationInput
   }
@@ -115685,6 +116763,8 @@ export namespace Prisma {
     identityId?: StringFilter<"AiAgentConversationBinding"> | string
     conversationId?: StringFilter<"AiAgentConversationBinding"> | string
     instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
     conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
     instance?: XOR<AiAgentInstanceScalarRelationFilter, AiAgentInstanceWhereInput>
   }, "id" | "identityId_conversationId">
@@ -115694,6 +116774,8 @@ export namespace Prisma {
     identityId?: SortOrder
     conversationId?: SortOrder
     instanceId?: SortOrder
+    providerId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
     _count?: AiAgentConversationBindingCountOrderByAggregateInput
     _max?: AiAgentConversationBindingMaxOrderByAggregateInput
     _min?: AiAgentConversationBindingMinOrderByAggregateInput
@@ -115707,6 +116789,8 @@ export namespace Prisma {
     identityId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
     conversationId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
     instanceId?: StringWithAggregatesFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableWithAggregatesFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableWithAggregatesFilter<"AiAgentConversationBinding"> | string | null
   }
 
   export type AiProviderOnboardingSessionWhereInput = {
@@ -116013,6 +117097,38 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"AiKnowledgeIndexEntry"> | Date | string | null
+  }
+
+  export type AiAgentRegistryMigrationWhereInput = {
+    AND?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    OR?: AiAgentRegistryMigrationWhereInput[]
+    NOT?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    id?: StringFilter<"AiAgentRegistryMigration"> | string
+  }
+
+  export type AiAgentRegistryMigrationOrderByWithRelationInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+    OR?: AiAgentRegistryMigrationWhereInput[]
+    NOT?: AiAgentRegistryMigrationWhereInput | AiAgentRegistryMigrationWhereInput[]
+  }, "id">
+
+  export type AiAgentRegistryMigrationOrderByWithAggregationInput = {
+    id?: SortOrder
+    _count?: AiAgentRegistryMigrationCountOrderByAggregateInput
+    _max?: AiAgentRegistryMigrationMaxOrderByAggregateInput
+    _min?: AiAgentRegistryMigrationMinOrderByAggregateInput
+  }
+
+  export type AiAgentRegistryMigrationScalarWhereWithAggregatesInput = {
+    AND?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput | AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    OR?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    NOT?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput | AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAgentRegistryMigration"> | string
   }
 
   export type CloudAuthUserWhereInput = {
@@ -123708,6 +124824,8 @@ export namespace Prisma {
 
   export type AiAgentConversationBindingCreateInput = {
     id?: string
+    providerId?: string | null
+    modelId?: string | null
     conversation: AiConversationCreateNestedOneWithoutAgentBindingInput
     instance: AiAgentInstanceCreateNestedOneWithoutConversationsInput
   }
@@ -123717,10 +124835,14 @@ export namespace Prisma {
     identityId: string
     conversationId: string
     instanceId: string
+    providerId?: string | null
+    modelId?: string | null
   }
 
   export type AiAgentConversationBindingUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
     conversation?: AiConversationUpdateOneRequiredWithoutAgentBindingNestedInput
     instance?: AiAgentInstanceUpdateOneRequiredWithoutConversationsNestedInput
   }
@@ -123730,6 +124852,8 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
     instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AiAgentConversationBindingCreateManyInput = {
@@ -123737,10 +124861,14 @@ export namespace Prisma {
     identityId: string
     conversationId: string
     instanceId: string
+    providerId?: string | null
+    modelId?: string | null
   }
 
   export type AiAgentConversationBindingUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AiAgentConversationBindingUncheckedUpdateManyInput = {
@@ -123748,6 +124876,8 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
     instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AiProviderOnboardingSessionCreateInput = {
@@ -124109,6 +125239,34 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AiAgentRegistryMigrationCreateInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedCreateInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationCreateManyInput = {
+    id: string
+  }
+
+  export type AiAgentRegistryMigrationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAgentRegistryMigrationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
   }
 
   export type CloudAuthUserCreateInput = {
@@ -132977,6 +134135,8 @@ export namespace Prisma {
     identityId?: SortOrder
     conversationId?: SortOrder
     instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
   }
 
   export type AiAgentConversationBindingMaxOrderByAggregateInput = {
@@ -132984,6 +134144,8 @@ export namespace Prisma {
     identityId?: SortOrder
     conversationId?: SortOrder
     instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
   }
 
   export type AiAgentConversationBindingMinOrderByAggregateInput = {
@@ -132991,6 +134153,8 @@ export namespace Prisma {
     identityId?: SortOrder
     conversationId?: SortOrder
     instanceId?: SortOrder
+    providerId?: SortOrder
+    modelId?: SortOrder
   }
 
   export type AiProviderOnboardingSessionCountOrderByAggregateInput = {
@@ -133144,6 +134308,18 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationCountOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationMaxOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AiAgentRegistryMigrationMinOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type CloudAuthSessionListRelationFilter = {
@@ -146692,12 +147868,16 @@ export namespace Prisma {
 
   export type AiAgentConversationBindingCreateWithoutConversationInput = {
     id?: string
+    providerId?: string | null
+    modelId?: string | null
     instance: AiAgentInstanceCreateNestedOneWithoutConversationsInput
   }
 
   export type AiAgentConversationBindingUncheckedCreateWithoutConversationInput = {
     id?: string
     instanceId: string
+    providerId?: string | null
+    modelId?: string | null
   }
 
   export type AiAgentConversationBindingCreateOrConnectWithoutConversationInput = {
@@ -146825,12 +148005,16 @@ export namespace Prisma {
 
   export type AiAgentConversationBindingUpdateWithoutConversationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
     instance?: AiAgentInstanceUpdateOneRequiredWithoutConversationsNestedInput
   }
 
   export type AiAgentConversationBindingUncheckedUpdateWithoutConversationInput = {
     id?: StringFieldUpdateOperationsInput | string
     instanceId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AccountCreateWithoutAiExecutionRecordsInput = {
@@ -147414,12 +148598,16 @@ export namespace Prisma {
 
   export type AiAgentConversationBindingCreateWithoutInstanceInput = {
     id?: string
+    providerId?: string | null
+    modelId?: string | null
     conversation: AiConversationCreateNestedOneWithoutAgentBindingInput
   }
 
   export type AiAgentConversationBindingUncheckedCreateWithoutInstanceInput = {
     id?: string
     conversationId: string
+    providerId?: string | null
+    modelId?: string | null
   }
 
   export type AiAgentConversationBindingCreateOrConnectWithoutInstanceInput = {
@@ -147579,6 +148767,8 @@ export namespace Prisma {
     identityId?: StringFilter<"AiAgentConversationBinding"> | string
     conversationId?: StringFilter<"AiAgentConversationBinding"> | string
     instanceId?: StringFilter<"AiAgentConversationBinding"> | string
+    providerId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
+    modelId?: StringNullableFilter<"AiAgentConversationBinding"> | string | null
   }
 
   export type AccountCreateWithoutAiAgentInstanceBindingsInput = {
@@ -166746,6 +167936,8 @@ export namespace Prisma {
   export type AiAgentConversationBindingCreateManyInstanceInput = {
     id?: string
     conversationId: string
+    providerId?: string | null
+    modelId?: string | null
   }
 
   export type AiAgentInstanceBindingUpdateWithoutInstanceInput = {
@@ -166769,17 +167961,23 @@ export namespace Prisma {
 
   export type AiAgentConversationBindingUpdateWithoutInstanceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
     conversation?: AiConversationUpdateOneRequiredWithoutAgentBindingNestedInput
   }
 
   export type AiAgentConversationBindingUncheckedUpdateWithoutInstanceInput = {
     id?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type AiAgentConversationBindingUncheckedUpdateManyWithoutInstanceInput = {
     id?: StringFieldUpdateOperationsInput | string
     conversationId?: StringFieldUpdateOperationsInput | string
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CloudAuthSessionCreateManyUserInput = {

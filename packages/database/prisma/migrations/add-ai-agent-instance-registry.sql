@@ -1,6 +1,7 @@
 -- Agent Instance Registry V2: credential-free Agent identity is independent of Provider onboarding.
 -- ADDITIVE ONLY. No existing AI providers, SecretVault rows or conversations are rewritten.
 BEGIN;
+CREATE TABLE IF NOT EXISTS "ai_agent_registry_migrations" ("id" TEXT NOT NULL PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS "ai_agent_instances" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "identity_id" TEXT NOT NULL,
@@ -17,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "ai_agent_instances" (
   CONSTRAINT "ai_agent_instances_identity_id_instance_id_key" UNIQUE ("identity_id","instance_id"),
   CONSTRAINT "ai_agent_instances_identity_id_fkey" FOREIGN KEY ("identity_id")
     REFERENCES "accounts" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "ai_agent_instances_web_driver_check" CHECK ("driver" = 'mastra'),
+  CONSTRAINT "ai_agent_instances_web_driver_check" CHECK ("driver" = 'mastra' AND "native_config" IS NULL AND "legacy_connection_id" IS NULL),
   CONSTRAINT "ai_agent_instances_revision_check" CHECK ("revision" > 0)
 );
 CREATE INDEX IF NOT EXISTS "ai_agent_instances_identity_id_idx" ON "ai_agent_instances"("identity_id");
@@ -62,6 +63,8 @@ CREATE TABLE IF NOT EXISTS "ai_agent_conversation_bindings" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "identity_id" TEXT NOT NULL,
   "conversation_id" TEXT NOT NULL,
+  "provider_id" TEXT,
+  "model_id" TEXT,
   "instance_id" TEXT NOT NULL,
   CONSTRAINT "ai_agent_conversation_bindings_identity_id_conversation_id_key"
     UNIQUE ("identity_id", "conversation_id"),
@@ -72,6 +75,8 @@ CREATE TABLE IF NOT EXISTS "ai_agent_conversation_bindings" (
     FOREIGN KEY ("identity_id", "instance_id")
     REFERENCES "ai_agent_instances"("identity_id", "instance_id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
+ALTER TABLE "ai_agent_conversation_bindings" ADD COLUMN IF NOT EXISTS "provider_id" TEXT;
+ALTER TABLE "ai_agent_conversation_bindings" ADD COLUMN IF NOT EXISTS "model_id" TEXT;
 CREATE INDEX IF NOT EXISTS "ai_agent_conversation_bindings_identity_id_instance_id_idx"
   ON "ai_agent_conversation_bindings"("identity_id", "instance_id");
 COMMIT;

@@ -1,3 +1,4 @@
+import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible-v6';
 import type { MastraModelConfig } from '@mastra/core/llm';
 import {
@@ -253,7 +254,8 @@ export class MastraModelResolver {
           input.providerId,
           input.modelId,
         );
-      } catch {
+      } catch (cause) {
+        if (!(cause instanceof AgentRegistryError)) throw cause;
         throw new AIExecutionError(
           'configuration_required',
           'Selected Agent instance does not have access to this model',

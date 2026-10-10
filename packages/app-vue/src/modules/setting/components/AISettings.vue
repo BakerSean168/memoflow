@@ -90,7 +90,9 @@
                   provider.id === 'mastra:default'
                     ? t('setting.agentInstances.needsConfig')
                     : provider.id.startsWith('agent:')
-                      ? selectedMastraBindings.length && provider.id === selectedProviderId
+                      ? registrySnapshot?.bindings.some(
+                          (binding) => 'agent:' + binding.instanceId === provider.id,
+                        )
                         ? t('setting.agentInstances.connectionReady')
                         : t('setting.agentInstances.needsConfig')
                       : provider.id.startsWith('slot:')
@@ -1113,8 +1115,7 @@ const defaultLocalSlots = computed(() =>
       !localConnections.value.some(
         (connection) =>
           connection.driver === driver.id &&
-          (!connection.instanceSlug ||
-            connection.instanceSlug === driver.id ||
+          (connection.instanceSlug === driver.id ||
             connection.instanceSlug === `${driver.id}-default`),
       ),
   ),
@@ -1599,6 +1600,17 @@ async function saveProvider() {
         onboardingId: probeResult.value.onboardingId,
         defaultModelId: effectiveModelId.value,
       });
+      if (agentRegistryClient && selectedMastraAgent.value) {
+        const target = selectedMastraAgent.value;
+        await agentRegistryClient.execute({
+          action: 'bind',
+          instanceId: target.instanceId,
+          expectedRevision: target.revision,
+          connectionId: replacementId,
+          modelId: effectiveModelId.value,
+        });
+        await loadAgentRegistry();
+      }
       delete providerModels.value[replacementId];
       providerStatusMap.value[replacementId] = null;
       toast.success(t('setting.ai.providerConnectionReplaced'));
