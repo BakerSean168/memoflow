@@ -35,10 +35,15 @@ test('[P0] Custom Provider add → atomic save → verified replacement uses the
   await registerAndLogin(page, { email, password });
   await page.goto('/settings?tab=ai', { waitUntil: 'domcontentloaded' });
   await expect(page.getByTestId('ai-settings-panel')).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
-  await expect(page.getByTestId('ai-provider-empty')).toBeVisible();
+  await expect(page.getByTestId('ai-mastra-needs-config')).toBeVisible();
   expect(await providerCount(page)).toBe(0);
 
   await page.getByTestId('ai-provider-add').click();
+  await expect(page.getByTestId('ai-provider-catalog-codex')).toHaveCount(0);
+  await expect(page.getByTestId('ai-provider-catalog-custom')).toHaveCount(0);
+  await page.getByTestId('ai-provider-catalog-mastra').click();
+  await page.locator('#ai-instance-name').fill(providerName);
+  await page.getByTestId('ai-instance-continue').click();
   await page.getByTestId('ai-provider-catalog-custom').click();
   await page.locator('#ai-provider-name').fill(providerName);
   await page.locator('#ai-provider-base-url').fill(baseUrl);
@@ -129,7 +134,7 @@ test('[opt-in] real OpenRouter credential → live catalog → explicit model �
   await expect(page.getByTestId('ai-settings-panel')).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
   expect(await providerCount(page)).toBe(0);
 
-  await page.getByTestId('ai-provider-add').click();
+  await page.getByTestId('ai-mastra-configure').click();
   await page.getByTestId('ai-provider-catalog-openrouter').click();
   await page.locator('#ai-provider-api-key').fill(openRouterKey!);
   await page.getByTestId('ai-provider-probe').click();

@@ -121,11 +121,33 @@ export class LocalAgentRepository {
       createdAt: now,
       updatedAt: now,
     });
-    await this.db.execute(
-      'INSERT INTO ai_local_agent_connections (id, identity_id, record_json) VALUES (?, ?, ?)',
-      [connection.id, owner, JSON.stringify(connection)],
-    );
+    await this.db.writeTransaction(async (tx) => {
+      await this.assertUniqueSlug(tx, owner, connection.instanceSlug);
+      await tx.execute(
+        'INSERT INTO ai_local_agent_connections (id, identity_id, record_json) VALUES (?, ?, ?)',
+        [connection.id, owner, JSON.stringify(connection)],
+      );
+    });
     return connection;
+  }
+  private async assertUniqueSlug(
+    tx: IElectronDatabaseTransaction,
+    owner: string,
+    slug?: string,
+    exceptId?: string,
+  ): Promise<void> {
+    if (!slug) return;
+    const rows = await tx.getAll<unknown>(
+      'SELECT record_json FROM ai_local_agent_connections WHERE identity_id = ?',
+      [owner],
+    );
+    if (
+      rows.some((row) => {
+        const item = decode(row, LocalAgentConnectionSchema);
+        return item.id !== exceptId && item.instanceSlug === slug;
+      })
+    )
+      throw new LocalAgentError('CONFLICT');
   }
   async updateConnection(
     owner: string,
@@ -143,10 +165,20 @@ export class LocalAgentRepository {
         tx,
       );
       if (previous.revision !== expectedRevision) throw new LocalAgentError('CONFLICT');
+      if (
+        previous.instanceSlug &&
+        parsed.instanceSlug &&
+        previous.instanceSlug !== parsed.instanceSlug
+      )
+        throw new LocalAgentError('CONFLICT');
+      const instanceSlug = previous.instanceSlug ?? parsed.instanceSlug;
+      await this.assertUniqueSlug(tx, owner, instanceSlug, id);
       const next = LocalAgentConnectionSchema.parse({
         ...previous,
         ...parsed,
         homePath: parsed.homePath,
+        instanceSlug,
+        accentColor: parsed.accentColor ?? previous.accentColor,
         revision: previous.revision + 1,
         updatedAt: Date.now(),
       });

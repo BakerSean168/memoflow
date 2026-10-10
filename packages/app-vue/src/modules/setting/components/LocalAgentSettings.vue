@@ -22,6 +22,14 @@
         />
       </div>
       <div class="space-y-2">
+        <Label for="ai-native-id">{{ t('setting.agentInstances.instanceId') }}</Label>
+        <Input
+          id="ai-native-id"
+          :model-value="connection?.instanceSlug ?? connection?.id ?? identity?.instanceSlug ?? ''"
+          readonly
+        />
+      </div>
+      <div class="space-y-2">
         <Label for="ai-native-executable">{{ t('aiAssistant.local.executable') }}</Label
         ><Input
           id="ai-native-executable"
@@ -132,6 +140,7 @@ import {
 } from '@memoflow/contracts/ai';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
+  identity?: Pick<LocalAgentConnectionInput, 'name' | 'instanceSlug' | 'accentColor'>;
   driver: LocalAgentDriver;
   status?: LocalAgentStatus;
   busy: boolean;
@@ -160,7 +169,9 @@ watch(
     const connection = props.connection;
     Object.assign(form, {
       driver: props.driver,
-      name: connection?.name ?? names[props.driver],
+      name: connection?.name ?? props.identity?.name ?? names[props.driver],
+      instanceSlug: connection?.instanceSlug ?? props.identity?.instanceSlug,
+      accentColor: connection?.accentColor ?? props.identity?.accentColor,
       executablePath: connection?.executablePath ?? props.driver,
       homePath: connection?.homePath ?? '',
       enabled: connection?.enabled ?? true,
@@ -173,7 +184,7 @@ const models = computed(() => (props.status?.status === 'ready' ? props.status.m
 const statusLabel = computed(() =>
   props.status?.status === 'ready'
     ? t('aiAssistant.local.ready', { count: props.status.models.length })
-    : (props.status?.message ?? t('setting.ai.savedProvider')),
+    : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
 const validatedInput = computed(() =>
   LocalAgentConnectionInputSchema.safeParse({

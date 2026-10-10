@@ -99,3 +99,28 @@ describe('selectable assistant runtime contracts', () => {
     expect(LocalAgentRequestResponseSchema.safeParse({ approved: true }).success).toBe(false);
   });
 });
+
+describe('local instance identity', () => {
+  it('accepts optional identity metadata and rejects unsafe slugs, colors and secrets', () => {
+    const base = { driver: 'codex', name: 'Personal', executablePath: 'codex', enabled: true };
+    expect(LocalAgentConnectionInputSchema.safeParse(base).success).toBe(true);
+    expect(
+      LocalAgentConnectionInputSchema.safeParse({
+        ...base,
+        instanceSlug: 'codex-personal',
+        accentColor: '#6469da',
+      }).success,
+    ).toBe(true);
+    for (const instanceSlug of ['Personal', '../codex', 'a b', '-codex', 'a--b']) {
+      expect(LocalAgentConnectionInputSchema.safeParse({ ...base, instanceSlug }).success).toBe(
+        false,
+      );
+    }
+    expect(
+      LocalAgentConnectionInputSchema.safeParse({ ...base, accentColor: 'url(secret)' }).success,
+    ).toBe(false);
+    expect(LocalAgentConnectionInputSchema.safeParse({ ...base, apiKey: 'secret' }).success).toBe(
+      false,
+    );
+  });
+});

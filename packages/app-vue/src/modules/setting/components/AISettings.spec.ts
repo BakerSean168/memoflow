@@ -6,6 +6,7 @@ import {
   AIProviderConfigClientDTOSchema,
   LocalAgentConnectionSchema,
   type LocalAgentConnectionInput,
+  type LocalAgentStatus,
   type AIProviderConfigClientDTO,
 } from '@memoflow/contracts/ai';
 import { ok, fail, type Result } from '@memoflow/contracts/result';
@@ -36,13 +37,26 @@ function provider(id: string, name: string, isDefault = false) {
   });
 }
 
-async function setup(withNative = false) {
+async function setup(withNative = false, empty = false) {
   let records = [
     provider('11111111-1111-4111-8111-111111111111', 'First', true),
     provider('22222222-2222-4222-8222-222222222222', 'Second'),
   ];
+  if (empty) records = [];
   const client = {
     listProviders: vi.fn(async () => ok(records)),
+    getProviderCatalog: vi.fn(async () =>
+      ok([
+        {
+          id: 'openai',
+          name: 'OpenAI',
+          description: 'Model service',
+          defaultBaseUrl: 'https://api.openai.com/v1',
+          baseUrlEditable: false,
+          recommendedModelIds: [],
+        },
+      ]),
+    ),
     updateProvider: vi.fn(
       async (
         id: string,
@@ -76,6 +90,7 @@ async function setup(withNative = false) {
       updatedAt: 1,
     }),
   );
+  if (empty) nativeRecords = [];
   const localClient = {
     listConnections: vi.fn(async () => nativeRecords),
     saveConnection: vi.fn(
@@ -98,7 +113,7 @@ async function setup(withNative = false) {
     deleteConnection: vi.fn(async (id: string) => {
       nativeRecords = nativeRecords.filter((item) => item.id !== id);
     }),
-    probeConnection: vi.fn(async () => ({
+    probeConnection: vi.fn(async (): Promise<LocalAgentStatus> => ({
       status: 'ready' as const,
       version: '1.0',
       models: [{ id: 'native-model', name: 'Native Model' }],
@@ -322,8 +337,11 @@ describe('Provider creation and composer integration', () => {
         ),
     ).toHaveLength(4);
     await wrapper.get('[data-testid="ai-provider-catalog-dsh"]').trigger('click');
-    await wrapper.get('#ai-native-name').setValue('DSH Personal');
-    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
+    await wrapper.get('#ai-instance-name').setValue('DSH Personal');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    await wrapper
+      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-provider-detail"]')
+      .trigger('submit');
     await flushPromises();
     expect(localClient.saveConnection).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -332,8 +350,6 @@ describe('Provider creation and composer integration', () => {
         enabled: true,
         writeScopes: [],
       }),
-      undefined,
-      undefined,
     );
     expect(wrapper.find('[data-testid="ai-provider-select-local:new-native"]').exists()).toBe(true);
     wrapper.unmount();
@@ -409,4 +425,119 @@ describe('Provider creation and composer integration', () => {
     });
     wrapper.unmount();
   });
+});
+
+describe('Agent defaults and wizard capabilities', () => {
+  it('shows unconfigured Mastra on Web, with only Mastra in Agent selection', async () => {
+    const { wrapper, client, localClient } = await setup(false, true);
+    expect(wrapper.get('[data-testid="ai-provider-list"]').text()).toContain('Mastra');
+    expect(wrapper.get('[data-testid="ai-mastra-needs-config"]').text()).toContain(
+      'Needs model configuration',
+    );
+    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.findAll('[data-testid^="ai-provider-catalog-"]')).toHaveLength(1);
+    expect(wrapper.find('[data-testid="ai-provider-catalog-openai"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-provider-catalog-mastra"]').trigger('click');
+    await wrapper.get('#ai-instance-name').setValue('Work Mastra');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-mastra-config"]').text()).toContain(
+      'saved after credential verification',
+    );
+    await wrapper.get('[data-testid="ai-provider-catalog-openai"]').trigger('click');
+    expect(wrapper.find('#ai-provider-api-key').exists()).toBe(true);
+    expect(client.updateProvider).not.toHaveBeenCalled();
+    expect(localClient.listConnections).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it('synthesizes four Desktop slots, never probes on open, and materializes one slot without duplication', async () => {
+    const { wrapper, localClient } = await setup(true, true);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
+    expect(localClient.probeConnection).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="ai-provider-select-slot:codex"]').trigger('click');
+    expect(wrapper.get('#ai-native-id').attributes('readonly')).toBeDefined();
+    await wrapper.get('[data-testid="ai-provider-detail"]').trigger('submit');
+    await flushPromises();
+    expect(localClient.saveConnection).toHaveBeenCalledWith(
+      expect.objectContaining({ instanceSlug: 'codex-default', driver: 'codex' }),
+      undefined,
+      undefined,
+    );
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
+    expect(wrapper.find('[data-testid="ai-provider-select-slot:codex"]').exists()).toBe(false);
+    expect(
+      wrapper.get('[data-testid="ai-provider-select-local:new-native"]').attributes('aria-current'),
+    ).toBe('true');
+    expect(localClient.probeConnection).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it('keeps the built-in Codex slot when a second named Codex instance is created', async () => {
+    const { wrapper, localClient } = await setup(true, true);
+    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
+    await wrapper.get('#ai-instance-name').setValue('Codex Work');
+    await wrapper.get('#ai-instance-slug').setValue('codex-work');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    await wrapper
+      .get('[data-testid="ai-agent-wizard"] [data-testid="ai-provider-detail"]')
+      .trigger('submit');
+    await flushPromises();
+    expect(localClient.saveConnection).toHaveBeenCalledWith(
+      expect.objectContaining({ driver: 'codex', instanceSlug: 'codex-work' }),
+    );
+    expect(wrapper.find('[data-testid="ai-provider-select-slot:codex"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-provider-select-local:new-native"]').exists()).toBe(true);
+    expect(wrapper.findAll('[data-testid="ai-provider-list"] [role="listitem"]')).toHaveLength(6);
+    wrapper.unmount();
+  });
+  it('blocks duplicate identity and preserves identity while navigating back from Config', async () => {
+    const { wrapper, localClient } = await setup(true);
+    await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-catalog-codex"]').trigger('click');
+    await wrapper.get('#ai-instance-slug').setValue('codex');
+    expect(
+      wrapper.get('[data-testid="ai-instance-continue"]').attributes('disabled'),
+    ).toBeDefined();
+    await wrapper.get('#ai-instance-slug').setValue('codex-work');
+    await wrapper.get('#ai-instance-name').setValue('Work');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    await wrapper.get('[data-testid="ai-agent-wizard"] #ai-native-home').setValue('/work/home');
+    await wrapper
+      .get('[data-testid="ai-agent-wizard"]')
+      .findAll('button')
+      .find((item) => item.text() === 'Back')!
+      .trigger('click');
+    expect((wrapper.get('#ai-instance-slug').element as HTMLInputElement).value).toBe('codex-work');
+    await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+    expect(
+      (wrapper.get('[data-testid="ai-agent-wizard"] #ai-native-home').element as HTMLInputElement)
+        .value,
+    ).toBe('/work/home');
+    expect(localClient.saveConnection).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+  it.each(['not_installed', 'login_required', 'unavailable', 'ready'] as const)(
+    'displays explicit native %s status',
+    async (status) => {
+      const { wrapper, localClient } = await setup(true);
+      localClient.probeConnection.mockResolvedValueOnce(
+        status === 'ready'
+          ? { status, models: [{ id: 'model', name: 'Model' }], version: '1' }
+          : { status, message: status },
+      );
+      await wrapper.get('[data-testid="ai-provider-select-local:codex"]').trigger('click');
+      await wrapper
+        .get('[data-testid="ai-provider-detail"]')
+        .findAll('button')
+        .find((item) => item.text().includes('Check'))!
+        .trigger('click');
+      await flushPromises();
+      expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
+        status === 'ready' ? 'Model' : status,
+      );
+      wrapper.unmount();
+    },
+  );
 });

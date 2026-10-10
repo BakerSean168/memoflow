@@ -18,6 +18,40 @@ describe('local Agent persistence with real SQLite', () => {
     enabled: true,
     writeScopes: [],
   };
+  it('persists unique immutable slugs per owner and preserves old records', async () => {
+    const db = database();
+    const store = new LocalAgentRepository(db);
+    const legacy = await store.createConnection('owner-a', input);
+    const named = await store.createConnection('owner-a', {
+      ...input,
+      instanceSlug: 'personal-codex',
+      accentColor: '#6469da',
+    });
+    await expect(
+      store.createConnection('owner-a', { ...input, instanceSlug: 'personal-codex' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    await expect(
+      store.createConnection('owner-b', { ...input, instanceSlug: 'personal-codex' }),
+    ).resolves.toMatchObject({ instanceSlug: 'personal-codex' });
+    await expect(
+      store.updateConnection('owner-a', legacy.id, 1, { ...input, instanceSlug: 'personal-codex' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    await expect(
+      store.updateConnection('owner-a', named.id, 1, { ...input, instanceSlug: 'renamed-id' }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    const updated = await store.updateConnection('owner-a', named.id, 1, {
+      ...input,
+      name: 'Renamed',
+    });
+    expect(updated).toMatchObject({
+      instanceSlug: 'personal-codex',
+      accentColor: '#6469da',
+      revision: 2,
+    });
+    expect(await new LocalAgentRepository(db).getConnection('owner-a', named.id)).toEqual(updated);
+    expect(await store.getConnection('owner-a', legacy.id)).toEqual(legacy);
+    expect(await store.getDefaultChoice('owner-a')).toEqual({ runtimeKind: 'builtin' });
+  });
   it('keeps defaults local and changes no existing conversation binding', async () => {
     const store = new LocalAgentRepository(database());
     expect(await store.getDefaultChoice('owner-a')).toEqual({ runtimeKind: 'builtin' });

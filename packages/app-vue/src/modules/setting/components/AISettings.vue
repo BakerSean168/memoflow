@@ -17,7 +17,7 @@
           class="size-7 rounded-lg"
           data-testid="ai-provider-add"
           :aria-label="t('setting.ai.addProvider')"
-          @click="openOnboarding"
+          @click="openAgentWizard"
           ><Plus class="size-4"
         /></Button>
       </div>
@@ -33,14 +33,14 @@
       </Button>
     </header>
     <p
-      v-if="localError && !selectedLocal && !newLocalDriver"
+      v-if="localError && !selectedLocal && !selectedSlotDriver"
       role="alert"
       class="text-sm text-destructive"
     >
       {{ t('aiAssistant.local.actionFailed') }}
     </p>
     <div
-      v-if="providerRows.length || newLocalDriver"
+      v-if="providerRows.length || selectedSlotDriver"
       class="grid min-h-[36rem] gap-4 lg:grid-cols-[268px_minmax(0,1fr)]"
     >
       <div
@@ -70,25 +70,38 @@
             <span
               class="flex size-5 shrink-0 items-center justify-center text-xs font-semibold text-primary"
               aria-hidden="true"
+              :style="{ color: provider.accentColor }"
             >
               {{ providerGlyph(provider.providerDefinitionId) }}
             </span>
             <span class="min-w-0">
-              <span class="block truncate text-sm font-medium">{{ provider.name }}</span>
+              <span class="block truncate text-sm font-medium">{{ provider.name }}</span
+              ><span class="block text-xs text-muted-foreground">{{
+                provider.id.startsWith('local:') || provider.id.startsWith('slot:')
+                  ? provider.providerDefinitionId
+                  : 'Mastra'
+              }}</span>
               <span class="mt-1 block truncate text-xs text-muted-foreground">
                 {{
-                  !provider.isActive
-                    ? t('setting.ai.inactiveProvider')
-                    : provider.id.startsWith('local:') && localStatuses[provider.id.slice(6)]
-                      ? localStatusLabel(localStatuses[provider.id.slice(6)]!)
-                      : provider.isDefault
-                        ? t('setting.ai.defaultProvider')
-                        : t('setting.ai.savedProvider')
+                  provider.id === 'mastra:default'
+                    ? t('setting.agentInstances.needsConfig')
+                    : provider.id.startsWith('slot:')
+                      ? t('setting.agentInstances.unchecked')
+                      : !provider.isActive
+                        ? t('setting.ai.inactiveProvider')
+                        : provider.id.startsWith('local:') && localStatuses[provider.id.slice(6)]
+                          ? localStatusLabel(localStatuses[provider.id.slice(6)]!)
+                          : provider.id.startsWith('local:')
+                            ? t('setting.agentInstances.unchecked')
+                            : provider.isDefault
+                              ? t('setting.ai.defaultProvider')
+                              : t('setting.ai.savedProvider')
                 }}
               </span>
             </span>
           </button>
           <Switch
+            v-if="!provider.id.startsWith('slot:') && provider.id !== 'mastra:default'"
             :model-value="provider.isActive"
             :disabled="localBusy || providerUpdateLoading[String(provider.id)] === true"
             :aria-label="t('setting.ai.enableProvider', { name: provider.name })"
@@ -96,12 +109,29 @@
           />
         </div>
       </div>
+      <div
+        v-if="selectedProviderId === 'mastra:default'"
+        data-testid="ai-provider-detail"
+        class="rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] p-5 space-y-5"
+      >
+        <h3 class="text-base font-semibold">Mastra</h3>
+        <p role="status" data-testid="ai-mastra-needs-config" class="text-sm text-muted-foreground">
+          {{ t('setting.agentInstances.needsConfig') }}
+        </p>
+        <p class="text-sm text-muted-foreground">
+          {{ t('setting.agentInstances.builtinDetail') }}
+        </p>
+        <Button data-testid="ai-mastra-configure" @click="openOnboarding">{{
+          t('setting.agentInstances.configure')
+        }}</Button>
+      </div>
       <LocalAgentSettings
-        v-if="selectedLocal || newLocalDriver"
-        :key="selectedLocal?.id ?? newLocalDriver ?? 'new-native'"
+        v-else-if="selectedLocal || selectedSlotDriver"
+        :key="selectedLocal?.id ?? selectedSlotDriver ?? 'new-native'"
         :connection="selectedLocal"
-        :driver="selectedLocal?.driver ?? newLocalDriver ?? 'codex'"
+        :driver="selectedLocal?.driver ?? selectedSlotDriver ?? 'codex'"
         :status="selectedLocal ? localStatuses[selectedLocal.id] : undefined"
+        :identity="selectedSlotIdentity"
         :busy="localBusy"
         :error="localError"
         @save="saveLocal"
@@ -120,7 +150,13 @@
         >
           <div class="flex min-w-0 items-center gap-2.5">
             <span class="text-primary" aria-hidden="true">◆</span>
-            <h3 class="truncate text-base font-semibold">{{ selectedProvider.name }}</h3>
+            <div>
+              <h3 class="truncate text-base font-semibold">{{ selectedProvider.name }}</h3>
+              <p class="text-xs text-muted-foreground">
+                Mastra · {{ selectedProvider.providerDefinitionId }}
+                {{ t('setting.agentInstances.serviceLabel') }}
+              </p>
+            </div>
           </div>
           <Badge v-if="selectedProvider.isDefault" variant="secondary">{{
             t('setting.ai.defaultProvider')
@@ -136,6 +172,10 @@
               maxlength="100"
               class="h-9 rounded-lg border-0 bg-muted/50 shadow-none"
             />
+          </div>
+          <div class="space-y-2">
+            <Label for="ai-saved-instance-id">{{ t('setting.agentInstances.instanceId') }}</Label>
+            <Input id="ai-saved-instance-id" :model-value="String(selectedProvider.id)" readonly />
           </div>
           <div class="space-y-2">
             <Label for="ai-saved-provider-url">API Base URL</Label>
@@ -274,7 +314,18 @@
     </SettingsStatusBlock>
   </section>
 
-  <Dialog :open="onboardingOpen" @update:open="handleDialogOpenChange">
+  <AgentInstanceWizard
+    :open="agentWizardOpen"
+    :native="Boolean(localClient)"
+    :catalog="providerCatalog"
+    :existing-slugs="localConnections.map((item) => item.instanceSlug ?? item.id)"
+    :busy="localBusy"
+    :error="localError"
+    @close="agentWizardOpen = false"
+    @save-local="createWizardLocal"
+    @configure-mastra="configureWizardMastra"
+  />
+  <Dialog v-if="onboardingOpen" :open="onboardingOpen" @update:open="handleDialogOpenChange">
     <SettingsDialogShell
       :title="onboardingTitle"
       :description="onboardingDescription"
@@ -296,16 +347,6 @@
             {{ t('setting.ai.loadingProviderCatalog') }}
           </div>
           <div class="grid gap-3 sm:grid-cols-2">
-            <button
-              v-for="driver in localDrivers"
-              :key="driver.id"
-              type="button"
-              class="rounded-xl bg-muted/50 p-4 text-left hover:bg-muted"
-              :data-testid="`ai-provider-catalog-${driver.id}`"
-              @click="addLocal(driver.id)"
-            >
-              <p class="font-medium">{{ driver.name }}</p>
-            </button>
             <button
               v-for="entry in providerCatalog"
               :key="entry.id"
@@ -656,6 +697,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, watch } from 'vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
+import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import { AI_LOCAL_AGENT_KEY } from '../../../di/keys';
 import { Plus, RefreshCw, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -664,7 +706,6 @@ import { Badge, Button, Dialog, Input, Label, Switch } from '@memoflow/ui-vue-sh
 import type {
   LocalAgentConnection,
   LocalAgentConnectionInput,
-  LocalAgentDriver,
   LocalAgentStatus,
   AIProviderCatalogEntryDTO,
   AIProviderConfigClientDTO,
@@ -699,6 +740,7 @@ const {
 } = useAI();
 
 const onboardingOpen = ref(false);
+const agentWizardOpen = ref(false);
 const onboardingMode = ref<OnboardingMode>('create');
 const replacementProvider = ref<AIProviderConfigClientDTO | null>(null);
 const onboardingStep = ref<OnboardingStep>('picker');
@@ -726,7 +768,7 @@ const localConnections = ref<LocalAgentConnection[]>([]);
 const localStatuses = ref<Record<string, LocalAgentStatus>>({});
 const localBusy = ref(false);
 const localError = ref(false);
-const newLocalDriver = ref<LocalAgentDriver | null>(null);
+const selectedProviderId = ref('');
 const localDrivers = computed(() =>
   localClient
     ? [
@@ -737,12 +779,49 @@ const localDrivers = computed(() =>
       ]
     : [],
 );
+const defaultLocalSlots = computed(() =>
+  localDrivers.value.filter(
+    (driver) =>
+      !localConnections.value.some(
+        (connection) =>
+          connection.driver === driver.id &&
+          (!connection.instanceSlug ||
+            connection.instanceSlug === driver.id ||
+            connection.instanceSlug === `${driver.id}-default`),
+      ),
+  ),
+);
+const selectedSlotDriver = computed(
+  () =>
+    defaultLocalSlots.value.find((item) => `slot:${item.id}` === selectedProviderId.value)?.id ??
+    null,
+);
 const providerRows = computed(() => [
-  ...providerItems.value,
+  ...(providerItems.value.length
+    ? providerItems.value.map((provider) => ({ ...provider, accentColor: undefined }))
+    : [
+        {
+          id: 'mastra:default',
+          name: 'Mastra',
+          providerDefinitionId: 'mastra',
+          isActive: true,
+          isDefault: true,
+          accentColor: undefined,
+        },
+      ]),
+  ...defaultLocalSlots.value.map((driver) => ({
+    id: `slot:${driver.id}`,
+    name: driver.name,
+    providerDefinitionId: driver.id,
+    isActive: true,
+    isDefault: false,
+    accentColor: undefined,
+  })),
   ...localConnections.value.map((connection) => ({
     id: `local:${connection.id}`,
     name: connection.name,
     providerDefinitionId: connection.driver,
+    accentColor: connection.accentColor,
     isActive: connection.enabled,
     isDefault: false,
   })),
@@ -789,29 +868,47 @@ async function checkLocal(connection: LocalAgentConnection) {
       localStatuses.value[connection.id] = status;
   });
 }
-function addLocal(driver: LocalAgentDriver) {
-  onboardingOpen.value = false;
-  newLocalDriver.value = driver;
-  selectedProviderId.value = '';
+const selectedSlotIdentity = computed(() => {
+  const driver = defaultLocalSlots.value.find(
+    (item) => `slot:${item.id}` === selectedProviderId.value,
+  );
+  return driver ? { name: driver.name, instanceSlug: `${driver.id}-default` } : undefined;
+});
+async function openAgentWizard() {
   localError.value = false;
+  agentWizardOpen.value = true;
+  await ensureProviderCatalog();
+}
+async function configureWizardMastra(service: AIProviderCatalogEntryDTO, name: string) {
+  agentWizardOpen.value = false;
+  resetOnboarding();
+  selectCatalogEntry(service);
+  connectionName.value = name;
+  onboardingOpen.value = true;
+}
+async function createWizardLocal(input: LocalAgentConnectionInput) {
+  if (!localClient) return;
+  await localAction(async () => {
+    const saved = await localClient.saveConnection(input);
+    localConnections.value = [...localConnections.value, saved];
+    agentWizardOpen.value = false;
+    selectedProviderId.value = `local:${saved.id}`;
+  });
 }
 function cancelNewLocal() {
-  newLocalDriver.value = null;
   selectedProviderId.value = String(providerRows.value[0]?.id ?? '');
 }
 async function saveLocal(input: LocalAgentConnectionInput) {
   if (!localClient) return;
   const selected = selectedLocal.value;
   const selection = selectedProviderId.value;
-  const draftDriver = newLocalDriver.value;
   await localAction(async () => {
     const saved = await localClient.saveConnection(input, selected?.id, selected?.revision);
     localConnections.value = selected
       ? localConnections.value.map((item) => (item.id === saved.id ? saved : item))
       : [...localConnections.value, saved];
     delete localStatuses.value[saved.id];
-    if (selectedProviderId.value === selection && newLocalDriver.value === draftDriver) {
-      newLocalDriver.value = null;
+    if (selectedProviderId.value === selection) {
       selectedProviderId.value = `local:${saved.id}`;
     }
   });
@@ -830,9 +927,10 @@ async function toggleProviderRow(id: string, enabled: boolean) {
   const connection = localConnections.value.find((item) => `local:${item.id}` === id);
   if (!connection || !localClient) return;
   await localAction(async () => {
-    const { driver, name, executablePath, homePath, writeScopes } = connection;
+    const { driver, name, executablePath, homePath, writeScopes, instanceSlug, accentColor } =
+      connection;
     const saved = await localClient.saveConnection(
-      { driver, name, executablePath, homePath, writeScopes, enabled },
+      { driver, name, executablePath, homePath, writeScopes, instanceSlug, accentColor, enabled },
       connection.id,
       connection.revision,
     );
@@ -843,7 +941,6 @@ async function toggleProviderRow(id: string, enabled: boolean) {
   });
 }
 
-const selectedProviderId = ref('');
 const providerNameDraft = ref('');
 const providerUpdateLoading = ref<Record<string, boolean>>({});
 const providerModels = ref<Record<string, AIModelInfo[]>>({});
@@ -868,7 +965,6 @@ const canSaveProviderName = computed(() => {
 watch(
   providerRows,
   (items) => {
-    if (newLocalDriver.value) return;
     if (!items.some((provider) => String(provider.id) === selectedProviderId.value)) {
       selectedProviderId.value = String(items[0]?.id ?? '');
     }
@@ -921,7 +1017,7 @@ const onboardingTitle = computed(() => {
   const replacing = onboardingMode.value === 'replace';
   switch (onboardingStep.value) {
     case 'picker':
-      return t('setting.ai.pickerTitle');
+      return t('setting.agentInstances.serviceTitle');
     case 'connection':
       return t(replacing ? 'setting.ai.replacementConnectionTitle' : 'setting.ai.connectionTitle');
     case 'model':
@@ -935,7 +1031,7 @@ const onboardingDescription = computed(() => {
   const replacing = onboardingMode.value === 'replace';
   switch (onboardingStep.value) {
     case 'picker':
-      return t('setting.ai.pickerDescription');
+      return t('setting.agentInstances.serviceDescription');
     case 'connection':
       return t(
         replacing
@@ -954,9 +1050,6 @@ const onboardingDescription = computed(() => {
   return '';
 });
 
-watch(selectedProviderId, (id) => {
-  if (id) newLocalDriver.value = null;
-});
 onMounted(() => {
   void loadLocalConnections();
   void loadProviders();
@@ -1126,12 +1219,13 @@ async function saveProvider() {
       providerStatusMap.value[replacementId] = null;
       toast.success(t('setting.ai.providerConnectionReplaced'));
     } else {
-      await commitProviderOnboarding({
+      const saved = await commitProviderOnboarding({
         onboardingId: probeResult.value.onboardingId,
         name: connectionName.value.trim(),
         defaultModelId: effectiveModelId.value,
         isDefault: isDefaultSelection.value,
       });
+      selectedProviderId.value = String(saved.id);
       toast.success(t('setting.ai.providerCreated'));
     }
     closeOnboarding();
