@@ -27,7 +27,7 @@ describe('AISettings Provider onboarding V2 surface', () => {
 
   it('reuses the same opaque-handle wizard for identity-bound Provider connection replacement', () => {
     expect(source).toContain("type OnboardingMode = 'create' | 'replace'");
-    expect(source).toContain('openProviderReplacement(provider)');
+    expect(source).toContain('openProviderReplacement(selectedProvider)');
     expect(source).toContain('probeProviderReplacement');
     expect(source).toContain('commitProviderReplacement');
     expect(source).toContain("onboardingMode.value === 'replace'");
@@ -45,7 +45,7 @@ describe('AISettings Provider onboarding V2 surface', () => {
   });
 
   it('keeps saved Provider connection testing on the identity-bound server path', () => {
-    expect(source).toContain('handleTestProvider(String(provider.id))');
+    expect(source).toContain('handleTestProvider(String(selectedProvider.id))');
     expect(source).toContain('testProvider({ providerId: providerId as never })');
     expect(source).not.toContain('apiKey: provider.apiKey');
   });

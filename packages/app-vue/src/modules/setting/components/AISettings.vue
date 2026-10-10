@@ -1,141 +1,278 @@
 <template>
-  <SettingsSection
-    :title="t('setting.ai.title')"
-    :description="t('setting.ai.description')"
-    test-id="ai-settings-panel"
+  <section
+    data-testid="ai-settings-panel"
+    class="space-y-5"
+    style="
+      --primary: 237 61% 62%;
+      --primary-foreground: 0 0% 100%;
+      --color-primary: #6469da;
+      --color-primary-foreground: #fff;
+    "
   >
-    <template #actions>
-      <Button variant="outline" size="sm" :disabled="isLoadingProviders" @click="loadProviders">
-        {{ t('setting.ai.refreshProviders') }}
-      </Button>
-      <Button size="sm" data-testid="ai-provider-add" @click="openOnboarding">
-        {{ t('setting.ai.addProvider') }}
-      </Button>
-    </template>
-
-    <div class="space-y-5">
-      <LocalAgentSettings />
-      <SettingsStatusBlock
-        v-if="defaultProvider"
-        kind="info"
-        :title="t('setting.ai.currentDefault')"
-        test-id="ai-provider-default-summary"
-      >
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="min-w-0 truncate text-sm font-semibold">
-            {{ defaultProvider.name }}
-            <span class="font-normal text-muted-foreground"
-              >· {{ defaultProvider.defaultModel || '—' }}</span
-            >
-          </p>
-          <Badge variant="secondary">{{ t('setting.ai.defaultProvider') }}</Badge>
-        </div>
-      </SettingsStatusBlock>
-
-      <div class="space-y-1">
-        <h3 class="text-sm font-semibold">{{ t('setting.ai.connectedProviders') }}</h3>
-        <p class="text-xs leading-5 text-muted-foreground">
-          {{ t('setting.ai.connectedProvidersDescription') }}
-        </p>
+    <header class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-sm font-semibold">Providers</h2>
+        <Button
+          size="icon"
+          class="size-7 rounded-lg"
+          data-testid="ai-provider-add"
+          :aria-label="t('setting.ai.addProvider')"
+          @click="openOnboarding"
+          ><Plus class="size-4"
+        /></Button>
       </div>
-
-      <div v-if="providerItems.length" class="space-y-3" data-testid="ai-provider-list">
-        <SettingsObjectCard v-for="provider in providerItems" :key="provider.id">
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="min-w-0 space-y-1.5">
-              <div class="flex flex-wrap items-center gap-2">
-                <p class="font-medium">{{ provider.name }}</p>
-                <Badge v-if="provider.isDefault" variant="secondary">{{
-                  t('setting.ai.defaultProvider')
-                }}</Badge>
-                <Badge v-if="!provider.isActive" variant="outline">{{
-                  t('setting.ai.inactiveProvider')
-                }}</Badge>
-              </div>
-              <p class="break-all text-xs text-muted-foreground">{{ provider.baseUrl }}</p>
-              <p class="text-sm">
-                <span class="text-muted-foreground">{{ t('setting.ai.defaultModelLabel') }}:</span>
-                {{ provider.defaultModel || '—' }}
-              </p>
-              <p v-if="provider.credentialRef" class="text-xs text-muted-foreground">
-                Provider credential configured
-              </p>
-              <SettingsStatusBlock
-                v-if="providerStatusMap[String(provider.id)]"
-                :kind="
-                  providerStatusMap[String(provider.id)]?.tone === 'error' ? 'error' : 'success'
-                "
-                :description="providerStatusMap[String(provider.id)]?.message"
-              />
-            </div>
-
-            <div class="flex flex-wrap justify-end gap-2">
-              <Button
-                v-if="!provider.isDefault"
-                variant="outline"
-                size="sm"
-                @click="handleSetDefault(String(provider.id))"
-              >
-                {{ t('setting.ai.setDefaultProvider') }}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="providerTestLoading[String(provider.id)] === true"
-                @click="handleTestProvider(String(provider.id))"
-              >
+      <Button
+        variant="ghost"
+        size="sm"
+        :disabled="isCheckingProviders || isLoadingProviders || localBusy"
+        data-testid="ai-provider-recheck"
+        @click="handleRecheckProviders"
+      >
+        <RefreshCw class="mr-1.5 size-3.5" :class="{ 'animate-spin': isCheckingProviders }" />
+        {{ t('setting.ai.recheckProviders') }}
+      </Button>
+    </header>
+    <p
+      v-if="localError && !selectedLocal && !newLocalDriver"
+      role="alert"
+      class="text-sm text-destructive"
+    >
+      {{ t('aiAssistant.local.actionFailed') }}
+    </p>
+    <div
+      v-if="providerRows.length || newLocalDriver"
+      class="grid min-h-[36rem] gap-4 lg:grid-cols-[268px_minmax(0,1fr)]"
+    >
+      <div
+        class="rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] p-3"
+        data-testid="ai-provider-list"
+        role="list"
+        :aria-label="t('setting.ai.providerList')"
+      >
+        <div
+          v-for="provider in providerRows"
+          :key="provider.id"
+          role="listitem"
+          class="mb-1 flex min-h-16 items-center gap-2 rounded-lg border px-3 py-2 last:mb-0"
+          :class="
+            String(provider.id) === selectedProviderId
+              ? 'border-primary/60 bg-primary/15'
+              : 'border-transparent hover:bg-muted'
+          "
+        >
+          <button
+            type="button"
+            class="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+            :aria-current="String(provider.id) === selectedProviderId ? 'true' : undefined"
+            :data-testid="`ai-provider-select-${provider.id}`"
+            @click="selectedProviderId = String(provider.id)"
+          >
+            <span
+              class="flex size-5 shrink-0 items-center justify-center text-xs font-semibold text-primary"
+              aria-hidden="true"
+            >
+              {{ providerGlyph(provider.providerDefinitionId) }}
+            </span>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-medium">{{ provider.name }}</span>
+              <span class="mt-1 block truncate text-xs text-muted-foreground">
                 {{
-                  providerTestLoading[String(provider.id)]
-                    ? t('setting.ai.testingProvider')
-                    : t('setting.ai.testProvider')
+                  !provider.isActive
+                    ? t('setting.ai.inactiveProvider')
+                    : provider.id.startsWith('local:') && localStatuses[provider.id.slice(6)]
+                      ? localStatusLabel(localStatuses[provider.id.slice(6)]!)
+                      : provider.isDefault
+                        ? t('setting.ai.defaultProvider')
+                        : t('setting.ai.savedProvider')
                 }}
-              </Button>
+              </span>
+            </span>
+          </button>
+          <Switch
+            :model-value="provider.isActive"
+            :disabled="localBusy || providerUpdateLoading[String(provider.id)] === true"
+            :aria-label="t('setting.ai.enableProvider', { name: provider.name })"
+            @update:model-value="toggleProviderRow(provider.id, $event)"
+          />
+        </div>
+      </div>
+      <LocalAgentSettings
+        v-if="selectedLocal || newLocalDriver"
+        :key="selectedLocal?.id ?? newLocalDriver ?? 'new-native'"
+        :connection="selectedLocal"
+        :driver="selectedLocal?.driver ?? newLocalDriver ?? 'codex'"
+        :status="selectedLocal ? localStatuses[selectedLocal.id] : undefined"
+        :busy="localBusy"
+        :error="localError"
+        @save="saveLocal"
+        @check="selectedLocal && checkLocal(selectedLocal)"
+        @remove="removeLocal"
+        @cancel="cancelNewLocal"
+      />
+      <div
+        v-else-if="selectedProvider"
+        :key="selectedProvider.id"
+        data-testid="ai-provider-detail"
+        class="flex min-w-0 flex-col rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] p-5"
+      >
+        <header
+          class="flex items-center justify-between gap-3 border-b border-[hsl(var(--border-subtle))] pb-4"
+        >
+          <div class="flex min-w-0 items-center gap-2.5">
+            <span class="text-primary" aria-hidden="true">◆</span>
+            <h3 class="truncate text-base font-semibold">{{ selectedProvider.name }}</h3>
+          </div>
+          <Badge v-if="selectedProvider.isDefault" variant="secondary">{{
+            t('setting.ai.defaultProvider')
+          }}</Badge>
+        </header>
+        <div class="mt-5 space-y-5">
+          <div class="space-y-2">
+            <Label for="ai-saved-provider-name">{{ t('setting.ai.displayName') }}</Label>
+            <Input
+              id="ai-saved-provider-name"
+              v-model="providerNameDraft"
+              :disabled="providerUpdateLoading[String(selectedProvider.id)] === true"
+              maxlength="100"
+              class="h-9 rounded-lg border-0 bg-muted/50 shadow-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="ai-saved-provider-url">API Base URL</Label>
+            <Input
+              id="ai-saved-provider-url"
+              :model-value="selectedProvider.baseUrl"
+              readonly
+              class="h-9 rounded-lg border-0 bg-muted/50 shadow-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <Label>API Key</Label>
               <Button
-                variant="outline"
+                variant="link"
                 size="sm"
-                :data-testid="`ai-provider-replace-${provider.id}`"
-                @click="openProviderReplacement(provider)"
+                class="h-auto p-0"
+                :data-testid="`ai-provider-replace-${selectedProvider.id}`"
+                @click="openProviderReplacement(selectedProvider)"
+                >{{ t('setting.ai.replaceConnection') }}</Button
               >
-                {{ t('setting.ai.replaceConnection') }}
-              </Button>
+            </div>
+            <div
+              class="rounded-lg bg-muted/60 px-3 py-2 text-sm text-muted-foreground"
+              data-testid="ai-provider-credential-state"
+            >
+              {{ t('setting.ai.credentialConfigured') }}
+            </div>
+          </div>
+          <div class="space-y-2" data-testid="ai-saved-provider-models">
+            <div
+              class="flex items-center justify-between gap-3 border-b border-[hsl(var(--border-subtle))] pb-2"
+            >
+              <h4 class="text-sm font-semibold">Models</h4>
               <Button
-                variant="outline"
+                variant="link"
                 size="sm"
-                :disabled="providerRefreshLoading[String(provider.id)] === true"
-                @click="handleRefreshModels(String(provider.id))"
+                class="h-auto p-0"
+                :disabled="providerRefreshLoading[String(selectedProvider.id)] === true"
+                @click="handleRefreshModels(String(selectedProvider.id))"
               >
                 {{
-                  providerRefreshLoading[String(provider.id)]
+                  providerRefreshLoading[String(selectedProvider.id)]
                     ? t('setting.ai.refreshingModels')
                     : t('setting.ai.refreshModels')
                 }}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                class="text-destructive"
-                @click="handleDeleteProvider(String(provider.id))"
-              >
-                {{ t('setting.ai.deleteProvider') }}
-              </Button>
             </div>
+            <div
+              v-for="model in selectedProviderModels"
+              :key="model.id"
+              class="flex items-center gap-3 rounded-lg bg-muted/50 px-3 py-3 text-sm"
+            >
+              <Star
+                class="size-3.5 shrink-0"
+                :class="
+                  model.id === selectedProvider.defaultModel
+                    ? 'fill-primary text-primary'
+                    : 'text-muted-foreground'
+                "
+              />
+              <span class="min-w-0 flex-1 truncate">{{ model.name || model.id }}</span>
+              <span
+                v-if="model.id === selectedProvider.defaultModel"
+                class="text-xs text-primary"
+                >{{ t('setting.ai.defaultModelLabel') }}</span
+              >
+            </div>
+            <p v-if="!selectedProviderModels.length" class="py-3 text-xs text-muted-foreground">
+              {{ t('setting.ai.modelInventoryHint') }}
+            </p>
           </div>
-        </SettingsObjectCard>
+          <SettingsStatusBlock
+            v-if="providerStatusMap[String(selectedProvider.id)]"
+            :kind="
+              providerStatusMap[String(selectedProvider.id)]?.tone === 'error' ? 'error' : 'success'
+            "
+            :description="providerStatusMap[String(selectedProvider.id)]?.message"
+          />
+        </div>
+        <div class="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
+          <div class="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              class="text-destructive"
+              @click="handleDeleteProvider(String(selectedProvider.id))"
+              >{{ t('setting.ai.deleteProvider') }}</Button
+            >
+            <Button
+              v-if="!selectedProvider.isDefault"
+              variant="ghost"
+              size="sm"
+              @click="handleSetDefault(String(selectedProvider.id))"
+              >{{ t('setting.ai.setDefaultProvider') }}</Button
+            >
+          </div>
+          <div class="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="providerTestLoading[String(selectedProvider.id)] === true"
+              @click="handleTestProvider(String(selectedProvider.id))"
+            >
+              {{
+                providerTestLoading[String(selectedProvider.id)]
+                  ? t('setting.ai.testingProvider')
+                  : t('setting.ai.testProvider')
+              }}</Button
+            >
+            <Button
+              size="sm"
+              :disabled="
+                !canSaveProviderName || providerUpdateLoading[String(selectedProvider.id)] === true
+              "
+              data-testid="ai-provider-save-metadata"
+              @click="handleSaveProviderName"
+              >{{ t('setting.ai.saveConfiguration') }}</Button
+            >
+          </div>
+        </div>
       </div>
-
-      <SettingsStatusBlock
-        v-else
-        kind="info"
-        :title="t('setting.ai.emptyTitle')"
-        :description="t('setting.ai.emptyDescription')"
-        test-id="ai-provider-empty"
-      >
-        <template #actions>
-          <Button size="sm" @click="openOnboarding">{{ t('setting.ai.addProvider') }}</Button>
-        </template>
-      </SettingsStatusBlock>
     </div>
-  </SettingsSection>
+    <SettingsStatusBlock
+      v-else
+      kind="info"
+      :title="t('setting.ai.emptyTitle')"
+      :description="t('setting.ai.emptyDescription')"
+      test-id="ai-provider-empty"
+    >
+      <template #actions
+        ><Button size="sm" @click="openOnboarding">{{
+          t('setting.ai.addProvider')
+        }}</Button></template
+      >
+    </SettingsStatusBlock>
+  </section>
 
   <Dialog :open="onboardingOpen" @update:open="handleDialogOpenChange">
     <SettingsDialogShell
@@ -155,13 +292,22 @@
 
       <div class="min-h-0">
         <div v-if="onboardingStep === 'picker'" class="space-y-4">
-          <Input v-model="catalogSearch" :placeholder="t('setting.ai.searchProviders')" autofocus />
           <div v-if="isLoadingCatalog" class="py-10 text-center text-sm text-muted-foreground">
             {{ t('setting.ai.loadingProviderCatalog') }}
           </div>
-          <div v-else class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-3 sm:grid-cols-2">
             <button
-              v-for="entry in filteredCatalog"
+              v-for="driver in localDrivers"
+              :key="driver.id"
+              type="button"
+              class="rounded-xl bg-muted/50 p-4 text-left hover:bg-muted"
+              :data-testid="`ai-provider-catalog-${driver.id}`"
+              @click="addLocal(driver.id)"
+            >
+              <p class="font-medium">{{ driver.name }}</p>
+            </button>
+            <button
+              v-for="entry in providerCatalog"
               :key="entry.id"
               type="button"
               class="group rounded-xl bg-[hsl(var(--surface-raised)/0.38)] p-4 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)] transition-[background-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_8px_22px_-18px_rgba(0,0,0,0.5)]"
@@ -187,7 +333,7 @@
             </button>
           </div>
           <p
-            v-if="!isLoadingCatalog && !filteredCatalog.length"
+            v-if="!isLoadingCatalog && !providerCatalog.length"
             class="py-8 text-center text-sm text-muted-foreground"
           >
             {{ t('setting.ai.noProviderMatches') }}
@@ -508,23 +654,25 @@
 </template>
 
 <script setup lang="ts">
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
-import { computed, onMounted, ref } from 'vue';
+import { AI_LOCAL_AGENT_KEY } from '../../../di/keys';
+import { Plus, RefreshCw, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { Badge, Button, Dialog, Input, Label, Switch } from '@memoflow/ui-vue-shadcn';
 import type {
+  LocalAgentConnection,
+  LocalAgentConnectionInput,
+  LocalAgentDriver,
+  LocalAgentStatus,
   AIProviderCatalogEntryDTO,
   AIProviderConfigClientDTO,
+  AIModelInfo,
   ProbeAIProviderConnectionRes,
 } from '@memoflow/contracts/ai';
 import { useAI } from '../../ai/composables/useAI';
-import {
-  SettingsDialogShell,
-  SettingsObjectCard,
-  SettingsSection,
-  SettingsStatusBlock,
-} from '../../../components/shared/settings';
+import { SettingsDialogShell, SettingsStatusBlock } from '../../../components/shared/settings';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
 
 type OnboardingStep = 'picker' | 'connection' | 'model' | 'review';
@@ -544,6 +692,7 @@ const {
   probeProviderReplacement,
   commitProviderReplacement,
   deleteProvider,
+  updateProvider,
   setDefaultProvider,
   refreshProviderModels,
   testProvider,
@@ -553,7 +702,6 @@ const onboardingOpen = ref(false);
 const onboardingMode = ref<OnboardingMode>('create');
 const replacementProvider = ref<AIProviderConfigClientDTO | null>(null);
 const onboardingStep = ref<OnboardingStep>('picker');
-const catalogSearch = ref('');
 const selectedCatalog = ref<AIProviderCatalogEntryDTO | null>(null);
 const connectionName = ref('');
 const connectionBaseUrl = ref('');
@@ -573,22 +721,170 @@ const providerTestLoading = ref<Record<string, boolean>>({});
 const providerStatusMap = ref<Record<string, ProviderStatusState | null>>({});
 
 const providerItems = computed(() => providers.value);
-const defaultProvider = computed(
-  () => providerItems.value.find((provider) => provider.isDefault) ?? null,
+const localClient = inject(AI_LOCAL_AGENT_KEY, undefined);
+const localConnections = ref<LocalAgentConnection[]>([]);
+const localStatuses = ref<Record<string, LocalAgentStatus>>({});
+const localBusy = ref(false);
+const localError = ref(false);
+const newLocalDriver = ref<LocalAgentDriver | null>(null);
+const localDrivers = computed(() =>
+  localClient
+    ? [
+        { id: 'codex' as const, name: 'Codex' },
+        { id: 'claude' as const, name: 'Claude Code' },
+        { id: 'pi' as const, name: 'Pi' },
+        { id: 'dsh' as const, name: 'DeepSeek Harness (DSH)' },
+      ]
+    : [],
 );
+const providerRows = computed(() => [
+  ...providerItems.value,
+  ...localConnections.value.map((connection) => ({
+    id: `local:${connection.id}`,
+    name: connection.name,
+    providerDefinitionId: connection.driver,
+    isActive: connection.enabled,
+    isDefault: false,
+  })),
+]);
+const selectedLocal = computed(
+  () =>
+    localConnections.value.find(
+      (connection) => `local:${connection.id}` === selectedProviderId.value,
+    ) ?? null,
+);
+function localStatusLabel(status: LocalAgentStatus) {
+  return status.status === 'ready'
+    ? t('aiAssistant.local.ready', { count: status.models.length })
+    : status.message;
+}
+async function localAction(work: () => Promise<void>) {
+  if (localBusy.value) return;
+  localBusy.value = true;
+  localError.value = false;
+  try {
+    await work();
+  } catch {
+    localError.value = true;
+  } finally {
+    localBusy.value = false;
+  }
+}
+async function loadLocalConnections() {
+  if (localClient)
+    await localAction(async () => {
+      localConnections.value = await localClient.listConnections();
+    });
+}
+async function checkLocal(connection: LocalAgentConnection) {
+  if (!localClient) return;
+  await localAction(async () => {
+    const status = await localClient.probeConnection(connection.id);
+    // Configuration changes or removal invalidate the old catalog.
+    if (
+      localConnections.value.some(
+        (item) => item.id === connection.id && item.revision === connection.revision,
+      )
+    )
+      localStatuses.value[connection.id] = status;
+  });
+}
+function addLocal(driver: LocalAgentDriver) {
+  onboardingOpen.value = false;
+  newLocalDriver.value = driver;
+  selectedProviderId.value = '';
+  localError.value = false;
+}
+function cancelNewLocal() {
+  newLocalDriver.value = null;
+  selectedProviderId.value = String(providerRows.value[0]?.id ?? '');
+}
+async function saveLocal(input: LocalAgentConnectionInput) {
+  if (!localClient) return;
+  const selected = selectedLocal.value;
+  const selection = selectedProviderId.value;
+  const draftDriver = newLocalDriver.value;
+  await localAction(async () => {
+    const saved = await localClient.saveConnection(input, selected?.id, selected?.revision);
+    localConnections.value = selected
+      ? localConnections.value.map((item) => (item.id === saved.id ? saved : item))
+      : [...localConnections.value, saved];
+    delete localStatuses.value[saved.id];
+    if (selectedProviderId.value === selection && newLocalDriver.value === draftDriver) {
+      newLocalDriver.value = null;
+      selectedProviderId.value = `local:${saved.id}`;
+    }
+  });
+}
+async function removeLocal() {
+  if (!localClient || !selectedLocal.value) return;
+  const id = selectedLocal.value.id;
+  await localAction(async () => {
+    await localClient.deleteConnection(id);
+    localConnections.value = localConnections.value.filter((item) => item.id !== id);
+    delete localStatuses.value[id];
+  });
+}
+async function toggleProviderRow(id: string, enabled: boolean) {
+  if (!id.startsWith('local:')) return handleToggleProvider(id, enabled);
+  const connection = localConnections.value.find((item) => `local:${item.id}` === id);
+  if (!connection || !localClient) return;
+  await localAction(async () => {
+    const { driver, name, executablePath, homePath, writeScopes } = connection;
+    const saved = await localClient.saveConnection(
+      { driver, name, executablePath, homePath, writeScopes, enabled },
+      connection.id,
+      connection.revision,
+    );
+    localConnections.value = localConnections.value.map((item) =>
+      item.id === saved.id ? saved : item,
+    );
+    delete localStatuses.value[saved.id];
+  });
+}
+
+const selectedProviderId = ref('');
+const providerNameDraft = ref('');
+const providerUpdateLoading = ref<Record<string, boolean>>({});
+const providerModels = ref<Record<string, AIModelInfo[]>>({});
+const isCheckingProviders = ref(false);
+const selectedProvider = computed(
+  () =>
+    providerItems.value.find((provider) => String(provider.id) === selectedProviderId.value) ??
+    null,
+);
+const selectedProviderModels = computed(() => {
+  const provider = selectedProvider.value;
+  if (!provider) return [];
+  return (
+    providerModels.value[String(provider.id)] ??
+    (provider.defaultModel ? [{ id: provider.defaultModel, name: provider.defaultModel }] : [])
+  );
+});
+const canSaveProviderName = computed(() => {
+  const name = providerNameDraft.value.trim();
+  return Boolean(selectedProvider.value && name && name !== selectedProvider.value.name);
+});
+watch(
+  providerRows,
+  (items) => {
+    if (newLocalDriver.value) return;
+    if (!items.some((provider) => String(provider.id) === selectedProviderId.value)) {
+      selectedProviderId.value = String(items[0]?.id ?? '');
+    }
+  },
+  { immediate: true },
+);
+watch([() => selectedProvider.value?.id, () => selectedProvider.value?.name], () => {
+  providerNameDraft.value = selectedProvider.value?.name ?? '';
+});
+
 const isBusy = computed(() => isProbing.value || isTestingModel.value || isSaving.value);
 const flowSteps = computed<OnboardingStep[]>(() =>
   onboardingMode.value === 'replace'
     ? ['connection', 'model', 'review']
     : ['picker', 'connection', 'model', 'review'],
 );
-const filteredCatalog = computed(() => {
-  const query = catalogSearch.value.trim().toLowerCase();
-  if (!query) return providerCatalog.value;
-  return providerCatalog.value.filter((entry) =>
-    `${entry.name} ${entry.description} ${entry.id}`.toLowerCase().includes(query),
-  );
-});
 const filteredModels = computed(() => {
   if (!probeResult.value || !selectedCatalog.value) return [];
   const query = modelSearch.value.trim().toLowerCase();
@@ -658,7 +954,11 @@ const onboardingDescription = computed(() => {
   return '';
 });
 
+watch(selectedProviderId, (id) => {
+  if (id) newLocalDriver.value = null;
+});
 onMounted(() => {
+  void loadLocalConnections();
   void loadProviders();
 });
 
@@ -731,7 +1031,6 @@ function resetOnboarding() {
   onboardingMode.value = 'create';
   replacementProvider.value = null;
   onboardingStep.value = 'picker';
-  catalogSearch.value = '';
   selectedCatalog.value = null;
   connectionName.value = '';
   connectionBaseUrl.value = '';
@@ -818,10 +1117,13 @@ async function saveProvider() {
   isSaving.value = true;
   try {
     if (onboardingMode.value === 'replace' && replacementProvider.value) {
-      await commitProviderReplacement(String(replacementProvider.value.id), {
+      const replacementId = String(replacementProvider.value.id);
+      await commitProviderReplacement(replacementId, {
         onboardingId: probeResult.value.onboardingId,
         defaultModelId: effectiveModelId.value,
       });
+      delete providerModels.value[replacementId];
+      providerStatusMap.value[replacementId] = null;
       toast.success(t('setting.ai.providerConnectionReplaced'));
     } else {
       await commitProviderOnboarding({
@@ -864,6 +1166,51 @@ function goBack() {
   }
 }
 
+async function handleRecheckProviders() {
+  isCheckingProviders.value = true;
+  try {
+    await loadProviders();
+    await loadLocalConnections();
+    for (const connection of localConnections.value.filter((item) => item.enabled)) {
+      await checkLocal(connection);
+    }
+    // Catalog reads do not send paid inference prompts.
+    for (const provider of providerItems.value.filter((item) => item.isActive)) {
+      await handleRefreshModels(String(provider.id));
+    }
+  } catch (error) {
+    toast.error(getAISettingErrorMessage(error, 'setting.ai.providerActionFailed'));
+  } finally {
+    isCheckingProviders.value = false;
+  }
+}
+
+async function handleToggleProvider(providerId: string, isActive: boolean) {
+  providerUpdateLoading.value[providerId] = true;
+  try {
+    await updateProvider(providerId, { isActive });
+  } catch (error) {
+    toast.error(getAISettingErrorMessage(error, 'setting.ai.providerActionFailed'));
+  } finally {
+    providerUpdateLoading.value[providerId] = false;
+  }
+}
+
+async function handleSaveProviderName() {
+  const providerId = selectedProviderId.value;
+  if (!canSaveProviderName.value) return;
+  const name = providerNameDraft.value.trim();
+  providerUpdateLoading.value[providerId] = true;
+  try {
+    await updateProvider(providerId, { name });
+    toast.success(t('setting.ai.configurationSaved'));
+  } catch (error) {
+    toast.error(getAISettingErrorMessage(error, 'setting.ai.providerActionFailed'));
+  } finally {
+    providerUpdateLoading.value[providerId] = false;
+  }
+}
+
 async function handleSetDefault(providerId: string) {
   try {
     await setDefaultProvider(providerId);
@@ -894,10 +1241,19 @@ async function handleTestProvider(providerId: string) {
 }
 
 async function handleRefreshModels(providerId: string) {
+  const providerVersion = providerItems.value.find(
+    (provider) => String(provider.id) === providerId,
+  )?.version;
   providerRefreshLoading.value[providerId] = true;
   providerStatusMap.value[providerId] = null;
   try {
     const snapshot = await refreshProviderModels(providerId);
+    if (
+      providerItems.value.find((provider) => String(provider.id) === providerId)?.version !==
+      providerVersion
+    )
+      return;
+    providerModels.value[providerId] = snapshot.models;
     providerStatusMap.value[providerId] = {
       tone: 'success',
       message: t('setting.ai.providerModelsRefreshed', {
@@ -917,6 +1273,8 @@ async function handleRefreshModels(providerId: string) {
 async function handleDeleteProvider(providerId: string) {
   try {
     await deleteProvider(providerId);
+    delete providerModels.value[providerId];
+    delete providerStatusMap.value[providerId];
     toast.success(t('setting.ai.providerDeleted'));
   } catch (error) {
     toast.error(getAISettingErrorMessage(error, 'setting.ai.providerActionFailed'));

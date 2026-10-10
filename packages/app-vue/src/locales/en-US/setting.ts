@@ -284,6 +284,16 @@ export default {
     "maxWidthNone": "No limit"
   },
   "ai": {
+    "recheckProviders": "Recheck",
+    "providerList": "Providers",
+    "savedProvider": "Configured",
+    "enableProvider": "Enable {name}",
+    "displayName": "Display name",
+    "credentialConfigured": "Credential configured",
+    "modelInventoryHint": "Recheck to load the available models.",
+    "saveConfiguration": "Save configuration",
+    "configurationSaved": "Configuration saved",
+
     "title": "AI Assistant",
     "addProvider": "Add Provider",
     "replaceConnection": "Replace connection",

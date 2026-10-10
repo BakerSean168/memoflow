@@ -4,12 +4,14 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-10-09T00:00:00Z
+updated: 2026-10-10T00:00:00Z
 ---
 
 # Archived Plans
 
 本目录存放已完成、暂停或仅保留背景参考价值的历史计划。
+
+- [Providers 设置与聊天输入区域整合](./2026-10-10-unified-provider-ui.md)：统一 API/原生 Providers 设置与聊天底栏；72 项测试、Web E2E、类型/lint/治理及 Linux 实际 Electron 持久化验收通过。
 
 - [Desktop Profile 研究与设计](./2026-10-09-desktop-profile-research-and-design.md)：已产出设计、官方资料与实施计划；实施进展见 active 计划。
 

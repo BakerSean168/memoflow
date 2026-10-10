@@ -284,6 +284,16 @@ export default {
     "maxWidthNone": "不限制"
   },
   "ai": {
+    "recheckProviders": "重新检查",
+    "providerList": "Providers",
+    "savedProvider": "已配置",
+    "enableProvider": "启用 {name}",
+    "displayName": "显示名称",
+    "credentialConfigured": "已配置凭据",
+    "modelInventoryHint": "重新检查以加载可用模型。",
+    "saveConfiguration": "保存配置",
+    "configurationSaved": "配置已保存",
+
     "title": "AI 设置",
     "addProvider": "添加 Provider",
     "replaceConnection": "更换连接",

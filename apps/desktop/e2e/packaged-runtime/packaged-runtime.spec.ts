@@ -216,13 +216,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     await mainWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=ai';
     });
-    const localSettings = mainWindow.getByTestId('ai-local-settings');
+    const localSettings = mainWindow.getByTestId('ai-settings-panel');
     await expect(localSettings).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
     await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
-    for (const driver of ['codex', 'claude', 'pi']) {
-      await localSettings.getByRole('combobox').selectOption(driver);
+    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
+      await mainWindow.getByTestId('ai-provider-add').click();
+      await mainWindow.getByTestId(`ai-provider-catalog-${driver}`).click();
       await localSettings
-        .getByLabel('连接名称', { exact: true })
+        .getByLabel('显示名称', { exact: true })
         .fill(`Packaged unavailable ${driver}`);
       await localSettings
         .getByLabel('程序路径或命令', { exact: true })
@@ -237,13 +238,14 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       await expect(
         localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
       ).not.toBeChecked();
-      await localSettings.getByRole('button', { name: '保存连接', exact: true }).click();
+      await localSettings.getByTestId('ai-native-save').click();
       const row = localSettings
-        .locator(':scope > div')
-        .filter({ hasText: `Packaged unavailable ${driver} · ${driver}` });
+        .getByTestId('ai-provider-list')
+        .getByRole('listitem')
+        .filter({ hasText: `Packaged unavailable ${driver}` });
       await expect(row).toBeVisible();
-      await row.getByRole('button', { name: '检查登录与模型', exact: true }).click();
-      await expect(row.getByRole('status')).toContainText('could not be started', {
+      await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
+      await expect(localSettings.getByRole('status')).toContainText('could not be started', {
         timeout: 30_000,
       });
       await expect(mainWindow.getByTestId('ai-provider-add')).toBeEnabled();
@@ -282,13 +284,15 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     await restartedWindow.evaluate(() => {
       window.location.hash = '#/settings?tab=ai';
     });
-    const restoredLocalSettings = restartedWindow.getByTestId('ai-local-settings');
-    for (const driver of ['codex', 'claude', 'pi']) {
+    const restoredLocalSettings = restartedWindow.getByTestId('ai-settings-panel');
+    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
       const row = restoredLocalSettings
-        .locator(':scope > div')
-        .filter({ hasText: `Packaged unavailable ${driver} · ${driver}` });
+        .getByTestId('ai-provider-list')
+        .getByRole('listitem')
+        .filter({ hasText: `Packaged unavailable ${driver}` });
       await expect(row).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
-      await row.getByRole('button', { name: '移除连接', exact: true }).click();
+      await row.getByRole('button').click();
+      await restoredLocalSettings.getByRole('button', { name: '删除', exact: true }).click();
       await expect(row).toHaveCount(0);
     }
     await expect(restartedWindow.getByTestId('ai-provider-add')).toBeEnabled();

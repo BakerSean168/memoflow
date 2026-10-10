@@ -169,7 +169,10 @@ onBeforeUnmount(() => {
       </ProductSurfaceHeader>
 
       <main class="min-h-0 flex-1 overflow-y-auto" data-testid="settings-content-scroll">
-        <div class="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
+        <div
+          class="mx-auto w-full px-5 py-8 sm:px-8 sm:py-10"
+          :class="activeTab === 'ai' ? 'max-w-[1064px]' : 'max-w-4xl'"
+        >
           <div class="min-w-0 space-y-8">
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />

@@ -493,7 +493,7 @@ export default {
       noSavedConversations: 'No saved conversations yet.',
       conversationName: 'Conversation Name',
       conversationPlaceholder: 'Conversation name',
-      messagePlaceholder: 'Describe what you want to get done, or ask a question…',
+      messagePlaceholder: "Ask anything, or {'@'}mention a goal, task or note…",
       provider: 'Provider',
       providerPlaceholder: 'Select provider',
       model: 'Model',

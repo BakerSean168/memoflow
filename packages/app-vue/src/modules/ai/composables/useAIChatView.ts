@@ -193,7 +193,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       })),
   );
 
-  const providerList = computed<ProviderListItem[]>(() => providers.value);
+  const providerList = computed<ProviderListItem[]>(() =>
+    providers.value.filter((provider) => provider.isActive),
+  );
   const persistWorkflowAndModel = (id: string) => {
     persistence.persistWorkflowState(id);
     modelSelection.persistSelectedModel(modelSelection.selectedModelKey.value, id);
