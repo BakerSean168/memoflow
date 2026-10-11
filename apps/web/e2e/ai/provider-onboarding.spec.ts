@@ -204,6 +204,11 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     await page.getByTestId('ai-chat-model-selector').click();
     const picker = page.getByTestId('ai-model-picker');
     await expect(picker).toBeVisible();
+    // Popover enters with a zoom animation. Measure after it settles instead
+    // of treating an in-flight transform as a change in the fixed dimensions.
+    await expect
+      .poll(async () => (await picker.boundingBox())?.width ?? 0)
+      .toBeGreaterThanOrEqual(359);
     const pickerBox = await picker.boundingBox();
     expect(pickerBox).not.toBeNull();
     expect(pickerBox!.x).toBeGreaterThanOrEqual(-1);
