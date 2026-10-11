@@ -319,6 +319,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       name: instance.name,
       driver: instance.driver,
       enabled: instance.enabled,
+      accentColor: instance.accentColor,
       configured:
         instance.driver === 'mastra'
           ? Boolean(
@@ -340,17 +341,31 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       )?.instanceId;
     return id ? `agent:${id}` : '';
   });
+  // The picker browses all eligible Mastra bindings, not just the currently
+  // selected Agent. Native catalogs are only available for the probed connection.
   const composerModels = computed(() => {
+    const mastraModels = modelSelection.allModelOptions.value.map((model) => ({
+      ...model,
+      agentKey: model.agentInstanceId
+        ? 'agent:' + model.agentInstanceId
+        : selectedComposerAgent.value,
+      providerName:
+        providerList.value.find((provider) => provider.id === model.providerId)?.name ??
+        model.providerName,
+    }));
     const choice = chatSession.runtimeChoice.value;
-    if (choice.runtimeKind === 'local_agent')
-      return localChoices.models.value.map((model) => ({
-        key: model.id,
-        providerId: choice.connectionId,
-        providerName: 'Native Agent',
-        modelId: model.id,
-        modelName: model.name,
-      }));
-    return modelSelection.selectedAgentModels.value;
+    const nativeModels =
+      choice.runtimeKind === 'local_agent'
+        ? localChoices.models.value.map((model) => ({
+            key: model.id,
+            agentKey: 'local:' + choice.connectionId,
+            providerId: choice.connectionId,
+            providerName: model.provider ?? 'Native Agent',
+            modelId: model.id,
+            modelName: model.name,
+          }))
+        : [];
+    return [...mastraModels, ...nativeModels];
   });
   const composerModelKey = computed(() =>
     chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
@@ -422,21 +437,50 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     }
     permissionMode.value = 'supervised';
   }
-  function selectComposerModel(key: string) {
+  async function selectComposerModel(key: string, agentKey: string) {
     if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
-    const choice = chatSession.runtimeChoice.value;
-    if (choice.runtimeKind === 'local_agent') {
-      if (localChoices.models.value.some((model) => model.id === key))
-        chatSession.runtimeChoice.value = { ...choice, modelId: key };
+    const agent = composerAgents.value.find((item) => item.id === agentKey && item.enabled);
+    if (!agent) return;
+    if (agentKey.startsWith('local:')) {
+      const connectionId = agentKey.slice(6);
+      const selected = chatSession.runtimeChoice.value;
+      if (selected.runtimeKind !== 'local_agent' || selected.connectionId !== connectionId)
+        await selectComposerAgent(agentKey);
+      const current = chatSession.runtimeChoice.value;
+      if (
+        current.runtimeKind === 'local_agent' &&
+        current.connectionId === connectionId &&
+        localChoices.models.value.some((model) => model.id === key)
+      )
+        chatSession.runtimeChoice.value = { ...current, modelId: key };
       return;
     }
+    const instanceId = agentKey.startsWith('agent:') ? agentKey.slice(6) : '';
+    const target = modelSelection.allModelOptions.value.find(
+      (model) =>
+        model.key === key &&
+        (model.agentInstanceId === instanceId ||
+          // Preserve a historically provider-bound conversation only for its
+          // existing selected model, never grant it another Agent's catalog.
+          (!model.agentInstanceId &&
+            selectedComposerAgent.value === agentKey &&
+            modelSelection.selectedModelKey.value === key)),
+    );
+    if (!target) return;
+    const previousAgent = selectedComposerAgent.value;
+    let needsNewConversation = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
+    if (needsNewConversation) {
+      startNewConversation(toolMode.value);
+      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+    }
     if (modelSelection.selectModel(key) === 'new_conversation_required') {
-      if (!modelSelection.allModelOptions.value.some((model) => model.key === key)) return;
+      needsNewConversation = true;
       startNewConversation(toolMode.value);
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
       modelSelection.selectModel(key);
-      toast.info(t('aiAssistant.agentSwitchNewConversation'));
     }
+    if (needsNewConversation) toast.info(t('aiAssistant.agentSwitchNewConversation'));
+    if (previousAgent !== agentKey) permissionMode.value = 'supervised';
   }
   function selectPermission(mode: AIChatPermissionMode) {
     if (chatSession.chatLoading.value) return;

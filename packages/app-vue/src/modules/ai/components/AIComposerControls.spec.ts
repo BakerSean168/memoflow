@@ -1,90 +1,190 @@
+/** @vitest-environment jsdom */
+import { h, defineComponent, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { describe, expect, it } from 'vitest';
-import { Select } from '@memoflow/ui-vue-shadcn';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '../../../locales/production-messages';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '../../../platform/server-state';
 import AIComposerControls from './AIComposerControls.vue';
+
+vi.mock('@memoflow/ui-vue-shadcn', () => {
+  const passthrough = (name: string) =>
+    defineComponent({
+      name,
+      inheritAttrs: false,
+      setup(_props, { slots, attrs }) {
+        return () => h('div', attrs, slots.default?.());
+      },
+    });
+  return {
+    Popover: passthrough('Popover'),
+    PopoverTrigger: passthrough('PopoverTrigger'),
+    PopoverContent: passthrough('PopoverContent'),
+  };
+});
 
 const agents = [
   {
     id: 'agent:mastra',
-    name: 'Personal Mastra',
+    name: 'Mastra',
     driver: 'mastra' as const,
     enabled: true,
     configured: true,
   },
   {
     id: 'agent:work',
-    name: 'Work Mastra',
+    name: 'Mastra',
     driver: 'mastra' as const,
+    enabled: true,
+    configured: true,
+  },
+  {
+    id: 'local:codex',
+    name: 'Codex Work',
+    driver: 'codex' as const,
     enabled: true,
     configured: false,
   },
 ];
 const models = [
   {
-    key: 'agent:mastra::provider-1::model-a',
+    key: 'agent:mastra::google-connection::gpt-4.1',
     agentInstanceId: 'mastra',
-    providerId: 'provider-1',
-    providerName: 'Personal',
-    modelId: 'model-a',
-    modelName: 'Model A',
+    agentKey: 'agent:mastra',
+    providerId: 'google-connection',
+    providerName: 'Google',
+    modelId: 'gpt-4.1',
+    modelName: 'Model Alpha',
   },
   {
-    key: 'agent:mastra::provider-1::model-b',
+    key: 'agent:mastra::google-connection::gemini-flash',
     agentInstanceId: 'mastra',
-    providerId: 'provider-1',
-    providerName: 'Personal',
-    modelId: 'model-b',
-    modelName: 'Model B',
+    agentKey: 'agent:mastra',
+    providerId: 'google-connection',
+    providerName: 'Google',
+    modelId: 'gemini-flash',
+    modelName: 'Gemini Flash',
+  },
+  {
+    key: 'agent:work::other-connection::gpt-4.1',
+    agentInstanceId: 'work',
+    agentKey: 'agent:work',
+    providerId: 'other-connection',
+    providerName: 'AnyRouter',
+    modelId: 'gpt-4.1',
+    modelName: 'Model Alpha',
   },
 ];
-function setup(overrides: Record<string, unknown> = {}) {
+function setup(overrides: Record<string, unknown> = {}, identityScope = 'profile-a') {
   return mount(AIComposerControls, {
     props: {
       agents,
       selectedAgentId: 'agent:mastra',
       models,
-      selectedModelKey: models[0].key,
+      selectedModelKey: models[0]!.key,
       permissionMode: 'supervised',
       native: false,
       disabled: false,
       ...overrides,
     },
     global: {
-      stubs: { teleport: true },
+      provide: { [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope },
       plugins: [createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages })],
     },
   });
 }
-describe('T3 three-part Agent / model / permissions composer', () => {
-  it('always shows three independent controls with the Agent display name, not a vendor', async () => {
+const openModels = async (wrapper: ReturnType<typeof setup>) => {
+  (wrapper.vm as unknown as { setMenu: (menu: 'models', open: boolean) => void }).setMenu(
+    'models',
+    true,
+  );
+  await nextTick();
+};
+
+describe('T3 model picker / conditional traits / enforced permissions', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('shows one model picker, a truthful default-traits control and compact permissions', () => {
     const wrapper = setup();
-    expect(wrapper.get('[data-testid="ai-chat-agent-selector"]').text()).toContain(
-      'Personal Mastra',
-    );
+    expect(wrapper.find('[data-testid="ai-chat-agent-selector"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="ai-chat-permission-selector"]').text()).toContain('需要确认');
-    const selectors = wrapper.findAllComponents(Select);
-    expect(selectors).toHaveLength(3);
-    selectors[0].vm.$emit('update:modelValue', 'agent:work');
-    selectors[1].vm.$emit('update:modelValue', models[1].key);
-    selectors[2].vm.$emit('update:modelValue', 'read-only');
-    expect(wrapper.emitted('selectAgent')).toEqual([['agent:work']]);
-    expect(wrapper.emitted('selectModel')).toEqual([[models[1].key]]);
-    expect(wrapper.emitted('permission')).toEqual([['read-only']]);
-    wrapper.unmount();
-  });
-  it('keeps Agent and permissions visible when an instance has no models', async () => {
-    const wrapper = setup({ models: [], selectedModelKey: '' });
-    expect(wrapper.find('[data-testid="ai-chat-agent-selector"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain('未配置模型');
+    expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(true);
-    await wrapper.get('[data-testid="ai-chat-model-selector"]').trigger('click');
-    expect(wrapper.emitted('settings')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain('Model Alpha');
+    expect(wrapper.get('[data-testid="ai-model-traits-menu"]').text()).toContain('默认参数');
     wrapper.unmount();
   });
-  it('offers only permission modes that the current runtime actually enforces', () => {
+
+  it('combines Agent sidebar and model selection without losing the owning instance', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(2);
+    expect(wrapper.get('[data-testid="ai-model-picker-option"]').text()).toContain('Google');
+    await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    await nextTick();
+    const row = wrapper.get('[data-testid="ai-model-picker-option"]');
+    expect(row.text()).toContain('AnyRouter');
+    expect(row.text()).toContain('work');
+    await row.trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[models[2]!.key, 'agent:work']]);
+    expect(wrapper.emitted('selectAgent')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('searches across providers while retaining same-ID connections', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-search"]').setValue('model alpha');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(2);
+    await wrapper.get('[data-testid="ai-model-picker-search"]').setValue('AnyRouter');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="ai-model-picker-option"]').text()).toContain('AnyRouter');
+    wrapper.unmount();
+  });
+
+  it('favorites a tuple without switching models, persists favorite and filters its tab', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-toggle-favorite"]').trigger('click');
+    expect(wrapper.emitted('selectModel')).toBeUndefined();
+    expect(localStorage.getItem('ai:composer:model-favorites:v1:profile-a')).toContain(
+      models[0]!.key,
+    );
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(1);
+    wrapper.unmount();
+
+    const restored = setup();
+    await openModels(restored);
+    await restored.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(restored.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(1);
+    restored.unmount();
+  });
+
+  it('isolates favorites between different identities on the same browser', async () => {
+    const first = setup({}, 'profile-a');
+    await openModels(first);
+    await first.get('[data-testid="ai-model-picker-toggle-favorite"]').trigger('click');
+    first.unmount();
+
+    const second = setup({}, 'profile-b');
+    await openModels(second);
+    await second.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(second.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(0);
+    second.unmount();
+  });
+
+  it('can switch to an enabled native Agent that needs its own model probe', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain('未配置模型');
+    await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
+    expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
+    wrapper.unmount();
+  });
+
+  it('offers only permission modes implemented by the selected runtime', async () => {
     const mastra = setup();
     const native = setup({ native: true });
     expect((mastra.vm as unknown as { permissionModes: string[] }).permissionModes).toEqual([
@@ -95,17 +195,21 @@ describe('T3 three-part Agent / model / permissions composer', () => {
       'supervised',
       'auto-approve',
     ]);
+    expect(mastra.get('[data-testid="ai-permission-picker"]').text()).not.toContain('Full access');
+    await mastra.get('[data-testid="ai-permission-option-read-only"]').trigger('click');
+    expect(mastra.emitted('permission')).toEqual([['read-only']]);
     mastra.unmount();
     native.unmount();
   });
-  it('locks all three controls while a message is executing', () => {
+
+  it('disables all three controls while a run is active', () => {
     const wrapper = setup({ disabled: true });
-    for (const testid of [
-      'ai-chat-agent-selector',
+    for (const id of [
       'ai-chat-model-selector',
+      'ai-chat-traits-selector',
       'ai-chat-permission-selector',
     ]) {
-      expect(wrapper.get(`[data-testid="${testid}"]`).attributes('disabled')).toBeDefined();
+      expect(wrapper.get('[data-testid="' + id + '"]').attributes('disabled')).toBeDefined();
     }
     wrapper.unmount();
   });
