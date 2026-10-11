@@ -301,6 +301,44 @@ describe('useAIChatSession Mastra-native open chat', () => {
 
   afterEach(() => localStorage.clear());
 
+  it('forwards explicit Desktop native model traits and never leaks them into Web Mastra turns', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const native = {
+      id: 'local-native',
+      runtimeKind: 'local_agent' as const,
+      connectionId: 'codex',
+      modelId: 'native-model',
+      name: 'Native',
+      driver: 'codex' as const,
+      createdAt: 1,
+      updatedAt: 2,
+    };
+    const localAgent = { createConversation: vi.fn(async () => native) };
+    const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+      localAgent: localAgent as never,
+      getNativeModelOptions: () => ({ reasoningEffort: 'high', serviceTier: 'priority' }),
+    });
+    session.runtimeChoice.value = {
+      runtimeKind: 'local_agent',
+      connectionId: 'codex',
+      modelId: 'native-model',
+    };
+    session.chatMessage.value = 'Hi';
+    await session.handleSendChat(service as never, null, 'Native', () => {});
+    expect(runtime.streamMessage.mock.calls[0]?.[0]).toMatchObject({
+      runtimeKind: 'local_agent',
+      nativeModelOptions: { reasoningEffort: 'high', serviceTier: 'priority' },
+    });
+    const webService = createServiceStub();
+    const webRuntime = createRuntimeStub();
+    const web = mountComposable(webService, webRuntime, 'web', createUsageRuntimeStub(), {
+      getNativeModelOptions: () => ({ reasoningEffort: 'high' }),
+    });
+    await send(web, webService, webRuntime);
+    expect(webRuntime.streamMessage.mock.calls[0]?.[0]).not.toHaveProperty('nativeModelOptions');
+  });
+
   it('creates only the Conversation shell, then streams through AssistantRuntimeClient with BYOK model selection', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

@@ -110,6 +110,59 @@ describe('local Agent conversation execution', () => {
     },
   );
 
+  it('rejects unadvertised effort or tier before starting a native turn, but forwards accepted options', async () => {
+    const { store, conversation } = await setup();
+    const runs: NativeAgentRunInput[] = [];
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: () => ({
+        async *run(input: NativeAgentRunInput): AsyncGenerator<NativeAgentEvent> {
+          runs.push(input);
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+        async probe() {
+          return {
+            status: 'ready' as const,
+            models: [
+              {
+                id: 'model',
+                name: 'Model',
+                reasoningEfforts: ['low', 'high'],
+                serviceTiers: [{ id: 'priority', name: 'Fast' }],
+              },
+            ],
+          };
+        },
+      }),
+    });
+    for (const modelOptions of [{ reasoningEffort: 'unavailable' }, { serviceTier: 'unknown' }]) {
+      await expect(
+        runtime
+          .dispatchMessage({
+            identityId: 'owner',
+            conversationId: conversation.id,
+            content: 'Hi',
+            modelOptions,
+          })
+          .next(),
+      ).rejects.toMatchObject({ code: 'LOCAL_AGENT_MODEL_UNSUPPORTED' });
+    }
+    for await (const _event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Hi',
+      modelOptions: { reasoningEffort: 'high', serviceTier: 'priority' },
+    })) {
+    }
+    expect(runs).toHaveLength(1);
+    expect(runs[0]?.modelOptions).toEqual({ reasoningEffort: 'high', serviceTier: 'priority' });
+    await runtime.dispose();
+  });
+
   it('changes model within one native conversation and snapshots each turn model', async () => {
     const { store, conversation } = await setup();
     const runs: NativeAgentRunInput[] = [];

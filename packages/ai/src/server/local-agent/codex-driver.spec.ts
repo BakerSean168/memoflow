@@ -83,6 +83,45 @@ describe('Codex native driver', () => {
     ).toMatchObject({ status: 'login_required' });
   });
 
+  it('projects the live catalog effort and service-tier metadata without guessing options', async () => {
+    const native = driver(`if(frame.method === 'model/list') {
+      reply({data:[{id:'model',model:'model',displayName:'Fixture',
+        supportedReasoningEfforts:[{reasoningEffort:'low'},{reasoningEffort:'super-high'}],
+        defaultReasoningEffort:'low',
+        serviceTiers:[{id:'priority',name:'Fast'}],defaultServiceTier:'priority'}],nextCursor:null});return;
+    }`);
+    expect(await native.probe()).toMatchObject({
+      status: 'ready',
+      models: [
+        {
+          id: 'model',
+          reasoningEfforts: ['low', 'super-high'],
+          defaultReasoningEffort: 'low',
+          serviceTiers: [{ id: 'priority', name: 'Fast' }],
+          defaultServiceTier: 'priority',
+        },
+      ],
+    });
+  });
+
+  it('forwards only explicitly selected native traits to Codex turn/start', async () => {
+    const native = driver(`if(frame.method === 'turn/start') {
+      if(frame.params.effort !== 'super-high' || frame.params.serviceTierForTurn !== 'priority') process.exit(8);
+      reply({turn:{id:'turn-1'}});
+      send({method:'turn/completed',params:{threadId:'native-1',turn:{id:'turn-1',status:'completed'}}});
+      return;
+    }`);
+    const results = [];
+    for await (const result of native.run({
+      modelId: 'model',
+      modelOptions: { reasoningEffort: 'super-high', serviceTier: 'priority' },
+      content: 'Hi',
+      mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+    }))
+      results.push(result);
+    expect(results.at(-1)).toEqual({ type: 'completed' });
+  });
+
   it('resumes the same native thread, injects session MCP, streams and answers a scoped permission request', async () => {
     const native = driver();
     const events = [];

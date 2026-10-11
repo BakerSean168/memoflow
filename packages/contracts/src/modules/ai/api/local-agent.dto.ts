@@ -86,11 +86,33 @@ export const LocalAgentConversationSchema = LocalAgentConversationCreateSchema.e
 });
 export type LocalAgentConversation = z.infer<typeof LocalAgentConversationSchema>;
 
+/** Discovered native model parameters; values are reported by the installed Agent. */
+export const LocalAgentModelOptionValueSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(40)
+  .regex(/^[a-z][a-z0-9-]*$/);
+export const LocalAgentModelOptionsSchema = z
+  .object({
+    reasoningEffort: LocalAgentModelOptionValueSchema.optional(),
+    serviceTier: LocalAgentModelOptionValueSchema.optional(),
+  })
+  .strict();
+export type LocalAgentModelOptions = z.infer<typeof LocalAgentModelOptionsSchema>;
+
 export const LocalAgentModelSchema = z
   .object({
     id,
     name: z.string().min(1).max(240),
     provider: z.string().max(240).optional(),
+    reasoningEfforts: z.array(LocalAgentModelOptionValueSchema).max(20).optional(),
+    defaultReasoningEffort: LocalAgentModelOptionValueSchema.optional(),
+    serviceTiers: z
+      .array(z.object({ id: LocalAgentModelOptionValueSchema, name: z.string().max(100) }).strict())
+      .max(20)
+      .optional(),
+    defaultServiceTier: LocalAgentModelOptionValueSchema.optional(),
   })
   .strict();
 export type LocalAgentModel = z.infer<typeof LocalAgentModelSchema>;

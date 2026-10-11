@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   AssistantRuntimeKindSchema,
   LocalAgentActivitySchema,
+  LocalAgentModelOptionsSchema,
   AgentInstanceSlugSchema,
 } from './local-agent.dto';
 /**
@@ -121,6 +122,8 @@ export const AssistantRuntimeClientCommandSchema = z
         /** Stable Mastra instance chosen in the composer (never API vendor ID). */
         agentInstanceId: AgentInstanceSlugSchema.optional(),
         permissionMode: AIChatPermissionModeSchema.optional(),
+        /** Desktop native-agent only; validated against the current host model catalog. */
+        nativeModelOptions: LocalAgentModelOptionsSchema.optional(),
         locale: z.enum(['zh-CN', 'en-US']).optional(),
         attachments: z.array(AssistantRuntimeAttachmentSchema).max(4).default([]),
         selectedEntities: z.array(AssistantRuntimeSelectedEntitySchema).max(12).default([]),
@@ -137,6 +140,17 @@ export const AssistantRuntimeClientCommandSchema = z
       .strict(),
   ])
   .superRefine((command, context) => {
+    if (
+      command.type === 'message' &&
+      command.nativeModelOptions &&
+      command.runtimeKind !== 'local_agent'
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['nativeModelOptions'],
+        message: 'Native model options require a local Agent',
+      });
+    }
     if (command.type === 'message') {
       const totalAttachmentChars = command.attachments.reduce(
         (total, attachment) => total + attachment.data.length,

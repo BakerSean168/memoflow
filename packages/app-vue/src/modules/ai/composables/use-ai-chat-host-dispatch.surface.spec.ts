@@ -37,7 +37,8 @@ describe('useAIChatSession runtime-owned open chat surface', () => {
     expect(session).toContain('options.runtime.cancelRun(runId)');
     expect(session).toContain('providerId: selectedModel!.providerId');
     expect(session).toContain('modelId: selectedModel!.modelId');
-    expect(session).toContain("{ runtimeKind: 'local_agent', modelId: choice.modelId }");
+    expect(session).toContain("runtimeKind: 'local_agent'");
+    expect(session).toContain('nativeModelOptions');
     expect(session).toContain('options.runtime.listMessages(conversationId, kind)');
     expect(session).toContain("event.type === 'assistant.message.delta'");
     expect(session).toContain("event.type === 'assistant.usage.updated'");

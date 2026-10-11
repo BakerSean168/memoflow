@@ -165,50 +165,85 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
       'same-mounted-application';
   });
   await page.getByTestId('settings-return-to-app').first().click();
-  await expect(page.getByTestId('ai-chat-agent-selector')).toBeVisible();
+  await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
   expect(
     await page.evaluate(
       () => (window as unknown as { __agentParityMarker: string }).__agentParityMarker,
     ),
   ).toBe('same-mounted-application');
-  await page.getByTestId('ai-chat-agent-selector').click();
-  await page.getByRole('option').filter({ hasText: providerName }).click();
   await page.getByTestId('ai-chat-model-selector').click();
-  await expect(page.getByRole('option', { name: 'E2E Model Alpha', exact: true })).toBeVisible();
-  await expect(page.getByRole('option', { name: 'E2E Model Beta', exact: true })).toBeVisible();
-  await page.getByRole('option', { name: 'E2E Model Beta', exact: true }).click();
+  await expect(page.getByTestId('ai-model-picker')).toBeVisible();
+  await expect(
+    page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Alpha' }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Beta' }),
+  ).toBeVisible();
+  await page.getByTestId('ai-model-picker-search').fill('Model Beta');
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(1);
+  await expect(page.getByTestId('ai-model-picker-option')).toContainText(providerName);
+  await page.getByTestId('ai-model-picker-toggle-favorite').click();
+  await expect(page.getByTestId('ai-chat-model-selector')).not.toContainText('E2E Model Beta');
+  await page.getByTestId('ai-model-picker-option').click();
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
+  // Mastra does not declare executable native traits; no inert UI should appear.
+  await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
   await page.getByTestId('ai-chat-permission-selector').click();
-  await page
-    .getByRole('option')
-    .filter({ hasText: /只读|Read only/i })
-    .click();
+  await page.getByTestId('ai-permission-option-read-only').click();
   await expect(page.getByTestId('ai-chat-permission-selector')).toContainText(/只读|Read only/i);
   const composer = page.getByTestId('ai-composer-surface');
   await composer.screenshot({
     path: testInfo.outputPath('composer-three-controls.png'),
     animations: 'disabled',
   });
-  for (const width of [1440, 390]) {
+  for (const width of [1440, 530, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    await expect(page.getByTestId('ai-chat-agent-selector')).toBeVisible();
     await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
+    await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
     await expect(page.getByTestId('ai-chat-permission-selector')).toBeVisible();
+    await page.getByTestId('ai-chat-model-selector').click();
+    const picker = page.getByTestId('ai-model-picker');
+    await expect(picker).toBeVisible();
+    const pickerBox = await picker.boundingBox();
+    expect(pickerBox).not.toBeNull();
+    expect(pickerBox!.x).toBeGreaterThanOrEqual(-1);
+    expect(pickerBox!.y).toBeGreaterThanOrEqual(-1);
+    expect(pickerBox!.x + pickerBox!.width).toBeLessThanOrEqual(width + 1);
+    if (width <= 530) {
+      await picker.screenshot({
+        path: testInfo.outputPath('model-picker-' + width + '.png'),
+        animations: 'disabled',
+      });
+    }
+    await page.getByTestId('ai-chat-permission-selector').click();
+    await expect(picker).toBeHidden();
+    const permissionPopup = page.getByTestId('ai-permission-picker');
+    await expect(permissionPopup).toBeVisible();
+    const permissionBox = await permissionPopup.boundingBox();
+    expect(permissionBox).not.toBeNull();
+    expect(permissionBox!.x).toBeGreaterThanOrEqual(-1);
+    expect(permissionBox!.x + permissionBox!.width).toBeLessThanOrEqual(width + 1);
+    if (width === 390) {
+      await permissionPopup.screenshot({
+        path: testInfo.outputPath('permission-picker-390.png'),
+        animations: 'disabled',
+      });
+    }
+    await page.keyboard.press('Escape');
+    await expect(permissionPopup).toBeHidden();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
   }
   await page.setViewportSize({ width: 1600, height: 900 });
-  await page.getByTestId('ai-chat-agent-selector').click();
-  await page
-    .getByRole('option')
-    .filter({ hasText: /配置 Agent|Configure Agent/ })
-    .click();
+  await page.getByTestId('ai-chat-model-selector').click();
+  await page.getByTestId('ai-model-picker-settings').click();
   const aiTab = page.getByTestId('settings-tab-ai');
   if (await aiTab.count()) await aiTab.first().click();
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
   await page.getByTestId('settings-return-to-app').first().click();
-  await expect(page.getByTestId('ai-chat-model-selector')).toContainText(/未配置|Not configured/i);
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText(/选择模型|Choose model/i);
 });
 
 test('[P0] Agent Registry rejects native Web drivers, stale revisions and cross-owner mutation', async ({

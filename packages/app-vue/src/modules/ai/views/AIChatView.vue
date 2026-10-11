@@ -201,6 +201,7 @@
               :models="composerModels"
               :selected-model-key="composerModelKey"
               :permission-mode="permissionMode"
+              :native-model-options="currentNativeModelOptions"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
               :loading="
@@ -211,6 +212,7 @@
               @select-agent="selectComposerAgent"
               @select-model="selectComposerModel"
               @permission="selectPermission"
+              @model-option="selectNativeModelOption"
               @settings="openAISettings"
             />
           </template>
@@ -408,6 +410,8 @@ const {
   composerModelKey,
   modelCatalogLoading,
   permissionMode,
+  currentNativeModelOptions,
+  selectNativeModelOption,
   selectComposerAgent,
   selectComposerModel,
   selectPermission,

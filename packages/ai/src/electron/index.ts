@@ -460,6 +460,10 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   modelId: messageCommand.modelId,
                   agentInstanceId: messageCommand.agentInstanceId,
                   permissionMode: messageCommand.permissionMode,
+                  ...(messageCommand.runtimeKind === 'local_agent' &&
+                  messageCommand.nativeModelOptions
+                    ? { modelOptions: messageCommand.nativeModelOptions }
+                    : {}),
                   locale: messageCommand.locale,
                   attachments: messageCommand.attachments,
                   selectedEntities: messageCommand.selectedEntities,
