@@ -251,11 +251,11 @@ watch(
         align="start"
         :side-offset="7"
         :collision-padding="12"
-        class="w-[min(23rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
+        class="w-[min(22.5rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
         data-testid="ai-model-picker"
       >
         <div
-          class="flex max-h-[min(25rem,calc(100dvh-5rem))] min-h-0"
+          class="flex h-[min(21.625rem,calc(100dvh-5rem))] min-h-0"
           @keydown="keyboardNavigation"
         >
           <nav
@@ -265,8 +265,10 @@ watch(
           >
             <button
               type="button"
-              class="grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              :class="activeSection === 'favorites' && !search ? 'bg-muted text-foreground' : ''"
+              class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              :class="
+                activeSection === 'favorites' && !search ? 'bg-foreground/10 text-foreground' : ''
+              "
               :aria-label="t('aiAssistant.composer.favorites')"
               :aria-pressed="activeSection === 'favorites' && !search"
               data-testid="ai-model-picker-favorites"
@@ -279,14 +281,22 @@ watch(
                 class="size-4"
                 :class="activeSection === 'favorites' && !search ? 'fill-current' : ''"
               />
+              <span
+                v-if="activeSection === 'favorites' && !search"
+                aria-hidden="true"
+                class="pointer-events-none absolute -right-1.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-l-full bg-primary"
+                data-testid="ai-model-picker-active-indicator"
+              />
             </button>
             <div class="mx-auto my-0.5 h-px w-6 shrink-0 bg-border/70" />
             <button
               v-for="agent in agents"
               :key="agent.id"
               type="button"
-              class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35"
-              :class="activeSection === agent.id && !search ? 'bg-muted text-foreground' : ''"
+              class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35 disabled:hover:bg-transparent"
+              :class="
+                activeSection === agent.id && !search ? 'bg-foreground/10 text-foreground' : ''
+              "
               :disabled="!agent.enabled"
               :title="instanceName(agent)"
               :aria-label="instanceName(agent)"
@@ -299,8 +309,10 @@ watch(
             >
               <AgentDriverIcon :driver="agent.driver" class="size-4" />
               <span
-                v-if="agent.id === selectedAgentId"
-                class="absolute bottom-0.5 right-0.5 size-1 rounded-full bg-primary"
+                v-if="activeSection === agent.id && !search"
+                aria-hidden="true"
+                class="pointer-events-none absolute -right-1.5 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-l-full bg-primary"
+                data-testid="ai-model-picker-active-indicator"
               />
             </button>
           </nav>
@@ -379,27 +391,45 @@ watch(
               </template>
               <div
                 v-else
-                class="px-3 py-5 text-center text-xs text-muted-foreground"
+                class="px-2.5 py-3 text-left text-xs leading-relaxed"
                 data-testid="ai-model-picker-empty"
+                role="status"
               >
-                <p>
+                <p class="text-muted-foreground">
                   {{
                     search
                       ? t('aiAssistant.composer.noSearchResults')
-                      : activeSection === 'favorites'
-                        ? t('aiAssistant.composer.noFavorites')
-                        : t('aiAssistant.composer.notConfigured')
+                      : loading
+                        ? t('aiAssistant.composer.loadingModels')
+                        : activeSection === 'favorites'
+                          ? t('aiAssistant.composer.noFavorites')
+                          : browsedAgent?.configured
+                            ? t('aiAssistant.composer.noAvailableModels')
+                            : t('aiAssistant.composer.notConfigured')
                   }}
                 </p>
-                <button
-                  v-if="browsedAgent?.enabled && !search && activeSection !== 'favorites'"
-                  type="button"
-                  class="mt-3 rounded-md bg-muted px-2.5 py-1.5 text-xs text-foreground hover:bg-muted/80"
-                  data-testid="ai-model-picker-select-agent"
-                  @click="selectAgentWithoutModel(browsedAgent)"
-                >
-                  {{ t('aiAssistant.composer.selectAgent') }}
-                </button>
+                <template v-if="browsedAgent && !search && !loading">
+                  <button
+                    type="button"
+                    class="mt-1.5 block text-left font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    data-testid="ai-model-picker-empty-settings"
+                    @click="
+                      openMenu = null;
+                      emit('settings');
+                    "
+                  >
+                    {{ t('aiAssistant.composer.openAgentSetup') }}
+                  </button>
+                  <button
+                    v-if="browsedAgent.enabled && browsedAgent.id !== selectedAgentId"
+                    type="button"
+                    class="mt-2 block text-left text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    data-testid="ai-model-picker-select-agent"
+                    @click="selectAgentWithoutModel(browsedAgent)"
+                  >
+                    {{ t('aiAssistant.composer.selectAgent') }}
+                  </button>
+                </template>
               </div>
             </div>
             <div class="shrink-0 border-t border-border/65 p-1.5">
