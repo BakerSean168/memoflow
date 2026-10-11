@@ -9,6 +9,9 @@ export default {
     unfavorite: 'Remove from favorites',
     noFavorites: 'No favorite models yet',
     noSearchResults: 'No matching models',
+    noAvailableModels: 'No models are available for this Agent.',
+    loadingModels: 'Loading models…',
+    openAgentSetup: 'Open Agent setup',
     selectAgent: 'Choose this Agent',
     modelOptions: 'Model options',
     reasoningEffort: 'Reasoning',
@@ -20,7 +23,7 @@ export default {
     chooseAgent: 'Choose Agent',
     chooseModel: 'Choose model',
     configure: 'Configure Agent',
-    notConfigured: 'Not configured',
+    notConfigured: 'No models are configured for this Agent.',
     disabled: 'Disabled',
     supervised: 'Supervised',
     supervisedHint:

@@ -178,10 +178,89 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     const wrapper = setup();
     await openModels(wrapper);
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
-    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain('未配置模型');
+    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain(
+      '此 Agent 尚未配置模型',
+    );
+    expect(wrapper.get('[data-testid="ai-model-picker-empty-settings"]').text()).toContain(
+      '打开 Agent 设置',
+    );
     await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
     expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
     wrapper.unmount();
+  });
+
+  it('keeps the same viewport-constrained panel geometry across models, empty Agents, favorites and searches', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    const picker = wrapper.get('[data-testid="ai-model-picker"]');
+    const frame = picker.get('div');
+    expect(picker.classes()).toContain('w-[min(360px,calc(100vw-24px))]');
+    expect(frame.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
+
+    await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain('尚无收藏模型');
+    await wrapper.get('[data-testid="ai-model-picker-search"]').setValue('missing-model');
+    expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain('没有匹配的模型');
+    expect(wrapper.find('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="ai-model-picker"]').element).toBe(picker.element);
+    expect(wrapper.get('[data-testid="ai-model-picker"]').get('div').element).toBe(frame.element);
+    wrapper.unmount();
+  });
+
+  it('highlights the browsed sidebar item with a right-hand rail, not an active-model dot', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    const selected = wrapper.get('[data-testid="ai-model-picker-agent-agent:mastra"]');
+    expect(selected.attributes('aria-pressed')).toBe('true');
+    expect(selected.classes()).toContain('hover:bg-foreground/10');
+    expect(selected.find('[data-testid="ai-model-picker-active-indicator"]').exists()).toBe(true);
+
+    await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    expect(selected.attributes('aria-pressed')).toBe('false');
+    expect(selected.find('[data-testid="ai-model-picker-active-indicator"]').exists()).toBe(false);
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-agent-agent:work"]')
+        .find('[data-testid="ai-model-picker-active-indicator"]')
+        .exists(),
+    ).toBe(true);
+    expect(wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]')).toHaveLength(1);
+
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(
+      wrapper
+        .get('[data-testid="ai-model-picker-favorites"]')
+        .find('[data-testid="ai-model-picker-active-indicator"]')
+        .exists(),
+    ).toBe(true);
+    expect(wrapper.findAll('[data-testid="ai-model-picker-active-indicator"]')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('explains configured-but-empty providers, opens Agent settings and does not mistake loading for failure', async () => {
+    const wrapper = setup({ models: models.slice(0, 2) });
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    const empty = wrapper.get('[data-testid="ai-model-picker-empty"]');
+    expect(empty.text()).toContain('此 Agent 暂无可用模型');
+    expect(empty.attributes('role')).toBe('status');
+    await wrapper.get('[data-testid="ai-model-picker-empty-settings"]').trigger('click');
+    expect(wrapper.emitted('settings')).toEqual([[]]);
+    wrapper.unmount();
+
+    const loading = setup({ models: models.slice(0, 2), loading: true });
+    await openModels(loading);
+    await loading.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
+    expect(loading.get('[data-testid="ai-model-picker-empty"]').text()).toContain('正在获取模型');
+    expect(loading.find('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(false);
+    await loading.setProps({ loading: false });
+    expect(loading.get('[data-testid="ai-model-picker-empty"]').text()).toContain(
+      '此 Agent 暂无可用模型',
+    );
+    expect(loading.get('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(true);
+    loading.unmount();
   });
 
   it('offers only permission modes implemented by the selected runtime', async () => {
