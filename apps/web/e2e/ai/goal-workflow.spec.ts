@@ -280,9 +280,11 @@ test.describe('AI Goal Workflow', () => {
 
     // Restore AI state without navigating to the native business review.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
+    const goalForm = page.getByTestId('goal-panel-form');
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
+    await expect(goalForm).toHaveCount(0);
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
@@ -292,22 +294,22 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
+    await expect(goalForm).toHaveCount(0);
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
     await page.getByTestId('ai-desktop-context-panel-toggle').click();
     await page.getByTestId('goal-open-native-review').click();
-    await expect(page.getByTestId('goal-dialog')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
+    await expect(goalForm).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
 
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
     await expect(
-      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+      goalForm.getByTestId('goal-key-result-draft-row'),
     ).toContainText('Complete the restored workflow approval');
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
+    await expect(goalForm.getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
     expect(telemetry.ownerGoalCreateCount).toBe(0);
     expect(telemetry.goalAgentStartCount).toBe(0);
@@ -329,16 +331,18 @@ test.describe('AI Goal Workflow', () => {
     // goal.create renders in the durable Workflow panel, not a
     // legacy goal-agent-panel.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
+    const goalForm = page.getByTestId('goal-panel-form');
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
     expect(ownerGoalId).toBeTruthy();
-    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(goalForm).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
     await expect(page.getByTestId('goal-workflow-draft-editor')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
     await expect(
-      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
+      goalForm.getByTestId('goal-key-result-draft-row'),
     ).toContainText(draft.keyResults[0].title);
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
@@ -350,8 +354,8 @@ test.describe('AI Goal Workflow', () => {
 
     // Owner-native controlled confirmation: native Save delegates through the workflow
     // coordinator; it is not an independent direct create.
-    await page.getByTestId('goal-dialog').getByTestId('save-goal-button').click();
-    await expect(page.getByTestId('goal-dialog')).toBeHidden({
+    await goalForm.getByTestId('save-goal-button').click();
+    await expect(goalForm).toBeHidden({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
 
@@ -647,7 +651,8 @@ test.describe('AI Goal Workflow', () => {
 
     // Native Goal review is the owner UI. Confirming its user cancel coordinates the
     // durable workflow cancel directly; no second hidden-panel cancellation is needed.
-    const nativeReview = page.getByTestId('goal-dialog');
+    const nativeReview = page.getByTestId('goal-panel-form');
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
     await expect(nativeReview).toBeVisible();
     await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();

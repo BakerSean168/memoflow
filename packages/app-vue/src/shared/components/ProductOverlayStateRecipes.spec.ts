@@ -61,6 +61,7 @@ describe('product overlay and state recipes', () => {
     const occurrence = read('modules/task/components/dialogs/TaskOccurrenceInspectDialog.vue');
     const krInspect = read('modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue');
     const goal = read('modules/goal/components/dialogs/GoalDialog.vue');
+    const goalFrame = read('modules/goal/components/dialogs/GoalFormFrame.vue');
     const task = read('modules/task/components/dialogs/TaskPlanDialog.vue');
     const routine = read('modules/routine/components/RoutineEditorDialog.vue');
     const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
@@ -69,7 +70,9 @@ describe('product overlay and state recipes', () => {
     expect(shell).toContain(':data-product-dialog-recipe="recipe"');
     expect(occurrence).toContain('recipe="inspect"');
     expect(krInspect).toContain('recipe="inspect"');
-    expect(goal).toContain('recipe="workspace"');
+    expect(goal).toContain('<GoalFormFrame');
+    expect(goal).not.toContain('<ProductDialogShell');
+    expect(goalFrame).toContain('recipe="workspace"');
     expect(task).toContain('recipe="workspace"');
     expect(routine).toContain('recipe="workspace"');
     expect(schedule).toContain('recipe="config"');

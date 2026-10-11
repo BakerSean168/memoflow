@@ -18,8 +18,10 @@ describe('MemoFlow product form language', () => {
   });
 
   it('keeps primary create/edit dialogs on the shared ProductDialogShell', () => {
+    expect(read('modules/goal/components/dialogs/GoalFormFrame.vue')).toContain(
+      '<ProductDialogShell',
+    );
     for (const file of [
-      'modules/goal/components/dialogs/GoalDialog.vue',
       'modules/goal/components/dialogs/GoalRecordDialog.vue',
       'modules/task/components/dialogs/TaskPlanDialog.vue',
       'modules/task/components/dialogs/TemplateSelectionDialog.vue',
