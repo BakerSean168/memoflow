@@ -8,6 +8,7 @@ import type {
   LocalAgentRequestResponse,
   LocalAgentStatus,
 } from '@memoflow/contracts/ai';
+import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeEventQueue } from './native-event-queue';
@@ -55,7 +56,17 @@ const initialization = z.object({
     apiProvider: z.string().optional(),
   }),
   models: z
-    .array(z.object({ value: z.string().min(1).max(512), displayName: z.string().max(240) }))
+    .array(
+      z.object({
+        value: z.string().min(1).max(512),
+        displayName: z.string().max(240),
+        supportsEffort: z.boolean().optional(),
+        supportedEffortLevels: z
+          .array(z.enum(['low', 'medium', 'high', 'xhigh', 'max']))
+          .max(10)
+          .optional(),
+      }),
+    )
     .max(2000),
 });
 const frameSchema = z
@@ -213,6 +224,10 @@ export class ClaudeDriver {
         ...(input
           ? {
               model: input.modelId,
+              ...(input.modelOptions?.reasoningEffort &&
+              LocalAgentModelOptionValueSchema.safeParse(input.modelOptions.reasoningEffort).success
+                ? { effort: input.modelOptions.reasoningEffort as Options['effort'] }
+                : {}),
               ...(input.nativeSessionId ? { resume: input.nativeSessionId } : {}),
             }
           : { settings: { disableAllHooks: true } }),
@@ -246,7 +261,13 @@ export class ClaudeDriver {
       )
         throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
       return {
-        models: init.models.map((model) => ({ id: model.value, name: model.displayName })),
+        models: init.models.map((model) => ({
+          id: model.value,
+          name: model.displayName,
+          ...(model.supportsEffort !== false && model.supportedEffortLevels?.length
+            ? { reasoningEfforts: model.supportedEffortLevels }
+            : {}),
+        })),
         fingerprint: await nativeIdentity('claude', this.connection.homePath, account),
       };
     } finally {

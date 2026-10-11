@@ -8,6 +8,7 @@ import type {
   LocalAgentConnectionInput,
   LocalAgentDriver,
   LocalAgentStatus,
+  LocalAgentModelOptions,
   LocalAgentConversationCreate,
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
@@ -58,6 +59,7 @@ type MessageInput = {
   content: string;
   modelId?: string;
   permissionMode?: AIChatPermissionMode;
+  modelOptions?: LocalAgentModelOptions;
   selectedEntities?: readonly AssistantRuntimeSelectedEntity[];
   attachments?: readonly unknown[];
   signal?: AbortSignal;
@@ -273,6 +275,29 @@ export class LocalAgentRuntime {
     if (input.permissionMode && !['supervised', 'auto-approve'].includes(input.permissionMode))
       throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
+    // Never trust model options from the renderer. A fresh owner-scoped native
+    // probe validates that the selected model itself advertises each option.
+    if (input.modelOptions) {
+      const { connection, conversation } = await this.persist(() =>
+        this.options.store.resolveConversation(input.identityId, input.conversationId),
+      );
+      const status = await this.runProbe(async () => connection);
+      const model =
+        status.status === 'ready'
+          ? status.models.find((entry) => entry.id === (input.modelId ?? conversation.modelId))
+          : undefined;
+      if (
+        !model ||
+        (input.modelOptions.reasoningEffort &&
+          !model.reasoningEfforts?.includes(input.modelOptions.reasoningEffort)) ||
+        (input.modelOptions.serviceTier &&
+          (!model.serviceTiers?.length ||
+            (input.modelOptions.serviceTier !== 'default' &&
+              !model.serviceTiers.some((tier) => tier.id === input.modelOptions?.serviceTier))))
+      ) {
+        throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+      }
+    }
     if (
       this.runs.size + this.pendingProbes >= 4 ||
       [...this.runs.values()].some(
@@ -360,6 +385,7 @@ export class LocalAgentRuntime {
         nativeSessionId: conversation.nativeSessionId,
         accountFingerprint: conversation.accountFingerprint,
         modelId,
+        ...(input.modelOptions ? { modelOptions: input.modelOptions } : {}),
         content,
         mcp: run.grant,
         signal: run.abort.signal,

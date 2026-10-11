@@ -5,8 +5,12 @@ import {
   LocalAgentConnectionInputSchema,
   LocalAgentClientCommandSchema,
   LocalAgentRequestResponseSchema,
+  LocalAgentStatusSchema,
 } from './local-agent.dto';
-import { AssistantToolNameSchema } from './assistant-runtime.dto';
+import {
+  AssistantToolNameSchema,
+  AssistantRuntimeClientCommandSchema,
+} from './assistant-runtime.dto';
 import { AssistantRuntimeEventSchema } from './assistant-events.dto';
 
 describe('selectable assistant runtime contracts', () => {
@@ -25,6 +29,47 @@ describe('selectable assistant runtime contracts', () => {
       AssistantRuntimeChoiceSchema.safeParse({
         runtimeKind: 'local_agent',
         providerId: 'api-key-provider',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('preserves native model trait capabilities but rejects foreign runtime parameters', () => {
+    expect(
+      LocalAgentStatusSchema.parse({
+        status: 'ready',
+        models: [
+          {
+            id: 'gpt-test',
+            name: 'GPT Test',
+            reasoningEfforts: ['low', 'super-high'],
+            defaultReasoningEffort: 'low',
+            serviceTiers: [{ id: 'priority', name: 'Fast' }],
+          },
+        ],
+      }).models[0],
+    ).toMatchObject({ reasoningEfforts: ['low', 'super-high'] });
+    const command = {
+      type: 'message',
+      conversationId: 'local-chat',
+      content: 'Hello',
+      surface: 'desktop',
+      runtimeKind: 'local_agent',
+      nativeModelOptions: { reasoningEffort: 'super-high' },
+    };
+    expect(AssistantRuntimeClientCommandSchema.safeParse(command).success).toBe(true);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({ ...command, runtimeKind: 'builtin' }).success,
+    ).toBe(false);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...command,
+        nativeModelOptions: { reasoningEffort: 'unsafe\nvalue' },
+      }).success,
+    ).toBe(false);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...command,
+        nativeModelOptions: { arbitrary: true },
       }).success,
     ).toBe(false);
   });

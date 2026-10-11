@@ -350,6 +350,8 @@ export function useAssistantStream(input: {
     let streamController: AbortController | null = null;
     let conversationId = '';
     const permissionMode = options.getPermissionMode?.() ?? 'supervised';
+    const nativeModelOptions =
+      choice.runtimeKind === 'local_agent' ? options.getNativeModelOptions?.() : undefined;
 
     try {
       const pendingAttachments = composerAttachments.value.map((attachment) => ({
@@ -405,7 +407,11 @@ export function useAssistantStream(input: {
           surface: options.surface,
           permissionMode,
           ...(choice.runtimeKind === 'local_agent'
-            ? { runtimeKind: 'local_agent', modelId: choice.modelId }
+            ? {
+                runtimeKind: 'local_agent',
+                modelId: choice.modelId,
+                ...(nativeModelOptions ? { nativeModelOptions } : {}),
+              }
             : {
                 providerId: selectedModel!.providerId,
                 modelId: selectedModel!.modelId,

@@ -11,6 +11,8 @@ export default {
     noSearchResults: 'No matching models',
     selectAgent: 'Choose this Agent',
     modelOptions: 'Model options',
+    reasoningEffort: 'Reasoning',
+    serviceTier: 'Service tier',
     defaultOptions: 'Default',
     noExecutableTraits:
       'This Agent/model has not declared verified reasoning or service-tier options. Its own defaults are used; unsupported settings are never sent.',

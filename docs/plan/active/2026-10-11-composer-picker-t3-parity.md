@@ -17,7 +17,7 @@ created: 2026-10-11T00:00:00Z
 
 1. Replace separate Agent and Model selects with one searchable Model Picker popover, per-instance navigation, favorite model keys stored locally, model-provider subtitle, unconfigured/disabled status, settings entry, keyboard and responsive positioning.
 2. Preserve authoritative Agent Registry and immutable conversation bindings: choose an agent/model tuple atomically; agent changes start a new conversation instead of silently rebinding a prior thread. Native model discovery remains probe-driven, not guessed.
-3. Add a compact read-only model-options control explaining that options come from real Agent capabilities; no unimplemented values are sent. It is explicitly a placeholder, not completion of backend Traits dispatch. Keep the control accessible without giving it a fake selected effort.
+3. Render the Traits control only when an installed native Agent's live model catalog advertises executable options. Codex exposes Reasoning and Service Tier; Claude Code exposes SDK Effort. The selected options travel through the strict Desktop command contract and are checked again against the current owner-scoped model catalog before native execution. Mastra, Pi and DSH hide Traits when no executable capability is reported. Keep the control accessible without giving it a fake selected effort.
 4. Render a compact exclusive permission popover with **only enforced modes** (Mastra Supervised/Read-only; native Supervised/Auto-approve). This is not a UI-only Full Access mode.
 5. Replace obsolete tests with component and browser tests (search, favorites, multiple same-driver instances, switch semantics, permissions, mobile and split viewport); update only intentional visual baselines. Run Nx lint/typecheck/governance, real Playwright onboarding E2E, CI.
 6. No production data reset, no direct Staging deployment and no change to Provider credentials.
@@ -32,7 +32,7 @@ created: 2026-10-11T00:00:00Z
 
 ## Implementation and validation (2026-10-11)
 
-The dedicated worktree `fix/composer-model-picker-traits` implements the combined T3-style model picker, a compact non-deceptive Traits disclosure and mutually exclusive enforced permission modes. It retains the shared Agent Registry/ModelResolver, supports searchable per-instance model directories, favorite tuples, source labels, and selecting a new Agent/model pair without reassigning an existing conversation. Favorites are scoped to the authenticated Web identity / Desktop Profile by the host-provided identity resolver; missing identity never writes a global favorite list.
+The dedicated worktree `fix/composer-model-picker-traits` implements the combined T3-style model picker, model-capability-driven conditional Traits and mutually exclusive enforced permission modes. It retains the shared Agent Registry/ModelResolver, supports searchable per-instance model directories, favorite tuples, source labels, and selecting a new Agent/model pair without reassigning an existing conversation. Favorites are scoped to the authenticated Web identity / Desktop Profile by the host-provided identity resolver; missing identity never writes a global favorite list.
 
 Source comparison: `pingdotgg/t3code@f769e01e28c80745621a699ed5ee021cc78039b6`; inspected ProviderModelPicker, ModelPickerContent, TraitsPicker, composerProviderState and ChatComposer. No upstream source was copied.
 
@@ -44,9 +44,15 @@ Evidence from isolated GCP Dev:
 - `app-vue:typecheck`, `web:typecheck`, builds/dependencies, scoped ESLint/Prettier and governance all passed.
 - A simultaneous broad test/inventory attempt hit the pre-existing resource contention: Vitest enumeration was interrupted and the browser timed out at cold-login navigation. Targeted tests and browser were re-run _serially_ without reproduction. The full CI run for this PR remains the authoritative broad verification.
 
-### Intentional defer: executable model traits
+### Executable native model traits (follow-up to PR #447)
 
-The current `AIModelInfo` and native model inventory do not declare authoritative reasoning effort/service tiers; the associated Web/Desktop run payloads do not accept these options. A read-only explanation of default native behavior is therefore displayed rather than a fake Medium/High/Fast setting. Proper end-to-end Traits requires a separate reviewed provider capability/probe contract, model-type-specific validation, persistence and runtime forwarding. This limitation is explicit and must not be represented as a completed T3 capability implementation.
+- Codex `model/list` fields `supportedReasoningEfforts`, `defaultReasoningEffort`, `serviceTiers` / legacy `additionalSpeedTiers` and `defaultServiceTier` are projected into the strict Desktop-native model catalog. Per-turn choices are mapped to `turn/start.effort` and `turn/start.serviceTierForTurn`.
+- Claude Code's installed Agent SDK initialization supplies `supportsEffort` and `supportedEffortLevels` when available. Only reported levels are exposed, and explicit choices flow into `query(options.effort)`.
+- An optional strict `nativeModelOptions` field is permitted only for `runtimeKind=local_agent`; web/Mastra requests containing native options are rejected. The Desktop host checks the selected model and options against a fresh owner-scoped native probe before starting the turn. Any unknown/unsupported value fails closed.
+- The Composer hides Traits when the selected model does not report executable options. Native choices stay scoped to the current Agent connection and model ID, so switching Agent/model cannot leak settings to another instance.
+- Unchanged: Mastra, Pi, DSH do not gain invented Reasoning options, and native model discovery/probing requires a Desktop runtime. Default execution omits unset parameters.
+
+Native per-model choices currently last for the mounted Composer session, not persistent thread-level preferences. Agent-defined service tiers are exposed only when the native model catalog explicitly reports them; there is no guessed list of providers or models.
 
 ### Rollout gate
 
@@ -60,3 +66,23 @@ No direct Staging or production mutation. PR must pass exact-head CI and indepen
 - [Permissions, 390px viewport](../../analysis/evidence/2026-10-11-composer-picker/permission-picker-390.png)
 
 Final serialized `pnpm test:inventory` completed successfully (1,379 discovered files). After the isolated browser regression and mocked capability tests passed, the only remaining broad gate is exact-head GitHub CI on the new pull request.
+
+### Native Traits implementation acceptance (2026-10-11)
+
+Source-validated protocols:
+
+- Codex App Server v2 uses `model/list` metadata for `supportedReasoningEfforts`, `defaultReasoningEffort`, `serviceTiers` and `defaultServiceTier`. Explicit selections are forwarded to `turn/start.effort` and `turn/start.serviceTierForTurn`.
+- The installed `@anthropic-ai/claude-agent-sdk` models report `supportsEffort` / `supportedEffortLevels`. The native query takes an explicit `Options.effort` only when selected.
+- Current `LocalAgentModelSchema` and strict native-only Assistant runtime message contract carry the discovered capabilities and explicit values, without exposing arbitrary executable arguments or credentials.
+- Before inference, the Desktop host re-resolves the owning connection for the current identity and probes the Agent again. Unknown model, unsupported effort or service tier fails closed. Web/Mastra requests containing `nativeModelOptions` are rejected at the contract boundary.
+- Traits are hidden on Mastra, Pi, DSH and any native model lacking executable capability descriptors. Default native settings do not send an explicit effort/tier. Explicit selections are in-memory per connection+model, and stale values are rejected after a model catalog change.
+
+Checks on the isolated follow-up patch:
+
+- Native driver and host-runtime tests: **24/24 passed** (includes catalog parsing, explicit Codex/Claude forwarding and rejected unsupported parameters).
+- Schema contracts: **8/8 passed** (includes native-only and strict payload validation).
+- Vue Composer/lifecycle: **22/22 passed**; session + dispatch surface: **30/30 passed** (includes native message options and Mastra payload isolation).
+- Real Web/API/PostgreSQL/Chromium onboarding: **2/2 P0 passed**; 1 external opt-in skipped; temporary database was dropped after use.
+- Updated Shell visual regression baselines verified **8/8** across Web/Desktop, including dark/light and narrow screen layouts, after model Traits concealment for Web/Mastra.
+- `contracts`, `ai`, `app-vue`, `desktop`, `web` typechecks passed with all 32 required task dependencies; scoped ESLint and Prettier passed.
+- Live signed-in native Codex/Claude execution was **not** performed on end-user Desktop; deterministic fake App Server / Agent SDK tests instead validate the exact supported native protocol fields. Full exact-head GitHub CI remains the gate before merge or deployment.

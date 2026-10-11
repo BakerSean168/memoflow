@@ -19,6 +19,7 @@ export interface UseAIChatSessionOptions {
   service: AIChatService;
   localAgent?: LocalAgentClient;
   getPermissionMode?: () => AIChatPermissionMode;
+  getNativeModelOptions?: () => import('@memoflow/contracts/ai').LocalAgentModelOptions | undefined;
   getDefaultRuntimeChoice?: () => import('@memoflow/contracts/ai').AssistantRuntimeChoice;
   /** Mastra-native authoritative history/stream/cancel client. */
   runtime: AssistantRuntimeClient;

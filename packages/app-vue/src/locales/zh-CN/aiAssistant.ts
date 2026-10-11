@@ -11,6 +11,8 @@ export default {
     noSearchResults: '没有匹配的模型',
     selectAgent: '选择此 Agent',
     modelOptions: '模型选项',
+    reasoningEffort: '推理强度',
+    serviceTier: '服务等级',
     defaultOptions: '默认',
     noExecutableTraits:
       '当前 Agent/模型没有提供已验证的推理强度或服务等级配置。将使用 Agent 自身的默认参数，不发送未支持的设置。',

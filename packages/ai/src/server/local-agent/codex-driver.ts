@@ -5,7 +5,10 @@ import type {
   LocalAgentRequest,
   LocalAgentRequestResponse,
   LocalAgentStatus,
+  LocalAgentModel,
+  LocalAgentModelOptions,
 } from '@memoflow/contracts/ai';
+import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
 import {
   NativeRpcTransport,
   type NativeProcessOptions,
@@ -31,6 +34,7 @@ export interface NativeAgentRunInput {
   nativeSessionId?: string | null;
   accountFingerprint?: string | null;
   modelId: string;
+  modelOptions?: LocalAgentModelOptions;
   content: string;
   mcp?: { url: string; token: string };
   signal?: AbortSignal;
@@ -40,10 +44,33 @@ const accountSchema = z.object({
   account: z.object({ type: z.string(), email: z.string().optional() }).nullable(),
   requiresOpenaiAuth: z.boolean(),
 });
+const optionValue = LocalAgentModelOptionValueSchema;
 const catalogSchema = z.object({
-  data: z.array(z.object({ id: z.string(), model: z.string(), displayName: z.string() })).max(200),
+  data: z
+    .array(
+      z.object({
+        id: z.string(),
+        model: z.string(),
+        displayName: z.string(),
+        supportedReasoningEfforts: z
+          .array(z.object({ reasoningEffort: z.string() }))
+          .max(20)
+          .optional(),
+        defaultReasoningEffort: z.string().optional(),
+        serviceTiers: z
+          .array(z.object({ id: z.string(), name: z.string() }))
+          .max(20)
+          .optional(),
+        additionalSpeedTiers: z.array(z.string()).max(20).optional(),
+        defaultServiceTier: z.string().nullable().optional(),
+      }),
+    )
+    .max(200),
   nextCursor: z.string().nullable().optional(),
 });
+function validOption(value: string): boolean {
+  return optionValue.safeParse(value).success;
+}
 const threadSchema = z.object({ thread: z.object({ id: z.string().min(1) }) });
 const turnSchema = z.object({ turn: z.object({ id: z.string().min(1) }) });
 const scopedSchema = z.object({ threadId: z.string(), turnId: z.string() });
@@ -94,7 +121,7 @@ export class CodexDriver {
   async probe(): Promise<LocalAgentStatus> {
     try {
       await this.connect();
-      const models: { id: string; name: string }[] = [];
+      const models: LocalAgentModel[] = [];
       let cursor: string | undefined;
       const cursors = new Set<string>();
       do {
@@ -105,7 +132,35 @@ export class CodexDriver {
             ...(cursor ? { cursor } : {}),
           }),
         );
-        models.push(...result.data.map((model) => ({ id: model.model, name: model.displayName })));
+        models.push(
+          ...result.data.map((model) => {
+            const reasoningEfforts = [
+              ...new Set(
+                (model.supportedReasoningEfforts ?? [])
+                  .map((option) => option.reasoningEffort)
+                  .filter(validOption),
+              ),
+            ];
+            const serviceTiers = (
+              model.serviceTiers ??
+              (model.additionalSpeedTiers ?? []).map((id) => ({ id, name: id }))
+            ).filter((tier) => validOption(tier.id) && tier.name.length <= 100);
+            return {
+              id: model.model,
+              name: model.displayName,
+              ...(reasoningEfforts.length ? { reasoningEfforts } : {}),
+              ...(model.defaultReasoningEffort &&
+              reasoningEfforts.includes(model.defaultReasoningEffort)
+                ? { defaultReasoningEffort: model.defaultReasoningEffort }
+                : {}),
+              ...(serviceTiers.length ? { serviceTiers } : {}),
+              ...(model.defaultServiceTier &&
+              serviceTiers.some((tier) => tier.id === model.defaultServiceTier)
+                ? { defaultServiceTier: model.defaultServiceTier }
+                : {}),
+            };
+          }),
+        );
         cursor = result.nextCursor ?? undefined;
         if (models.length > 2000 || (cursor && cursors.has(cursor)))
           throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
@@ -201,6 +256,12 @@ export class CodexDriver {
         await transport.request('turn/start', {
           threadId: this.threadId,
           model: input.modelId,
+          ...(input.modelOptions?.reasoningEffort
+            ? { effort: input.modelOptions.reasoningEffort }
+            : {}),
+          ...(input.modelOptions?.serviceTier
+            ? { serviceTierForTurn: input.modelOptions.serviceTier }
+            : {}),
           input: [{ type: 'text', text: input.content }],
         }),
       );

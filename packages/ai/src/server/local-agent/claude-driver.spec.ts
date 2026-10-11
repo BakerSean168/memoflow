@@ -54,7 +54,14 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
       async initializationResult() {
         return {
           account: { email: 'test@example.test', tokenSource: 'oauth' },
-          models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+          models: [
+            {
+              value: 'sonnet',
+              displayName: 'Sonnet',
+              supportsEffort: true,
+              supportedEffortLevels: ['low', 'medium', 'high'],
+            },
+          ],
         };
       },
       async interrupt() {},
@@ -67,11 +74,49 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
   const driver = new ClaudeDriver(connection, '/tmp', factory);
   expect(await driver.probe()).toMatchObject({
     status: 'ready',
-    models: [{ id: 'sonnet', name: 'Sonnet' }],
+    models: [{ id: 'sonnet', name: 'Sonnet', reasoningEfforts: ['low', 'medium', 'high'] }],
   });
   expect(prompts).toBe(0);
   expect(closed).toBe(true);
 });
+it('passes model-validated effort to the Claude SDK query, not prompt text', async () => {
+  let applied: string | undefined;
+  const factory: ClaudeQueryFactory = ({ prompt, options }) => {
+    applied = options.effort;
+    return {
+      async initializationResult() {
+        return {
+          account: { email: 'test@example.test', tokenSource: 'oauth' },
+          models: [
+            {
+              value: 'sonnet',
+              displayName: 'Sonnet',
+              supportsEffort: true,
+              supportedEffortLevels: ['low', 'medium', 'high'],
+            },
+          ],
+        };
+      },
+      async interrupt() {},
+      close() {},
+      async *[Symbol.asyncIterator]() {
+        for await (const _message of prompt) {
+          yield { type: 'result', subtype: 'success', session_id: 'native' };
+          break;
+        }
+      },
+    };
+  };
+  const driver = new ClaudeDriver(connection, '/tmp', factory);
+  for await (const _event of driver.run({
+    modelId: 'sonnet',
+    modelOptions: { reasoningEffort: 'high' },
+    content: 'Hello',
+  })) {
+  }
+  expect(applied).toBe('high');
+});
+
 it('resumes the SDK session, injects MCP, answers native permission and streams once', async () => {
   const initializationCalls: Array<string | undefined> = [];
   const factory: ClaudeQueryFactory = ({ prompt, options }) => ({

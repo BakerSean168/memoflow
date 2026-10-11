@@ -186,8 +186,8 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await expect(page.getByTestId('ai-chat-model-selector')).not.toContainText('E2E Model Beta');
   await page.getByTestId('ai-model-picker-option').click();
   await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
-  await page.getByTestId('ai-chat-traits-selector').click();
-  await expect(page.getByTestId('ai-model-traits-menu')).toContainText(/模型选项|Model options/);
+  // Mastra does not declare executable native traits; no inert UI should appear.
+  await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
   await page.getByTestId('ai-chat-permission-selector').click();
   await page.getByTestId('ai-permission-option-read-only').click();
   await expect(page.getByTestId('ai-chat-permission-selector')).toContainText(/只读|Read only/i);
@@ -199,7 +199,7 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   for (const width of [1440, 530, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
-    await expect(page.getByTestId('ai-chat-traits-selector')).toBeVisible();
+    await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
     await expect(page.getByTestId('ai-chat-permission-selector')).toBeVisible();
     await page.getByTestId('ai-chat-model-selector').click();
     const picker = page.getByTestId('ai-model-picker');

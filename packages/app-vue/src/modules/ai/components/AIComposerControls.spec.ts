@@ -104,14 +104,14 @@ const openModels = async (wrapper: ReturnType<typeof setup>) => {
 describe('T3 model picker / conditional traits / enforced permissions', () => {
   beforeEach(() => localStorage.clear());
 
-  it('shows one model picker, a truthful default-traits control and compact permissions', () => {
+  it('hides inert model options for Mastra while retaining model and permission controls', () => {
     const wrapper = setup();
     expect(wrapper.find('[data-testid="ai-chat-agent-selector"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain('Model Alpha');
-    expect(wrapper.get('[data-testid="ai-model-traits-menu"]').text()).toContain('默认参数');
+    expect(wrapper.find('[data-testid="ai-model-traits-menu"]').exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -202,8 +202,74 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     native.unmount();
   });
 
+  it('also hides Traits for a native Agent that reports no executable options', () => {
+    const bare = {
+      key: 'pi-model',
+      agentKey: 'local:codex',
+      providerId: 'pi',
+      providerName: 'Pi',
+      modelId: 'pi-model',
+      modelName: 'Pi model',
+    };
+    const wrapper = setup({
+      native: true,
+      selectedAgentId: 'local:codex',
+      selectedModelKey: bare.key,
+      models: [bare],
+    });
+    expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('shows only discovered native effort and tier choices, never fabricated traits', async () => {
+    const nativeModel = {
+      key: 'codex-model',
+      agentKey: 'local:codex',
+      providerId: 'codex',
+      providerName: 'Codex',
+      modelId: 'gpt-test',
+      modelName: 'Codex Test',
+      reasoningEfforts: ['low', 'medium', 'super-high'],
+      defaultReasoningEffort: 'medium',
+      serviceTiers: [{ id: 'priority', name: 'Fast' }],
+    };
+    const wrapper = setup({
+      native: true,
+      selectedAgentId: 'local:codex',
+      selectedModelKey: nativeModel.key,
+      models: [nativeModel],
+    });
+    expect(wrapper.get('[data-testid="ai-chat-traits-selector"]').text()).toContain('medium');
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
+    await wrapper.get('[data-testid="ai-traits-effort-super-high"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'super-high']]);
+    await wrapper.get('[data-testid="ai-traits-tier-priority"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([
+      ['reasoningEffort', 'super-high'],
+      ['serviceTier', 'priority'],
+    ]);
+    wrapper.unmount();
+  });
+
   it('disables all three controls while a run is active', () => {
-    const wrapper = setup({ disabled: true });
+    const nativeModel = {
+      key: 'model',
+      agentKey: 'local:codex',
+      providerId: 'codex',
+      providerName: 'Codex',
+      modelId: 'model',
+      modelName: 'Model',
+      reasoningEfforts: ['high'],
+    };
+    const wrapper = setup({
+      disabled: true,
+      native: true,
+      models: [nativeModel],
+      selectedAgentId: 'local:codex',
+      selectedModelKey: 'model',
+    });
     for (const id of [
       'ai-chat-model-selector',
       'ai-chat-traits-selector',
