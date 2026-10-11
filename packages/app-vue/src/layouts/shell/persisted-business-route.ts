@@ -14,9 +14,11 @@ export function canonicalizePersistedBusinessRoute(route: string): string {
   const path = withoutHash.slice(0, queryIndex);
   const search = new URLSearchParams(withoutHash.slice(queryIndex + 1));
   const dialog = search.get('dialog');
-  if (!dialog) return route;
+  const panelForm = path === '/goals' && search.get('goalForm') === 'create';
+  if (!dialog && !panelForm) return route;
 
   search.delete('dialog');
+  if (panelForm) search.delete('goalForm');
 
   // Goal edit/create identity belongs to the dialog rather than the list surface.
   if (path === '/goals' && dialog === 'goal') {

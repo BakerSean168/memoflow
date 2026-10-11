@@ -385,6 +385,8 @@ describe('GoalModuleLayout', () => {
 // Owner session probe keeps these integration tests focused on route/loading/lifecycle.
 // The real GoalDialog adapter is exercised in GoalDialog.spec.ts.
 const sessionProbe: GoalNativeEditSession = {
+  claimControl: vi.fn(),
+  releaseControl: vi.fn(),
   patch: vi.fn(),
   addChild: vi.fn(),
   removeChild: vi.fn(),
@@ -434,7 +436,13 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
   const Consumer = defineComponent({
     setup() {
       const surface = useGoalNativeSurface();
-      expect(Object.keys(surface).sort()).toEqual(['locate', 'openCreate', 'openExisting']);
+      expect(Object.keys(surface).sort()).toEqual([
+        'isAvailable',
+        'locate',
+        'openControlledCreate',
+        'openCreate',
+        'openExisting',
+      ]);
       return () => null;
     },
   });
@@ -487,7 +495,67 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     useGoal().isSaving.value = false;
   });
 
-  it.each(['create', 'edit'] as const)(
+  it('rechecks safety after asynchronous preflight and never opens a dirty-confirm takeover path', async () => {
+    const { wrapper, router, host } = await mountNativeHost('/tasks', true);
+    const originalConfirm = window.confirm;
+    const confirm = vi.fn(() => true);
+    window.confirm = confirm;
+    try {
+      const opening = host.openControlledCreate('run-race');
+      await Promise.resolve();
+      useAppShellStore().setSurfaceStatus('dirty');
+      await expect(opening).rejects.toThrow('conflict');
+      expect(confirm).not.toHaveBeenCalled();
+      expect(router.currentRoute.value.fullPath).toBe('/tasks');
+      expect(useAppShellStore().businessControl).toBeNull();
+    } finally {
+      window.confirm = originalConfirm;
+      wrapper.unmount();
+    }
+  });
+
+  it('releases owner control when its shell host is disposed, without discarding the draft', async () => {
+    const { wrapper, host, disposeHost } = await mountNativeHost('/tasks', true);
+    const ai = await host.openControlledCreate('run-dispose');
+    ai.patch({ name: 'Retained draft after disconnect' });
+    const owner = host.locate()!;
+    disposeHost();
+    expect(useAppShellStore().businessControl).toBeNull();
+    owner.patch({ summary: 'Editable again' });
+    expect(owner.readDraftState().draft.name).toBe('Retained draft after disconnect');
+    expect(() => ai.patch({ name: 'Stale operation' })).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it('does not take over an existing manual draft, then claims the real panel owner with navigation protection', async () => {
+    const { wrapper, router, host } = await mountNativeHost('/goals?dialog=goal', true);
+    const manual = host.locate()!;
+    manual.patch({ name: 'Unsaved manual Goal' });
+    await flushPromises();
+    expect(host.isAvailable()).toBe(false);
+    await expect(host.openControlledCreate('run-1')).rejects.toThrow('conflict');
+    expect(router.currentRoute.value.fullPath).toBe('/goals?dialog=goal');
+    expect(manual.readDraftState().draft.name).toBe('Unsaved manual Goal');
+    manual.requestCancel();
+    await flushPromises();
+    expect(host.isAvailable()).toBe(true);
+    const controlled = await host.openControlledCreate('run-1');
+    expect(router.currentRoute.value.query.goalForm).toBe('create');
+    expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    controlled.patch({ name: 'AI Goal' });
+    expect(() => host.locate()!.patch({ name: 'User overwrite' })).toThrow('controlled');
+    await router.push('/tasks');
+    expect(router.currentRoute.value.query.goalForm).toBe('create');
+    controlled.releaseControl();
+    expect(useAppShellStore().businessControl).toBeNull();
+    host.locate()!.patch({ name: 'User takes over' });
+    expect(host.locate()!.readDraftState().draft.name).toBe('User takes over');
+    expect(() => controlled.patch({ name: 'Stale AI' })).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it.each(['create', 'edit', 'panel'] as const)(
     'preserves the real %s owner draft across route-driven KeepAlive tab switches',
     async (mode) => {
       const goal = createMockGoal({ name: 'Loaded Goal', keyResults: [] });
@@ -505,7 +573,10 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
         },
       };
       goalMocks.getGoalAggregateView.mockResolvedValue(aggregate);
-      const initial = `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
+      const initial =
+        mode === 'panel'
+          ? '/goals?goalForm=create'
+          : `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
       const { wrapper, router, host } = await mountNativeHost(initial, true);
       const session = host.locate()!;
       expect(session).not.toBeNull();
@@ -643,7 +714,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     expect(host.locate()).toBeNull();
     const session = await host.openCreate();
     expect(session).toBe(sessionProbe);
-    expect(router.currentRoute.value.fullPath).toBe('/goals?dialog=goal');
+    expect(router.currentRoute.value.fullPath).toBe('/goals?goalForm=create');
     expect(wrapper.findComponent(SessionDialogProbe).props('open')).toBe(true);
     expect(useAppShellStore().activeTab?.module).toBe('goal');
     expect(host.locate()).toBe(session);
@@ -789,7 +860,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     expect(router.currentRoute.value.query).toMatchObject({
       status: 'active',
       label: 'work',
-      dialog: 'goal',
+      goalForm: 'create',
     });
     await router.replace({
       name: 'goal-list',

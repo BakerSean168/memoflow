@@ -14,7 +14,11 @@ import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativ
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
 
-interface GoalNativeSurfaceHost extends OwnerNativeEditSurface<GoalNativeEditSession> {
+export interface GoalAIEditSurface extends OwnerNativeEditSurface<GoalNativeEditSession> {
+  isAvailable(): boolean;
+  openControlledCreate(ownerId: string): Promise<GoalNativeEditSession>;
+}
+interface GoalNativeSurfaceHost extends GoalAIEditSurface {
   register(fullPath: string, session: GoalNativeEditSession): () => void;
 }
 const GoalNativeSurfaceKey: InjectionKey<GoalNativeSurfaceHost> = Symbol('GoalNativeSurface');
@@ -26,10 +30,27 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   const { t } = useI18n();
   const live = shallowRef<{ fullPath: string; session: GoalNativeEditSession } | null>(null);
   const disposed = shallowRef(false);
+  let releaseControl: (() => void) | null = null;
+  const removeGuard = router.beforeEach(
+    (to) => !store.businessControl || to.fullPath === store.businessControl.route,
+  );
   onScopeDispose(() => {
+    releaseControl?.();
+    removeGuard();
     disposed.value = true;
     live.value = null;
   });
+
+  function isAvailable(): boolean {
+    return (
+      !disposed.value &&
+      !store.businessControl &&
+      store.surfaceStatus === 'clean' &&
+      !live.value &&
+      !router.currentRoute.value.query.dialog &&
+      router.currentRoute.value.query.goalForm !== 'create'
+    );
+  }
 
   function locate(): GoalNativeEditSession | null {
     return !disposed.value &&
@@ -40,16 +61,19 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       : null;
   }
 
-  async function open(goalId?: string): Promise<GoalNativeEditSession> {
+  async function open(goalId?: string, requireClean = false): Promise<GoalNativeEditSession> {
     // Flush native dirty/busy publication before checking the shell leave protocol.
     await nextTick();
     if (disposed.value) throw new Error('Goal surface host is closed');
+    if (requireClean && !isAvailable()) throw new Error('Business surface conflict');
     const query =
       router.currentRoute.value.name === 'goal-list' ? { ...router.currentRoute.value.query } : {};
     delete query.goalId;
+    delete query.dialog;
+    delete query.goalForm;
     const target = router.resolve({
       name: 'goal-list',
-      query: { ...query, dialog: 'goal', ...(goalId ? { goalId } : {}) },
+      query: { ...query, ...(goalId ? { dialog: 'goal', goalId } : { goalForm: 'create' }) },
     });
     if (router.currentRoute.value.fullPath !== target.fullPath) {
       if (!(await navigateBusinessSurface(router, target.fullPath, t))) {
@@ -107,6 +131,43 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   }
 
   const host: GoalNativeSurfaceHost = {
+    isAvailable,
+    async openControlledCreate(ownerId) {
+      await nextTick();
+      if (!isAvailable()) throw new Error('Business surface conflict');
+      const session = await open(undefined, true);
+      const state = session.readDraftState();
+      if (state.dirty || state.busy) throw new Error('Business surface changed while opening');
+      const version = store.claimBusinessControl(ownerId, router.currentRoute.value.fullPath);
+      let controlled: GoalNativeEditSession;
+      try {
+        controlled = session.claimControl(ownerId);
+      } catch (error) {
+        store.releaseBusinessControl(ownerId, version);
+        throw error;
+      }
+      const release = () => {
+        try {
+          controlled.releaseControl();
+        } catch {
+          /* Owner may already have closed the handle. */
+        }
+        store.releaseBusinessControl(ownerId, version);
+        if (releaseControl === release) releaseControl = null;
+      };
+      releaseControl = release;
+      return {
+        ...controlled,
+        releaseControl() {
+          controlled.releaseControl();
+          release();
+        },
+        requestCancel() {
+          controlled.requestCancel();
+          release();
+        },
+      };
+    },
     openCreate: () => open(),
     openExisting: (id) => {
       if (!id.trim()) return Promise.reject(new Error('Goal identity is required'));
@@ -117,7 +178,10 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       const entry = { fullPath, session };
       live.value = entry;
       return () => {
-        if (live.value === entry) live.value = null;
+        if (live.value === entry) {
+          releaseControl?.();
+          live.value = null;
+        }
       };
     },
   };
@@ -126,10 +190,16 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
 }
 
 /** Consumers get only semantic opening/location. Registration belongs to the owner. */
-export function useGoalNativeSurface(): OwnerNativeEditSurface<GoalNativeEditSession> {
+export function useGoalNativeSurface(): GoalAIEditSurface {
   const host = inject(GoalNativeSurfaceKey);
   if (!host) throw new Error('Goal native surface requires AppShell');
-  return { openCreate: host.openCreate, openExisting: host.openExisting, locate: host.locate };
+  return {
+    openCreate: host.openCreate,
+    openExisting: host.openExisting,
+    locate: host.locate,
+    isAvailable: host.isAvailable,
+    openControlledCreate: host.openControlledCreate,
+  };
 }
 
 export function useGoalNativeSurfaceRegistration(): GoalNativeSurfaceHost | null {

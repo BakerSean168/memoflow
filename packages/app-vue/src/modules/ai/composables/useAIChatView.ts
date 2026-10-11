@@ -828,11 +828,20 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const canSendMessage = computed(
     () =>
       !chatSession.chatLoading.value &&
+      !goalWorkflow.goalAgentLoading.value &&
+      !goalWorkflow.goalAgentResuming.value &&
+      !goalWorkflow.goalManualHandoff.value &&
       (chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
         ? localChoices.canSend.value
         : modelSelection.canSendMessage.value && modelSelection.selectedModel.value !== null),
   );
   function canLeaveWorkflowReview(): boolean {
+    // The handed-off native draft still coordinates deterministic workflow Save.
+    // Do not reset that coordinator while the user is editing it.
+    if (goalWorkflow.goalManualHandoff.value) {
+      toast.info(t('aiAssistant.businessSurface.handedOff'));
+      return false;
+    }
     return canLeaveAIWorkflowReview(
       toolMode.value,
       {

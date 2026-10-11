@@ -112,6 +112,8 @@ export type ChatItem = {
   status: MessageStatus;
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
+  /** Local receipt emitted only after the native owner successfully applies a command. */
+  businessOperation?: { runId: string; revision: number; operation: 'goal.patch' };
   toolActivity?: Extract<
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }

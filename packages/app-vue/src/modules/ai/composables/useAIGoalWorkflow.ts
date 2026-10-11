@@ -3,7 +3,7 @@ import {
   type AIWorkflowRunView,
   type GoalPlanDraft,
 } from '@memoflow/contracts/ai';
-import { computed, ref } from 'vue';
+import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
@@ -34,6 +34,22 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const goalWorkflowRun = ref<Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null>(null);
+  let startEpoch = 0;
+  let runtimeMessageId: string | null = null;
+  function runtimeStatus(content: string, status: 'generating' | 'success' | 'error' | 'aborted') {
+    let item = options.chatTimeline.value.find((entry) => entry.id === runtimeMessageId);
+    if (!item) {
+      runtimeMessageId = `goal-runtime:${options.chatConversationId.value}:${++startMessageSequence}`;
+      item = { id: runtimeMessageId, role: 'assistant', content, status };
+      options.chatTimeline.value.push(item);
+    }
+    item.content = content;
+    item.status = status;
+    options.scrollMessagesToBottom();
+  }
+  onScopeDispose(() => {
+    startEpoch++;
+  });
 
   const goalDraftLoading = ref(false);
   const goalWorkflowStage = ref<GoalWorkflowStage>('collect');
@@ -45,6 +61,26 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const automationExecuting = ref(false);
   const goalAgentLoading = ref(false);
   const goalAgentResuming = ref(false);
+  watch(
+    goalAgentResuming,
+    (resuming) => {
+      if (resuming) runtimeStatus(t('aiAssistant.businessSurface.resuming'), 'generating');
+      else if (goalWorkflowRun.value) {
+        const status = goalWorkflowRun.value.status;
+        runtimeStatus(
+          t(`aiAssistant.businessSurface.${status === 'suspended' ? 'waiting' : status}`),
+          status === 'running'
+            ? 'generating'
+            : status === 'failed'
+              ? 'error'
+              : status === 'cancelled'
+                ? 'aborted'
+                : 'success',
+        );
+      }
+    },
+    { flush: 'sync' },
+  );
 
   const editableGoal = computed<EditableGoal>(() => {
     const goal = currentReviewDraft()?.goal;
@@ -90,7 +126,12 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     submitGoalClarificationResponse,
     submitGoalRevisionResponse,
     confirmGoalAgentRun,
-    cancelGoalAgentRun,
+    cancelGoalAgentRun: cancelReviewRun,
+    goalSurfaceConflict,
+    goalSurfaceReady,
+    goalManualHandoff,
+    continueGoalSurfaceControl,
+    handoffGoalNativeReview,
     reviseGoalAgentRun,
   } = review;
 
@@ -125,6 +166,13 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     let projection = Promise.resolve();
     if (!nativeDraft) retireNativeReview();
     goalWorkflowRun.value = run;
+    if (run.status === 'running')
+      runtimeStatus(t('aiAssistant.businessSurface.running'), 'generating');
+    else if (runtimeMessageId)
+      runtimeStatus(
+        t(`aiAssistant.businessSurface.${run.status === 'suspended' ? 'waiting' : run.status}`),
+        run.status === 'failed' ? 'error' : run.status === 'cancelled' ? 'aborted' : 'success',
+      );
     const suspension = run.suspension;
     if (run.status === 'suspended' && suspension?.type === 'clarification_required') {
       goalWorkflowStage.value = 'clarification';
@@ -268,8 +316,10 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     const idea = options.buildConversationTranscript().trim();
     if (!idea) return false;
 
+    const epoch = ++startEpoch;
     goalAgentLoading.value = true;
     goalDraftLoading.value = true;
+    runtimeStatus(t('aiAssistant.businessSurface.requesting'), 'generating');
     try {
       const run = await options.workflowRuntime.start({
         kind: 'goal.create',
@@ -281,6 +331,18 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
         modelId: selectedModel.modelId,
         locale: locale.value.startsWith('en') ? 'en-US' : 'zh-CN',
       });
+      if (epoch !== startEpoch) {
+        if (!['completed', 'failed', 'cancelled'].includes(run.status)) {
+          const cancelled = await options.workflowRuntime.cancel({ runId: run.runId });
+          if (cancelled && cancelled.status !== 'cancelled') {
+            if (runtimeMessageId)
+              runtimeStatus(t('aiAssistant.businessSurface.cancelUnconfirmed'), 'error');
+            return false;
+          }
+        }
+        if (runtimeMessageId) runtimeStatus(t('aiAssistant.businessSurface.cancelled'), 'aborted');
+        return false;
+      }
       await projectRun(run);
       if (run.kind === 'goal.create' && run.status === 'failed') {
         toast.error(getAIWorkflowTerminalFailureMessage(run.failure, t));
@@ -293,12 +355,27 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       if (draft?.goal.name) await options.maybeRenameCurrentConversation(draft.goal.name);
       return true;
     } catch (error) {
-      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      if (epoch === startEpoch) {
+        runtimeStatus(t('aiAssistant.businessSurface.failed'), 'error');
+        toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+      } else if (runtimeMessageId) {
+        runtimeStatus(t('aiAssistant.businessSurface.cancelUnconfirmed'), 'error');
+      }
       return false;
     } finally {
       goalAgentLoading.value = false;
       goalDraftLoading.value = false;
     }
+  }
+
+  async function cancelGoalAgentRun(): Promise<void> {
+    if (goalAgentResuming.value || goalOwnerAttemptPending.value) return;
+    startEpoch++;
+    if (!goalWorkflowRun.value && goalAgentLoading.value) {
+      runtimeStatus(t('aiAssistant.businessSurface.cancelling'), 'generating');
+      return;
+    }
+    await cancelReviewRun();
   }
 
   async function generateGoalDraftFromConversation(): Promise<void> {
@@ -436,6 +513,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   }
 
   function resetGoalArtifacts(): void {
+    startEpoch++;
+    runtimeMessageId = null;
     retireNativeReview();
     goalWorkflowRun.value = null;
     goalWorkflowStage.value = 'collect';
@@ -447,6 +526,11 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalDraftLoading,
     goalOwnerSubmitted,
     goalOwnerAttemptPending,
+    goalSurfaceConflict,
+    goalSurfaceReady,
+    goalManualHandoff,
+    continueGoalSurfaceControl,
+    handoffGoalNativeReview,
     goalWorkflowStage,
     goalClarification,
     goalWorkflowRun,
@@ -500,4 +584,5 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   };
 }
 
+let startMessageSequence = 0;
 export type { UseAIGoalWorkflowOptions } from './types';

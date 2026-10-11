@@ -75,6 +75,7 @@ describe('useAIChatSession runtime-owned open chat surface', () => {
     expect(session).not.toContain('buildHostOpenChatStopCancelCommand');
     expect(composer).toContain('ai-chat-stop-generating');
     expect(chatView).toContain('@stop="stopGenerating"');
+    expect(chatView).toContain("if (toolMode.value === 'goal-create') void cancelGoalAgentRun();");
   });
 
   it('documents the Mastra runtime path and forbids legacy open-chat fallback', () => {

@@ -2110,6 +2110,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/goal/reference/goal-business-panel.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.goal-reference.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.goal-reference.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/goal/reference/goal-reference.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -4262,6 +4276,14 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/business-surface-control.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12794,7 +12816,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 2,
       "e2eOwnership": {
         "lane": "reference",
         "lifecycle": "active",
@@ -13104,7 +13126,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 287
+      "fileCount": 288
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13851,12 +13873,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1197,
+    "unit": 1198,
     "integration": 47,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 48,
+    "e2e": 49,
     "perf": 2,
     "governance": 65
   },
@@ -13867,7 +13889,7 @@
       "desktop": 2,
       "local-validation": 6,
       "nightly": 5,
-      "reference": 5,
+      "reference": 6,
       "required": 22,
       "secure-acceptance": 2,
       "specialized": 3,
@@ -13876,7 +13898,7 @@
     "countsByRole": {
       "artifact": 3,
       "canonical": 25,
-      "reference": 5,
+      "reference": 6,
       "supplemental": 15
     },
     "automatedCollectorCount": 4,

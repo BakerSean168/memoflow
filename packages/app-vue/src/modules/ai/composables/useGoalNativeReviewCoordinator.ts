@@ -48,6 +48,9 @@ export function useGoalNativeReviewCoordinator(input: {
   const workflowFailureMessage = (run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>) =>
     getAIWorkflowTerminalFailureMessage(run.failure, t);
   const nativeSurface = useGoalNativeSurface();
+  const goalSurfaceConflict = ref(false);
+  const goalSurfaceReady = ref(false);
+  const goalManualHandoff = ref(false);
   const labelCatalog = useLabelCatalog();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   let nativeSession: GoalNativeEditSession | null = null;
@@ -117,8 +120,8 @@ export function useGoalNativeReviewCoordinator(input: {
     });
     pendingLabelNames = existingLabels.filter((item) => !item.label).map((item) => item.name);
     keyResultRefs = new Map(projectedKeyResultIds.map(([ref, id]) => [id, ref]));
-    // During clarification the native owner surface stays editable, but its Save
-    // action is still coordinated to a no-op until workflow review is ready.
+    // The scoped AI capability may patch, but native user commands remain blocked
+    // until the user explicitly takes over in Chat.
     session.setEditingBlocked(false);
   }
 
@@ -145,6 +148,18 @@ export function useGoalNativeReviewCoordinator(input: {
     };
     pendingProjection = pending;
     return pending.promise;
+  }
+
+  function recordNativePatch(runId: string, projection: GoalNativeProjection): void {
+    const operationId = `goal-native-patch:${runId}:${projection.revision}:${projection.mode}`;
+    if (options.chatTimeline.value.some((item) => item.id === operationId)) return;
+    options.chatTimeline.value.push({
+      id: operationId,
+      role: 'assistant',
+      status: 'success',
+      content: t('aiAssistant.businessSurface.formUpdated', { revision: projection.revision }),
+      businessOperation: { runId, revision: projection.revision, operation: 'goal.patch' },
+    });
   }
 
   async function performNativeReview(
@@ -207,13 +222,13 @@ export function useGoalNativeReviewCoordinator(input: {
     const existing = await labelCatalog.existingNames(projection.draft.goal.labels);
     if (epoch !== projectionEpoch) return;
 
-    if (
-      nativeSession &&
-      projectedRunId === run.runId &&
-      projectedRevision === projection.revision
-    ) {
+    if (nativeSession && projectedRunId === run.runId) {
+      if (goalManualHandoff.value || pendingOwnerAttempt || submitted)
+        throw new Error('Goal revision is frozen by the native owner');
       nativeSession.setEditingBlocked(false);
       applyNativeProjection(nativeSession, projection, existing);
+      recordNativePatch(run.runId, projection);
+      projectedRevision = projection.revision;
       projectedMode = projection.mode;
       submitted = null;
       goalOwnerSubmitted.value = false;
@@ -221,13 +236,35 @@ export function useGoalNativeReviewCoordinator(input: {
       return;
     }
 
-    const session = await nativeSurface.openCreate();
+    if (!nativeSurface.isAvailable()) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    let session: GoalNativeEditSession;
+    try {
+      session = await nativeSurface.openControlledCreate(run.runId);
+    } catch (error) {
+      if (!nativeSurface.isAvailable()) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      throw error;
+    }
+    goalSurfaceConflict.value = false;
+    goalManualHandoff.value = false;
     if (epoch !== projectionEpoch) {
       session.requestCancel();
       return;
     }
-    applyNativeProjection(session, projection, existing);
+    try {
+      applyNativeProjection(session, projection, existing);
+    } catch (error) {
+      session.releaseControl();
+      throw error;
+    }
+    recordNativePatch(run.runId, projection);
     nativeSession = session;
+    goalSurfaceReady.value = true;
     projectedRunId = run.runId;
     projectedRevision = projection.revision;
     projectedMode = projection.mode;
@@ -235,11 +272,32 @@ export function useGoalNativeReviewCoordinator(input: {
     goalOwnerSubmitted.value = false;
   }
 
+  async function continueGoalSurfaceControl(): Promise<void> {
+    // Recheck the actual owner on every click, not the earlier conflict snapshot.
+    if (goalAgentResuming.value || !nativeSurface.isAvailable()) return;
+    goalSurfaceConflict.value = false;
+    await openGoalNativeReview();
+  }
+
+  function handoffGoalNativeReview(): void {
+    if (goalAgentResuming.value || pendingOwnerAttempt || submitted || !nativeSession) return;
+    nativeSession.releaseControl();
+    nativeSession = nativeSurface.locate();
+    nativeSession?.coordinateSubmit(
+      () => confirmGoalAgentRun(),
+      async () => {
+        goalManualHandoff.value = false;
+        await cancelGoalAgentRun();
+      },
+    );
+    goalManualHandoff.value = true;
+  }
+
   async function openGoalNativeReview(): Promise<void> {
     const run = goalWorkflowRun.value;
     if (
       !run ||
-      run.suspension?.type !== 'goal_draft_review' ||
+      !goalNativeProjection(run) ||
       goalAgentResuming.value ||
       submitted ||
       pendingOwnerAttempt
@@ -265,7 +323,9 @@ export function useGoalNativeReviewCoordinator(input: {
   function retireNativeReview(): void {
     pendingProjection = null;
     projectionEpoch += 1;
-    if (nativeSession) {
+    goalSurfaceConflict.value = false;
+    goalSurfaceReady.value = false;
+    if (nativeSession && !goalManualHandoff.value) {
       try {
         nativeSession.setEditingBlocked(false);
         nativeSession.requestCancel();
@@ -274,6 +334,7 @@ export function useGoalNativeReviewCoordinator(input: {
       }
     }
     nativeSession = null;
+    goalManualHandoff.value = false;
     projectedRunId = null;
     submitted = null;
     pendingOwnerAttempt = null;
@@ -398,7 +459,13 @@ export function useGoalNativeReviewCoordinator(input: {
   async function submitGoalRevisionResponse(response: string): Promise<boolean> {
     let run = goalWorkflowRun.value;
     const normalized = response.trim();
-    if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value || !normalized)
+    if (
+      !run ||
+      !goalAgentWaitingForApproval.value ||
+      goalAgentResuming.value ||
+      goalManualHandoff.value ||
+      !normalized
+    )
       return false;
     goalAgentResuming.value = true;
     try {
@@ -611,6 +678,11 @@ export function useGoalNativeReviewCoordinator(input: {
   }
   return {
     project,
+    goalSurfaceConflict,
+    goalSurfaceReady,
+    goalManualHandoff,
+    continueGoalSurfaceControl,
+    handoffGoalNativeReview,
     goalOwnerSubmitted,
     goalOwnerAttemptPending,
     goalAgentWaitingForClarification,

@@ -34,6 +34,8 @@ const fixture = await vi.hoisted(async () => {
     messagesViewport: ref(null),
     setSurfaceContextEntity: vi.fn(),
     abortActiveStream: vi.fn(),
+    prepareWorkflowTurn: vi.fn(),
+    stopGenerating: vi.fn(),
     scrollMessagesToBottom: vi.fn(),
     selectConversation: vi.fn(async (item: { id: string }) => {
       session.chatConversationId.value = item.id;
@@ -60,6 +62,17 @@ const fixture = await vi.hoisted(async () => {
       goalWorkflowRun: goalRun,
       goalWorkflowStage: ref('collect'),
       goalAgentResuming: ref(false),
+      goalAgentLoading: ref(false),
+      goalAgentWaitingForClarification: ref(false),
+      goalAgentWaitingForApproval: ref(false),
+      goalSurfaceConflict: ref(false),
+      goalSurfaceReady: ref(false),
+      goalManualHandoff: ref(false),
+      continueGoalSurfaceControl: vi.fn(),
+      handoffGoalNativeReview: vi.fn(),
+      cancelGoalAgentRun: vi.fn(),
+      confirmGoalAgentRun: vi.fn(),
+      startGoalAgentRun: vi.fn(),
       goalOwnerAttemptPending: ref(false),
       clarificationAnswers: ref([]),
       editableTasks: ref([]),
@@ -80,6 +93,7 @@ const fixture = await vi.hoisted(async () => {
     task: {
       taskWorkflowRun: taskRun,
       taskAgentResuming: ref(false),
+      taskAgentWaitingForClarification: ref(false),
       taskOwnerAttemptPending: ref(false),
       projectRun: vi.fn(async (run: AIWorkflowRunView) => {
         taskRun.value = run;
@@ -92,6 +106,7 @@ const fixture = await vi.hoisted(async () => {
     knowledge: {
       knowledgeCaptureRun: knowledgeRun,
       knowledgeCaptureResuming: ref(false),
+      knowledgeCaptureWaitingForClarification: ref(false),
       projectRun: vi.fn(async (run: AIWorkflowRunView) => {
         knowledgeRun.value = run;
       }),
@@ -162,6 +177,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
   const wrapper = shallowMount(AIChatView, {
     props: { composerOnly: true },
     global: {
+      stubs: { teleport: true },
       plugins: [
         pinia,
         router,
@@ -196,6 +212,31 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.session.chatConversationId.value = null;
     fixture.session.chatMessage.value = '';
     fixture.session.runtimeChoice.value = { runtimeKind: 'builtin' };
+  });
+
+  it('does not start a Goal workflow after Stop during conversation preparation', async () => {
+    let prepared!: () => void;
+    fixture.session.prepareWorkflowTurn.mockReturnValue(
+      new Promise((resolve) => {
+        prepared = () =>
+          resolve({ conversationId: 'conv-stop', content: '帮我规划今年考研，目标北京大学' });
+      }),
+    );
+    const { wrapper } = await mountView();
+    await flushPromises();
+    fixture.session.chatMessage.value = '帮我规划今年考研，目标北京大学';
+    const composer = wrapper.findComponent({ name: 'AIFooterComposer' });
+    composer.vm.$emit('send');
+    await flushPromises();
+    expect(fixture.session.prepareWorkflowTurn).toHaveBeenCalledOnce();
+    wrapper.findComponent({ name: 'AIFooterComposer' }).vm.$emit('stop');
+    prepared();
+    await flushPromises();
+    expect(
+      fixture.goal.cancelGoalAgentRun.mock.calls.length +
+        fixture.session.stopGenerating.mock.calls.length,
+    ).toBe(1);
+    expect(fixture.goal.startGoalAgentRun).not.toHaveBeenCalled();
   });
 
   it('resets once before awaiting the Agent Registry and preserves drafts typed during initialization', async () => {

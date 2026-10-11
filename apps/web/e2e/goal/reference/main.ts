@@ -31,6 +31,7 @@ import GoalModuleLayout from '@memoflow/app-vue/modules/goal/views/GoalModuleLay
 import GoalListView from '@memoflow/app-vue/modules/goal/views/GoalListView.vue';
 import GoalDetailView from '@memoflow/app-vue/modules/goal/views/GoalDetailView.vue';
 import GoalDialog from '@memoflow/app-vue/modules/goal/components/dialogs/GoalDialog.vue';
+import type { GoalNativeEditSession } from '@memoflow/app-vue/modules/goal/composables/goalNativeEditSession';
 import { goalRoutes } from '@memoflow/app-vue/modules/goal/router';
 import '../../../../../apps/web/src/styles/index.css';
 
@@ -227,13 +228,54 @@ const router = createRouter({
   ],
 });
 const creating = ref(params.get('state') === 'create');
+const panel = params.get('surface') === 'panel';
+let controlledSession: GoalNativeEditSession | null = null;
+const commandResult = ref('');
+function receiveSession(session: GoalNativeEditSession | null) {
+  if (!session || !panel || params.get('control') !== 'ai') return;
+  controlledSession = session.claimControl('browser-workflow-run');
+  controlledSession.patch({ name: 'AI draft', description: 'Initial business command' });
+}
+function applyPanelCommand() {
+  controlledSession?.patch({
+    name: 'Updated by owner command',
+    description: 'Actual batch patch result',
+  });
+  commandResult.value = 'Applied';
+}
+function releasePanelControl() {
+  controlledSession?.releaseControl();
+  controlledSession = null;
+  commandResult.value = 'Handed off without saving';
+}
 const app = createApp(
   defineComponent({
     setup: () => () =>
       h('main', { class: '@container/panel h-screen w-full' }, [
         creating.value ? null : h(RouterView),
+        panel && params.get('control') === 'ai'
+          ? h('aside', [
+              h(
+                'button',
+                { 'data-testid': 'business-patch', onClick: applyPanelCommand },
+                'Apply business command',
+              ),
+              h(
+                'button',
+                { 'data-testid': 'business-handoff', onClick: releasePanelControl },
+                'Hand off',
+              ),
+              h(
+                'p',
+                { role: 'status', 'data-testid': 'business-command-result' },
+                commandResult.value,
+              ),
+            ])
+          : null,
         h(GoalDialog, {
           open: creating.value,
+          presentation: panel ? 'panel' : 'dialog',
+          onSessionChange: receiveSession,
           'onUpdate:open': (open: boolean) => {
             creating.value = open;
           },

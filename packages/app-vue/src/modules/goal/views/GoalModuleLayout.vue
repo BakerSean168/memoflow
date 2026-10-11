@@ -16,8 +16,9 @@
       @update-labels="setLabelIdsAll"
     />
     <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <router-view />
+      <router-view v-show="!panelFormOpen" />
       <GoalDialog
+        :presentation="panelFormOpen ? 'panel' : 'dialog'"
         :open="dialogOpen"
         @session-change="handleSessionChange"
         @update:open="handleDialogOpenUpdate"
@@ -103,6 +104,15 @@ const {
 } = useGoal();
 const { options: labelOptions, isLoading: labelsLoading } = useLabelCatalog();
 
+// Capture presentation in the active owner, not from the globally changing route:
+// inactive KeepAlive editors must retain their draft when another tab is shown.
+const panelFormOpen = ref(false);
+async function closeEditor() {
+  if (!panelFormOpen.value) return routeDialog.close();
+  const query = { ...route.query };
+  delete query.goalForm;
+  await router.replace({ path: route.path, query });
+}
 const dialogOpen = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
 const editingGoal = ref<GoalClientDTO | null>(null);
@@ -128,7 +138,7 @@ function handleDialogOpenUpdate(open: boolean) {
   if (open) return;
   dialogOpen.value = false;
   goalDialogDirty.value = false;
-  void routeDialog.close();
+  void closeEditor();
 }
 function openCreateWithAI() {
   if (goalDialogBusy.value || isSaving.value) return;
@@ -146,14 +156,15 @@ function openKnowledge(goalId: string) {
 let loadRevision = 0;
 let lastSynchronizedIdentity: string | null = null;
 function dialogIdentity(): string {
-  return JSON.stringify([route.name, route.query.dialog, route.query.goalId]);
+  return JSON.stringify([route.name, route.query.dialog, route.query.goalId, route.query.goalForm]);
 }
 async function syncDialogFromRoute() {
   if (!surfaceActive || dialogIdentity() === lastSynchronizedIdentity) return;
   lastSynchronizedIdentity = dialogIdentity();
+  panelFormOpen.value = route.name === 'goal-list' && route.query.goalForm === 'create';
   const revision = ++loadRevision;
   handleSessionChange(null);
-  if (route.name !== 'goal-list' || route.query.dialog !== 'goal') {
+  if (route.name !== 'goal-list' || (route.query.dialog !== 'goal' && !panelFormOpen.value)) {
     dialogOpen.value = false;
     editingGoal.value = null;
     goalDialogDirty.value = false;
@@ -173,7 +184,7 @@ async function syncDialogFromRoute() {
   try {
     aggregate = await getGoalAggregateView(goalId);
   } catch {
-    if (revision === loadRevision) await routeDialog.close();
+    if (revision === loadRevision) await closeEditor();
     return;
   }
   if (revision !== loadRevision) return;
@@ -181,13 +192,13 @@ async function syncDialogFromRoute() {
     ? { ...aggregate.goal, keyResults: aggregate.keyResults, reviews: aggregate.reviews }
     : null;
   dialogOpen.value = editingGoal.value !== null;
-  if (!editingGoal.value) await routeDialog.close();
+  if (!editingGoal.value) await closeEditor();
 }
 
 async function handleSaved() {
   goalDialogDirty.value = false;
   await fetchGoals();
-  await routeDialog.close();
+  await closeEditor();
 }
 
 function handleDatabaseTablesChanged(event: Event) {
@@ -198,7 +209,12 @@ function handleDatabaseTablesChanged(event: Event) {
 }
 
 watch(
-  [() => route.name, () => route.query.dialog, () => route.query.goalId],
+  [
+    () => route.name,
+    () => route.query.dialog,
+    () => route.query.goalId,
+    () => route.query.goalForm,
+  ],
   async () => {
     // KeepAlive lifecycle hooks are queued alongside post-render watchers.
     await nextTick();

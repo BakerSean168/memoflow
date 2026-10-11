@@ -156,6 +156,9 @@
         v-show="!composerOnly"
         ref="messagePanelRef"
         :timeline="chatTimeline"
+        :show-workflow-surface="
+          toolMode === 'goal-create' && (goalSurfaceConflict || goalSurfaceReady)
+        "
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
         :can-save-local-note="
@@ -168,13 +171,64 @@
         @tool-decision="decideToolApproval"
         @native-response="respondNativeRequest"
         @save-local-note="localAssistant.saveNote"
-      />
+      >
+        <template #workflow-surface>
+          <section
+            v-if="goalSurfaceConflict"
+            class="space-y-3 rounded-lg border p-3"
+            data-testid="ai-goal-surface-conflict"
+          >
+            <p>{{ t('aiAssistant.businessSurface.conflict') }}</p>
+            <div class="flex flex-wrap gap-2">
+              <Button :disabled="goalAgentResuming" @click="continueGoalSurfaceControl">{{
+                t('aiAssistant.businessSurface.continue')
+              }}</Button>
+              <Button variant="outline" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
+                t('aiAssistant.businessSurface.pause')
+              }}</Button>
+            </div>
+          </section>
+          <section
+            v-else-if="goalSurfaceReady && goalAgentWaitingForApproval && !goalOwnerSubmitted"
+            class="space-y-3 rounded-lg border p-3"
+            data-testid="ai-goal-save-question"
+          >
+            <p>
+              {{
+                t(
+                  goalManualHandoff
+                    ? 'aiAssistant.businessSurface.handedOff'
+                    : 'aiAssistant.businessSurface.saveQuestion',
+                )
+              }}
+            </p>
+            <div v-if="!goalManualHandoff" class="flex flex-wrap gap-2">
+              <Button
+                :disabled="goalAgentResuming"
+                data-testid="ai-goal-save"
+                @click="confirmGoalAgentRun()"
+                >{{ t('aiAssistant.businessSurface.save') }}</Button
+              >
+              <Button
+                variant="outline"
+                :disabled="goalAgentResuming"
+                data-testid="ai-goal-handoff"
+                @click="handoffGoalNativeReview"
+                >{{ t('aiAssistant.businessSurface.handoff') }}</Button
+              >
+              <Button variant="ghost" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
+                t('common.cancel')
+              }}</Button>
+            </div>
+          </section>
+        </template>
+      </AIMessagePanel>
 
       <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
         <AIFooterComposer
           ref="composerRef"
           v-model="chatMessage"
-          :loading="chatLoading"
+          :loading="chatLoading || goalAgentLoading || goalAgentResuming"
           :can-send="canSendMessage"
           :attachments="composerAttachments"
           :context-entities="composerContextEntities"
@@ -395,7 +449,7 @@ const {
   startNewConversation: startNewConversationBase,
   prepareWorkflowTurn,
   handleSendChat: handleSendChatBase,
-  stopGenerating,
+  stopGenerating: stopGeneratingBase,
   decideToolApproval,
 } = session;
 
@@ -422,6 +476,14 @@ const {
   goalWorkflowRun,
   goalOwnerSubmitted,
   goalAgentResuming,
+  goalAgentLoading,
+  goalSurfaceConflict,
+  goalSurfaceReady,
+  goalManualHandoff,
+  continueGoalSurfaceControl,
+  handoffGoalNativeReview,
+  cancelGoalAgentRun,
+  confirmGoalAgentRun,
   editableGoal,
   editableKeyResults,
   editableTasks,
@@ -572,7 +634,15 @@ const workflowInProgress = computed(() => {
   return Boolean(active && !['completed', 'failed', 'cancelled'].includes(active.status));
 });
 
+let composerWorkflowEpoch = 0;
+function stopGenerating() {
+  composerWorkflowEpoch++;
+  if (toolMode.value === 'goal-create') void cancelGoalAgentRun();
+  else stopGeneratingBase();
+}
+
 async function handleComposerSend() {
+  if (chatLoading.value || goalAgentLoading.value || goalAgentResuming.value) return;
   // Native execution stays native; read-only chats never launch write workflows.
   if (runtimeChoice.value.runtimeKind === 'local_agent' || permissionMode.value === 'read-only') {
     if (workflowInProgress.value) return;
@@ -629,8 +699,9 @@ async function handleComposerSend() {
   }
 
   if (!workflowInProgress.value && inferredMode === 'goal-create') {
+    const epoch = ++composerWorkflowEpoch;
     const workflowTurn = await prepareWorkflowTurn();
-    if (!workflowTurn) return;
+    if (!workflowTurn || epoch !== composerWorkflowEpoch) return;
     const started = await startGoalAgentRun(workflowTurn.content);
     if (started === false) toolMode.value = 'chat';
     return;

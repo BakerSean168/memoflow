@@ -108,6 +108,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     if (chatLoading.value) return null;
     const pendingContent = chatMessage.value.trim();
     if (!pendingContent) return null;
+    chatLoading.value = true;
     try {
       const conversationId = await ensureConversationCreated(loadService, conversationName);
       const pendingAttachments = composerAttachments.value.map((attachment) => ({
@@ -129,6 +130,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.sendFailed'));
       return null;
+    } finally {
+      chatLoading.value = false;
     }
   }
 

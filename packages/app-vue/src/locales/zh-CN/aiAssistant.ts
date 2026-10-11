@@ -1,4 +1,23 @@
 export default {
+  businessSurface: {
+    requesting: '正在提交目标规划请求…',
+    running: '目标规划工作流正在运行…',
+    resuming: '正在处理你的工作流答复…',
+    waiting: '工作流已暂停，等待你的答复。',
+    completed: '目标工作流已完成。',
+    failed: '目标工作流未完成，请检查错误后重试。',
+    cancelled: '本次 AI 操作已取消。',
+    cancelling: '已请求取消，正在等待工作流确认…',
+    cancelUnconfirmed: '尚未确认工作流已取消，请恢复会话检查状态。',
+    conflict: '检测到你正在操作业务内容，接管可能导致未保存数据丢失。请先处理好再告诉我。',
+    continue: '我已经处理好了，开始吧',
+    pause: '暂停本次操作',
+    formUpdated: '已在右侧目标表单应用第 {revision} 版字段（批量更新）。',
+    saveQuestion: '我已经初步填写好了，要直接保存还是继续手动修改？',
+    save: '直接保存',
+    handoff: '先不保存，我继续手动编辑',
+    handedOff: '已交还编辑权，草稿尚未保存。请在右侧表单修改并保存。',
+  },
   composer: {
     agent: 'Agent',
     agents: 'Agent 实例',

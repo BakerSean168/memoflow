@@ -19,6 +19,8 @@ import { error, ok } from '@memoflow/contracts/result';
 const native = vi.hoisted(() => ({
   readGoal: vi.fn(),
   openCreate: vi.fn(),
+  available: true,
+  releaseControl: vi.fn(),
   coordinateSubmit: vi.fn(),
   requestSubmit: vi.fn(),
   requestCancel: vi.fn(),
@@ -30,7 +32,12 @@ vi.mock('../../../shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),
 }));
 vi.mock('../../../layouts/shell/useGoalNativeSurface', () => ({
-  useGoalNativeSurface: () => ({ openCreate: native.openCreate, locate: vi.fn() }),
+  useGoalNativeSurface: () => ({
+    openCreate: native.openCreate,
+    openControlledCreate: native.openCreate,
+    isAvailable: () => native.available,
+    locate: () => session(),
+  }),
 }));
 vi.mock('../../../shared/composables/useLabelCatalog', () => ({
   useLabelCatalog: () => ({
@@ -43,6 +50,8 @@ vi.mock('../../../shared/composables/useLabelCatalog', () => ({
 function session() {
   return {
     coordinateSubmit: native.coordinateSubmit,
+    claimControl: vi.fn(() => session()),
+    releaseControl: native.releaseControl,
     setEditingBlocked: vi.fn((blocked) => {
       native.blocked = blocked;
     }),
@@ -231,6 +240,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
   beforeEach(() => {
     vi.clearAllMocks();
     native.active = true;
+    native.available = true;
     native.blocked = false;
     native.readGoal.mockResolvedValue(error('NOT_FOUND', 'Not created'));
     native.state = {
@@ -252,6 +262,78 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       native.active = false;
     });
     native.requestSubmit.mockImplementation(async (context) => ({ id: context.createId }));
+  });
+
+  it('asks before takeover without opening or overwriting, and rechecks each continue click', async () => {
+    native.available = false;
+    native.state!.name = 'My unsaved form';
+    const runtime = createRuntimeStub();
+    runtime.start.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }),
+    );
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    await vm.startGoalAgentRun();
+    expect(vm.goalSurfaceConflict).toBe(true);
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(native.state!.name).toBe('My unsaved form');
+    await vm.continueGoalSurfaceControl();
+    expect(native.openCreate).not.toHaveBeenCalled();
+    native.available = true;
+    await vm.continueGoalSurfaceControl();
+    expect(vm.goalSurfaceConflict).toBe(false);
+    expect(vm.goalSurfaceReady).toBe(true);
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    expect(native.state!.name).toBe('Deep work');
+    wrapper.unmount();
+  });
+
+  it('hands the real unsaved draft to the user and does not reapply duplicate projections', async () => {
+    const runtime = createRuntimeStub();
+    const run = makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) });
+    runtime.start.mockResolvedValue(run);
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    await vm.startGoalAgentRun();
+    expect(runtime.resume).not.toHaveBeenCalled();
+    expect(native.requestSubmit).not.toHaveBeenCalled();
+    expect(options.chatTimeline.value.filter((item) => item.businessOperation)).toHaveLength(1);
+    vm.handoffGoalNativeReview();
+    expect(native.releaseControl).toHaveBeenCalledOnce();
+    expect(vm.goalManualHandoff).toBe(true);
+    native.state!.name = 'My edited draft';
+    await vm.projectRun(run);
+    expect(native.state!.name).toBe('My edited draft');
+    expect(options.chatTimeline.value.filter((item) => item.businessOperation)).toHaveLength(1);
+    wrapper.unmount();
+    expect(native.requestCancel).not.toHaveBeenCalled();
+  });
+
+  it('shows assistant request status immediately and cancels a late start without projecting its form', async () => {
+    const runtime = createRuntimeStub();
+    let resolve!: (run: GoalRun) => void;
+    runtime.start.mockReturnValue(
+      new Promise<GoalRun>((done) => {
+        resolve = done;
+      }),
+    );
+    runtime.cancel.mockResolvedValue(null);
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const starting = vm.startGoalAgentRun();
+    expect(options.chatTimeline.value[0]).toMatchObject({
+      role: 'assistant',
+      status: 'generating',
+    });
+    await vm.cancelGoalAgentRun();
+    resolve(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }));
+    expect(await starting).toBe(false);
+    expect(runtime.cancel).toHaveBeenCalledWith({ runId: 'run-1' });
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(options.chatTimeline.value[0]?.status).toBe('aborted');
+    wrapper.unmount();
   });
 
   it('starts a goal.create workflow through the runtime client with only client-safe input', async () => {
@@ -286,9 +368,15 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
 
     await vm.startGoalAgentRun();
     expect(vm.goalWorkflowStage).toBe('clarification');
-    expect(options.chatTimeline.value).toMatchObject([
-      { id: 'goal-clarification-run-1-1', role: 'assistant', content: 'Budget?' },
-    ]);
+    expect(options.chatTimeline.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'goal-clarification-run-1-1',
+          role: 'assistant',
+          content: 'Budget?',
+        }),
+      ]),
+    );
 
     await expect(vm.submitGoalClarificationResponse('About 1000, with flexibility')).resolves.toBe(
       true,
@@ -398,9 +486,12 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
         }),
       ]),
     );
-    expect(options.chatTimeline.value[0]?.content).toContain('Review guide');
-    expect(options.chatTimeline.value[0]?.content).not.toContain('task:weekly-review');
-    expect(options.chatTimeline.value[0]?.content).not.toContain('note:review-guide');
+    const proposal = options.chatTimeline.value.find((item) =>
+      item.id.startsWith('goal-supporting-proposals-'),
+    );
+    expect(proposal?.content).toContain('Review guide');
+    expect(proposal?.content).not.toContain('task:weekly-review');
+    expect(proposal?.content).not.toContain('note:review-guide');
 
     await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(draft) }), false);
     expect(

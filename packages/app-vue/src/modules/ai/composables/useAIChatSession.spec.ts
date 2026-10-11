@@ -391,6 +391,29 @@ describe('useAIChatSession Mastra-native open chat', () => {
     );
   });
 
+  it('reserves workflow preparation before awaiting conversation creation to reject double-send', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    let complete!: () => void;
+    service.createConversation.mockReturnValue(
+      new Promise((resolve) => {
+        complete = () => resolve(ok(createConversationDTO('conv-1')));
+      }),
+    );
+    const composable = mountComposable(service, runtime);
+    composable.chatMessage.value = 'Create a study goal';
+    const first = composable.prepareWorkflowTurn(service as never, 'New chat', () => {});
+    expect(composable.chatLoading.value).toBe(true);
+    await expect(
+      composable.prepareWorkflowTurn(service as never, 'New chat', () => {}),
+    ).resolves.toBeNull();
+    expect(service.createConversation).toHaveBeenCalledOnce();
+    complete();
+    await first;
+    expect(composable.chatLoading.value).toBe(false);
+    expect(composable.chatTimeline.value).toHaveLength(1);
+  });
+
   it('prepares an explicit workflow turn without invoking the generic Assistant runtime', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
