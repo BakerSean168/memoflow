@@ -194,8 +194,8 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     await openModels(wrapper);
     const picker = wrapper.get('[data-testid="ai-model-picker"]');
     const frame = picker.get('div');
-    expect(picker.classes()).toContain('w-[min(22.5rem,calc(100vw-1.5rem))]');
-    expect(frame.classes()).toContain('h-[min(21.625rem,calc(100dvh-5rem))]');
+    expect(picker.classes()).toContain('w-[min(360px,calc(100vw-24px))]');
+    expect(frame.classes()).toContain('h-[min(346px,calc(100dvh-80px))]');
 
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
     expect(wrapper.get('[data-testid="ai-model-picker-empty"]').exists()).toBe(true);

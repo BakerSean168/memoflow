@@ -251,13 +251,10 @@ watch(
         align="start"
         :side-offset="7"
         :collision-padding="12"
-        class="w-[min(22.5rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
+        class="w-[min(360px,calc(100vw-24px))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl p-0"
         data-testid="ai-model-picker"
       >
-        <div
-          class="flex h-[min(21.625rem,calc(100dvh-5rem))] min-h-0"
-          @keydown="keyboardNavigation"
-        >
+        <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
           <nav
             class="flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
             :aria-label="t('aiAssistant.composer.agents')"
