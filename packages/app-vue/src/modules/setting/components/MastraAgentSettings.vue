@@ -136,6 +136,15 @@ watch(
 );
 watch(selectedConnectionId, () => resetConnection(), { immediate: true });
 watch(
+  modelId,
+  () => {
+    // Choosing a new model invalidates the prior save acknowledgement and manual test.
+    saved.value = false;
+    modelVerified.value = '';
+  },
+  { flush: 'sync' },
+);
+watch(
   () => connection.value?.version,
   (next, previous) => {
     if (previous !== undefined && next !== previous && phase.value !== 'saving') resetConnection();
@@ -512,6 +521,7 @@ onBeforeUnmount(() => {
         <p
           v-if="saved"
           role="status"
+          data-testid="ai-mastra-save-confirmation"
           class="flex items-center gap-1.5 text-xs text-muted-foreground"
         >
           <Check class="size-3.5" />{{ t('setting.agentInstances.savedInstance') }}

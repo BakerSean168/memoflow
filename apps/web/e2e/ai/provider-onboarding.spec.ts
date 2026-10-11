@@ -117,6 +117,9 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   // re-entering a key or changing a shared model-service default.
   await selectModel(page, /E2E Model Alpha/);
   await page.getByTestId('ai-mastra-connection-save').click();
+  // The selector displays the draft before the asynchronous Registry bind finishes.
+  // Wait for the real save acknowledgement so this assertion cannot race the API.
+  await expect(page.getByTestId('ai-mastra-save-confirmation')).toBeVisible();
   await expect(page.getByTestId('ai-default-model')).toContainText(/Alpha/);
   const defaults = await page.evaluate(async () => {
     const [providers, agents] = await Promise.all([

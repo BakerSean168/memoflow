@@ -18,6 +18,7 @@ import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
+import { SettingsStatusBlock } from '../../../components/shared/settings';
 
 const { t } = useI18n();
 const registry = inject(AI_AGENT_REGISTRY_KEY, undefined);
@@ -271,7 +272,12 @@ onBeforeUnmount(() => {
         }}</Button
       >
     </header>
-    <p v-if="failure" role="alert" class="px-2 text-sm text-destructive">{{ failure }}</p>
+    <SettingsStatusBlock
+      v-if="failure"
+      kind="error"
+      :description="failure"
+      test-id="ai-provider-error"
+    />
     <div
       v-if="instances.length"
       class="grid min-h-[34rem] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] lg:grid-cols-[15.5rem_minmax(0,1fr)]"
@@ -355,9 +361,12 @@ onBeforeUnmount(() => {
         />
       </div>
     </div>
-    <p v-else-if="loading" role="status" class="px-2 text-sm text-muted-foreground">
-      {{ t('aiAssistant.local.checking') }}
-    </p>
+    <SettingsStatusBlock
+      v-else-if="loading"
+      kind="loading"
+      :title="t('aiAssistant.local.checking')"
+      test-id="ai-provider-loading"
+    />
     <AgentInstanceWizard
       :open="wizardOpen"
       :native="Boolean(local)"
