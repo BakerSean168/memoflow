@@ -191,7 +191,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         'subagent',
       ],
     });
-    this.controller.onSessionCreated(applyMemoFlowSessionToolPolicy, { blocking: true });
+    this.controller.onSessionCreated((session) => applyMemoFlowSessionToolPolicy(session), {
+      blocking: true,
+    });
     this.mastra = new Mastra({
       storage: deps.storage,
       agents: {
@@ -354,6 +356,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async *dispatchMessage(
     input: AssistantTurnInput,
   ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
+    if (input.permissionMode && !['supervised', 'read-only'].includes(input.permissionMode))
+      throw new AIExecutionError('configuration_required', 'Unsupported Mastra permission mode');
     await this.init();
     await this.history.ensureConversation({
       identityId: input.identityId,
@@ -398,6 +402,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);
+    requestContext.setRaw('permissionMode', input.permissionMode ?? 'supervised');
     if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
@@ -462,7 +467,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     // Reapply on cached/reconnected sessions; setup failure must prevent the turn.
-    await applyMemoFlowSessionToolPolicy(session);
+    await applyMemoFlowSessionToolPolicy(
+      session,
+      input.permissionMode === 'read-only' ? 'read-only' : 'supervised',
+    );
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
     yield* new AssistantTurnSession({

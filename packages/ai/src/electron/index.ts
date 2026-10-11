@@ -459,6 +459,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   providerId: messageCommand.providerId,
                   modelId: messageCommand.modelId,
                   agentInstanceId: messageCommand.agentInstanceId,
+                  permissionMode: messageCommand.permissionMode,
                   locale: messageCommand.locale,
                   attachments: messageCommand.attachments,
                   selectedEntities: messageCommand.selectedEntities,

@@ -40,6 +40,7 @@ import {
   SETTING_SERVICE_KEY,
   AI_CLIENT_KEY,
   AI_AGENT_REGISTRY_KEY,
+  AI_CONFIGURATION_REVISION_KEY,
   AI_LOCAL_AGENT_KEY,
   AI_ASSISTANT_RUNTIME_KEY,
   AI_RUNTIME_USAGE_KEY,
@@ -116,6 +117,7 @@ export function installDesktopAppServices(
   app.provide(AI_LOCAL_AGENT_KEY, createLocalAgentIpcClient(resultIpcClient));
   app.provide(AI_CLIENT_KEY, createAIIpcClient(resultIpcClient));
   app.provide(AI_AGENT_REGISTRY_KEY, createAgentRegistryIpcClient(resultIpcClient));
+  app.provide(AI_CONFIGURATION_REVISION_KEY, ref(0));
   app.provide(AI_ASSISTANT_RUNTIME_KEY, createAssistantRuntimeIpcClient(resultIpcClient));
   app.provide(AI_RUNTIME_USAGE_KEY, createRuntimeUsageIpcClient(resultIpcClient));
   app.provide(AI_WORKFLOW_RUNTIME_KEY, createWorkflowRuntimeIpcClient(resultIpcClient));

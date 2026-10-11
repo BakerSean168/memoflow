@@ -28,6 +28,11 @@ export class AgentInstanceRegistry {
   constructor(
     private readonly repository: IAgentInstanceRepository,
     private readonly host: 'web' | 'desktop',
+    private readonly verifyBindingModel?: (
+      owner: string,
+      providerId: string,
+      modelId: string,
+    ) => Promise<number>,
   ) {}
   async list(owner: string): Promise<AgentRegistrySnapshot> {
     const snapshot = AgentRegistrySnapshotSchema.parse(await this.repository.list(owner));
@@ -100,17 +105,24 @@ export class AgentInstanceRegistry {
       connectionId: input.connectionId,
       modelId: input.action === 'bind' ? input.modelId : '',
     };
+    const verifiedVersion =
+      input.action === 'bind' && this.verifyBindingModel
+        ? await this.verifyBindingModel(owner, input.connectionId, input.modelId)
+        : undefined;
     return this.repository.bind(
       owner,
       next,
       input.expectedRevision,
       binding,
       input.action === 'unbind',
+      verifiedVersion,
     );
   }
   /**
    * Executable selections must point to an enabled Mastra instance and an
-   * exact, previously verified model-service binding. No global provider fallback.
+   * bound model-service connection. binding.modelId is a saved default, not a
+   * per-model permission list: live catalogue membership and model capabilities
+   * remain exclusively enforced by ModelResolver before inference.
    */
   async assertModelBinding(
     owner: string,
@@ -125,10 +137,7 @@ export class AgentInstanceRegistry {
       throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
     if (
       !bindings.some(
-        (binding) =>
-          binding.instanceId === instanceId &&
-          binding.connectionId === providerId &&
-          binding.modelId === modelId,
+        (binding) => binding.instanceId === instanceId && binding.connectionId === providerId,
       )
     )
       throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');

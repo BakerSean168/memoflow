@@ -28,7 +28,8 @@ beforeAll(async () => {
     CREATE TABLE ai_provider_configs (
       id TEXT PRIMARY KEY, identity_id TEXT NOT NULL REFERENCES accounts(id), name TEXT,
       credential_ref TEXT, default_model TEXT, available_models TEXT DEFAULT '[]',
-      is_default BOOLEAN DEFAULT FALSE, is_active BOOLEAN DEFAULT TRUE, deleted_at TIMESTAMP(3)
+      is_default BOOLEAN DEFAULT FALSE, is_active BOOLEAN DEFAULT TRUE,
+      version INTEGER NOT NULL DEFAULT 1, deleted_at TIMESTAMP(3)
     );
     CREATE TABLE ai_conversations (id TEXT PRIMARY KEY, identity_id TEXT NOT NULL REFERENCES accounts(id));
     INSERT INTO accounts VALUES ('owner'), ('other');

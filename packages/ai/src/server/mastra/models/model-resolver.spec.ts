@@ -14,6 +14,10 @@ import {
   createAIProviderSecretVaultStub,
 } from '../../../testing/ai-test-support';
 import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
+import {
+  AgentInstanceRegistry,
+  defaultAgentInstance,
+} from '../../application/agent-instance/agent-instance.registry';
 import { MastraModelResolver } from './model-resolver';
 import { normalizeOpenAICompatibleModelId } from '../../shared/openai-compatible-normalize';
 
@@ -185,6 +189,45 @@ describe('MastraModelResolver', () => {
       modelId: 'allowed-model',
     });
     expect(assertModelBinding).toHaveBeenCalledOnce();
+  });
+
+  it('allows another live model on the bound connection but rejects an unlisted model before inference', async () => {
+    const provider = createAIProviderConfigServerDTO({
+      id: 'provider-selected' as never,
+      identityId: 'identity-1' as never,
+      defaultModel: 'default-model',
+    });
+    const registry = new AgentInstanceRegistry(
+      {
+        list: async () => ({
+          instances: [defaultAgentInstance('mastra')],
+          bindings: [
+            { instanceId: 'mastra', connectionId: 'provider-selected', modelId: 'default-model' },
+          ],
+        }),
+      } as never,
+      'web',
+    );
+    const resolver = new MastraModelResolver(
+      createAIProviderConfigRepositoryStub({ findByIdForIdentity: async () => provider }),
+      createAIProviderSecretVaultStub(),
+      inertFetch,
+      { modelCatalog: catalogPort(['default-model', 'allowed-model']), agentRegistry: registry },
+    );
+    const input = {
+      identityId: 'identity-1',
+      agentInstanceId: 'mastra',
+      providerId: 'provider-selected',
+      modelId: 'allowed-model',
+    };
+    await expect(resolver.resolve(input)).resolves.toMatchObject({ modelId: 'allowed-model' });
+    await expect(resolver.resolve({ ...input, modelId: 'forged-model' })).rejects.toMatchObject({
+      category: 'configuration_required',
+    });
+    await expect(resolver.resolve({ ...input, providerId: 'not-bound' })).rejects.toMatchObject({
+      category: 'configuration_required',
+    });
+    expect(inertFetch).not.toHaveBeenCalled();
   });
 
   it('refuses explicit Agent identities when the authoritative registry is unavailable', async () => {

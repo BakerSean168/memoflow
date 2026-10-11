@@ -426,6 +426,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
     expectedRevision: number,
     binding: AgentInstanceModelBinding,
     remove: boolean,
+    verifiedProviderVersion?: number,
   ): Promise<AgentInstance> {
     const next = AgentInstanceSchema.parse(instance);
     return this.db.writeTransaction(async (tx) => {
@@ -438,15 +439,19 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         const connection = await tx.getOptional<{
           default_model: string | null;
           available_models: string | null;
+          version: number;
         }>(
-          'SELECT default_model, available_models FROM ai_provider_configs WHERE id = ? AND identity_id = ? AND deleted_at IS NULL AND is_active = 1',
+          'SELECT default_model, available_models, version FROM ai_provider_configs WHERE id = ? AND identity_id = ? AND deleted_at IS NULL AND is_active = 1',
           [binding.connectionId, owner],
         );
         if (!connection) throw new AgentRegistryError('NOT_FOUND');
+        if (verifiedProviderVersion !== undefined && connection.version !== verifiedProviderVersion)
+          throw new AgentRegistryError('CONFLICT');
         const models: Array<{ id: string }> = connection.available_models
           ? JSON.parse(connection.available_models)
           : [];
         if (
+          verifiedProviderVersion === undefined &&
           binding.modelId !== connection.default_model &&
           !models.some((model) => model.id === binding.modelId)
         )

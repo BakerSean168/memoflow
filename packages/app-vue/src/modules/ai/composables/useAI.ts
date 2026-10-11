@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { computed, inject, onScopeDispose, ref, watch } from 'vue';
 import type {
   AICapabilities,
   AIProviderConfigClientDTO,
@@ -14,7 +14,7 @@ import type {
   CommitAIProviderReplacementReq,
 } from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
-import { AI_CLIENT_KEY } from '../../../di/keys';
+import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 
 /**
@@ -24,6 +24,16 @@ import { useStrictInject } from '../../../shared/utils/useStrictInject';
  */
 export function useAI() {
   const client = useStrictInject(AI_CLIENT_KEY, 'AIClient');
+  const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
+  const invalidateConfiguration = () => {
+    if (configurationRevision) configurationRevision.value++;
+  };
+  let providerLoadGeneration = 0;
+  let disposed = false;
+  onScopeDispose(() => {
+    disposed = true;
+    providerLoadGeneration++;
+  });
   const providers = ref<AIProviderConfigClientDTO[]>([]);
   const capabilities = ref<AICapabilities | null>(null);
   const providerCatalog = ref<AIProviderCatalogEntryDTO[]>([]);
@@ -33,18 +43,23 @@ export function useAI() {
   const hasProviders = computed(() => providers.value.length > 0);
 
   async function loadProviders() {
+    const generation = ++providerLoadGeneration;
     isLoadingProviders.value = true;
     try {
       const nextProviders = unwrap(await client.listProviders());
-      providers.value = nextProviders;
-      console.debug('[AI] providers loaded', {
-        count: providers.value.length,
-        providerIds: providers.value.map((provider) => String(provider.id)).slice(0, 10),
-      });
+      if (!disposed && generation === providerLoadGeneration) providers.value = nextProviders;
       return providers.value;
+    } catch (error) {
+      if (!disposed && generation === providerLoadGeneration) providers.value = [];
+      throw error;
     } finally {
-      isLoadingProviders.value = false;
+      if (!disposed && generation === providerLoadGeneration) isLoadingProviders.value = false;
     }
+  }
+  if (configurationRevision) {
+    watch(configurationRevision, () => {
+      void loadProviders().catch(() => undefined);
+    });
   }
 
   async function loadCapabilities() {
@@ -72,6 +87,7 @@ export function useAI() {
 
   async function commitProviderOnboarding(request: CommitAIProviderOnboardingReq) {
     const provider = unwrap(await client.commitProviderOnboarding(request));
+    invalidateConfiguration();
     await loadProviders();
     return provider;
   }
@@ -88,23 +104,27 @@ export function useAI() {
     request: CommitAIProviderReplacementReq,
   ) {
     const provider = unwrap(await client.commitProviderReplacement(providerId, request));
+    invalidateConfiguration();
     await loadProviders();
     return provider;
   }
 
   async function updateProvider(id: string, request: UpdateAIProviderConfigReq) {
     const provider = unwrap(await client.updateProvider(id, request));
+    invalidateConfiguration();
     await loadProviders();
     return provider;
   }
 
   async function deleteProvider(id: string) {
     unwrap(await client.deleteProvider(id));
+    invalidateConfiguration();
     await loadProviders();
   }
 
   async function setDefaultProvider(providerId: string) {
     unwrap(await client.setDefaultProvider(providerId));
+    invalidateConfiguration();
     await loadProviders();
   }
 
@@ -122,6 +142,7 @@ export function useAI() {
 
   return {
     service: client,
+    invalidateConfiguration,
     providers,
     capabilities,
     providerCatalog,

@@ -195,18 +195,22 @@
           @remove-context-entity="removeContextEntity"
         >
           <template #provider-options>
-            <AILocalRuntimePicker
-              v-if="localAssistant.available"
-              :choice="runtimeChoice"
-              :connections="localAssistant.connections.value"
-              :models="localAssistant.models.value"
-              :status="localAssistant.status.value"
-              :loading="localAssistant.loading.value"
-              :error="localAssistant.error.value"
+            <AIComposerControls
+              :agents="composerAgents"
+              :selected-agent-id="selectedComposerAgent"
+              :models="composerModels"
+              :selected-model-key="composerModelKey"
+              :permission-mode="permissionMode"
+              :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
-              @select="localAssistant.select"
-              @refresh="localAssistant.probe"
-              @set-default="localAssistant.setDefault"
+              :loading="
+                runtimeChoice.runtimeKind === 'local_agent'
+                  ? localAssistant.loading.value
+                  : modelCatalogLoading
+              "
+              @select-agent="selectComposerAgent"
+              @select-model="selectComposerModel"
+              @permission="selectPermission"
               @settings="openAISettings"
             />
           </template>
@@ -290,7 +294,7 @@ import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
-import AILocalRuntimePicker from '../components/AILocalRuntimePicker.vue';
+import AIComposerControls from '../components/AIComposerControls.vue';
 import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
@@ -393,7 +397,21 @@ const {
   decideToolApproval,
 } = session;
 
-const { selectedModelKey, modelGroups, canSendMessage, selectModel } = model;
+const {
+  selectedModelKey,
+  modelGroups,
+  canSendMessage,
+  selectModel,
+  composerAgents,
+  selectedComposerAgent,
+  composerModels,
+  composerModelKey,
+  modelCatalogLoading,
+  permissionMode,
+  selectComposerAgent,
+  selectComposerModel,
+  selectPermission,
+} = model;
 
 const {
   goalClarification,
@@ -551,6 +569,13 @@ const workflowInProgress = computed(() => {
 });
 
 async function handleComposerSend() {
+  // Native execution stays native; read-only chats never launch write workflows.
+  if (runtimeChoice.value.runtimeKind === 'local_agent' || permissionMode.value === 'read-only') {
+    if (workflowInProgress.value) return;
+    toolMode.value = 'chat';
+    await handleSendChatBase();
+    return;
+  }
   const inferredMode = workflowInProgress.value
     ? toolMode.value
     : inferWorkflowMode(chatMessage.value);

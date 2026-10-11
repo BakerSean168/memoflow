@@ -12,6 +12,10 @@ import {
  * client payload that attempts to smuggle identityId is rejected.
  */
 
+/** Permission choices are per turn and are enforced by each runtime, never by prompt text. */
+export const AIChatPermissionModeSchema = z.enum(['supervised', 'read-only', 'auto-approve']);
+export type AIChatPermissionMode = z.infer<typeof AIChatPermissionModeSchema>;
+
 export const AIRuntimeSurfaceSchema = z.enum(['web', 'desktop', 'mobile', 'server']);
 export type AIRuntimeSurface = z.infer<typeof AIRuntimeSurfaceSchema>;
 
@@ -116,6 +120,7 @@ export const AssistantRuntimeClientCommandSchema = z
         modelId: z.string().min(1).optional(),
         /** Stable Mastra instance chosen in the composer (never API vendor ID). */
         agentInstanceId: AgentInstanceSlugSchema.optional(),
+        permissionMode: AIChatPermissionModeSchema.optional(),
         locale: z.enum(['zh-CN', 'en-US']).optional(),
         attachments: z.array(AssistantRuntimeAttachmentSchema).max(4).default([]),
         selectedEntities: z.array(AssistantRuntimeSelectedEntitySchema).max(12).default([]),

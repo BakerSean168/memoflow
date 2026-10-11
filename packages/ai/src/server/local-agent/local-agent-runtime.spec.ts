@@ -26,6 +26,90 @@ async function setup() {
 }
 
 describe('local Agent conversation execution', () => {
+  it.each(['supervised', 'auto-approve'] as const)(
+    'enforces per-turn %s native permission choices without granting new write scopes',
+    async (permissionMode) => {
+      const { store, conversation } = await setup();
+      const respond = vi.fn(() => true);
+      const runtime = new LocalAgentRuntime({
+        store,
+        cwd: '/tmp',
+        createDriver: () => ({
+          async *run(): AsyncGenerator<NativeAgentEvent> {
+            yield {
+              type: 'request',
+              request: { type: 'permission', requestId: 'permission-1', title: 'Run command' },
+            };
+            yield {
+              type: 'request',
+              request: {
+                type: 'user_input',
+                requestId: 'question-1',
+                questions: [{ id: 'q', prompt: 'Which branch?', options: ['main', 'dev'] }],
+              },
+            };
+            yield { type: 'completed' };
+          },
+          respond,
+          cancel() {},
+          async close() {},
+          async probe() {
+            return { status: 'ready' as const, models: [] };
+          },
+        }),
+      });
+      const events = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: conversation.id,
+        content: 'Proceed',
+        permissionMode,
+      }))
+        events.push(event);
+      if (permissionMode === 'auto-approve') {
+        expect(respond).toHaveBeenCalledOnce();
+        expect(respond).toHaveBeenCalledWith('permission-1', {
+          type: 'permission',
+          decision: 'approve_once',
+        });
+        expect(
+          events.some(
+            (event) =>
+              event.type === 'assistant.request.required' &&
+              event.data.requestId === 'permission-1',
+          ),
+        ).toBe(false);
+      } else {
+        expect(respond).not.toHaveBeenCalled();
+        expect(
+          events.some(
+            (event) =>
+              event.type === 'assistant.request.required' &&
+              event.data.requestId === 'permission-1',
+          ),
+        ).toBe(true);
+      }
+      expect(
+        events.some(
+          (event) =>
+            event.type === 'assistant.request.required' && event.data.requestId === 'question-1',
+        ),
+      ).toBe(true);
+      expect((await store.listConnections('owner'))[0].writeScopes).toEqual([]);
+      await expect(
+        runtime
+          .dispatchMessage({
+            identityId: 'owner',
+            conversationId: conversation.id,
+            content: 'Read',
+            permissionMode: 'read-only',
+          })
+          .next(),
+      ).rejects.toMatchObject({ code: 'LOCAL_AGENT_PERMISSION_DENIED' });
+      await runtime.dispose();
+    },
+  );
+
   it('changes model within one native conversation and snapshots each turn model', async () => {
     const { store, conversation } = await setup();
     const runs: NativeAgentRunInput[] = [];

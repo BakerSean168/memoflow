@@ -59,6 +59,7 @@ import { AI_PROVIDER_CATALOG } from '@memoflow/contracts/ai';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../mastra/runtime';
 import type { LocalAgentRuntime } from '../local-agent/local-agent-runtime';
 import { AgentInstanceRegistry } from '../application/agent-instance/agent-instance.registry';
+import { AgentRegistryError } from '../application/agent-instance/agent-instance.repository';
 import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import { assembleCapabilities } from '../shared/assemble-capabilities';
 import { OpenAICompatibleChatExecutionAdapter } from './adapters/openai-compatible-chat-execution.adapter';
@@ -584,6 +585,31 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     ? new AgentInstanceRegistry(
         dependencies.agentInstanceRepository,
         dependencies.localAgentRuntime ? 'desktop' : 'web',
+        async (identityId, providerId, modelId) => {
+          const connection = await providerConfigRepository.findByIdForIdentity(
+            identityId,
+            providerId,
+          );
+          if (!connection || !connection.isActive || connection.deletedAt)
+            throw new AgentRegistryError('NOT_FOUND');
+          if (connection.defaultModel !== modelId) {
+            if (!dependencies.mastraRuntime) throw new AgentRegistryError('VALIDATION_ERROR');
+            try {
+              // Validate the live directory/capabilities, not the retired stored
+              // available_models column. Binding need not mutate shared defaults.
+              await dependencies.mastraRuntime.assertModelSelection({
+                identityId,
+                providerId,
+                modelId,
+              });
+            } catch (error) {
+              if (isAIExecutionError(error) && error.category === 'configuration_required')
+                throw new AgentRegistryError('VALIDATION_ERROR');
+              throw error;
+            }
+          }
+          return connection.version;
+        },
       )
     : null;
   const knowledgeQueryServices: AIKnowledgeQueryServices = hasKnowledgeIndexStack

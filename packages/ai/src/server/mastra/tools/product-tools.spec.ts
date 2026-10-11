@@ -72,6 +72,33 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
     }
   });
 
+  it('enforces read-only permission in both approval policy and the actual write entrypoint', async () => {
+    const session = {
+      state: { set: vi.fn(async () => {}) },
+      resolveToolApproval: (_name: string): 'allow' | 'ask' | 'deny' => 'allow',
+    };
+    await applyMemoFlowSessionToolPolicy(session, 'read-only');
+    for (const [name, policy] of Object.entries(MEMOFLOW_PRODUCT_TOOL_POLICY))
+      expect(session.resolveToolApproval(name)).toBe(policy.category === 'read' ? 'allow' : 'deny');
+    expect(session.resolveToolApproval('unclassified')).toBe('deny');
+    const executeAction = vi.fn();
+    const tools = createMemoFlowProductTools({ notificationReadPort: { executeAction } as never });
+    const requestContext = context();
+    requestContext.setRaw('permissionMode', 'read-only');
+    await expect(
+      tools.notification_execute_action.execute?.(
+        { notificationId: 'n', actionKey: 'archive' },
+        { requestContext, observe: {} as never },
+      ),
+    ).rejects.toThrow('Read-only');
+    expect(executeAction).not.toHaveBeenCalled();
+    await applyMemoFlowSessionToolPolicy(session, 'supervised');
+    expect(session.resolveToolApproval('notification_execute_action')).toBe('ask');
+    await expect(applyMemoFlowSessionToolPolicy(session, 'auto-approve' as never)).rejects.toThrow(
+      'Unsupported',
+    );
+  });
+
   it('exposes a strict canonical Routine trigger union', () => {
     expect(
       RoutineTriggerSchema.safeParse({

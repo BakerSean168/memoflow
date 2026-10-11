@@ -138,12 +138,20 @@ describe('settings presentation primitives', () => {
       resolve(settingsRoot, 'KnowledgeRepositorySettings.vue'),
       'utf8',
     );
+    const mastraDetail = readFileSync(resolve(settingsRoot, 'MastraAgentSettings.vue'), 'utf8');
+    const agentWizard = readFileSync(resolve(settingsRoot, 'AgentInstanceWizard.vue'), 'utf8');
 
-    // Providers uses the dedicated list/detail layout; owner behavior is covered by AISettings.spec.ts.
+    // Providers delegates model connections and the dedicated T3-style wizard to child
+    // components. Assert each actual owner rather than requiring them in the root SFC.
     expect(ai).toContain('<SettingsStatusBlock');
-    expect(ai).toContain('<SettingsDialogShell');
+    expect(ai).toContain('<AgentInstanceWizard');
+    expect(ai).toContain('<MastraAgentSettings');
     expect(ai).toContain('useAI()');
-    expect(ai).toContain('commitProviderOnboarding');
+    expect(mastraDetail).toContain('<SettingsPropertyRow');
+    expect(mastraDetail).toContain('commitProviderOnboarding');
+    expect(agentWizard).toContain('<DialogContent');
+    expect(agentWizard).toContain('<DialogTitle');
+    expect(agentWizard).toContain('<DialogDescription');
     expect(ai).not.toContain('<Card');
     expect(ai).not.toContain('<DialogContent');
     expect(ai).not.toMatch(/(?:amber|emerald)-\d+/);

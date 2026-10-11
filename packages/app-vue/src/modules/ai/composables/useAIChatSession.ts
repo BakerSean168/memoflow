@@ -3,7 +3,7 @@ import type {
   RuntimeUsageClient,
   LocalAgentClient,
 } from '@memoflow/ai/client';
-import type { AIRuntimeSurface } from '@memoflow/contracts/ai';
+import type { AIRuntimeSurface, AIChatPermissionMode } from '@memoflow/contracts/ai';
 import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -18,6 +18,7 @@ export interface UseAIChatSessionOptions {
   /** Transitional shell/workflow client. Open-chat transcript execution never uses it. */
   service: AIChatService;
   localAgent?: LocalAgentClient;
+  getPermissionMode?: () => AIChatPermissionMode;
   getDefaultRuntimeChoice?: () => import('@memoflow/contracts/ai').AssistantRuntimeChoice;
   /** Mastra-native authoritative history/stream/cancel client. */
   runtime: AssistantRuntimeClient;

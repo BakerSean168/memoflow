@@ -90,8 +90,6 @@ export interface ChatViewInitContext {
   getPersistedModelKey: () => string | undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   selectConversation: (item: any) => Promise<void>;
-  resetChatSession: (mode: string, getDefaultName: (mode: string) => string) => void;
-  getDefaultConversationName: (mode: string) => string;
   lastActiveConversationId: { value: string };
   conversationList: { value: Array<{ id: string }> };
   adjustComposerHeight: () => void;
@@ -171,7 +169,8 @@ export function bindChatViewLifecycle(
 
 /** Runs the onMounted initialization sequence. */
 export async function initializeChatView(ctx: ChatViewInitContext): Promise<void> {
-  ctx.resetChatSession('chat', ctx.getDefaultConversationName);
+  // Never clear an editable composer after awaiting provider or registry requests.
+  // The initial session reset belongs to the synchronous beginning of onMounted.
   ctx.lastActiveConversationId.value = localStorage.getItem('ai:last-conversation-id') || '';
 
   try {

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir } from 'node:fs/promises';
 import type {
   AssistantRuntimeEvent,
+  AIChatPermissionMode,
   AssistantRuntimeMessageView,
   LocalAgentConnection,
   LocalAgentConnectionInput,
@@ -56,6 +57,7 @@ type MessageInput = {
   conversationId: string;
   content: string;
   modelId?: string;
+  permissionMode?: AIChatPermissionMode;
   selectedEntities?: readonly AssistantRuntimeSelectedEntity[];
   attachments?: readonly unknown[];
   signal?: AbortSignal;
@@ -268,6 +270,8 @@ export class LocalAgentRuntime {
 
   async *dispatchMessage(input: MessageInput): AsyncGenerator<AssistantRuntimeEvent> {
     this.assertActive();
+    if (input.permissionMode && !['supervised', 'auto-approve'].includes(input.permissionMode))
+      throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
     if (input.attachments?.length) throw new LocalAgentError('LOCAL_AGENT_UNSUPPORTED_INPUT');
     if (
       this.runs.size + this.pendingProbes >= 4 ||
@@ -418,7 +422,24 @@ export class LocalAgentRuntime {
             },
           };
         } else if (event.type === 'request') {
-          yield { ...envelope(), type: 'assistant.request.required', data: event.request };
+          // Only native permission requests may be explicitly auto-approved for
+          // this turn. User questions, sandbox and scoped MCP grants are untouched.
+          if (input.permissionMode === 'auto-approve' && event.request.type === 'permission') {
+            if (
+              !run.driver.respond(event.request.requestId, {
+                type: 'permission',
+                decision: 'approve_once',
+              })
+            )
+              throw new LocalAgentError('LOCAL_AGENT_PERMISSION_DENIED');
+            yield {
+              ...envelope(),
+              type: 'assistant.request.resolved',
+              data: { requestId: event.request.requestId, resolution: 'answered' },
+            };
+          } else {
+            yield { ...envelope(), type: 'assistant.request.required', data: event.request };
+          }
         } else if (event.type === 'request_resolved') {
           yield {
             ...envelope(),

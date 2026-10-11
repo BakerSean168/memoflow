@@ -294,6 +294,27 @@ describe('useShellRouterSync settings origin (Phase 0 / UI-007)', () => {
     wrapper.unmount();
   });
 
+  it('returns deep-linked settings to Home without traversing external document history', async () => {
+    const fixture = await mountRouterSync('/settings');
+    const wrapper = fixture.mount();
+    const back = vi.spyOn(fixture.router, 'back');
+    const originalLength = window.history.length;
+    Object.defineProperty(window.history, 'length', { configurable: true, value: 4 });
+    try {
+      expect(fixture.store.settingsOrigin).toBeNull();
+      expect(fixture.store.activeTab).toBeUndefined();
+      await fixture.actions().returnFromSettings();
+      expect(fixture.router.currentRoute.value.fullPath).toBe('/');
+      expect(back).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window.history, 'length', {
+        configurable: true,
+        value: originalLength,
+      });
+      wrapper.unmount();
+    }
+  });
+
   it('falls back to Home when the saved origin tab is gone', async () => {
     const fixture = await mountRouterSync('/goals/g-1');
     const tab = fixture.store.openTab({
