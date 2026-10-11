@@ -63,13 +63,19 @@ type MastraOpenChatCapture = {
 
 type MastraOpenChatMockOptions = {
   streamDeltaCount?: number;
+  /** Hold Registry initialization open while the user types into the mounted composer. */
+  beforeRegistryList?: Promise<void>;
+  onRegistryListRequested?: () => void;
 };
 
 async function installMastraOpenChatMocks(
   page: Page,
   options: MastraOpenChatMockOptions = {},
 ): Promise<MastraOpenChatCapture> {
-  await installMastraRegistryMock(page, providerId, modelId);
+  await installMastraRegistryMock(page, providerId, modelId, {
+    beforeList: options.beforeRegistryList,
+    onListRequested: options.onRegistryListRequested,
+  });
   const capture: MastraOpenChatCapture = {
     messageCommands: [],
     historyRequests: [],
@@ -116,6 +122,14 @@ async function installMastraOpenChatMocks(
           deletedAt: null,
         },
       ],
+    });
+  });
+
+  await page.route('**/api/v1/ai/providers/*/refresh-models', async (route) => {
+    await fulfillJson(route, {
+      providerId,
+      models: [{ id: modelId, name: modelId }],
+      fetchedAt: Date.now(),
     });
   });
 
@@ -337,6 +351,50 @@ test.describe('AI Mastra open-chat product cutover', () => {
       'Mastra authoritative reply 1.',
     );
     expect(capture.historyRequests).toHaveLength(0);
+  });
+
+  test('[P1] preserves a draft typed before slow Agent Registry initialization completes', async ({
+    page,
+  }) => {
+    let unblockRegistry = () => {};
+    const registryGate = new Promise<void>((resolve) => {
+      unblockRegistry = resolve;
+    });
+    let registryRequests = 0;
+    try {
+      const capture = await bootstrapMastraOpenChat(page, {
+        beforeRegistryList: registryGate,
+        onRegistryListRequested: () => {
+          registryRequests++;
+        },
+      });
+      await expect.poll(() => registryRequests).toBeGreaterThan(0);
+      const composer = page.getByTestId('ai-chat-composer');
+      const draft = 'Keep this draft while the Agent Registry finishes loading.';
+      await composer.fill(draft);
+      await expect(composer).toHaveValue(draft);
+
+      unblockRegistry();
+      await expect(page.getByTestId('ai-chat-send-message')).toBeEnabled({
+        timeout: TIMEOUT_CONFIG.NAVIGATION,
+      });
+      await expect(composer).toHaveValue(draft);
+      const response = page.waitForResponse(
+        (candidate) =>
+          candidate.url().includes('/ai/runtime/assistant/sse') &&
+          candidate.request().method() === 'POST' &&
+          candidate.status() === 200,
+      );
+      await page.getByTestId('ai-chat-send-message').click();
+      await response;
+      expect(capture.messageCommands).toHaveLength(1);
+      expect(capture.messageCommands[0]).toMatchObject({
+        content: draft,
+        agentInstanceId: 'mastra',
+      });
+    } finally {
+      unblockRegistry();
+    }
   });
 
   test('[P1] bounds streaming render updates and browser long tasks for a large delta burst', async ({

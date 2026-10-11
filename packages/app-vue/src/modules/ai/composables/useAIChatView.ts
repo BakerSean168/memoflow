@@ -820,6 +820,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   });
 
   onMounted(async () => {
+    // Reset before the first await: the composer is already visible and users
+    // must be able to type a draft while the Agent Registry is still loading.
+    chatSession.resetChatSession('chat', getDefaultConversationName);
     await localChoices.refresh();
     await loadAgentRegistry();
     await initializeChatView({
@@ -829,8 +832,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       syncSelectedModel: modelSelection.syncSelectedModel,
       getPersistedModelKey: modelSelection.getPersistedModelKey,
       selectConversation,
-      resetChatSession: chatSession.resetChatSession,
-      getDefaultConversationName,
       lastActiveConversationId: chatSession.lastActiveConversationId,
       conversationList: chatSession.conversationList,
       adjustComposerHeight,

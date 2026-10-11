@@ -41,6 +41,11 @@ const fixture = await vi.hoisted(async () => {
     startNewConversation: vi.fn(() => {
       session.chatConversationId.value = null;
     }),
+    resetChatSession: vi.fn((mode: string, getDefaultName: (mode: string) => string) => {
+      session.chatMessage.value = '';
+      session.chatConversationId.value = null;
+      session.conversationTitle.value = getDefaultName(mode);
+    }),
     loadConversationList: vi.fn(),
   };
   return {
@@ -189,7 +194,31 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.task.taskWorkflowRun.value = null;
     fixture.knowledge.knowledgeCaptureRun.value = null;
     fixture.session.chatConversationId.value = null;
+    fixture.session.chatMessage.value = '';
     fixture.session.runtimeChoice.value = { runtimeKind: 'builtin' };
+  });
+
+  it('resets once before awaiting the Agent Registry and preserves drafts typed during initialization', async () => {
+    let releaseRegistry = () => {};
+    const waitingForRegistry = new Promise<void>((resolve) => {
+      releaseRegistry = resolve;
+    });
+    const registry = {
+      list: vi.fn(() => waitingForRegistry.then(() => ({ instances: [], bindings: [] }))),
+    };
+    const { wrapper } = await mountView({ [AI_AGENT_REGISTRY_KEY as symbol]: registry });
+    await flushPromises();
+    expect(registry.list).toHaveBeenCalledOnce();
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+    fixture.session.chatMessage.value = 'My draft during an unfinished registry request';
+
+    releaseRegistry();
+    await flushPromises();
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+    expect(fixture.session.chatMessage.value).toBe(
+      'My draft during an unfinished registry request',
+    );
+    wrapper.unmount();
   });
 
   it('refreshes the persistent composer after settings invalidates the app configuration', async () => {

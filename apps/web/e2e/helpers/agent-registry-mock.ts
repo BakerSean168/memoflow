@@ -6,6 +6,7 @@ export async function installMastraRegistryMock(
   page: Page,
   providerId: string,
   modelId: string,
+  options: { beforeList?: Promise<void>; onListRequested?: () => void } = {},
 ): Promise<void> {
   const snapshot = AgentRegistrySnapshotSchema.parse({
     instances: [
@@ -23,6 +24,10 @@ export async function installMastraRegistryMock(
     bindings: [{ instanceId: 'mastra', connectionId: providerId, modelId }],
   });
   await page.route('**/api/v1/ai/agent-instances', async (route) => {
+    if (route.request().method() === 'GET') {
+      options.onListRequested?.();
+      await options.beforeList;
+    }
     const command = route.request().method() === 'POST' ? route.request().postDataJSON() : null;
     const data = command?.action === 'conversation_selection' ? null : snapshot;
     await route.fulfill({
