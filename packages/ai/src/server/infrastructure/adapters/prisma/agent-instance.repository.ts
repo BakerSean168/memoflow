@@ -231,6 +231,7 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
         });
         const provider = await tx.aiProviderConfig.findFirst({
           where: { id: providerId, identityId: owner, deletedAt: null, isActive: true },
+          select: { id: true },
         });
         if (!binding || !provider) throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
       }

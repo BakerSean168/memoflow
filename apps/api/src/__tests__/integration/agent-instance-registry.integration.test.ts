@@ -53,7 +53,7 @@ afterAll(async () => {
   await admin.end();
 });
 
-it('uses real Prisma transactions for Owner/CAS, concurrent claims, restart selection and deletion protection', async () => {
+it('uses real Prisma transactions for Owner/CAS, mutable conversation selection, restart and deletion protection', async () => {
   for (const instanceId of ['mastra-one', 'mastra-two']) {
     await registry.execute('owner', {
       action: 'create',
@@ -110,11 +110,31 @@ it('uses real Prisma transactions for Owner/CAS, concurrent claims, restart sele
       }),
     ),
   );
-  expect(claims.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
-  expect(claims.find((result) => result.status === 'rejected')).toMatchObject({
-    reason: { code: 'CONFLICT' },
+  // Agent configuration updates still use CAS above. A conversation selection
+  // is now mutable between turns: both valid selections can commit, with exactly
+  // one current binding. Runtime turn reservations prevent overlapping execution.
+  expect(claims).toEqual([
+    { status: 'fulfilled', value: undefined },
+    { status: 'fulfilled', value: undefined },
+  ]);
+  const concurrentSelection = await repository.getConversationSelection('owner', 'conversation');
+  expect(['mastra-one', 'mastra-two']).toContain(concurrentSelection?.agentInstanceId);
+  expect(concurrentSelection).toMatchObject({ providerId: 'provider', modelId: 'model' });
+  expect(
+    (await sql.query('SELECT COUNT(*)::int AS count FROM ai_agent_conversation_bindings')).rows,
+  ).toEqual([{ count: 1 }]);
+
+  // Deterministic next-turn selection must survive process/repository recreation
+  // without creating a second conversation or modifying Provider defaults.
+  const agentInstanceId =
+    concurrentSelection?.agentInstanceId === 'mastra-one' ? 'mastra-two' : 'mastra-one';
+  await registry.assertTurnSelection({
+    owner: 'owner',
+    conversationId: 'conversation',
+    agentInstanceId,
+    providerId: 'provider',
+    modelId: 'model',
   });
-  const agentInstanceId = claims[0]?.status === 'fulfilled' ? 'mastra-one' : 'mastra-two';
   const reloaded = new AgentInstanceRegistry(
     createAIPrismaRepositories(prisma).agentInstanceRepository,
     'web',
@@ -140,4 +160,7 @@ it('uses real Prisma transactions for Owner/CAS, concurrent claims, restart sele
   expect(
     (await sql.query('SELECT credential_ref,default_model FROM ai_provider_configs')).rows,
   ).toEqual([{ credential_ref: 'opaque-original-ref', default_model: 'model' }]);
+  expect((await sql.query('SELECT id,identity_id FROM ai_conversations')).rows).toEqual([
+    { id: 'conversation', identity_id: 'owner' },
+  ]);
 });

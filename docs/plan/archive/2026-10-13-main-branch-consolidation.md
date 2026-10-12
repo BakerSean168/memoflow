@@ -114,3 +114,33 @@ repository cleanup does not mean that every future product acceptance item is do
 Raw logs, branch SHA/tree proofs and the stash path audit are retained outside the
 repository in `/home/dev/projects/.memoflow-consolidation-20261013/` so validation
 does not leave another dirty worktree or branch.
+
+## Exact-head CI regression repairs
+
+The first consolidated exact-head CI run (`38287436740`, `7de6793795c`)
+passed unit, coverage, typecheck, static analysis, build, boundary, performance
+and governance checks, and identified the following remaining integration
+contracts before merge:
+
+- The synthetic Agent Registry E2E fixture had no live model-catalog endpoint.
+  The composer correctly failed closed after discovery returned no models.
+  The fixture now returns the schema-validated catalogue for its own synthetic
+  provider only; production readiness and authorization checks are unchanged.
+- The real-PostgreSQL Registry test still asserted first-Agent lifetime ownership.
+  The useful same-conversation switching implementation intentionally maintains
+  a mutable current selection. The test now verifies both concurrent selections
+  succeed with one binding, a subsequent switch survives repository recreation,
+  Owner/CAS/deletion protections remain, and the conversation and Provider
+  defaults are unchanged. The existence check selects only provider ID instead
+  of loading unrelated provider columns. The focused real-DB test passes.
+- Four shared shell visual baselines used an explicitly empty Provider fixture.
+  Manual image review confirmed the only changed pixels are the empty-state
+  footer: an unusable model/permission selector becomes Open Provider settings.
+  Only those four images were updated; shared web/desktop parity and the strict
+  zero-difference threshold are unchanged.
+
+The earlier local prod-like images started and migrated successfully, but a
+browser preflight raced the web health check and a second preflight correctly
+rejected a dirty-source revision mismatch. These are not recorded as browser
+passes. Final browser evidence must come from a clean, exact-revision healthy
+build after these repairs. Final CI/merge/cleanup evidence is attached to PR #449.
