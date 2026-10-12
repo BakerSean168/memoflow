@@ -198,3 +198,10 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 - 真实引擎 **5/5**：同进程答复 → routine_create 审批 → Finished；独立进程生成真实挂起、退出后新 runtime 认领并完成同一链路；同进程与独立进程恢复后的取消；同进程 read-only 恢复不放宽。审批覆盖 foreign/stale 拒绝、并发仅一次、最终历史内容与挂起/投影无遗留。重启 fixture 直接启动独立 Vitest 进程复用同一 harness，排除 SDK 进程内执行对象缓存；正常测试中 fixture 跳过、仅子进程启用。
 - 最终 AI 全量 **109 files / 721 passed + 1 fixture skipped**（消费边界补强后复跑通过）；HTTP/IPC async approval 与原有 mock 校验测试保留；Chat composables **35/35**；合同 **21/21**；ai/app-vue/api/contracts/web typecheck **5 projects + 32 dependency tasks** 全绿，最终 ai:typecheck 另行复验通过；affected lint **41 projects**、`memoflow:governance-check` 通过；inventory 预热后重新生成，**1,393 files**。
 - **既有边界保留：重启后的审批只保证投影可见，SDK 未 armed 的 approval gate 不可收养，作为后续项。** 未做逐 token SSE、Goal clarification 迁移、生产 Provider canary、跨设备一致性或部署。PR #449 保持 Draft，不能按本批宣称 P1/P2 完整验收。新 head 的 exact-head CI 推送后由 T3 watch 核对。
+
+
+### Stage B-2 exact-head CI 收口
+
+实现提交 `11aa35fa4c490fcb14c9043011941a8e0f3937f3`（`fix(ai): close Ask User answer and parked approval lifecycle`）已推送至原 Draft PR #449。GitHub Actions [CI run 38280422432](https://github.com/BakerSean168/memoflow/actions/runs/38280422432) 的 head_sha 与实现提交完全一致，**19/19 jobs 全部 success**，包含 Unit Tests、Typecheck、Build、Static Analysis、Governance、Web Flow Shard 1–4、各 Oracle 与 Delivery Observation；没有重跑或未分类失败。
+
+Stage B-2 本切片的本地 RED→GREEN 与实现 exact-head CI 门槛已满足。PR 仍保持 Draft；重启审批 gate 收养、跨重启 read-only 许可边界及其余已列后续项不作扩大验收。此文档证据提交不改变实现，推送后的当前 head CI 仍由 T3 watch 独立核对。
