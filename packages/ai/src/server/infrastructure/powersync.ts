@@ -11,6 +11,7 @@ import { AgentInstancePowerSyncRepository } from './adapters/powersync/agent-ins
 import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import type {
   IAIExecutionRecordPort,
+  IConversationAttentionPort,
   IAIUsageReadPort,
   IKnowledgeIndexRepository,
   IAIProviderOnboardingCommitPort,
@@ -19,6 +20,7 @@ import type {
 } from '../application/ports';
 import {
   AIExecutionRecordPowerSyncAdapter,
+  ConversationAttentionPowerSyncAdapter,
   AIKnowledgeIndexPowerSyncRepository,
   PowerSyncAIConversationRepository,
   PowerSyncAIProviderConfigRepository,
@@ -35,13 +37,16 @@ export interface AIPowerSyncRepositorySet {
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly knowledgeIndexRepository: IKnowledgeIndexRepository;
   readonly executionRecordPort: IAIExecutionRecordPort & IAIUsageReadPort;
+  readonly conversationAttentionPort: IConversationAttentionPort;
   readonly providerOnboardingSessionRepository: IAIProviderOnboardingSessionRepository;
   readonly providerOnboardingCommitPort: IAIProviderOnboardingCommitPort;
   readonly providerSecretVault: IAIProviderSecretVault;
 }
 
 export function createAIPowerSyncRepositories(db: IElectronDatabase): AIPowerSyncRepositorySet {
-  const providerOnboardingSessionRepository = new PowerSyncAIProviderOnboardingSessionRepository(db);
+  const providerOnboardingSessionRepository = new PowerSyncAIProviderOnboardingSessionRepository(
+    db,
+  );
   const providerSecretVault = new PowerSyncAIProviderSecretVault(db);
   return {
     agentInstanceRepository: new AgentInstancePowerSyncRepository(db),
@@ -49,6 +54,7 @@ export function createAIPowerSyncRepositories(db: IElectronDatabase): AIPowerSyn
     providerConfigRepository: new PowerSyncAIProviderConfigRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPowerSyncRepository(db),
     executionRecordPort: new AIExecutionRecordPowerSyncAdapter(db),
+    conversationAttentionPort: new ConversationAttentionPowerSyncAdapter(db),
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort: new PowerSyncAIProviderOnboardingCommitAdapter(db),
     providerSecretVault,

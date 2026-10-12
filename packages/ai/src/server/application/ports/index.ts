@@ -6,6 +6,17 @@ export type {
   AIUsageQuery,
   AIUsageSummary,
 } from './ai-execution-record.port';
+export {
+  ASSISTANT_ATTENTION_LEASE_MS,
+  effectiveAssistantAttentionState,
+} from './conversation-attention.port';
+export type {
+  IConversationAttentionPort,
+  AssistantAttentionTransition,
+  AssistantAttentionIdentity,
+  AssistantAttentionLookup,
+  AssistantAttentionAcknowledge,
+} from './conversation-attention.port';
 export type {
   AIEvaluationCheckRecord,
   AIEvaluationHistoryRecord,

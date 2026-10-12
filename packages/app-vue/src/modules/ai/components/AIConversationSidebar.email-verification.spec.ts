@@ -24,6 +24,10 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
     DropdownMenuContent: passthrough('DropdownMenuContentStub'),
     DropdownMenuItem: passthrough('DropdownMenuItemStub'),
     DropdownMenuTrigger: passthrough('DropdownMenuTriggerStub'),
+    Tooltip: passthrough('TooltipStub'),
+    TooltipContent: passthrough('TooltipContentStub'),
+    TooltipProvider: passthrough('TooltipProviderStub'),
+    TooltipTrigger: passthrough('TooltipTriggerStub'),
   };
 });
 

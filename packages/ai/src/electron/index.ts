@@ -70,6 +70,10 @@ import {
 } from '@memoflow/contracts/electron';
 import {
   AssistantRuntimeApprovalCommandSchema,
+  AssistantAttentionListRequestSchema,
+  AssistantAttentionListResponseSchema,
+  AssistantAttentionAckRequestSchema,
+  AssistantAttentionAckResponseSchema,
   AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
@@ -94,6 +98,7 @@ import type { AITransportModuleInstance } from '../server/infrastructure';
 import { toAITransportFailure } from '../server/transport';
 import { AgentInstanceController } from '../server/transport/agent-instance.controller';
 import { withAuthenticatedValue } from './authenticated-ipc';
+import { ConversationAttentionObserver } from '../server/application/services/conversation-attention-observer';
 
 const logger = createLogger('AIElectron');
 
@@ -176,6 +181,9 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
 
       try {
         const aiModule = options.instance;
+        const attentionObserver = aiModule.conversationAttentionPort
+          ? new ConversationAttentionObserver(aiModule.conversationAttentionPort)
+          : null;
         const { providerManagement, assistantConversation, knowledge, evaluationOperations } =
           aiModule;
 
@@ -450,6 +458,14 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             });
 
             void (async () => {
+              const kind = messageCommand.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin';
+              const pulse = attentionObserver
+                ? setInterval(() => {
+                    void attentionObserver
+                      .heartbeat(requestContext.identityId, kind, messageCommand.conversationId)
+                      .catch(() => undefined);
+                  }, 30_000)
+                : null;
               try {
                 for await (const runtimeEvent of runtime.dispatchMessage({
                   identityId: requestContext.identityId,
@@ -470,6 +486,9 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   signal: abortController.signal,
                 })) {
                   const validated = AssistantRuntimeEventSchema.parse(runtimeEvent);
+                  await attentionObserver
+                    ?.observe(requestContext.identityId, kind, validated)
+                    .catch(() => undefined);
                   if (!event.sender.isDestroyed()) {
                     event.sender.send(AIStreamChannels.RUNTIME_ASSISTANT_EVENT, {
                       streamId,
@@ -490,6 +509,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   });
                 }
               } finally {
+                if (pulse) clearInterval(pulse);
                 activeStreamSessions.delete(streamId);
               }
             })();
@@ -627,6 +647,14 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   conversationId: parsed.data.conversationId,
                 }),
               });
+              await aiModule.conversationAttentionPort
+                ?.forget({
+                  identityId: requestContext.identityId,
+                  runtimeKind:
+                    parsed.data.runtimeKind === 'local_agent' ? 'local_agent' : 'builtin',
+                  conversationId: parsed.data.conversationId,
+                })
+                .catch(() => undefined);
               return ok(result);
             } catch (error) {
               const failure = toAITransportFailure(error, {
@@ -642,6 +670,62 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_DELETE);
+
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST, async (_, payload) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = AssistantAttentionListRequestSchema.safeParse(payload);
+            if (!parsed.success)
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid attention list',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            if (!aiModule.conversationAttentionPort)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Attention unavailable' });
+            try {
+              const items = await aiModule.conversationAttentionPort.list({
+                identityId: requestContext.identityId,
+                ...parsed.data,
+              });
+              return ok(AssistantAttentionListResponseSchema.parse({ items }));
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_RUNTIME_ERROR',
+                fallbackMessage: 'Attention read failed',
+              });
+              return fail({ code: failure.code, message: failure.message });
+            }
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST);
+
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK, async (_, payload) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = AssistantAttentionAckRequestSchema.safeParse(payload);
+            if (!parsed.success)
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid attention acknowledgement',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            if (!aiModule.conversationAttentionPort)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Attention unavailable' });
+            try {
+              const acknowledged = await aiModule.conversationAttentionPort.acknowledge({
+                identityId: requestContext.identityId,
+                ...parsed.data,
+              });
+              return ok(AssistantAttentionAckResponseSchema.parse({ acknowledged }));
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_RUNTIME_ERROR',
+                fallbackMessage: 'Attention acknowledgement failed',
+              });
+              return fail({ code: failure.code, message: failure.message });
+            }
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK);
 
         ipcMain.handle(AIChannels.RUNTIME_USAGE_GET, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {

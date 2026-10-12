@@ -7,6 +7,7 @@
     <AIConversationSidebar
       v-if="!hideConversationSidebar && !composerOnly"
       :conversations="conversationList"
+      :conversation-statuses="conversationStatuses"
       :recent-goals="recentGoalList"
       :recent-knowledge-notes="recentKnowledgeNoteList"
       :recent-knowledge-notes-email-verification-required="
@@ -41,6 +42,7 @@
           variant="mobile"
           show-close
           :conversations="conversationList"
+          :conversation-statuses="conversationStatuses"
           :recent-goals="recentGoalList"
           :recent-knowledge-notes="recentKnowledgeNoteList"
           :recent-knowledge-notes-email-verification-required="
@@ -371,6 +373,7 @@ const {
   chatConversationId,
   chatTimeline,
   conversationList,
+  conversationStatuses,
   conversationListLoading,
   recentGoalList,
   recentKnowledgeNoteList,
@@ -706,6 +709,7 @@ onMounted(() => {
 
 defineExpose({
   conversationList,
+  conversationStatuses,
   conversationListLoading,
   chatConversationId,
   selectConversation,

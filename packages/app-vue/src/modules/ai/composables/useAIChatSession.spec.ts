@@ -197,6 +197,53 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it('projects live stream and approval events to sidebar without inventing unread history', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const session = mountComposable(service, runtime);
+    let onEvent!: (event: AssistantRuntimeEvent) => void;
+    let finish!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      onEvent = handlers.onEvent;
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    });
+    expect(session.conversationStatuses.value).toEqual({});
+    session.chatMessage.value = 'Review my latest changes';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(onEvent).toBeDefined());
+    expect(session.conversationStatuses.value['conv-1']).toBe('working');
+
+    onEvent(event(1, 'assistant.run.started', {}));
+    onEvent(
+      event(2, 'assistant.approval.required', {
+        toolCallId: 'tool-1',
+        toolName: 'routine_create',
+        category: 'edit',
+        risk: 'high',
+      }),
+    );
+    expect(session.conversationStatuses.value['conv-1']).toBe('approval');
+    onEvent(
+      event(3, 'assistant.approval.resolved', {
+        toolCallId: 'tool-1',
+        resolution: 'approved',
+      }),
+    );
+    expect(session.conversationStatuses.value['conv-1']).toBe('working');
+    onEvent(
+      event(4, 'assistant.run.failed', {
+        code: 'AI_RUNTIME_TRANSPORT_ERROR',
+        message: 'Runtime unavailable',
+      }),
+    );
+    expect(session.conversationStatuses.value['conv-1']).toBe('failed');
+    finish();
+    await sending;
+    expect(session.conversationStatuses.value['conv-1']).toBe('failed');
+  });
+
   it.each(['stop', 'new', 'select'] as const)(
     'fences a pending native creation after %s',
     async (action) => {

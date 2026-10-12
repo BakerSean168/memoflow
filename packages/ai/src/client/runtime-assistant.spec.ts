@@ -86,6 +86,40 @@ const completed = {
 };
 
 describe('AssistantRuntimeHttpClient', () => {
+  it('reads and acknowledges only bounded durable attention over authenticated HTTP', async () => {
+    const result = {
+      conversationId: 'conv-1',
+      runtimeKind: 'builtin' as const,
+      state: 'done' as const,
+      revision: 5,
+      seenRevision: 0,
+      runId: 'run-5',
+      updatedAt: 1000,
+    };
+    const post = vi
+      .fn()
+      .mockResolvedValueOnce(ok({ items: [result] }))
+      .mockResolvedValueOnce(ok({ acknowledged: true }));
+    const client = new AssistantRuntimeHttpClient(httpStub({ post }));
+    await expect(client.listAttention(['conv-1'])).resolves.toEqual([result]);
+    await expect(client.acknowledgeAttention('conv-1', 5)).resolves.toBe(true);
+    expect(post).toHaveBeenNthCalledWith(1, '/ai/runtime/assistant/attention/list', {
+      conversationIds: ['conv-1'],
+      runtimeKind: 'builtin',
+    });
+    expect(post).toHaveBeenNthCalledWith(2, '/ai/runtime/assistant/attention/ack', {
+      conversationId: 'conv-1',
+      revision: 5,
+      runtimeKind: 'builtin',
+    });
+    await expect(client.listAttention(['conv-1'], 'local_agent')).rejects.toMatchObject({
+      code: 'NOT_SUPPORTED',
+    });
+    await expect(client.acknowledgeAttention('conv-1', 5, 'local_agent')).rejects.toMatchObject({
+      code: 'NOT_SUPPORTED',
+    });
+  });
+
   it('loads authoritative history from the canonical runtime endpoint without identity payloads', async () => {
     const history = {
       conversationId: 'conversation-1',
@@ -179,6 +213,35 @@ describe('AssistantRuntimeHttpClient', () => {
 });
 
 describe('AssistantRuntimeIpcClient', () => {
+  it('reads native and built-in attention through identity-free Desktop IPC contracts', async () => {
+    const item = {
+      conversationId: 'native-1',
+      runtimeKind: 'local_agent' as const,
+      state: 'approval' as const,
+      revision: 7,
+      seenRevision: 0,
+      runId: 'native-run',
+      updatedAt: 1000,
+    };
+    const invoke = vi
+      .fn()
+      .mockResolvedValueOnce(ok({ items: [item] }))
+      .mockResolvedValueOnce(ok({ acknowledged: true }));
+    const client = new AssistantRuntimeIpcClient({ invoke } as never);
+    await expect(client.listAttention(['native-1'], 'local_agent')).resolves.toEqual([item]);
+    await expect(client.acknowledgeAttention('native-1', 7, 'local_agent')).resolves.toBe(true);
+    expect(invoke).toHaveBeenNthCalledWith(1, AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST, {
+      conversationIds: ['native-1'],
+      runtimeKind: 'local_agent',
+    });
+    expect(invoke).toHaveBeenNthCalledWith(2, AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK, {
+      conversationId: 'native-1',
+      revision: 7,
+      runtimeKind: 'local_agent',
+    });
+    expect(JSON.stringify(invoke.mock.calls)).not.toContain('identityId');
+  });
+
   it('loads authoritative history over the canonical IPC request channel', async () => {
     const history = {
       conversationId: 'conversation-1',
