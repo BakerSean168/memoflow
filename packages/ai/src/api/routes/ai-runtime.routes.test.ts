@@ -785,7 +785,7 @@ describe('authenticated Assistant attention routes', () => {
 describe('authenticated Assistant approval route', () => {
   it('binds the strict command to server ExecutionContext and fails closed without identity', async () => {
     const stub = runtimeStub();
-    const decideToolApproval = vi.fn(() => false);
+    const decideToolApproval = vi.fn(async () => false);
     Object.assign(stub.runtime, { decideToolApproval });
     const router = registerAIRuntimeRoutes(stub.runtime, { auth: (_req, _res, next) => next() });
     const handler = getRouteHandler(router, 'post', '/assistant/approval');

@@ -105,6 +105,7 @@ export type ChatToolApproval = Extract<
   runId: string;
   status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale';
   errorMessage?: string;
+  parked?: boolean;
 };
 
 export type ChatItem = {

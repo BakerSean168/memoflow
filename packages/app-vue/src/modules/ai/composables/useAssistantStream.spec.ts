@@ -77,6 +77,7 @@ function createHarness() {
         handlers.onEvent?.(askUserEvent());
       },
     ),
+    decideToolApproval: vi.fn(async () => true),
     answerToolSuspension: vi.fn(async () => true),
     listAskUserSuspensions: vi.fn(async () => []),
   };
@@ -126,6 +127,41 @@ function pendingRequest(timeline: Ref<ChatItem[]>): ChatAskUserRequest | undefin
 
 describe('useAssistantStream ask_user lifecycle', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('keeps a recovered approval pending when the composer releases and rejects retained foreign cards', async () => {
+    const { timeline, runtime, stream, conversation } = createHarness();
+    timeline.value.push({ id: 'parked', role: 'assistant', content: '', status: 'success', approvals: [{ runId: 'parked', conversationId: CONVERSATION_ID, toolCallId: 'write', toolName: 'routine_create', category: 'edit', risk: 'high', status: 'pending', parked: true }] });
+    const approval = timeline.value[0]!.approvals![0]!;
+    stream.abortActiveStream();
+    expect(approval.status).toBe('pending');
+    runtime.decideToolApproval.mockRejectedValueOnce(new Error('transport'));
+    await stream.decideToolApproval(approval, 'approve');
+    expect(approval.status).toBe('pending');
+    expect(approval.errorMessage).toBeTruthy();
+    conversation.chatConversationId.value = 'other';
+    await stream.decideToolApproval(approval, 'approve');
+    expect(runtime.decideToolApproval).toHaveBeenCalledTimes(1);
+  });
+
+  it('settles a parked decision acknowledged during a new turn and refreshes after its release', async () => {
+    const { timeline, runtime, stream, conversation } = createHarness();
+    timeline.value.push({ id: 'parked', role: 'assistant', content: '', status: 'success', approvals: [{ runId: 'parked', conversationId: CONVERSATION_ID, toolCallId: 'write', toolName: 'routine_create', category: 'edit', risk: 'high', status: 'pending', parked: true }] });
+    const approval = timeline.value[0]!.approvals![0]!;
+    let acknowledge!: (accepted: boolean) => void;
+    runtime.decideToolApproval.mockImplementation(() => new Promise((resolve) => { acknowledge = resolve; }));
+    const deciding = stream.decideToolApproval(approval, 'approve');
+    let release!: () => void;
+    runtime.streamMessage.mockImplementation(async () => new Promise<void>((resolve) => { release = resolve; }));
+    const sending = stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    await vi.waitFor(() => expect(release).toBeTypeOf('function'));
+    acknowledge(true);
+    await deciding;
+    expect(approval.status).toBe('approved');
+    expect(conversation.refreshRuntimeHistory).not.toHaveBeenCalled();
+    release();
+    await sending;
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
+  });
 
   it('forwards an answer for a pending question after the suspended turn released the composer', async () => {
     const { stream, runtime, timeline, conversation } = createHarness();

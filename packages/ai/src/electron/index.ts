@@ -552,7 +552,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 message: 'Invalid runtime assistant approval command',
                 details: formatZodErrors(parsed.error.issues),
               });
-            const accepted = aiModule.mastraRuntime.decideToolApproval({
+            const accepted = await aiModule.mastraRuntime.decideToolApproval({
               context: requestContext,
               command: parsed.data,
             });

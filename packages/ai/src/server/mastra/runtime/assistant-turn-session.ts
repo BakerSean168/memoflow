@@ -309,6 +309,7 @@ export class AssistantTurnSession {
         emit('assistant.ask_user.resolved', { toolCallId: event.toolCallId, resolution: 'cancelled' });
         return;
       }
+      if (event.type === 'tool_start' && event.toolName === 'ask_user') return;
       if (event.type === 'tool_start' || event.type === 'tool_approval_required') {
         const name = AssistantToolNameSchema.safeParse(event.toolName);
         const policy = memoFlowToolPolicy(event.toolName);

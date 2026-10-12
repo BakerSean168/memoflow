@@ -354,6 +354,9 @@ describe('AI vNext runtime contracts', () => {
     expect(AssistantRuntimeClientCommandSchema.safeParse({ type: 'tool_answer', conversationId: 'c', runId: 'r', toolCallId: 't', answer: ['A', 'B'] }).success).toBe(true);
     expect(AssistantRuntimeClientCommandSchema.safeParse({ type: 'tool_answer', conversationId: 'c', runId: 'r', toolCallId: 't', answer: 'A', identityId: 'foreign' }).success).toBe(false);
     expect(AssistantRuntimeAskUserSuspensionsSchema.safeParse([{ runId: 'r', toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] }]).success).toBe(true);
+    const approval = { runId: 'r', toolCallId: 't', question: 'routine_create', approval: { toolName: 'routine_create', category: 'edit', risk: 'high' } };
+    expect(AssistantRuntimeAskUserSuspensionsSchema.safeParse([approval]).success).toBe(true);
+    expect(AssistantRuntimeAskUserSuspensionsSchema.safeParse([{ ...approval, approval: { ...approval.approval, args: { secret: 'private' } } }]).success).toBe(false);
     expect(AssistantRuntimeEventSchema.safeParse({ eventId: 'r:1', runId: 'r', conversationId: 'c', sequence: 1, createdAt: 1, type: 'assistant.ask_user.required', data: { toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] } }).success).toBe(true);
   });
 

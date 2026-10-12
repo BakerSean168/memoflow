@@ -364,7 +364,7 @@ export function registerAIRuntimeRoutes(
     }
   });
 
-  router.post('/assistant/approval', auth, (req, res) => {
+  router.post('/assistant/approval', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
     if (!authenticatedIdentity(req)) {
       res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
@@ -380,7 +380,7 @@ export function registerAIRuntimeRoutes(
       return;
     }
     try {
-      const accepted = runtime.decideToolApproval({
+      const accepted = await runtime.decideToolApproval({
         context: extractAiExpressExecutionContext(req),
         command: parsed.data,
       });

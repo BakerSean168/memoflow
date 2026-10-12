@@ -109,6 +109,11 @@ export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boole
 export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
 
 export const AssistantRuntimeAskUserSuspensionSchema = z.object({
+  approval: z.object({
+    toolName: AssistantToolNameSchema,
+    category: z.enum(['read', 'edit', 'execute']),
+    risk: z.enum(['low', 'high']),
+  }).strict().optional(),
   runId: z.string().min(1).max(512),
   toolCallId: z.string().min(1).max(512),
   question: z.string().trim().min(1).max(2000),

@@ -176,3 +176,25 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 本地证据：AI 定向 5 文件 **101/101**；Chat/attention composables 4 文件 **42/42**；API compose-ai **4/4**；Desktop compose-ai **5/5**；affected lint **41 projects** 通过。ai/app-vue/api/contracts/web/desktop typecheck **6 projects + 32 dependency tasks** 全部通过；`memoflow:governance-check` 通过。
 
 基线 `d40092d1e76` 的 exact-head CI 仍未产生 run；等待超过 10 分钟后 close/reopen #449 仍未收到新 run。此次合并是 PR 冲突维护，不代表 Stage B-2 实施放行；Ask User 答复/审批真实引擎 RED→GREEN 尚未开始。推送合并 head 后仍要求 exact-head 19-job CI 全绿，PR 保持 Draft，不合并、不部署。
+
+
+## Stage B-2 · Ask User 答复闭环正确性检查点（2026-10-12）
+
+### 基线与真实 RED
+
+- main attention 冲突合并 head `54b35d2935b71810a4c6db3dddd791cd1e47ac24` 的 exact-head CI **run 38273263822 / 19/19 job 全绿**，满足本阶段开工门槛。
+- 新增真实 AgentController + LibSQL + native ask_user 的模型桩链路，首轮 **39 通过 / 1 失败**：ask_user 不在实际 available tools 中，其 tool_start 又被产品工具投影视为未知而 abort。补齐内建工具分类/许可及专属事件处理后，真实挂起成功；后续 RED 暴露真实存储记录只有 args、无 mock 提供的 suspendPayload。继续验证发现审批事件先于快照发布、重建订阅会重放旧挂起，以及取消后存储快照残留。未用 mock 掩盖这些失败。
+
+### 本批实现
+
+- 答复通过同 id 缓存 Session / 新 Session 的 respondToToolSuspension 恢复；新会话 register 认领持久挂起。每次装配最小 AI context envelope 和服务端身份/ExecutionContext。WeakMap 记录已应用 permission mode；已记录的 read-only 会话不被 supervised 重放放宽，新会话 fail-closed supervised。**read-only 跨进程重启恢复为 supervised 是本任务接受的边界**。
+- 共享恢复 driver 订阅原生事件，以匹配 toolCallId 的 tool_end 确认命令消费；忽略新订阅重放的原始挂起，在后续 approval gate 或 agent_end 停止。SDK 的 respond Promise 自身可能等待下一次审批，因此审批事件成为此命令边界；后续挂起须等其持久快照可读再确认，保证客户端立即刷新历史能恢复新卡片。保留 run in-flight 守卫和 owner/thread/resource/toolCallId 校验。
+- decideToolApproval 变为 async，active turn 路径保留，parked 路径只允许同进程已 armed 的缓存 gate，核对 run/toolCallId；HTTP /assistant/approval 和 Desktop IPC 均 await。并发审批仅消费一次。
+- pending 合同在既有数组项增加 optional approval（仅公开 toolName/category/risk）；owner 过滤后投影审批，不泄漏 args。前端恢复既有审批卡并标记 parked，释放 turn 时保留 pending；仅当前可见会话卡可提交，成功决定后刷新权威历史。回执与下一 turn 重叠的竞态另外 RED→GREEN：即使 chatLoading 已变 true，当前可见旧卡仍正确结算；历史刷新延后到新 turn 释放，避免永久 sending 或覆盖生成中的消息。前端 typecheck/lint 在此修复后另行复跑通过。
+- 取消采用原生 abortRun denied 结算，调用 abortRunStream 退休流注册，并在 denial 持久化完成后删除该已验证 run 的 agentic-loop / executionWorkflow 快照，不再恢复模型生成。**真实测试纠正 SDK 事实：abortRunStream 本身清理的是进程内流注册，并不会删除 parked 存储快照**；快照删除使用当前固定 SDK 的公开 WorkflowsStorage 方法，没有数据库迁移。
+
+### 验证与边界
+
+- 真实引擎 **5/5**：同进程答复 → routine_create 审批 → Finished；独立进程生成真实挂起、退出后新 runtime 认领并完成同一链路；同进程与独立进程恢复后的取消；同进程 read-only 恢复不放宽。审批覆盖 foreign/stale 拒绝、并发仅一次、最终历史内容与挂起/投影无遗留。重启 fixture 直接启动独立 Vitest 进程复用同一 harness，排除 SDK 进程内执行对象缓存；正常测试中 fixture 跳过、仅子进程启用。
+- 最终 AI 全量 **109 files / 721 passed + 1 fixture skipped**（消费边界补强后复跑通过）；HTTP/IPC async approval 与原有 mock 校验测试保留；Chat composables **35/35**；合同 **21/21**；ai/app-vue/api/contracts/web typecheck **5 projects + 32 dependency tasks** 全绿，最终 ai:typecheck 另行复验通过；affected lint **41 projects**、`memoflow:governance-check` 通过；inventory 预热后重新生成，**1,393 files**。
+- **既有边界保留：重启后的审批只保证投影可见，SDK 未 armed 的 approval gate 不可收养，作为后续项。** 未做逐 token SSE、Goal clarification 迁移、生产 Provider canary、跨设备一致性或部署。PR #449 保持 Draft，不能按本批宣称 P1/P2 完整验收。新 head 的 exact-head CI 推送后由 T3 watch 核对。

@@ -50,6 +50,14 @@ export function useAssistantStream(input: {
   // answerable. Remember which run is parked so the composer release neither
   // expires the pending question nor blocks the answer/cancel command.
   const suspendedAskUserRunId = shallowRef<string | null>(null);
+  let deferredApprovalHistory: string | null = null;
+
+  function refreshDeferredApprovalHistory() {
+    if (!deferredApprovalHistory) return;
+    const conversationId = deferredApprovalHistory;
+    deferredApprovalHistory = null;
+    void reconcileAskUserHistory(conversationId);
+  }
 
   function isAbortLikeError(error: unknown): boolean {
     if (error instanceof DOMException && error.name === 'AbortError') return true;
@@ -78,6 +86,7 @@ export function useAssistantStream(input: {
         if (request.status === 'pending' || request.status === 'sending')
           request.status = 'expired';
       for (const approval of item.approvals ?? []) {
+        if (approval.parked) continue;
         if (approval.status === 'pending' || approval.status === 'sending') {
           approval.status = resolution;
           approval.errorMessage = undefined;
@@ -94,18 +103,19 @@ export function useAssistantStream(input: {
   async function decideToolApproval(approval: ChatToolApproval, decision: 'approve' | 'decline') {
     if (
       approval.status !== 'pending' ||
-      approval.runId !== activeRuntimeRunId.value ||
+      (!approval.parked && approval.runId !== activeRuntimeRunId.value) ||
       approval.conversationId !== chatConversationId.value ||
-      !chatLoading.value
+      (!approval.parked && !chatLoading.value) ||
+      (approval.parked && (!chatTimeline.value.some((item) => item.approvals?.includes(approval)) || chatLoading.value))
     )
       return;
     approval.status = 'sending';
     approval.errorMessage = undefined;
     const stillWaiting = () =>
       approval.status === 'sending' &&
-      approval.runId === activeRuntimeRunId.value &&
+      (approval.parked || approval.runId === activeRuntimeRunId.value) &&
       approval.conversationId === chatConversationId.value &&
-      chatLoading.value;
+      (approval.parked ? chatTimeline.value.some((item) => item.approvals?.includes(approval)) : chatLoading.value);
     try {
       const accepted = await options.runtime.decideToolApproval({
         type: 'tool_approval',
@@ -114,7 +124,12 @@ export function useAssistantStream(input: {
         toolCallId: approval.toolCallId,
         decision,
       });
-      // The event stream, not an acknowledgement, owns resolution.
+      if (accepted && approval.parked && stillWaiting()) {
+        approval.status = decision === 'approve' ? 'approved' : 'declined';
+        if (chatLoading.value) deferredApprovalHistory = approval.conversationId;
+        else await reconcileAskUserHistory(approval.conversationId);
+      }
+      // Live decisions are resolved by the event stream.
       if (!accepted && stillWaiting()) {
         approval.status = 'stale';
         approval.errorMessage = t('aiAssistant.chatPage.tools.stale');
@@ -277,6 +292,7 @@ export function useAssistantStream(input: {
     activeStreamAbortController.value = null;
     activeRuntimeRunId.value = null;
     chatLoading.value = false;
+    refreshDeferredApprovalHistory();
   }
 
   function markGeneratingAssistantAborted() {
@@ -314,7 +330,7 @@ export function useAssistantStream(input: {
         try {
           const pending = await options.runtime.listAskUserSuspensions(chatConversationId.value);
           for (const suspended of pending) {
-            if (suspended.runId !== event.runId) continue;
+            if (suspended.runId !== event.runId || suspended.approval) continue;
             item.askUserRequests ??= [];
             if (!item.askUserRequests.some((request) => request.toolCallId === suspended.toolCallId)) item.askUserRequests.push({ ...suspended, conversationId: event.conversationId, status: 'pending' });
           }
@@ -591,6 +607,7 @@ export function useAssistantStream(input: {
         activeStreamAbortController.value = null;
         activeRuntimeRunId.value = null;
         chatLoading.value = false;
+        refreshDeferredApprovalHistory();
       }
     }
   }

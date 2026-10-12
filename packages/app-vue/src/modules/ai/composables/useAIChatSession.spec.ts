@@ -847,6 +847,23 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
   });
 
+  it('restores a parked approval and drains its decision before refreshing history', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listAskUserSuspensions.mockResolvedValue([{ runId: 'parked', toolCallId: 'write', question: 'routine_create', approval: { toolName: 'routine_create', category: 'edit', risk: 'high' } }]);
+    const composable = mountComposable(service, runtime);
+    await composable.selectConversation({ id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key);
+    const approval = composable.chatTimeline.value.flatMap((item) => item.approvals ?? [])[0]!;
+    expect(approval).toMatchObject({ status: 'pending', parked: true });
+    expect(composable.chatLoading.value).toBe(false);
+    runtime.decideToolApproval.mockResolvedValue(true);
+    runtime.listAskUserSuspensions.mockResolvedValue([]);
+    await composable.decideToolApproval(approval, 'approve');
+    expect(runtime.decideToolApproval).toHaveBeenCalledWith({ type: 'tool_approval', conversationId: 'conv-1', runId: 'parked', toolCallId: 'write', decision: 'approve' });
+    expect(approval.status).toBe('approved');
+    expect(composable.chatTimeline.value.flatMap((item) => item.approvals ?? [])).toEqual([]);
+  });
+
   it('restores native ask_user cards on conversation reload even if Mastra has no assistant message yet', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

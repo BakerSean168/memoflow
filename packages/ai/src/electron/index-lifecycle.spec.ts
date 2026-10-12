@@ -104,7 +104,7 @@ function createFakeInstance() {
     totalTokens: 125,
     estimatedCost: 0.0000375,
   }));
-  const decideToolApproval = vi.fn(() => false);
+  const decideToolApproval = vi.fn(async () => false);
   const answerToolSuspension = vi.fn(async () => true);
   const attentionPort = {
     list: vi.fn(async () => []),

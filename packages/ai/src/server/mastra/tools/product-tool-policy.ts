@@ -30,6 +30,7 @@ export function memoFlowToolPolicy(toolName: string) {
 }
 
 export function memoFlowToolCategory(toolName: string): ToolCategory {
+  if (toolName === 'ask_user') return 'read';
   return memoFlowToolPolicy(toolName)?.category ?? 'other';
 }
 
@@ -44,6 +45,8 @@ export async function applyMemoFlowSessionToolPolicy(
   if (mode !== 'supervised' && mode !== 'read-only')
     throw new Error('Unsupported Mastra permission mode');
   const permissionFor = (name: string): PermissionPolicy => {
+    // Asking the user is a native suspension, including in read-only sessions.
+    if (name === 'ask_user') return 'allow';
     const rule = memoFlowToolPolicy(name);
     if (!rule || (mode === 'read-only' && rule.category !== 'read')) return 'deny';
     return rule.permission;
@@ -53,7 +56,7 @@ export async function applyMemoFlowSessionToolPolicy(
     permissionRules: {
       categories: { other: 'deny' },
       tools: Object.fromEntries(
-        Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).map((name) => [name, permissionFor(name)]),
+        [...Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY), 'ask_user'].map((name) => [name, permissionFor(name)]),
       ),
     },
   });

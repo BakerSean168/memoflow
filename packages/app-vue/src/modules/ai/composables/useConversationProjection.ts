@@ -139,11 +139,19 @@ export function useConversationProjection(input: {
     historyIncomplete.value = history.incomplete ?? false;
     const timeline = history.messages.map((message, index) => normalizeChatItem(message, index));
     for (const suspension of pendingAskUser) {
-      const id = `ask-user-${suspension.runId}`;
+      const id = `${suspension.approval ? 'approval' : 'ask-user'}-${suspension.runId}`;
       let item = timeline.find((candidate) => candidate.id === id);
       if (!item) {
         item = { id, role: 'assistant', content: '', status: 'success', askUserRequests: [] };
         timeline.push(item);
+      }
+      if (suspension.approval) {
+        item.approvals ??= [];
+        if (!item.approvals.some((approval) => approval.toolCallId === suspension.toolCallId)) item.approvals.push({
+          ...suspension.approval, runId: suspension.runId, toolCallId: suspension.toolCallId,
+          conversationId, status: 'pending', parked: true,
+        });
+        continue;
       }
       if (!item.askUserRequests?.some((candidate) => candidate.toolCallId === suspension.toolCallId)) {
         item.askUserRequests ??= [];
