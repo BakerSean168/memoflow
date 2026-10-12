@@ -1951,6 +1951,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/ai/provider-composer-states.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-provider.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/ai/provider-onboarding.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -12691,7 +12705,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 2,
       "e2eOwnership": {
         "lane": "secure-acceptance",
         "lifecycle": "active",
@@ -13856,7 +13870,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 48,
+    "e2e": 49,
     "perf": 2,
     "governance": 65
   },
@@ -13869,7 +13883,7 @@
       "nightly": 5,
       "reference": 5,
       "required": 22,
-      "secure-acceptance": 2,
+      "secure-acceptance": 3,
       "specialized": 3,
       "visual-artifact": 3
     },
@@ -13877,7 +13891,7 @@
       "artifact": 3,
       "canonical": 25,
       "reference": 5,
-      "supplemental": 15
+      "supplemental": 16
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

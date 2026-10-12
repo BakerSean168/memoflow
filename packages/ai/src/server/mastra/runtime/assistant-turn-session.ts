@@ -20,7 +20,13 @@ import { memoFlowToolPolicy } from '../tools/product-tool-policy';
 import { AsyncEventQueue } from './async-event-queue';
 import { projectAssistantUsage, type AssistantUsageSnapshot } from './assistant-observability';
 import { AssistantTurnObservability } from './assistant-turn-observability';
-import { toAIPublicFailure } from '../../../shared/ai-public-failure';
+import {
+  readAIProviderFailureDiagnostics,
+  toAIPublicFailure,
+} from '../../../shared/ai-public-failure';
+import { createLogger } from '@memoflow/utils/logger';
+
+const logger = createLogger('AssistantTurnSession');
 
 function messageText(event: Extract<AgentControllerEvent, { type: 'message_start' }>): string {
   const parts = event.message.content.parts;
@@ -86,6 +92,17 @@ export class AssistantTurnSession {
     let lastText = '';
     let assistantMessageId: string | undefined;
     let lastRuntimeError: { code: string; message: string } | undefined;
+    const recordRuntimeFailure = (error: unknown): void => {
+      lastRuntimeError = publicRuntimeError(error);
+      logger.warn('Assistant turn runtime failure', {
+        requestId: input.context?.requestId,
+        conversationId: input.conversationId,
+        modelId: resolvedModel.modelId,
+        agentInstanceId: input.agentInstanceId,
+        code: lastRuntimeError.code,
+        ...readAIProviderFailureDiagnostics(error),
+      });
+    };
     let lastUsage: AssistantUsageSnapshot | undefined;
     let settled = false;
     let stopping = false;
@@ -110,6 +127,7 @@ export class AssistantTurnSession {
     const telemetry = new AssistantTurnObservability({
       identityId: input.identityId,
       conversationId: input.conversationId,
+      agentInstanceId: input.agentInstanceId,
       context: input.context,
       model: resolvedModel,
       runId: currentRunId,
@@ -328,7 +346,7 @@ export class AssistantTurnSession {
         return;
       }
       if (event.type === 'error') {
-        lastRuntimeError = publicRuntimeError(event.error);
+        recordRuntimeFailure(event.error);
         return;
       }
       if (event.type === 'agent_end') {
@@ -366,7 +384,7 @@ export class AssistantTurnSession {
             if (settled) return;
             const wasStopping = stopping;
             if (pending.size) abort();
-            lastRuntimeError = publicRuntimeError(error);
+            recordRuntimeFailure(error);
             settle(wasStopping ? 'assistant.run.cancelled' : 'assistant.run.failed');
           });
 

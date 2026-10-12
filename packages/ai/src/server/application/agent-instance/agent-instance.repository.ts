@@ -22,13 +22,13 @@ export interface IAgentInstanceRepository {
   ): Promise<AgentInstance>;
   hasConnectionBindings(owner: string, connectionId: string): Promise<boolean>;
   hasConversationBindings(owner: string, instanceId: string): Promise<boolean>;
-  /** Stable owner-scoped turn binding, null for historical/legacy conversations. */
+  /** Last accepted owner-scoped turn binding, null for historical/legacy conversations. */
   getConversationInstance(owner: string, conversationId: string): Promise<string | null>;
   getConversationSelection(
     owner: string,
     conversationId: string,
   ): Promise<AgentConversationSelection | null>;
-  /** Idempotent for the same identity; conflicting instance IDs must fail closed. */
+  /** Atomically selects an enabled Mastra instance; native targets and foreign bindings fail closed. */
   claimConversationInstance(
     owner: string,
     conversationId: string,

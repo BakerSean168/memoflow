@@ -113,6 +113,7 @@ model AiExecutionRecord {
   runId                String?  @map("run_id")
   requestId            String?  @map("request_id")
   traceId              String?  @map("trace_id")
+  agentInstanceId      String?  @map("agent_instance_id")
   providerConnectionId String?  @map("provider_connection_id")
   modelId              String?  @map("model_id")
   errorCategory        String?  @map("error_category")

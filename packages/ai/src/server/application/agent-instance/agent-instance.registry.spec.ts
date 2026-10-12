@@ -50,7 +50,15 @@ describe('Agent registry with real SQLite persistence', () => {
       action: 'update',
       instanceId: 'codex',
       expectedRevision: 0,
-      patch: { name: 'Personal', enabled: false },
+      patch: {
+        name: 'Personal',
+        enabled: false,
+        nativeConfig: {
+          executablePath: '/custom/codex',
+          homePath: '/custom/home',
+          writeScopes: ['goals:write'],
+        },
+      },
     });
     expect(
       (await new LocalAgentRepository(db).listConnections('a')).find(
@@ -71,10 +79,73 @@ describe('Agent registry with real SQLite persistence', () => {
         patch: { name: 'Stale' },
       }),
     ).rejects.toMatchObject({ code: 'CONFLICT' });
-    await registry.execute('a', { action: 'remove', instanceId: 'codex', expectedRevision: 1 });
+    await expect(
+      registry.execute('a', { action: 'remove', instanceId: 'codex', expectedRevision: 1 }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    await registry.execute('a', { action: 'reset', instanceId: 'codex', expectedRevision: 1 });
+    expect(
+      (await new LocalAgentRepository(db).listConnections('a')).find(
+        (entry) => entry.instanceSlug === 'codex',
+      ),
+    ).toMatchObject({
+      enabled: true,
+      executablePath: 'codex',
+      writeScopes: [],
+    });
+    expect(
+      (await new LocalAgentRepository(db).listConnections('a')).find(
+        (entry) => entry.instanceSlug === 'codex',
+      )?.homePath,
+    ).toBeUndefined();
     expect(
       (await registry.list('a')).instances.find((item) => item.instanceId === 'codex')?.revision,
-    ).toBe(0);
+    ).toBe(2);
+  });
+  it('resets the built-in instance without deleting its model, secrets or existing conversation binding', async () => {
+    const { db, registry } = setup('web');
+    await db.execute(
+      'INSERT INTO ai_provider_configs (id, identity_id, default_model, available_models, is_active) VALUES (?, ?, ?, ?, ?)',
+      ['service', 'a', 'model', '[{"id":"model"}]', 1],
+    );
+    await registry.execute('a', {
+      action: 'bind',
+      instanceId: 'mastra',
+      expectedRevision: 0,
+      connectionId: 'service',
+      modelId: 'model',
+    });
+    await registry.execute('a', {
+      action: 'update',
+      instanceId: 'mastra',
+      expectedRevision: 1,
+      patch: { name: 'Custom', enabled: false, accentColor: '#ffffff' },
+    });
+    await db.execute(
+      'INSERT INTO ai_agent_conversation_bindings (id, identity_id, conversation_id, instance_id) VALUES (?, ?, ?, ?)',
+      ['history', 'a', 'chat', 'mastra'],
+    );
+    await expect(
+      registry.execute('a', { action: 'remove', instanceId: 'mastra', expectedRevision: 2 }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    await registry.execute('a', { action: 'reset', instanceId: 'mastra', expectedRevision: 2 });
+    const result = await registry.list('a');
+    expect(result.instances[0]).toMatchObject({
+      instanceId: 'mastra',
+      name: 'Mastra',
+      enabled: true,
+      accentColor: '#6469da',
+      revision: 3,
+    });
+    expect(result.bindings).toEqual([
+      { instanceId: 'mastra', connectionId: 'service', modelId: 'model' },
+    ]);
+    expect(await db.getAll('SELECT id FROM ai_provider_configs')).toEqual([{ id: 'service' }]);
+    expect(await db.getAll('SELECT id FROM ai_agent_conversation_bindings')).toEqual([
+      { id: 'history' },
+    ]);
+    await expect(
+      registry.execute('a', { action: 'reset', instanceId: 'mastra', expectedRevision: 2 }),
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
   });
   it('binds a verified model service with owner checks, revision CAS and no key storage', async () => {
     const { db, registry } = setup('desktop');
@@ -168,6 +239,47 @@ describe('Agent registry with real SQLite persistence', () => {
       repository.claimConversationInstance('owner', 'racing-chat', instance.instanceId),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' });
     expect(await repository.getConversationInstance('owner', 'racing-chat')).toBeNull();
+  });
+
+  it('switches validated Mastra instances within one conversation and rejects invalid targets without changing selection', async () => {
+    const { db, registry } = setup('desktop');
+    const repository = new AgentInstancePowerSyncRepository(db);
+    await db.execute(
+      'INSERT INTO ai_provider_configs (id, identity_id, default_model, available_models, is_active) VALUES (?, ?, ?, ?, ?)',
+      ['provider-1', 'owner', 'model-1', '[{"id":"model-1"}]', 1],
+    );
+    for (const instanceId of ['first', 'second']) {
+      await registry.execute('owner', { action: 'create', instance: { ...instance, instanceId } });
+      await registry.execute('owner', {
+        action: 'bind',
+        instanceId,
+        expectedRevision: 1,
+        connectionId: 'provider-1',
+        modelId: 'model-1',
+      });
+    }
+    const selection = {
+      owner: 'owner',
+      conversationId: 'same-chat',
+      providerId: 'provider-1',
+      modelId: 'model-1',
+    };
+    await registry.assertTurnSelection({ ...selection, agentInstanceId: 'first' });
+    await registry.assertTurnSelection({ ...selection, agentInstanceId: 'second' });
+    expect(await repository.getConversationSelection('owner', 'same-chat')).toEqual({
+      agentInstanceId: 'second',
+      providerId: 'provider-1',
+      modelId: 'model-1',
+    });
+    await expect(
+      registry.assertTurnSelection({
+        ...selection,
+        agentInstanceId: 'first',
+        providerId: 'missing',
+      }),
+    ).rejects.toMatchObject({ code: 'AI_CONFIGURATION_REQUIRED' });
+    expect(await repository.getConversationInstance('owner', 'same-chat')).toBe('second');
+    expect(await repository.getConversationInstance('other-owner', 'same-chat')).toBeNull();
   });
 
   it('claims a new conversation to one enabled Mastra instance and refuses cross-agent fallback', async () => {
@@ -459,7 +571,7 @@ describe('Agent registry with real SQLite persistence', () => {
     const secondIdentity = native.find(
       (entry) => entry.legacyConnectionId === second.id,
     )?.instanceId;
-    await registry.execute('owner', { action: 'remove', instanceId: 'codex', expectedRevision: 1 });
+    await registry.execute('owner', { action: 'reset', instanceId: 'codex', expectedRevision: 1 });
     expect(
       (await registry.list('owner')).instances.find(
         (entry) => entry.legacyConnectionId === second.id,

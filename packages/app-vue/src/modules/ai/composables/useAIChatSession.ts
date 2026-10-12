@@ -71,6 +71,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     updateLastActiveConversation,
     clearLastActiveConversation,
     loadConversationList,
+    markConversationActivity,
+    syncConversationSummary,
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,
@@ -110,6 +112,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     if (!pendingContent) return null;
     try {
       const conversationId = await ensureConversationCreated(loadService, conversationName);
+      markConversationActivity(conversationId);
+      void loadConversationList(loadService);
       const pendingAttachments = composerAttachments.value.map((attachment) => ({
         mediaType: attachment.mediaType,
         ...(attachment.filename ? { filename: attachment.filename } : {}),
@@ -199,6 +203,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     clearLastActiveConversation,
     buildConversationTranscript,
     loadConversationList,
+    syncConversationSummary,
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,

@@ -24,6 +24,8 @@ export function useAssistantStream(input: {
     | 'lastRuntimeUsage'
     | 'ensureConversationCreated'
     | 'refreshRuntimeUsage'
+    | 'markConversationActivity'
+    | 'loadConversationList'
   >;
   composer: ReturnType<typeof useAIComposerContext>;
 }) {
@@ -35,6 +37,8 @@ export function useAssistantStream(input: {
     lastRuntimeUsage,
     ensureConversationCreated,
     refreshRuntimeUsage,
+    markConversationActivity,
+    loadConversationList,
   } = input.conversation;
   const { composerAttachments, clearComposerTurnState } = composer;
   const { t } = useI18n();
@@ -331,7 +335,11 @@ export function useAssistantStream(input: {
       const target = chatTimeline.value.find((item) => item.id === assistantDraftId);
       if (target) {
         target.status = 'error';
-        target.errorMessage = event.data.message;
+        target.errorMessage = getAIErrorMessage(
+          event.data,
+          t,
+          'aiAssistant.dialogs.chat.sendFailed',
+        );
       }
     }
   }
@@ -373,6 +381,7 @@ export function useAssistantStream(input: {
         streamController.signal,
       );
       streamController.signal.throwIfAborted();
+      markConversationActivity(conversationId);
       lastRuntimeUsage.value = null;
 
       userDraftId = `user-draft-${Date.now()}`;
@@ -457,6 +466,7 @@ export function useAssistantStream(input: {
         toast.error(errorMessage);
       }
     } finally {
+      if (conversationId) void loadConversationList(loadService);
       if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
       if (assistantDraftId)
         settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {

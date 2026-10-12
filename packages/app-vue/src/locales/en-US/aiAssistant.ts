@@ -1,5 +1,11 @@
 export default {
   composer: {
+    switchBlocked: {
+      incompatible: 'This conversation cannot switch to this Agent yet. Start a new conversation to use it.',
+      busy: 'Wait for the current reply, tool operation or workflow review to finish before switching.',
+      loading: 'Loading the conversation selection…',
+    },
+    openProviderSettings: 'Open provider settings',
     agent: 'Agent',
     agents: 'Agent instances',
     model: 'Model',
@@ -9,9 +15,9 @@ export default {
     unfavorite: 'Remove from favorites',
     noFavorites: 'No favorite models yet',
     noSearchResults: 'No matching models',
-    noAvailableModels: 'No models are available for this Agent.',
+    noAvailableModels: 'No models are available for this provider.',
     loadingModels: 'Loading models…',
-    openAgentSetup: 'Open Agent setup',
+    openAgentSetup: 'Open provider setup',
     selectAgent: 'Choose this Agent',
     modelOptions: 'Model options',
     reasoningEffort: 'Reasoning',

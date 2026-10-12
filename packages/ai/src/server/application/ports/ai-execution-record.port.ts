@@ -28,6 +28,7 @@ export interface AIExecutionRecordInput {
   runId?: string;
   requestId?: string;
   traceId?: string;
+  agentInstanceId?: string;
   providerConnectionId?: string;
   modelId?: string;
   errorCategory?: string;

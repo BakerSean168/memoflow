@@ -13547,6 +13547,7 @@ export namespace Prisma {
     runId: string | null
     requestId: string | null
     traceId: string | null
+    agentInstanceId: string | null
     providerConnectionId: string | null
     modelId: string | null
     errorCategory: string | null
@@ -13567,6 +13568,7 @@ export namespace Prisma {
     runId: string | null
     requestId: string | null
     traceId: string | null
+    agentInstanceId: string | null
     providerConnectionId: string | null
     modelId: string | null
     errorCategory: string | null
@@ -13587,6 +13589,7 @@ export namespace Prisma {
     runId: number
     requestId: number
     traceId: number
+    agentInstanceId: number
     providerConnectionId: number
     modelId: number
     errorCategory: number
@@ -13619,6 +13622,7 @@ export namespace Prisma {
     runId?: true
     requestId?: true
     traceId?: true
+    agentInstanceId?: true
     providerConnectionId?: true
     modelId?: true
     errorCategory?: true
@@ -13639,6 +13643,7 @@ export namespace Prisma {
     runId?: true
     requestId?: true
     traceId?: true
+    agentInstanceId?: true
     providerConnectionId?: true
     modelId?: true
     errorCategory?: true
@@ -13659,6 +13664,7 @@ export namespace Prisma {
     runId?: true
     requestId?: true
     traceId?: true
+    agentInstanceId?: true
     providerConnectionId?: true
     modelId?: true
     errorCategory?: true
@@ -13766,6 +13772,7 @@ export namespace Prisma {
     runId: string | null
     requestId: string | null
     traceId: string | null
+    agentInstanceId: string | null
     providerConnectionId: string | null
     modelId: string | null
     errorCategory: string | null
@@ -13805,6 +13812,7 @@ export namespace Prisma {
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
+    agentInstanceId?: boolean
     providerConnectionId?: boolean
     modelId?: boolean
     errorCategory?: boolean
@@ -13826,6 +13834,7 @@ export namespace Prisma {
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
+    agentInstanceId?: boolean
     providerConnectionId?: boolean
     modelId?: boolean
     errorCategory?: boolean
@@ -13847,6 +13856,7 @@ export namespace Prisma {
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
+    agentInstanceId?: boolean
     providerConnectionId?: boolean
     modelId?: boolean
     errorCategory?: boolean
@@ -13868,6 +13878,7 @@ export namespace Prisma {
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
+    agentInstanceId?: boolean
     providerConnectionId?: boolean
     modelId?: boolean
     errorCategory?: boolean
@@ -13879,7 +13890,7 @@ export namespace Prisma {
     completedAt?: boolean
   }
 
-  export type AiExecutionRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "operation" | "outcome" | "conversationId" | "runId" | "requestId" | "traceId" | "providerConnectionId" | "modelId" | "errorCategory" | "safeError" | "estimatedCostUsd" | "tokenUsage" | "latencyMs" | "createdAt" | "completedAt", ExtArgs["result"]["aiExecutionRecord"]>
+  export type AiExecutionRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "operation" | "outcome" | "conversationId" | "runId" | "requestId" | "traceId" | "agentInstanceId" | "providerConnectionId" | "modelId" | "errorCategory" | "safeError" | "estimatedCostUsd" | "tokenUsage" | "latencyMs" | "createdAt" | "completedAt", ExtArgs["result"]["aiExecutionRecord"]>
   export type AiExecutionRecordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -13904,6 +13915,7 @@ export namespace Prisma {
       runId: string | null
       requestId: string | null
       traceId: string | null
+      agentInstanceId: string | null
       providerConnectionId: string | null
       modelId: string | null
       errorCategory: string | null
@@ -14345,6 +14357,7 @@ export namespace Prisma {
     readonly runId: FieldRef<"AiExecutionRecord", 'String'>
     readonly requestId: FieldRef<"AiExecutionRecord", 'String'>
     readonly traceId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly agentInstanceId: FieldRef<"AiExecutionRecord", 'String'>
     readonly providerConnectionId: FieldRef<"AiExecutionRecord", 'String'>
     readonly modelId: FieldRef<"AiExecutionRecord", 'String'>
     readonly errorCategory: FieldRef<"AiExecutionRecord", 'String'>
@@ -114449,6 +114462,7 @@ export namespace Prisma {
     runId: 'runId',
     requestId: 'requestId',
     traceId: 'traceId',
+    agentInstanceId: 'agentInstanceId',
     providerConnectionId: 'providerConnectionId',
     modelId: 'modelId',
     errorCategory: 'errorCategory',
@@ -116351,6 +116365,7 @@ export namespace Prisma {
     runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    agentInstanceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
@@ -116372,6 +116387,7 @@ export namespace Prisma {
     runId?: SortOrderInput | SortOrder
     requestId?: SortOrderInput | SortOrder
     traceId?: SortOrderInput | SortOrder
+    agentInstanceId?: SortOrderInput | SortOrder
     providerConnectionId?: SortOrderInput | SortOrder
     modelId?: SortOrderInput | SortOrder
     errorCategory?: SortOrderInput | SortOrder
@@ -116396,6 +116412,7 @@ export namespace Prisma {
     runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    agentInstanceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
@@ -116417,6 +116434,7 @@ export namespace Prisma {
     runId?: SortOrderInput | SortOrder
     requestId?: SortOrderInput | SortOrder
     traceId?: SortOrderInput | SortOrder
+    agentInstanceId?: SortOrderInput | SortOrder
     providerConnectionId?: SortOrderInput | SortOrder
     modelId?: SortOrderInput | SortOrder
     errorCategory?: SortOrderInput | SortOrder
@@ -116445,6 +116463,7 @@ export namespace Prisma {
     runId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
     requestId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
     traceId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    agentInstanceId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
     providerConnectionId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
     modelId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
     errorCategory?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
@@ -124397,6 +124416,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -124418,6 +124438,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -124437,6 +124458,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124458,6 +124480,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124478,6 +124501,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -124497,6 +124521,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -124517,6 +124542,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -133767,6 +133793,7 @@ export namespace Prisma {
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
+    agentInstanceId?: SortOrder
     providerConnectionId?: SortOrder
     modelId?: SortOrder
     errorCategory?: SortOrder
@@ -133792,6 +133819,7 @@ export namespace Prisma {
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
+    agentInstanceId?: SortOrder
     providerConnectionId?: SortOrder
     modelId?: SortOrder
     errorCategory?: SortOrder
@@ -133812,6 +133840,7 @@ export namespace Prisma {
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
+    agentInstanceId?: SortOrder
     providerConnectionId?: SortOrder
     modelId?: SortOrder
     errorCategory?: SortOrder
@@ -145658,6 +145687,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -145677,6 +145707,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -147241,6 +147272,7 @@ export namespace Prisma {
     runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    agentInstanceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
     errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
@@ -165852,6 +165884,7 @@ export namespace Prisma {
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
+    agentInstanceId?: string | null
     providerConnectionId?: string | null
     modelId?: string | null
     errorCategory?: string | null
@@ -167130,6 +167163,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -167149,6 +167183,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
@@ -167168,6 +167203,7 @@ export namespace Prisma {
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
+    agentInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
     providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
     modelId?: NullableStringFieldUpdateOperationsInput | string | null
     errorCategory?: NullableStringFieldUpdateOperationsInput | string | null

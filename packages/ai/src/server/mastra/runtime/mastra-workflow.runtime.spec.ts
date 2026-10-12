@@ -149,6 +149,7 @@ async function createRuntime(
     ok({ noteId: request.knowledgeDocumentId }),
   );
   const recordExecution = vi.fn(async (_record: AIExecutionRecordInput) => {});
+  const recordActivity = vi.fn(async (_identityId: string, _id: string, _at: number) => {});
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -167,6 +168,7 @@ async function createRuntime(
     storage,
     modelResolver,
     conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
+    conversationActivity: { recordActivity },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
       readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
@@ -216,6 +218,7 @@ async function createRuntime(
     createConfirmedKnowledgeNote,
     summarizeUsage,
     recordExecution,
+    recordActivity,
     modelResolver,
     createRoutine,
   };
@@ -524,6 +527,202 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     // Test cleanup only: restore original binding so the real producer can finish.
     turn.session.run.setRunId({ runId: 'native-turn' });
     turn.session.abortRun();
+  });
+
+  it('reserves a conversation before asynchronous model validation and does not mutate selection on failure', async () => {
+    const assertTurnSelection = vi.fn(async () => {});
+    const { runtime, modelResolver } = await createRuntime(undefined, { assertTurnSelection });
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    let rejectModel!: (error: Error) => void;
+    const resolving = new Promise<never>((_resolve, reject) => {
+      rejectModel = reject;
+    });
+    const resolve = vi.spyOn(modelResolver, 'resolve').mockReturnValue(resolving);
+    const first = runtime
+      .dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'same',
+        content: 'first',
+        agentInstanceId: 'first',
+        providerId: 'p',
+        modelId: 'm',
+      })
+      .next();
+    await vi.waitFor(() => expect(resolve).toHaveBeenCalledOnce());
+    const second = runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: 'same',
+      content: 'second',
+      agentInstanceId: 'second',
+      providerId: 'p',
+      modelId: 'm',
+    });
+    await expect(second.next()).rejects.toThrow('active turn');
+    expect(assertTurnSelection).not.toHaveBeenCalled();
+    rejectModel(new Error('invalid model'));
+    await expect(first).rejects.toThrow('invalid model');
+    expect(assertTurnSelection).not.toHaveBeenCalled();
+    resolve.mockRejectedValueOnce(new Error('retry validation'));
+    await expect(
+      runtime
+        .dispatchMessage({ identityId: 'owner', conversationId: 'same', content: 'retry' })
+        .next(),
+    ).rejects.toThrow('retry validation');
+    expect(resolve).toHaveBeenCalledTimes(2);
+  });
+
+  it('projects a real native provider failure after switching models and releases the conversation', async () => {
+    const { runtime, modelResolver, recordExecution } = await createRuntime();
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    vi.spyOn(modelResolver, 'resolve').mockImplementation(
+      async (input) =>
+        ({
+          providerId: 'p',
+          providerName: 'Fixture',
+          modelId: input.modelId!,
+          capabilities: {},
+          model: {
+            specificationVersion: 'v2',
+            provider: 'fixture',
+            modelId: input.modelId!,
+            supportedUrls: {},
+            doStream: async () => ({
+              stream: new ReadableStream({
+                start(controller) {
+                  controller.enqueue({ type: 'stream-start', warnings: [] });
+                  controller.enqueue({
+                    type: 'error',
+                    error: Object.assign(new Error('PRIVATE_RESPONSE_BODY'), { statusCode: 503 }),
+                  });
+                  controller.close();
+                },
+              }),
+            }),
+          },
+        }) as never,
+    );
+    for (const modelId of ['first', 'switched']) {
+      const events: AssistantRuntimeEvent[] = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'retryable-chat',
+        modelId,
+        providerId: 'p',
+        content: 'fixture question',
+        context: context('owner', modelId),
+      }))
+        events.push(event);
+      expect(events.at(-1)).toMatchObject({
+        conversationId: 'retryable-chat',
+        type: 'assistant.run.failed',
+        data: { code: 'SERVICE_UNAVAILABLE', message: 'AI service is unavailable' },
+      });
+      expect(JSON.stringify(events)).not.toContain('PRIVATE_RESPONSE_BODY');
+    }
+    expect(
+      recordExecution.mock.calls
+        .map(([record]) => record)
+        .filter((record) => record.operation === 'assistant.turn'),
+    ).toEqual([
+      expect.objectContaining({ modelId: 'first', errorCategory: 'SERVICE_UNAVAILABLE' }),
+      expect.objectContaining({ modelId: 'switched', errorCategory: 'SERVICE_UNAVAILABLE' }),
+    ]);
+  });
+
+  it('uses two different models and instances with the same native thread and preserves prior context and execution sources', async () => {
+    const assertTurnSelection = vi.fn(async () => {});
+    const { runtime, modelResolver, recordExecution, recordActivity } = await createRuntime(
+      undefined,
+      {
+        assertTurnSelection,
+      },
+    );
+    recordActivity.mockRejectedValueOnce(new Error('activity storage offline'));
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    const prompts: unknown[] = [];
+    const resolve = vi.spyOn(modelResolver, 'resolve').mockImplementation(async (input) => {
+      const modelId = input.modelId!;
+      return {
+        providerId: input.providerId!,
+        providerName: 'Fixture',
+        modelId,
+        capabilities: {},
+        model: {
+          specificationVersion: 'v2',
+          provider: 'fixture',
+          modelId,
+          supportedUrls: {},
+          doStream: async (options: unknown) => {
+            prompts.push(options);
+            return {
+              stream: new ReadableStream({
+                start(controller) {
+                  for (const chunk of [
+                    { type: 'stream-start', warnings: [] },
+                    { type: 'text-start', id: 'reply' },
+                    { type: 'text-delta', id: 'reply', delta: `Reply from ${modelId}` },
+                    { type: 'text-end', id: 'reply' },
+                    {
+                      type: 'finish',
+                      finishReason: 'stop',
+                      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+                    },
+                  ])
+                    controller.enqueue(chunk);
+                  controller.close();
+                },
+              }),
+            };
+          },
+        },
+      } as never;
+    });
+    for (const [agentInstanceId, modelId] of [
+      ['first', 'alpha'],
+      ['second', 'beta'],
+    ]) {
+      const events: AssistantRuntimeEvent[] = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'continuous-chat',
+        agentInstanceId,
+        providerId: 'p',
+        modelId,
+        content: `Question ${modelId}`,
+        context: context('owner', modelId),
+      }))
+        events.push(event);
+      expect(events.at(-1)?.type).toBe('assistant.run.completed');
+      expect(events).toContainEqual(
+        expect.objectContaining({
+          type: 'assistant.run.started',
+          data: { providerId: 'p', modelId },
+        }),
+      );
+    }
+    expect(resolve).toHaveBeenCalled();
+    expect(recordActivity).toHaveBeenCalledTimes(2);
+    expect(recordActivity).toHaveBeenLastCalledWith('owner', 'continuous-chat', expect.any(Number));
+    expect(JSON.stringify(prompts.at(-1))).toContain('Question alpha');
+    expect(JSON.stringify(prompts.at(-1))).toContain('Reply from alpha');
+    expect(
+      recordExecution.mock.calls
+        .map(([record]) => record)
+        .filter((record) => record.operation === 'assistant.turn'),
+    ).toEqual([
+      expect.objectContaining({
+        conversationId: 'continuous-chat',
+        agentInstanceId: 'first',
+        modelId: 'alpha',
+        providerConnectionId: 'p',
+      }),
+      expect.objectContaining({
+        conversationId: 'continuous-chat',
+        agentInstanceId: 'second',
+        modelId: 'beta',
+        providerConnectionId: 'p',
+      }),
+    ]);
   });
 
   it('filters foreign thread activity and rejects overlapping product turns instead of queueing', async () => {

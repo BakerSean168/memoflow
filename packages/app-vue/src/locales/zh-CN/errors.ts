@@ -11,6 +11,13 @@ export default {
   SIGN_IN_FAILED: '登录未完成，请重试。',
 
   AI_WORKFLOW_STATUS_UNSUPPORTED: '此工作流状态已不受支持，请重新创建工作流。',
+  AI_RUNTIME_ERROR: '本次回复未能完成，请重试或切换模型。',
+  AI_RUNTIME_TRANSPORT_ERROR: '本次回复未能完成，请重试或切换模型。',
+  PROVIDER_AUTH_FAILED: '模型服务拒绝访问，请检查 Provider 的密钥和访问权限。',
+  MODEL_NOT_AVAILABLE: '当前模型不可用，请切换模型或检查 Provider 配置。',
+  AI_CONFIGURATION_REQUIRED: '请先在 Provider 设置中配置可用的模型服务。',
+  AI_CAPABILITY_UNSUPPORTED: '当前模型不支持此功能，请切换模型。',
+  AI_CAPABILITY_UNVERIFIED: '尚未确认当前模型支持此功能，请切换模型或检查 Provider 配置。',
   BAD_REQUEST: '请求参数错误，请检查后重试',
   UNAUTHORIZED: '当前登录状态无效，请重新登录',
   FORBIDDEN: '你没有权限执行此操作',

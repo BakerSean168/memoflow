@@ -6,6 +6,35 @@ import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
 import { canLeaveAIWorkflowReview } from './chatViewHelpers';
+import { maybeRenameConversation } from './chatViewHelpers';
+import { ok, error } from '@memoflow/contracts/result';
+
+describe('conversation title synchronization', () => {
+  it('passes the saved title DTO to the sidebar rather than requiring a list round-trip', async () => {
+    const conversation = { id: 'conv-1', name: 'Renamed', updatedAt: 20 };
+    const service = { updateConversation: vi.fn().mockResolvedValue(ok(conversation)) };
+    const sync = vi.fn(async () => {});
+    await expect(maybeRenameConversation('Renamed', 'Old', 'conv-1', service, sync)).resolves.toBe(
+      true,
+    );
+    expect(sync).toHaveBeenCalledWith(conversation);
+  });
+  it('does not update the sidebar when the rename fails', async () => {
+    const service = {
+      updateConversation: vi.fn().mockResolvedValue(error('SERVICE_UNAVAILABLE', 'Unavailable')),
+    };
+    const sync = vi.fn(async () => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      await expect(
+        maybeRenameConversation('Renamed', 'Old', 'conv-1', service, sync),
+      ).resolves.toBe(false);
+      expect(sync).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});
 
 describe('workflow conversation departure', () => {
   it.each([

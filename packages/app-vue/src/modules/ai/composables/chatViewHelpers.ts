@@ -5,7 +5,7 @@
  */
 
 import type { AIChatService } from './types';
-import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, AIConversationClientDTO } from '@memoflow/contracts/ai';
 import type { IWorkflowRuntimeService } from '../../../di/types';
 import { unwrap } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
@@ -122,16 +122,19 @@ export async function maybeRenameConversation(
   currentTitle: string,
   conversationId: string | null,
   service: Pick<AIChatService, 'updateConversation'>,
-  reload: () => Promise<void>,
-): Promise<void> {
+  reload: (conversation: AIConversationClientDTO) => Promise<void>,
+): Promise<boolean> {
   const nextName = name.trim();
-  if (!nextName || nextName === currentTitle) return;
-  if (!conversationId) return;
+  if (!nextName || nextName === currentTitle || !conversationId) return false;
   try {
-    unwrap(await service.updateConversation(conversationId, { name: nextName }));
-    await reload();
+    const conversation = unwrap(
+      await service.updateConversation(conversationId, { name: nextName }),
+    );
+    await reload(conversation);
+    return true;
   } catch (error) {
     console.warn('[AIChatView] failed to update conversation title', error);
+    return false;
   }
 }
 

@@ -204,11 +204,7 @@
               :native-model-options="currentNativeModelOptions"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
-              :loading="
-                runtimeChoice.runtimeKind === 'local_agent'
-                  ? localAssistant.loading.value
-                  : modelCatalogLoading
-              "
+              :loading="composerLoading"
               @select-agent="selectComposerAgent"
               @select-model="selectComposerModel"
               @permission="selectPermission"
@@ -408,7 +404,7 @@ const {
   selectedComposerAgent,
   composerModels,
   composerModelKey,
-  modelCatalogLoading,
+  composerLoading,
   permissionMode,
   currentNativeModelOptions,
   selectNativeModelOption,

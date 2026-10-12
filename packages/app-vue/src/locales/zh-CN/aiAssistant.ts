@@ -1,5 +1,11 @@
 export default {
   composer: {
+    switchBlocked: {
+      incompatible: '当前会话暂不支持切换到此 Agent，请新建会话使用。',
+      busy: '请等待当前回复、工具操作或工作流确认结束后再切换。',
+      loading: '正在加载会话的模型选择…',
+    },
+    openProviderSettings: '打开 Provider 设置',
     agent: 'Agent',
     agents: 'Agent 实例',
     model: '模型',
@@ -9,9 +15,9 @@ export default {
     unfavorite: '取消收藏',
     noFavorites: '尚无收藏模型',
     noSearchResults: '没有匹配的模型',
-    noAvailableModels: '此 Agent 暂无可用模型。',
+    noAvailableModels: '此 Provider 暂无可用模型。',
     loadingModels: '正在获取模型…',
-    openAgentSetup: '打开 Agent 设置',
+    openAgentSetup: '打开 Provider 设置',
     selectAgent: '选择此 Agent',
     modelOptions: '模型选项',
     reasoningEffort: '推理强度',

@@ -17,6 +17,7 @@ export function createAIConversationRepositoryStub(
     findByIdForIdentity: async () => null,
     findByIdentityId: async () => [],
     delete: async () => {},
+    recordActivity: async () => {},
     ...overrides,
   };
 }
@@ -38,30 +39,48 @@ export function createAIProviderConfigRepositoryStub(
 export function createAIProviderSecretVaultStub(
   initial: Record<string, string> = { credential_test: 'plain-secret' },
 ): IAIProviderSecretVault {
-  const values = new Map<string, { identityId: string; value: string; expiresAt: number | null; revoked: boolean }>(
-    Object.entries(initial).map(([ref, value]) => [ref, { identityId: 'identity-1', value, expiresAt: null, revoked: false }]),
+  const values = new Map<
+    string,
+    { identityId: string; value: string; expiresAt: number | null; revoked: boolean }
+  >(
+    Object.entries(initial).map(([ref, value]) => [
+      ref,
+      { identityId: 'identity-1', value, expiresAt: null, revoked: false },
+    ]),
   );
   return {
     async store(input) {
       const ref = `credential_test_${values.size}` as AIProviderCredentialRef;
-      values.set(ref, { identityId: input.identityId, value: input.value, expiresAt: input.expiresAt ?? null, revoked: false });
+      values.set(ref, {
+        identityId: input.identityId,
+        value: input.value,
+        expiresAt: input.expiresAt ?? null,
+        revoked: false,
+      });
       return ref;
     },
     async resolve(input) {
       const value = values.get(String(input.credentialRef));
-      if (!value || value.identityId !== input.identityId || value.revoked || (value.expiresAt !== null && value.expiresAt <= (input.now ?? Date.now()))) {
+      if (
+        !value ||
+        value.identityId !== input.identityId ||
+        value.revoked ||
+        (value.expiresAt !== null && value.expiresAt <= (input.now ?? Date.now()))
+      ) {
         throw new Error('AI provider credential is unavailable');
       }
       return { value: value.value };
     },
     async replace(input) {
       const value = values.get(String(input.credentialRef));
-      if (!value || value.identityId !== input.identityId || value.revoked) throw new Error('AI provider credential is unavailable');
+      if (!value || value.identityId !== input.identityId || value.revoked)
+        throw new Error('AI provider credential is unavailable');
       value.value = input.value;
     },
     async revoke(input) {
       const value = values.get(String(input.credentialRef));
-      if (!value || value.identityId !== input.identityId) throw new Error('AI provider credential is unavailable');
+      if (!value || value.identityId !== input.identityId)
+        throw new Error('AI provider credential is unavailable');
       value.revoked = true;
     },
   };

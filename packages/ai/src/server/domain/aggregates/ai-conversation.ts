@@ -28,13 +28,27 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     this._props = { ...rest };
   }
 
-  public get identityId(): IIdentityId { return this._props.identityId; }
-  public get name(): string { return this._props.name; }
-  public get status(): ConversationStatus { return this._props.status; }
-  public get createdAt(): Date { return this._props.createdAt; }
-  public get updatedAt(): Date { return this._props.updatedAt; }
-  public get deletedAt(): Date | null { return this._props.deletedAt; }
-  public get version(): number { return this._props.version; }
+  public get identityId(): IIdentityId {
+    return this._props.identityId;
+  }
+  public get name(): string {
+    return this._props.name;
+  }
+  public get status(): ConversationStatus {
+    return this._props.status;
+  }
+  public get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  public get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
+  public get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
+  public get version(): number {
+    return this._props.version;
+  }
 
   public static create(params: { identityId: string; name: string }): AIConversation {
     const now = new Date();
@@ -56,19 +70,24 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     return conversation;
   }
 
-  public static load(state: AIConversationState): AIConversation { return new AIConversation(state); }
+  public static load(state: AIConversationState): AIConversation {
+    return new AIConversation(state);
+  }
 
   public updateStatus(status: ConversationStatus): void {
     if (this._props.status === status) return;
     const oldStatus = this._props.status;
     this._props.status = status;
     this._props.updatedAt = new Date();
-    this.addDomainEvent<AIEventMap['ai:conversation-status-changed']>('ai:conversation-status-changed', {
-      identityId: this._props.identityId,
-      conversation: this.toServerDTO(),
-      oldStatus,
-      newStatus: status,
-    });
+    this.addDomainEvent<AIEventMap['ai:conversation-status-changed']>(
+      'ai:conversation-status-changed',
+      {
+        identityId: this._props.identityId,
+        conversation: this.toServerDTO(),
+        oldStatus,
+        newStatus: status,
+      },
+    );
   }
 
   public rename(name: string): void {
@@ -81,6 +100,11 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
       conversation: this.toServerDTO(),
       changes: ['name'],
     });
+  }
+
+  public recordActivity(at: number): void {
+    if (!this._props.deletedAt && at > this._props.updatedAt.getTime())
+      this._props.updatedAt = new Date(at);
   }
 
   public softDelete(): void {

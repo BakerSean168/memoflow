@@ -23,18 +23,13 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
     this.conversations.set(String(conversation.id), conversation);
   }
 
-  async findByIdForIdentity(
-    identityId: string,
-    id: string,
-  ): Promise<AIConversation | null> {
+  async findByIdForIdentity(identityId: string, id: string): Promise<AIConversation | null> {
     const conversation = this.conversations.get(id) ?? null;
     if (!conversation || String(conversation.identityId) !== identityId) return null;
     return conversation;
   }
 
-  async findByIdentityId(
-    identityId: string,
-  ): Promise<AIConversation[]> {
+  async findByIdentityId(identityId: string): Promise<AIConversation[]> {
     return Array.from(this.conversations.values()).filter(
       (conversation) => String(conversation.identityId) === identityId,
     );
@@ -49,11 +44,18 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
   }
 
   // Test helpers
+  async recordActivity(identityId: string, id: string, at: number): Promise<void> {
+    const conversation = await this.findByIdForIdentity(identityId, id);
+    conversation?.recordActivity(at);
+  }
+
   clear(): void {
     this.conversations.clear();
   }
 
   seed(conversations: AIConversation[]): void {
-    conversations.forEach((conversation) => this.conversations.set(String(conversation.id), conversation));
+    conversations.forEach((conversation) =>
+      this.conversations.set(String(conversation.id), conversation),
+    );
   }
 }

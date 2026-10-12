@@ -187,6 +187,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
+    "apps/web/e2e/ai/provider-composer-states.spec.ts": {
+      "surface": "ai",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+    },
     "apps/web/e2e/ai/provider-onboarding.spec.ts": {
       "surface": "ai",
       "role": "supplemental",

@@ -7,6 +7,8 @@ import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import type { AssistantRuntimeClient, RuntimeUsageClient } from '@memoflow/ai/client';
 import { useAIChatSession, type UseAIChatSessionOptions } from './useAIChatSession';
 import type { ChatModelOption } from './types';
+import enErrors from '../../../locales/en-US/errors';
+import zhErrors from '../../../locales/zh-CN/errors';
 
 const toastMocks = vi.hoisted(() => ({
   success: vi.fn(),
@@ -20,6 +22,7 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
+      errors: enErrors,
       common: { unknown: 'Unknown', operationFailed: 'Operation failed' },
       aiAssistant: {
         chatPage: {
@@ -47,6 +50,7 @@ const i18n = createI18n({
         },
       },
     },
+    'zh-CN': { errors: zhErrors },
   },
 });
 
@@ -197,6 +201,151 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it('does not resurrect a deleted conversation from an older list request', async () => {
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub());
+    await session.ensureConversationCreated(service as never, 'New chat');
+    let resolveOld!: (value: unknown) => void;
+    service.listConversations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveOld = resolve;
+        }),
+    );
+    const old = session.loadConversationList(service as never);
+    service.listConversations.mockResolvedValueOnce(
+      ok({ data: [], total: 0, page: 1, pageSize: 24 }),
+    );
+    await session.deleteConversation(
+      'conv-1',
+      service as never,
+      () => {},
+      () => {},
+    );
+    resolveOld(ok({ data: [createConversationDTO('conv-1')], total: 1, page: 1, pageSize: 24 }));
+    await old;
+    expect(session.conversationList.value).toEqual([]);
+    expect(session.chatConversationId.value).toBe('');
+  });
+  it('retains multiple new conversations and updated titles when calibration lags', async () => {
+    const service = createServiceStub();
+    service.createConversation
+      .mockResolvedValueOnce(ok(createConversationDTO('first')))
+      .mockResolvedValueOnce(ok(createConversationDTO('second')));
+    const session = mountComposable(service, createRuntimeStub());
+    await session.ensureConversationCreated(service as never, 'First');
+    session.startNewConversation();
+    await session.ensureConversationCreated(service as never, 'Second');
+    session.syncConversationSummary({
+      ...createConversationDTO('second'),
+      name: 'Renamed second',
+      updatedAt: Date.now(),
+    } as never);
+    service.listConversations.mockResolvedValueOnce(
+      ok({ data: [createConversationDTO('first')], total: 1, page: 1, pageSize: 24 }),
+    );
+    await session.loadConversationList(service as never);
+    expect(session.conversationList.value).toMatchObject([
+      { id: 'second', name: 'Renamed second' },
+      { id: 'first' },
+    ]);
+    expect(session.chatConversationId.value).toBe('second');
+  });
+
+  it('shows a persisted new conversation before inference finishes and preserves it through a stale list response', async () => {
+    const service = createServiceStub();
+    let resolveList!: (value: unknown) => void;
+    service.listConversations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveList = resolve;
+        }),
+    );
+    const runtime = createRuntimeStub();
+    let finish!: () => void;
+    const streaming = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    runtime.streamMessage.mockImplementation(async () => streaming);
+    const session = mountComposable(service, runtime);
+    const loading = session.loadConversationList(service as never);
+    session.chatMessage.value = 'hello';
+    const sending = session.handleSendChat(service as never, MODEL, 'Created chat', () => {});
+    await vi.waitFor(() => expect(runtime.streamMessage).toHaveBeenCalledTimes(1));
+    expect(session.conversationList.value).toMatchObject([{ id: 'conv-1', name: 'New chat' }]);
+    resolveList(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await loading;
+    expect(session.chatConversationId.value).toBe('conv-1');
+    expect(session.conversationList.value.map((item) => item.id)).toContain('conv-1');
+    finish();
+    await sending;
+  });
+
+  it('ignores an older overlapping list load and retains entries on request failure', async () => {
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub());
+    let resolveOld!: (value: unknown) => void;
+    service.listConversations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveOld = resolve;
+        }),
+    );
+    const old = session.loadConversationList(service as never);
+    service.listConversations.mockResolvedValueOnce(
+      ok({
+        data: [{ id: 'newer', name: 'Newer', updatedAt: 10 }],
+        total: 1,
+        page: 1,
+        pageSize: 24,
+      }),
+    );
+    await session.loadConversationList(service as never);
+    resolveOld(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await old;
+    expect(session.conversationList.value.map((item) => item.id)).toEqual(['newer']);
+    service.listConversations.mockRejectedValueOnce(new Error('offline'));
+    await session.loadConversationList(service as never);
+    expect(session.conversationList.value.map((item) => item.id)).toEqual(['newer']);
+  });
+
+  it('adds workflow conversations to the same list immediately', async () => {
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub());
+    session.chatMessage.value = 'Create a goal';
+    await session.prepareWorkflowTurn(service as never, 'Goal chat', () => {});
+    expect(session.conversationList.value.map((item) => item.id)).toEqual(['conv-1']);
+  });
+  it('localizes streamed runtime failures while retaining the conversation and allowing the next turn', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const composable = mountComposable(service, runtime, 'web');
+    const previousLocale = i18n.global.locale.value;
+    i18n.global.locale.value = 'zh-CN';
+    try {
+      await send(composable, service, runtime, [
+        {
+          eventId: 'failure-1',
+          runId: 'run-1',
+          conversationId: 'conv-1',
+          sequence: 1,
+          createdAt: 1,
+          type: 'assistant.run.failed',
+          data: { code: 'AI_RUNTIME_TRANSPORT_ERROR', message: 'AI runtime request failed' },
+        },
+      ]);
+      expect(composable.chatTimeline.value.at(-1)?.errorMessage).toBe(
+        '本次回复未能完成，请重试或切换模型。',
+      );
+      expect(composable.chatConversationId.value).toBe('conv-1');
+      expect(composable.chatLoading.value).toBe(false);
+      await send(composable, service, runtime);
+      expect(service.createConversation).toHaveBeenCalledTimes(1);
+      expect(runtime.streamMessage.mock.calls[1][0].conversationId).toBe('conv-1');
+    } finally {
+      i18n.global.locale.value = previousLocale;
+    }
+  });
   it.each(['stop', 'new', 'select'] as const)(
     'fences a pending native creation after %s',
     async (action) => {
@@ -236,6 +385,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
       resolve({ id: 'late-native-chat' });
       await pending;
       expect(session.chatConversationId.value).toBe(selected);
+      expect(session.conversationList.value.map((item) => item.id)).toContain('late-native-chat');
       expect(runtime.streamMessage).not.toHaveBeenCalled();
       expect(session.chatLoading.value).toBe(false);
     },
@@ -275,6 +425,9 @@ describe('useAIChatSession Mastra-native open chat', () => {
       modelId: 'native-model',
       name: 'Native chat',
     });
+    expect(session.conversationList.value).toMatchObject([
+      { id: 'native-chat', runtimeKind: 'local_agent' },
+    ]);
     expect(service.createConversation).not.toHaveBeenCalled();
     expect(runtime.streamMessage).toHaveBeenCalledWith(
       expect.objectContaining({

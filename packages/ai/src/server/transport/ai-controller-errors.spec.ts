@@ -1,7 +1,10 @@
 import { ResultErrorException } from '@memoflow/contracts/result';
 import { describe, expect, it } from 'vitest';
 import { AIExecutionError } from '../../shared/ai-execution-error';
-import { toAIPublicFailure } from '../../shared/ai-public-failure';
+import {
+  readAIProviderFailureDiagnostics,
+  toAIPublicFailure,
+} from '../../shared/ai-public-failure';
 import { toAITransportFailure } from './ai-controller-errors';
 
 const fallback = {
@@ -10,6 +13,29 @@ const fallback = {
 } as const;
 
 describe('AI public failure projection', () => {
+  it('classifies a retry-wrapped provider failure and bounds cyclic unknown causes', () => {
+    const upstream = { statusCode: 503, responseBody: 'private provider details' };
+    expect(toAIPublicFailure({ lastError: upstream }, fallback).code).toBe('SERVICE_UNAVAILABLE');
+    expect(toAIPublicFailure({ cause: { name: 'TimeoutError' } }, fallback).code).toBe('TIMEOUT');
+    const cyclic: { cause?: unknown } = {};
+    cyclic.cause = cyclic;
+    expect(readAIProviderFailureDiagnostics(cyclic)).toEqual({ timedOut: false });
+    expect(toAIPublicFailure(cyclic, fallback).code).toBe('AI_RUNTIME_ERROR');
+    expect(toAIPublicFailure({ statusCode: 400 }, fallback).code).toBe('AI_RUNTIME_ERROR');
+  });
+  it.each([
+    [401, 'PROVIDER_AUTH_FAILED'],
+    [403, 'PROVIDER_AUTH_FAILED'],
+    [404, 'MODEL_NOT_AVAILABLE'],
+    [503, 'SERVICE_UNAVAILABLE'],
+  ])('classifies provider HTTP %s without exposing raw diagnostics', (statusCode, code) => {
+    const failure = toAIPublicFailure(
+      { name: 'AI_APICallError', statusCode, responseBody: 'secret-body' },
+      fallback,
+    );
+    expect(failure.code).toBe(code);
+    expect(JSON.stringify(failure)).not.toContain('secret-body');
+  });
   it('falls back for internal structured errors and projects only requestId', () => {
     const secret = 'server-secret-api-key';
     const error = new ResultErrorException(

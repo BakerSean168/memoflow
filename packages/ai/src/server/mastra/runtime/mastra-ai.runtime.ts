@@ -65,13 +65,20 @@ import {
 import { AssistantHistoryService } from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { createLogger } from '@memoflow/utils/logger';
+
+const logger = createLogger('MastraAIRuntime');
 
 export interface MastraAIRuntimeDependencies {
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
-  /** Host-authoritative turn claim: one stable Mastra Agent identity per new conversation. */
+  /** Host-authoritative last accepted selection; compatible Mastra instances share the thread. */
   readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>;
   readonly conversationShellSource: AssistantConversationShellSource;
+  /** Host-owned activity projection; independent of Mastra transcript persistence. */
+  readonly conversationActivity?: {
+    recordActivity(identityId: string, id: string, at: number): Promise<void>;
+  };
   /** Host-bound canonical Goal/Task/Reminder application mutations for ADR-052. */
   readonly goalPlanMutationPort: GoalPlanMutationPort;
   /** Host-bound canonical Task application mutation for the task.create workflow. */
@@ -113,6 +120,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private readonly durableWorkflows: MastraDurableWorkflowRuntime;
   private initPromise: Promise<void> | null = null;
   private disposePromise: Promise<void> | null = null;
+  private readonly reservedConversations = new Set<string>();
   private readonly activeRuns = new Map<string, ActiveAssistantTurn>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
@@ -247,12 +255,31 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     await this.disposePromise;
   }
 
+  private async recordConversationActivity(
+    identityId: string,
+    conversationId: string,
+    requestId?: string,
+  ): Promise<void> {
+    try {
+      await this.deps.conversationActivity?.recordActivity(identityId, conversationId, Date.now());
+    } catch {
+      // Sidebar metadata must not turn an otherwise valid reply into a failed turn.
+      logger.warn('Conversation activity projection failed', { conversationId, requestId });
+    }
+  }
+
   async start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.start(input);
+    const run = await this.durableWorkflows.start(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async startDetached(input: {
@@ -260,7 +287,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     request: AIWorkflowStartClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.startDetached(input);
+    const run = await this.durableWorkflows.startDetached(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async resume(input: {
@@ -268,7 +301,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     request: AIWorkflowResumeClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.resume(input);
+    const run = await this.durableWorkflows.resume(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async resumeDetached(input: {
@@ -356,6 +395,20 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async *dispatchMessage(
     input: AssistantTurnInput,
   ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
+    const key = JSON.stringify([input.identityId, input.conversationId]);
+    if (this.reservedConversations.has(key))
+      throw new Error('Assistant conversation already has an active turn');
+    this.reservedConversations.add(key);
+    try {
+      yield* this.dispatchReservedMessage(input);
+    } finally {
+      this.reservedConversations.delete(key);
+    }
+  }
+
+  private async *dispatchReservedMessage(
+    input: AssistantTurnInput,
+  ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
     if (input.permissionMode && !['supervised', 'read-only'].includes(input.permissionMode))
       throw new AIExecutionError('configuration_required', 'Unsupported Mastra permission mode');
     await this.init();
@@ -365,25 +418,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (input.context && input.context.identityId !== input.identityId) {
       throw new Error('Mastra Assistant execution context identity mismatch');
-    }
-    if (this.deps.agentRegistry) {
-      try {
-        await this.deps.agentRegistry.assertTurnSelection({
-          owner: input.identityId,
-          conversationId: input.conversationId,
-          agentInstanceId: input.agentInstanceId,
-          providerId: input.providerId,
-          modelId: input.modelId,
-        });
-      } catch (cause) {
-        if (!(cause instanceof AgentRegistryError)) throw cause;
-        throw new AIExecutionError(
-          'configuration_required',
-          'Selected Agent instance is unavailable or its model is not bound',
-        );
-      }
-    } else if (input.agentInstanceId) {
-      throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
     }
     const startedAt = Date.now();
     const resolvedModel = await this.deps.modelResolver.resolve({
@@ -473,6 +507,30 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     );
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
+    if (this.deps.agentRegistry) {
+      try {
+        await this.deps.agentRegistry.assertTurnSelection({
+          owner: input.identityId,
+          conversationId: input.conversationId,
+          agentInstanceId: input.agentInstanceId,
+          providerId: input.providerId,
+          modelId: input.modelId,
+        });
+      } catch (cause) {
+        if (!(cause instanceof AgentRegistryError)) throw cause;
+        throw new AIExecutionError(
+          'configuration_required',
+          'Selected Agent instance is unavailable or its model is not bound',
+        );
+      }
+    } else if (input.agentInstanceId) {
+      throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
+    }
+    await this.recordConversationActivity(
+      input.identityId,
+      input.conversationId,
+      input.context?.requestId,
+    );
     yield* new AssistantTurnSession({
       session,
       activeRuns: this.activeRuns,
