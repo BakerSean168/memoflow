@@ -88,10 +88,20 @@ test.describe('Local Docker core product Phase C', () => {
     await panelToggle.dispatchEvent('click');
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-    await page
+    const cancelGoal = page
       .getByTestId('goal-dialog')
-      .getByRole('button', { name: '取消', exact: true })
-      .click();
+      .getByRole('button', { name: '取消', exact: true });
+    await cancelGoal.click();
+    const discardConfirmation = page.getByRole('alertdialog', { name: '放弃未保存的更改？' });
+    await expect(discardConfirmation).toBeVisible();
+    await discardConfirmation.getByRole('button', { name: '取消', exact: true }).click();
+    await expect(discardConfirmation).toBeHidden();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
+
+    await cancelGoal.click();
+    await expect(discardConfirmation).toBeVisible();
+    await discardConfirmation.getByRole('button', { name: '放弃更改', exact: true }).click();
+    await expect(discardConfirmation).toBeHidden();
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
 
     await page.getByTestId('business-panel-focus-toggle').click();
