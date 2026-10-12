@@ -41,9 +41,18 @@ export const GoalIdParamsSchema = z.object({
 /**
  * 创建目标 Schema
  */
+/** The server validates this native AI claim inside the Goal create transaction. */
+export const GoalNativeAiLeaseSchema = z.object({
+  runId: z.string().min(1),
+  token: z.string().uuid(),
+  fence: z.number().int().positive(),
+}).strict();
+export type GoalNativeAiLease = z.infer<typeof GoalNativeAiLeaseSchema>;
+
 export const CreateGoalSchema = z
   .object({
     id: brandedId<GoalId>().optional(),
+    nativeAiLease: GoalNativeAiLeaseSchema.optional(),
     name: GoalNameSchema,
     summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').optional(),
     description: z.string().max(10000, '目标描述不能超过 10000 字符').optional(),

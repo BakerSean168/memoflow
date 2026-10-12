@@ -23,6 +23,23 @@ export class PrismaGoalWriteTransactionRunner implements GoalWriteTransactionRun
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const receiptAdapter = new PrismaGoalReliableOperationAdapter(tx);
       return work({
+        assertNativeAiLease: async (identityId, lease) => {
+          // The zero-delta UPDATE is a row-level write lock held until Goal
+          // persistence commits. Concurrent claim/release/renew waits, so a
+          // superseded fence cannot race between the authority check and Save.
+          // clock_timestamp() checks expiry at statement evaluation time.
+          const rows = await tx.$queryRaw<Array<{ fence: number }>>`
+            UPDATE "ai_goal_surface_leases"
+            SET "expires_at" = "expires_at"
+            WHERE "identity_id" = ${identityId}
+              AND "run_id" = ${lease.runId}
+              AND "owner_token" = ${lease.token}
+              AND "fence" = ${lease.fence}
+              AND "expires_at" > clock_timestamp()
+            RETURNING "fence"
+          `;
+          return rows.length === 1;
+        },
         goalRepository: new GoalPrismaRepository(tx, bufferedEventBus, true),
         goalRecordRepository: new GoalRecordPrismaRepository(tx),
         recordGoalCompletionReceipt: (input) => receiptAdapter.recordGoalCompletionReceipt(input),

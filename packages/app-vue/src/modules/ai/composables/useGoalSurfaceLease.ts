@@ -1,5 +1,6 @@
 import { onScopeDispose } from 'vue';
 import type { WorkflowRuntimeClient } from '@memoflow/ai/client';
+import type { GoalNativeAiLease } from '@memoflow/contracts/goal';
 
 type Grant = { runId: string; token: string; fence: number; expiresAt: number };
 
@@ -117,7 +118,14 @@ export function useGoalSurfaceLease(
     }
   }
 
+  function currentGrant(runId: string): GoalNativeAiLease | null {
+    const active = grant;
+    if (!active || active.runId !== runId || active.expiresAt <= Date.now()) return null;
+    // A detached capability snapshot, never the mutable heartbeat state.
+    return { runId: active.runId, token: active.token, fence: active.fence };
+  }
+
   onScopeDispose(() => { void release(); });
 
-  return { claim, verify, release, isHeld: (runId: string) => grant?.runId === runId };
+  return { claim, verify, release, currentGrant, isHeld: (runId: string) => grant?.runId === runId };
 }

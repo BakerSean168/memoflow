@@ -1,6 +1,7 @@
 import type {
   CreateGoalReq,
   GoalClientDTO,
+  GoalNativeAiLease,
   GoalReminderConfigDTO,
   GoalStatus,
   GoalTimeframe,
@@ -54,6 +55,8 @@ export type GoalNativeEditSession = OwnerNativeEditSession<
 };
 
 export interface GoalNativeSubmitContext {
+  /** Authenticated Goal owner Save MUST verify this fence in the write tx. */
+  nativeAiLease: GoalNativeAiLease;
   /** Called after validation/label resolution, immediately before owner persistence. */
   onCreateAttempt?: () => void;
   createId: NonNullable<CreateGoalReq['id']>;

@@ -98,12 +98,20 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     ai.patch({ name: 'Scoped Goal' });
     const context = {
       createId: created.id,
+      nativeAiLease: {
+        runId: 'run-save',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 4,
+      },
       keyResultIds: [],
       pendingLabelNames: [],
       expectedDraft: ai.readDraftState().draft,
     };
     const saving = ai.requestSubmit(context);
     await expect(ai.requestSubmit(context)).rejects.toThrow('busy');
+    expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({
+      nativeAiLease: context.nativeAiLease,
+    }));
     expect(mocks.createGoal).toHaveBeenCalledOnce();
     complete();
     expect(await saving).toEqual(created);
@@ -967,6 +975,11 @@ describe('Goal owner native edit session (PVC-AI-8001)', () => {
     expect(session.readDraftState()).toEqual(beforeRejectedPatch);
     const onCreateAttempt = vi.fn();
     const context = () => ({
+      nativeAiLease: {
+        runId: 'review-run',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 2,
+      },
       onCreateAttempt,
       createId:
         'GoalId_550e8400-e29b-41d4-a716-446655440001' as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['createId'],

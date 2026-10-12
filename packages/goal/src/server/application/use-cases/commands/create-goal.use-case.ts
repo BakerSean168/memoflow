@@ -185,6 +185,10 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
     input: CreateGoalReq | GoalPortabilityCreateInput,
     cx: ExecutionContext,
   ): Promise<Result<GoalMutationReceipt>> {
+    const nativeAiLease = 'nativeAiLease' in input ? input.nativeAiLease : undefined;
+    if (nativeAiLease && !this.goalWriteTransactionRunner) {
+      return error('CONFLICT', 'Controlled Goal creation requires a transaction-scoped lease gate');
+    }
     // 1. 验证输入
     if (!input.name?.trim()) {
       return error('VALIDATION_ERROR', 'Name is required');
@@ -197,7 +201,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
     // workflows and local-first clients. Replaying the same create after a
     // disconnect/restart returns the existing aggregate instead of creating a
     // second business fact.
-    if (input.id) {
+    if (input.id && !nativeAiLease) {
       const existing = await this.goalRepository.findByIdForIdentity(cx.identityId, input.id, {
         includeChildren: true,
       });
@@ -248,11 +252,39 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
           goal.hydrateLabels(labels);
         }
       };
+      // A controlled AI create is fenced by the SAME database transaction that
+      // persists the Goal/KRs/labels. The low-level gate must hold its row lock
+      // until commit; a UI preflight by itself would have a TOCTOU gap.
+      const result = { leaseLost: false, replay: null as GoalMutationReceipt | null };
       if (this.goalWriteTransactionRunner) {
-        await this.goalWriteTransactionRunner.run((ctx) => persist(ctx.goalRepository));
+        await this.goalWriteTransactionRunner.run(async (ctx) => {
+          if (nativeAiLease) {
+            if (
+              !ctx.assertNativeAiLease ||
+              !(await ctx.assertNativeAiLease(cx.identityId, nativeAiLease))
+            ) {
+              result.leaseLost = true;
+              return;
+            }
+            if (input.id) {
+              const existing = await ctx.goalRepository.findByIdForIdentity(cx.identityId, input.id, {
+                includeChildren: true,
+              });
+              if (existing) {
+                result.replay = createGoalMutationReceipt(existing, {
+                  keyResultIds: existing.keyResults.map((keyResult) => keyResult.id),
+                });
+                return;
+              }
+            }
+          }
+          await persist(ctx.goalRepository);
+        });
       } else {
         await persist(this.goalRepository);
       }
+      if (result.leaseLost) return error('CONFLICT', 'Goal native AI control lease expired or was superseded');
+      if (result.replay) return ok(result.replay);
       return ok(
         createGoalMutationReceipt(goal, {
           keyResultIds: goal.keyResults.map((keyResult) => keyResult.id),
@@ -266,7 +298,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
       // breaks the durable workflow into `failed`. If the caller supplied a
       // deterministic id and another attempt committed the same aggregate first,
       // surface that durable fact as an idempotent replay.
-      if (input.id) {
+      if (input.id && !nativeAiLease) {
         try {
           const existing = await this.goalRepository.findByIdForIdentity(cx.identityId, input.id, {
             includeChildren: true,

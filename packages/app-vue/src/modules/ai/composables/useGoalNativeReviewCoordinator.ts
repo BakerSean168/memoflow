@@ -747,7 +747,10 @@ export function useGoalNativeReviewCoordinator(input: {
           // Only the controlled same-revision retry may temporarily release the
           // owner lock. requestSubmit synchronously takes the owner's busy lock.
           if (pendingOwnerAttempt) session.setEditingBlocked(false);
+          const nativeAiLease = surfaceLease.currentGrant(run.runId);
+          if (!nativeAiLease) throw new Error('Goal panel lease was lost before persistence');
           saved = await session.requestSubmit({
+            nativeAiLease,
             onCreateAttempt: () => {
               pendingOwnerAttempt = {
                 runId: run!.runId,

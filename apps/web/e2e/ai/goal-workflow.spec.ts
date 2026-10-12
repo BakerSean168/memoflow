@@ -24,6 +24,7 @@ import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting'
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
+import { createGoalLeaseDbMirror, type GoalLeaseDbMirror } from '../helpers/goalLeaseDbMirror';
 
 const generateTestEmail = () =>
   `e2e-ai-goal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
@@ -181,8 +182,11 @@ async function bootstrapGoalWorkflowSession(
     password: e2ePassword,
   });
 
+  const leaseMirror = await createGoalLeaseDbMirror({ email });
+
   const telemetry = await installGoalWorkflowMocks(page, {
     seedConversation: options.seedConversation,
+    leaseMirror,
   });
 
   await seedAiLocalState(page, {
@@ -305,9 +309,9 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
 
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
-    await expect(
-      goalForm.getByTestId('goal-key-result-draft-row'),
-    ).toContainText('Complete the restored workflow approval');
+    await expect(goalForm.getByTestId('goal-key-result-draft-row')).toContainText(
+      'Complete the restored workflow approval',
+    );
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
@@ -343,9 +347,9 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('goal-workflow-draft-editor')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
-    await expect(
-      goalForm.getByTestId('goal-key-result-draft-row'),
-    ).toContainText(draft.keyResults[0].title);
+    await expect(goalForm.getByTestId('goal-key-result-draft-row')).toContainText(
+      draft.keyResults[0].title,
+    );
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
     // Goal/KR editing stays native; supporting Task/Knowledge overlays remain in the workflow.
@@ -680,6 +684,9 @@ test.describe('AI Goal Workflow', () => {
 
 type GoalWorkflowMockOptions = {
   seedConversation?: boolean;
+  /** Mirrors mocked lease decisions into the real API database so the
+   * transaction-scoped native Goal fence sees the same custody the UI sees. */
+  leaseMirror: GoalLeaseDbMirror;
 };
 
 type GoalWorkflowMockTelemetry = {
@@ -1189,7 +1196,7 @@ function executeGoalWorkflowMockRun(
 
 async function installGoalWorkflowMocks(
   page: Page,
-  options: GoalWorkflowMockOptions = {},
+  options: GoalWorkflowMockOptions,
 ): Promise<GoalWorkflowMockTelemetry> {
   await installMastraRegistryMock(page, 'provider-e2e-openai', 'gpt-4.1-mini');
   const conversationId = e2eConversationId;
@@ -1665,12 +1672,18 @@ async function installGoalWorkflowMocks(
   // The E2E host uses mock workflow snapshots, so it must own their lease
   // endpoint as well. Keep the real claim/renew/release contract, including
   // monotone generations and a persistent grant across page reloads; do not
-  // bypass the product's fail-closed native form custody checks.
-  const goalLeases = new Map<string, {
-    token: string | null;
-    fence: number;
-    expiresAt: number;
-  }>();
+  // bypass the product's fail-closed native form custody checks. Every decided
+  // grant is mirrored into the real test database so the server-side fenced
+  // Goal create proves custody against real rows, not against the mock alone.
+  const leaseMirror = options.leaseMirror;
+  const goalLeases = new Map<
+    string,
+    {
+      token: string | null;
+      fence: number;
+      expiresAt: number;
+    }
+  >();
   await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
     if (route.request().method() !== 'POST') {
       await route.continue();
@@ -1679,8 +1692,7 @@ async function installGoalWorkflowMocks(
     const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
     expect(request).not.toHaveProperty('identityId');
     const knownRun =
-      request.runId === restoredApprovalRun.runId ||
-      workflowRunsByRunId.has(request.runId);
+      request.runId === restoredApprovalRun.runId || workflowRunsByRunId.has(request.runId);
     if (!knownRun) {
       await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
       return;
@@ -1699,10 +1711,14 @@ async function installGoalWorkflowMocks(
         expiresAt: now + 30_000,
       };
       goalLeases.set(request.runId, next);
-      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({
-        status: 'claimed',
-        ...next,
-      }));
+      await leaseMirror.claim({ runId: request.runId, ...next });
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'claimed',
+          ...next,
+        }),
+      );
       return;
     }
 
@@ -1717,14 +1733,29 @@ async function installGoalWorkflowMocks(
     }
     if (request.action === 'renew') {
       current.expiresAt = now + 30_000;
-      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({
-        status: 'renewed',
+      await leaseMirror.renew({
+        runId: request.runId,
+        token: request.token,
+        fence: request.fence,
         expiresAt: current.expiresAt,
-      }));
+      });
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'renewed',
+          expiresAt: current.expiresAt,
+        }),
+      );
       return;
     }
     current.token = null;
     current.expiresAt = now;
+    await leaseMirror.release({
+      runId: request.runId,
+      token: request.token,
+      fence: request.fence,
+      now,
+    });
     await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'released' }));
   });
 

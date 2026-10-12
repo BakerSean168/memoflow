@@ -792,7 +792,7 @@ async function persistDraft(context?: GoalNativeSubmitContext): Promise<GoalClie
 
   const req: CreateGoalReq = {
     ...common,
-    ...(context ? { id: context.createId } : {}),
+    ...(context ? { id: context.createId, nativeAiLease: context.nativeAiLease } : {}),
     ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }, index) => ({
       ...item,
