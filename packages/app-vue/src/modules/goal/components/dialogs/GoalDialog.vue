@@ -225,14 +225,14 @@
     </form>
 
     <template #footer>
-      <Button variant="ghost" :disabled="isBusy" @click="setOpen(false)">
+      <Button variant="ghost" :disabled="interactionBusy" @click="setOpen(false)">
         {{ t('common.cancel') }}
       </Button>
       <Button
         type="submit"
         form="goal-form"
         data-testid="save-goal-button"
-        :disabled="!draft.name.trim() || isBusy || krEditorOpen"
+        :disabled="!draft.name.trim() || interactionBusy || krEditorOpen"
       >
         {{ mode === 'edit' ? t('goal.dialog.saveChanges') : t('goal.dialog.createGoal') }}
       </Button>
@@ -319,8 +319,20 @@ const editingBlocked = ref(false);
 // Session-local capability: the scoped AI handle can mutate while user commands cannot.
 // Reload invalidates the handle; the durable workflow restores only through a fresh safety check.
 const control = ref<symbol | null>(null);
+// Once the AI has projected a draft and coordinated submit/cancel, the owner must be
+// able to confirm or dismiss it even though the AI capability still holds `control`.
+// `isBusy` keeps inputs locked during AI patching; `interactionBusy` gates only the
+// Save/Cancel affordances and the close guard so the owner can always settle a review.
+const coordinated = ref(false);
 const isBusy = computed(
   () => submitting.value || isSaving.value || editingBlocked.value || control.value !== null,
+);
+const interactionBusy = computed(
+  () =>
+    submitting.value ||
+    isSaving.value ||
+    editingBlocked.value ||
+    (control.value !== null && !coordinated.value),
 );
 watch(isBusy, (busy) => emit('busy-change', busy), { immediate: true, flush: 'sync' });
 const {
@@ -501,6 +513,7 @@ function publishSession(): void {
           throw new Error('Submission coordination requires create mode');
         submitCoordinator = submit;
         cancelCoordinator = cancel;
+        coordinated.value = true;
       },
       async requestSubmit(context) {
         assertEditable();
@@ -533,6 +546,7 @@ function publishSession(): void {
 function retireSession(): void {
   control.value = null;
   editingBlocked.value = false;
+  coordinated.value = false;
   invalidateSession?.();
   emit('session-change', null);
 }
@@ -595,6 +609,7 @@ function reset(): void {
   submitCoordinator = null;
   cancelCoordinator = null;
   editingBlocked.value = false;
+  coordinated.value = false;
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
 }
@@ -614,7 +629,7 @@ watch(draft, () => emit('dirty-change', isDirty.value), { deep: true });
 
 const { requestClose } = useDialogCloseGuard({
   dirty: isDirty,
-  busy: isBusy,
+  busy: interactionBusy,
   onClose: async () => {
     if (cancelCoordinator) {
       await cancelCoordinator();
@@ -678,11 +693,12 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
-  if (isBusy.value) return;
+  if (submitting.value || isSaving.value || editingBlocked.value) return;
   if (submitCoordinator) {
     await submitCoordinator();
     return;
   }
+  if (control.value !== null) return;
   await saveOwner();
 }
 

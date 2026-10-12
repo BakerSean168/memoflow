@@ -139,7 +139,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     await wrapper.get('[data-testid="ai-ask-user-submit"]').trigger('submit');
     expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }, 'Long term']);
     await wrapper.get('[data-testid="ai-ask-user-cancel"]').trigger('click');
-    expect(wrapper.emitted('ask-user-answer')?.[1]).toMatchObject([{ toolCallId: 'ask-1' }, { action: 'cancel' }]);
+    expect(wrapper.emitted('ask-user-cancel')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }]);
     wrapper.unmount();
   });
 
