@@ -1,7 +1,9 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
 import {
   AIWorkflowRunViewSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   KnowledgeDraftSchema,
   TaskPlanDraftContentSchema,
 } from '@memoflow/contracts/ai';
@@ -1659,6 +1661,72 @@ async function installGoalWorkflowMocks(
     createdAt: Date.now(),
     draft: createTaskWorkflowDraft('Restored Mastra task workflow'),
   };
+
+  // The E2E host uses mock workflow snapshots, so it must own their lease
+  // endpoint as well. Keep the real claim/renew/release contract, including
+  // monotone generations and a persistent grant across page reloads; do not
+  // bypass the product's fail-closed native form custody checks.
+  const goalLeases = new Map<string, {
+    token: string | null;
+    fence: number;
+    expiresAt: number;
+  }>();
+  await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
+    if (route.request().method() !== 'POST') {
+      await route.continue();
+      return;
+    }
+    const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
+    expect(request).not.toHaveProperty('identityId');
+    const knownRun =
+      request.runId === restoredApprovalRun.runId ||
+      workflowRunsByRunId.has(request.runId);
+    if (!knownRun) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+
+    const now = Date.now();
+    const current = goalLeases.get(request.runId);
+    if (request.action === 'claim') {
+      if (current?.token && current.expiresAt > now) {
+        await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'busy' }));
+        return;
+      }
+      const next = {
+        token: randomUUID(),
+        fence: (current?.fence ?? 0) + 1,
+        expiresAt: now + 30_000,
+      };
+      goalLeases.set(request.runId, next);
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({
+        status: 'claimed',
+        ...next,
+      }));
+      return;
+    }
+
+    if (
+      !current ||
+      current.token !== request.token ||
+      current.fence !== request.fence ||
+      (request.action === 'renew' && current.expiresAt <= now)
+    ) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'renew') {
+      current.expiresAt = now + 30_000;
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({
+        status: 'renewed',
+        expiresAt: current.expiresAt,
+      }));
+      return;
+    }
+    current.token = null;
+    current.expiresAt = now;
+    await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'released' }));
+  });
 
   await page.route('**/api/v1/ai/runtime/workflow/start', async (route) => {
     if (route.request().method() !== 'POST') {

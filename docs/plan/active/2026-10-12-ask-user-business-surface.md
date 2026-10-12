@@ -131,3 +131,15 @@ updated: 2026-10-12T08:00:00Z
 2. 跨 Desktop 本地 Profile / Web 服务器共享的锁，不保证所有设备同一数据域；如需真正跨渠道同步控制，必须收敛身份与共享 authoritative lease/storage。
 3. 手动 handoff 的未保存草稿跨设备/重启恢复不在本切片；现有前端 overlay 只恢复有限 supporting data，不当作持久 Native Goal draft。
 4. 真实鉴权 API+PG migration+真实 Provider Chat / owner form/browser 整链路、崩溃后迁移接管及双设备并发验收未通过。不得自动 merge、部署或修改生产数据。
+
+
+## ChatGPT 接手 · P2 CI 回归修复（2026-10-12）
+
+在 5cd7f53f6d0 的 exact-head CI（run 38221646725）中，Typecheck、Build、Static Analysis、Governance 和其余三个 Web Flow Shard 已通过，但出现两个独立测试契约失配：
+
+- Desktop compose-ai.spec.ts 未预期新注入的 AiGoalSurfaceLeasePowerSyncRepository。现改用真实类的 expect.any() 核验依赖，未删除任何组合契约字段。该文件的 5/5 单测已通过。Coverage 子流程同样因这条测试而失败，不是另一个业务错误。
+- Web goal-workflow.spec.ts 仍 mock Mastra 工作流的 start/get/resume，却没有 mock 新增的 Goal Surface Lease 接口。由于产品端必须 fail-closed，这使 3 个 P0 浏览器用例找不到右侧原生表单。现于同一测试 fixture 中补齐 goal-surface-lease 的严格请求/响应 schema、只接受已知 Run、30 秒 TTL、单活 claim、renew/release 的 token + fence 校验，以及 release 后单调 fence。未禁用生产校验，也未放宽 UI 可见性断言。
+- 为防止本地过期测试库执行数据丢失型 Prisma 变更，浏览器回归改用独立且新建的 PostgreSQL 测试数据库 memoflow_pr449_p2e2e_20261012，不修改共享 memoflow_test。
+- 修复后本地验收：Desktop compose-ai.spec.ts **5/5**；隔离 PostgreSQL 下 Chromium Playwright 上一轮 3 个失败的 Goal P0 用例 **3/3**；修改文件 ESLint 0 错误。新提交 exact-head CI 尚待推送后验证，不宣称全绿。
+
+此阶段只收敛测试环境与新租约合同的对齐，没有改变服务端最终 Goal 持久写入事务。此前 P2 留下的原子 domain fencing、跨宿主一致性、正式 PostgreSQL 环境复验仍是下一道门槛。
