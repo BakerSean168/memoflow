@@ -99,6 +99,7 @@ updated: 2026-10-12T13:05:00Z
 6. RED→GREEN：真实 LibSQL Workflow 状态持久化与服务端投影测试、模型工具声明和身份测试、模型多步骤调用选项测试、右侧 native owner 字段逐次更新、冲突/人工接手、运行中轮询/取消迟到竞态等测试。当前定向：AI 139+（后续 17 项 Planner 测试）、UI 49+（含 1 个取消竞态），lint 0 errors，AI/ Vue typecheck 通过。真正 exact-head CI 以推送后 GitHub 结果为准。
 
 **仍未完成且不得混淆：**
+
 - 没有使用真实生产 Provider 验证模型实际按预期调用五个工具并继续输出合法最终决策；不同 Provider 的 tool calling / structured output 兼容性需要单独 canary。
 - 模型工具操作与 UI 刷新采用经验证的 durable action journal + 短轮询，而非逐 token SSE。
 - **运行中可读事实的独立验收：**Mastra 的 `setState` 在 Workflow Step 尚未 yield 前仅更新其引擎状态；原实现的 snapshot.value.liveActions 此刻不可由另一请求读取，新增的真实 LibSQL 中途阻塞测试先 RED。现在通过版本限定的 transactional `WorkflowsStorage.updateWorkflowState` 只发布 top-level `goalLiveActions` 预览，CAS 仅允许 running 状态，不改引擎 `value/context/step graph`；读 API 在 running 期间选有效持久投影，完成/暂停后恢复以 `snapshot.value.liveActions` 为权威。PG 与 LibSQL 对该 update API 的实现均已检查为单事务并合并扩展字段。由于额外快照字段不是 SDK 公布的稳定 opts 类型，本功能依赖当前固定 Mastra 1.70.0 存储实现；升级 SDK 必须跑中途读写与终态防复活测试，不得无验收直接升级。
@@ -131,7 +132,6 @@ updated: 2026-10-12T13:05:00Z
 2. 跨 Desktop 本地 Profile / Web 服务器共享的锁，不保证所有设备同一数据域；如需真正跨渠道同步控制，必须收敛身份与共享 authoritative lease/storage。
 3. 手动 handoff 的未保存草稿跨设备/重启恢复不在本切片；现有前端 overlay 只恢复有限 supporting data，不当作持久 Native Goal draft。
 4. 真实鉴权 API+PG migration+真实 Provider Chat / owner form/browser 整链路、崩溃后迁移接管及双设备并发验收未通过。不得自动 merge、部署或修改生产数据。
-
 
 ## ChatGPT 接手 · P2 CI 回归修复（2026-10-12）
 
