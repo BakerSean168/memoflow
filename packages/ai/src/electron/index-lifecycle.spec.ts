@@ -102,6 +102,7 @@ function createFakeInstance() {
     estimatedCost: 0.0000375,
   }));
   const decideToolApproval = vi.fn(() => false);
+  const answerToolSuspension = vi.fn(async () => true);
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
   const instance = {
@@ -112,7 +113,7 @@ function createFakeInstance() {
     assistantConversation,
     knowledge,
     evaluationOperations,
-    mastraRuntime: { summarizeUsage, decideToolApproval } as never,
+    mastraRuntime: { summarizeUsage, decideToolApproval, answerToolSuspension } as never,
     workflowRuntime: null,
     start,
     dispose,
@@ -125,6 +126,7 @@ function createFakeInstance() {
     evaluationOperations,
     summarizeUsage,
     decideToolApproval,
+    answerToolSuspension,
     start,
     dispose,
   };
@@ -162,6 +164,17 @@ describe('createAIElectronModule lifecycle', () => {
     expect(mocks.handlers.has('ai:agent:run:start')).toBe(false);
     expect(mocks.handlers.has('ai:assistant:dispatch:start')).toBe(false);
     expect(mocks.handlers.has('ai:chat:message:stream:start')).toBe(false);
+  });
+
+  it('awaits native ask_user reply over Desktop IPC before serializing accepted', async () => {
+    await moduleDef.register(createFakeContext());
+    const command = { type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' };
+    const result = await mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ANSWER)!(undefined, command);
+    expect(fake.answerToolSuspension).toHaveBeenCalledWith(expect.objectContaining({
+      context: expect.objectContaining({ identityId: 'identity-1' }),
+      command,
+    }));
+    expect(result).toEqual(ok({ accepted: true }));
   });
 
   it('routes product IPC through the matching capability port', async () => {

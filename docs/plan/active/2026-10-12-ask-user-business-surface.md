@@ -2,7 +2,7 @@
 tags: [plan, active]
 description: Ask User 与 Goal BusinessPanel owner 操作纵向切片
 created: 2026-10-12T00:00:00Z
-updated: 2026-10-12T00:00:00Z
+updated: 2026-10-12T06:35:00Z
 ---
 
 # Ask User + Goal Business Surface
@@ -69,3 +69,20 @@ updated: 2026-10-12T00:00:00Z
 - 初次全 app-vue test 在 200 秒 timeout；随后修正新增接口涉及的 mock 与 source assertion，再跑上述 89 文件范围全绿。未宣称整个 app-vue suite 通过。
 
 最终复验：exact-head CI（run 38199456950 @ `5f8fa09d5ab`）19/19 job 全绿（含 Unit Tests、Typecheck、Web Flow Shard 1–4/4、Validate Oracle、Web Flow Oracle、Governance Oracle 等）。此前两次红灯的可复现失败均由本切片修复，不再有未分类失败。
+
+## ChatGPT 接手 · Ask User 续流闭环检查点（2026-10-12）
+
+继续在原 feat/agent-ask-user-business-surface 独立 worktree 实施，不改 main checkout。fc5f80e07fc 的历史 CI 19/19 通过，仅证明旧 HEAD，不能代替本批 CI。
+
+- 修正 HTTP /assistant/answer 与 Desktop IPC 对异步 answerToolSuspension 的 Promise 错判；两个传输入口显式 await，HTTP 错误严格映射 public transport code，避免泄漏 provider 凭据。
+- Mastra resumeStream 返回的是 MastraModelOutput；须等待读取其 text 完成，再确认答复或取消，随后刷新权威消息历史显示后续 Assistant 内容。
+- 重新进入会话时，除了 Mastra history，还读取 listAskUserSuspensions，把持久待答问题恢复为 Chat 卡片；不用依赖旧组件加载状态。成功回答后刷新历史；不伪造模型输出。
+- 取消同样校验 runId / threadId / resourceId / toolCallId，拒绝外部用户或会话；用 resumedRuns 避免同进程重复恢复。
+- RED→GREEN 验证：HTTP+IPC 33/33，Chat Composables 31/31，Mastra Runtime 39/39，app-vue Nx typecheck（含依赖包构建）成功。更全面的 exact-head CI 以本批提交后 GitHub 实际结果为准。
+- 注意：本批是「恢复生成完成，再读取历史」，并非续流期间逐 token 送达；真实 provider/API/PG 浏览器全链路、跨进程幂等性尚未验收。
+
+### 后续主任务（尚未完成）
+
+1. **P1：**模型生成过程中调用真实 Goal 语义业务工具并同步右侧表单，必须在 owner 授权、校验与持久化 Action Journal 下实现；现有完整 GoalPlanDraft + batch patch 仍然不是增量工具。
+2. **P2：**跨窗口/设备 durable lease、人工接手后禁止覆盖、持久恢复及真实运行环境 E2E。
+3. 每次检查点提交并 push 到原 Draft PR #449，核对该 HEAD CI；P1/P2 未验收不得合并或部署。

@@ -558,7 +558,10 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       resumeStream: (data: unknown, options: unknown) => Promise<unknown>;
     };
     vi.spyOn(suspendedAgent, 'listSuspendedRuns').mockResolvedValue({ runs: [{ runId: 'persisted-run', threadId: 'ask-chat', resourceId: 'identity-a', toolCalls: [{ toolCallId: 'question-1', toolName: 'ask_user', suspendPayload: { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] } }] }] });
-    const resume = vi.spyOn(suspendedAgent, 'resumeStream').mockResolvedValue({} as never);
+    const resumedText = vi.fn(async () => 'continued answer');
+    const resume = vi.spyOn(suspendedAgent, 'resumeStream').mockResolvedValue({
+      get text() { return resumedText(); },
+    } as never);
     const projection = await first.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: 'ask-chat' });
     expect(projection).toEqual([{ runId: 'persisted-run', toolCallId: 'question-1', question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }]);
     const command = { type: 'tool_answer' as const, action: 'answer' as const, conversationId: 'ask-chat', runId: 'persisted-run', toolCallId: 'question-1', answer: 'A' };
@@ -566,6 +569,38 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command: { ...command, answer: 'not-an-option' } })).resolves.toBe(false);
     await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command })).resolves.toBe(true);
     expect(resume).toHaveBeenCalledWith('A', expect.objectContaining({ runId: 'persisted-run', toolCallId: 'question-1', memory: { thread: 'ask-chat', resource: 'identity-a' } }));
+    expect(resumedText).toHaveBeenCalledTimes(1);
+  });
+
+  it('scopes persisted ask_user cancellation to the authenticated owner and drains the resumed output', async () => {
+    const first = await createRuntime();
+    await first.runtime.init();
+    const agent = first.runtime.assistant as never as {
+      listSuspendedRuns: (query: unknown) => Promise<unknown>;
+      resumeStream: (value: unknown, options: unknown) => Promise<unknown>;
+    };
+    const resumedText = vi.fn(async () => 'cancel handled');
+    vi.spyOn(agent, 'listSuspendedRuns').mockResolvedValue({
+      runs: [{
+        runId: 'cancel-run',
+        threadId: 'owner-chat',
+        resourceId: 'identity-a',
+        toolCalls: [{ toolCallId: 'ask-1', toolName: 'ask_user', suspendPayload: { question: 'Continue?' } }],
+      }],
+    } as never);
+    const resume = vi.spyOn(agent, 'resumeStream').mockResolvedValue({
+      get text() { return resumedText(); },
+    } as never);
+    const command = {
+      type: 'tool_answer' as const, action: 'cancel' as const,
+      conversationId: 'owner-chat', runId: 'cancel-run', toolCallId: 'ask-1', answer: 'cancelled',
+    };
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'owner'), command: { ...command, conversationId: 'other-chat' } })).resolves.toBe(false);
+    expect(resume).not.toHaveBeenCalled();
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'owner'), command })).resolves.toBe(true);
+    expect(resume).toHaveBeenCalledTimes(1);
+    expect(resumedText).toHaveBeenCalledTimes(1);
   });
 
   it('does not start a native turn when the dispatch signal is already aborted', async () => {

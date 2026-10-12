@@ -24,6 +24,7 @@ export function useAssistantStream(input: {
     | 'lastRuntimeUsage'
     | 'ensureConversationCreated'
     | 'refreshRuntimeUsage'
+    | 'refreshRuntimeHistory'
   >;
   composer: ReturnType<typeof useAIComposerContext>;
 }) {
@@ -35,6 +36,7 @@ export function useAssistantStream(input: {
     lastRuntimeUsage,
     ensureConversationCreated,
     refreshRuntimeUsage,
+    refreshRuntimeHistory,
   } = input.conversation;
   const { composerAttachments, clearComposerTurnState } = composer;
   const { t } = useI18n();
@@ -154,39 +156,81 @@ export function useAssistantStream(input: {
     }
   }
 
-  async function answerAskUser(request: ChatAskUserRequest, answer: ChatAskUserAnswer) {
-    // A suspended question outlives the stream turn: it is answerable while its run
-    // is parked, even though chatLoading was released to free the composer.
-    const suspendedRun = suspendedAskUserRunId.value === request.runId;
-    if (
-      request.status !== 'pending' ||
-      request.conversationId !== chatConversationId.value ||
-      (!suspendedRun && (request.runId !== activeRuntimeRunId.value || !chatLoading.value))
-    )
-      return;
-    request.status = 'sending'; request.errorMessage = undefined;
-    const stillWaiting = () => request.status === 'sending' && request.runId === suspendedAskUserRunId.value && request.conversationId === chatConversationId.value;
+  /** Never trust a retained card from a different conversation or stale projection. */
+  function isVisibleAskUserRequest(request: ChatAskUserRequest): boolean {
+    return request.conversationId === chatConversationId.value &&
+      chatTimeline.value.some((item) => item.askUserRequests?.includes(request)) &&
+      (!chatLoading.value || activeRuntimeRunId.value === request.runId);
+  }
+
+  async function reconcileAskUserHistory(conversationId: string) {
+    if (conversationId !== chatConversationId.value) return;
     try {
-      const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'answer', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer });
-      if (!accepted && stillWaiting()) { request.status = 'expired'; request.errorMessage = t('aiAssistant.chatPage.tools.stale'); }
+      await refreshRuntimeHistory(conversationId);
     } catch {
-      if (stillWaiting()) { request.status = 'pending'; request.errorMessage = t('aiAssistant.chatPage.tools.transportError'); }
+      // The server already accepted the answer; a history read failure must not
+      // re-enable the answered card and permit duplicate resume requests.
+      toast.error(t('aiAssistant.dialogs.chat.loadFailed'));
+    }
+  }
+
+  async function answerAskUser(request: ChatAskUserRequest, answer: ChatAskUserAnswer) {
+    if (request.status !== 'pending' || !isVisibleAskUserRequest(request)) return;
+    request.status = 'sending';
+    request.errorMessage = undefined;
+    try {
+      const accepted = await options.runtime.answerToolSuspension({
+        type: 'tool_answer',
+        action: 'answer',
+        conversationId: request.conversationId,
+        runId: request.runId,
+        toolCallId: request.toolCallId,
+        answer,
+      });
+      if (!isVisibleAskUserRequest(request) || request.status !== 'sending') return;
+      if (!accepted) {
+        request.status = 'expired';
+        request.errorMessage = t('aiAssistant.chatPage.tools.stale');
+        return;
+      }
+      request.status = 'answered';
+      if (suspendedAskUserRunId.value === request.runId) suspendedAskUserRunId.value = null;
+      await reconcileAskUserHistory(request.conversationId);
+    } catch {
+      if (isVisibleAskUserRequest(request) && request.status === 'sending') {
+        request.status = 'pending';
+        request.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+      }
     }
   }
 
   async function cancelAskUser(request: ChatAskUserRequest) {
-    const suspendedRun = suspendedAskUserRunId.value === request.runId;
-    if (
-      request.status !== 'pending' ||
-      request.conversationId !== chatConversationId.value ||
-      (!suspendedRun && (request.runId !== activeRuntimeRunId.value || !chatLoading.value))
-    )
-      return;
-    request.status = 'sending'; request.errorMessage = undefined;
+    if (request.status !== 'pending' || !isVisibleAskUserRequest(request)) return;
+    request.status = 'sending';
+    request.errorMessage = undefined;
     try {
-      const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'cancel', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer: 'cancelled' });
-      if (request.status === 'sending') request.status = accepted ? 'expired' : 'expired';
-    } catch { if (request.status === 'sending') { request.status = 'pending'; request.errorMessage = t('aiAssistant.chatPage.tools.transportError'); } }
+      const accepted = await options.runtime.answerToolSuspension({
+        type: 'tool_answer',
+        action: 'cancel',
+        conversationId: request.conversationId,
+        runId: request.runId,
+        toolCallId: request.toolCallId,
+        answer: 'cancelled',
+      });
+      if (!isVisibleAskUserRequest(request) || request.status !== 'sending') return;
+      request.status = 'expired';
+      if (!accepted) {
+        request.errorMessage = t('aiAssistant.chatPage.tools.stale');
+        return;
+      }
+      if (suspendedAskUserRunId.value === request.runId) suspendedAskUserRunId.value = null;
+      await reconcileAskUserHistory(request.conversationId);
+    } catch {
+      if (isVisibleAskUserRequest(request) && request.status === 'sending') {
+        request.status = 'pending';
+        request.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+      }
+    }
   }
 
   function clearPendingStreamFlushTimer() {
@@ -418,6 +462,12 @@ export function useAssistantStream(input: {
   ) {
     const choice = runtimeChoice.value;
     if ((choice.runtimeKind === 'builtin' && !selectedModel) || chatLoading.value) return;
+    // A suspended ask_user turn must be resolved before another message can
+    // mutate the same conversation. Avoid overlapping native Agent runs.
+    if (chatTimeline.value.some((item) => item.askUserRequests?.some(
+      (request) => request.conversationId === chatConversationId.value &&
+        (request.status === 'pending' || request.status === 'sending'),
+    ))) return;
 
     let userDraftId = '';
     let assistantDraftId = '';

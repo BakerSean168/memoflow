@@ -87,6 +87,7 @@ function createHarness() {
     lastRuntimeUsage: ref(null),
     ensureConversationCreated: vi.fn(async () => CONVERSATION_ID),
     refreshRuntimeUsage: vi.fn(async () => undefined),
+    refreshRuntimeHistory: vi.fn(async () => undefined),
   };
   const composer = {
     composerAttachments: ref([]),
@@ -116,7 +117,7 @@ function createHarness() {
     }),
     { global: { plugins: [i18n] } },
   );
-  return { timeline: timeline as Ref<ChatItem[]>, runtime, stream };
+  return { timeline: timeline as Ref<ChatItem[]>, runtime, stream, conversation };
 }
 
 function pendingRequest(timeline: Ref<ChatItem[]>): ChatAskUserRequest | undefined {
@@ -127,7 +128,7 @@ describe('useAssistantStream ask_user lifecycle', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('forwards an answer for a pending question after the suspended turn released the composer', async () => {
-    const { stream, runtime, timeline } = createHarness();
+    const { stream, runtime, timeline, conversation } = createHarness();
     await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
     await nextTick();
 
@@ -146,5 +147,23 @@ describe('useAssistantStream ask_user lifecycle', () => {
       toolCallId: TOOL_CALL_ID,
       answer: 'A',
     });
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
+    expect(request!.status).toBe('answered');
+  });
+
+  it('permits a restored pending question to be answered without a live stream run', async () => {
+    const { stream, runtime, timeline, conversation } = createHarness();
+    const request: ChatAskUserRequest = {
+      toolCallId: TOOL_CALL_ID, question: 'Pick one', options: [{ label: 'A' }],
+      runId: RUN_ID, conversationId: CONVERSATION_ID, status: 'pending',
+    };
+    timeline.value = [{
+      id: 'ask-user-restored', role: 'assistant', content: '',
+      status: 'success', askUserRequests: [request],
+    }];
+    await stream.answerAskUser(request, 'A');
+    expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
+    expect(request.status).toBe('answered');
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
   });
 });

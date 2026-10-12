@@ -505,7 +505,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
             const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(command);
             if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
-            return ok(AssistantRuntimeToolAnswerResultSchema.parse({ accepted: aiModule.mastraRuntime.answerToolSuspension({ context: requestContext, command: parsed.data }) }));
+            return ok(AssistantRuntimeToolAnswerResultSchema.parse({ accepted: await aiModule.mastraRuntime.answerToolSuspension({ context: requestContext, command: parsed.data }) }));
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_ANSWER);

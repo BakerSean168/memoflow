@@ -118,6 +118,8 @@ function createRuntimeStub(): AssistantRuntimeClient & {
   streamMessage: ReturnType<typeof vi.fn>;
   cancelRun: ReturnType<typeof vi.fn>;
   decideToolApproval: ReturnType<typeof vi.fn>;
+  listAskUserSuspensions: ReturnType<typeof vi.fn>;
+  answerToolSuspension: ReturnType<typeof vi.fn>;
 } {
   return {
     listMessages: vi.fn(async () => persistedHistory()),
@@ -125,6 +127,8 @@ function createRuntimeStub(): AssistantRuntimeClient & {
     streamMessage: vi.fn(async () => {}),
     cancelRun: vi.fn(async () => true),
     decideToolApproval: vi.fn(async () => true),
+    listAskUserSuspensions: vi.fn(async () => []),
+    answerToolSuspension: vi.fn(async () => true),
   } as never;
 }
 
@@ -794,6 +798,74 @@ describe('useAIChatSession Mastra-native open chat', () => {
     composable.scrollMessagesToBottom();
     await nextTick();
     expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
+  });
+
+  it('restores native ask_user cards on conversation reload even if Mastra has no assistant message yet', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listMessages.mockResolvedValue({
+      conversationId: 'conv-1',
+      messages: persistedHistory().messages.slice(0, 1),
+    });
+    runtime.listAskUserSuspensions.mockResolvedValue([
+      { runId: 'suspended-run', toolCallId: 'ask-1', question: 'Choose date', options: [{ label: 'June' }, { label: 'July' }] },
+    ]);
+    const composable = mountComposable(service, runtime);
+
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+
+    expect(runtime.listAskUserSuspensions).toHaveBeenCalledWith('conv-1');
+    expect(composable.chatTimeline.value[0]?.role).toBe('user');
+    expect(composable.chatTimeline.value[1]).toMatchObject({
+      role: 'assistant',
+      askUserRequests: [{
+        runId: 'suspended-run', toolCallId: 'ask-1', conversationId: 'conv-1',
+        question: 'Choose date', status: 'pending',
+      }],
+    });
+  });
+
+  it('projects the resumed model reply into Chat after answering a restored ask_user question', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listMessages.mockResolvedValueOnce({
+      conversationId: 'conv-1',
+      messages: persistedHistory().messages.slice(0, 1),
+    });
+    runtime.listAskUserSuspensions.mockResolvedValueOnce([
+      { runId: 'suspended-run', toolCallId: 'ask-1', question: 'Choose date', options: [{ label: 'June' }, { label: 'July' }] },
+    ]);
+    runtime.answerToolSuspension.mockImplementation(async () => true);
+    const composable = mountComposable(service, runtime);
+
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+    const request = composable.chatTimeline.value[1]?.askUserRequests?.[0];
+    expect(request?.status).toBe('pending');
+
+    await composable.answerAskUser(request!, 'July');
+    expect(runtime.answerToolSuspension).toHaveBeenCalledWith({
+      type: 'tool_answer', action: 'answer', conversationId: 'conv-1',
+      runId: 'suspended-run', toolCallId: 'ask-1', answer: 'July',
+    });
+    expect(composable.chatTimeline.value.at(-1)).toMatchObject({
+      id: 'assistant-1',
+      role: 'assistant',
+      content: 'final content',
+      status: 'success',
+    });
+    // A superseded card cannot resume the same run a second time.
+    await composable.answerAskUser(request!, 'July');
+    expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
   });
 
   it('loads conversation history and durable usage from their canonical runtime clients', async () => {

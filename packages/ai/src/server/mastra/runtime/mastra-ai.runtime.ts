@@ -353,17 +353,43 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   }
 
   async cancelAskUserSuspension(input: { context: ExecutionContext; command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand }): Promise<boolean> {
-    if (input.command.action !== 'cancel') return false;
-    const runs = await this.assistant.listSuspendedRuns({ threadId: input.command.conversationId, resourceId: input.context.identityId });
-    const run = runs.runs.find((candidate) => candidate.runId === input.command.runId);
-    const suspension = run?.toolCalls.find((call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user');
-    if (!suspension) return false;
-    this.resumedRuns.add(run!.runId);
+    if (input.command.action !== 'cancel' || !input.context.identityId || input.command.identityId) return false;
+    const runs = await this.assistant.listSuspendedRuns({
+      threadId: input.command.conversationId,
+      resourceId: input.context.identityId,
+    });
+    const run = runs.runs.find((candidate) =>
+      candidate.runId === input.command.runId &&
+      candidate.threadId === input.command.conversationId &&
+      candidate.resourceId === input.context.identityId,
+    );
+    const suspension = run?.toolCalls.find((call) =>
+      call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user',
+    );
+    if (!run || !suspension || this.resumedRuns.has(run.runId)) return false;
+    this.resumedRuns.add(run.runId);
     const requestContext = new RequestContext();
-    requestContext.setRaw('identityId', input.context.identityId); requestContext.setRaw('executionContext', input.context);
-    requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.context.identityId); requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.command.conversationId);
-    try { await this.assistant.resumeStream('The user cancelled this question. Continue without requiring an answer.', { runId: run!.runId, toolCallId: suspension.toolCallId, memory: { thread: input.command.conversationId, resource: input.context.identityId }, requestContext }); return true; }
-    finally { this.resumedRuns.delete(run!.runId); }
+    requestContext.setRaw('identityId', input.context.identityId);
+    requestContext.setRaw('executionContext', input.context);
+    requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.context.identityId);
+    requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.command.conversationId);
+    try {
+      const resumed = await this.assistant.resumeStream(
+        'The user cancelled this question. Continue without requiring an answer.',
+        {
+          runId: run.runId,
+          toolCallId: suspension.toolCallId,
+          memory: { thread: input.command.conversationId, resource: input.context.identityId },
+          requestContext,
+        },
+      );
+      await resumed.text;
+      return true;
+    } catch {
+      return false;
+    } finally {
+      this.resumedRuns.delete(run.runId);
+    }
   }
 
   async answerToolSuspension(input: {
@@ -390,7 +416,16 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     requestContext.setRaw('identityId', input.context.identityId); requestContext.setRaw('executionContext', input.context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.context.identityId); requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.command.conversationId);
     try {
-      await this.assistant.resumeStream(input.command.answer, { runId: run.runId, toolCallId: input.command.toolCallId, memory: { thread: input.command.conversationId, resource: input.context.identityId }, requestContext });
+      const resumed = await this.assistant.resumeStream(input.command.answer, {
+        runId: run.runId,
+        toolCallId: input.command.toolCallId,
+        memory: { thread: input.command.conversationId, resource: input.context.identityId },
+        requestContext,
+      });
+      // resumeStream returns a MastraModelOutput immediately. Drain its result
+      // before acknowledging the answer; otherwise the HTTP/IPC client reads
+      // history before the resumed assistant turn has persisted any output.
+      await resumed.text;
       return true;
     } catch { return false; }
     finally { this.resumedRuns.delete(run.runId); }

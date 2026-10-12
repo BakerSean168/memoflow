@@ -129,12 +129,32 @@ export function useConversationProjection(input: {
       kind === 'local_agent'
         ? await options.runtime.listMessages(conversationId, kind)
         : await options.runtime.listMessages(conversationId);
-    if (runtimeChoice.value.runtimeKind !== kind) return;
+    // Ask-user suspensions live in Mastra's durable run store rather than
+    // ordinary text history. Restore them even if the turn never wrote a text
+    // message before pausing, so a reload does not strand the pending answer.
+    const pendingAskUser = kind === 'local_agent'
+      ? []
+      : await options.runtime.listAskUserSuspensions(conversationId).catch(() => []);
+    if (runtimeChoice.value.runtimeKind !== kind || chatConversationId.value !== conversationId) return;
     historyIncomplete.value = history.incomplete ?? false;
-    if (chatConversationId.value !== conversationId) return;
-    chatTimeline.value = history.messages.map((message, index) =>
-      normalizeChatItem(message, index),
-    );
+    const timeline = history.messages.map((message, index) => normalizeChatItem(message, index));
+    for (const suspension of pendingAskUser) {
+      const id = `ask-user-${suspension.runId}`;
+      let item = timeline.find((candidate) => candidate.id === id);
+      if (!item) {
+        item = { id, role: 'assistant', content: '', status: 'success', askUserRequests: [] };
+        timeline.push(item);
+      }
+      if (!item.askUserRequests?.some((candidate) => candidate.toolCallId === suspension.toolCallId)) {
+        item.askUserRequests ??= [];
+        item.askUserRequests.push({
+          ...suspension,
+          conversationId,
+          status: 'pending',
+        });
+      }
+    }
+    chatTimeline.value = timeline;
   }
 
   async function refreshRuntimeUsage(conversationId: string): Promise<void> {
@@ -261,6 +281,7 @@ export function useConversationProjection(input: {
     updateLastActiveConversation,
     clearLastActiveConversation,
     loadConversationList,
+    refreshRuntimeHistory,
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,
