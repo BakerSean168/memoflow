@@ -44,6 +44,10 @@ export function useAssistantStream(input: {
   let pendingStreamDelta = '';
   let pendingStreamAssistantId: string | null = null;
   let pendingStreamFlushTimer: ReturnType<typeof setTimeout> | null = null;
+  // A live `ask_user` suspension ends the stream turn while the question stays
+  // answerable. Remember which run is parked so the composer release neither
+  // expires the pending question nor blocks the answer/cancel command.
+  const suspendedAskUserRunId = shallowRef<string | null>(null);
 
   function isAbortLikeError(error: unknown): boolean {
     if (error instanceof DOMException && error.name === 'AbortError') return true;
@@ -78,6 +82,8 @@ export function useAssistantStream(input: {
         }
       }
       for (const request of item.askUserRequests ?? []) {
+        // A parked ask_user question stays pending until it is answered or cancelled.
+        if (request.runId === suspendedAskUserRunId.value) continue;
         if (request.status === 'pending' || request.status === 'sending') request.status = 'expired';
       }
     }
@@ -149,9 +155,17 @@ export function useAssistantStream(input: {
   }
 
   async function answerAskUser(request: ChatAskUserRequest, answer: ChatAskUserAnswer) {
-    if (request.status !== 'pending' || request.runId !== activeRuntimeRunId.value || request.conversationId !== chatConversationId.value || !chatLoading.value) return;
+    // A suspended question outlives the stream turn: it is answerable while its run
+    // is parked, even though chatLoading was released to free the composer.
+    const suspendedRun = suspendedAskUserRunId.value === request.runId;
+    if (
+      request.status !== 'pending' ||
+      request.conversationId !== chatConversationId.value ||
+      (!suspendedRun && (request.runId !== activeRuntimeRunId.value || !chatLoading.value))
+    )
+      return;
     request.status = 'sending'; request.errorMessage = undefined;
-    const stillWaiting = () => request.status === 'sending' && request.runId === activeRuntimeRunId.value && request.conversationId === chatConversationId.value && chatLoading.value;
+    const stillWaiting = () => request.status === 'sending' && request.runId === suspendedAskUserRunId.value && request.conversationId === chatConversationId.value;
     try {
       const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'answer', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer });
       if (!accepted && stillWaiting()) { request.status = 'expired'; request.errorMessage = t('aiAssistant.chatPage.tools.stale'); }
@@ -161,7 +175,13 @@ export function useAssistantStream(input: {
   }
 
   async function cancelAskUser(request: ChatAskUserRequest) {
-    if (request.status !== 'pending' || request.conversationId !== chatConversationId.value) return;
+    const suspendedRun = suspendedAskUserRunId.value === request.runId;
+    if (
+      request.status !== 'pending' ||
+      request.conversationId !== chatConversationId.value ||
+      (!suspendedRun && (request.runId !== activeRuntimeRunId.value || !chatLoading.value))
+    )
+      return;
     request.status = 'sending'; request.errorMessage = undefined;
     try {
       const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'cancel', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer: 'cancelled' });
@@ -260,11 +280,19 @@ export function useAssistantStream(input: {
     if (event.type === 'assistant.ask_user.required') {
       item.askUserRequests ??= [];
       if (!item.askUserRequests.some((request) => request.toolCallId === event.data.toolCallId)) item.askUserRequests.push({ ...event.data, conversationId: event.conversationId, runId: event.runId, status: 'pending' });
+      else {
+        const existing = item.askUserRequests.find((request) => request.toolCallId === event.data.toolCallId)!;
+        if (existing.status === 'expired') existing.status = 'pending';
+      }
+      // Park the run so the eventual composer release neither expires the question
+      // nor blocks the answer/cancel command.
+      suspendedAskUserRunId.value = event.runId;
       return;
     }
     if (event.type === 'assistant.ask_user.resolved') {
       const request = item.askUserRequests?.find((candidate) => candidate.toolCallId === event.data.toolCallId);
       if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+      if (suspendedAskUserRunId.value === event.runId) suspendedAskUserRunId.value = null;
       return;
     }
     if (event.type === 'assistant.request.required') {

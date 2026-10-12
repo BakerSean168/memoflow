@@ -1,0 +1,150 @@
+import { defineComponent, h, nextTick, ref, type Ref } from 'vue';
+import { mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import { useAssistantStream } from './useAssistantStream';
+import type { ChatModelOption, ChatAskUserRequest, ChatItem } from './types';
+
+const toastMocks = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+vi.mock('vue-sonner', () => ({ toast: toastMocks }));
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en-US',
+  messages: {
+    'en-US': {
+      common: { unknown: 'Unknown', operationFailed: 'Operation failed' },
+      aiAssistant: {
+        chatPage: {
+          tools: {
+            stale: 'This decision is stale or already settled.',
+            transportError: 'Could not send the decision. Try again.',
+          },
+        },
+        dialogs: { chat: { sendFailed: 'Send failed' } },
+      },
+    },
+  },
+});
+
+const CONVERSATION_ID = 'conversation-1';
+const RUN_ID = 'run-1';
+const TOOL_CALL_ID = 'ask-1';
+
+const MODEL: ChatModelOption = {
+  key: 'provider-1::model-1',
+  providerId: 'provider-1',
+  providerName: 'Main provider',
+  modelId: 'model-1',
+  modelName: 'Model 1',
+};
+
+function assistantRunStarted(): AssistantRuntimeEvent {
+  return {
+    type: 'assistant.run.started',
+    eventId: 'e0',
+    runId: RUN_ID,
+    conversationId: CONVERSATION_ID,
+    sequence: 0,
+    createdAt: Date.now(),
+    data: { modelId: 'model-1', providerId: 'provider-1' },
+  } as AssistantRuntimeEvent;
+}
+
+function askUserEvent(): AssistantRuntimeEvent {
+  return {
+    type: 'assistant.ask_user.required',
+    eventId: 'e1',
+    runId: RUN_ID,
+    conversationId: CONVERSATION_ID,
+    sequence: 1,
+    createdAt: Date.now(),
+    data: {
+      toolCallId: TOOL_CALL_ID,
+      question: 'Pick one',
+      options: [{ label: 'A' }, { label: 'B' }],
+    },
+  } as AssistantRuntimeEvent;
+}
+
+function createHarness() {
+  const timeline = ref<ChatItem[]>([]);
+  const runtime = {
+    streamMessage: vi.fn(
+      async (_command: unknown, handlers: { onEvent?: (event: AssistantRuntimeEvent) => void }) => {
+        handlers.onEvent?.(assistantRunStarted());
+        handlers.onEvent?.(askUserEvent());
+      },
+    ),
+    answerToolSuspension: vi.fn(async () => true),
+    listAskUserSuspensions: vi.fn(async () => []),
+  };
+  const conversation = {
+    runtimeChoice: ref({ runtimeKind: 'builtin', providerId: 'provider-1', modelId: 'model-1' }),
+    chatConversationId: ref(CONVERSATION_ID),
+    chatTimeline: timeline,
+    lastRuntimeUsage: ref(null),
+    ensureConversationCreated: vi.fn(async () => CONVERSATION_ID),
+    refreshRuntimeUsage: vi.fn(async () => undefined),
+  };
+  const composer = {
+    composerAttachments: ref([]),
+    clearComposerTurnState: vi.fn(),
+    selectedEntities: vi.fn(() => []),
+  };
+  const options = {
+    service: {},
+    runtime,
+    usageRuntime: {},
+    surface: 'web',
+    getDefaultConversationName: () => 'New chat',
+  } as unknown as Parameters<typeof useAssistantStream>[0]['options'];
+
+  let stream!: ReturnType<typeof useAssistantStream>;
+  mount(
+    defineComponent({
+      setup() {
+        stream = useAssistantStream({
+          options,
+          chatMessage: ref('hello'),
+          conversation: conversation as never,
+          composer: composer as never,
+        });
+        return () => h('div');
+      },
+    }),
+    { global: { plugins: [i18n] } },
+  );
+  return { timeline: timeline as Ref<ChatItem[]>, runtime, stream };
+}
+
+function pendingRequest(timeline: Ref<ChatItem[]>): ChatAskUserRequest | undefined {
+  return timeline.value.flatMap((item) => item.askUserRequests ?? [])[0];
+}
+
+describe('useAssistantStream ask_user lifecycle', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('forwards an answer for a pending question after the suspended turn released the composer', async () => {
+    const { stream, runtime, timeline } = createHarness();
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    await nextTick();
+
+    const request = pendingRequest(timeline);
+    expect(request).toBeDefined();
+    expect(request!.status).toBe('pending');
+    // The suspended turn released the composer; it must not orphan the pending question.
+    expect(stream.chatLoading.value).toBe(false);
+
+    await stream.answerAskUser(request!, 'A');
+    expect(runtime.answerToolSuspension).toHaveBeenCalledWith({
+      type: 'tool_answer',
+      action: 'answer',
+      conversationId: CONVERSATION_ID,
+      runId: RUN_ID,
+      toolCallId: TOOL_CALL_ID,
+      answer: 'A',
+    });
+  });
+});
