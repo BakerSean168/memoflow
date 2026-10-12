@@ -2,7 +2,7 @@
 tags: [plan, active]
 description: Ask User 与 Goal BusinessPanel owner 操作纵向切片
 created: 2026-10-12T00:00:00Z
-updated: 2026-10-12T08:00:00Z
+updated: 2026-10-12T13:05:00Z
 ---
 
 # Ask User + Goal Business Surface
@@ -143,3 +143,27 @@ updated: 2026-10-12T08:00:00Z
 - 修复后本地验收：Desktop compose-ai.spec.ts **5/5**；隔离 PostgreSQL 下 Chromium Playwright 上一轮 3 个失败的 Goal P0 用例 **3/3**；修改文件 ESLint 0 错误。新提交 exact-head CI 尚待推送后验证，不宣称全绿。
 
 此阶段只收敛测试环境与新租约合同的对齐，没有改变服务端最终 Goal 持久写入事务。此前 P2 留下的原子 domain fencing、跨宿主一致性、正式 PostgreSQL 环境复验仍是下一道门槛。
+
+## 交接收口 · 事务级 fencing + E2E 对齐（2026-10-12）
+
+前一实施线程（T3 `4d6b897f…c7cf1`，Pi/glm-5.3）在 `b6d1c396d02` 后中断（`run_interrupt_request`，无新提交），留下 16 个未提交文件的事务级 fencing WIP；本会话按用户决策接手为唯一 writer，其 WIP 全部保留并收口为 `212d24837b2`。
+
+### 本批交付
+
+- **事务内 fencing（前一线程 WIP，本会话逐行审查保留）**：`GoalWriteTransactionContext` 新增 `assertNativeAiLease`；Prisma 路径用零增量 `UPDATE … SET expires_at=expires_at … RETURNING` 行锁保持到提交，`clock_timestamp()` 在语句求值时判定过期；PowerSync 在同一串行 SQLite 写事务内校验。`CreateGoalUseCase` 无事务 runner 即 fail-closed CONFLICT；fenced 路径的幂等 replay 移入事务内；租约失配/过期在 owner mutation 前拒绝。租约行释放不删除，fence 代数不回滚。
+- **客户端**：`useGoalSurfaceLease.currentGrant(runId)` 返回 detached grant snapshot 进入 `requestSubmit`；`CreateGoalSchema` 接受严格 `GoalNativeAiLease`（runId/token(uuid)/fence），`GoalAgentCreateSchema` 显式 omit（模型不能自供租约）。
+- **E2E 对齐缺口（本会话发现并修复，前一线程报告已预告但未做）**：goal-workflow E2E 的 lease 端点是 mock（真实端点对不存在的 run fail-closed），但 `POST /api/v1/goals` 是 observe-only → 真实 API+PG；WIP 的围栏会使真实保存 CONFLICT。修复：新增 `apps/web/e2e/helpers/goalLeaseDbMirror.ts`，把 mock 决定的 claim/renew/release 逐条镜像写入 E2E API 所用的同一测试库（`TEST_DATABASE_URL` 解析链与 `ensureTestDatabase()` 完全一致、UTC 会话时区，行语义与 Prisma repo 逐行对齐），E2E 因此真实验证围栏而非绕过它；apps/web 新增 `pg@8.23.0` devDependency。
+
+### 验证记录（本会话独立复验，不采信前一线程的自报）
+
+- `api` compose-ai.spec **4/4**（b6d1c396d02 CI 红灯根因，WIP 内修复有效）；`goal:test` 全量通过；`goal:test:integration` 通过，`goal-native-ai-lease.integration.test.ts` **2/2**（真实 PG 行锁/过期/围栏）。本地共享 `memoflow_test` 曾落后 schema（缺 lease 表 + 两个旧唯一约束，查实 0 重复行），经用户显式同意以 `db push --accept-data-loss` 同步，仅新增性变更。
+- app-vue 受影响 4 文件 **111/111**（超过前一线程自报的 90/90）；typecheck（app-vue/api/goal/contracts/ai/web 含依赖 33 任务）与 affected lint（41 projects）全过；`release-tooling.test.mjs` 本地 **11/11**——b6d1c396d02 CI 中的 AppImage 失败确认为并行负载 flaky，非真回归。
+- E2E「Goal Agent」**3/3**（3.4m）：mock claim → DB 镜像 → 真实事务校验 → 真实 Goal 创建，链路首次真正验证 fenced create。其余 goal-workflow 用例不触及 lease 路径（goal-crud/core-product-phase-d 无 AI 原生评审，desktop e2e 无 goal 流），交 exact-head CI 覆盖。
+
+### CI 状态与平台事故
+
+推送 `212d24837b2` 后 GitHub Actions 平台 `degraded_performance`（githubstatus 确认）：push/PR 事件未产生 workflow run（第三方 App check-suite 正常收到事件、schedule 类 workflow 正常执行），close/reopen PR #449 已重试触发。exact-head CI 以平台恢复后实际结果为准，未宣称全绿。
+
+### 剩余门槛（不变）
+
+生产 Provider canary、跨设备/跨宿主租约一致性、真实凭据全链路验收、最终端到端验收与完整 exact-head CI 未完成；P1/P2 未验收不得合并或部署。
