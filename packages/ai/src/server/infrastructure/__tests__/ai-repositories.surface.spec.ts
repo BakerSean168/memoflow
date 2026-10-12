@@ -19,6 +19,7 @@ describe('ai repository factories surface', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const expectedKeys = [
     'agentInstanceRepository',
+    'conversationAttentionPort',
     'conversationRepository',
     'executionRecordPort',
     'knowledgeIndexRepository',
@@ -34,6 +35,8 @@ describe('ai repository factories surface', () => {
     const typed: AIPowerSyncRepositorySet = set;
     expect(typeof typed.conversationRepository.findByIdForIdentity).toBe('function');
     expect(typeof typed.executionRecordPort.record).toBe('function');
+    expect(typeof typed.conversationAttentionPort.transition).toBe('function');
+    expect(typeof typed.conversationAttentionPort.acknowledge).toBe('function');
     expect(typeof typed.agentInstanceRepository.getConversationSelection).toBe('function');
     expect(typeof typed.providerOnboardingSessionRepository.create).toBe('function');
     expect(typeof typed.providerOnboardingCommitPort.commit).toBe('function');
@@ -47,6 +50,8 @@ describe('ai repository factories surface', () => {
     const typed: AIPrismaRepositorySet = set;
     expect(typeof typed.conversationRepository.findByIdForIdentity).toBe('function');
     expect(typeof typed.executionRecordPort.record).toBe('function');
+    expect(typeof typed.conversationAttentionPort.transition).toBe('function');
+    expect(typeof typed.conversationAttentionPort.acknowledge).toBe('function');
     expect(typeof typed.agentInstanceRepository.getConversationSelection).toBe('function');
     expect(typeof typed.providerOnboardingSessionRepository.create).toBe('function');
     expect(typeof typed.providerOnboardingCommitPort.commit).toBe('function');
