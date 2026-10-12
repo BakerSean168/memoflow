@@ -1,5 +1,7 @@
 import type {
   AIWorkflowResumeClientRequest,
+  AIGoalSurfaceLeaseRequest,
+  AIGoalSurfaceLeaseResponse,
   AIWorkflowRunView,
   AIWorkflowStartClientRequest,
 } from '@memoflow/contracts/ai';
@@ -36,4 +38,5 @@ export interface AIWorkflowRuntimePort {
     conversationId?: string;
   }): Promise<readonly AIWorkflowRunView[]>;
   cancel(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null>;
+  goalSurfaceLease(input: { identityId: string; request: AIGoalSurfaceLeaseRequest }): Promise<AIGoalSurfaceLeaseResponse>;
 }

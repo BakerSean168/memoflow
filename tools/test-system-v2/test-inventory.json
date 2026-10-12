@@ -3103,6 +3103,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3623,6 +3633,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3994,6 +4014,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4726,6 +4756,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12573,7 +12611,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 104
+      "fileCount": 107
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13127,14 +13165,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 104
+      "fileCount": 107
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 289
+      "fileCount": 290
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13422,6 +13460,7 @@
       "packages/account/src/server/transport/__tests__/account.controller.test.ts",
       "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
       "packages/ai/src/api/routes/ai-provider-onboarding.routes.spec.ts",
+      "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
@@ -13474,6 +13513,7 @@
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-conversation-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-config-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-onboarding-session-memory.repository.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
@@ -13512,6 +13552,7 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "packages/ai/src/server/mastra/tools/owner-contracts.surface.spec.ts",
@@ -13881,7 +13922,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1199,
+    "unit": 1203,
     "integration": 47,
     "smoke": 3,
     "boundary-ipc": 8,

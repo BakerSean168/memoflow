@@ -193,3 +193,58 @@ describe('unsupported workflow snapshot transport parity', () => {
     },
   );
 });
+
+
+describe('Goal native surface lease contract over HTTP/IPC', () => {
+  const claimed = {
+    status: 'claimed' as const,
+    token: '11111111-1111-4111-8111-111111111111',
+    fence: 3,
+    expiresAt: 30_000,
+  };
+
+  it('binds claim, renewal and release to the same validated transport contract', async () => {
+    const post = vi.fn().mockResolvedValue(ok(claimed));
+    const invoke = vi.fn().mockResolvedValue(ok(claimed));
+    for (const client of [
+      new WorkflowRuntimeHttpClient(httpStub({ post })),
+      new WorkflowRuntimeIpcClient({ invoke } as never),
+    ]) {
+      await expect(client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' }))
+        .resolves.toEqual(claimed);
+      await expect(client.goalSurfaceLease({
+        action: 'renew', runId: 'goal-run-1', token: claimed.token, fence: claimed.fence,
+      })).resolves.toEqual(claimed);
+      await expect(client.goalSurfaceLease({
+        action: 'release', runId: 'goal-run-1', token: claimed.token, fence: claimed.fence,
+      })).resolves.toEqual(claimed);
+    }
+    expect(post).toHaveBeenCalledWith('/ai/runtime/workflow/goal-surface-lease', expect.any(Object));
+    expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, expect.any(Object));
+    expect(JSON.stringify([...post.mock.calls, ...invoke.mock.calls])).not.toContain('identityId');
+  });
+
+  it('rejects client-supplied owner identity and missing token/fence before any request', async () => {
+    const post = vi.fn();
+    const invoke = vi.fn();
+    for (const client of [
+      new WorkflowRuntimeHttpClient(httpStub({ post })),
+      new WorkflowRuntimeIpcClient({ invoke } as never),
+    ]) {
+      await expect(client.goalSurfaceLease({
+        action: 'claim', runId: 'goal-run-1', identityId: 'foreign',
+      } as never)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      await expect(client.goalSurfaceLease({
+        action: 'renew', runId: 'goal-run-1', token: claimed.token,
+      } as never)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    }
+    expect(post).not.toHaveBeenCalled();
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('rejects malformed provider responses instead of silently granting control', async () => {
+    const post = vi.fn().mockResolvedValue(ok({ status: 'claimed', fence: 4 }));
+    const client = new WorkflowRuntimeHttpClient(httpStub({ post }));
+    await expect(client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' })).rejects.toThrow();
+  });
+});

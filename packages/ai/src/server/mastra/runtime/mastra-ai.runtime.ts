@@ -16,6 +16,8 @@ import {
   type AIWorkflowResumeClientRequest,
   type AIWorkflowRunView,
   type AIWorkflowStartClientRequest,
+  type AIGoalSurfaceLeaseRequest,
+  type AIGoalSurfaceLeaseResponse,
   type AssistantRuntimeEvent,
   type AssistantRuntimeHistoryView,
 } from '@memoflow/contracts/ai';
@@ -39,6 +41,7 @@ import {
   TaskPlannerWorker,
 } from '../agents';
 import { createMemoFlowProductTools } from '../tools/product-tools';
+import type { IGoalSurfaceLeaseRepository } from '../../application/ports/goal-surface-lease.port';
 import type { MastraModelResolver } from '../models';
 import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
 import { AIExecutionError } from '../../../shared/ai-execution-error';
@@ -87,6 +90,7 @@ export interface MastraAIRuntimeDependencies {
   readonly executionRecordPort?: IAIExecutionRecordPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
   readonly usageReadPort?: IAIUsageReadPort;
+  readonly goalSurfaceLeaseRepository?: IGoalSurfaceLeaseRepository;
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
@@ -216,6 +220,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       history: this.history,
       usageReadPort: deps.usageReadPort,
+      goalSurfaceLeaseRepository: deps.goalSurfaceLeaseRepository,
       goalCreateWorkflow: this.goalCreateWorkflow,
       taskCreateWorkflow: this.taskCreateWorkflow,
       knowledgeCaptureWorkflow: this.knowledgeCaptureWorkflow,
@@ -247,6 +252,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       })();
     }
     await this.disposePromise;
+  }
+
+  async goalSurfaceLease(input: {
+    identityId: string;
+    request: AIGoalSurfaceLeaseRequest;
+  }): Promise<AIGoalSurfaceLeaseResponse> {
+    await this.init();
+    return this.durableWorkflows.goalSurfaceLease(input);
   }
 
   async start(input: {

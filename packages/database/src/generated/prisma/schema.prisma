@@ -59,6 +59,7 @@ model Account {
   notifications                 Notification[]
   aiConversations               AiConversation[]
   aiExecutionRecords            AiExecutionRecord[]
+  aiGoalSurfaceLeases           AiGoalSurfaceLease[]
   aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
   aiProviderConfigs             AiProviderConfig[]
   aiAgentInstances              AiAgentInstance[]
@@ -102,6 +103,25 @@ model AiConversation {
   @@index([status])
   @@index([createdAt])
   @@map("ai_conversations")
+}
+
+/// One AI-owned native Goal panel per authenticated workflow run.
+/// Keep a row after release so fencing generations never roll back.
+model AiGoalSurfaceLease {
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  runId      String   @map("run_id")
+  ownerToken String?  @map("owner_token")
+  fence      Int      @default(1)
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, runId])
+  @@index([expiresAt])
+  @@map("ai_goal_surface_leases")
 }
 
 model AiExecutionRecord {

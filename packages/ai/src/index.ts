@@ -60,6 +60,12 @@ export {
   type AIContextSectionInput,
   type AIKnowledgeEvidenceInput,
 } from './server/mastra/context';
+export { AiGoalSurfaceLeasePrismaRepository } from './server/infrastructure/adapters/prisma/ai-goal-surface-lease.prisma';
+export { AiGoalSurfaceLeasePowerSyncRepository } from './server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync';
+export type {
+  IGoalSurfaceLeaseRepository,
+  GoalSurfaceLeaseGrant,
+} from './server/application/ports/goal-surface-lease.port';
 export { AIEvaluationReportFileAdapter } from './server/infrastructure';
 export { LocalAgentRuntime } from './server/local-agent/local-agent-runtime';
 export { AgentInstanceRegistry } from './server/application/agent-instance/agent-instance.registry';

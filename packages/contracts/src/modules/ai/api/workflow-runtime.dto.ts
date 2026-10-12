@@ -257,6 +257,36 @@ export const AIWorkflowListClientRequestSchema = z
   .strict();
 export type AIWorkflowListClientRequest = z.infer<typeof AIWorkflowListClientRequestSchema>;
 
+/** Server-issued Goal native-panel lease token; identity always comes from auth. */
+export const AIGoalSurfaceLeaseRequestSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('claim'), runId: z.string().min(1), identityId: z.never().optional() }).strict(),
+  z.object({
+    action: z.literal('renew'), runId: z.string().min(1),
+    token: z.string().uuid(), fence: z.number().int().positive(),
+    identityId: z.never().optional(),
+  }).strict(),
+  z.object({
+    action: z.literal('release'), runId: z.string().min(1),
+    token: z.string().uuid(), fence: z.number().int().positive(),
+    identityId: z.never().optional(),
+  }).strict(),
+]);
+export type AIGoalSurfaceLeaseRequest = z.infer<typeof AIGoalSurfaceLeaseRequestSchema>;
+
+export const AIGoalSurfaceLeaseResponseSchema = z.discriminatedUnion('status', [
+  z.object({
+    status: z.literal('claimed'),
+    token: z.string().uuid(),
+    fence: z.number().int().positive(),
+    expiresAt: z.number().int().positive(),
+  }).strict(),
+  z.object({ status: z.literal('busy') }).strict(),
+  z.object({ status: z.literal('renewed'), expiresAt: z.number().int().positive() }).strict(),
+  z.object({ status: z.literal('lost') }).strict(),
+  z.object({ status: z.literal('released') }).strict(),
+]);
+export type AIGoalSurfaceLeaseResponse = z.infer<typeof AIGoalSurfaceLeaseResponseSchema>;
+
 export const AIWorkflowCancelClientRequestSchema = z
   .object({
     runId: z.string().min(1),

@@ -13,6 +13,8 @@ import {
   AIRuntimeUsageQueryClientRequestSchema,
   AIRuntimeUsageSummarySchema,
   AIWorkflowCancelClientRequestSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   AIWorkflowGetClientRequestSchema,
   AIWorkflowListClientRequestSchema,
   AIWorkflowResumeClientRequestSchema,
@@ -445,6 +447,38 @@ export function registerAIRuntimeRoutes(
       res
         .status(failure.statusCode)
         .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+    }
+  });
+
+  router.post('/workflow/goal-surface-lease', auth, async (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    if (!workflowRuntime) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI workflow runtime unavailable'));
+      return;
+    }
+    const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues)));
+      return;
+    }
+    try {
+      const result = AIGoalSurfaceLeaseResponseSchema.parse(
+        await workflowRuntime.goalSurfaceLease({ identityId, request: parsed.data }),
+      );
+      res.status(200).json(responseBuilder.success(result));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Goal surface lease failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 

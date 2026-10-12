@@ -54,6 +54,7 @@ const CURRENT_CHANNELS = [
   AIChannels.RUNTIME_WORKFLOW_GET,
   AIChannels.RUNTIME_WORKFLOW_LIST,
   AIChannels.RUNTIME_WORKFLOW_CANCEL,
+  AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE,
   AIChannels.KNOWLEDGE_QUERY,
   AIChannels.KNOWLEDGE_EXPAND,
   AIChannels.KNOWLEDGE_REINDEX,
@@ -155,6 +156,29 @@ describe('createAIElectronModule lifecycle', () => {
     }
     mocks.handlers.clear();
     vi.clearAllMocks();
+  });
+
+  it('routes Goal surface lease IPC through authenticated identity and rejects identity injection', async () => {
+    const grant = {
+      status: 'claimed', token: '11111111-1111-4111-8111-111111111111',
+      fence: 2, expiresAt: Date.now() + 30_000,
+    };
+    const goalSurfaceLease = vi.fn(async () => grant);
+    Object.assign(fake.instance, {
+      workflowRuntime: { goalSurfaceLease },
+    });
+    await moduleDef.register(createFakeContext());
+    const handler = mocks.handlers.get(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE)!;
+    const request = { action: 'claim', runId: 'goal-run-1' };
+    expect(await handler(undefined, request)).toMatchObject({ ok: true, data: grant });
+    expect(goalSurfaceLease).toHaveBeenCalledExactlyOnceWith({
+      identityId: 'identity-1', request,
+    });
+    const rejected = await handler(undefined, {
+      action: 'claim', runId: 'goal-run-1', identityId: 'other',
+    });
+    expect(rejected).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(goalSurfaceLease).toHaveBeenCalledTimes(1);
   });
 
   it('registers only current product + Mastra runtime channels', async () => {

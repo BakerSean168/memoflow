@@ -82,6 +82,8 @@ import {
   AIRuntimeUsageQueryClientRequestSchema,
   AIRuntimeUsageSummarySchema,
   AIWorkflowCancelClientRequestSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   AIWorkflowGetClientRequestSchema,
   AIWorkflowListClientRequestSchema,
   AIWorkflowResumeClientRequestSchema,
@@ -781,6 +783,36 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_WORKFLOW_RESUME);
+        ipcMain.handle(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, async (_, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.workflowRuntime) {
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI workflow runtime unavailable' });
+            }
+            const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
+            if (!parsed.success) {
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid Goal surface lease request',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            }
+            try {
+              const result = AIGoalSurfaceLeaseResponseSchema.parse(
+                await aiModule.workflowRuntime.goalSurfaceLease({
+                  identityId: requestContext.identityId, request: parsed.data,
+                }),
+              );
+              return ok(result);
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Goal surface lease failed',
+              });
+              return fail({ code: failure.code, message: failure.message, context: failure.context });
+            }
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE);
         ipcMain.handle(AIChannels.RUNTIME_WORKFLOW_GET, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.workflowRuntime) {

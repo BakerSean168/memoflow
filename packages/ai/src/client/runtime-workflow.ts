@@ -1,5 +1,9 @@
 import {
   AIWorkflowCancelClientRequestSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
+  type AIGoalSurfaceLeaseRequest,
+  type AIGoalSurfaceLeaseResponse,
   AIWorkflowGetClientRequestSchema,
   AIWorkflowListClientRequestSchema,
   AIWorkflowResumeClientRequestSchema,
@@ -69,6 +73,7 @@ export interface WorkflowRuntimeClient {
   get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null>;
   list(request?: AIWorkflowListClientRequest): Promise<readonly AIWorkflowRunView[]>;
   cancel(request: AIWorkflowCancelClientRequest): Promise<AIWorkflowRunView | null>;
+  goalSurfaceLease(request: AIGoalSurfaceLeaseRequest): Promise<AIGoalSurfaceLeaseResponse>;
 }
 
 function invalidRequest(kind: string): never {
@@ -133,6 +138,15 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
     return parseRuns(unwrapOrThrowError(result));
   }
 
+  async goalSurfaceLease(request: AIGoalSurfaceLeaseRequest): Promise<AIGoalSurfaceLeaseResponse> {
+    const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
+    if (!parsed.success) invalidRequest('Goal surface lease');
+    const result = await this.httpClient.post<unknown>(
+      '/ai/runtime/workflow/goal-surface-lease', parsed.data,
+    );
+    return AIGoalSurfaceLeaseResponseSchema.parse(unwrapOrThrowError(result));
+  }
+
   async cancel(request: AIWorkflowCancelClientRequest): Promise<AIWorkflowRunView | null> {
     const parsed = AIWorkflowCancelClientRequestSchema.safeParse(request);
     if (!parsed.success) invalidRequest('cancel');
@@ -189,6 +203,15 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
       parsed.data,
     );
     return parseRuns(unwrapOrThrowError(result));
+  }
+
+  async goalSurfaceLease(request: AIGoalSurfaceLeaseRequest): Promise<AIGoalSurfaceLeaseResponse> {
+    const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
+    if (!parsed.success) invalidRequest('Goal surface lease');
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, parsed.data,
+    );
+    return AIGoalSurfaceLeaseResponseSchema.parse(unwrapOrThrowError(result));
   }
 
   async cancel(request: AIWorkflowCancelClientRequest): Promise<AIWorkflowRunView | null> {

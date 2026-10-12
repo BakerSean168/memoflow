@@ -2,7 +2,7 @@
 tags: [plan, active]
 description: Ask User 与 Goal BusinessPanel owner 操作纵向切片
 created: 2026-10-12T00:00:00Z
-updated: 2026-10-12T07:00:00Z
+updated: 2026-10-12T08:00:00Z
 ---
 
 # Ask User + Goal Business Surface
@@ -83,7 +83,7 @@ updated: 2026-10-12T07:00:00Z
 
 ### 后续主任务（尚未完成）
 
-1. **P1：**模型生成过程中调用真实 Goal 语义业务工具并同步右侧表单，必须在 owner 授权、校验与持久化 Action Journal 下实现；现有完整 GoalPlanDraft + batch patch 仍然不是增量工具。
+1. **P1：**真实 Mastra 语义 Goal 工具、运行中事务预览、原生 owner 逐字段更新已由 `cc7f73d4a28` 完成检查点，19/19 CI 全绿；生产 Provider 兼容性 canary 未做。
 2. **P2：**跨窗口/设备 durable lease、人工接手后禁止覆盖、持久恢复及真实运行环境 E2E。
 3. 每次检查点提交并 push 到原 Draft PR #449，核对该 HEAD CI；P1/P2 未验收不得合并或部署。
 
@@ -104,6 +104,30 @@ updated: 2026-10-12T07:00:00Z
 - **运行中可读事实的独立验收：**Mastra 的 `setState` 在 Workflow Step 尚未 yield 前仅更新其引擎状态；原实现的 snapshot.value.liveActions 此刻不可由另一请求读取，新增的真实 LibSQL 中途阻塞测试先 RED。现在通过版本限定的 transactional `WorkflowsStorage.updateWorkflowState` 只发布 top-level `goalLiveActions` 预览，CAS 仅允许 running 状态，不改引擎 `value/context/step graph`；读 API 在 running 期间选有效持久投影，完成/暂停后恢复以 `snapshot.value.liveActions` 为权威。PG 与 LibSQL 对该 update API 的实现均已检查为单事务并合并扩展字段。由于额外快照字段不是 SDK 公布的稳定 opts 类型，本功能依赖当前固定 Mastra 1.70.0 存储实现；升级 SDK 必须跑中途读写与终态防复活测试，不得无验收直接升级。
 - 模拟 Provider 真实多步 Mastra Agent 验证了 tool-call → `goal_set_name` execute → structured final decision，区别于仅 mock generate 参数；不需要实际商业 Provider 额度。
 - 安全测试覆盖存储 publisher 的非所有者及已挂起 Run 写入拒绝、run/revision/actionId 幂等、同一运行中的多调用排序、浏览器 late poll、用户草稿冲突/人工接手不覆盖。
-- Goal Native Owner 仍是前端单工作区 capability；跨设备/窗口的服务端 durable lease、失效恢复/统一权限资源和 Action Journal 跨进程单写与原子 CAS 尚未落地。后续为 P2 安全硬化。
+- Goal Native Owner 原本是前端单工作区 capability；P2 首个纵切增加 Web PostgreSQL 持久 Goal Run 租约和 Desktop profile-local SQLite 租约。**仅授权本地 AI 预览操作，未构成最终 Goal 写入事务级 fencing**；Action Journal 跨进程原子 CAS 仍未完成。
 - Task/Note/Routine 等其他业务模块仍未复用；当前按用户要求先完成 Goal 纵切。
 - 真实凭据/PG/全流程浏览器验收尚需独立环境，不得自动生产部署/合并。
+
+## ChatGPT 接手 · Goal Surface 租约 P2 第 1 纵切（2026-10-12）
+
+### 实施内容
+
+- Web API 宿主的新增 `AiGoalSurfaceLease`（identityId + runId 唯一），持久 ownerToken、单调 fence、30 秒 TTL；Prisma 事务条件更新抢占，续租与释放必须匹配 `identityId/runId/token/fence`，释放不删行，不能复用旧 generation。新增**独立可审查 SQL migration**，**未在任何真实 PostgreSQL 上运行**。
+- Desktop 单机同 profile 的 PowerSync SQLite 原子 `writeTransaction` 版本，创建本地 Lease 表；这只能互斥该本地 profile 下共享同一 SQLite 的窗口，**不宣称跨 Web/桌面设备共享租约**。
+- Mastra 工作流 runtime 的 `goalSurfaceLease` 身份绑定：`runId` 属于调用者、必须是有效 Goal workflow；服务端 mint UUID token，不接受客户端 identity 注入。renew/release CAS；终态拒绝 claim/renew，但允许原持有者 release。心跳只取 owner 过滤后的 durable workflow snapshot，避免每 8 秒额外读一整份 usage summary。
+- HTTP `/workflow/goal-surface-lease` 与 Desktop IPC `ai:runtime:workflow:goal-surface-lease` 共享严格请求/响应合同。客户端 `useGoalSurfaceLease` 定时续租、网络断开或 fence 失效时 fail-closed，刷新后必须重新 claim；异步旧 claim 结果不能复活已销毁的客户端。
+- Goal Native Coordinator 在 AI 接管、每次增量业务操作/最终投影、保存前校验 lease。竞争失败展示 surface conflict，不创建/覆盖原生表单；失去 lease 关闭**仅 AI 控制的**预览，不自动丢弃人工 handoff 草稿，停止后续 AI patch/native 保存。
+
+### 验证与剩余风险
+
+- 本地真实 SQLite 测试：并发 claim 唯一获胜、过期换代 fence 递增、跨账号隔离、过时持有者不能 renew/release。
+- Vue composable 测试：双窗口抢占、网络故障、过期失效、迟到 claim、运行中 Goal 工具不得在 `busy` 时改草稿、`lost` 不得继续保存；Desktop/HTTP 客户端 contract、Electron channel registry、Mastra owner runtime auth 另外定向覆盖。
+- 独立目标测试：Goal UI 3 files / **55 tests**，AI 租约/Client/IPC 5 files / **32 tests**，新增 HTTP route 鉴权 2/2；Prisma schema validate、database:build、ai:build、API/Desktop typecheck、改动 ESLint、`memoflow:governance-check` 通过。测试清单已刷为 1,386 个文件。未进行真实 PostgreSQL 数据库写入，未使用真实供应商额度。
+- 当前 P2 是受控租约检查点，**不包含最终 Domain Save 的原子 fencing**；本地通过仍必须检查提交后 exact-head CI，不能按 P2 完整完成验收。
+
+**尚未实施／不能放宽的门槛：**
+
+1. **最终持久 Goal 写入的同事务 fencing**：当前在调用 native Save 前校验服务器租约，但并非写入事务自身的原子 token+fence CAS；在网络或 TTL 边界仍有 TOCTOU。必须把 token/fence 与经认证的 domain 保存事务结合，或在提交时用服务端同事务 fencing gate；不做完不得称“完全防止跨设备旧持有者写入”。
+2. 跨 Desktop 本地 Profile / Web 服务器共享的锁，不保证所有设备同一数据域；如需真正跨渠道同步控制，必须收敛身份与共享 authoritative lease/storage。
+3. 手动 handoff 的未保存草稿跨设备/重启恢复不在本切片；现有前端 overlay 只恢复有限 supporting data，不当作持久 Native Goal draft。
+4. 真实鉴权 API+PG migration+真实 Provider Chat / owner form/browser 整链路、崩溃后迁移接管及双设备并发验收未通过。不得自动 merge、部署或修改生产数据。

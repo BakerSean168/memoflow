@@ -197,6 +197,7 @@ type WorkflowRuntimeStub = {
   get: ReturnType<typeof vi.fn>;
   list: ReturnType<typeof vi.fn>;
   cancel: ReturnType<typeof vi.fn>;
+  goalSurfaceLease: ReturnType<typeof vi.fn>;
 };
 
 function createRuntimeStub(): WorkflowRuntimeStub {
@@ -206,6 +207,20 @@ function createRuntimeStub(): WorkflowRuntimeStub {
     get: vi.fn(),
     list: vi.fn(),
     cancel: vi.fn(),
+    goalSurfaceLease: vi.fn(async (request: { action: string }) => {
+      if (request.action === 'claim') {
+        return {
+          status: 'claimed' as const,
+          token: '11111111-1111-4111-8111-111111111111',
+          fence: 1,
+          expiresAt: Date.now() + 30_000,
+        };
+      }
+      if (request.action === 'renew') {
+        return { status: 'renewed' as const, expiresAt: Date.now() + 30_000 };
+      }
+      return { status: 'released' as const };
+    }),
   };
 }
 
@@ -384,6 +399,61 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       liveActions: [...running.liveActions!, { sequence: 2, command: { actionId: 'name-2', revision: 1, operation: 'goal.setName', value: 'Should not overwrite' } }],
     }));
     expect(native.state!.name).toBe('Human override');
+    wrapper.unmount();
+  });
+
+  it('blocks live AI field changes until this window obtains the server lease', async () => {
+    const runtime = createRuntimeStub();
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const running = makeGoalRun({
+      status: 'running',
+      liveActions: [{
+        sequence: 1,
+        command: { actionId: 'server-tool-1', revision: 1, operation: 'goal.setName', value: 'AI projected' },
+      }],
+    });
+    native.state!.name = 'Unsaved user draft';
+    runtime.goalSurfaceLease.mockResolvedValueOnce({ status: 'busy' });
+    await vm.projectRun(running);
+    expect(vm.goalSurfaceConflict).toBe(true);
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(native.state!.name).toBe('Unsaved user draft');
+    expect(runtime.goalSurfaceLease).toHaveBeenCalledWith({ action: 'claim', runId: 'run-1' });
+    await vm.continueGoalSurfaceControl();
+    expect(vm.goalSurfaceConflict).toBe(false);
+    expect(native.state!.name).toBe('AI projected');
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it('revokes AI projection authority when the lease is superseded and denies later native save', async () => {
+    const runtime = createRuntimeStub();
+    const wrapper = mountComposable(makeOptions(runtime));
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const action = {
+      sequence: 1,
+      command: { actionId: 'name-1', revision: 1, operation: 'goal.setName' as const, value: 'Initial model title' },
+    };
+    await vm.projectRun(makeGoalRun({ status: 'running', liveActions: [action] }));
+    expect(native.state!.name).toBe('Initial model title');
+    runtime.goalSurfaceLease.mockResolvedValueOnce({ status: 'lost' });
+    await vm.projectRun(makeGoalRun({
+      status: 'running',
+      liveActions: [
+        action,
+        { sequence: 2, command: { actionId: 'name-2', revision: 1, operation: 'goal.setName', value: 'Stale model title' } },
+      ],
+    }));
+    expect(vm.goalSurfaceConflict).toBe(true);
+    expect(vm.goalSurfaceReady).toBe(false);
+    expect(native.requestCancel).toHaveBeenCalledOnce();
+    expect(native.state!.name).toBe('Initial model title');
+    runtime.start.mockResolvedValue(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }));
+    // No native save may bypass the lost server lease.
+    await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }), false);
+    await vm.confirmGoalAgentRun();
+    expect(native.requestSubmit).not.toHaveBeenCalled();
     wrapper.unmount();
   });
 

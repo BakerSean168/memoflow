@@ -165,6 +165,7 @@ export const AIChannels = {
   RUNTIME_WORKFLOW_GET: 'ai:runtime:workflow:get',
   RUNTIME_WORKFLOW_LIST: 'ai:runtime:workflow:list',
   RUNTIME_WORKFLOW_CANCEL: 'ai:runtime:workflow:cancel',
+  RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE: 'ai:runtime:workflow:goal-surface-lease',
   KNOWLEDGE_EXPAND: 'ai:knowledge:expand',
   KNOWLEDGE_QUERY: 'ai:knowledge:query',
   KNOWLEDGE_REINDEX: 'ai:knowledge:reindex',
