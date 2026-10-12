@@ -10,16 +10,37 @@
 import { vKeyboardList } from '../../shared/keyboard/list-adapter';
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { MoreHorizontal, Search, SquarePen, Trash2, X, Check, LockKeyhole } from '@lucide/vue';
+import {
+  MoreHorizontal,
+  Search,
+  SquarePen,
+  Trash2,
+  X,
+  Check,
+  LockKeyhole,
+  CircleAlert,
+  CircleCheck,
+  MessageCircleQuestion,
+  ShieldAlert,
+  LoaderCircle,
+} from '@lucide/vue';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from '@memoflow/ui-vue-shadcn';
 import type { ProfileSummary } from '@memoflow/contracts/electron';
 import { APP_NAME_ZH } from '@memoflow/assets';
+import type {
+  ConversationAttentionStatus,
+  ConversationAttentionMap,
+} from '../../modules/ai/composables/useConversationAttention';
 
 interface ConversationEntry {
   id: string;
@@ -36,6 +57,7 @@ const props = defineProps<{
   profiles?: ProfileSummary[];
   activeProfileId?: string;
   groups: ConversationGroup[];
+  conversationStatuses?: ConversationAttentionMap;
   activeConversationId: string | null;
   userName?: string;
   /** 当前壳层展示的是哪一种身份，而不是含混的“是否登录”。 */
@@ -64,6 +86,24 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const stateIcons = {
+  failed: CircleAlert,
+  input: MessageCircleQuestion,
+  approval: ShieldAlert,
+  working: LoaderCircle,
+  done: CircleCheck,
+} as const;
+const stateColors: Record<ConversationAttentionStatus, string> = {
+  failed: 'text-[#F87171]',
+  input: 'text-[#A5B4FC]',
+  approval: 'text-[#FBBF24]',
+  working: 'text-[#7DD3FC]',
+  done: 'text-[#6EE7B7]',
+};
+function stateOf(id: string): ConversationAttentionStatus | undefined {
+  return props.conversationStatuses?.[id];
+}
 
 const searchOpen = ref(false);
 const searchQuery = ref('');
@@ -210,17 +250,42 @@ const identityLabel = () => {
         >
           <button
             type="button"
-            class="min-w-0 flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5"
+            class="min-w-0 w-full flex-1 px-2 py-1.5 text-left text-[12.5px] leading-5"
+            :class="stateOf(item.id) ? 'pr-16' : 'pr-9'"
             :data-keyboard-item="item.id"
             @click="emit('select-conversation', item.id)"
           >
-            <span class="block truncate">{{ item.title }}</span>
+            <span class="block min-w-0 truncate whitespace-nowrap">{{ item.title }}</span>
           </button>
+          <TooltipProvider v-if="stateOf(item.id)">
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <button
+                  type="button"
+                  class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`)"
+                  data-testid="shell-conversation-status"
+                  @click.stop="emit('select-conversation', item.id)"
+                >
+                  <component
+                    :is="stateIcons[stateOf(item.id)!]"
+                    class="h-4 w-4 shrink-0"
+                    :class="stateColors[stateOf(item.id)!]"
+                    aria-hidden="true"
+                  />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" class="text-xs">
+                {{ t(`aiAssistant.chatPage.sidebar.attention.${stateOf(item.id)}`) }}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <button
                 type="button"
-                class="mr-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
+                class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
+                :class="stateOf(item.id) ? 'right-8' : 'right-0.5'"
                 :aria-label="t('common.more')"
                 @click.stop
               >

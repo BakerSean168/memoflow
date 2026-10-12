@@ -3,6 +3,10 @@ import {
   AssistantRuntimeToolAnswerCommandSchema,
   AssistantRuntimeToolAnswerResultSchema,
   AssistantRuntimeApprovalCommandSchema,
+  AssistantAttentionListRequestSchema,
+  AssistantAttentionListResponseSchema,
+  AssistantAttentionAckRequestSchema,
+  AssistantAttentionAckResponseSchema,
   AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema as AnyAssistantRuntimeClientCommandSchema,
@@ -33,6 +37,8 @@ import {
   readAiExpressEnvelopeMeta,
 } from '../../shared/express-execution-context';
 import { toAITransportFailure } from '../../server/transport';
+import type { IConversationAttentionPort } from '../../server/application/ports/conversation-attention.port';
+import { ConversationAttentionObserver } from '../../server/application/services/conversation-attention-observer';
 
 // HTTP hosts only own built-in conversations; a Desktop reference never falls back.
 const AssistantRuntimeClientCommandSchema = AnyAssistantRuntimeClientCommandSchema.refine(
@@ -86,9 +92,11 @@ export function registerAIRuntimeRoutes(
   runtime: AssistantRuntimePort | null,
   middleware: PlatformMiddleware,
   workflowRuntime: AIWorkflowRuntimePort | null = null,
+  attentionPort: IConversationAttentionPort | null = null,
 ): Router {
   const router = Router();
   const { auth } = middleware;
+  const attentionObserver = attentionPort ? new ConversationAttentionObserver(attentionPort) : null;
 
   router.post('/assistant/sse', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
@@ -125,6 +133,14 @@ export function registerAIRuntimeRoutes(
     };
     req.on('aborted', close);
     res.on('close', close);
+    const conversationId = parsed.data.conversationId;
+    const pulse = attentionObserver
+      ? setInterval(() => {
+          void attentionObserver
+            .heartbeat(identityId, 'builtin', conversationId)
+            .catch(() => undefined);
+        }, 30_000)
+      : null;
 
     try {
       for await (const event of runtime.dispatchMessage({
@@ -143,6 +159,7 @@ export function registerAIRuntimeRoutes(
       })) {
         if (connectionClosed || res.writableEnded) break;
         const validated: AssistantRuntimeEvent = AssistantRuntimeEventSchema.parse(event);
+        await attentionObserver?.observe(identityId, 'builtin', validated).catch(() => undefined);
         if (!writeRuntimeSse(res, 'runtime', validated)) {
           close();
           break;
@@ -160,6 +177,7 @@ export function registerAIRuntimeRoutes(
         });
       }
     } finally {
+      if (pulse) clearInterval(pulse);
       req.removeListener('aborted', close);
       res.removeListener('close', close);
       if (!res.writableEnded) res.end();
@@ -243,6 +261,9 @@ export function registerAIRuntimeRoutes(
           conversationId: parsed.data.conversationId,
         }),
       });
+      await attentionPort
+        ?.forget({ identityId, runtimeKind: 'builtin', conversationId: parsed.data.conversationId })
+        .catch(() => undefined);
       res.status(200).json(responseBuilder.success(result));
     } catch (error) {
       const failure = toAITransportFailure(error, {
@@ -276,6 +297,70 @@ export function registerAIRuntimeRoutes(
       res.status(failure.statusCode).json(
         responseBuilder.error(failure.code, failure.message, undefined, failure.context),
       );
+    }
+  });
+
+  router.post('/assistant/attention/list', auth, async (req, res) => {
+    const reply = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) return void res.status(401).json(reply.unauthorized('Unauthorized'));
+    if (!attentionPort)
+      return void res.status(503).json(reply.error('SERVICE_UNAVAILABLE', 'Attention unavailable'));
+    const parsed = AssistantAttentionListRequestSchema.safeParse(req.body);
+    if (!parsed.success || parsed.data.runtimeKind !== 'builtin')
+      return void res
+        .status(400)
+        .json(
+          reply.validationError(
+            parsed.success
+              ? [{ field: 'runtimeKind', code: 'INVALID_FIELD', message: 'Desktop only' }]
+              : formatZodErrors(parsed.error.issues),
+          ),
+        );
+    try {
+      const items = await attentionPort.list({
+        identityId,
+        runtimeKind: 'builtin',
+        conversationIds: parsed.data.conversationIds,
+      });
+      res.status(200).json(reply.success(AssistantAttentionListResponseSchema.parse({ items })));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'Attention read failed',
+      });
+      res.status(failure.statusCode).json(reply.error(failure.code, failure.message));
+    }
+  });
+
+  router.post('/assistant/attention/ack', auth, async (req, res) => {
+    const reply = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) return void res.status(401).json(reply.unauthorized('Unauthorized'));
+    if (!attentionPort)
+      return void res.status(503).json(reply.error('SERVICE_UNAVAILABLE', 'Attention unavailable'));
+    const parsed = AssistantAttentionAckRequestSchema.safeParse(req.body);
+    if (!parsed.success || parsed.data.runtimeKind !== 'builtin')
+      return void res
+        .status(400)
+        .json(
+          reply.validationError(
+            parsed.success
+              ? [{ field: 'runtimeKind', code: 'INVALID_FIELD', message: 'Desktop only' }]
+              : formatZodErrors(parsed.error.issues),
+          ),
+        );
+    try {
+      const acknowledged = await attentionPort.acknowledge({ identityId, ...parsed.data });
+      res
+        .status(200)
+        .json(reply.success(AssistantAttentionAckResponseSchema.parse({ acknowledged })));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'Attention acknowledgement failed',
+      });
+      res.status(failure.statusCode).json(reply.error(failure.code, failure.message));
     }
   });
 

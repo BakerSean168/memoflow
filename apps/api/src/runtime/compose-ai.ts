@@ -193,6 +193,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
     workflowRuntime: mastraRuntime,
     knowledgeIndexRepository: repositorySet.knowledgeIndexRepository,
     executionRecordPort: repositorySet.executionRecordPort,
+    conversationAttentionPort: repositorySet.conversationAttentionPort,
     evaluationReportPort,
     knowledgeNotePersistence,
     knowledgeSourcePort,

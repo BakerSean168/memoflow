@@ -12,6 +12,7 @@ import type { IAIConversationRepository } from '../domain/repositories/i-ai-conv
 import type { IAIProviderConfigRepository } from '../domain/repositories/i-ai-provider-config-repository';
 import type {
   IAIExecutionRecordPort,
+  IConversationAttentionPort,
   IAIUsageReadPort,
   IKnowledgeIndexRepository,
   IAIProviderOnboardingCommitPort,
@@ -21,6 +22,7 @@ import type {
 import {
   AIConversationPrismaRepository,
   AIExecutionRecordPrismaAdapter,
+  ConversationAttentionPrismaAdapter,
   AIKnowledgeIndexPrismaRepository,
   AIProviderConfigPrismaRepository,
   AIProviderOnboardingCommitPrismaAdapter,
@@ -34,6 +36,7 @@ export interface AIPrismaRepositorySet {
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly knowledgeIndexRepository: IKnowledgeIndexRepository;
   readonly executionRecordPort: IAIExecutionRecordPort & IAIUsageReadPort;
+  readonly conversationAttentionPort: IConversationAttentionPort;
   readonly providerOnboardingSessionRepository: IAIProviderOnboardingSessionRepository;
   readonly providerOnboardingCommitPort: IAIProviderOnboardingCommitPort;
   readonly providerSecretVault: IAIProviderSecretVault;
@@ -46,6 +49,7 @@ export function createAIPrismaRepositories(db: PrismaClient): AIPrismaRepository
     providerConfigRepository: new AIProviderConfigPrismaRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPrismaRepository(db),
     executionRecordPort: new AIExecutionRecordPrismaAdapter(db),
+    conversationAttentionPort: new ConversationAttentionPrismaAdapter(db),
     providerOnboardingSessionRepository: new AIProviderOnboardingSessionPrismaRepository(db),
     providerOnboardingCommitPort: new AIProviderOnboardingCommitPrismaAdapter(db),
     providerSecretVault: new AIProviderSecretPrismaVault(db),

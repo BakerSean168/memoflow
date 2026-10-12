@@ -41,6 +41,7 @@ import type {
 import { AIConversationPortableCapability } from '../application';
 import type {
   IAIExecutionRecordPort,
+  IConversationAttentionPort,
   IAIEvaluationReportPort,
   IAnalyticsQueryPort,
   IAnalyticsReadPort,
@@ -158,6 +159,7 @@ export interface AIModuleDependencies {
   readonly analyticsReadPort?: IAnalyticsReadPort;
   readonly analyticsQueryPort?: IAnalyticsQueryPort;
   readonly executionRecordPort?: IAIExecutionRecordPort;
+  readonly conversationAttentionPort?: IConversationAttentionPort;
   readonly evaluationReportPort?: IAIEvaluationReportPort;
   /** Short-lived identity-bound Provider onboarding state selected by the host. */
   readonly providerOnboardingSessionRepository?: IAIProviderOnboardingSessionRepository;
@@ -326,6 +328,7 @@ export interface AIModuleInstance {
   readonly evaluationOperations: AIEvaluationOperationsPort;
   /** Mastra-native Assistant execution surface. */
   readonly mastraRuntime: MastraAIRuntime | null;
+  readonly conversationAttentionPort: IConversationAttentionPort | null;
   readonly localAgentRuntime?: LocalAgentRuntime | null;
   /** Canonical Workflow execution surface; null until a Mastra workflow runtime is composed. */
   readonly workflowRuntime: AIWorkflowRuntimePort | null;
@@ -341,6 +344,7 @@ export type AITransportModuleInstance = Pick<
   | 'knowledge'
   | 'evaluationOperations'
   | 'mastraRuntime'
+  | 'conversationAttentionPort'
   | 'localAgentRuntime'
   | 'agentRegistry'
   | 'workflowRuntime'
@@ -826,6 +830,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     knowledge,
     evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
+    conversationAttentionPort: dependencies.conversationAttentionPort ?? null,
     localAgentRuntime: dependencies.localAgentRuntime ?? null,
     agentRegistry,
     workflowRuntime: dependencies.workflowRuntime ?? null,

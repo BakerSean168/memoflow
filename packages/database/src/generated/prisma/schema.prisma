@@ -60,6 +60,7 @@ model Account {
   aiConversations               AiConversation[]
   aiExecutionRecords            AiExecutionRecord[]
   aiGoalSurfaceLeases           AiGoalSurfaceLease[]
+  aiConversationAttention       AiConversationAttention[]
   aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
   aiProviderConfigs             AiProviderConfig[]
   aiAgentInstances              AiAgentInstance[]
@@ -122,6 +123,29 @@ model AiGoalSurfaceLease {
   @@unique([identityId, runId])
   @@index([expiresAt])
   @@map("ai_goal_surface_leases")
+}
+
+/**
+ * Durable owner-scoped status and read receipt; never stores prompts/tool arguments.
+ */
+model AiConversationAttention {
+  id             String   @id
+  identityId     String   @map("identity_id")
+  runtimeKind    String   @map("runtime_kind")
+  conversationId String   @map("conversation_id")
+  runId          String   @map("run_id")
+  runSequence    Int      @default(0) @map("run_sequence")
+  state          String   @default("normal")
+  revision       Int      @default(1)
+  seenRevision   Int      @default(0) @map("seen_revision")
+  runStartedAt   DateTime @default(now()) @map("run_started_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, runtimeKind, conversationId])
+  @@index([identityId])
+  @@map("ai_conversation_attention")
 }
 
 model AiExecutionRecord {

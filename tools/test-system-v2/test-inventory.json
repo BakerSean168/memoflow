@@ -3283,6 +3283,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3514,6 +3524,16 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/__tests__/ai-repositories.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-attention-persistence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4563,6 +4583,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4756,6 +4784,22 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12629,7 +12673,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 107
+      "fileCount": 109
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13183,14 +13227,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 107
+      "fileCount": 109
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 290
+      "fileCount": 293
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13496,6 +13540,7 @@
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-query-services.test.ts",
@@ -13520,6 +13565,7 @@
       "packages/ai/src/server/infrastructure/__tests__/ai-module-partial-start.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-provider-secret-ownership.surface.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-repositories.surface.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-attention-persistence.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-domain-events.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-repository.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-record-usage.test.ts",
@@ -13941,7 +13987,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1204,
+    "unit": 1209,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,

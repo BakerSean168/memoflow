@@ -30,6 +30,11 @@ export type AiConversation = $Result.DefaultSelection<Prisma.$AiConversationPayl
  */
 export type AiGoalSurfaceLease = $Result.DefaultSelection<Prisma.$AiGoalSurfaceLeasePayload>
 /**
+ * Model AiConversationAttention
+ * * Durable owner-scoped status and read receipt; never stores prompts/tool arguments.
+ */
+export type AiConversationAttention = $Result.DefaultSelection<Prisma.$AiConversationAttentionPayload>
+/**
  * Model AiExecutionRecord
  *
  */
@@ -643,6 +648,16 @@ export class PrismaClient<
     * ```
     */
   get aiGoalSurfaceLease(): Prisma.AiGoalSurfaceLeaseDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiConversationAttention`: Exposes CRUD operations for the **AiConversationAttention** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiConversationAttentions
+    * const aiConversationAttentions = await prisma.aiConversationAttention.findMany()
+    * ```
+    */
+  get aiConversationAttention(): Prisma.AiConversationAttentionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiExecutionRecord`: Exposes CRUD operations for the **AiExecutionRecord** model.
@@ -1953,6 +1968,7 @@ export namespace Prisma {
     Account: 'Account',
     AiConversation: 'AiConversation',
     AiGoalSurfaceLease: 'AiGoalSurfaceLease',
+    AiConversationAttention: 'AiConversationAttention',
     AiExecutionRecord: 'AiExecutionRecord',
     AiProviderConfig: 'AiProviderConfig',
     AiAgentInstance: 'AiAgentInstance',
@@ -2054,7 +2070,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2277,6 +2293,80 @@ export namespace Prisma {
           count: {
             args: Prisma.AiGoalSurfaceLeaseCountArgs<ExtArgs>
             result: $Utils.Optional<AiGoalSurfaceLeaseCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiConversationAttention: {
+        payload: Prisma.$AiConversationAttentionPayload<ExtArgs>
+        fields: Prisma.AiConversationAttentionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiConversationAttentionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiConversationAttentionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          findFirst: {
+            args: Prisma.AiConversationAttentionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiConversationAttentionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          findMany: {
+            args: Prisma.AiConversationAttentionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>[]
+          }
+          create: {
+            args: Prisma.AiConversationAttentionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          createMany: {
+            args: Prisma.AiConversationAttentionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiConversationAttentionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>[]
+          }
+          delete: {
+            args: Prisma.AiConversationAttentionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          update: {
+            args: Prisma.AiConversationAttentionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiConversationAttentionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiConversationAttentionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiConversationAttentionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiConversationAttentionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiConversationAttentionPayload>
+          }
+          aggregate: {
+            args: Prisma.AiConversationAttentionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiConversationAttention>
+          }
+          groupBy: {
+            args: Prisma.AiConversationAttentionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiConversationAttentionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiConversationAttentionCountArgs<ExtArgs>
+            result: $Utils.Optional<AiConversationAttentionCountAggregateOutputType> | number
           }
         }
       }
@@ -8770,6 +8860,7 @@ export namespace Prisma {
     account?: AccountOmit
     aiConversation?: AiConversationOmit
     aiGoalSurfaceLease?: AiGoalSurfaceLeaseOmit
+    aiConversationAttention?: AiConversationAttentionOmit
     aiExecutionRecord?: AiExecutionRecordOmit
     aiProviderConfig?: AiProviderConfigOmit
     aiAgentInstance?: AiAgentInstanceOmit
@@ -8962,6 +9053,7 @@ export namespace Prisma {
     aiConversations: number
     aiExecutionRecords: number
     aiGoalSurfaceLeases: number
+    aiConversationAttention: number
     aiKnowledgeIndexEntries: number
     aiProviderConfigs: number
     aiAgentInstances: number
@@ -9005,6 +9097,7 @@ export namespace Prisma {
     aiConversations?: boolean | AccountCountOutputTypeCountAiConversationsArgs
     aiExecutionRecords?: boolean | AccountCountOutputTypeCountAiExecutionRecordsArgs
     aiGoalSurfaceLeases?: boolean | AccountCountOutputTypeCountAiGoalSurfaceLeasesArgs
+    aiConversationAttention?: boolean | AccountCountOutputTypeCountAiConversationAttentionArgs
     aiKnowledgeIndexEntries?: boolean | AccountCountOutputTypeCountAiKnowledgeIndexEntriesArgs
     aiProviderConfigs?: boolean | AccountCountOutputTypeCountAiProviderConfigsArgs
     aiAgentInstances?: boolean | AccountCountOutputTypeCountAiAgentInstancesArgs
@@ -9212,6 +9305,13 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountAiGoalSurfaceLeasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AiGoalSurfaceLeaseWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAiConversationAttentionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiConversationAttentionWhereInput
   }
 
   /**
@@ -10465,6 +10565,7 @@ export namespace Prisma {
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiGoalSurfaceLeases?: boolean | Account$aiGoalSurfaceLeasesArgs<ExtArgs>
+    aiConversationAttention?: boolean | Account$aiConversationAttentionArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
     aiAgentInstances?: boolean | Account$aiAgentInstancesArgs<ExtArgs>
@@ -10541,6 +10642,7 @@ export namespace Prisma {
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
     aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiGoalSurfaceLeases?: boolean | Account$aiGoalSurfaceLeasesArgs<ExtArgs>
+    aiConversationAttention?: boolean | Account$aiConversationAttentionArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
     aiAgentInstances?: boolean | Account$aiAgentInstancesArgs<ExtArgs>
@@ -10595,6 +10697,7 @@ export namespace Prisma {
       aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
       aiExecutionRecords: Prisma.$AiExecutionRecordPayload<ExtArgs>[]
       aiGoalSurfaceLeases: Prisma.$AiGoalSurfaceLeasePayload<ExtArgs>[]
+      aiConversationAttention: Prisma.$AiConversationAttentionPayload<ExtArgs>[]
       aiKnowledgeIndexEntries: Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>[]
       aiProviderConfigs: Prisma.$AiProviderConfigPayload<ExtArgs>[]
       aiAgentInstances: Prisma.$AiAgentInstancePayload<ExtArgs>[]
@@ -11039,6 +11142,7 @@ export namespace Prisma {
     aiConversations<T extends Account$aiConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiExecutionRecords<T extends Account$aiExecutionRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiExecutionRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiGoalSurfaceLeases<T extends Account$aiGoalSurfaceLeasesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiGoalSurfaceLeasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGoalSurfaceLeasePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiConversationAttention<T extends Account$aiConversationAttentionArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationAttentionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiKnowledgeIndexEntries<T extends Account$aiKnowledgeIndexEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiKnowledgeIndexEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderConfigs<T extends Account$aiProviderConfigsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiAgentInstances<T extends Account$aiAgentInstancesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiAgentInstancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAgentInstancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12129,6 +12233,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AiGoalSurfaceLeaseScalarFieldEnum | AiGoalSurfaceLeaseScalarFieldEnum[]
+  }
+
+  /**
+   * Account.aiConversationAttention
+   */
+  export type Account$aiConversationAttentionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    where?: AiConversationAttentionWhereInput
+    orderBy?: AiConversationAttentionOrderByWithRelationInput | AiConversationAttentionOrderByWithRelationInput[]
+    cursor?: AiConversationAttentionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiConversationAttentionScalarFieldEnum | AiConversationAttentionScalarFieldEnum[]
   }
 
   /**
@@ -14778,6 +14906,1189 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiGoalSurfaceLeaseInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiConversationAttention
+   */
+
+  export type AggregateAiConversationAttention = {
+    _count: AiConversationAttentionCountAggregateOutputType | null
+    _avg: AiConversationAttentionAvgAggregateOutputType | null
+    _sum: AiConversationAttentionSumAggregateOutputType | null
+    _min: AiConversationAttentionMinAggregateOutputType | null
+    _max: AiConversationAttentionMaxAggregateOutputType | null
+  }
+
+  export type AiConversationAttentionAvgAggregateOutputType = {
+    runSequence: number | null
+    revision: number | null
+    seenRevision: number | null
+  }
+
+  export type AiConversationAttentionSumAggregateOutputType = {
+    runSequence: number | null
+    revision: number | null
+    seenRevision: number | null
+  }
+
+  export type AiConversationAttentionMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    runtimeKind: string | null
+    conversationId: string | null
+    runId: string | null
+    runSequence: number | null
+    state: string | null
+    revision: number | null
+    seenRevision: number | null
+    runStartedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiConversationAttentionMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    runtimeKind: string | null
+    conversationId: string | null
+    runId: string | null
+    runSequence: number | null
+    state: string | null
+    revision: number | null
+    seenRevision: number | null
+    runStartedAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiConversationAttentionCountAggregateOutputType = {
+    id: number
+    identityId: number
+    runtimeKind: number
+    conversationId: number
+    runId: number
+    runSequence: number
+    state: number
+    revision: number
+    seenRevision: number
+    runStartedAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiConversationAttentionAvgAggregateInputType = {
+    runSequence?: true
+    revision?: true
+    seenRevision?: true
+  }
+
+  export type AiConversationAttentionSumAggregateInputType = {
+    runSequence?: true
+    revision?: true
+    seenRevision?: true
+  }
+
+  export type AiConversationAttentionMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    runtimeKind?: true
+    conversationId?: true
+    runId?: true
+    runSequence?: true
+    state?: true
+    revision?: true
+    seenRevision?: true
+    runStartedAt?: true
+    updatedAt?: true
+  }
+
+  export type AiConversationAttentionMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    runtimeKind?: true
+    conversationId?: true
+    runId?: true
+    runSequence?: true
+    state?: true
+    revision?: true
+    seenRevision?: true
+    runStartedAt?: true
+    updatedAt?: true
+  }
+
+  export type AiConversationAttentionCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    runtimeKind?: true
+    conversationId?: true
+    runId?: true
+    runSequence?: true
+    state?: true
+    revision?: true
+    seenRevision?: true
+    runStartedAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiConversationAttentionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiConversationAttention to aggregate.
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiConversationAttentions to fetch.
+     */
+    orderBy?: AiConversationAttentionOrderByWithRelationInput | AiConversationAttentionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiConversationAttentionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiConversationAttentions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiConversationAttentions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiConversationAttentions
+    **/
+    _count?: true | AiConversationAttentionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: AiConversationAttentionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: AiConversationAttentionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiConversationAttentionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiConversationAttentionMaxAggregateInputType
+  }
+
+  export type GetAiConversationAttentionAggregateType<T extends AiConversationAttentionAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiConversationAttention]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiConversationAttention[P]>
+      : GetScalarType<T[P], AggregateAiConversationAttention[P]>
+  }
+
+
+
+
+  export type AiConversationAttentionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiConversationAttentionWhereInput
+    orderBy?: AiConversationAttentionOrderByWithAggregationInput | AiConversationAttentionOrderByWithAggregationInput[]
+    by: AiConversationAttentionScalarFieldEnum[] | AiConversationAttentionScalarFieldEnum
+    having?: AiConversationAttentionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiConversationAttentionCountAggregateInputType | true
+    _avg?: AiConversationAttentionAvgAggregateInputType
+    _sum?: AiConversationAttentionSumAggregateInputType
+    _min?: AiConversationAttentionMinAggregateInputType
+    _max?: AiConversationAttentionMaxAggregateInputType
+  }
+
+  export type AiConversationAttentionGroupByOutputType = {
+    id: string
+    identityId: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence: number
+    state: string
+    revision: number
+    seenRevision: number
+    runStartedAt: Date
+    updatedAt: Date
+    _count: AiConversationAttentionCountAggregateOutputType | null
+    _avg: AiConversationAttentionAvgAggregateOutputType | null
+    _sum: AiConversationAttentionSumAggregateOutputType | null
+    _min: AiConversationAttentionMinAggregateOutputType | null
+    _max: AiConversationAttentionMaxAggregateOutputType | null
+  }
+
+  type GetAiConversationAttentionGroupByPayload<T extends AiConversationAttentionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiConversationAttentionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiConversationAttentionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiConversationAttentionGroupByOutputType[P]>
+            : GetScalarType<T[P], AiConversationAttentionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiConversationAttentionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    runtimeKind?: boolean
+    conversationId?: boolean
+    runId?: boolean
+    runSequence?: boolean
+    state?: boolean
+    revision?: boolean
+    seenRevision?: boolean
+    runStartedAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiConversationAttention"]>
+
+  export type AiConversationAttentionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    runtimeKind?: boolean
+    conversationId?: boolean
+    runId?: boolean
+    runSequence?: boolean
+    state?: boolean
+    revision?: boolean
+    seenRevision?: boolean
+    runStartedAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiConversationAttention"]>
+
+  export type AiConversationAttentionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    runtimeKind?: boolean
+    conversationId?: boolean
+    runId?: boolean
+    runSequence?: boolean
+    state?: boolean
+    revision?: boolean
+    seenRevision?: boolean
+    runStartedAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiConversationAttention"]>
+
+  export type AiConversationAttentionSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    runtimeKind?: boolean
+    conversationId?: boolean
+    runId?: boolean
+    runSequence?: boolean
+    state?: boolean
+    revision?: boolean
+    seenRevision?: boolean
+    runStartedAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiConversationAttentionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "runtimeKind" | "conversationId" | "runId" | "runSequence" | "state" | "revision" | "seenRevision" | "runStartedAt" | "updatedAt", ExtArgs["result"]["aiConversationAttention"]>
+  export type AiConversationAttentionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiConversationAttentionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiConversationAttentionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiConversationAttentionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiConversationAttention"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      runtimeKind: string
+      conversationId: string
+      runId: string
+      runSequence: number
+      state: string
+      revision: number
+      seenRevision: number
+      runStartedAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aiConversationAttention"]>
+    composites: {}
+  }
+
+  type AiConversationAttentionGetPayload<S extends boolean | null | undefined | AiConversationAttentionDefaultArgs> = $Result.GetResult<Prisma.$AiConversationAttentionPayload, S>
+
+  type AiConversationAttentionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiConversationAttentionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiConversationAttentionCountAggregateInputType | true
+    }
+
+  export interface AiConversationAttentionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiConversationAttention'], meta: { name: 'AiConversationAttention' } }
+    /**
+     * Find zero or one AiConversationAttention that matches the filter.
+     * @param {AiConversationAttentionFindUniqueArgs} args - Arguments to find a AiConversationAttention
+     * @example
+     * // Get one AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiConversationAttentionFindUniqueArgs>(args: SelectSubset<T, AiConversationAttentionFindUniqueArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiConversationAttention that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiConversationAttentionFindUniqueOrThrowArgs} args - Arguments to find a AiConversationAttention
+     * @example
+     * // Get one AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiConversationAttentionFindUniqueOrThrowArgs>(args: SelectSubset<T, AiConversationAttentionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiConversationAttention that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionFindFirstArgs} args - Arguments to find a AiConversationAttention
+     * @example
+     * // Get one AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiConversationAttentionFindFirstArgs>(args?: SelectSubset<T, AiConversationAttentionFindFirstArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiConversationAttention that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionFindFirstOrThrowArgs} args - Arguments to find a AiConversationAttention
+     * @example
+     * // Get one AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiConversationAttentionFindFirstOrThrowArgs>(args?: SelectSubset<T, AiConversationAttentionFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiConversationAttentions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiConversationAttentions
+     * const aiConversationAttentions = await prisma.aiConversationAttention.findMany()
+     *
+     * // Get first 10 AiConversationAttentions
+     * const aiConversationAttentions = await prisma.aiConversationAttention.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiConversationAttentionWithIdOnly = await prisma.aiConversationAttention.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiConversationAttentionFindManyArgs>(args?: SelectSubset<T, AiConversationAttentionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiConversationAttention.
+     * @param {AiConversationAttentionCreateArgs} args - Arguments to create a AiConversationAttention.
+     * @example
+     * // Create one AiConversationAttention
+     * const AiConversationAttention = await prisma.aiConversationAttention.create({
+     *   data: {
+     *     // ... data to create a AiConversationAttention
+     *   }
+     * })
+     *
+     */
+    create<T extends AiConversationAttentionCreateArgs>(args: SelectSubset<T, AiConversationAttentionCreateArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiConversationAttentions.
+     * @param {AiConversationAttentionCreateManyArgs} args - Arguments to create many AiConversationAttentions.
+     * @example
+     * // Create many AiConversationAttentions
+     * const aiConversationAttention = await prisma.aiConversationAttention.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiConversationAttentionCreateManyArgs>(args?: SelectSubset<T, AiConversationAttentionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiConversationAttentions and returns the data saved in the database.
+     * @param {AiConversationAttentionCreateManyAndReturnArgs} args - Arguments to create many AiConversationAttentions.
+     * @example
+     * // Create many AiConversationAttentions
+     * const aiConversationAttention = await prisma.aiConversationAttention.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiConversationAttentions and only return the `id`
+     * const aiConversationAttentionWithIdOnly = await prisma.aiConversationAttention.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiConversationAttentionCreateManyAndReturnArgs>(args?: SelectSubset<T, AiConversationAttentionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiConversationAttention.
+     * @param {AiConversationAttentionDeleteArgs} args - Arguments to delete one AiConversationAttention.
+     * @example
+     * // Delete one AiConversationAttention
+     * const AiConversationAttention = await prisma.aiConversationAttention.delete({
+     *   where: {
+     *     // ... filter to delete one AiConversationAttention
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiConversationAttentionDeleteArgs>(args: SelectSubset<T, AiConversationAttentionDeleteArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiConversationAttention.
+     * @param {AiConversationAttentionUpdateArgs} args - Arguments to update one AiConversationAttention.
+     * @example
+     * // Update one AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiConversationAttentionUpdateArgs>(args: SelectSubset<T, AiConversationAttentionUpdateArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiConversationAttentions.
+     * @param {AiConversationAttentionDeleteManyArgs} args - Arguments to filter AiConversationAttentions to delete.
+     * @example
+     * // Delete a few AiConversationAttentions
+     * const { count } = await prisma.aiConversationAttention.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiConversationAttentionDeleteManyArgs>(args?: SelectSubset<T, AiConversationAttentionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiConversationAttentions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiConversationAttentions
+     * const aiConversationAttention = await prisma.aiConversationAttention.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiConversationAttentionUpdateManyArgs>(args: SelectSubset<T, AiConversationAttentionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiConversationAttentions and returns the data updated in the database.
+     * @param {AiConversationAttentionUpdateManyAndReturnArgs} args - Arguments to update many AiConversationAttentions.
+     * @example
+     * // Update many AiConversationAttentions
+     * const aiConversationAttention = await prisma.aiConversationAttention.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiConversationAttentions and only return the `id`
+     * const aiConversationAttentionWithIdOnly = await prisma.aiConversationAttention.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiConversationAttentionUpdateManyAndReturnArgs>(args: SelectSubset<T, AiConversationAttentionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiConversationAttention.
+     * @param {AiConversationAttentionUpsertArgs} args - Arguments to update or create a AiConversationAttention.
+     * @example
+     * // Update or create a AiConversationAttention
+     * const aiConversationAttention = await prisma.aiConversationAttention.upsert({
+     *   create: {
+     *     // ... data to create a AiConversationAttention
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiConversationAttention we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiConversationAttentionUpsertArgs>(args: SelectSubset<T, AiConversationAttentionUpsertArgs<ExtArgs>>): Prisma__AiConversationAttentionClient<$Result.GetResult<Prisma.$AiConversationAttentionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiConversationAttentions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionCountArgs} args - Arguments to filter AiConversationAttentions to count.
+     * @example
+     * // Count the number of AiConversationAttentions
+     * const count = await prisma.aiConversationAttention.count({
+     *   where: {
+     *     // ... the filter for the AiConversationAttentions we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiConversationAttentionCountArgs>(
+      args?: Subset<T, AiConversationAttentionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiConversationAttentionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiConversationAttention.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiConversationAttentionAggregateArgs>(args: Subset<T, AiConversationAttentionAggregateArgs>): Prisma.PrismaPromise<GetAiConversationAttentionAggregateType<T>>
+
+    /**
+     * Group by AiConversationAttention.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiConversationAttentionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiConversationAttentionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiConversationAttentionGroupByArgs['orderBy'] }
+        : { orderBy?: AiConversationAttentionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiConversationAttentionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiConversationAttentionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiConversationAttention model
+   */
+  readonly fields: AiConversationAttentionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiConversationAttention.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiConversationAttentionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiConversationAttention model
+   */
+  interface AiConversationAttentionFieldRefs {
+    readonly id: FieldRef<"AiConversationAttention", 'String'>
+    readonly identityId: FieldRef<"AiConversationAttention", 'String'>
+    readonly runtimeKind: FieldRef<"AiConversationAttention", 'String'>
+    readonly conversationId: FieldRef<"AiConversationAttention", 'String'>
+    readonly runId: FieldRef<"AiConversationAttention", 'String'>
+    readonly runSequence: FieldRef<"AiConversationAttention", 'Int'>
+    readonly state: FieldRef<"AiConversationAttention", 'String'>
+    readonly revision: FieldRef<"AiConversationAttention", 'Int'>
+    readonly seenRevision: FieldRef<"AiConversationAttention", 'Int'>
+    readonly runStartedAt: FieldRef<"AiConversationAttention", 'DateTime'>
+    readonly updatedAt: FieldRef<"AiConversationAttention", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiConversationAttention findUnique
+   */
+  export type AiConversationAttentionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter, which AiConversationAttention to fetch.
+     */
+    where: AiConversationAttentionWhereUniqueInput
+  }
+
+  /**
+   * AiConversationAttention findUniqueOrThrow
+   */
+  export type AiConversationAttentionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter, which AiConversationAttention to fetch.
+     */
+    where: AiConversationAttentionWhereUniqueInput
+  }
+
+  /**
+   * AiConversationAttention findFirst
+   */
+  export type AiConversationAttentionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter, which AiConversationAttention to fetch.
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiConversationAttentions to fetch.
+     */
+    orderBy?: AiConversationAttentionOrderByWithRelationInput | AiConversationAttentionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiConversationAttentions.
+     */
+    cursor?: AiConversationAttentionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiConversationAttentions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiConversationAttentions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiConversationAttentions.
+     */
+    distinct?: AiConversationAttentionScalarFieldEnum | AiConversationAttentionScalarFieldEnum[]
+  }
+
+  /**
+   * AiConversationAttention findFirstOrThrow
+   */
+  export type AiConversationAttentionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter, which AiConversationAttention to fetch.
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiConversationAttentions to fetch.
+     */
+    orderBy?: AiConversationAttentionOrderByWithRelationInput | AiConversationAttentionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiConversationAttentions.
+     */
+    cursor?: AiConversationAttentionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiConversationAttentions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiConversationAttentions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiConversationAttentions.
+     */
+    distinct?: AiConversationAttentionScalarFieldEnum | AiConversationAttentionScalarFieldEnum[]
+  }
+
+  /**
+   * AiConversationAttention findMany
+   */
+  export type AiConversationAttentionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter, which AiConversationAttentions to fetch.
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiConversationAttentions to fetch.
+     */
+    orderBy?: AiConversationAttentionOrderByWithRelationInput | AiConversationAttentionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiConversationAttentions.
+     */
+    cursor?: AiConversationAttentionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiConversationAttentions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiConversationAttentions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiConversationAttentions.
+     */
+    distinct?: AiConversationAttentionScalarFieldEnum | AiConversationAttentionScalarFieldEnum[]
+  }
+
+  /**
+   * AiConversationAttention create
+   */
+  export type AiConversationAttentionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiConversationAttention.
+     */
+    data: XOR<AiConversationAttentionCreateInput, AiConversationAttentionUncheckedCreateInput>
+  }
+
+  /**
+   * AiConversationAttention createMany
+   */
+  export type AiConversationAttentionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiConversationAttentions.
+     */
+    data: AiConversationAttentionCreateManyInput | AiConversationAttentionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiConversationAttention createManyAndReturn
+   */
+  export type AiConversationAttentionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiConversationAttentions.
+     */
+    data: AiConversationAttentionCreateManyInput | AiConversationAttentionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiConversationAttention update
+   */
+  export type AiConversationAttentionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiConversationAttention.
+     */
+    data: XOR<AiConversationAttentionUpdateInput, AiConversationAttentionUncheckedUpdateInput>
+    /**
+     * Choose, which AiConversationAttention to update.
+     */
+    where: AiConversationAttentionWhereUniqueInput
+  }
+
+  /**
+   * AiConversationAttention updateMany
+   */
+  export type AiConversationAttentionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiConversationAttentions.
+     */
+    data: XOR<AiConversationAttentionUpdateManyMutationInput, AiConversationAttentionUncheckedUpdateManyInput>
+    /**
+     * Filter which AiConversationAttentions to update
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * Limit how many AiConversationAttentions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiConversationAttention updateManyAndReturn
+   */
+  export type AiConversationAttentionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * The data used to update AiConversationAttentions.
+     */
+    data: XOR<AiConversationAttentionUpdateManyMutationInput, AiConversationAttentionUncheckedUpdateManyInput>
+    /**
+     * Filter which AiConversationAttentions to update
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * Limit how many AiConversationAttentions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiConversationAttention upsert
+   */
+  export type AiConversationAttentionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiConversationAttention to update in case it exists.
+     */
+    where: AiConversationAttentionWhereUniqueInput
+    /**
+     * In case the AiConversationAttention found by the `where` argument doesn't exist, create a new AiConversationAttention with this data.
+     */
+    create: XOR<AiConversationAttentionCreateInput, AiConversationAttentionUncheckedCreateInput>
+    /**
+     * In case the AiConversationAttention was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiConversationAttentionUpdateInput, AiConversationAttentionUncheckedUpdateInput>
+  }
+
+  /**
+   * AiConversationAttention delete
+   */
+  export type AiConversationAttentionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
+    /**
+     * Filter which AiConversationAttention to delete.
+     */
+    where: AiConversationAttentionWhereUniqueInput
+  }
+
+  /**
+   * AiConversationAttention deleteMany
+   */
+  export type AiConversationAttentionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiConversationAttentions to delete
+     */
+    where?: AiConversationAttentionWhereInput
+    /**
+     * Limit how many AiConversationAttentions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiConversationAttention without action
+   */
+  export type AiConversationAttentionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiConversationAttention
+     */
+    select?: AiConversationAttentionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiConversationAttention
+     */
+    omit?: AiConversationAttentionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiConversationAttentionInclude<ExtArgs> | null
   }
 
 
@@ -115719,6 +117030,23 @@ export namespace Prisma {
   export type AiGoalSurfaceLeaseScalarFieldEnum = (typeof AiGoalSurfaceLeaseScalarFieldEnum)[keyof typeof AiGoalSurfaceLeaseScalarFieldEnum]
 
 
+  export const AiConversationAttentionScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    runtimeKind: 'runtimeKind',
+    conversationId: 'conversationId',
+    runId: 'runId',
+    runSequence: 'runSequence',
+    state: 'state',
+    revision: 'revision',
+    seenRevision: 'seenRevision',
+    runStartedAt: 'runStartedAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiConversationAttentionScalarFieldEnum = (typeof AiConversationAttentionScalarFieldEnum)[keyof typeof AiConversationAttentionScalarFieldEnum]
+
+
   export const AiExecutionRecordScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -117400,6 +118728,7 @@ export namespace Prisma {
     aiConversations?: AiConversationListRelationFilter
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseListRelationFilter
+    aiConversationAttention?: AiConversationAttentionListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
     aiProviderConfigs?: AiProviderConfigListRelationFilter
     aiAgentInstances?: AiAgentInstanceListRelationFilter
@@ -117451,6 +118780,7 @@ export namespace Prisma {
     aiConversations?: AiConversationOrderByRelationAggregateInput
     aiExecutionRecords?: AiExecutionRecordOrderByRelationAggregateInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseOrderByRelationAggregateInput
+    aiConversationAttention?: AiConversationAttentionOrderByRelationAggregateInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryOrderByRelationAggregateInput
     aiProviderConfigs?: AiProviderConfigOrderByRelationAggregateInput
     aiAgentInstances?: AiAgentInstanceOrderByRelationAggregateInput
@@ -117505,6 +118835,7 @@ export namespace Prisma {
     aiConversations?: AiConversationListRelationFilter
     aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseListRelationFilter
+    aiConversationAttention?: AiConversationAttentionListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
     aiProviderConfigs?: AiProviderConfigListRelationFilter
     aiAgentInstances?: AiAgentInstanceListRelationFilter
@@ -117692,6 +119023,94 @@ export namespace Prisma {
     expiresAt?: DateTimeWithAggregatesFilter<"AiGoalSurfaceLease"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"AiGoalSurfaceLease"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiGoalSurfaceLease"> | Date | string
+  }
+
+  export type AiConversationAttentionWhereInput = {
+    AND?: AiConversationAttentionWhereInput | AiConversationAttentionWhereInput[]
+    OR?: AiConversationAttentionWhereInput[]
+    NOT?: AiConversationAttentionWhereInput | AiConversationAttentionWhereInput[]
+    id?: StringFilter<"AiConversationAttention"> | string
+    identityId?: StringFilter<"AiConversationAttention"> | string
+    runtimeKind?: StringFilter<"AiConversationAttention"> | string
+    conversationId?: StringFilter<"AiConversationAttention"> | string
+    runId?: StringFilter<"AiConversationAttention"> | string
+    runSequence?: IntFilter<"AiConversationAttention"> | number
+    state?: StringFilter<"AiConversationAttention"> | string
+    revision?: IntFilter<"AiConversationAttention"> | number
+    seenRevision?: IntFilter<"AiConversationAttention"> | number
+    runStartedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+    updatedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AiConversationAttentionOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    runtimeKind?: SortOrder
+    conversationId?: SortOrder
+    runId?: SortOrder
+    runSequence?: SortOrder
+    state?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+    runStartedAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AiConversationAttentionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_runtimeKind_conversationId?: AiConversationAttentionIdentityIdRuntimeKindConversationIdCompoundUniqueInput
+    AND?: AiConversationAttentionWhereInput | AiConversationAttentionWhereInput[]
+    OR?: AiConversationAttentionWhereInput[]
+    NOT?: AiConversationAttentionWhereInput | AiConversationAttentionWhereInput[]
+    identityId?: StringFilter<"AiConversationAttention"> | string
+    runtimeKind?: StringFilter<"AiConversationAttention"> | string
+    conversationId?: StringFilter<"AiConversationAttention"> | string
+    runId?: StringFilter<"AiConversationAttention"> | string
+    runSequence?: IntFilter<"AiConversationAttention"> | number
+    state?: StringFilter<"AiConversationAttention"> | string
+    revision?: IntFilter<"AiConversationAttention"> | number
+    seenRevision?: IntFilter<"AiConversationAttention"> | number
+    runStartedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+    updatedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id" | "identityId_runtimeKind_conversationId">
+
+  export type AiConversationAttentionOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    runtimeKind?: SortOrder
+    conversationId?: SortOrder
+    runId?: SortOrder
+    runSequence?: SortOrder
+    state?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+    runStartedAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiConversationAttentionCountOrderByAggregateInput
+    _avg?: AiConversationAttentionAvgOrderByAggregateInput
+    _max?: AiConversationAttentionMaxOrderByAggregateInput
+    _min?: AiConversationAttentionMinOrderByAggregateInput
+    _sum?: AiConversationAttentionSumOrderByAggregateInput
+  }
+
+  export type AiConversationAttentionScalarWhereWithAggregatesInput = {
+    AND?: AiConversationAttentionScalarWhereWithAggregatesInput | AiConversationAttentionScalarWhereWithAggregatesInput[]
+    OR?: AiConversationAttentionScalarWhereWithAggregatesInput[]
+    NOT?: AiConversationAttentionScalarWhereWithAggregatesInput | AiConversationAttentionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    identityId?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    runtimeKind?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    conversationId?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    runId?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    runSequence?: IntWithAggregatesFilter<"AiConversationAttention"> | number
+    state?: StringWithAggregatesFilter<"AiConversationAttention"> | string
+    revision?: IntWithAggregatesFilter<"AiConversationAttention"> | number
+    seenRevision?: IntWithAggregatesFilter<"AiConversationAttention"> | number
+    runStartedAt?: DateTimeWithAggregatesFilter<"AiConversationAttention"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiConversationAttention"> | Date | string
   }
 
   export type AiExecutionRecordWhereInput = {
@@ -125476,6 +126895,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -125526,6 +126946,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -125576,6 +126997,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -125626,6 +127048,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -125821,6 +127244,103 @@ export namespace Prisma {
     fence?: IntFieldUpdateOperationsInput | number
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionCreateInput = {
+    id: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiConversationAttentionInput
+  }
+
+  export type AiConversationAttentionUncheckedCreateInput = {
+    id: string
+    identityId: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiConversationAttentionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiConversationAttentionNestedInput
+  }
+
+  export type AiConversationAttentionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionCreateManyInput = {
+    id: string
+    identityId: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiConversationAttentionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -134737,6 +136257,12 @@ export namespace Prisma {
     none?: AiGoalSurfaceLeaseWhereInput
   }
 
+  export type AiConversationAttentionListRelationFilter = {
+    every?: AiConversationAttentionWhereInput
+    some?: AiConversationAttentionWhereInput
+    none?: AiConversationAttentionWhereInput
+  }
+
   export type AiKnowledgeIndexEntryListRelationFilter = {
     every?: AiKnowledgeIndexEntryWhereInput
     some?: AiKnowledgeIndexEntryWhereInput
@@ -134927,6 +136453,10 @@ export namespace Prisma {
   }
 
   export type AiGoalSurfaceLeaseOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiConversationAttentionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -135243,6 +136773,66 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type AiConversationAttentionIdentityIdRuntimeKindConversationIdCompoundUniqueInput = {
+    identityId: string
+    runtimeKind: string
+    conversationId: string
+  }
+
+  export type AiConversationAttentionCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    runtimeKind?: SortOrder
+    conversationId?: SortOrder
+    runId?: SortOrder
+    runSequence?: SortOrder
+    state?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+    runStartedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiConversationAttentionAvgOrderByAggregateInput = {
+    runSequence?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+  }
+
+  export type AiConversationAttentionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    runtimeKind?: SortOrder
+    conversationId?: SortOrder
+    runId?: SortOrder
+    runSequence?: SortOrder
+    state?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+    runStartedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiConversationAttentionMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    runtimeKind?: SortOrder
+    conversationId?: SortOrder
+    runId?: SortOrder
+    runSequence?: SortOrder
+    state?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
+    runStartedAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiConversationAttentionSumOrderByAggregateInput = {
+    runSequence?: SortOrder
+    revision?: SortOrder
+    seenRevision?: SortOrder
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -140282,6 +141872,13 @@ export namespace Prisma {
     connect?: AiGoalSurfaceLeaseWhereUniqueInput | AiGoalSurfaceLeaseWhereUniqueInput[]
   }
 
+  export type AiConversationAttentionCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput> | AiConversationAttentionCreateWithoutAccountInput[] | AiConversationAttentionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiConversationAttentionCreateOrConnectWithoutAccountInput | AiConversationAttentionCreateOrConnectWithoutAccountInput[]
+    createMany?: AiConversationAttentionCreateManyAccountInputEnvelope
+    connect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+  }
+
   export type AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput = {
     create?: XOR<AiKnowledgeIndexEntryCreateWithoutAccountInput, AiKnowledgeIndexEntryUncheckedCreateWithoutAccountInput> | AiKnowledgeIndexEntryCreateWithoutAccountInput[] | AiKnowledgeIndexEntryUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput | AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput[]
@@ -140566,6 +142163,13 @@ export namespace Prisma {
     connectOrCreate?: AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput | AiGoalSurfaceLeaseCreateOrConnectWithoutAccountInput[]
     createMany?: AiGoalSurfaceLeaseCreateManyAccountInputEnvelope
     connect?: AiGoalSurfaceLeaseWhereUniqueInput | AiGoalSurfaceLeaseWhereUniqueInput[]
+  }
+
+  export type AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput> | AiConversationAttentionCreateWithoutAccountInput[] | AiConversationAttentionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiConversationAttentionCreateOrConnectWithoutAccountInput | AiConversationAttentionCreateOrConnectWithoutAccountInput[]
+    createMany?: AiConversationAttentionCreateManyAccountInputEnvelope
+    connect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
   }
 
   export type AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput = {
@@ -141058,6 +142662,20 @@ export namespace Prisma {
     update?: AiGoalSurfaceLeaseUpdateWithWhereUniqueWithoutAccountInput | AiGoalSurfaceLeaseUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: AiGoalSurfaceLeaseUpdateManyWithWhereWithoutAccountInput | AiGoalSurfaceLeaseUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: AiGoalSurfaceLeaseScalarWhereInput | AiGoalSurfaceLeaseScalarWhereInput[]
+  }
+
+  export type AiConversationAttentionUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput> | AiConversationAttentionCreateWithoutAccountInput[] | AiConversationAttentionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiConversationAttentionCreateOrConnectWithoutAccountInput | AiConversationAttentionCreateOrConnectWithoutAccountInput[]
+    upsert?: AiConversationAttentionUpsertWithWhereUniqueWithoutAccountInput | AiConversationAttentionUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiConversationAttentionCreateManyAccountInputEnvelope
+    set?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    disconnect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    delete?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    connect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    update?: AiConversationAttentionUpdateWithWhereUniqueWithoutAccountInput | AiConversationAttentionUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiConversationAttentionUpdateManyWithWhereWithoutAccountInput | AiConversationAttentionUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiConversationAttentionScalarWhereInput | AiConversationAttentionScalarWhereInput[]
   }
 
   export type AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput = {
@@ -141630,6 +143248,20 @@ export namespace Prisma {
     deleteMany?: AiGoalSurfaceLeaseScalarWhereInput | AiGoalSurfaceLeaseScalarWhereInput[]
   }
 
+  export type AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput> | AiConversationAttentionCreateWithoutAccountInput[] | AiConversationAttentionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiConversationAttentionCreateOrConnectWithoutAccountInput | AiConversationAttentionCreateOrConnectWithoutAccountInput[]
+    upsert?: AiConversationAttentionUpsertWithWhereUniqueWithoutAccountInput | AiConversationAttentionUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiConversationAttentionCreateManyAccountInputEnvelope
+    set?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    disconnect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    delete?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    connect?: AiConversationAttentionWhereUniqueInput | AiConversationAttentionWhereUniqueInput[]
+    update?: AiConversationAttentionUpdateWithWhereUniqueWithoutAccountInput | AiConversationAttentionUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiConversationAttentionUpdateManyWithWhereWithoutAccountInput | AiConversationAttentionUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiConversationAttentionScalarWhereInput | AiConversationAttentionScalarWhereInput[]
+  }
+
   export type AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<AiKnowledgeIndexEntryCreateWithoutAccountInput, AiKnowledgeIndexEntryUncheckedCreateWithoutAccountInput> | AiKnowledgeIndexEntryCreateWithoutAccountInput[] | AiKnowledgeIndexEntryUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput | AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput[]
@@ -141896,6 +143528,20 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiGoalSurfaceLeasesInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiGoalSurfaceLeasesInput, AccountUpdateWithoutAiGoalSurfaceLeasesInput>, AccountUncheckedUpdateWithoutAiGoalSurfaceLeasesInput>
+  }
+
+  export type AccountCreateNestedOneWithoutAiConversationAttentionInput = {
+    create?: XOR<AccountCreateWithoutAiConversationAttentionInput, AccountUncheckedCreateWithoutAiConversationAttentionInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiConversationAttentionInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAiConversationAttentionNestedInput = {
+    create?: XOR<AccountCreateWithoutAiConversationAttentionInput, AccountUncheckedCreateWithoutAiConversationAttentionInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiConversationAttentionInput
+    upsert?: AccountUpsertWithoutAiConversationAttentionInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiConversationAttentionInput, AccountUpdateWithoutAiConversationAttentionInput>, AccountUncheckedUpdateWithoutAiConversationAttentionInput>
   }
 
   export type AccountCreateNestedOneWithoutAiExecutionRecordsInput = {
@@ -147275,6 +148921,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AiConversationAttentionCreateWithoutAccountInput = {
+    id: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiConversationAttentionUncheckedCreateWithoutAccountInput = {
+    id: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiConversationAttentionCreateOrConnectWithoutAccountInput = {
+    where: AiConversationAttentionWhereUniqueInput
+    create: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiConversationAttentionCreateManyAccountInputEnvelope = {
+    data: AiConversationAttentionCreateManyAccountInput | AiConversationAttentionCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AiKnowledgeIndexEntryCreateWithoutAccountInput = {
     id: string
     repositoryId: string
@@ -148859,6 +150541,39 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiGoalSurfaceLease"> | Date | string
   }
 
+  export type AiConversationAttentionUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiConversationAttentionWhereUniqueInput
+    update: XOR<AiConversationAttentionUpdateWithoutAccountInput, AiConversationAttentionUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiConversationAttentionCreateWithoutAccountInput, AiConversationAttentionUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiConversationAttentionUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiConversationAttentionWhereUniqueInput
+    data: XOR<AiConversationAttentionUpdateWithoutAccountInput, AiConversationAttentionUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiConversationAttentionUpdateManyWithWhereWithoutAccountInput = {
+    where: AiConversationAttentionScalarWhereInput
+    data: XOR<AiConversationAttentionUpdateManyMutationInput, AiConversationAttentionUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiConversationAttentionScalarWhereInput = {
+    AND?: AiConversationAttentionScalarWhereInput | AiConversationAttentionScalarWhereInput[]
+    OR?: AiConversationAttentionScalarWhereInput[]
+    NOT?: AiConversationAttentionScalarWhereInput | AiConversationAttentionScalarWhereInput[]
+    id?: StringFilter<"AiConversationAttention"> | string
+    identityId?: StringFilter<"AiConversationAttention"> | string
+    runtimeKind?: StringFilter<"AiConversationAttention"> | string
+    conversationId?: StringFilter<"AiConversationAttention"> | string
+    runId?: StringFilter<"AiConversationAttention"> | string
+    runSequence?: IntFilter<"AiConversationAttention"> | number
+    state?: StringFilter<"AiConversationAttention"> | string
+    revision?: IntFilter<"AiConversationAttention"> | number
+    seenRevision?: IntFilter<"AiConversationAttention"> | number
+    runStartedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+    updatedAt?: DateTimeFilter<"AiConversationAttention"> | Date | string
+  }
+
   export type AiKnowledgeIndexEntryUpsertWithWhereUniqueWithoutAccountInput = {
     where: AiKnowledgeIndexEntryWhereUniqueInput
     update: XOR<AiKnowledgeIndexEntryUpdateWithoutAccountInput, AiKnowledgeIndexEntryUncheckedUpdateWithoutAccountInput>
@@ -149405,6 +151120,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -149454,6 +151170,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -149538,6 +151255,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -149587,6 +151305,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -149661,6 +151380,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -149710,6 +151430,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -149775,6 +151496,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -149824,6 +151546,223 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutAiConversationAttentionInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAiConversationAttentionInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAiConversationAttentionInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAiConversationAttentionInput, AccountUncheckedCreateWithoutAiConversationAttentionInput>
+  }
+
+  export type AccountUpsertWithoutAiConversationAttentionInput = {
+    update: XOR<AccountUpdateWithoutAiConversationAttentionInput, AccountUncheckedUpdateWithoutAiConversationAttentionInput>
+    create: XOR<AccountCreateWithoutAiConversationAttentionInput, AccountUncheckedCreateWithoutAiConversationAttentionInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAiConversationAttentionInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAiConversationAttentionInput, AccountUncheckedUpdateWithoutAiConversationAttentionInput>
+  }
+
+  export type AccountUpdateWithoutAiConversationAttentionInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAiConversationAttentionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -149873,6 +151812,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -149922,6 +151862,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -149987,6 +151928,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -150036,6 +151978,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -150086,6 +152029,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
@@ -150135,6 +152079,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -150223,6 +152168,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
@@ -150272,6 +152218,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -150337,6 +152284,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
@@ -150386,6 +152334,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -150498,6 +152447,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
@@ -150547,6 +152497,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -150640,6 +152591,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -150689,6 +152641,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -150832,6 +152785,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -150881,6 +152835,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -151160,6 +153115,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -151209,6 +153165,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -151274,6 +153231,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -151323,6 +153281,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -151372,6 +153331,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -151421,6 +153381,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -151486,6 +153447,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -151535,6 +153497,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -151584,6 +153547,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
@@ -151633,6 +153597,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -151698,6 +153663,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
@@ -151747,6 +153713,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -152197,6 +154164,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -152246,6 +154214,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -152640,6 +154609,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -152689,6 +154659,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -153346,6 +155317,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -153395,6 +155367,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -153599,6 +155572,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -153648,6 +155622,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -154557,6 +156532,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -154606,6 +156582,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -154720,6 +156697,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -154769,6 +156747,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -155120,6 +157099,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -155169,6 +157149,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -155272,6 +157253,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -155321,6 +157303,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -155402,6 +157385,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -155451,6 +157435,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -155596,6 +157581,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -155645,6 +157631,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -155786,6 +157773,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -155835,6 +157823,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -155989,6 +157978,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -156038,6 +158028,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -156322,6 +158313,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -156371,6 +158363,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -156500,6 +158493,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -156549,6 +158543,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -156599,6 +158594,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -156648,6 +158644,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -156780,6 +158777,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -156829,6 +158827,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -157158,6 +159157,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -157207,6 +159207,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -157345,6 +159346,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -157394,6 +159396,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -159205,6 +161208,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -159254,6 +161258,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -159319,6 +161324,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -159368,6 +161374,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -159417,6 +161424,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -159466,6 +161474,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -159531,6 +161540,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -159580,6 +161590,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -159629,6 +161640,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -159678,6 +161690,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -159900,6 +161913,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -159949,6 +161963,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -160072,6 +162087,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -160121,6 +162137,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -160186,6 +162203,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -160235,6 +162253,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -160284,6 +162303,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -160333,6 +162353,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -160425,6 +162446,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -160474,6 +162496,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -160539,6 +162562,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -160588,6 +162612,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -160717,6 +162742,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -160766,6 +162792,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -160891,6 +162918,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -160940,6 +162968,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -161040,6 +163069,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -161089,6 +163119,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -161154,6 +163185,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -161203,6 +163235,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -161293,6 +163326,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -161342,6 +163376,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -161460,6 +163495,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -161509,6 +163545,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -161651,6 +163688,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -161700,6 +163738,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -161765,6 +163804,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -161814,6 +163854,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -161987,6 +164028,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -162036,6 +164078,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -162241,6 +164284,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -162290,6 +164334,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -162398,6 +164443,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -162447,6 +164493,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -162497,6 +164544,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -162546,6 +164594,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -162611,6 +164660,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -162660,6 +164710,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -162895,6 +164946,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -162944,6 +164996,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -163299,6 +165352,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -163348,6 +165402,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -164305,6 +166360,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -164354,6 +166410,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -164464,6 +166521,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -164513,6 +166571,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -164612,6 +166671,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -164661,6 +166721,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -164726,6 +166787,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -164775,6 +166837,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -164824,6 +166887,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -164873,6 +166937,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -164982,6 +167047,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -165031,6 +167097,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -165096,6 +167163,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -165145,6 +167213,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -165275,6 +167344,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -165324,6 +167394,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -165444,6 +167515,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -165493,6 +167565,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -165558,6 +167631,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -165607,6 +167681,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -165656,6 +167731,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -165705,6 +167781,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -165770,6 +167847,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -165819,6 +167897,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -165868,6 +167947,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -165917,6 +167997,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -166119,6 +168200,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -166168,6 +168250,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -166319,6 +168402,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -166368,6 +168452,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -166495,6 +168580,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -166544,6 +168630,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -166662,6 +168749,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -166711,6 +168799,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -166838,6 +168927,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -166887,6 +168977,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -167003,6 +169094,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -167052,6 +169144,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -167151,6 +169244,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -167200,6 +169294,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -167290,6 +169385,7 @@ export namespace Prisma {
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
@@ -167339,6 +169435,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
@@ -167435,6 +169532,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
@@ -167484,6 +169582,7 @@ export namespace Prisma {
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
@@ -167853,6 +169952,19 @@ export namespace Prisma {
     fence?: number
     expiresAt: Date | string
     createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiConversationAttentionCreateManyAccountInput = {
+    id: string
+    runtimeKind: string
+    conversationId: string
+    runId: string
+    runSequence?: number
+    state?: string
+    revision?: number
+    seenRevision?: number
+    runStartedAt?: Date | string
     updatedAt?: Date | string
   }
 
@@ -169199,6 +171311,45 @@ export namespace Prisma {
     fence?: IntFieldUpdateOperationsInput | number
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiConversationAttentionUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runtimeKind?: StringFieldUpdateOperationsInput | string
+    conversationId?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    runSequence?: IntFieldUpdateOperationsInput | number
+    state?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    seenRevision?: IntFieldUpdateOperationsInput | number
+    runStartedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

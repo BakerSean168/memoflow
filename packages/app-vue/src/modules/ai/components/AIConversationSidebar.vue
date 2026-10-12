@@ -58,40 +58,67 @@
     </div>
 
     <div class="min-h-0 flex-1 overflow-y-auto p-2">
-      <!-- 会话列表：日常路径，置顶 -->
-      <div
-        v-for="item in conversations"
-        :key="item.id"
-        class="group mb-1 flex items-center gap-1 rounded-lg pr-1 text-sm transition-colors"
-        :class="
-          activeConversationId === item.id
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-        "
-      >
-        <button
-          type="button"
-          class="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          @click="$emit('select', item)"
+      <!-- 固定状态图标位于标题行末端；已查看的普通成功会话不渲染状态。 -->
+      <TooltipProvider>
+        <div
+          v-for="item in conversations"
+          :key="item.id"
+          class="group relative mb-1 flex min-h-9 items-center rounded-lg text-sm transition-colors"
+          :class="
+            activeConversationId === item.id
+              ? 'bg-accent text-accent-foreground'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          "
+          data-testid="ai-sidebar-conversation-row"
         >
-          <MessageSquare class="h-4 w-4 shrink-0" />
-          <span class="min-w-0 flex-1 truncate">
-            {{ item.name || t('common.untitled') }}
-            <span class="ml-1 text-[10px] text-muted-foreground">{{
-              item.runtimeKind === 'local_agent' ? item.driver : t('aiAssistant.local.builtin')
-            }}</span>
-          </span>
-        </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          :aria-label="t('common.delete')"
-          class="h-8 w-8 shrink-0 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-          @click.stop="$emit('delete', item.id)"
-        >
-          <Trash2 class="h-4 w-4" />
-        </Button>
-      </div>
+          <button
+            type="button"
+            class="flex h-9 min-w-0 w-full items-center rounded-lg py-2 pl-3 pr-16 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :aria-label="item.name || t('common.untitled')"
+            @click="$emit('select', item)"
+          >
+            <span class="block min-w-0 flex-1 truncate whitespace-nowrap">
+              {{ item.name || t('common.untitled') }}
+              <span class="ml-1 text-[10px] text-muted-foreground">{{
+                item.runtimeKind === 'local_agent' ? item.driver : t('aiAssistant.local.builtin')
+              }}</span>
+            </span>
+          </button>
+
+          <Tooltip v-if="conversationStatuses[item.id]">
+            <TooltipTrigger as-child>
+              <button
+                type="button"
+                class="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                :aria-label="
+                  t(`aiAssistant.chatPage.sidebar.attention.${conversationStatuses[item.id]}`)
+                "
+                data-testid="ai-sidebar-conversation-status"
+                @click.stop="$emit('select', item)"
+              >
+                <component
+                  :is="attentionIcon[conversationStatuses[item.id]!]"
+                  class="h-4 w-4 shrink-0"
+                  :class="attentionColor[conversationStatuses[item.id]!]"
+                  aria-hidden="true"
+                />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" class="text-xs">
+              {{ t(`aiAssistant.chatPage.sidebar.attention.${conversationStatuses[item.id]}`) }}
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            variant="ghost"
+            size="icon"
+            :aria-label="t('common.delete')"
+            class="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+            @click.stop="$emit('delete', item.id)"
+          >
+            <Trash2 class="h-4 w-4" />
+          </Button>
+        </div>
+      </TooltipProvider>
 
       <div
         v-if="!conversations.length && !loading"
@@ -198,13 +225,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, type Component } from 'vue';
 import { semanticToneStatusClass } from '../../../shared/constants/semantic-tone';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   ChevronDown,
   FileText,
-  MessageSquare,
+  CircleAlert,
+  CircleCheck,
+  LoaderCircle,
+  MessageCircleQuestion,
+  ShieldAlert,
   MoreHorizontal,
   Plus,
   RefreshCcw,
@@ -223,7 +254,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@memoflow/ui-vue-shadcn';
+import type {
+  ConversationAttentionMap,
+  ConversationAttentionStatus,
+} from '../composables/useConversationAttention';
 import type {
   AIWorkspaceRecentGoal,
   AIWorkspaceRecentKnowledgeNote,
@@ -233,6 +272,7 @@ import type {
 const props = withDefaults(
   defineProps<{
     conversations: ConversationSummary[];
+    conversationStatuses?: ConversationAttentionMap;
     recentGoals: AIWorkspaceRecentGoal[];
     recentKnowledgeNotes: AIWorkspaceRecentKnowledgeNote[];
     /** When true, show verification-required degrade instead of empty notes. */
@@ -247,6 +287,7 @@ const props = withDefaults(
   {
     variant: 'desktop',
     showClose: false,
+    conversationStatuses: () => ({}),
     recentKnowledgeNotesEmailVerificationRequired: false,
     recentKnowledgeNotesErrorMessageKey: null,
   },
@@ -264,6 +305,21 @@ defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const attentionIcon = {
+  failed: CircleAlert,
+  input: MessageCircleQuestion,
+  approval: ShieldAlert,
+  working: LoaderCircle,
+  done: CircleCheck,
+} satisfies Record<ConversationAttentionStatus, Component>;
+const attentionColor = {
+  failed: 'text-[#F87171]',
+  input: 'text-[#A5B4FC]',
+  approval: 'text-[#FBBF24]',
+  working: 'text-[#7DD3FC]',
+  done: 'text-[#6EE7B7]',
+} satisfies Record<ConversationAttentionStatus, string>;
 
 // 折叠段默认收起（回溯/快捷入口非日常路径，§1-5）
 const recentGoalsOpen = ref(false);

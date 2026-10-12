@@ -91,6 +91,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     agentInstanceRepository,
     knowledgeIndexRepository,
     executionRecordPort,
+    conversationAttentionPort,
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort,
   } = createAIPowerSyncRepositories(dependencies.db);
@@ -176,6 +177,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
     workflowRuntime: mastraRuntime,
     knowledgeIndexRepository,
     executionRecordPort,
+    conversationAttentionPort,
     evaluationReportPort: new AIEvaluationReportFileAdapter(),
     knowledgeNotePersistence: dependencies.knowledgeNotePersistence,
     knowledgeSourcePort: dependencies.knowledgeSourcePort,

@@ -9,6 +9,19 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       common: { loading: 'Loading', more: 'More', delete: 'Delete' },
+      aiAssistant: {
+        chatPage: {
+          sidebar: {
+            attention: {
+              failed: 'Execution failed',
+              input: 'Answer required',
+              approval: 'Approval required',
+              working: 'Working',
+              done: 'New result',
+            },
+          },
+        },
+      },
       shell: {
         search: 'Search',
         newChat: 'New Chat',
@@ -50,6 +63,35 @@ const groups = [
     items: [{ id: 'c', title: 'Infrastructure migration' }],
   },
 ];
+
+describe('ConversationSidebar attention', () => {
+  it('displays semantic status icons and preserves conversation navigation', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: {
+        groups,
+        activeConversationId: 'b',
+        conversationStatuses: { a: 'working', c: 'done' },
+      },
+      global: { plugins: [i18n] },
+    });
+    const icons = wrapper.findAll('[data-testid="shell-conversation-status"]');
+    expect(icons).toHaveLength(2);
+    expect(icons[0]!.attributes('aria-label')).toBe('Working');
+    expect(icons[0]!.find('svg').classes()).toContain('text-[#7DD3FC]');
+    expect(icons[1]!.attributes('aria-label')).toBe('New result');
+    expect(icons[1]!.find('svg').classes()).toContain('text-[#6EE7B7]');
+    const firstRow = wrapper
+      .findAll('nav button')
+      .find((item) => item.text() === 'Personal systems architecture');
+    expect(firstRow?.classes()).toContain('pr-16');
+    expect(firstRow?.find('span').classes()).toContain('truncate');
+    const normalRow = wrapper.findAll('nav button').find((item) => item.text() === 'Training plan');
+    expect(normalRow?.classes()).toContain('pr-9');
+    await icons[0]!.trigger('click');
+    expect(wrapper.emitted('select-conversation')).toEqual([['a']]);
+    wrapper.unmount();
+  });
+});
 
 describe('ConversationSidebar search', () => {
   it('returns keyboard focus to search after Escape and preserves conversation navigation', async () => {

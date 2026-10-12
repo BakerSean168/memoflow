@@ -3,6 +3,7 @@
  */
 
 export * from './ai-runtime.dto';
+export * from './assistant-attention.dto';
 export * from './ai-goal-create-workflow.dto';
 export * from './ai-goal-research.dto';
 export * from './ai-task-create-workflow.dto';

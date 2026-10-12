@@ -12,6 +12,8 @@ import type { AIChatService } from './types';
 import { useAIComposerContext } from './useAIComposerContext';
 import { useAssistantStream } from './useAssistantStream';
 import { useConversationProjection } from './useConversationProjection';
+import { useConversationAttention } from './useConversationAttention';
+import { useDurableConversationAttention } from './useDurableConversationAttention';
 
 const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
 export interface UseAIChatSessionOptions {
@@ -78,6 +80,18 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     normalizeChatItem,
   } = conversation;
   const stream = useAssistantStream({ options, chatMessage, conversation, composer });
+  const attention = useConversationAttention({
+    conversationId: chatConversationId,
+    loading: stream.chatLoading,
+    timeline: chatTimeline,
+  });
+  const durableAttention = useDurableConversationAttention({
+    runtime: options.runtime,
+    conversations: conversationList,
+    activeConversationId: chatConversationId,
+    local: attention.statuses,
+    loading: stream.chatLoading,
+  });
   const {
     chatLoading,
     activeStreamAbortController,
@@ -87,6 +101,20 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     decideToolApproval,
     handleSendChat,
   } = stream;
+
+  async function selectConversationWithAttention(...args: Parameters<typeof selectConversation>) {
+    attention.acknowledge(args[0].id);
+    await selectConversation(...args);
+  }
+
+  async function deleteConversationWithAttention(...args: Parameters<typeof deleteConversation>) {
+    const id = args[0];
+    const wasListed = conversationList.value.some((item) => item.id === id);
+    await deleteConversation(...args);
+    if (wasListed && !conversationList.value.some((item) => item.id === id)) {
+      attention.clear(id);
+    }
+  }
 
   function buildConversationTranscript() {
     const transcript = chatTimeline.value
@@ -187,6 +215,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     conversationTitle,
     conversationListLoading,
     conversationList,
+    conversationStatuses: durableAttention.statuses,
     lastActiveConversationId,
     messagesViewport,
     composerTextarea,
@@ -205,8 +234,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     buildConversationTranscript,
     loadConversationList,
     refreshRuntimeUsage,
-    selectConversation,
-    deleteConversation,
+    selectConversation: selectConversationWithAttention,
+    deleteConversation: deleteConversationWithAttention,
     ensureConversationCreated,
     prepareWorkflowTurn,
     resetChatSession,

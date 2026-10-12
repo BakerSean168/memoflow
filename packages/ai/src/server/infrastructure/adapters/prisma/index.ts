@@ -2,6 +2,7 @@ export { AIConversationPrismaRepository } from './ai-conversation-prisma.reposit
 export { AIProviderConfigPrismaRepository } from './ai-provider-config-prisma.repository';
 export { AIKnowledgeIndexPrismaRepository } from './ai-knowledge-index-prisma.repository';
 export { AIExecutionRecordPrismaAdapter } from './ai-execution-record-prisma.adapter';
+export { ConversationAttentionPrismaAdapter } from './ai-conversation-attention-prisma.adapter';
 
 export { AIProviderOnboardingSessionPrismaRepository } from './ai-provider-onboarding-session-prisma.repository';
 

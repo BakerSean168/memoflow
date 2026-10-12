@@ -217,6 +217,13 @@ export default {
       recentKnowledgeNotes: '最近知识笔记',
       noRecentKnowledgeNotes: '暂无最近知识笔记',
       goalProgress: '{progress}%',
+      attention: {
+        failed: '执行失败',
+        input: '等待回答',
+        approval: '等待审批',
+        working: '正在执行',
+        done: '有新结果',
+      },
     },
     toolIntro: {
       goalCreate: {

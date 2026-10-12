@@ -151,6 +151,20 @@ exports.Prisma.AiGoalSurfaceLeaseScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AiConversationAttentionScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  runtimeKind: 'runtimeKind',
+  conversationId: 'conversationId',
+  runId: 'runId',
+  runSequence: 'runSequence',
+  state: 'state',
+  revision: 'revision',
+  seenRevision: 'seenRevision',
+  runStartedAt: 'runStartedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1410,6 +1424,7 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   AiConversation: 'AiConversation',
   AiGoalSurfaceLease: 'AiGoalSurfaceLease',
+  AiConversationAttention: 'AiConversationAttention',
   AiExecutionRecord: 'AiExecutionRecord',
   AiProviderConfig: 'AiProviderConfig',
   AiAgentInstance: 'AiAgentInstance',

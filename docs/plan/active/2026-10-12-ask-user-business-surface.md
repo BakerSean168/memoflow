@@ -167,3 +167,12 @@ updated: 2026-10-12T13:05:00Z
 ### 剩余门槛（不变）
 
 生产 Provider canary、跨设备/跨宿主租约一致性、真实凭据全链路验收、最终端到端验收与完整 exact-head CI 未完成；P1/P2 未验收不得合并或部署。
+
+
+## Stage B-2 前置 · 合并 main attention 冲突检查点（2026-10-12）
+
+T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 main `4ba621daab0`（#450 durable conversation attention），不触碰 main checkout。保留本分支 Ask User 答复/挂起读取接口与 main attention list/ack 接口、两套 IPC lifecycle fixture；Prisma source schema 同时保留 AiGoalSurfaceLease 与 AiConversationAttention，从合并后 schema 重新生成并归一化 client，不执行数据库迁移或 db push。测试清单重新生成，1,393 文件。
+
+本地证据：AI 定向 5 文件 **101/101**；Chat/attention composables 4 文件 **42/42**；API compose-ai **4/4**；Desktop compose-ai **5/5**；affected lint **41 projects** 通过。ai/app-vue/api/contracts/web/desktop typecheck **6 projects + 32 dependency tasks** 全部通过；`memoflow:governance-check` 通过。
+
+基线 `d40092d1e76` 的 exact-head CI 仍未产生 run；等待超过 10 分钟后 close/reopen #449 仍未收到新 run。此次合并是 PR 冲突维护，不代表 Stage B-2 实施放行；Ask User 答复/审批真实引擎 RED→GREEN 尚未开始。推送合并 head 后仍要求 exact-head 19-job CI 全绿，PR 保持 Draft，不合并、不部署。

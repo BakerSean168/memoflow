@@ -1,5 +1,10 @@
 import {
   type AssistantRuntimeKind,
+  AssistantAttentionListRequestSchema,
+  AssistantAttentionListResponseSchema,
+  AssistantAttentionAckRequestSchema,
+  AssistantAttentionAckResponseSchema,
+  type AssistantAttentionView,
   AssistantRuntimeApprovalCommandSchema,
   AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeToolAnswerCommandSchema,
@@ -41,6 +46,15 @@ export interface AssistantRuntimeHandlers {
 
 /** Thin client-side vNext seam; no Mastra private type crosses this interface. */
 export interface AssistantRuntimeClient {
+  listAttention(
+    conversationIds: string[],
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantAttentionView[]>;
+  acknowledgeAttention(
+    conversationId: string,
+    revision: number,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<boolean>;
   listMessages(
     conversationId: string,
     runtimeKind?: AssistantRuntimeKind,
@@ -103,6 +117,8 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
   private readonly deleteUrl = '/ai/runtime/assistant/delete';
   private readonly streamUrl = '/ai/runtime/assistant/sse';
   private readonly cancelUrl = '/ai/runtime/assistant/cancel';
+  private readonly attentionListUrl = '/ai/runtime/assistant/attention/list';
+  private readonly attentionAckUrl = '/ai/runtime/assistant/attention/ack';
 
   constructor(private readonly httpClient: IResultHttpClient) {}
 
@@ -112,6 +128,36 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
     return parsed.data;
+  }
+
+  async listAttention(
+    conversationIds: string[],
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantAttentionView[]> {
+    if (runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent attention requires Desktop', 'NOT_SUPPORTED');
+    const request = AssistantAttentionListRequestSchema.parse({
+      conversationIds,
+      runtimeKind: 'builtin',
+    });
+    const result = await this.httpClient.post<unknown>(this.attentionListUrl, request);
+    return AssistantAttentionListResponseSchema.parse(unwrapOrThrowError(result)).items;
+  }
+
+  async acknowledgeAttention(
+    conversationId: string,
+    revision: number,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<boolean> {
+    if (runtimeKind === 'local_agent')
+      throw createResultClientError('Local Agent attention requires Desktop', 'NOT_SUPPORTED');
+    const request = AssistantAttentionAckRequestSchema.parse({
+      conversationId,
+      revision,
+      runtimeKind: 'builtin',
+    });
+    const result = await this.httpClient.post<unknown>(this.attentionAckUrl, request);
+    return AssistantAttentionAckResponseSchema.parse(unwrapOrThrowError(result)).acknowledged;
   }
 
   async listMessages(
@@ -263,6 +309,38 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
     return parsed.data;
+  }
+
+  async listAttention(
+    conversationIds: string[],
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<AssistantAttentionView[]> {
+    const request = AssistantAttentionListRequestSchema.parse({
+      conversationIds,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST,
+      request,
+    );
+    return AssistantAttentionListResponseSchema.parse(unwrapOrThrowError(result)).items;
+  }
+
+  async acknowledgeAttention(
+    conversationId: string,
+    revision: number,
+    runtimeKind?: AssistantRuntimeKind,
+  ): Promise<boolean> {
+    const request = AssistantAttentionAckRequestSchema.parse({
+      conversationId,
+      revision,
+      ...(runtimeKind ? { runtimeKind } : {}),
+    });
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK,
+      request,
+    );
+    return AssistantAttentionAckResponseSchema.parse(unwrapOrThrowError(result)).acknowledged;
   }
 
   async listMessages(
