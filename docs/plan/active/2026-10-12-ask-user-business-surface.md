@@ -44,10 +44,11 @@ updated: 2026-10-12T00:00:00Z
 - 第一时间显示真实请求、运行/答复处理/暂停/终止状态；只有原生 patch 成功后才记录带 run/revision 的本地操作回执，重复 projection 不再填第二遍。现阶段实际是一次 batch patch，不伪装成逐 token 填写。
 - Workflow turn 准备在 conversation 创建之前同步占用发送状态，拒绝 double-send；Stop 的 epoch 检查覆盖准备期和 late start，不会在取消后继续打开表单；取消结果未经 server 确认不显示为已取消。
 - 最终自审补充：KeepAlive panel presentation 捕获在 active owner，避免切 Tab 造成草稿 reset；native opening 每个 async preflight 后再次检查 clean 状态，不能落入普通 dirty-confirm 导航路径。
+- AgentController 原生 `ask_user` 纵向切片：注册 SDK `askUserTool` 并暴露可用工具清单；`tool_suspended` 翻译为 `assistant.ask_user.required`；答复合同 `AssistantRuntimeToolAnswerCommandSchema`（`action: 'answer' | 'cancel'`）+ `assistant.ask_user.resolved`；HTTP `/assistant/answer`、`/assistant/ask-user/pending` 与 IPC 通道；运行中会话经 `session.respondToToolSuspension` 恢复，持久化/重启后经 `agent.listSuspendedRuns()` 定位 + `agent.resumeStream()` 恢复；前端 ask-user 卡片、`answerAskUser` / `cancelAskUser` 与 `assistant.run.started` 后的 suspension 恢复。
 
 ## 尚未完成 / 未验证
 
-1. 原生 AgentController `ask_user` 的权限/事件合同、答复 API、选项校验、恢复/history/cancel 全链路；当前两个 Goal Chat 问询不是 SDK 原生 ask_user。
+1. Goal create workflow 的 clarification/review 仍走 Mastra workflow `suspend`（`clarification_required` / `goal_draft_review`），尚未迁移到 SDK `ask_user` tool。SDK 原生 `ask_user` 能力本身已接通（见“实际完成范围”），两者是不同机制，不能互相替代。
 2. 模型生成期间逐条业务命令、可持久回放的动作 journal。当前 planner 仍返回整份 draft，再真实 batch patch；仅改变承载与控制不能当成完成核心渐进式体验。
 3. 跨窗口/设备 durable lease、用户手动编辑草稿的刷新持久化。当前 scope 是单个 mounted shell；刷新后锁释放，workflow draft 从 server 恢复，人工未同步字段没有新增持久化保障。
 4. 所有 Task/Note/Routine/Schedule 活跃 editor 的通用 conflict publication。Shell dirty/busy 导航控制通用，但 owner capability 当前仅 Goal。
@@ -67,4 +68,4 @@ updated: 2026-10-12T00:00:00Z
 - 最后补充 preparation/Stop/异步 takeover race 三文件定向测试：62/62 通过。广域 exact-head 复验在提交后执行，最终数量以 PR 验证回报为准。
 - 初次全 app-vue test 在 200 秒 timeout；随后修正新增接口涉及的 mock 与 source assertion，再跑上述 89 文件范围全绿。未宣称整个 app-vue suite 通过。
 
-最终复验、提交和 PR 状态将在交付回报中给出。
+最终复验：exact-head CI（run 38199456950 @ `5f8fa09d5ab`）19/19 job 全绿（含 Unit Tests、Typecheck、Web Flow Shard 1–4/4、Validate Oracle、Web Flow Oracle、Governance Oracle 等）。此前两次红灯的可复现失败均由本切片修复，不再有未分类失败。
