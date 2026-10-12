@@ -947,6 +947,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       chatTimeline: chatSession.chatTimeline,
       conversationTitle: chatSession.conversationTitle,
       conversationList: chatSession.conversationList,
+      conversationStatuses: chatSession.conversationStatuses,
       conversationListLoading: chatSession.conversationListLoading,
       recentGoalList,
       recentTaskList,

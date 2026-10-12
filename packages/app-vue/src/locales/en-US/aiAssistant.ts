@@ -209,6 +209,13 @@ export default {
       recentKnowledgeNotes: 'Recent Knowledge Notes',
       noRecentKnowledgeNotes: 'No recent knowledge notes',
       goalProgress: '{progress}%',
+      attention: {
+        failed: 'Execution failed',
+        input: 'Waiting for your answer',
+        approval: 'Approval required',
+        working: 'Working',
+        done: 'New result',
+      },
     },
     toolIntro: {
       goalCreate: {
