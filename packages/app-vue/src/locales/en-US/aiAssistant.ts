@@ -89,7 +89,6 @@ export default {
     approveOnce: 'Allow once',
     decline: 'Decline',
     answer: 'Send answer',
-    cancel: 'Cancel',
     chooseAnswer: 'Choose an answer',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:
