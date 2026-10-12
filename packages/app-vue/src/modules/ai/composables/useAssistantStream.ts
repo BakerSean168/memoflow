@@ -7,7 +7,7 @@ import { nextTick, ref, shallowRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
-import type { AIChatService, ChatModelOption, ChatToolApproval, ChatNativeRequest } from './types';
+import type { AIChatService, ChatModelOption, ChatToolApproval, ChatNativeRequest, ChatAskUserRequest, ChatAskUserAnswer } from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 import type { useAIComposerContext } from './useAIComposerContext';
@@ -77,6 +77,9 @@ export function useAssistantStream(input: {
           approval.errorMessage = undefined;
         }
       }
+      for (const request of item.askUserRequests ?? []) {
+        if (request.status === 'pending' || request.status === 'sending') request.status = 'expired';
+      }
     }
   }
 
@@ -143,6 +146,27 @@ export function useAssistantStream(input: {
         request.errorMessage = t('aiAssistant.chatPage.tools.transportError');
       }
     }
+  }
+
+  async function answerAskUser(request: ChatAskUserRequest, answer: ChatAskUserAnswer) {
+    if (request.status !== 'pending' || request.runId !== activeRuntimeRunId.value || request.conversationId !== chatConversationId.value || !chatLoading.value) return;
+    request.status = 'sending'; request.errorMessage = undefined;
+    const stillWaiting = () => request.status === 'sending' && request.runId === activeRuntimeRunId.value && request.conversationId === chatConversationId.value && chatLoading.value;
+    try {
+      const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'answer', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer });
+      if (!accepted && stillWaiting()) { request.status = 'expired'; request.errorMessage = t('aiAssistant.chatPage.tools.stale'); }
+    } catch {
+      if (stillWaiting()) { request.status = 'pending'; request.errorMessage = t('aiAssistant.chatPage.tools.transportError'); }
+    }
+  }
+
+  async function cancelAskUser(request: ChatAskUserRequest) {
+    if (request.status !== 'pending' || request.conversationId !== chatConversationId.value) return;
+    request.status = 'sending'; request.errorMessage = undefined;
+    try {
+      const accepted = await options.runtime.answerToolSuspension({ type: 'tool_answer', action: 'cancel', conversationId: request.conversationId, runId: request.runId, toolCallId: request.toolCallId, answer: 'cancelled' });
+      if (request.status === 'sending') request.status = accepted ? 'expired' : 'expired';
+    } catch { if (request.status === 'sending') { request.status = 'pending'; request.errorMessage = t('aiAssistant.chatPage.tools.transportError'); } }
   }
 
   function clearPendingStreamFlushTimer() {
@@ -221,6 +245,28 @@ export function useAssistantStream(input: {
     if (activeRuntimeRunId.value && event.runId !== activeRuntimeRunId.value) return;
     const item = chatTimeline.value.find((candidate) => candidate.id === assistantDraftId);
     if (!item) return;
+    if (event.type === 'assistant.run.started' && event.runId && chatConversationId.value) {
+      void (async () => {
+        try {
+          const pending = await options.runtime.listAskUserSuspensions(chatConversationId.value);
+          for (const suspended of pending) {
+            if (suspended.runId !== event.runId) continue;
+            item.askUserRequests ??= [];
+            if (!item.askUserRequests.some((request) => request.toolCallId === suspended.toolCallId)) item.askUserRequests.push({ ...suspended, conversationId: event.conversationId, status: 'pending' });
+          }
+        } catch { /* A failed projection must not break the live turn stream. */ }
+      })();
+    }
+    if (event.type === 'assistant.ask_user.required') {
+      item.askUserRequests ??= [];
+      if (!item.askUserRequests.some((request) => request.toolCallId === event.data.toolCallId)) item.askUserRequests.push({ ...event.data, conversationId: event.conversationId, runId: event.runId, status: 'pending' });
+      return;
+    }
+    if (event.type === 'assistant.ask_user.resolved') {
+      const request = item.askUserRequests?.find((candidate) => candidate.toolCallId === event.data.toolCallId);
+      if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+      return;
+    }
     if (event.type === 'assistant.request.required') {
       item.nativeRequests ??= [];
       if (!item.nativeRequests.some((value) => value.request.requestId === event.data.requestId))
@@ -473,6 +519,8 @@ export function useAssistantStream(input: {
 
   return {
     respondNativeRequest,
+    answerAskUser,
+    cancelAskUser,
     chatLoading,
     activeStreamAbortController,
     activeRuntimeRunId,

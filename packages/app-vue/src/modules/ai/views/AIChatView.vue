@@ -170,6 +170,8 @@
         @quick-task="openQuickTaskWithoutAI"
         @tool-decision="decideToolApproval"
         @native-response="respondNativeRequest"
+        @ask-user-answer="answerAskUser"
+        @ask-user-cancel="cancelAskUser"
         @save-local-note="localAssistant.saveNote"
       >
         <template #workflow-surface>
@@ -420,6 +422,8 @@ const {
   runtimeChoice,
   historyIncomplete,
   respondNativeRequest,
+  answerAskUser,
+  cancelAskUser,
   chatMessage,
   chatLoading,
   chatConversationId,

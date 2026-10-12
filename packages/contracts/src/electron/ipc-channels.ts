@@ -152,6 +152,8 @@ export const AIChannels = {
   LOCAL_AGENT: 'ai:local-agent',
   AGENT_INSTANCE: 'ai:agent-instance',
   RUNTIME_ASSISTANT_APPROVAL: 'ai:runtime:assistant:approval',
+  RUNTIME_ASSISTANT_ANSWER: 'ai:runtime:assistant:answer',
+  RUNTIME_ASSISTANT_ASK_USER_PENDING: 'ai:runtime:assistant:ask-user-pending',
   RUNTIME_ASSISTANT_CANCEL: 'ai:runtime:assistant:cancel',
   RUNTIME_ASSISTANT_HISTORY: 'ai:runtime:assistant:history',
   RUNTIME_ASSISTANT_DELETE: 'ai:runtime:assistant:delete',

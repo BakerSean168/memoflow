@@ -2,6 +2,7 @@ import { AgentRegistryError } from '../../application/agent-instance/agent-insta
 import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime';
 import { applyMemoFlowSessionToolPolicy, memoFlowToolCategory } from '../tools/product-tool-policy';
 import { AgentController } from '@mastra/core/agent-controller';
+import { askUserTool } from '@mastra/core/tools';
 import { Mastra } from '@mastra/core/mastra';
 import {
   MASTRA_RESOURCE_ID_KEY,
@@ -114,6 +115,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private initPromise: Promise<void> | null = null;
   private disposePromise: Promise<void> | null = null;
   private readonly activeRuns = new Map<string, ActiveAssistantTurn>();
+  private readonly resumedRuns = new Set<string>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
   constructor(private readonly deps: MastraAIRuntimeDependencies) {
@@ -176,13 +178,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         {
           id: 'assistant',
           name: 'Assistant',
-          tools: productTools,
-          availableTools: Object.keys(productTools),
+          tools: { ...productTools, ask_user: askUserTool },
+          availableTools: [...Object.keys(productTools), 'ask_user'],
         },
       ],
       defaultModeId: 'assistant',
       disableBuiltinTools: [
-        'ask_user',
         'submit_plan',
         'task_write',
         'task_update',
@@ -337,6 +338,62 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     const active = this.activeRuns.get(input.runId);
     if (!active || active.identityId !== input.identityId) return false;
     return active.abort();
+  }
+
+  async listAskUserSuspensions(input: { identityId: string; conversationId: string }): Promise<readonly { runId: string; toolCallId: string; question: string; options?: { label: string; description?: string }[]; selectionMode?: 'single_select' | 'multi_select' }[]> {
+    await this.init();
+    const suspended = await this.assistant.listSuspendedRuns({ threadId: input.conversationId, resourceId: input.identityId });
+    return suspended.runs.flatMap((run) => run.toolCalls.flatMap((call) => {
+      if (call.toolName !== 'ask_user' || !call.toolCallId || !call.suspendPayload || typeof call.suspendPayload !== 'object' || Array.isArray(call.suspendPayload)) return [];
+      const payload = call.suspendPayload as Record<string, unknown>;
+      if (typeof payload.question !== 'string' || !payload.question.trim() || payload.question.length > 2000) return [];
+      const options = Array.isArray(payload.options) ? payload.options.filter((option): option is { label: string; description?: string } => Boolean(option) && typeof option === 'object' && typeof (option as { label?: unknown }).label === 'string') : undefined;
+      return [{ runId: run.runId, toolCallId: call.toolCallId, question: payload.question, ...(options?.length ? { options } : {}), ...(payload.selectionMode === 'single_select' || payload.selectionMode === 'multi_select' ? { selectionMode: payload.selectionMode } : {}) }];
+    }));
+  }
+
+  async cancelAskUserSuspension(input: { context: ExecutionContext; command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand }): Promise<boolean> {
+    if (input.command.action !== 'cancel') return false;
+    const runs = await this.assistant.listSuspendedRuns({ threadId: input.command.conversationId, resourceId: input.context.identityId });
+    const run = runs.runs.find((candidate) => candidate.runId === input.command.runId);
+    const suspension = run?.toolCalls.find((call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user');
+    if (!suspension) return false;
+    this.resumedRuns.add(run!.runId);
+    const requestContext = new RequestContext();
+    requestContext.setRaw('identityId', input.context.identityId); requestContext.setRaw('executionContext', input.context);
+    requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.context.identityId); requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.command.conversationId);
+    try { await this.assistant.resumeStream('The user cancelled this question. Continue without requiring an answer.', { runId: run!.runId, toolCallId: suspension.toolCallId, memory: { thread: input.command.conversationId, resource: input.context.identityId }, requestContext }); return true; }
+    finally { this.resumedRuns.delete(run!.runId); }
+  }
+
+  async answerToolSuspension(input: {
+    context: ExecutionContext;
+    command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand;
+  }): Promise<boolean> {
+    if (input.command.action === 'cancel') return this.cancelAskUserSuspension(input);
+    if (!input.context.identityId || input.command.identityId) return false;
+    const active = this.activeRuns.get(input.command.runId);
+    if (active && active.identityId === input.context.identityId && active.conversationId === input.command.conversationId) return active.answer(input.command, input.context);
+    const runs = await this.assistant.listSuspendedRuns({ threadId: input.command.conversationId, resourceId: input.context.identityId });
+    const run = runs.runs.find((candidate) => candidate.runId === input.command.runId && candidate.threadId === input.command.conversationId && candidate.resourceId === input.context.identityId);
+    const suspended = run?.toolCalls.find((call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user');
+    if (!run || !suspended || !suspended.suspendPayload || typeof suspended.suspendPayload !== 'object' || Array.isArray(suspended.suspendPayload)) return false;
+    const payload = suspended.suspendPayload as { options?: { label?: unknown }[]; selectionMode?: unknown };
+    if (payload.options) {
+      const labels = new Set(payload.options.map((option) => option.label).filter((label): label is string => typeof label === 'string'));
+      if (payload.selectionMode === 'multi_select') { if (!Array.isArray(input.command.answer) || !input.command.answer.length || input.command.answer.some((value) => !labels.has(value)) || new Set(input.command.answer).size !== input.command.answer.length) return false; }
+      else if (typeof input.command.answer !== 'string' || !labels.has(input.command.answer)) return false;
+    } else if (typeof input.command.answer !== 'string' || !input.command.answer.trim() || input.command.answer.length > 4000) return false;
+    if (this.resumedRuns.has(run.runId)) return false;
+    this.resumedRuns.add(run.runId);
+    const requestContext = new RequestContext();
+    requestContext.setRaw('identityId', input.context.identityId); requestContext.setRaw('executionContext', input.context);
+    requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.context.identityId); requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.command.conversationId);
+    try {
+      await this.assistant.resumeStream(input.command.answer, { runId: run.runId, toolCallId: input.command.toolCallId, memory: { thread: input.command.conversationId, resource: input.context.identityId }, requestContext });
+      return true;
+    } catch { return false; }
+    finally { this.resumedRuns.delete(run.runId); }
   }
 
   decideToolApproval(input: {

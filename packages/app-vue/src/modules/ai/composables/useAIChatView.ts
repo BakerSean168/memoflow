@@ -950,6 +950,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       runtimeChoice: chatSession.runtimeChoice,
       historyIncomplete: chatSession.historyIncomplete,
       respondNativeRequest: chatSession.respondNativeRequest,
+      answerAskUser: chatSession.answerAskUser,
+      cancelAskUser: chatSession.cancelAskUser,
       chatMessage: chatSession.chatMessage,
       chatLoading: chatSession.chatLoading,
       chatConversationId: chatSession.chatConversationId,

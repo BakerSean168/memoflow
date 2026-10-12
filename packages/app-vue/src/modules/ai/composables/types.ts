@@ -8,6 +8,7 @@ import type {
   LocalAgentConversation,
   LocalAgentRequest,
   LocalAgentActivity,
+  AssistantRuntimeToolAnswerCommand,
   GoalPlanDraft,
   GoalPlanKnowledge,
   GoalPlanTask,
@@ -123,6 +124,7 @@ export type ChatItem = {
   nativeActivities?: LocalAgentActivity[];
   localAgentSource?: AssistantRuntimeMessageView['localAgentSource'];
   nativeRequests?: ChatNativeRequest[];
+  askUserRequests?: ChatAskUserRequest[];
 };
 
 export type ChatNativeRequest = {
@@ -132,6 +134,18 @@ export type ChatNativeRequest = {
   status: 'pending' | 'sending' | 'answered' | 'expired';
   errorMessage?: string;
 };
+
+export type ChatAskUserRequest = {
+  toolCallId: string;
+  question: string;
+  options?: { label: string; description?: string }[];
+  selectionMode?: 'single_select' | 'multi_select';
+  conversationId: string;
+  runId: string;
+  status: 'pending' | 'sending' | 'answered' | 'expired';
+  errorMessage?: string;
+};
+export type ChatAskUserAnswer = AssistantRuntimeToolAnswerCommand['answer'];
 
 export type ConversationSummary =
   (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' }) | LocalAgentConversation;

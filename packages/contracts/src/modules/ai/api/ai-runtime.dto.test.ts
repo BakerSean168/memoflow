@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeEventSchema,
+  AssistantRuntimeAskUserSuspensionsSchema,
   AssistantRuntimeHistoryClientRequestSchema,
   AssistantRuntimeHistoryViewSchema,
   AIWorkflowCancelClientRequestSchema,
@@ -347,6 +348,13 @@ describe('AI vNext runtime contracts', () => {
     });
     expect(JSON.stringify(credentialAttempt)).not.toContain('must-not-cross-boundary');
     expect(JSON.stringify(credentialAttempt)).not.toContain('apiKey');
+  });
+
+  it('validates Mastra-native Ask User answer commands and suspension projections', () => {
+    expect(AssistantRuntimeClientCommandSchema.safeParse({ type: 'tool_answer', conversationId: 'c', runId: 'r', toolCallId: 't', answer: ['A', 'B'] }).success).toBe(true);
+    expect(AssistantRuntimeClientCommandSchema.safeParse({ type: 'tool_answer', conversationId: 'c', runId: 'r', toolCallId: 't', answer: 'A', identityId: 'foreign' }).success).toBe(false);
+    expect(AssistantRuntimeAskUserSuspensionsSchema.safeParse([{ runId: 'r', toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] }]).success).toBe(true);
+    expect(AssistantRuntimeEventSchema.safeParse({ eventId: 'r:1', runId: 'r', conversationId: 'c', sequence: 1, createdAt: 1, type: 'assistant.ask_user.required', data: { toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] } }).success).toBe(true);
   });
 
   it('rejects identity injection on workflow resume and keeps resume commands typed', () => {

@@ -178,6 +178,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     runtimeChoice,
     historyIncomplete,
     respondNativeRequest: stream.respondNativeRequest,
+    answerAskUser: stream.answerAskUser,
+    cancelAskUser: stream.cancelAskUser,
     chatMessage,
     chatLoading,
     chatConversationId,

@@ -71,6 +71,8 @@ import {
 import {
   AssistantRuntimeApprovalCommandSchema,
   AssistantRuntimeApprovalResultSchema,
+  AssistantRuntimeToolAnswerCommandSchema,
+  AssistantRuntimeToolAnswerResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
@@ -498,6 +500,25 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_START);
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ANSWER, async (_, command) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(command);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
+            return ok(AssistantRuntimeToolAnswerResultSchema.parse({ accepted: aiModule.mastraRuntime.answerToolSuspension({ context: requestContext, command: parsed.data }) }));
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ANSWER);
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING, async (_, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(request);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid conversation reference' });
+            return ok(await aiModule.mastraRuntime.listAskUserSuspensions({ identityId: requestContext.identityId, conversationId: parsed.data.conversationId }));
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING);
+
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_APPROVAL, async (_, command) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.mastraRuntime)

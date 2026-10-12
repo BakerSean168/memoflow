@@ -127,6 +127,29 @@
                 :request="request"
                 @respond="$emit('native-response', request, $event)"
               />
+              <section v-for="request in item.askUserRequests ?? []" :key="`${request.runId}:${request.toolCallId}`" class="mb-3 space-y-3 rounded-xl border p-3" data-testid="ai-ask-user-request">
+                <p class="text-sm font-medium">{{ request.question }}</p>
+                <p class="text-xs text-muted-foreground" role="status">{{ t(`aiAssistant.local.${request.status}`) }}</p>
+                <p v-if="request.errorMessage" role="alert">{{ request.errorMessage }}</p>
+                <form v-if="request.status === 'pending' || request.status === 'sending'" class="space-y-2" @submit.prevent="$emit('ask-user-answer', request, askUserAnswers[request.toolCallId] ?? '')">
+                  <label v-if="request.options && request.selectionMode !== 'multi_select'" class="block space-y-1 text-sm">
+                    <span>{{ t('aiAssistant.local.chooseAnswer') }}</span>
+                    <select v-model="askUserAnswers[request.toolCallId]" class="block w-full rounded border bg-background p-2" required :disabled="request.status !== 'pending'">
+                      <option disabled value="">{{ t('aiAssistant.local.chooseAnswer') }}</option>
+                      <option v-for="option in request.options" :key="option.label" :value="option.label">{{ option.label }}</option>
+                    </select>
+                  </label>
+                  <template v-else-if="request.options && request.selectionMode === 'multi_select'">
+                    <label v-for="option in request.options" :key="option.label" class="flex items-center gap-2 text-sm">
+                      <input v-model="askUserAnswers[request.toolCallId]" type="checkbox" :value="option.label" :disabled="request.status !== 'pending'" />
+                      {{ option.label }}
+                    </label>
+                  </template>
+                  <input v-else v-model="askUserAnswers[request.toolCallId]" class="w-full rounded border bg-background p-2" :maxlength="4000" required :disabled="request.status !== 'pending'" />
+                  <button type="submit" class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50" :disabled="request.status !== 'pending'" data-testid="ai-ask-user-submit">{{ t('aiAssistant.local.answer') }}</button>
+                  <button type="button" class="rounded-md border px-3 py-2 text-sm disabled:opacity-50" :disabled="request.status !== 'pending'" data-testid="ai-ask-user-cancel" @click="$emit('ask-user-cancel', request)">{{ t('aiAssistant.local.cancel') }}</button>
+                </form>
+              </section>
               <details
                 v-if="item.nativeActivities?.length"
                 class="mb-2 text-xs text-muted-foreground"
@@ -343,7 +366,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue';
+import { onBeforeUnmount, reactive, ref } from 'vue';
 import {
   Check,
   Copy,
@@ -367,6 +390,8 @@ import {
   type ChatItem,
   type ChatToolApproval,
   type ChatNativeRequest,
+  type ChatAskUserRequest,
+  type ChatAskUserAnswer,
   type WorkflowMode,
 } from '../composables/types';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
@@ -396,6 +421,8 @@ defineEmits<{
   'native-response': [request: ChatNativeRequest, response: LocalAgentRequestResponse['response']];
   'save-local-note': [content: string];
   'tool-decision': [approval: ChatToolApproval, decision: 'approve' | 'decline'];
+  'ask-user-answer': [request: ChatAskUserRequest, answer: ChatAskUserAnswer];
+  'ask-user-cancel': [request: ChatAskUserRequest];
 }>();
 
 const shortcutEntries = [
@@ -430,6 +457,7 @@ onBeforeUnmount(() => {
 
 defineExpose({ viewport });
 
+const askUserAnswers = reactive<Record<string, string | string[]>>({});
 const { t } = useI18n();
 const { typingPlaceholder, getMessageStatusLabel } = useAIFormatters();
 </script>

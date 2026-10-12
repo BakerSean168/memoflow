@@ -30,6 +30,7 @@ const i18n = createI18n({
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
           message: { copy: 'Copy', copied: 'Copied' },
+          local: { pending: 'Waiting', sending: 'Sending', answered: 'Answered', expired: 'Expired', answer: 'Send answer', chooseAnswer: 'Choose answer', cancel: 'Cancel' },
           tools: {
             approvalTitle: 'Tool approval',
             pending: 'Waiting for your decision',
@@ -128,6 +129,17 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
       semanticElevationClass('inset'),
     );
     expect(messages[1].find('[data-testid="memoflow-ai-icon"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders an Ask User prompt with selection and answer/cancel actions', async () => {
+    const wrapper = mount(AIMessagePanel, { props: { timeline: [{ id: 'assistant-ask', role: 'assistant', content: '', status: 'generating', askUserRequests: [{ toolCallId: 'ask-1', runId: 'run-1', conversationId: 'conversation-1', question: 'Choose a target', options: [{ label: 'Near term' }, { label: 'Long term' }], selectionMode: 'single_select', status: 'pending' }] }], toolMode: 'chat' }, global: { plugins: [i18n] } });
+    expect(wrapper.get('[data-testid="ai-ask-user-request"]').text()).toContain('Choose a target');
+    await wrapper.get('select').setValue('Long term');
+    await wrapper.get('[data-testid="ai-ask-user-submit"]').trigger('submit');
+    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }, 'Long term']);
+    await wrapper.get('[data-testid="ai-ask-user-cancel"]').trigger('click');
+    expect(wrapper.emitted('ask-user-answer')?.[1]).toMatchObject([{ toolCallId: 'ask-1' }, { action: 'cancel' }]);
     wrapper.unmount();
   });
 

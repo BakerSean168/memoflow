@@ -82,6 +82,7 @@ export default {
     approveOnce: '仅允许本次',
     decline: '拒绝',
     answer: '提交回答',
+    chooseAnswer: '请选择一项',
     incompleteHistory: '这段历史不完整，未完成的操作不会自动重放。',
     description:
       '使用本机已安装并配置的 Codex、Claude Code、Pi 或 DeepSeek Harness (DSH)。内置助手继续使用你配置的模型连接。',

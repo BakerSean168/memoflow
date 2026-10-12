@@ -25,6 +25,9 @@ import type { QueryKnowledgeReq, QueryKnowledgeRes } from '../api/ai-knowledge-q
 import type {
   AssistantRuntimeApprovalCommand,
   AssistantRuntimeApprovalResult,
+  AssistantRuntimeToolAnswerCommand,
+  AssistantRuntimeToolAnswerResult,
+  AssistantRuntimeAskUserSuspension,
   AssistantRuntimeClientCommand,
   AssistantRuntimeCancelResult,
   AssistantRuntimeConversationDeleteResult,
@@ -61,6 +64,8 @@ export type AIRpcMap = {
     { streamId: string; command: AssistantRuntimeClientCommand },
     void,
   ];
+  'ai:runtime:assistant:answer': [AssistantRuntimeToolAnswerCommand, AssistantRuntimeToolAnswerResult];
+  'ai:runtime:assistant:ask-user-pending': [AssistantRuntimeHistoryClientRequest, AssistantRuntimeAskUserSuspension[]];
   'ai:runtime:assistant:approval': [
     AssistantRuntimeApprovalCommand,
     AssistantRuntimeApprovalResult,

@@ -548,6 +548,26 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     await turn.finished;
   });
 
+  it('resumes a persisted native ask_user suspension after recreating the runtime and rejects foreign answers', async () => {
+    const file = join(tmpdir(), `memoflow-ask-user-${randomUUID()}.db`);
+    const first = await createRuntime(file);
+    vi.spyOn(first.runtime.history, 'ensureConversation').mockResolvedValue();
+    await first.runtime.init();
+    const suspendedAgent = first.runtime.assistant as never as {
+      listSuspendedRuns: (input: { threadId: string; resourceId: string }) => Promise<{ runs: { runId: string; toolCalls: { toolCallId: string; toolName: string; suspendPayload: unknown }[] }[] }>;
+      resumeStream: (data: unknown, options: unknown) => Promise<unknown>;
+    };
+    vi.spyOn(suspendedAgent, 'listSuspendedRuns').mockResolvedValue({ runs: [{ runId: 'persisted-run', threadId: 'ask-chat', resourceId: 'identity-a', toolCalls: [{ toolCallId: 'question-1', toolName: 'ask_user', suspendPayload: { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] } }] }] });
+    const resume = vi.spyOn(suspendedAgent, 'resumeStream').mockResolvedValue({} as never);
+    const projection = await first.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: 'ask-chat' });
+    expect(projection).toEqual([{ runId: 'persisted-run', toolCallId: 'question-1', question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }]);
+    const command = { type: 'tool_answer' as const, action: 'answer' as const, conversationId: 'ask-chat', runId: 'persisted-run', toolCallId: 'question-1', answer: 'A' };
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command: { ...command, answer: 'not-an-option' } })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command })).resolves.toBe(true);
+    expect(resume).toHaveBeenCalledWith('A', expect.objectContaining({ runId: 'persisted-run', toolCallId: 'question-1', memory: { thread: 'ask-chat', resource: 'identity-a' } }));
+  });
+
   it('does not start a native turn when the dispatch signal is already aborted', async () => {
     const { runtime, modelResolver } = await createRuntime();
     vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
