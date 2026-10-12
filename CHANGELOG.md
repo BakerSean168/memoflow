@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.19.0](https://github.com/BakerSean168/memoflow/compare/v0.18.0...v0.19.0) (2026-10-12)
+
+
+### Features
+
+* **ai:** capability-aware T3-style composer and native traits ([#447](https://github.com/BakerSean168/memoflow/issues/447)) ([171b81a](https://github.com/BakerSean168/memoflow/commit/171b81a3fc5507464b1c898f7ecb90d03c3de63a))
+* **ai:** durable conversation attention in Workspace sidebar (P72-P73) ([4ba621d](https://github.com/BakerSean168/memoflow/commit/4ba621daab03d02dafdbc95fb7ac207b56406c4f))
+* **ai:** persist conversation attention and sync sidebar ([000cd7a](https://github.com/BakerSean168/memoflow/commit/000cd7ac2376d3ceb9c895bae5311cb4214798c9))
+* **ai:** show live conversation attention in sidebar ([bc76118](https://github.com/BakerSean168/memoflow/commit/bc76118307ac042ae98586328e66b21d1ed6d958))
+
+
+### Bug Fixes
+
+* **ai:** stabilize model picker geometry and empty states ([#448](https://github.com/BakerSean168/memoflow/issues/448)) ([1e79cbb](https://github.com/BakerSean168/memoflow/commit/1e79cbbadc4416af239b1206f071323e5549c246))
+* **ai:** T3-style Agent settings and composer lifecycle ([#445](https://github.com/BakerSean168/memoflow/issues/445)) ([d381bf4](https://github.com/BakerSean168/memoflow/commit/d381bf442be34d49a1aa0c5b681564bfc2ffec64))
+
 ## [0.18.0](https://github.com/BakerSean168/memoflow/compare/v0.17.0...v0.18.0) (2026-10-10)
 
 
