@@ -46,6 +46,8 @@ const CURRENT_CHANNELS = [
   AIChannels.RUNTIME_ASSISTANT_APPROVAL,
   AIChannels.RUNTIME_ASSISTANT_HISTORY,
   AIChannels.RUNTIME_ASSISTANT_DELETE,
+  AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST,
+  AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK,
   AIChannels.RUNTIME_USAGE_GET,
   AIChannels.RUNTIME_WORKFLOW_START,
   AIChannels.RUNTIME_WORKFLOW_RESUME,
@@ -100,6 +102,13 @@ function createFakeInstance() {
     estimatedCost: 0.0000375,
   }));
   const decideToolApproval = vi.fn(() => false);
+  const attentionPort = {
+    list: vi.fn(async () => []),
+    acknowledge: vi.fn(async () => true),
+    transition: vi.fn(async () => undefined),
+    heartbeat: vi.fn(async () => undefined),
+    forget: vi.fn(async () => undefined),
+  };
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
   const instance = {
@@ -111,6 +120,7 @@ function createFakeInstance() {
     knowledge,
     evaluationOperations,
     mastraRuntime: { summarizeUsage, decideToolApproval } as never,
+    conversationAttentionPort: attentionPort,
     workflowRuntime: null,
     start,
     dispose,
@@ -123,6 +133,7 @@ function createFakeInstance() {
     evaluationOperations,
     summarizeUsage,
     decideToolApproval,
+    attentionPort,
     start,
     dispose,
   };
@@ -168,6 +179,58 @@ describe('createAIElectronModule lifecycle', () => {
     const result = await handler(undefined, undefined);
     expect(result).toMatchObject({ ok: true });
     expect(fake.providerManagement.listProviders).toHaveBeenCalledTimes(1);
+  });
+
+  it('restricts attention list and acknowledgements to the authenticated owner and valid runtime kind', async () => {
+    const ctx = createFakeContext();
+    await moduleDef.register(ctx);
+    const list = mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST)!;
+    const ack = mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK)!;
+    expect(
+      await list(undefined, { runtimeKind: 'local_agent', conversationIds: ['native-1'] }),
+    ).toMatchObject({ ok: true, data: { items: [] } });
+    expect(fake.attentionPort.list).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      runtimeKind: 'local_agent',
+      conversationIds: ['native-1'],
+    });
+    expect(
+      await ack(undefined, {
+        runtimeKind: 'local_agent',
+        conversationId: 'native-1',
+        revision: 3,
+      }),
+    ).toMatchObject({ ok: true, data: { acknowledged: true } });
+    expect(fake.attentionPort.acknowledge).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      runtimeKind: 'local_agent',
+      conversationId: 'native-1',
+      revision: 3,
+    });
+    for (const payload of [
+      { runtimeKind: 'local_agent', conversationIds: ['native-1'], identityId: 'forged' },
+      { runtimeKind: 'unsupported', conversationIds: ['native-1'] },
+      { runtimeKind: 'builtin', conversationIds: Array.from({ length: 101 }, (_, i) => String(i)) },
+    ]) {
+      expect(await list(undefined, payload)).toMatchObject({
+        ok: false,
+        error: { code: 'VALIDATION_ERROR' },
+      });
+    }
+    for (const payload of [
+      { runtimeKind: 'local_agent', conversationId: 'native-1', revision: 0 },
+      { runtimeKind: 'local_agent', conversationId: 'native-1', revision: 3, identityId: 'forged' },
+    ]) {
+      expect(await ack(undefined, payload)).toMatchObject({
+        ok: false,
+        error: { code: 'VALIDATION_ERROR' },
+      });
+    }
+    expect(fake.attentionPort.list).toHaveBeenCalledTimes(1);
+    expect(fake.attentionPort.acknowledge).toHaveBeenCalledTimes(1);
+    vi.mocked(ctx.auth.requireRequestContext).mockRejectedValueOnce(new Error('unauthorized'));
+    expect(await list(undefined, { conversationIds: ['native-1'] })).toMatchObject({ ok: false });
+    expect(fake.attentionPort.list).toHaveBeenCalledTimes(1);
   });
 
   it('does not route local conversation history into Mastra when local execution is unavailable', async () => {
