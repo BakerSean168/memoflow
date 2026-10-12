@@ -279,7 +279,8 @@ test.describe('AI Goal Workflow', () => {
   test('[P0] restores a pending Goal Agent approval run after refresh', async ({ page }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page, {
       conversationId: e2eConversationId,
-      modelKey: 'agent:mastra::provider-e2e-openai::gpt-4.1-mini',
+      modelKey:
+        'agent:mastra::AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801::gpt-4.1-mini',
       workflowEntry: createPendingApprovalWorkflowEntry(),
       seedConversation: true,
     });
@@ -385,7 +386,9 @@ test.describe('AI Goal Workflow', () => {
     );
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
-    expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
+    expect(telemetry.lastGoalAgentStart?.providerId).toBe(
+      'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    );
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
     expect(telemetry.ownerGoalCreateCount).toBe(1);
     expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
@@ -418,7 +421,8 @@ test.describe('AI Goal Workflow', () => {
   test('[P0] restores a pending task.create approval run after refresh', async ({ page }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page, {
       conversationId: e2eConversationId,
-      modelKey: 'agent:mastra::provider-e2e-openai::gpt-4.1-mini',
+      modelKey:
+        'agent:mastra::AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801::gpt-4.1-mini',
       workflowEntry: createPendingTaskApprovalWorkflowEntry(),
       seedConversation: true,
     });
@@ -675,7 +679,9 @@ test.describe('AI Goal Workflow', () => {
     });
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
-    expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
+    expect(telemetry.lastGoalAgentStart?.providerId).toBe(
+      'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    );
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
     expect(telemetry.goalAgentCancelCount).toBe(1);
     expect(telemetry.goalAgentApprovalResumeCount).toBe(0);
@@ -1198,7 +1204,11 @@ async function installGoalWorkflowMocks(
   page: Page,
   options: GoalWorkflowMockOptions,
 ): Promise<GoalWorkflowMockTelemetry> {
-  await installMastraRegistryMock(page, 'provider-e2e-openai', 'gpt-4.1-mini');
+  await installMastraRegistryMock(
+    page,
+    'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    'gpt-4.1-mini',
+  );
   const conversationId = e2eConversationId;
   let conversationName = 'Goal Workflow Session';
   let generateGoalStep = options.seedConversation ? 1 : 0;
@@ -1373,7 +1383,7 @@ async function installGoalWorkflowMocks(
     await fulfillJson(route, {
       data: [
         {
-          id: 'provider-e2e-openai',
+          id: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
           identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',
           name: 'E2E OpenAI',
           providerDefinitionId: 'openai',
@@ -1508,7 +1518,7 @@ async function installGoalWorkflowMocks(
     expect(request.type).toBe('message');
     expect(request.surface).toBe('web');
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
     expect(request.modelId).toBe('gpt-4.1-mini');
 
     const userContent = request.content ?? '';
@@ -1547,7 +1557,10 @@ async function installGoalWorkflowMocks(
         sequence: 1,
         createdAt: now,
         type: 'assistant.run.started',
-        data: { providerId: 'provider-e2e-openai', modelId: 'gpt-4.1-mini' },
+        data: {
+          providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+          modelId: 'gpt-4.1-mini',
+        },
       },
       {
         eventId: `${runId}:2`,
@@ -1602,7 +1615,7 @@ async function installGoalWorkflowMocks(
 
     expect(request.maxResources).toBe(8);
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
 
     const query = request.query ?? '';
 
@@ -1611,7 +1624,7 @@ async function installGoalWorkflowMocks(
         answer:
           'I do not have enough repository evidence to answer this from your indexed knowledge base.',
         citations: [],
-        providerId: 'provider-e2e-openai',
+        providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
         tokenUsage: {
           promptTokens: 48,
           completionTokens: 18,
@@ -1640,7 +1653,7 @@ async function installGoalWorkflowMocks(
           score: 0.94,
         },
       ],
-      providerId: 'provider-e2e-openai',
+      providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
       tokenUsage: {
         promptTokens: 64,
         completionTokens: 24,
@@ -1775,7 +1788,7 @@ async function installGoalWorkflowMocks(
     expect(request).not.toHaveProperty('identityId');
     expect(request.conversationId).toBeTruthy();
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
     expect(request.modelId).toBe('gpt-4.1-mini');
 
     if (request.kind === 'goal.create') {
