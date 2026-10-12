@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+2026-10-13 repository consolidation: these plans also retain pending product acceptance and historical checkpoints; their presence is not evidence of a running implementation task. Useful existing code is consolidated through PR #449 rather than held on idle branches. See the [consolidation audit](../archive/2026-10-13-main-branch-consolidation.md) for verified scope and explicit remaining acceptance limits.
+
 - [Ask User + Goal Business Surface](./2026-10-12-ask-user-business-surface.md)：右侧原生表单、owner capability、冲突/保存/接手 UI 与真实运行状态切片已实现；SDK 原生 ask_user、生成期间增量操作、跨窗口 durable control 尚未闭合，不可按完整功能验收。
 
 - [Agent UI / T3 Code 对齐修复](./2026-10-11-agent-ui-t3-parity.md)：独立 Agent/模型/权限选择、内联 Endpoint/Key、默认实例开关及 Settings 返回 Chat 的即时刷新；真实 Web/API/PG 浏览器 2/2、UI 120/120、AI 110/110 已通过，等待提交与 exact-head CI。

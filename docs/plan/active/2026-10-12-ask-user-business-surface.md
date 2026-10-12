@@ -13,7 +13,7 @@ The user now requests consolidation of all useful MemoFlow branches and dirty wo
 
 The later entries below supersede earlier checkpoint limitations where implementation has advanced. Remaining real-provider canary, cross-device/cross-host verification, unarmed approval-gate adoption after restart, read-only policy persistence across restart, and token-streamed answer resumption remain explicit product/acceptance follow-ups; merging this reviewed slice must not label them complete. They do not require an idle feature branch to be retained.
 
-See [main consolidation](./2026-10-13-main-branch-consolidation.md) for the current integration and cleanup evidence.
+See [main consolidation](../archive/2026-10-13-main-branch-consolidation.md) for the current integration and cleanup evidence.
 
 ## 边界
 
