@@ -709,6 +709,7 @@ onMounted(() => {
 
 defineExpose({
   conversationList,
+  conversationStatuses,
   conversationListLoading,
   chatConversationId,
   selectConversation,

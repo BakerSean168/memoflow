@@ -155,6 +155,8 @@ export const AIChannels = {
   RUNTIME_ASSISTANT_CANCEL: 'ai:runtime:assistant:cancel',
   RUNTIME_ASSISTANT_HISTORY: 'ai:runtime:assistant:history',
   RUNTIME_ASSISTANT_DELETE: 'ai:runtime:assistant:delete',
+  RUNTIME_ASSISTANT_ATTENTION_LIST: 'ai:runtime:assistant:attention:list',
+  RUNTIME_ASSISTANT_ATTENTION_ACK: 'ai:runtime:assistant:attention:ack',
   /** Cross-runtime durable token/cost projection by conversation or run. */
   RUNTIME_USAGE_GET: 'ai:runtime:usage:get',
   /** AI vNext canonical Workflow request/response surface. */

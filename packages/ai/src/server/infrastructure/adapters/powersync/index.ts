@@ -2,6 +2,7 @@ export { PowerSyncAIConversationRepository } from './ai-conversation-powersync.r
 export { PowerSyncAIProviderConfigRepository } from './ai-provider-config-powersync.repository';
 export { AIKnowledgeIndexPowerSyncRepository } from './ai-knowledge-index-powersync.repository';
 export { AIExecutionRecordPowerSyncAdapter } from './ai-execution-record-powersync.adapter';
+export { ConversationAttentionPowerSyncAdapter } from './ai-conversation-attention-powersync.adapter';
 export * from './mappers';
 export { PowerSyncAIProviderOnboardingSessionRepository } from './ai-provider-onboarding-session-powersync.repository';
 export { PowerSyncAIProviderOnboardingCommitAdapter } from './ai-provider-onboarding-commit-powersync.adapter';

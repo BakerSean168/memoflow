@@ -624,6 +624,127 @@ describe('registerAIRuntimeRoutes', () => {
   });
 });
 
+describe('authenticated Assistant attention routes', () => {
+  function portStub() {
+    const list = vi.fn(async () => [
+      {
+        conversationId: 'conversation-1',
+        runtimeKind: 'builtin' as const,
+        state: 'done' as const,
+        revision: 4,
+        seenRevision: 0,
+        runId: 'run-4',
+        updatedAt: Date.now(),
+      },
+    ]);
+    const acknowledge = vi.fn(async () => true);
+    const transition = vi.fn(async () => {});
+    const heartbeat = vi.fn(async () => {});
+    const forget = vi.fn(async () => {});
+    return { list, acknowledge, transition, heartbeat, forget };
+  }
+
+  it('requires authenticated identity, rejects Desktop kind and forwards bounded owner-scoped list', async () => {
+    const port = portStub();
+    const router = registerAIRuntimeRoutes(runtimeStub().runtime, { auth }, null, port);
+    const handler = getRouteHandler(router, 'post', '/assistant/attention/list');
+    const { res } = response();
+    await handler(
+      request({ conversationIds: ['conversation-1'], runtimeKind: 'builtin' }) as never,
+      res as never,
+    );
+    expect(res.statusCode).toBe(200);
+    expect(port.list).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      runtimeKind: 'builtin',
+      conversationIds: ['conversation-1'],
+    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { items: [expect.objectContaining({ state: 'done', revision: 4 })] },
+      }),
+    );
+    for (const bad of [
+      { conversationIds: ['conversation-1'], runtimeKind: 'local_agent' },
+      { conversationIds: Array.from({ length: 101 }, (_, i) => 'item-' + i) },
+      { conversationIds: ['conversation-1'], identityId: 'someone-else' },
+    ]) {
+      const x = response().res;
+      await handler(request(bad) as never, x as never);
+      expect(x.statusCode).toBe(400);
+    }
+    const none = response().res;
+    await handler(request({ conversationIds: ['conversation-1'] }, '') as never, none as never);
+    expect(none.statusCode).toBe(401);
+    expect(port.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('never accepts client-provided identity or future revision and binds ack to current owner', async () => {
+    const port = portStub();
+    const router = registerAIRuntimeRoutes(runtimeStub().runtime, { auth }, null, port);
+    const handler = getRouteHandler(router, 'post', '/assistant/attention/ack');
+    const payload = { conversationId: 'conversation-1', revision: 4, runtimeKind: 'builtin' };
+    const okResponse = response().res;
+    await handler(request(payload) as never, okResponse as never);
+    expect(port.acknowledge).toHaveBeenCalledWith({ identityId: 'identity-1', ...payload });
+    expect(okResponse.statusCode).toBe(200);
+    for (const bad of [
+      { ...payload, identityId: 'forged' },
+      { ...payload, revision: 0 },
+      { ...payload, runtimeKind: 'local_agent' },
+    ]) {
+      const x = response().res;
+      await handler(request(bad) as never, x as never);
+      expect(x.statusCode).toBe(400);
+    }
+    expect(port.acknowledge).toHaveBeenCalledTimes(1);
+  });
+
+  it('projects an actual SSE lifecycle without storing model output', async () => {
+    const port = portStub();
+    const started: AssistantRuntimeEvent = {
+      eventId: 'r:1',
+      runId: 'r',
+      conversationId: 'conversation-1',
+      sequence: 1,
+      createdAt: 1000,
+      type: 'assistant.run.started',
+      data: {},
+    };
+    const completed: AssistantRuntimeEvent = {
+      eventId: 'r:2',
+      runId: 'r',
+      conversationId: 'conversation-1',
+      sequence: 2,
+      createdAt: 2000,
+      type: 'assistant.run.completed',
+      data: { content: 'top secret output' },
+    };
+    const router = registerAIRuntimeRoutes(
+      runtimeStub([started, completed]).runtime,
+      { auth },
+      null,
+      port,
+    );
+    const { res } = response();
+    await getRouteHandler(
+      router,
+      'post',
+      '/assistant/sse',
+    )(request(messageCommand) as never, res as never);
+    expect(port.transition.mock.calls.map(([payload]) => payload.state)).toEqual([
+      'working',
+      'done',
+    ]);
+    expect(port.transition.mock.calls.map(([payload]) => payload.identityId)).toEqual([
+      'identity-1',
+      'identity-1',
+    ]);
+    for (const [payload] of port.transition.mock.calls)
+      expect(JSON.stringify(payload)).not.toContain('top secret output');
+  });
+});
+
 describe('authenticated Assistant approval route', () => {
   it('binds the strict command to server ExecutionContext and fails closed without identity', async () => {
     const stub = runtimeStub();

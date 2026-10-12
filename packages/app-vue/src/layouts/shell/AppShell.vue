@@ -272,6 +272,7 @@ function bindHostResizeObserver() {
   measureComposerHosts();
 }
 
+const conversationStatuses = computed(() => aiRef.value?.conversationStatuses ?? {});
 const conversations = computed<ConversationSummary[]>(
   () => (aiRef.value?.conversationList ?? []) as ConversationSummary[],
 );
@@ -1060,6 +1061,7 @@ onBeforeUnmount(() => {
             <ConversationSidebar
               class="h-full w-full"
               :groups="conversationGroups"
+              :conversation-statuses="conversationStatuses"
               :profiles="desktopProfiles"
               :active-profile-id="desktopAccess?.profile?.profileId"
               :active-conversation-id="activeConversationId"
@@ -1237,6 +1239,7 @@ onBeforeUnmount(() => {
           <ConversationSidebar
             class="h-full w-full"
             :groups="conversationGroups"
+            :conversation-statuses="conversationStatuses"
             :profiles="desktopProfiles"
             :active-profile-id="desktopAccess?.profile?.profileId"
             :active-conversation-id="activeConversationId"

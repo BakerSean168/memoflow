@@ -13,6 +13,7 @@ import { useAIComposerContext } from './useAIComposerContext';
 import { useAssistantStream } from './useAssistantStream';
 import { useConversationProjection } from './useConversationProjection';
 import { useConversationAttention } from './useConversationAttention';
+import { useDurableConversationAttention } from './useDurableConversationAttention';
 
 const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
 export interface UseAIChatSessionOptions {
@@ -83,6 +84,13 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     conversationId: chatConversationId,
     loading: stream.chatLoading,
     timeline: chatTimeline,
+  });
+  const durableAttention = useDurableConversationAttention({
+    runtime: options.runtime,
+    conversations: conversationList,
+    activeConversationId: chatConversationId,
+    local: attention.statuses,
+    loading: stream.chatLoading,
   });
   const {
     chatLoading,
@@ -202,7 +210,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     conversationTitle,
     conversationListLoading,
     conversationList,
-    conversationStatuses: attention.statuses,
+    conversationStatuses: durableAttention.statuses,
     lastActiveConversationId,
     messagesViewport,
     composerTextarea,

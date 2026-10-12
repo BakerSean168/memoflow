@@ -627,6 +627,19 @@ const ai_conversations = new Table({
   deleted_at: column.text,
 });
 
+const ai_conversation_attention = new Table({
+  identity_id: column.text,
+  runtime_kind: column.text,
+  conversation_id: column.text,
+  run_id: column.text,
+  run_sequence: column.integer,
+  state: column.text,
+  revision: column.integer,
+  seen_revision: column.integer,
+  run_started_at: column.integer,
+  updated_at: column.integer,
+});
+
 const ai_execution_records = new Table({
   identity_id: column.text,
   operation: column.text,
@@ -886,6 +899,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_local_agent_connections,
   ai_local_conversations,
   ai_local_conversation_items,
+  ai_conversation_attention,
   ai_execution_records,
   ai_provider_configs,
   ai_provider_onboarding_sessions,

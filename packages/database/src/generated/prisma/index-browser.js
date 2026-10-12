@@ -140,6 +140,20 @@ exports.Prisma.AiConversationScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
+exports.Prisma.AiConversationAttentionScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  runtimeKind: 'runtimeKind',
+  conversationId: 'conversationId',
+  runId: 'runId',
+  runSequence: 'runSequence',
+  state: 'state',
+  revision: 'revision',
+  seenRevision: 'seenRevision',
+  runStartedAt: 'runStartedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1398,6 +1412,7 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   Account: 'Account',
   AiConversation: 'AiConversation',
+  AiConversationAttention: 'AiConversationAttention',
   AiExecutionRecord: 'AiExecutionRecord',
   AiProviderConfig: 'AiProviderConfig',
   AiAgentInstance: 'AiAgentInstance',
