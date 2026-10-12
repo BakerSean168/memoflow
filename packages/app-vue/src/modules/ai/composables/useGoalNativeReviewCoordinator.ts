@@ -1,4 +1,4 @@
-import { type AIWorkflowRunView, type GoalPlanDraft } from '@memoflow/contracts/ai';
+import { type AIWorkflowRunView, type GoalPlanDraft, type GoalWorkflowLiveActionRecord } from '@memoflow/contracts/ai';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -56,7 +56,7 @@ export function useGoalNativeReviewCoordinator(input: {
   let nativeSession: GoalNativeEditSession | null = null;
   let projectedRunId: string | null = null;
   let projectedRevision: number | null = null;
-  let projectedMode: 'clarification' | 'review' | null = null;
+  let projectedMode: 'clarification' | 'review' | 'live' | null = null;
   let pendingOwnerAttempt: {
     runId: string;
     revision: number;
@@ -78,6 +78,140 @@ export function useGoalNativeReviewCoordinator(input: {
     mode: 'clarification' | 'review';
     promise: Promise<void>;
   } | null = null;
+  const appliedLiveActionIds = new Set<string>();
+  let pendingLiveProjection: { runId: string; lastSequence: number; promise: Promise<void> } | null = null;
+
+  function recordNativeLiveAction(runId: string, record: GoalWorkflowLiveActionRecord): void {
+    const id = `goal-native-live:${runId}:${record.command.revision}:${record.command.actionId}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    options.chatTimeline.value.push({
+      id,
+      role: 'assistant',
+      status: 'success',
+      content: t('aiAssistant.businessSurface.formUpdated', { revision: record.command.revision }),
+      businessOperation: {
+        runId, revision: record.command.revision, operation: record.command.operation,
+      },
+    });
+  }
+
+  function applyNativeLiveCommand(session: GoalNativeEditSession, record: GoalWorkflowLiveActionRecord): void {
+    const { command } = record;
+    if (command.operation === 'goal.setName') {
+      session.patch({ name: command.value });
+    } else if (command.operation === 'goal.patchDescription') {
+      session.patch({ description: command.value ?? '' });
+    } else if (command.operation === 'goal.setStart') {
+      session.patch({ start: command.value });
+    } else if (command.operation === 'goal.setTarget') {
+      session.patch({ target: command.value });
+    } else if (command.operation === 'goal.patchKeyResults') {
+      const ids = command.value.map((item) =>
+        `workflow-draft-ref:${encodeURIComponent(item.draftRef)}` as GoalNativeSubmitContext['keyResultIds'][number],
+      );
+      session.patch({
+        keyResults: command.value.map((item, index) => ({
+          id: ids[index]!,
+          title: item.title,
+          description: item.description ?? null,
+          calculationMethod: item.aggregationMethod,
+          initialValue: item.initialValue,
+          currentValue: item.currentValue,
+          targetValue: item.targetValue,
+          target: item.target ?? null,
+          unit: item.unit ?? '',
+          weight: item.weight,
+        })),
+      });
+      keyResultRefs = new Map(command.value.map((item, index) => [ids[index]!, item.draftRef]));
+    }
+  }
+
+  async function performLiveProjection(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
+    if (run.status !== 'running' || !run.liveActions?.length ||
+        goalManualHandoff.value || pendingOwnerAttempt || submitted) return;
+    const actions = [...run.liveActions].sort((a, b) => a.sequence - b.sequence);
+    const appliedKey = (record: GoalWorkflowLiveActionRecord) =>
+      `${record.command.revision}:${record.command.actionId}`;
+    const unapplied = actions.filter((record) => !appliedLiveActionIds.has(appliedKey(record)));
+    if (unapplied.length === 0) return;
+    let session = nativeSession;
+    if (session && projectedRunId !== run.runId) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    if (session) {
+      try {
+        session.readDraftState();
+      } catch {
+        session = null;
+        nativeSession = null;
+        appliedLiveActionIds.clear();
+      }
+    }
+    const epoch = ++projectionEpoch;
+    let opened = false;
+    if (!session) {
+      if (!nativeSurface.isAvailable()) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      try {
+        session = await nativeSurface.openControlledCreate(run.runId);
+        opened = true;
+      } catch (error) {
+        if (!nativeSurface.isAvailable()) {
+          goalSurfaceConflict.value = true;
+          return;
+        }
+        throw error;
+      }
+    }
+    if (epoch !== projectionEpoch || goalManualHandoff.value || run.runId !== goalWorkflowRun.value?.runId) {
+      if (opened) session.requestCancel();
+      return;
+    }
+    try {
+      session.coordinateSubmit(async () => undefined, () => cancelGoalAgentRun());
+      // Claim control still prevents user edits; AI capability patches only this
+      // mounted native owner draft. No direct Goal persistence occurs here.
+      session.setEditingBlocked(false);
+      for (const record of actions) {
+        if (appliedLiveActionIds.has(appliedKey(record))) continue;
+        applyNativeLiveCommand(session, record);
+        appliedLiveActionIds.add(appliedKey(record));
+        recordNativeLiveAction(run.runId, record);
+      }
+      nativeSession = session;
+      projectedRunId = run.runId;
+      projectedRevision = actions[actions.length - 1]!.command.revision;
+      projectedMode = 'live';
+      goalSurfaceReady.value = true;
+      goalSurfaceConflict.value = false;
+    } catch (error) {
+      if (opened) session.requestCancel();
+      throw error;
+    }
+  }
+
+  function projectLive(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): Promise<void> {
+    const lastSequence = run.liveActions?.[run.liveActions.length - 1]?.sequence ?? 0;
+    if (pendingLiveProjection?.runId === run.runId && pendingLiveProjection.lastSequence === lastSequence)
+      return pendingLiveProjection.promise;
+    const pending = {
+      runId: run.runId,
+      lastSequence,
+      promise: Promise.resolve().then(() => performLiveProjection(run)).finally(() => {
+        if (pendingLiveProjection === pending) pendingLiveProjection = null;
+      }),
+    };
+    pendingLiveProjection = pending;
+    nativeProjection = pending.promise;
+    return pending.promise;
+  }
+
 
   function applyNativeProjection(
     session: GoalNativeEditSession,
@@ -297,14 +431,14 @@ export function useGoalNativeReviewCoordinator(input: {
     const run = goalWorkflowRun.value;
     if (
       !run ||
-      !goalNativeProjection(run) ||
+      (!goalNativeProjection(run) && !(run.status === 'running' && run.liveActions?.length)) ||
       goalAgentResuming.value ||
       submitted ||
       pendingOwnerAttempt
     )
       return;
     try {
-      nativeProjection = projectNativeReview(run);
+      nativeProjection = run.status === 'running' ? projectLive(run) : projectNativeReview(run);
       await nativeProjection;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
@@ -322,6 +456,8 @@ export function useGoalNativeReviewCoordinator(input: {
 
   function retireNativeReview(): void {
     pendingProjection = null;
+    pendingLiveProjection = null;
+    appliedLiveActionIds.clear();
     projectionEpoch += 1;
     goalSurfaceConflict.value = false;
     goalSurfaceReady.value = false;
@@ -678,6 +814,7 @@ export function useGoalNativeReviewCoordinator(input: {
   }
   return {
     project,
+    projectLive,
     goalSurfaceConflict,
     goalSurfaceReady,
     goalManualHandoff,

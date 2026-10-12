@@ -1,4 +1,5 @@
 import { goalWorkflowEntityId } from './deterministic-entity-id';
+import type { MastraCompositeStore } from '@mastra/core/storage';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {
@@ -8,6 +9,7 @@ import {
   GoalCreateWorkflowInputSchema,
   GoalPlanDraftContentSchema,
   GoalPlanDraftSchema,
+  GoalWorkflowLiveActionJournalSchema,
   GoalPlanExecutionReceiptSchema,
   GoalResearchEvidenceSchema,
   type GoalPlanDraft,
@@ -21,6 +23,12 @@ import {
   type GoalPlannerPort,
 } from '../agents/goal-planner.worker';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';
+import {
+  GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY,
+  appendGoalWorkflowLiveAction,
+  publishRunningGoalActions,
+  type GoalWorkflowLiveActionSink,
+} from './goal-business-action-journal';
 
 export const GOAL_CREATE_WORKFLOW_ID = 'goal-create';
 export const GOAL_CREATE_LIFECYCLE_STEP_ID = 'goal-create-lifecycle';
@@ -36,6 +44,7 @@ export const GoalCreateWorkflowStateSchema = z
     revisionInstruction: z.string().optional(),
     targetRevision: z.number().int().positive(),
     researchEvidence: z.array(GoalResearchEvidenceSchema).max(8).default([]),
+    liveActions: GoalWorkflowLiveActionJournalSchema.default([]),
     draft: GoalPlanDraftSchema.optional(),
     priorReceipt: GoalPlanExecutionReceiptSchema.optional(),
   })
@@ -142,6 +151,8 @@ function currentExecutionContext(
 export function createGoalCreateWorkflow(input: {
   planner: GoalPlannerPort;
   applyService: ApplyGoalPlanService;
+  /** Must be the same Mastra storage instance as the registered Workflow. */
+  liveActionStorage?: Pick<MastraCompositeStore, 'getStore'>;
 }) {
   const lifecycle = createStep({
     id: GOAL_CREATE_LIFECYCLE_STEP_ID,
@@ -258,27 +269,74 @@ export function createGoalCreateWorkflow(input: {
           targetRevision: options.targetRevision,
         });
         requestContext.setRaw('workflowRunId', runId);
-        const decision = await input.planner.plan(
-          {
-            input: current.input,
-            clarification: current.clarification,
-            mode: options.mode,
-            currentDraft: current.draft,
-            researchEvidence: current.researchEvidence,
-            instruction: options.instruction,
-            forceDraft: options.forceDraft,
+        let accepting = true;
+        let actionQueue: Promise<unknown> = Promise.resolve();
+        const sink: GoalWorkflowLiveActionSink = {
+          identityId: current.input.identityId,
+          runId,
+          revision: options.targetRevision,
+          append(command) {
+            // Mastra may dispatch independent tool calls concurrently. Serialize
+            // the workflow state mutation before acknowledging each staged action.
+            const append = actionQueue.then(async () => {
+              if (
+                !accepting ||
+                current.phase !== 'planning' ||
+                current.targetRevision !== options.targetRevision ||
+                requestContext.getRaw('identityId') !== current.input.identityId
+              ) {
+                throw new Error('Goal action workflow owner is no longer active');
+              }
+              const recorded = appendGoalWorkflowLiveAction({
+                journal: current.liveActions,
+                command,
+                revision: options.targetRevision,
+              });
+              if (!recorded.duplicate) {
+                await persist({ ...current, liveActions: recorded.journal });
+                if (input.liveActionStorage) {
+                  await publishRunningGoalActions({
+                    storage: input.liveActionStorage,
+                    identityId: current.input.identityId,
+                    runId,
+                    journal: recorded.journal,
+                  });
+                }
+              }
+              return recorded.record;
+            });
+            actionQueue = append.then(() => undefined, () => undefined);
+            return append;
           },
-          requestContext,
-        );
-        const newResearchEvidence = readGoalPlannerResearchEvidence(requestContext);
-        if (newResearchEvidence.length > 0) {
-          const researchEvidence = mergeGoalResearchEvidence(
-            current.researchEvidence,
-            newResearchEvidence,
+        };
+        requestContext.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, sink);
+        try {
+          const decision = await input.planner.plan(
+            {
+              input: current.input,
+              clarification: current.clarification,
+              mode: options.mode,
+              currentDraft: current.draft,
+              researchEvidence: current.researchEvidence,
+              instruction: options.instruction,
+              forceDraft: options.forceDraft,
+            },
+            requestContext,
           );
-          await persist({ ...current, researchEvidence });
+          await actionQueue;
+          const newResearchEvidence = readGoalPlannerResearchEvidence(requestContext);
+          if (newResearchEvidence.length > 0) {
+            const researchEvidence = mergeGoalResearchEvidence(
+              current.researchEvidence,
+              newResearchEvidence,
+            );
+            await persist({ ...current, researchEvidence });
+          }
+          return handlePlanningDecision(decision, options.targetRevision);
+        } finally {
+          accepting = false;
+          requestContext.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, null);
         }
-        return handlePlanningDecision(decision, options.targetRevision);
       };
 
       const applyAndResolve = async (priorReceipt = current.priorReceipt) => {

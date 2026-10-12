@@ -36,6 +36,61 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   const goalWorkflowRun = ref<Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null>(null);
   let startEpoch = 0;
   let runtimeMessageId: string | null = null;
+  let pollingRunId: string | null = null;
+  let pollingTimer: ReturnType<typeof setTimeout> | null = null;
+  let pollingActive = false;
+  let pollingEpoch = 0;
+  let pollingFailures = 0;
+
+  function stopPollingGoalRun(): void {
+    if (pollingTimer !== null) clearTimeout(pollingTimer);
+    pollingTimer = null;
+    pollingRunId = null;
+    pollingActive = false;
+    pollingEpoch++;
+    pollingFailures = 0;
+  }
+
+  function scheduleGoalRunPolling(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): void {
+    if (run.status !== 'running' || run.conversationId !== options.chatConversationId.value) {
+      stopPollingGoalRun();
+      return;
+    }
+    if (pollingRunId !== run.runId) {
+      stopPollingGoalRun();
+      pollingRunId = run.runId;
+    }
+    if (pollingTimer !== null || pollingActive) return;
+    const epoch = pollingEpoch;
+    const delay = Math.min(12_000, 1000 * 2 ** Math.min(pollingFailures, 4));
+    pollingTimer = setTimeout(async () => {
+      pollingTimer = null;
+      if (pollingEpoch !== epoch || goalWorkflowRun.value?.runId !== run.runId ||
+          options.chatConversationId.value !== run.conversationId) return;
+      pollingActive = true;
+      try {
+        const fresh = await options.workflowRuntime.get({ runId: run.runId });
+        if (pollingEpoch !== epoch || goalWorkflowRun.value?.runId !== run.runId ||
+            options.chatConversationId.value !== run.conversationId) return;
+        pollingFailures = 0;
+        await projectRun(fresh);
+      } catch {
+        // Keep the durable run authoritative. A transient read failure must
+        // not terminate a still-running Goal planner or fabricate a result.
+        pollingFailures = Math.min(pollingFailures + 1, 4);
+      } finally {
+        // An older in-flight read must not clear the busy flag of a newer
+        // run, nor prevent the newer run from scheduling its own reads.
+        if (pollingEpoch === epoch) {
+          pollingActive = false;
+          if (goalWorkflowRun.value?.status === 'running' &&
+              goalWorkflowRun.value.runId === run.runId) {
+            scheduleGoalRunPolling(run);
+          }
+        }
+      }
+    }, delay);
+  }
   function runtimeStatus(content: string, status: 'generating' | 'success' | 'error' | 'aborted') {
     let item = options.chatTimeline.value.find((entry) => entry.id === runtimeMessageId);
     if (!item) {
@@ -49,6 +104,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   }
   onScopeDispose(() => {
     startEpoch++;
+    stopPollingGoalRun();
   });
 
   const goalDraftLoading = ref(false);
@@ -156,6 +212,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
 
   function projectRun(run: AIWorkflowRunView | null, projectNative = true): Promise<void> {
     if (!run || run.kind !== 'goal.create') {
+      stopPollingGoalRun();
       goalWorkflowRun.value = null;
       goalWorkflowStage.value = 'collect';
       goalClarification.value = null;
@@ -164,10 +221,20 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
 
     const nativeDraft = goalNativeProjection(run);
     let projection = Promise.resolve();
-    if (!nativeDraft) retireNativeReview();
+    if (!nativeDraft && !(run.status === 'running' &&
+      (run.liveActions?.length || (goalSurfaceReady.value && goalWorkflowRun.value?.runId === run.runId))))
+      retireNativeReview();
     goalWorkflowRun.value = run;
-    if (run.status === 'running')
+    if (run.status === 'running') {
       runtimeStatus(t('aiAssistant.businessSurface.running'), 'generating');
+      if (projectNative && run.liveActions?.length) {
+        const liveProjection = review.projectLive(run);
+        projection = liveProjection;
+        void liveProjection.catch((error) =>
+          toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed')),
+        );
+      }
+    }
     else if (runtimeMessageId)
       runtimeStatus(
         t(`aiAssistant.businessSurface.${run.status === 'suspended' ? 'waiting' : run.status}`),
@@ -218,6 +285,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       goalWorkflowStage.value = 'plan';
       goalClarification.value = null;
     }
+    scheduleGoalRunPolling(run);
     options.scrollMessagesToBottom();
     return projection;
   }
@@ -370,6 +438,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
 
   async function cancelGoalAgentRun(): Promise<void> {
     if (goalAgentResuming.value || goalOwnerAttemptPending.value) return;
+    stopPollingGoalRun();
     startEpoch++;
     if (!goalWorkflowRun.value && goalAgentLoading.value) {
       runtimeStatus(t('aiAssistant.businessSurface.cancelling'), 'generating');

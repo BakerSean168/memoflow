@@ -10,6 +10,7 @@ import type {
   LocalAgentActivity,
   AssistantRuntimeToolAnswerCommand,
   GoalPlanDraft,
+  GoalWorkflowLiveAction,
   GoalPlanKnowledge,
   GoalPlanTask,
   QueryKnowledgeRes,
@@ -114,7 +115,7 @@ export type ChatItem = {
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
   /** Local receipt emitted only after the native owner successfully applies a command. */
-  businessOperation?: { runId: string; revision: number; operation: 'goal.patch' };
+  businessOperation?: { runId: string; revision: number; operation: 'goal.patch' | GoalWorkflowLiveAction['operation'] };
   toolActivity?: Extract<
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }

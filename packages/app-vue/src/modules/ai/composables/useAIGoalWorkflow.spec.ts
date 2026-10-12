@@ -264,6 +264,129 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     native.requestSubmit.mockImplementation(async (context) => ({ id: context.createId }));
   });
 
+  it('ignores a late poll from a canceled run when a new Goal workflow has started', async () => {
+    vi.useFakeTimers();
+    const runtime = createRuntimeStub();
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    try {
+      const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+      let resolveOld!: (value: GoalRun) => void;
+      runtime.start.mockResolvedValueOnce(makeGoalRun({ runId: 'old-run' }))
+        .mockResolvedValueOnce(makeGoalRun({ runId: 'new-run' }));
+      runtime.get.mockImplementation(({ runId }: { runId: string }) =>
+        runId === 'old-run'
+          ? new Promise((resolve) => { resolveOld = resolve; })
+          : Promise.resolve(makeGoalRun({
+              runId: 'new-run',
+              status: 'running',
+              liveActions: [{ sequence: 1, command: { actionId: 'new-name', revision: 1, operation: 'goal.setName', value: 'New run' } }],
+            })),
+      );
+      runtime.cancel.mockResolvedValue(makeGoalRun({ runId: 'old-run', status: 'cancelled' }));
+      await vm.startGoalAgentRun();
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(runtime.get).toHaveBeenCalledWith({ runId: 'old-run' });
+      await vm.cancelGoalAgentRun();
+      await vm.startGoalAgentRun();
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(runtime.get).toHaveBeenCalledWith({ runId: 'new-run' });
+      expect(native.state!.name).toBe('New run');
+      resolveOld(makeGoalRun({ runId: 'old-run', status: 'suspended', suspension: review(makeDraft(1)) }));
+      await Promise.resolve();
+      expect(vm.goalWorkflowRun?.runId).toBe('new-run');
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it('polls the durable workflow while planning and projects real tool receipts before final review', async () => {
+    vi.useFakeTimers();
+    const runtime = createRuntimeStub();
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    try {
+      const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+      const first = makeGoalRun({ status: 'running' });
+      const action = { sequence: 1, command: { actionId: 'model-tool-1', revision: 1, operation: 'goal.setName' as const, value: 'Running preview' } };
+      runtime.start.mockResolvedValue(first);
+      runtime.get
+        .mockResolvedValueOnce(makeGoalRun({ status: 'running', liveActions: [action] }))
+        .mockResolvedValueOnce(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)), liveActions: [action] }));
+      await vm.startGoalAgentRun();
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(runtime.get).toHaveBeenCalledWith({ runId: 'run-1' });
+      expect(native.state!.name).toBe('Running preview');
+      expect(options.chatTimeline.value.find((item) => item.businessOperation?.operation === 'goal.setName')).toBeTruthy();
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(vm.goalWorkflowStage).toBe('confirm');
+      expect(native.state!.name).toBe('Deep work');
+      await vi.advanceTimersByTimeAsync(1600);
+      expect(runtime.get).toHaveBeenCalledTimes(2);
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it('applies real ordered model actions to the claimed native Goal form during planning', async () => {
+    const runtime = createRuntimeStub();
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const running = makeGoalRun({
+      status: 'running',
+      liveActions: [
+        { sequence: 1, command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Learn TypeScript' } },
+        { sequence: 2, command: { actionId: 'description-1', revision: 1, operation: 'goal.patchDescription', value: 'Finish the course' } },
+      ],
+    });
+    await vm.projectRun(running);
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    expect(native.state).toMatchObject({ name: 'Learn TypeScript', description: 'Finish the course' });
+    expect(options.chatTimeline.value.filter((item) => item.businessOperation)).toHaveLength(2);
+    await vm.projectRun(running);
+    expect(native.openCreate).toHaveBeenCalledOnce();
+    expect(options.chatTimeline.value.filter((item) => item.businessOperation)).toHaveLength(2);
+
+    // The final canonical review reconciles staged fields under the SAME owner,
+    // and must not close/discard the AI-owned form.
+    await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)), liveActions: running.liveActions }));
+    expect(native.state!.name).toBe('Deep work');
+    expect(native.requestCancel).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
+  it('never overwrites a user draft when the native surface is busy or handed off', async () => {
+    const runtime = createRuntimeStub();
+    const options = makeOptions(runtime);
+    const wrapper = mountComposable(options);
+    const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
+    const running = makeGoalRun({
+      status: 'running',
+      liveActions: [{ sequence: 1, command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'AI proposal' } }],
+    });
+    native.available = false;
+    native.state!.name = 'My existing draft';
+    await vm.projectRun(running);
+    expect(vm.goalSurfaceConflict).toBe(true);
+    expect(native.openCreate).not.toHaveBeenCalled();
+    expect(native.state!.name).toBe('My existing draft');
+    native.available = true;
+    await vm.continueGoalSurfaceControl();
+    expect(native.state!.name).toBe('AI proposal');
+    vm.handoffGoalNativeReview();
+    expect(vm.goalManualHandoff).toBe(true);
+    native.state!.name = 'Human override';
+    await vm.projectRun(makeGoalRun({
+      status: 'running',
+      liveActions: [...running.liveActions!, { sequence: 2, command: { actionId: 'name-2', revision: 1, operation: 'goal.setName', value: 'Should not overwrite' } }],
+    }));
+    expect(native.state!.name).toBe('Human override');
+    wrapper.unmount();
+  });
+
   it('asks before takeover without opening or overwriting, and rechecks each continue click', async () => {
     native.available = false;
     native.state!.name = 'My unsaved form';

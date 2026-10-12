@@ -1,5 +1,6 @@
 import type { Agent } from '@mastra/core/agent';
 import type { RequestContext } from '@mastra/core/request-context';
+import { GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY } from '../workflows/goal-business-action-journal';
 import type { z } from 'zod';
 type UnknownRecord = Record<string, unknown>;
 
@@ -157,8 +158,13 @@ export async function generateGoalPlanningDecision<TSchema extends z.ZodTypeAny>
   outputs: unknown[],
   allowResearch: boolean,
 ): Promise<z.infer<TSchema>> {
+  const stagedToolsAvailable = Boolean(requestContext.getRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY));
   const firstOutput = await agent.generate(prompt, {
     requestContext,
+    // The provider must be able to execute several real tool calls and still
+    // return the authoritative structured planning decision. The SDK defaults
+    // to a single step, which would strand the final output after the first tool.
+    ...(stagedToolsAvailable ? { maxSteps: 12 } : {}),
     structuredOutput: {
       schema,
       // The canonical Goal draft uses transforms/custom refinements that are
@@ -188,6 +194,7 @@ export async function generateGoalPlanningDecision<TSchema extends z.ZodTypeAny>
 
   const repairOutput = await agent.generate(repairPrompt, {
     requestContext,
+    ...(stagedToolsAvailable ? { maxSteps: 12 } : {}),
     structuredOutput: {
       schema,
       jsonPromptInjection: 'system',

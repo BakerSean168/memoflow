@@ -4,6 +4,7 @@ import { CreateTaskPlanSchema } from '../../task';
 import {
   GoalCreateClientInputSchema,
   GoalPlanDraftSchema,
+  GoalWorkflowLiveActionJournalSchema,
   GoalPlanExecutionFailureSchema,
   GoalPlanExecutionReceiptSchema,
 } from './ai-goal-create-workflow.dto';
@@ -287,6 +288,7 @@ export const AIWorkflowRunViewSchema = z.discriminatedUnion('kind', [
     ...WorkflowRunViewBaseShape,
     kind: z.literal('goal.create'),
     suspension: GoalWorkflowSuspensionSchema.optional(),
+    liveActions: GoalWorkflowLiveActionJournalSchema.optional(),
     result: GoalPlanExecutionReceiptSchema.optional(),
   }),
   z.object({

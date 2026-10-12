@@ -149,6 +149,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
       applyService: new ApplyGoalPlanService(deps.goalPlanMutationPort),
+      liveActionStorage: deps.storage,
     });
     this.taskPlanner = new TaskPlannerWorker(
       deps.modelResolver,
