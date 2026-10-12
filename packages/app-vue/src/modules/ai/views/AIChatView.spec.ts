@@ -283,7 +283,16 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(viewComposable).toContain('canLeaveBusinessSurface(t)');
     expect(viewComposable).toContain('goalWorkflow.goalOwnerAttemptPending.value');
     expect(viewComposable).toContain('knowledgeCaptureWorkflow.knowledgeCaptureResuming.value');
-    expect(viewComposable.match(/if \(!canLeaveWorkflowReview\(\)\) return/g)).toHaveLength(4);
+    // Guard each actual departure, not a global count that also included the
+    // retired model-switch/new-conversation path. Same-thread model switching
+    // preserves the native draft and has behavioral coverage in the lifecycle suite.
+    for (const entrypoint of ['selectConversation', 'startNewConversation', 'exitToolMode']) {
+      expect(viewComposable).toMatch(
+        new RegExp(
+          `function ${entrypoint}\\([^)]*\\)\\s*\\{\\s*if \\(!canLeaveWorkflowReview\\(\\)\\) return;`,
+        ),
+      );
+    }
   });
   it('routes all normal reviews to native owners without retired editor wiring', () => {
     for (const symbol of [

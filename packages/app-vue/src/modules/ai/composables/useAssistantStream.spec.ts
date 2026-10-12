@@ -82,14 +82,20 @@ function createHarness() {
     listAskUserSuspensions: vi.fn(async () => []),
   };
   const conversation = {
-    runtimeChoice: ref({ runtimeKind: 'builtin', providerId: 'provider-1', modelId: 'model-1' }),
+    runtimeChoice: ref({
+      runtimeKind: 'builtin' as const,
+      providerId: 'provider-1',
+      modelId: 'model-1',
+    }),
     chatConversationId: ref(CONVERSATION_ID),
     chatTimeline: timeline,
     lastRuntimeUsage: ref(null),
     ensureConversationCreated: vi.fn(async () => CONVERSATION_ID),
     refreshRuntimeUsage: vi.fn(async () => undefined),
     refreshRuntimeHistory: vi.fn(async () => undefined),
-  };
+    markConversationActivity: vi.fn(),
+    loadConversationList: vi.fn(async () => undefined),
+  } satisfies Parameters<typeof useAssistantStream>[0]['conversation'];
   const composer = {
     composerAttachments: ref([]),
     clearComposerTurnState: vi.fn(),
@@ -110,7 +116,7 @@ function createHarness() {
         stream = useAssistantStream({
           options,
           chatMessage: ref('hello'),
-          conversation: conversation as never,
+          conversation,
           composer: composer as never,
         });
         return () => h('div');
@@ -130,7 +136,24 @@ describe('useAssistantStream ask_user lifecycle', () => {
 
   it('keeps a recovered approval pending when the composer releases and rejects retained foreign cards', async () => {
     const { timeline, runtime, stream, conversation } = createHarness();
-    timeline.value.push({ id: 'parked', role: 'assistant', content: '', status: 'success', approvals: [{ runId: 'parked', conversationId: CONVERSATION_ID, toolCallId: 'write', toolName: 'routine_create', category: 'edit', risk: 'high', status: 'pending', parked: true }] });
+    timeline.value.push({
+      id: 'parked',
+      role: 'assistant',
+      content: '',
+      status: 'success',
+      approvals: [
+        {
+          runId: 'parked',
+          conversationId: CONVERSATION_ID,
+          toolCallId: 'write',
+          toolName: 'routine_create',
+          category: 'edit',
+          risk: 'high',
+          status: 'pending',
+          parked: true,
+        },
+      ],
+    });
     const approval = timeline.value[0]!.approvals![0]!;
     stream.abortActiveStream();
     expect(approval.status).toBe('pending');
@@ -145,13 +168,40 @@ describe('useAssistantStream ask_user lifecycle', () => {
 
   it('settles a parked decision acknowledged during a new turn and refreshes after its release', async () => {
     const { timeline, runtime, stream, conversation } = createHarness();
-    timeline.value.push({ id: 'parked', role: 'assistant', content: '', status: 'success', approvals: [{ runId: 'parked', conversationId: CONVERSATION_ID, toolCallId: 'write', toolName: 'routine_create', category: 'edit', risk: 'high', status: 'pending', parked: true }] });
+    timeline.value.push({
+      id: 'parked',
+      role: 'assistant',
+      content: '',
+      status: 'success',
+      approvals: [
+        {
+          runId: 'parked',
+          conversationId: CONVERSATION_ID,
+          toolCallId: 'write',
+          toolName: 'routine_create',
+          category: 'edit',
+          risk: 'high',
+          status: 'pending',
+          parked: true,
+        },
+      ],
+    });
     const approval = timeline.value[0]!.approvals![0]!;
     let acknowledge!: (accepted: boolean) => void;
-    runtime.decideToolApproval.mockImplementation(() => new Promise((resolve) => { acknowledge = resolve; }));
+    runtime.decideToolApproval.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          acknowledge = resolve;
+        }),
+    );
     const deciding = stream.decideToolApproval(approval, 'approve');
     let release!: () => void;
-    runtime.streamMessage.mockImplementation(async () => new Promise<void>((resolve) => { release = resolve; }));
+    runtime.streamMessage.mockImplementation(
+      async () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        }),
+    );
     const sending = stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
     await vi.waitFor(() => expect(release).toBeTypeOf('function'));
     acknowledge(true);
@@ -173,6 +223,8 @@ describe('useAssistantStream ask_user lifecycle', () => {
     expect(request!.status).toBe('pending');
     // The suspended turn released the composer; it must not orphan the pending question.
     expect(stream.chatLoading.value).toBe(false);
+    expect(conversation.markConversationActivity).toHaveBeenCalledWith(CONVERSATION_ID);
+    expect(conversation.loadConversationList).toHaveBeenCalledOnce();
 
     await stream.answerAskUser(request!, 'A');
     expect(runtime.answerToolSuspension).toHaveBeenCalledWith({
@@ -190,13 +242,22 @@ describe('useAssistantStream ask_user lifecycle', () => {
   it('permits a restored pending question to be answered without a live stream run', async () => {
     const { stream, runtime, timeline, conversation } = createHarness();
     const request: ChatAskUserRequest = {
-      toolCallId: TOOL_CALL_ID, question: 'Pick one', options: [{ label: 'A' }],
-      runId: RUN_ID, conversationId: CONVERSATION_ID, status: 'pending',
+      toolCallId: TOOL_CALL_ID,
+      question: 'Pick one',
+      options: [{ label: 'A' }],
+      runId: RUN_ID,
+      conversationId: CONVERSATION_ID,
+      status: 'pending',
     };
-    timeline.value = [{
-      id: 'ask-user-restored', role: 'assistant', content: '',
-      status: 'success', askUserRequests: [request],
-    }];
+    timeline.value = [
+      {
+        id: 'ask-user-restored',
+        role: 'assistant',
+        content: '',
+        status: 'success',
+        askUserRequests: [request],
+      },
+    ];
     await stream.answerAskUser(request, 'A');
     expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
     expect(request.status).toBe('answered');
