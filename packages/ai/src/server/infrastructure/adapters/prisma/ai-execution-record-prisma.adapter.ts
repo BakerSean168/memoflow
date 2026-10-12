@@ -46,6 +46,7 @@ export class AIExecutionRecordPrismaAdapter implements IAIExecutionRecordPort, I
         runId: input.runId ?? null,
         requestId: input.requestId ?? null,
         traceId: input.traceId ?? null,
+        agentInstanceId: input.agentInstanceId ?? null,
         providerConnectionId: input.providerConnectionId ?? null,
         modelId: input.modelId ?? null,
         errorCategory: input.errorCategory ?? null,

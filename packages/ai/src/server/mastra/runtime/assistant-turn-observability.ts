@@ -25,6 +25,7 @@ export class AssistantTurnObservability {
     private readonly input: {
       identityId: string;
       conversationId: string;
+      agentInstanceId?: string;
       context?: ExecutionContext;
       model: ResolvedAIModel;
       runId: () => string;

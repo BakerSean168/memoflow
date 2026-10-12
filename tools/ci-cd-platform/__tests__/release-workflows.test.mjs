@@ -13,20 +13,23 @@ function workflowStep(workflow, name) {
   return workflow.slice(start, next < 0 ? workflow.length : next);
 }
 
-test('release-please maintains the Release PR only after successful main CI and never publishes', async () => {
+test('release-please prepares a Release PR only on manual verified-main dispatch and never publishes', async () => {
   const [workflow, config] = await Promise.all([
     readRepoFile('.github/workflows/release-please.yml'),
     readRepoFile('release-please-config.json'),
   ]);
 
-  assert.match(workflow, /workflow_run:/);
-  assert.match(workflow, /workflows:\s*\[?['"]CI['"]\]?/);
-  assert.match(workflow, /types:\s*\[?completed\]?/);
-  assert.match(workflow, /branches:\s*\[?main\]?/);
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /workflow_run\.conclusion == 'success'/);
-  assert.match(workflow, /workflow_run\.event == 'push'/);
-  assert.match(workflow, /workflow_run\.head_branch == 'main'/);
+  assert.doesNotMatch(workflow, /workflow_run:|schedule:|pull_request:/);
+  assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/);
+  assert.match(workflow, /branch\.data\.commit\.sha !== context\.sha/);
+  assert.match(workflow, /workflow_id: 'ci\.yml'/);
+  assert.match(workflow, /head_sha: context\.sha/);
+  assert.match(workflow, /run\.head_sha === context\.sha/);
+  assert.match(workflow, /run\.event === 'push'/);
+  assert.match(workflow, /run\.conclusion === 'success'/);
+  assert.match(workflow, /actions: read/);
+  assert.match(workflow, /target-branch: main/);
   assert.match(workflow, /group:\s*prepare-release-main/);
   assert.doesNotMatch(workflow, /push:\s*\n\s*branches:/);
   assert.doesNotMatch(workflow, /gh release|createRelease|createRef|docker\/build-push-action/u);

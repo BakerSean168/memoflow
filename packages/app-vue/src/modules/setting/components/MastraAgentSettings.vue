@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Check, Link, LoaderCircle, RefreshCw, Unplug } from '@lucide/vue';
+import { Check, Link, LoaderCircle, RefreshCw, RotateCcw, Trash2, Unplug } from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -38,6 +38,7 @@ const emit = defineEmits<{
   toggle: [enabled: boolean];
   rename: [name: string];
   remove: [];
+  reset: [];
 }>();
 const { t } = useI18n();
 const registry = inject(AI_AGENT_REGISTRY_KEY, undefined);
@@ -317,22 +318,27 @@ onBeforeUnmount(() => {
 
 <template>
   <section data-testid="ai-mastra-instance-detail" class="min-w-0 space-y-6 p-1 sm:p-2">
-    <header class="flex items-center justify-between gap-4 px-3 py-2">
-      <div class="flex min-w-0 items-center gap-3">
+    <header class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2">
+      <div class="flex min-w-0 flex-1 basis-40 items-center gap-3">
         <AgentDriverIcon driver="mastra" class="size-5" :style="{ color: instance.accentColor }" />
         <div class="min-w-0">
           <h3 class="truncate text-base font-semibold">{{ instance.name }}</h3>
           <p class="mt-1 text-xs text-muted-foreground">Mastra · {{ instance.instanceId }}</p>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <Badge variant="secondary" role="status" data-testid="ai-mastra-status">{{
-          !instance.enabled
-            ? t('setting.ai.inactiveProvider')
-            : connected
-              ? t('setting.agentInstances.connectionReady')
-              : t('setting.agentInstances.needsConfig')
-        }}</Badge
+      <div class="ml-auto flex shrink-0 items-center gap-1.5">
+        <Badge
+          class="shrink-0 whitespace-nowrap"
+          variant="secondary"
+          role="status"
+          data-testid="ai-mastra-status"
+          >{{
+            !instance.enabled
+              ? t('setting.ai.inactiveProvider')
+              : connected
+                ? t('setting.agentInstances.connectionReady')
+                : t('setting.agentInstances.needsConfig')
+          }}</Badge
         ><Switch
           :model-value="instance.enabled"
           :disabled="busy"
@@ -340,6 +346,35 @@ onBeforeUnmount(() => {
           data-testid="ai-provider-detail-toggle"
           @update:model-value="emit('toggle', $event)"
         />
+        <Button
+          v-if="instance.revision > 0"
+          size="icon"
+          variant="ghost"
+          class="size-7 shrink-0 rounded-md text-muted-foreground"
+          :class="
+            instance.instanceId === instance.driver
+              ? 'hover:bg-muted/70 hover:text-foreground'
+              : 'hover:bg-destructive/10 hover:text-destructive'
+          "
+          :disabled="busy"
+          :aria-label="
+            instance.instanceId === instance.driver
+              ? t('setting.agentInstances.resetDefault')
+              : t('setting.ai.deleteProvider')
+          "
+          :title="
+            instance.instanceId === instance.driver
+              ? t('setting.agentInstances.resetDefaultHint')
+              : t('setting.ai.deleteProvider')
+          "
+          :data-testid="
+            instance.instanceId === instance.driver ? 'ai-agent-reset' : 'ai-agent-delete'
+          "
+          @click="instance.instanceId === instance.driver ? emit('reset') : emit('remove')"
+        >
+          <RotateCcw v-if="instance.instanceId === instance.driver" class="size-3.5" />
+          <Trash2 v-else class="size-3.5" />
+        </Button>
       </div>
     </header>
     <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
@@ -572,20 +607,5 @@ onBeforeUnmount(() => {
         >
       </div>
     </details>
-    <div v-if="instance.revision > 0" class="flex justify-end px-3">
-      <Button
-        size="sm"
-        variant="ghost"
-        class="text-destructive"
-        :disabled="busy"
-        data-testid="ai-agent-delete"
-        @click="emit('remove')"
-        >{{
-          instance.instanceId === 'mastra'
-            ? t('setting.agentInstances.resetDefault')
-            : t('setting.ai.deleteProvider')
-        }}</Button
-      >
-    </div>
   </section>
 </template>

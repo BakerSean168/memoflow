@@ -91,6 +91,17 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     expect(selection.canSendMessage.value).toBe(false);
     wrapper.unmount();
   });
+  it('does not invent a saved model after the live catalog has settled empty or removed it', () => {
+    const { wrapper, selection, catalogs } = mounted({});
+    catalogs.value = { 'provider-1': [] };
+    expect(selection.allModelOptions.value).toEqual([]);
+    catalogs.value = { 'provider-1': [{ id: 'new-model', name: 'New model' }] };
+    expect(selection.allModelOptions.value.map((model) => model.modelId)).toEqual([
+      'new-model',
+      'new-model',
+    ]);
+    wrapper.unmount();
+  });
   it('offers verified inventory models only from the selected Agent connection', async () => {
     const { wrapper, selection, catalogs } = mounted({});
     catalogs.value = {
@@ -195,18 +206,18 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     expect(selection.selectedModel.value?.agentInstanceId).toBeUndefined();
     wrapper.unmount();
   });
-  it('requires a new conversation before selecting another Agent and keeps the old selection intact', () => {
+  it('selects another Mastra instance in the same conversation and remembers its next-turn model', () => {
     localStorage.setItem(
       'ai:conversation-model-map',
       JSON.stringify({ bound: 'agent:mastra::provider-1::model-default' }),
     );
     const { wrapper, selection } = mounted({ currentConversation: 'bound' });
     expect(selection.selectModel('agent:mastra-anyrouter::provider-1::model-custom')).toBe(
-      'new_conversation_required',
+      'selected',
     );
-    expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra');
+    expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra-anyrouter');
     expect(JSON.parse(localStorage.getItem('ai:conversation-model-map') || '{}').bound).toBe(
-      'agent:mastra::provider-1::model-default',
+      'agent:mastra-anyrouter::provider-1::model-custom',
     );
     expect(selection.selectModel('unknown')).toBe('unavailable');
     wrapper.unmount();
@@ -228,9 +239,48 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
       modelId: 'model-custom',
     });
     expect(selection.canSendMessage.value).toBe(true);
-    expect(selection.selectModel('agent:mastra::provider-1::model-default')).toBe(
-      'new_conversation_required',
+    expect(selection.selectModel('agent:mastra::provider-1::model-default')).toBe('selected');
+    wrapper.unmount();
+  });
+
+  it('restores a pending next-turn instance across remount without overwriting it with the last executed instance', async () => {
+    localStorage.setItem(
+      'ai:conversation-model-map',
+      JSON.stringify({ bound: 'agent:mastra-anyrouter::provider-1::model-custom' }),
     );
+    const { wrapper, selection, catalogs } = mounted({
+      currentConversation: 'bound',
+      readConversationSelection: async () => ({
+        agentInstanceId: 'mastra',
+        providerId: 'provider-1',
+        modelId: 'model-default',
+      }),
+    });
+    await nextTick();
+    expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra-anyrouter');
+    catalogs.value = {
+      'provider-1': [
+        { id: 'model-custom', name: 'Custom' },
+        { id: 'model-default', name: 'Default' },
+      ],
+    };
+    await nextTick();
+    expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra-anyrouter');
+    expect(selection.canSendMessage.value).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('allows choosing a bound model in an unclaimed conversation instead of creating another conversation', async () => {
+    const { wrapper, selection, chatConversationId } = mounted({
+      currentConversation: 'empty-shell',
+      readConversationSelection: async () => null,
+    });
+    await nextTick();
+    expect(selection.selectModel('agent:mastra-anyrouter::provider-1::model-custom')).toBe(
+      'selected',
+    );
+    expect(chatConversationId.value).toBe('empty-shell');
+    expect(selection.canSendMessage.value).toBe(true);
     wrapper.unmount();
   });
 

@@ -4,19 +4,19 @@ tags:
   - development
   - release
   - workflow
-description: Release Lifecycle V3：成功 main CI 自动维护 Release PR，exact-SHA Draft/Postflight 与四平台 Desktop 发布
+description: Release Lifecycle V3：手动准备 Release PR，verified main 与 exact-SHA Draft/Postflight 发布
 created: 2026-05-19T00:00:00
-updated: 2026-09-02T16:15:00+08:00
+updated: 2026-10-13T00:00:00Z
 ---
 
 # Release 工作流
 
 MemoFlow 正在实施 **Release Lifecycle V3**。当前已落地的 Phase 1 把发布拆成两个明确阶段：
 
-1. `Prepare Release`：成功的 exact-SHA `main` CI 自动触发 release-please 维护版本、CHANGELOG 和 Release PR，手工 dispatch 只用于重试；
+1. `Prepare Release`：到达发布里程碑时手动 dispatch；验证当前 `main` 的 exact-SHA CI 成功后，由 release-please 维护版本、CHANGELOG 和 Release PR；
 2. `Release Publish`：Release PR 合并后的 exact SHA 必须先通过 full `CI`，随后创建 Draft Release/tag，构建 Windows/Linux/macOS Desktop 资产与当前 Server 镜像；postflight 全部通过后才公开 GitHub Release。Server candidate 的 build-once/promote-many 是 V3 Phase 2/3 的后续切换。
 
-Prepare Release 不再从原始 push 直接触发，而是在 `CI` 已成功后运行，因此只有 verified main 才维护 Release PR；Release Publish 仍与 release-please 解耦，避免 tag/CI 竞态和半发布状态。
+Prepare Release 不由 push 或 CI 完成事件自动触发，避免日常合并后反复创建发布分支。手动入口仍要求 verified current main；Release Publish 继续独立维护 exact-SHA 发布门禁，不降低验证要求。
 
 ## 标准顺序
 
@@ -36,11 +36,11 @@ pnpm docker:local:up
 - 从 `main` 切短生命周期分支；
 - 完成改动和验证；
 - 发起 PR 并合并到 `main`；
-- `main` commit 必须完成 full CI；成功后自动运行 `Prepare Release`。这只创建或更新 Release PR，不创建 release/tag。
+- `main` commit 必须完成 full CI；普通合并不创建 Release PR 或发布分支。完成后删除已合并的短生命周期分支。
 
-### 3. 自动 Prepare Release
+### 3. 手动 Prepare Release
 
-`.github/workflows/release-please.yml` 监听 `CI` 的 `workflow_run`。仅当来源是 `push`、分支是 `main`、结论为 `success` 时，release-please 才运行。`workflow_dispatch` 保留为幂等重试入口。
+`.github/workflows/release-please.yml` 仅接受 `workflow_dispatch`，且只在 `main` 上执行。它先核对 dispatch SHA 仍为当前 main，并确认该 SHA 的 push CI 成功，然后才创建或更新 Release PR。main 已移动或 CI 未成功时明确失败；完成 CI 后重新 dispatch。发布准备会按需创建临时 release 分支，未准备发布时仓库保持 main-only。
 
 它使用 manifest mode：
 

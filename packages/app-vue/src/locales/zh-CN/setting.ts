@@ -26,6 +26,7 @@ export default {
     "existingConnections": "已有连接（可选）",
     "newConnection": "新建连接",
     "resetDefault": "恢复默认实例",
+    "resetDefaultHint": "恢复实例默认设置，保留模型连接和历史会话。",
     "nativePermissionHint": "这些权限仅控制 MemoFlow 业务数据写入，不等于设备的无限制访问权限。",
     "registryUnavailable": "Agent 配置暂时不可用，请在宿主重新连接后重试。",
     "testModel": "测试模型",

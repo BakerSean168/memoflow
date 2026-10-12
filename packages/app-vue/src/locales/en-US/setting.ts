@@ -26,6 +26,7 @@ export default {
     "existingConnections": "Existing connections (optional)",
     "newConnection": "New connection",
     "resetDefault": "Reset default instance",
+    "resetDefaultHint": "Restore instance defaults; keep model connections and conversation history.",
     "nativePermissionHint": "These scopes limit MemoFlow business writes. They do not grant unrestricted access to this device.",
     "registryUnavailable": "Agent configuration is unavailable. Retry after the host reconnects.",
     "testModel": "Test model",

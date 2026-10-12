@@ -31,6 +31,8 @@ beforeEach(async () => {
   expect((await db.query('SELECT current_database() AS name')).rows[0]?.name).toBe(databaseName);
   await db.query(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;
     CREATE TABLE accounts (id TEXT PRIMARY KEY);
+    CREATE TABLE ai_execution_records (id TEXT PRIMARY KEY);
+    INSERT INTO ai_execution_records VALUES ('historical-turn');
     CREATE TABLE ai_provider_configs (
       id TEXT PRIMARY KEY, identity_id TEXT NOT NULL REFERENCES accounts(id),
       name TEXT NOT NULL, credential_ref TEXT NOT NULL, default_model TEXT,
@@ -53,6 +55,9 @@ it('backfills deterministically once, preserves provider/secret/history and does
   const before = (await db.query('SELECT * FROM ai_provider_configs ORDER BY id')).rows;
   await db.query(migration);
   await prepareAIAgentRegistry(db);
+  expect((await db.query('SELECT id,agent_instance_id FROM ai_execution_records')).rows).toEqual([
+    { id: 'historical-turn', agent_instance_id: null },
+  ]);
   expect(
     (
       await db.query(

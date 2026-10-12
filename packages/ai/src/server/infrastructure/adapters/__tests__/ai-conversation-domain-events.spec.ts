@@ -7,6 +7,43 @@ import { createTypedEventSubscriber, eventBus } from '@memoflow/utils/domain';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 import { AIConversationPrismaRepository } from '../prisma/ai-conversation-prisma.repository';
 import { PowerSyncAIConversationRepository } from '../powersync/ai-conversation-powersync.repository';
+import { createLocalAgentSqlite } from '../../../../testing/local-agent-sqlite';
+
+describe('conversation activity with real SQLite', () => {
+  it('keeps title and ownership intact, rejects older activity, and does not revive deleted shells', async () => {
+    const db = createLocalAgentSqlite();
+    try {
+      await db.execute(
+        'CREATE TABLE ai_conversations (id TEXT PRIMARY KEY, identity_id TEXT, name TEXT, status TEXT, version INTEGER, created_at TEXT, updated_at TEXT, deleted_at TEXT)',
+      );
+      const repo = new PowerSyncAIConversationRepository(db);
+      const conversation = AIConversation.create({
+        identityId: 'identity-1',
+        name: 'Preserved title',
+      });
+      await repo.save(conversation);
+      const at = conversation.updatedAt.getTime() + 1000;
+      await repo.recordActivity('identity-1', String(conversation.id), at);
+      await repo.recordActivity('foreign', String(conversation.id), at + 1000);
+      await repo.recordActivity('identity-1', String(conversation.id), at - 100);
+      const updated = await repo.findByIdForIdentity('identity-1', String(conversation.id));
+      expect(updated?.name).toBe('Preserved title');
+      expect(updated?.updatedAt.getTime()).toBe(at);
+      await repo.delete('identity-1', String(conversation.id));
+      const deleted = await db.getOptional('SELECT * FROM ai_conversations WHERE id = ?', [
+        String(conversation.id),
+      ]);
+      await repo.recordActivity('identity-1', String(conversation.id), at + 1000);
+      expect(
+        await db.getOptional('SELECT * FROM ai_conversations WHERE id = ?', [
+          String(conversation.id),
+        ]),
+      ).toEqual(deleted);
+    } finally {
+      db.close();
+    }
+  });
+});
 
 const eventTypes = [
   'ai:conversation-created',
@@ -53,11 +90,16 @@ function electronMock(): IElectronDatabase {
     execute: vi.fn(async () => ({ rowsAffected: 1 })),
     getAll: vi.fn(async () => []),
     getOptional: vi.fn(async () => null),
-    get: vi.fn(async () => { throw new Error('get() should not be called'); }),
+    get: vi.fn(async () => {
+      throw new Error('get() should not be called');
+    }),
   };
   return {
     ...tx,
-    writeTransaction: vi.fn(async <T>(callback: (transaction: IElectronDatabaseTransaction) => Promise<T>) => callback(tx)),
+    writeTransaction: vi.fn(
+      async <T>(callback: (transaction: IElectronDatabaseTransaction) => Promise<T>) =>
+        callback(tx),
+    ),
   } as IElectronDatabase;
 }
 

@@ -7,7 +7,14 @@ import { nextTick, ref, shallowRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
-import type { AIChatService, ChatModelOption, ChatToolApproval, ChatNativeRequest, ChatAskUserRequest, ChatAskUserAnswer } from './types';
+import type {
+  AIChatService,
+  ChatModelOption,
+  ChatToolApproval,
+  ChatNativeRequest,
+  ChatAskUserRequest,
+  ChatAskUserAnswer,
+} from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 import type { useAIComposerContext } from './useAIComposerContext';
@@ -25,6 +32,8 @@ export function useAssistantStream(input: {
     | 'ensureConversationCreated'
     | 'refreshRuntimeUsage'
     | 'refreshRuntimeHistory'
+    | 'markConversationActivity'
+    | 'loadConversationList'
   >;
   composer: ReturnType<typeof useAIComposerContext>;
 }) {
@@ -37,6 +46,8 @@ export function useAssistantStream(input: {
     ensureConversationCreated,
     refreshRuntimeUsage,
     refreshRuntimeHistory,
+    markConversationActivity,
+    loadConversationList,
   } = input.conversation;
   const { composerAttachments, clearComposerTurnState } = composer;
   const { t } = useI18n();
@@ -95,7 +106,8 @@ export function useAssistantStream(input: {
       for (const request of item.askUserRequests ?? []) {
         // A parked ask_user question stays pending until it is answered or cancelled.
         if (request.runId === suspendedAskUserRunId.value) continue;
-        if (request.status === 'pending' || request.status === 'sending') request.status = 'expired';
+        if (request.status === 'pending' || request.status === 'sending')
+          request.status = 'expired';
       }
     }
   }
@@ -106,7 +118,9 @@ export function useAssistantStream(input: {
       (!approval.parked && approval.runId !== activeRuntimeRunId.value) ||
       approval.conversationId !== chatConversationId.value ||
       (!approval.parked && !chatLoading.value) ||
-      (approval.parked && (!chatTimeline.value.some((item) => item.approvals?.includes(approval)) || chatLoading.value))
+      (approval.parked &&
+        (!chatTimeline.value.some((item) => item.approvals?.includes(approval)) ||
+          chatLoading.value))
     )
       return;
     approval.status = 'sending';
@@ -115,7 +129,9 @@ export function useAssistantStream(input: {
       approval.status === 'sending' &&
       (approval.parked || approval.runId === activeRuntimeRunId.value) &&
       approval.conversationId === chatConversationId.value &&
-      (approval.parked ? chatTimeline.value.some((item) => item.approvals?.includes(approval)) : chatLoading.value);
+      (approval.parked
+        ? chatTimeline.value.some((item) => item.approvals?.includes(approval))
+        : chatLoading.value);
     try {
       const accepted = await options.runtime.decideToolApproval({
         type: 'tool_approval',
@@ -173,9 +189,11 @@ export function useAssistantStream(input: {
 
   /** Never trust a retained card from a different conversation or stale projection. */
   function isVisibleAskUserRequest(request: ChatAskUserRequest): boolean {
-    return request.conversationId === chatConversationId.value &&
+    return (
+      request.conversationId === chatConversationId.value &&
       chatTimeline.value.some((item) => item.askUserRequests?.includes(request)) &&
-      (!chatLoading.value || activeRuntimeRunId.value === request.runId);
+      (!chatLoading.value || activeRuntimeRunId.value === request.runId)
+    );
   }
 
   async function reconcileAskUserHistory(conversationId: string) {
@@ -332,16 +350,33 @@ export function useAssistantStream(input: {
           for (const suspended of pending) {
             if (suspended.runId !== event.runId || suspended.approval) continue;
             item.askUserRequests ??= [];
-            if (!item.askUserRequests.some((request) => request.toolCallId === suspended.toolCallId)) item.askUserRequests.push({ ...suspended, conversationId: event.conversationId, status: 'pending' });
+            if (
+              !item.askUserRequests.some((request) => request.toolCallId === suspended.toolCallId)
+            )
+              item.askUserRequests.push({
+                ...suspended,
+                conversationId: event.conversationId,
+                status: 'pending',
+              });
           }
-        } catch { /* A failed projection must not break the live turn stream. */ }
+        } catch {
+          /* A failed projection must not break the live turn stream. */
+        }
       })();
     }
     if (event.type === 'assistant.ask_user.required') {
       item.askUserRequests ??= [];
-      if (!item.askUserRequests.some((request) => request.toolCallId === event.data.toolCallId)) item.askUserRequests.push({ ...event.data, conversationId: event.conversationId, runId: event.runId, status: 'pending' });
+      if (!item.askUserRequests.some((request) => request.toolCallId === event.data.toolCallId))
+        item.askUserRequests.push({
+          ...event.data,
+          conversationId: event.conversationId,
+          runId: event.runId,
+          status: 'pending',
+        });
       else {
-        const existing = item.askUserRequests.find((request) => request.toolCallId === event.data.toolCallId)!;
+        const existing = item.askUserRequests.find(
+          (request) => request.toolCallId === event.data.toolCallId,
+        )!;
         if (existing.status === 'expired') existing.status = 'pending';
       }
       // Park the run so the eventual composer release neither expires the question
@@ -350,7 +385,9 @@ export function useAssistantStream(input: {
       return;
     }
     if (event.type === 'assistant.ask_user.resolved') {
-      const request = item.askUserRequests?.find((candidate) => candidate.toolCallId === event.data.toolCallId);
+      const request = item.askUserRequests?.find(
+        (candidate) => candidate.toolCallId === event.data.toolCallId,
+      );
       if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
       if (suspendedAskUserRunId.value === event.runId) suspendedAskUserRunId.value = null;
       return;
@@ -465,7 +502,11 @@ export function useAssistantStream(input: {
       const target = chatTimeline.value.find((item) => item.id === assistantDraftId);
       if (target) {
         target.status = 'error';
-        target.errorMessage = event.data.message;
+        target.errorMessage = getAIErrorMessage(
+          event.data,
+          t,
+          'aiAssistant.dialogs.chat.sendFailed',
+        );
       }
     }
   }
@@ -480,10 +521,16 @@ export function useAssistantStream(input: {
     if ((choice.runtimeKind === 'builtin' && !selectedModel) || chatLoading.value) return;
     // A suspended ask_user turn must be resolved before another message can
     // mutate the same conversation. Avoid overlapping native Agent runs.
-    if (chatTimeline.value.some((item) => item.askUserRequests?.some(
-      (request) => request.conversationId === chatConversationId.value &&
-        (request.status === 'pending' || request.status === 'sending'),
-    ))) return;
+    if (
+      chatTimeline.value.some((item) =>
+        item.askUserRequests?.some(
+          (request) =>
+            request.conversationId === chatConversationId.value &&
+            (request.status === 'pending' || request.status === 'sending'),
+        ),
+      )
+    )
+      return;
 
     let userDraftId = '';
     let assistantDraftId = '';
@@ -513,6 +560,7 @@ export function useAssistantStream(input: {
         streamController.signal,
       );
       streamController.signal.throwIfAborted();
+      markConversationActivity(conversationId);
       lastRuntimeUsage.value = null;
 
       userDraftId = `user-draft-${Date.now()}`;
@@ -597,6 +645,7 @@ export function useAssistantStream(input: {
         toast.error(errorMessage);
       }
     } finally {
+      if (conversationId) void loadConversationList(loadService);
       if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
       if (assistantDraftId)
         settleVisibleApprovals(streamController?.signal.aborted ? 'cancelled' : 'failed', {

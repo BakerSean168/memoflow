@@ -50,7 +50,7 @@ export function useAI() {
       if (!disposed && generation === providerLoadGeneration) providers.value = nextProviders;
       return providers.value;
     } catch (error) {
-      if (!disposed && generation === providerLoadGeneration) providers.value = [];
+      // Preserve the last loaded configuration so a failed refresh does not erase the editor.
       throw error;
     } finally {
       if (!disposed && generation === providerLoadGeneration) isLoadingProviders.value = false;

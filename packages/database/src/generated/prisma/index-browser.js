@@ -174,6 +174,7 @@ exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   runId: 'runId',
   requestId: 'requestId',
   traceId: 'traceId',
+  agentInstanceId: 'agentInstanceId',
   providerConnectionId: 'providerConnectionId',
   modelId: 'modelId',
   errorCategory: 'errorCategory',

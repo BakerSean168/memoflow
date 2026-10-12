@@ -119,11 +119,20 @@ const fixture = await vi.hoisted(async () => {
 });
 
 vi.mock('./useAI', async () => {
+  const { ref } = await import('vue');
   return {
     useAI: () => ({
       service: {},
       providers: fixture.providers,
+      isLoadingProviders: ref(false),
       loadProviders: fixture.loadProviders,
+      refreshProviderModels: vi.fn(async (providerId: string) => ({
+        providerId,
+        models: fixture.providers.value
+          .filter((provider) => String(provider.id) === providerId && provider.defaultModel)
+          .map((provider) => ({ id: provider.defaultModel, name: provider.defaultModel })),
+        fetchedAt: Date.now(),
+      })),
     }),
   };
 });
@@ -323,6 +332,59 @@ describe('AI conversation restoration and business navigation', () => {
     fixture.providers.value = [];
   });
 
+  it('switches Mastra instances without clearing the conversation, transcript or draft and blocks busy switches', async () => {
+    fixture.providers.value = [
+      {
+        id: 'p1',
+        name: 'Provider',
+        defaultModel: 'model',
+        isActive: true,
+      } as import('@memoflow/contracts/ai').AIProviderConfigClientDTO,
+    ];
+    const entries = ['mastra', 'work'].map((instanceId) => ({
+      instanceId,
+      driver: 'mastra',
+      name: instanceId,
+      enabled: true,
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    }));
+    const registry = {
+      list: vi.fn(async () => ({
+        instances: entries,
+        bindings: entries.map((entry) => ({
+          instanceId: entry.instanceId,
+          connectionId: 'p1',
+          modelId: 'model',
+        })),
+      })),
+    };
+    const { wrapper } = await mountView({ [AI_AGENT_REGISTRY_KEY as symbol]: registry });
+    await flushPromises();
+    fixture.session.chatConversationId.value = 'same-conversation';
+    fixture.session.chatMessage.value = 'Keep draft';
+    wrapper.vm.permissionMode = 'read-only';
+    await flushPromises();
+    await wrapper.vm.selectComposerModel('agent:work::p1::model', 'agent:work');
+    expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
+    expect(fixture.session.chatConversationId.value).toBe('same-conversation');
+    expect(fixture.session.chatMessage.value).toBe('Keep draft');
+    expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');
+    expect(wrapper.vm.permissionMode).toBe('supervised');
+    fixture.session.chatLoading.value = true;
+    await wrapper.vm.selectComposerModel('agent:mastra::p1::model', 'agent:mastra');
+    expect(wrapper.vm.selectedModelKey).toBe('agent:work::p1::model');
+    fixture.session.chatLoading.value = false;
+    await wrapper.vm.localAssistant.select({
+      runtimeKind: 'local_agent',
+      connectionId: 'other',
+      modelId: 'native',
+    });
+    expect(fixture.session.runtimeChoice.value.runtimeKind).toBe('builtin');
+    expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
+  });
+
   it('keeps the conversation and composer draft when changing the same Agent model', async () => {
     const { wrapper } = await mountView();
     fixture.session.runtimeChoice.value = {
@@ -346,7 +408,11 @@ describe('AI conversation restoration and business navigation', () => {
       connectionId: 'agent-two',
       modelId: 'new',
     });
-    expect(fixture.session.startNewConversation).toHaveBeenCalledOnce();
+    expect(fixture.session.startNewConversation).not.toHaveBeenCalled();
+    expect(fixture.session.runtimeChoice.value).toMatchObject({
+      connectionId: 'agent-one',
+      modelId: 'new',
+    });
   });
 
   it.each(['goal.create', 'task.create', 'knowledge.capture'] as const)(

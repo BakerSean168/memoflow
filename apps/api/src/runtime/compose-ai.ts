@@ -159,6 +159,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
       { agentRegistry },
     ),
     conversationShellSource: new ConversationShellSource(repositorySet.conversationRepository),
+    conversationActivity: repositorySet.conversationRepository,
     goalPlanMutationPort,
     goalSurfaceLeaseRepository: new AiGoalSurfaceLeasePrismaRepository(dependencies.db),
     taskPlanMutationPort,

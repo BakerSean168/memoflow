@@ -7,6 +7,14 @@ updated: 2026-10-12T13:05:00Z
 
 # Ask User + Goal Business Surface
 
+## 2026-10-13 Integration authorization update
+
+The user now requests consolidation of all useful MemoFlow branches and dirty work into main. This explicitly replaces the historical draft-only/no-merge hold recorded below. PR #449 is being integrated with the previously uncommitted Provider, same-conversation model selection, localized-error, and conversation-list fixes. Regression and exact-head CI gates still apply. No production deployment or release is authorized by this cleanup.
+
+The later entries below supersede earlier checkpoint limitations where implementation has advanced. Remaining real-provider canary, cross-device/cross-host verification, unarmed approval-gate adoption after restart, read-only policy persistence across restart, and token-streamed answer resumption remain explicit product/acceptance follow-ups; merging this reviewed slice must not label them complete. They do not require an idle feature branch to be retained.
+
+See [main consolidation](./2026-10-13-main-branch-consolidation.md) for the current integration and cleanup evidence.
+
 ## 边界
 
 唯一 writer：`feat/agent-ask-user-business-surface`，独立 worktree，base `1e79cbbadc4`。
@@ -168,7 +176,6 @@ updated: 2026-10-12T13:05:00Z
 
 生产 Provider canary、跨设备/跨宿主租约一致性、真实凭据全链路验收、最终端到端验收与完整 exact-head CI 未完成；P1/P2 未验收不得合并或部署。
 
-
 ## Stage B-2 前置 · 合并 main attention 冲突检查点（2026-10-12）
 
 T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 main `4ba621daab0`（#450 durable conversation attention），不触碰 main checkout。保留本分支 Ask User 答复/挂起读取接口与 main attention list/ack 接口、两套 IPC lifecycle fixture；Prisma source schema 同时保留 AiGoalSurfaceLease 与 AiConversationAttention，从合并后 schema 重新生成并归一化 client，不执行数据库迁移或 db push。测试清单重新生成，1,393 文件。
@@ -176,7 +183,6 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 本地证据：AI 定向 5 文件 **101/101**；Chat/attention composables 4 文件 **42/42**；API compose-ai **4/4**；Desktop compose-ai **5/5**；affected lint **41 projects** 通过。ai/app-vue/api/contracts/web/desktop typecheck **6 projects + 32 dependency tasks** 全部通过；`memoflow:governance-check` 通过。
 
 基线 `d40092d1e76` 的 exact-head CI 仍未产生 run；等待超过 10 分钟后 close/reopen #449 仍未收到新 run。此次合并是 PR 冲突维护，不代表 Stage B-2 实施放行；Ask User 答复/审批真实引擎 RED→GREEN 尚未开始。推送合并 head 后仍要求 exact-head 19-job CI 全绿，PR 保持 Draft，不合并、不部署。
-
 
 ## Stage B-2 · Ask User 答复闭环正确性检查点（2026-10-12）
 
@@ -198,7 +204,6 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 - 真实引擎 **5/5**：同进程答复 → routine_create 审批 → Finished；独立进程生成真实挂起、退出后新 runtime 认领并完成同一链路；同进程与独立进程恢复后的取消；同进程 read-only 恢复不放宽。审批覆盖 foreign/stale 拒绝、并发仅一次、最终历史内容与挂起/投影无遗留。重启 fixture 直接启动独立 Vitest 进程复用同一 harness，排除 SDK 进程内执行对象缓存；正常测试中 fixture 跳过、仅子进程启用。
 - 最终 AI 全量 **109 files / 721 passed + 1 fixture skipped**（消费边界补强后复跑通过）；HTTP/IPC async approval 与原有 mock 校验测试保留；Chat composables **35/35**；合同 **21/21**；ai/app-vue/api/contracts/web typecheck **5 projects + 32 dependency tasks** 全绿，最终 ai:typecheck 另行复验通过；affected lint **41 projects**、`memoflow:governance-check` 通过；inventory 预热后重新生成，**1,393 files**。
 - **既有边界保留：重启后的审批只保证投影可见，SDK 未 armed 的 approval gate 不可收养，作为后续项。** 未做逐 token SSE、Goal clarification 迁移、生产 Provider canary、跨设备一致性或部署。PR #449 保持 Draft，不能按本批宣称 P1/P2 完整验收。新 head 的 exact-head CI 推送后由 T3 watch 核对。
-
 
 ### Stage B-2 exact-head CI 收口
 

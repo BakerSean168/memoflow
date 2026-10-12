@@ -121,6 +121,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
         { agentRegistry },
       ),
       conversationShellSource: new ConversationShellSource(conversationRepository),
+      conversationActivity: conversationRepository,
       goalPlanMutationPort,
       goalSurfaceLeaseRepository: new AiGoalSurfaceLeasePowerSyncRepository(dependencies.db),
       taskPlanMutationPort: taskPlanMutationAdapter,

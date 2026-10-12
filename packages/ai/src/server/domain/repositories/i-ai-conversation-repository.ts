@@ -10,4 +10,6 @@ export interface IAIConversationRepository {
   ): Promise<AIConversation | null>;
   findByIdentityId(identityId: string): Promise<AIConversation[]>;
   delete(identityId: string, id: string): Promise<void>;
+  /** Advance activity monotonically without overwriting title/config or reviving deleted shells. */
+  recordActivity(identityId: string, id: string, at: number): Promise<void>;
 }

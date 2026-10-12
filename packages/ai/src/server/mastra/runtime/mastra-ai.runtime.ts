@@ -1,6 +1,10 @@
 import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime';
-import { applyMemoFlowSessionToolPolicy, memoFlowToolCategory, memoFlowToolPolicy } from '../tools/product-tool-policy';
+import {
+  applyMemoFlowSessionToolPolicy,
+  memoFlowToolCategory,
+  memoFlowToolPolicy,
+} from '../tools/product-tool-policy';
 import { AgentController, type Session } from '@mastra/core/agent-controller';
 import { askUserTool } from '@mastra/core/tools';
 import { Mastra } from '@mastra/core/mastra';
@@ -71,13 +75,20 @@ import {
 import { AssistantHistoryService } from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { createLogger } from '@memoflow/utils/logger';
+
+const logger = createLogger('MastraAIRuntime');
 
 export interface MastraAIRuntimeDependencies {
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
-  /** Host-authoritative turn claim: one stable Mastra Agent identity per new conversation. */
+  /** Host-authoritative last accepted selection; compatible Mastra instances share the thread. */
   readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>;
   readonly conversationShellSource: AssistantConversationShellSource;
+  /** Host-owned activity projection; independent of Mastra transcript persistence. */
+  readonly conversationActivity?: {
+    recordActivity(identityId: string, id: string, at: number): Promise<void>;
+  };
   /** Host-bound canonical Goal/Task/Reminder application mutations for ADR-052. */
   readonly goalPlanMutationPort: GoalPlanMutationPort;
   /** Host-bound canonical Task application mutation for the task.create workflow. */
@@ -120,6 +131,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private readonly durableWorkflows: MastraDurableWorkflowRuntime;
   private initPromise: Promise<void> | null = null;
   private disposePromise: Promise<void> | null = null;
+  private readonly reservedConversations = new Set<string>();
   private readonly activeRuns = new Map<string, ActiveAssistantTurn>();
   private readonly resumedRuns = new Set<string>();
   private readonly sessionModes = new WeakMap<Session, 'supervised' | 'read-only'>();
@@ -265,12 +277,31 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     return this.durableWorkflows.goalSurfaceLease(input);
   }
 
+  private async recordConversationActivity(
+    identityId: string,
+    conversationId: string,
+    requestId?: string,
+  ): Promise<void> {
+    try {
+      await this.deps.conversationActivity?.recordActivity(identityId, conversationId, Date.now());
+    } catch {
+      // Sidebar metadata must not turn an otherwise valid reply into a failed turn.
+      logger.warn('Conversation activity projection failed', { conversationId, requestId });
+    }
+  }
+
   async start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.start(input);
+    const run = await this.durableWorkflows.start(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async startDetached(input: {
@@ -278,7 +309,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     request: AIWorkflowStartClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.startDetached(input);
+    const run = await this.durableWorkflows.startDetached(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async resume(input: {
@@ -286,7 +323,13 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     request: AIWorkflowResumeClientRequest;
   }): Promise<AIWorkflowRunView> {
     await this.init();
-    return this.durableWorkflows.resume(input);
+    const run = await this.durableWorkflows.resume(input);
+    await this.recordConversationActivity(
+      input.context.identityId,
+      run.conversationId,
+      input.context.requestId,
+    );
+    return run;
   }
 
   async resumeDetached(input: {
@@ -357,7 +400,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     return active.abort();
   }
 
-  private async applySessionPolicy(session: Session, mode: 'supervised' | 'read-only' = 'supervised') {
+  private async applySessionPolicy(
+    session: Session,
+    mode: 'supervised' | 'read-only' = 'supervised',
+  ) {
     await applyMemoFlowSessionToolPolicy(session, mode);
     this.sessionModes.set(session, mode);
   }
@@ -370,15 +416,26 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, context.identityId);
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, conversationId);
     const envelope = await this.deps.contextAssembler.assemble({
-      invocation: { identityId: context.identityId, conversationId, surface: 'assistant', locale: 'zh-CN' },
+      invocation: {
+        identityId: context.identityId,
+        conversationId,
+        surface: 'assistant',
+        locale: 'zh-CN',
+      },
       userInput: { content: '', attachments: [], selectedEntities: [] },
-      domainFacts: [], knowledgeEvidence: [],
-      selectedEntities: [{ entityType: 'conversation', id: conversationId, source: 'assistant.session' }],
+      domainFacts: [],
+      knowledgeEvidence: [],
+      selectedEntities: [
+        { entityType: 'conversation', id: conversationId, source: 'assistant.session' },
+      ],
     });
     setAIContextRequestContext(requestContext, envelope);
     const session = await this.controller.createSession({
-      id: `conversation:${conversationId}`, ownerId: context.identityId,
-      resourceId: context.identityId, threadId: conversationId, requestContext,
+      id: `conversation:${conversationId}`,
+      ownerId: context.identityId,
+      resourceId: context.identityId,
+      threadId: conversationId,
+      requestContext,
     });
     if (!this.sessionModes.has(session)) await this.applySessionPolicy(session);
     return { session, requestContext };
@@ -395,9 +452,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     let consumed = false;
     let nextSuspensionId: string | undefined;
     let finish!: (accepted: boolean) => void;
-    const ended = new Promise<boolean>((resolve) => { finish = resolve; });
+    const ended = new Promise<boolean>((resolve) => {
+      finish = resolve;
+    });
     const unsubscribe = session.subscribe((event) => {
-      if (session.run.bindingGeneration() !== generation || session.thread.getId() !== conversationId) {
+      if (
+        session.run.bindingGeneration() !== generation ||
+        session.thread.getId() !== conversationId
+      ) {
         finish(false);
         return;
       }
@@ -406,78 +468,178 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       // The answer was consumed; its successor approval is now independently decidable.
       if (event.type === 'tool_end' && event.toolCallId === resumingToolCallId) consumed = true;
       if (consumed && event.type === 'tool_suspended') nextSuspensionId = event.toolCallId;
-      if (consumed && event.type === 'tool_approval_required') { nextSuspensionId = event.toolCallId; finish(true); }
+      if (consumed && event.type === 'tool_approval_required') {
+        nextSuspensionId = event.toolCallId;
+        finish(true);
+      }
       // A new subscription may replay the original parked suspension before
       // delivering the resumed run. That replay is not this answer's boundary.
-      if (event.type === 'agent_end' && (event.reason === 'error' || event.reason === 'aborted' || consumed)) finish(event.reason !== 'error' && event.reason !== 'aborted');
+      if (
+        event.type === 'agent_end' &&
+        (event.reason === 'error' || event.reason === 'aborted' || consumed)
+      )
+        finish(event.reason !== 'error' && event.reason !== 'aborted');
     });
     try {
       // Suspension responses can themselves wait on a successor approval gate.
       // Its event is the boundary for this command; do not wait for that decision here.
-      const responding = Promise.resolve().then(respond).then((accepted) => accepted ? ended : false);
+      const responding = Promise.resolve()
+        .then(respond)
+        .then((accepted) => (accepted ? ended : false));
       const accepted = await Promise.race([responding, ended]);
       if (accepted && nextSuspensionId) {
         // The gate event precedes durable snapshot publication. A history refresh
         // must see the successor approval rather than the just-answered question.
         const deadline = Date.now() + 10000;
         while (true) {
-          const suspended = await this.assistant.listSuspendedRuns({ threadId: conversationId, resourceId: session.identity.getResourceId() });
-          if (session.run.bindingGeneration() !== generation || session.thread.getId() !== conversationId) return false;
-          if (suspended.runs.some((run) => run.runId === runId && run.toolCalls.some((call) => call.toolCallId === nextSuspensionId))) break;
+          const suspended = await this.assistant.listSuspendedRuns({
+            threadId: conversationId,
+            resourceId: session.identity.getResourceId(),
+          });
+          if (
+            session.run.bindingGeneration() !== generation ||
+            session.thread.getId() !== conversationId
+          )
+            return false;
+          if (
+            suspended.runs.some(
+              (run) =>
+                run.runId === runId &&
+                run.toolCalls.some((call) => call.toolCallId === nextSuspensionId),
+            )
+          )
+            break;
           if (Date.now() >= deadline) throw new Error('Successor suspension was not persisted');
           await new Promise((resolve) => setTimeout(resolve, 25));
         }
       }
       return accepted;
-    } finally { unsubscribe(); }
+    } finally {
+      unsubscribe();
+    }
   }
 
-  async listAskUserSuspensions(input: { identityId: string; conversationId: string }): Promise<readonly AssistantRuntimeAskUserSuspension[]> {
+  async listAskUserSuspensions(input: {
+    identityId: string;
+    conversationId: string;
+  }): Promise<readonly AssistantRuntimeAskUserSuspension[]> {
     await this.init();
-    const suspended = await this.assistant.listSuspendedRuns({ threadId: input.conversationId, resourceId: input.identityId });
-    return suspended.runs.filter((run) => run.threadId === input.conversationId && run.resourceId === input.identityId).flatMap((run) => run.toolCalls.flatMap((call): AssistantRuntimeAskUserSuspension[] => {
-      if (!call.toolName) return [];
-      const policy = memoFlowToolPolicy(call.toolName);
-      const toolName = AssistantToolNameSchema.safeParse(call.toolName);
-      if (policy?.requireApproval && toolName.success && call.toolCallId && (policy.category === 'edit' || policy.category === 'execute' || policy.category === 'read')) {
-        return [{ runId: run.runId, toolCallId: call.toolCallId, question: call.toolName, approval: { toolName: toolName.data, category: policy.category, risk: 'high' } }];
-      }
-      const raw = call.suspendPayload ?? call.args;
-      if (call.toolName !== 'ask_user' || !call.toolCallId || !raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
-      const payload = raw as Record<string, unknown>;
-      if (typeof payload.question !== 'string' || !payload.question.trim() || payload.question.length > 2000) return [];
-      const options = Array.isArray(payload.options) ? payload.options.filter((option): option is { label: string; description?: string } => Boolean(option) && typeof option === 'object' && typeof (option as { label?: unknown }).label === 'string') : undefined;
-      return [{ runId: run.runId, toolCallId: call.toolCallId, question: payload.question, ...(options?.length ? { options } : {}), ...(payload.selectionMode === 'single_select' || payload.selectionMode === 'multi_select' ? { selectionMode: payload.selectionMode } : {}) }];
-    }));
+    const suspended = await this.assistant.listSuspendedRuns({
+      threadId: input.conversationId,
+      resourceId: input.identityId,
+    });
+    return suspended.runs
+      .filter((run) => run.threadId === input.conversationId && run.resourceId === input.identityId)
+      .flatMap((run) =>
+        run.toolCalls.flatMap((call): AssistantRuntimeAskUserSuspension[] => {
+          if (!call.toolName) return [];
+          const policy = memoFlowToolPolicy(call.toolName);
+          const toolName = AssistantToolNameSchema.safeParse(call.toolName);
+          if (
+            policy?.requireApproval &&
+            toolName.success &&
+            call.toolCallId &&
+            (policy.category === 'edit' ||
+              policy.category === 'execute' ||
+              policy.category === 'read')
+          ) {
+            return [
+              {
+                runId: run.runId,
+                toolCallId: call.toolCallId,
+                question: call.toolName,
+                approval: { toolName: toolName.data, category: policy.category, risk: 'high' },
+              },
+            ];
+          }
+          const raw = call.suspendPayload ?? call.args;
+          if (
+            call.toolName !== 'ask_user' ||
+            !call.toolCallId ||
+            !raw ||
+            typeof raw !== 'object' ||
+            Array.isArray(raw)
+          )
+            return [];
+          const payload = raw as Record<string, unknown>;
+          if (
+            typeof payload.question !== 'string' ||
+            !payload.question.trim() ||
+            payload.question.length > 2000
+          )
+            return [];
+          const options = Array.isArray(payload.options)
+            ? payload.options.filter(
+                (option): option is { label: string; description?: string } =>
+                  Boolean(option) &&
+                  typeof option === 'object' &&
+                  typeof (option as { label?: unknown }).label === 'string',
+              )
+            : undefined;
+          return [
+            {
+              runId: run.runId,
+              toolCallId: call.toolCallId,
+              question: payload.question,
+              ...(options?.length ? { options } : {}),
+              ...(payload.selectionMode === 'single_select' ||
+              payload.selectionMode === 'multi_select'
+                ? { selectionMode: payload.selectionMode }
+                : {}),
+            },
+          ];
+        }),
+      );
   }
 
-  async cancelAskUserSuspension(input: { context: ExecutionContext; command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand }): Promise<boolean> {
-    if (input.command.action !== 'cancel' || !input.context.identityId || input.command.identityId) return false;
+  async cancelAskUserSuspension(input: {
+    context: ExecutionContext;
+    command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand;
+  }): Promise<boolean> {
+    if (input.command.action !== 'cancel' || !input.context.identityId || input.command.identityId)
+      return false;
     const runs = await this.assistant.listSuspendedRuns({
       threadId: input.command.conversationId,
       resourceId: input.context.identityId,
     });
-    const run = runs.runs.find((candidate) =>
-      candidate.runId === input.command.runId &&
-      candidate.threadId === input.command.conversationId &&
-      candidate.resourceId === input.context.identityId,
+    const run = runs.runs.find(
+      (candidate) =>
+        candidate.runId === input.command.runId &&
+        candidate.threadId === input.command.conversationId &&
+        candidate.resourceId === input.context.identityId,
     );
-    const suspension = run?.toolCalls.find((call) =>
-      call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user',
+    const suspension = run?.toolCalls.find(
+      (call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user',
     );
     if (!run || !suspension || this.resumedRuns.has(run.runId)) return false;
     this.resumedRuns.add(run.runId);
     try {
       const { session } = await this.suspensionSession(input.context, input.command.conversationId);
       if (session.run.isRunning()) return false;
-      session.suspensions.register({ runId: run.runId, toolCallId: input.command.toolCallId,
-        toolName: 'ask_user', threadId: input.command.conversationId, resourceId: input.context.identityId });
+      session.suspensions.register({
+        runId: run.runId,
+        toolCallId: input.command.toolCallId,
+        toolName: 'ask_user',
+        threadId: input.command.conversationId,
+        resourceId: input.context.identityId,
+      });
       let settled!: () => void;
       let rejectSettlement!: (cause: Error) => void;
-      const denied = new Promise<void>((resolve, reject) => { settled = resolve; rejectSettlement = reject; });
-      const settlementTimeout = setTimeout(() => rejectSettlement(new Error('Suspension cancellation did not settle')), 10000);
+      const denied = new Promise<void>((resolve, reject) => {
+        settled = resolve;
+        rejectSettlement = reject;
+      });
+      const settlementTimeout = setTimeout(
+        () => rejectSettlement(new Error('Suspension cancellation did not settle')),
+        10000,
+      );
       const unsubscribe = session.subscribe((event) => {
-        if (event.type === 'tool_end' && event.toolCallId === input.command.toolCallId && event.denied) settled();
+        if (
+          event.type === 'tool_end' &&
+          event.toolCallId === input.command.toolCallId &&
+          event.denied
+        )
+          settled();
       });
       try {
         session.abortRun();
@@ -489,9 +651,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         const workflows = await this.deps.storage.getStore('workflows');
         if (!workflows) throw new Error('Suspension storage unavailable');
         await workflows.deleteWorkflowRunById({ runId: run.runId, workflowName: 'agentic-loop' });
-        await workflows.deleteWorkflowRunById({ runId: run.runId, workflowName: 'executionWorkflow' });
+        await workflows.deleteWorkflowRunById({
+          runId: run.runId,
+          workflowName: 'executionWorkflow',
+        });
         return true;
-      } finally { clearTimeout(settlementTimeout); unsubscribe(); }
+      } finally {
+        clearTimeout(settlementTimeout);
+        unsubscribe();
+      }
     } catch {
       return false;
     } finally {
@@ -506,32 +674,84 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (input.command.action === 'cancel') return this.cancelAskUserSuspension(input);
     if (!input.context.identityId || input.command.identityId) return false;
     const active = this.activeRuns.get(input.command.runId);
-    if (active && active.identityId === input.context.identityId && active.conversationId === input.command.conversationId) return active.answer(input.command, input.context);
-    const runs = await this.assistant.listSuspendedRuns({ threadId: input.command.conversationId, resourceId: input.context.identityId });
-    const run = runs.runs.find((candidate) => candidate.runId === input.command.runId && candidate.threadId === input.command.conversationId && candidate.resourceId === input.context.identityId);
-    const suspended = run?.toolCalls.find((call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user');
+    if (
+      active &&
+      active.identityId === input.context.identityId &&
+      active.conversationId === input.command.conversationId
+    )
+      return active.answer(input.command, input.context);
+    const runs = await this.assistant.listSuspendedRuns({
+      threadId: input.command.conversationId,
+      resourceId: input.context.identityId,
+    });
+    const run = runs.runs.find(
+      (candidate) =>
+        candidate.runId === input.command.runId &&
+        candidate.threadId === input.command.conversationId &&
+        candidate.resourceId === input.context.identityId,
+    );
+    const suspended = run?.toolCalls.find(
+      (call) => call.toolCallId === input.command.toolCallId && call.toolName === 'ask_user',
+    );
     const raw = suspended?.suspendPayload ?? suspended?.args;
     if (!run || !suspended || !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
     const payload = raw as { options?: { label?: unknown }[]; selectionMode?: unknown };
     if (payload.options) {
-      const labels = new Set(payload.options.map((option) => option.label).filter((label): label is string => typeof label === 'string'));
-      if (payload.selectionMode === 'multi_select') { if (!Array.isArray(input.command.answer) || !input.command.answer.length || input.command.answer.some((value) => !labels.has(value)) || new Set(input.command.answer).size !== input.command.answer.length) return false; }
-      else if (typeof input.command.answer !== 'string' || !labels.has(input.command.answer)) return false;
-    } else if (typeof input.command.answer !== 'string' || !input.command.answer.trim() || input.command.answer.length > 4000) return false;
+      const labels = new Set(
+        payload.options
+          .map((option) => option.label)
+          .filter((label): label is string => typeof label === 'string'),
+      );
+      if (payload.selectionMode === 'multi_select') {
+        if (
+          !Array.isArray(input.command.answer) ||
+          !input.command.answer.length ||
+          input.command.answer.some((value) => !labels.has(value)) ||
+          new Set(input.command.answer).size !== input.command.answer.length
+        )
+          return false;
+      } else if (typeof input.command.answer !== 'string' || !labels.has(input.command.answer))
+        return false;
+    } else if (
+      typeof input.command.answer !== 'string' ||
+      !input.command.answer.trim() ||
+      input.command.answer.length > 4000
+    )
+      return false;
     if (this.resumedRuns.has(run.runId)) return false;
     this.resumedRuns.add(run.runId);
     try {
-      const { session, requestContext } = await this.suspensionSession(input.context, input.command.conversationId);
+      const { session, requestContext } = await this.suspensionSession(
+        input.context,
+        input.command.conversationId,
+      );
       if (session.run.isRunning()) return false;
-      session.suspensions.register({ runId: run.runId, toolCallId: input.command.toolCallId,
-        toolName: 'ask_user', threadId: input.command.conversationId, resourceId: input.context.identityId });
-      return await this.driveSuspensionResume(session, input.command.conversationId, run.runId, input.command.toolCallId, async () => {
-        await session.respondToToolSuspension({ resumeData: input.command.answer,
-          toolCallId: input.command.toolCallId, requestContext });
-        return true;
+      session.suspensions.register({
+        runId: run.runId,
+        toolCallId: input.command.toolCallId,
+        toolName: 'ask_user',
+        threadId: input.command.conversationId,
+        resourceId: input.context.identityId,
       });
-    } catch { return false; }
-    finally { this.resumedRuns.delete(run.runId); }
+      return await this.driveSuspensionResume(
+        session,
+        input.command.conversationId,
+        run.runId,
+        input.command.toolCallId,
+        async () => {
+          await session.respondToToolSuspension({
+            resumeData: input.command.answer,
+            toolCallId: input.command.toolCallId,
+            requestContext,
+          });
+          return true;
+        },
+      );
+    } catch {
+      return false;
+    } finally {
+      this.resumedRuns.delete(run.runId);
+    }
   }
 
   async decideToolApproval(input: {
@@ -541,25 +761,81 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (!input.context.identityId || input.command.identityId) return false;
     const active = this.activeRuns.get(input.command.runId);
     if (active) {
-      if (active.identityId !== input.context.identityId || active.conversationId !== input.command.conversationId) return false;
+      if (
+        active.identityId !== input.context.identityId ||
+        active.conversationId !== input.command.conversationId
+      )
+        return false;
       return active.decide(input.command, input.context);
     }
-    const runs = await this.assistant.listSuspendedRuns({ threadId: input.command.conversationId, resourceId: input.context.identityId });
-    const run = runs.runs.find((candidate) => candidate.runId === input.command.runId && candidate.threadId === input.command.conversationId && candidate.resourceId === input.context.identityId);
-    if (!run?.toolCalls.some((call) => call.toolCallId === input.command.toolCallId && call.toolName && memoFlowToolPolicy(call.toolName)?.requireApproval) || this.resumedRuns.has(run.runId)) return false;
+    const runs = await this.assistant.listSuspendedRuns({
+      threadId: input.command.conversationId,
+      resourceId: input.context.identityId,
+    });
+    const run = runs.runs.find(
+      (candidate) =>
+        candidate.runId === input.command.runId &&
+        candidate.threadId === input.command.conversationId &&
+        candidate.resourceId === input.context.identityId,
+    );
+    if (
+      !run?.toolCalls.some(
+        (call) =>
+          call.toolCallId === input.command.toolCallId &&
+          call.toolName &&
+          memoFlowToolPolicy(call.toolName)?.requireApproval,
+      ) ||
+      this.resumedRuns.has(run.runId)
+    )
+      return false;
     this.resumedRuns.add(run.runId);
     try {
-      const { session, requestContext } = await this.suspensionSession(input.context, input.command.conversationId);
-      if (!session.approval.isArmed() || session.approval.getToolCallId() !== input.command.toolCallId || session.getCurrentRunId() !== run.runId) return false;
-      return await this.driveSuspensionResume(session, input.command.conversationId, run.runId, input.command.toolCallId, () => {
-        session.respondToToolApproval({ decision: input.command.decision, toolCallId: input.command.toolCallId, requestContext });
-        return !session.approval.isArmed();
-      });
-    } catch { return false; }
-    finally { this.resumedRuns.delete(run.runId); }
+      const { session, requestContext } = await this.suspensionSession(
+        input.context,
+        input.command.conversationId,
+      );
+      if (
+        !session.approval.isArmed() ||
+        session.approval.getToolCallId() !== input.command.toolCallId ||
+        session.getCurrentRunId() !== run.runId
+      )
+        return false;
+      return await this.driveSuspensionResume(
+        session,
+        input.command.conversationId,
+        run.runId,
+        input.command.toolCallId,
+        () => {
+          session.respondToToolApproval({
+            decision: input.command.decision,
+            toolCallId: input.command.toolCallId,
+            requestContext,
+          });
+          return !session.approval.isArmed();
+        },
+      );
+    } catch {
+      return false;
+    } finally {
+      this.resumedRuns.delete(run.runId);
+    }
   }
 
   async *dispatchMessage(
+    input: AssistantTurnInput,
+  ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
+    const key = JSON.stringify([input.identityId, input.conversationId]);
+    if (this.reservedConversations.has(key))
+      throw new Error('Assistant conversation already has an active turn');
+    this.reservedConversations.add(key);
+    try {
+      yield* this.dispatchReservedMessage(input);
+    } finally {
+      this.reservedConversations.delete(key);
+    }
+  }
+
+  private async *dispatchReservedMessage(
     input: AssistantTurnInput,
   ): AsyncGenerator<AssistantRuntimeEvent, void, void> {
     if (input.permissionMode && !['supervised', 'read-only'].includes(input.permissionMode))
@@ -571,25 +847,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     if (input.context && input.context.identityId !== input.identityId) {
       throw new Error('Mastra Assistant execution context identity mismatch');
-    }
-    if (this.deps.agentRegistry) {
-      try {
-        await this.deps.agentRegistry.assertTurnSelection({
-          owner: input.identityId,
-          conversationId: input.conversationId,
-          agentInstanceId: input.agentInstanceId,
-          providerId: input.providerId,
-          modelId: input.modelId,
-        });
-      } catch (cause) {
-        if (!(cause instanceof AgentRegistryError)) throw cause;
-        throw new AIExecutionError(
-          'configuration_required',
-          'Selected Agent instance is unavailable or its model is not bound',
-        );
-      }
-    } else if (input.agentInstanceId) {
-      throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
     }
     const startedAt = Date.now();
     const resolvedModel = await this.deps.modelResolver.resolve({
@@ -679,6 +936,30 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     );
     if (conversationBusy() || session.run.isRunning())
       throw new Error('Assistant conversation already has an active turn');
+    if (this.deps.agentRegistry) {
+      try {
+        await this.deps.agentRegistry.assertTurnSelection({
+          owner: input.identityId,
+          conversationId: input.conversationId,
+          agentInstanceId: input.agentInstanceId,
+          providerId: input.providerId,
+          modelId: input.modelId,
+        });
+      } catch (cause) {
+        if (!(cause instanceof AgentRegistryError)) throw cause;
+        throw new AIExecutionError(
+          'configuration_required',
+          'Selected Agent instance is unavailable or its model is not bound',
+        );
+      }
+    } else if (input.agentInstanceId) {
+      throw new AIExecutionError('configuration_required', 'Agent instance Registry unavailable');
+    }
+    await this.recordConversationActivity(
+      input.identityId,
+      input.conversationId,
+      input.context?.requestId,
+    );
     yield* new AssistantTurnSession({
       session,
       activeRuns: this.activeRuns,

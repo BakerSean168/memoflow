@@ -9,6 +9,7 @@ export async function prepareAIAgentRegistry(client: AgentRegistryMigrationClien
     // Serialize concurrent migrator starts before reading the durable cutover marker.
     await client.query("SELECT pg_advisory_xact_lock(hashtext('ai-agent-registry-v2'))");
     await client.query(`
+      ALTER TABLE IF EXISTS ai_execution_records ADD COLUMN IF NOT EXISTS agent_instance_id TEXT;
       ALTER TABLE ai_agent_conversation_bindings ADD COLUMN IF NOT EXISTS provider_id TEXT;
       ALTER TABLE ai_agent_conversation_bindings ADD COLUMN IF NOT EXISTS model_id TEXT;
       CREATE TABLE IF NOT EXISTS ai_agent_registry_migrations (id TEXT PRIMARY KEY);

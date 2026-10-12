@@ -1,10 +1,7 @@
 name: Prepare Release
 
+# Release branches are created only at an explicitly requested release milestone.
 on:
-  workflow_run:
-    workflows: ['CI']
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -12,23 +9,39 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: write
   pull-requests: write
 
 jobs:
   release-please:
     name: Prepare Release PR
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Require verified current main
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = await github.rest.repos.getBranch({ owner, repo, branch: 'main' });
+            if (branch.data.commit.sha !== context.sha) {
+              throw new Error('Prepare Release requires the current main SHA; dispatch again after its CI succeeds.');
+            }
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner, repo, workflow_id: 'ci.yml', branch: 'main',
+              event: 'push', head_sha: context.sha, status: 'success', per_page: 100,
+            });
+            if (!data.workflow_runs.some((run) =>
+              run.head_sha === context.sha && run.head_branch === 'main' &&
+              run.event === 'push' && run.conclusion === 'success')) {
+              throw new Error('Prepare Release requires successful exact-SHA main CI.');
+            }
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v4
         with:
-          # This workflow only prepares/updates the release PR. Publishing remains
-          # owned by release-publish.yml after the release commit passes exact-SHA CI.
+          # Preparation never publishes. Release Publish still owns the exact-SHA
+          # release validation, immutable tag, and release assets.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          target-branch: main
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

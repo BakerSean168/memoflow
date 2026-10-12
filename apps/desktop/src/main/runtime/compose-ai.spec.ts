@@ -218,6 +218,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
       conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
+      conversationActivity: repositorySet.conversationRepository,
       goalPlanMutationPort: vi.mocked(DesktopGoalPlanMutationAdapter).mock.results[0].value,
       goalSurfaceLeaseRepository: expect.any(AiGoalSurfaceLeasePowerSyncRepository),
       taskPlanMutationPort: vi.mocked(DesktopTaskPlanMutationAdapter).mock.results[0].value,
