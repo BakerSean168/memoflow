@@ -74,7 +74,21 @@ class WorkspaceSubscription {
             this.ready = false;
             this.cursor = undefined;
           }
-          await Promise.all([...this.listeners].map((listener) => listener.receive(event)));
+          const delivered = new Set(this.listeners);
+          await Promise.all([...delivered].map((listener) => listener.receive(event)));
+          if (event.type === 'stream.ready') {
+            // A consumer can join while another projection is still calibrating.
+            // Deliver ready to those consumers before committing the shared cursor.
+            while (true) {
+              if (controller.signal.aborted || this.controller !== controller) return;
+              const newlyJoined = [...this.listeners].filter(
+                (listener) => !delivered.has(listener),
+              );
+              if (!newlyJoined.length) break;
+              newlyJoined.forEach((listener) => delivered.add(listener));
+              await Promise.all(newlyJoined.map((listener) => listener.receive(event)));
+            }
+          }
           if (controller.signal.aborted || this.controller !== controller) return;
           if (event.type === 'stream.ready') {
             this.ready = true;

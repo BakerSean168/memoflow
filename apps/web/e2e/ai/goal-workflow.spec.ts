@@ -286,8 +286,6 @@ test.describe('AI Goal Workflow', () => {
 
   test('[P0] streams Goal fields without polling and keeps the failed draft available for native save', async ({ page }) => {
     const email = generateTestEmail();
-    const telemetry = await bootstrapGoalWorkflowSession(page, { email });
-    const mirror = await createGoalLeaseDbMirror({ email });
     const responses = new Set<ServerResponse>();
     const runId = `workflow-sse-${randomUUID()}`;
     let view: Extract<AIWorkflowRunView, { kind: 'goal.create' }> = {
@@ -298,7 +296,8 @@ test.describe('AI Goal Workflow', () => {
     let head = 0;
     let journal: GoalWorkflowLiveActionRecord[] = [];
     let grant: { token: string; fence: number; expiresAt: number } | null = null;
-    const origin = new URL(page.url()).origin;
+    // Install the SSE fixture before login mounts the shared Workspace subscription.
+    const origin = new URL(WEB_CONFIG.getFullUrl('/')).origin;
     const server = createServer((req, res) => {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -325,6 +324,8 @@ test.describe('AI Goal Workflow', () => {
     };
     try {
       await page.route('**/api/v1/ai/runtime/workspace/sse', (route) => route.continue({ url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/events` }));
+      const telemetry = await bootstrapGoalWorkflowSession(page, { email });
+      const mirror = await createGoalLeaseDbMirror({ email });
       await page.route('**/api/v1/ai/runtime/workflow/start', async (route) => {
         const request = route.request().postDataJSON();
         view = { ...view, conversationId: request.conversationId };

@@ -218,3 +218,61 @@ it('resets the reconnect cursor and calibrates new listeners after a stream epoc
     vi.useRealTimers();
   }
 });
+
+it('calibrates a consumer joining while the initial stream.ready projection is still pending', async () => {
+  let transport!: WorkspaceEventStreamOptions;
+  const stream = vi.fn((options: WorkspaceEventStreamOptions) => {
+    transport = options;
+    return new Promise<void>((resolve) =>
+      options.signal.addEventListener('abort', () => resolve(), { once: true }),
+    );
+  });
+  const runtime: WorkflowRuntimeClient = {
+    streamWorkspaceEvents: stream,
+    start: vi.fn(),
+    resume: vi.fn(),
+    get: vi.fn(),
+    list: vi.fn(),
+    cancel: vi.fn(),
+    goalSurfaceLease: vi.fn(),
+  };
+  let entered!: () => void;
+  const initialProjectionEntered = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  let complete!: () => void;
+  const initialProjection = vi.fn(async (event: { type: string }) => {
+    if (event.type === 'stream.ready') {
+      entered();
+      await new Promise<void>((resolve) => {
+        complete = resolve;
+      });
+    }
+  });
+  const first = new AbortController();
+  const second = new AbortController();
+  const firstSubscription = subscribeWorkspaceEvents(runtime, {
+    signal: first.signal,
+    onEvent: initialProjection,
+  });
+  const readyDelivery = transport.onEvent({ type: 'stream.ready', cursor: 'current' });
+  await initialProjectionEntered;
+  const secondProjection = vi.fn(async () => {});
+  const secondSubscription = subscribeWorkspaceEvents(runtime, {
+    signal: second.signal,
+    onEvent: secondProjection,
+  });
+  expect(secondProjection).not.toHaveBeenCalled();
+  complete();
+  try {
+    await readyDelivery;
+    await vi.waitFor(() =>
+      expect(secondProjection).toHaveBeenCalledWith({ type: 'stream.ready', cursor: 'current' }),
+    );
+    expect(stream).toHaveBeenCalledOnce();
+  } finally {
+    first.abort();
+    second.abort();
+    await Promise.all([firstSubscription, secondSubscription]);
+  }
+});

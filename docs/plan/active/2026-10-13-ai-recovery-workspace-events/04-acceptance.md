@@ -94,6 +94,16 @@ S6/S7 现已包含实际代码及定向测试，当前本地候选的四项目 t
 - 新启动器的 Prettier 与 `git diff --check` 通过，`web:lint` exit 0、`web:typecheck` exit 0（32 个依赖任务），工程治理检查 exit 0。修改后的独立端口 E2E 首次遭遇并发 Nx daemon `EPIPE`（未进入浏览器），隔离并串行使用 `NX_DAEMON=false` 后，在独立 `20382` 端口、`/tmp/memoflow-auto2b-ai-e2e-*` 报告目录复测：真实 API/PostgreSQL/Chromium 登录与 Goal checkpoint 场景 1/1 通过、exit 0、Nx cache 0/1，Playwright 用时 46.2 秒、Nx 整体约 76 秒。这证明启动器修复并未破坏主要 E2E 流程；此前 `EPIPE` 属 Nx 执行环境并发问题，不能计作产品失败。
 - Git 提交和官方 validate-local-deploy 实际执行入口受到远程工具安全检查拦截，尚无新的 Commit、PR/CI 或 Docker prod-like 部署证据。仍须关闭这些验收缺口；不绕过安全拦截，保留 staged 及 unstaged 修改。
 
+## 2026-10-14 · Workspace SSE late-join 初始化竞态修复（ChatGPT Web）
+
+执行入口：ChatGPT Web → Agent Fabric → GCP `gcp-dev-01`，基线为 `39abe37b1e2`；没有启动其他写入 Worker，也未使用 Codex Team 额度。
+
+- 在 `packages/app-vue/src/shared/services/workspace-event-subscription.ts` 发现竞态：`stream.ready` 的首批监听者仍在异步快照校准时，新加入的消费者既未被首批事件广播覆盖，也因共享 ready 状态尚未提交而拿不到初始化通知。该消费者可能无法建立投影快照。
+- 新增 `workspaceEventSubscription.spec.ts` 的 late-join 回归，先复现 RED：5 项中 4 项通过、1 项按预期失败（第二消费者的 `stream.ready` 收到 0 次）；再修复初始 ready 广播，补送给广播过程中加入的监听者。所有相关消费者投影完成后才提交共享游标；投影拒绝仍阻止 ACK。
+- GREEN：定向 `app-vue:test` 5/5 通过、Nx cache 0/1；Conversation/Goal/Attention/共享订阅联动范围 5 文件 / 108 项通过、Nx cache 0/1；`app-vue:typecheck` exit 0；`app-vue:lint` exit 0；`memoflow:governance-check` exit 0；Prettier 与 `git diff --check` 通过。以上均为本轮真实执行。
+- 官方上轮 `reports/local-deploy-validation-auto3/latest.json` 的唯一阻塞是 Docker 浏览器证据 HEAD 不匹配：浏览器 `77f5c7de09a7`，Docker API/Web 镜像和容器均为 `bfc3ca1ccae`，当前源码基线 `39abe37b1e2`。本轮尝试按仓库官方入口执行 `pnpm docker:local:up`，被远程操作安全检查阻止，未启动任务、未改容器、未伪造新证据。此项仍是发布验收阻塞。
+- 剩余：在获得合法执行条件后重建匹配当前候选的 Docker Prod-like、运行真实 local-docker Chromium，重跑 `validate-local-deploy`，核对新 HEAD 的 PR CI 和 Desktop 实机。不能因定向测试通过提前宣称整体交付。
+
 ## S0 历史切片记录
 
 以下记录仅对应 S0 当时的改动，保留其原始验证范围。当前 mounted 草稿保护与 refresh checkpoint 分开验收。
