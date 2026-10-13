@@ -88,7 +88,20 @@ test.describe('Local Docker core product Phase C', () => {
     await panelToggle.dispatchEvent('click');
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-    await page.getByTestId('goal-dialog').getByRole('button', { name: '取消', exact: true }).click();
+    const cancelGoal = page
+      .getByTestId('goal-dialog')
+      .getByRole('button', { name: '取消', exact: true });
+    await cancelGoal.click();
+    const discardConfirmation = page.getByRole('alertdialog', { name: '放弃未保存的更改？' });
+    await expect(discardConfirmation).toBeVisible();
+    await discardConfirmation.getByRole('button', { name: '取消', exact: true }).click();
+    await expect(discardConfirmation).toBeHidden();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
+
+    await cancelGoal.click();
+    await expect(discardConfirmation).toBeVisible();
+    await discardConfirmation.getByRole('button', { name: '放弃更改', exact: true }).click();
+    await expect(discardConfirmation).toBeHidden();
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
 
     await page.getByTestId('business-panel-focus-toggle').click();
@@ -127,9 +140,14 @@ test.describe('Local Docker core product Phase C', () => {
 
 async function expectComposerGeometry(composer: Locator): Promise<void> {
   await expect(composer).toBeVisible();
+  // The unified Agent controls expose an actionable Provider-settings button
+  // for the empty state, replacing the retired informational cue.
+  const configureProvider = composer.getByTestId('ai-composer-provider-unavailable');
+  await expect(configureProvider).toBeVisible();
+  await expect(configureProvider).toBeEnabled();
   const geometry = await composer.evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    const cue = element.querySelector('[data-testid="ai-chat-empty-models-cue"]');
+    const cue = element.querySelector('[data-testid="ai-composer-provider-unavailable"]');
     const cueRect = cue?.getBoundingClientRect();
     return {
       composerHeight: rect.height,

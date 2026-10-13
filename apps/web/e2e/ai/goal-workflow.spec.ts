@@ -1,7 +1,9 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
 import {
   AIWorkflowRunViewSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   KnowledgeDraftSchema,
   TaskPlanDraftContentSchema,
 } from '@memoflow/contracts/ai';
@@ -22,6 +24,7 @@ import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting'
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
+import { createGoalLeaseDbMirror, type GoalLeaseDbMirror } from '../helpers/goalLeaseDbMirror';
 
 const generateTestEmail = () =>
   `e2e-ai-goal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
@@ -179,8 +182,11 @@ async function bootstrapGoalWorkflowSession(
     password: e2ePassword,
   });
 
+  const leaseMirror = await createGoalLeaseDbMirror({ email });
+
   const telemetry = await installGoalWorkflowMocks(page, {
     seedConversation: options.seedConversation,
+    leaseMirror,
   });
 
   await seedAiLocalState(page, {
@@ -273,16 +279,19 @@ test.describe('AI Goal Workflow', () => {
   test('[P0] restores a pending Goal Agent approval run after refresh', async ({ page }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page, {
       conversationId: e2eConversationId,
-      modelKey: 'agent:mastra::provider-e2e-openai::gpt-4.1-mini',
+      modelKey:
+        'agent:mastra::AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801::gpt-4.1-mini',
       workflowEntry: createPendingApprovalWorkflowEntry(),
       seedConversation: true,
     });
 
     // Restore AI state without navigating to the native business review.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
+    const goalForm = page.getByTestId('goal-panel-form');
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
+    await expect(goalForm).toHaveCount(0);
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
@@ -292,22 +301,22 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
+    await expect(goalForm).toHaveCount(0);
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
     await page.getByTestId('ai-desktop-context-panel-toggle').click();
     await page.getByTestId('goal-open-native-review').click();
-    await expect(page.getByTestId('goal-dialog')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.NAVIGATION,
-    });
+    await expect(goalForm).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
 
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Restored AI Agent workspace');
-    await expect(
-      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
-    ).toContainText('Complete the restored workflow approval');
+    await expect(goalForm.getByTestId('goal-key-result-draft-row')).toContainText(
+      'Complete the restored workflow approval',
+    );
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Restored AI Agent workspace/i);
-    await expect(page.getByTestId('goal-dialog').getByTestId('save-goal-button')).toBeVisible();
+    await expect(goalForm.getByTestId('save-goal-button')).toBeVisible();
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
     expect(telemetry.ownerGoalCreateCount).toBe(0);
     expect(telemetry.goalAgentStartCount).toBe(0);
@@ -329,17 +338,19 @@ test.describe('AI Goal Workflow', () => {
     // goal.create renders in the durable Workflow panel, not a
     // legacy goal-agent-panel.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
+    const goalForm = page.getByTestId('goal-panel-form');
     await expect(workflowPanel).toHaveCount(1);
     await expect(workflowPanel).toContainText(/suspended/i);
     const ownerGoalId = telemetry.lastGoalWorkflowOwnerCreate?.goalId;
     expect(ownerGoalId).toBeTruthy();
-    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(goalForm).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
     await expect(page.getByTestId('goal-workflow-draft-editor')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draft.goal.name);
-    await expect(
-      page.getByTestId('goal-dialog').getByTestId('goal-key-result-draft-row'),
-    ).toContainText(draft.keyResults[0].title);
+    await expect(goalForm.getByTestId('goal-key-result-draft-row')).toContainText(
+      draft.keyResults[0].title,
+    );
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
     // Goal/KR editing stays native; supporting Task/Knowledge overlays remain in the workflow.
@@ -350,8 +361,8 @@ test.describe('AI Goal Workflow', () => {
 
     // Owner-native controlled confirmation: native Save delegates through the workflow
     // coordinator; it is not an independent direct create.
-    await page.getByTestId('goal-dialog').getByTestId('save-goal-button').click();
-    await expect(page.getByTestId('goal-dialog')).toBeHidden({
+    await goalForm.getByTestId('save-goal-button').click();
+    await expect(goalForm).toBeHidden({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
 
@@ -375,7 +386,9 @@ test.describe('AI Goal Workflow', () => {
     );
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
-    expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
+    expect(telemetry.lastGoalAgentStart?.providerId).toBe(
+      'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    );
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
     expect(telemetry.ownerGoalCreateCount).toBe(1);
     expect(telemetry.goalConfirmationEvents).toEqual(['owner_create', 'approve']);
@@ -408,7 +421,8 @@ test.describe('AI Goal Workflow', () => {
   test('[P0] restores a pending task.create approval run after refresh', async ({ page }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page, {
       conversationId: e2eConversationId,
-      modelKey: 'agent:mastra::provider-e2e-openai::gpt-4.1-mini',
+      modelKey:
+        'agent:mastra::AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801::gpt-4.1-mini',
       workflowEntry: createPendingTaskApprovalWorkflowEntry(),
       seedConversation: true,
     });
@@ -647,7 +661,8 @@ test.describe('AI Goal Workflow', () => {
 
     // Native Goal review is the owner UI. Confirming its user cancel coordinates the
     // durable workflow cancel directly; no second hidden-panel cancellation is needed.
-    const nativeReview = page.getByTestId('goal-dialog');
+    const nativeReview = page.getByTestId('goal-panel-form');
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
     await expect(nativeReview).toBeVisible();
     await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
@@ -664,7 +679,9 @@ test.describe('AI Goal Workflow', () => {
     });
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
-    expect(telemetry.lastGoalAgentStart?.providerId).toBe('provider-e2e-openai');
+    expect(telemetry.lastGoalAgentStart?.providerId).toBe(
+      'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    );
     expect(telemetry.lastGoalAgentStart?.model).toBe('gpt-4.1-mini');
     expect(telemetry.goalAgentCancelCount).toBe(1);
     expect(telemetry.goalAgentApprovalResumeCount).toBe(0);
@@ -673,6 +690,9 @@ test.describe('AI Goal Workflow', () => {
 
 type GoalWorkflowMockOptions = {
   seedConversation?: boolean;
+  /** Mirrors mocked lease decisions into the real API database so the
+   * transaction-scoped native Goal fence sees the same custody the UI sees. */
+  leaseMirror: GoalLeaseDbMirror;
 };
 
 type GoalWorkflowMockTelemetry = {
@@ -1182,9 +1202,13 @@ function executeGoalWorkflowMockRun(
 
 async function installGoalWorkflowMocks(
   page: Page,
-  options: GoalWorkflowMockOptions = {},
+  options: GoalWorkflowMockOptions,
 ): Promise<GoalWorkflowMockTelemetry> {
-  await installMastraRegistryMock(page, 'provider-e2e-openai', 'gpt-4.1-mini');
+  await installMastraRegistryMock(
+    page,
+    'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+    'gpt-4.1-mini',
+  );
   const conversationId = e2eConversationId;
   let conversationName = 'Goal Workflow Session';
   let generateGoalStep = options.seedConversation ? 1 : 0;
@@ -1359,7 +1383,7 @@ async function installGoalWorkflowMocks(
     await fulfillJson(route, {
       data: [
         {
-          id: 'provider-e2e-openai',
+          id: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
           identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',
           name: 'E2E OpenAI',
           providerDefinitionId: 'openai',
@@ -1494,7 +1518,7 @@ async function installGoalWorkflowMocks(
     expect(request.type).toBe('message');
     expect(request.surface).toBe('web');
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
     expect(request.modelId).toBe('gpt-4.1-mini');
 
     const userContent = request.content ?? '';
@@ -1533,7 +1557,10 @@ async function installGoalWorkflowMocks(
         sequence: 1,
         createdAt: now,
         type: 'assistant.run.started',
-        data: { providerId: 'provider-e2e-openai', modelId: 'gpt-4.1-mini' },
+        data: {
+          providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
+          modelId: 'gpt-4.1-mini',
+        },
       },
       {
         eventId: `${runId}:2`,
@@ -1588,7 +1615,7 @@ async function installGoalWorkflowMocks(
 
     expect(request.maxResources).toBe(8);
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
 
     const query = request.query ?? '';
 
@@ -1597,7 +1624,7 @@ async function installGoalWorkflowMocks(
         answer:
           'I do not have enough repository evidence to answer this from your indexed knowledge base.',
         citations: [],
-        providerId: 'provider-e2e-openai',
+        providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
         tokenUsage: {
           promptTokens: 48,
           completionTokens: 18,
@@ -1626,7 +1653,7 @@ async function installGoalWorkflowMocks(
           score: 0.94,
         },
       ],
-      providerId: 'provider-e2e-openai',
+      providerId: 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801',
       tokenUsage: {
         promptTokens: 64,
         completionTokens: 24,
@@ -1655,6 +1682,96 @@ async function installGoalWorkflowMocks(
     draft: createTaskWorkflowDraft('Restored Mastra task workflow'),
   };
 
+  // The E2E host uses mock workflow snapshots, so it must own their lease
+  // endpoint as well. Keep the real claim/renew/release contract, including
+  // monotone generations and a persistent grant across page reloads; do not
+  // bypass the product's fail-closed native form custody checks. Every decided
+  // grant is mirrored into the real test database so the server-side fenced
+  // Goal create proves custody against real rows, not against the mock alone.
+  const leaseMirror = options.leaseMirror;
+  const goalLeases = new Map<
+    string,
+    {
+      token: string | null;
+      fence: number;
+      expiresAt: number;
+    }
+  >();
+  await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
+    if (route.request().method() !== 'POST') {
+      await route.continue();
+      return;
+    }
+    const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
+    expect(request).not.toHaveProperty('identityId');
+    const knownRun =
+      request.runId === restoredApprovalRun.runId || workflowRunsByRunId.has(request.runId);
+    if (!knownRun) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+
+    const now = Date.now();
+    const current = goalLeases.get(request.runId);
+    if (request.action === 'claim') {
+      if (current?.token && current.expiresAt > now) {
+        await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'busy' }));
+        return;
+      }
+      const next = {
+        token: randomUUID(),
+        fence: (current?.fence ?? 0) + 1,
+        expiresAt: now + 30_000,
+      };
+      goalLeases.set(request.runId, next);
+      await leaseMirror.claim({ runId: request.runId, ...next });
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'claimed',
+          ...next,
+        }),
+      );
+      return;
+    }
+
+    if (
+      !current ||
+      current.token !== request.token ||
+      current.fence !== request.fence ||
+      (request.action === 'renew' && current.expiresAt <= now)
+    ) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'renew') {
+      current.expiresAt = now + 30_000;
+      await leaseMirror.renew({
+        runId: request.runId,
+        token: request.token,
+        fence: request.fence,
+        expiresAt: current.expiresAt,
+      });
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'renewed',
+          expiresAt: current.expiresAt,
+        }),
+      );
+      return;
+    }
+    current.token = null;
+    current.expiresAt = now;
+    await leaseMirror.release({
+      runId: request.runId,
+      token: request.token,
+      fence: request.fence,
+      now,
+    });
+    await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'released' }));
+  });
+
   await page.route('**/api/v1/ai/runtime/workflow/start', async (route) => {
     if (route.request().method() !== 'POST') {
       await route.continue();
@@ -1671,7 +1788,7 @@ async function installGoalWorkflowMocks(
     expect(request).not.toHaveProperty('identityId');
     expect(request.conversationId).toBeTruthy();
     expect(request.agentInstanceId).toBe('mastra');
-    expect(request.providerId).toBe('provider-e2e-openai');
+    expect(request.providerId).toBe('AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801');
     expect(request.modelId).toBe('gpt-4.1-mini');
 
     if (request.kind === 'goal.create') {

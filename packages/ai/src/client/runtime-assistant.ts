@@ -7,6 +7,10 @@ import {
   type AssistantAttentionView,
   AssistantRuntimeApprovalCommandSchema,
   AssistantRuntimeApprovalResultSchema,
+  AssistantRuntimeToolAnswerCommandSchema,
+  AssistantRuntimeToolAnswerResultSchema,
+  AssistantRuntimeAskUserSuspensionsSchema,
+  type AssistantRuntimeToolAnswerCommand,
   type AssistantRuntimeApprovalCommand,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
@@ -62,6 +66,8 @@ export interface AssistantRuntimeClient {
     signal?: AbortSignal,
   ): Promise<void>;
   cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean>;
+  answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean>;
+  listAskUserSuspensions(conversationId: string): Promise<readonly import('@memoflow/contracts/ai').AssistantRuntimeAskUserSuspension[]>;
   decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
 
@@ -69,6 +75,7 @@ const TERMINAL_TYPES = new Set<AssistantRuntimeEvent['type']>([
   'assistant.run.completed',
   'assistant.run.failed',
   'assistant.run.cancelled',
+  'assistant.ask_user.required',
 ]);
 
 function validateMessageCommand(
@@ -114,6 +121,14 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
   private readonly attentionAckUrl = '/ai/runtime/assistant/attention/ack';
 
   constructor(private readonly httpClient: IResultHttpClient) {}
+
+  async listAskUserSuspensions(conversationId: string) {
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+    const result = await this.httpClient.post<unknown>('/ai/runtime/assistant/ask-user/pending', request);
+    const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
+    return parsed.data;
+  }
 
   async listAttention(
     conversationIds: string[],
@@ -226,6 +241,7 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
             terminalSeen = true;
             return;
           }
+          if (parsed.data.type === 'assistant.ask_user.required') return;
           continue;
         }
 
@@ -259,6 +275,14 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
     return parsed.data.accepted;
   }
 
+  async answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean> {
+    const validated = AssistantRuntimeToolAnswerCommandSchema.parse(command);
+    const result = await this.httpClient.post<unknown>('/ai/runtime/assistant/answer', validated);
+    const parsed = AssistantRuntimeToolAnswerResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) throw runtimeProtocolError('AI runtime answer failed protocol validation');
+    return parsed.data.accepted;
+  }
+
   async cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean> {
     if (runtimeKind === 'local_agent')
       throw createResultClientError('Local Agent execution requires Desktop', 'NOT_SUPPORTED');
@@ -278,6 +302,14 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 
 export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
+
+  async listAskUserSuspensions(conversationId: string) {
+    const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
+    const result = await this.ipcClient.invoke<unknown>(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING, request);
+    const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
+    return parsed.data;
+  }
 
   async listAttention(
     conversationIds: string[],
@@ -417,6 +449,8 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
       if (TERMINAL_TYPES.has(parsed.data.type)) {
         if (abortRequested) settleError(createResultClientError('请求已取消', 'ABORTED'));
         else settleOk();
+      } else if (parsed.data.type === 'assistant.ask_user.required') {
+        settleOk();
       }
     };
     const onTransportError = (...args: unknown[]) => {
@@ -452,6 +486,14 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
     const parsed = AssistantRuntimeApprovalResultSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success)
       throw runtimeProtocolError('AI runtime approval failed protocol validation');
+    return parsed.data.accepted;
+  }
+
+  async answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean> {
+    const validated = AssistantRuntimeToolAnswerCommandSchema.parse(command);
+    const result = await this.ipcClient.invoke<unknown>(AIChannels.RUNTIME_ASSISTANT_ANSWER, validated);
+    const parsed = AssistantRuntimeToolAnswerResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) throw runtimeProtocolError('AI runtime answer failed protocol validation');
     return parsed.data.accepted;
   }
 

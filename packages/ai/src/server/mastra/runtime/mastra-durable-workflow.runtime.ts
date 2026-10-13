@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { AIExecutionError } from '../../../shared/ai-execution-error';
 import type { AgentInstanceRegistry } from '../../application/agent-instance/agent-instance.registry';
@@ -15,8 +16,11 @@ import {
   type AIWorkflowResumeClientRequest,
   type AIWorkflowRunView,
   type AIWorkflowStartClientRequest,
+  type AIGoalSurfaceLeaseRequest,
+  type AIGoalSurfaceLeaseResponse,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { IGoalSurfaceLeaseRepository } from '../../application/ports/goal-surface-lease.port';
 import type { IAIUsageReadPort } from '../../application/ports';
 import {
   GOAL_CREATE_LIFECYCLE_STEP_ID,
@@ -46,6 +50,7 @@ type DurableWorkflowDependencies = {
   readonly history: Pick<AssistantHistoryService, 'appendUserTurn'>;
   readonly agentRegistry?: Pick<AgentInstanceRegistry, 'assertTurnSelection'>;
   readonly usageReadPort?: IAIUsageReadPort;
+  readonly goalSurfaceLeaseRepository?: IGoalSurfaceLeaseRepository;
   readonly goalCreateWorkflow: ReturnType<typeof createGoalCreateWorkflow>;
   readonly taskCreateWorkflow: ReturnType<typeof createTaskCreateWorkflow>;
   readonly knowledgeCaptureWorkflow: ReturnType<typeof createKnowledgeCaptureWorkflow>;
@@ -574,6 +579,46 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     return enriched
       .filter((view): view is AIWorkflowRunView => view !== null)
       .sort((left, right) => right.updatedAt - left.updatedAt);
+  }
+
+  async goalSurfaceLease(input: {
+    identityId: string;
+    request: AIGoalSurfaceLeaseRequest;
+  }): Promise<AIGoalSurfaceLeaseResponse> {
+    const repository = this.deps.goalSurfaceLeaseRepository;
+    if (!repository) throw new Error('AI_GOAL_SURFACE_LEASE_UNAVAILABLE');
+    // Heartbeats must not materialize an entire per-run usage summary. Read the
+    // owner-filtered Goal snapshot directly from the canonical workflow store.
+    const store = await this.workflowStore();
+    const row = await store.getWorkflowRunById({
+      workflowName: GOAL_CREATE_WORKFLOW_ID,
+      runId: input.request.runId,
+    });
+    const run = row ? projectGoalCreateRun(row, input.identityId) : null;
+    if (!run) return { status: 'lost' };
+    const now = Date.now();
+    const expiresAt = now + 30_000;
+    const scope = { identityId: input.identityId, runId: run.runId, now };
+    if (input.request.action === 'release') {
+      const released = await repository.release({
+        ...scope, token: input.request.token, fence: input.request.fence,
+      });
+      return { status: released ? 'released' : 'lost' };
+    }
+    if (run.status !== 'running' && run.status !== 'suspended') return { status: 'lost' };
+    if (input.request.action === 'renew') {
+      const renewed = await repository.renew({
+        ...scope, token: input.request.token, fence: input.request.fence, expiresAt,
+      });
+      return renewed ? { status: 'renewed', expiresAt } : { status: 'lost' };
+    }
+    const claimed = await repository.claim({ ...scope, expiresAt, token: randomUUID() });
+    return claimed ? {
+      status: 'claimed',
+      token: claimed.token,
+      fence: claimed.fence,
+      expiresAt: claimed.expiresAt,
+    } : { status: 'busy' };
   }
 
   async cancel(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null> {

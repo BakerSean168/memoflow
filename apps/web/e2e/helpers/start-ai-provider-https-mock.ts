@@ -79,6 +79,27 @@ const server = createServer(
     if (request.method === 'POST' && request.url === '/v1/chat/completions') {
       const body = await readJson(request);
       const model = typeof body.model === 'string' ? body.model : 'e2e-model-alpha';
+      if (body.stream === true) {
+        response.writeHead(200, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+        });
+        const base = {
+          id: `chatcmpl-e2e-${Date.now()}`,
+          object: 'chat.completion.chunk',
+          created: Math.floor(Date.now() / 1000),
+          model,
+        };
+        for (const [delta, finishReason] of [
+          [{ role: 'assistant', content: `E2E provider connection OK (${model})` }, null],
+          [{}, 'stop'],
+        ])
+          response.write(
+            `data: ${JSON.stringify({ ...base, choices: [{ index: 0, delta, finish_reason: finishReason }] })}\n\n`,
+          );
+        response.end('data: [DONE]\n\n');
+        return;
+      }
       sendJson(response, 200, {
         id: `chatcmpl-e2e-provider-${Date.now()}`,
         object: 'chat.completion',

@@ -1,6 +1,7 @@
 import type {
   CreateGoalReq,
   GoalClientDTO,
+  GoalNativeAiLease,
   GoalReminderConfigDTO,
   GoalStatus,
   GoalTimeframe,
@@ -44,12 +45,18 @@ export type GoalNativeEditSession = OwnerNativeEditSession<
   GoalNativeSubmitContext,
   GoalClientDTO | null
 > & {
+  /** Claim atomically; only the returned capability may mutate until released. */
+  claimControl(ownerId: string): GoalNativeEditSession;
+  /** Releases this handle's control without closing or discarding the native draft. */
+  releaseControl(): void;
   /** Native Save/Enter and user dismissal delegate to workflow coordinators; semantic owner validation remains native. */
   setEditingBlocked(blocked: boolean): void;
   coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;
 };
 
 export interface GoalNativeSubmitContext {
+  /** Authenticated Goal owner Save MUST verify this fence in the write tx. */
+  nativeAiLease: GoalNativeAiLease;
   /** Called after validation/label resolution, immediately before owner persistence. */
   onCreateAttempt?: () => void;
   createId: NonNullable<CreateGoalReq['id']>;

@@ -49,6 +49,44 @@ function row(snapshot: unknown, resourceId: string | undefined = 'owner') {
   };
 }
 
+describe('goal.create live model tool action projection', () => {
+  const action = {
+    sequence: 1,
+    command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Pass JLPT N1' },
+  };
+  const snapshot = (liveActions: unknown) => ({
+    status: 'running',
+    context: { input: { idea: 'Plan a goal', identityId: 'owner', conversationId: 'thread' } },
+    value: { phase: 'planning', liveActions },
+  });
+
+  it('projects staged actions while planning for the current owner only', () => {
+    expect(projectGoalCreateRun(row(snapshot([action])), 'owner')).toMatchObject({
+      status: 'running',
+      liveActions: [action],
+    });
+    expect(projectGoalCreateRun(row(snapshot([action])), 'foreign')).toBeNull();
+  });
+
+  it('rejects corrupt action payloads and never exposes them to another user', () => {
+    const unsafe = row(snapshot([{ sequence: 1, command: { ...action.command, operation: 'goal.persist' } }]));
+    expect(() => projectGoalCreateRun(unsafe, 'owner')).toThrow();
+    expect(projectGoalCreateRun(unsafe, 'foreign')).toBeNull();
+  });
+
+  it('rejects replay snapshots with duplicate revision-scoped ids or sequence gaps', () => {
+    expect(() => projectGoalCreateRun(row(snapshot([action, { ...action, sequence: 2 }])), 'owner')).toThrow();
+    expect(() => projectGoalCreateRun(row(snapshot([{ ...action, sequence: 5 }])), 'owner')).toThrow();
+  });
+
+  it('does not fabricate actions for legacy workflow snapshots', () => {
+    expect(projectGoalCreateRun(row({
+      status: 'running',
+      context: { input: { idea: 'Plan a goal', identityId: 'owner', conversationId: 'thread' } },
+    }), 'owner')).not.toHaveProperty('liveActions');
+  });
+});
+
 describe.each(owners)('$kind durable snapshot projection', (owner) => {
   function snapshot(status: string, extra: Record<string, unknown> = {}) {
     return {

@@ -46,7 +46,7 @@ export function canLeaveBusinessSurface(t?: Translate, to?: RouteLocationNormali
 
   const translate: Translate = t ?? ((key: string) => getI18nGlobal().t(key));
 
-  if (store.surfaceStatus === 'busy') {
+  if (store.businessControl || store.surfaceStatus === 'busy') {
     toast.info(translate('shell.panel.busyTransitionHint'));
     return false;
   }

@@ -33,6 +33,7 @@ import {
   ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
+  AiGoalSurfaceLeasePowerSyncRepository,
   LocalAgentRuntime,
   LocalAgentRepository,
   MastraModelResolver,
@@ -120,7 +121,9 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
         { agentRegistry },
       ),
       conversationShellSource: new ConversationShellSource(conversationRepository),
+      conversationActivity: conversationRepository,
       goalPlanMutationPort,
+      goalSurfaceLeaseRepository: new AiGoalSurfaceLeasePowerSyncRepository(dependencies.db),
       taskPlanMutationPort: taskPlanMutationAdapter,
       knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(
         dependencies.knowledgeNotePersistence,

@@ -115,6 +115,54 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
+  it('locks incompatible Agents and search results while leaving compatible models selectable', async () => {
+    const wrapper = setup({
+      agents: agents.map((agent) =>
+        agent.id === 'agent:work' ? { ...agent, switchBlockedReason: 'incompatible' } : agent,
+      ),
+    });
+    const blocked = wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]');
+    expect(blocked.attributes('aria-disabled')).toBe('true');
+    expect(blocked.attributes('title')).toContain('当前会话暂不支持切换');
+    await blocked.trigger('click');
+    expect(wrapper.emitted('selectAgent')).toBeUndefined();
+    await wrapper.get('[data-testid="ai-model-picker-search"]').setValue('Model Alpha');
+    const rows = wrapper.findAll('[data-testid="ai-model-picker-option"]');
+    expect(rows).toHaveLength(2);
+    const lockedModel = rows.find((row) =>
+      row.attributes('data-model-key')?.startsWith('agent:work'),
+    )!;
+    expect(lockedModel.attributes('disabled')).toBeDefined();
+    await lockedModel.trigger('click');
+    expect(wrapper.emitted('selectModel')).toBeUndefined();
+    await rows
+      .find((row) => row.attributes('data-model-key')?.startsWith('agent:mastra'))!
+      .trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[models[0]!.key, 'agent:mastra']]);
+  });
+
+  it('replaces all dependent controls with provider settings only after availability settles', async () => {
+    const wrapper = setup({ models: [], loading: true });
+    expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(false);
+    await wrapper.setProps({ loading: false });
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-composer-provider-unavailable"]').trigger('click');
+    expect(wrapper.emitted('settings')).toEqual([[]]);
+    await wrapper.setProps({
+      models,
+      agents: agents.map((agent) => ({ ...agent, enabled: false })),
+    });
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('does not show reasoning for a single fixed effort', () => {
+    const model = { ...models[0]!, reasoningEfforts: ['high'] };
+    const wrapper = setup({ native: true, models: [model] });
+    expect(wrapper.find('[data-testid="ai-chat-traits-selector"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
   it('combines Agent sidebar and model selection without losing the owning instance', async () => {
     const wrapper = setup();
     await openModels(wrapper);
@@ -179,10 +227,10 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     await openModels(wrapper);
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
     expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain(
-      '此 Agent 尚未配置模型',
+      '此 Provider 暂无可用模型',
     );
     expect(wrapper.get('[data-testid="ai-model-picker-empty-settings"]').text()).toContain(
-      '打开 Agent 设置',
+      '打开 Provider 设置',
     );
     await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
     expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
@@ -244,7 +292,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     await openModels(wrapper);
     await wrapper.get('[data-testid="ai-model-picker-agent-agent:work"]').trigger('click');
     const empty = wrapper.get('[data-testid="ai-model-picker-empty"]');
-    expect(empty.text()).toContain('此 Agent 暂无可用模型');
+    expect(empty.text()).toContain('此 Provider 暂无可用模型');
     expect(empty.attributes('role')).toBe('status');
     await wrapper.get('[data-testid="ai-model-picker-empty-settings"]').trigger('click');
     expect(wrapper.emitted('settings')).toEqual([[]]);
@@ -257,7 +305,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(loading.find('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(false);
     await loading.setProps({ loading: false });
     expect(loading.get('[data-testid="ai-model-picker-empty"]').text()).toContain(
-      '此 Agent 暂无可用模型',
+      '此 Provider 暂无可用模型',
     );
     expect(loading.get('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(true);
     loading.unmount();
@@ -281,6 +329,11 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     native.unmount();
   });
 
+  it('hides permission switching when the runtime only offers one mode', () => {
+    const wrapper = setup({ supportedPermissionModes: ['supervised'] });
+    expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
   it('also hides Traits for a native Agent that reports no executable options', () => {
     const bare = {
       key: 'pi-model',
@@ -340,7 +393,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       providerName: 'Codex',
       modelId: 'model',
       modelName: 'Model',
-      reasoningEfforts: ['high'],
+      reasoningEfforts: ['low', 'high'],
     };
     const wrapper = setup({
       disabled: true,

@@ -2,11 +2,12 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import {
   Brain,
+  CircleAlert,
   Check,
   ChevronDown,
   Eye,
+  LockKeyhole,
   Search,
-  Settings2,
   ShieldCheck,
   Star,
   Zap,
@@ -30,6 +31,7 @@ interface ComposerAgentOption {
   enabled: boolean;
   configured: boolean;
   accentColor?: string;
+  switchBlockedReason?: 'incompatible' | 'busy' | 'loading';
 }
 type ComposerModel = ChatModelOption & { agentKey: string } & Partial<
     Pick<
@@ -49,6 +51,7 @@ const props = defineProps<{
   native: boolean;
   disabled: boolean;
   loading?: boolean;
+  supportedPermissionModes?: AIChatPermissionMode[];
 }>();
 const emit = defineEmits<{
   selectAgent: [id: string];
@@ -78,12 +81,21 @@ const selectedModel = computed(() =>
     (model) => model.key === props.selectedModelKey && model.agentKey === props.selectedAgentId,
   ),
 );
+const providerUnavailable = computed(
+  () =>
+    !props.loading &&
+    !props.models.some((model) =>
+      props.agents.some((agent) => agent.id === model.agentKey && agent.enabled),
+    ),
+);
+const hasReasoningChoices = computed(
+  () => (selectedModel.value?.reasoningEfforts?.length ?? 0) > 1,
+);
 const hasModelTraits = computed(
   () =>
+    !providerUnavailable.value &&
     props.native &&
-    Boolean(
-      selectedModel.value?.reasoningEfforts?.length || selectedModel.value?.serviceTiers?.length,
-    ),
+    Boolean(hasReasoningChoices.value || selectedModel.value?.serviceTiers?.length),
 );
 const selectedEffort = computed(
   () =>
@@ -92,7 +104,7 @@ const selectedEffort = computed(
 const selectedServiceTier = computed(() => props.nativeModelOptions?.serviceTier ?? 'default');
 const traitsLabel = computed(
   () =>
-    selectedEffort.value ||
+    (hasReasoningChoices.value ? selectedEffort.value : '') ||
     (selectedServiceTier.value !== 'default'
       ? selectedServiceTier.value
       : t('aiAssistant.composer.defaultOptions')),
@@ -103,7 +115,10 @@ function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
   openMenu.value = null;
 }
 const permissionModes = computed<AIChatPermissionMode[]>(() =>
-  props.native ? ['supervised', 'auto-approve'] : ['supervised', 'read-only'],
+  providerUnavailable.value || !currentAgent.value?.enabled || !selectedModel.value
+    ? []
+    : (props.supportedPermissionModes ??
+      (props.native ? ['supervised', 'auto-approve'] : ['supervised', 'read-only'])),
 );
 const permissionHint = (mode: AIChatPermissionMode) =>
   t(
@@ -140,8 +155,22 @@ const browsedAgent = computed(() => props.agents.find((entry) => entry.id === ac
 const canChooseModel = (model: ComposerModel) =>
   !props.disabled &&
   !props.loading &&
-  Boolean(props.agents.find((agent) => agent.id === model.agentKey && agent.enabled));
+  Boolean(
+    props.agents.find(
+      (agent) => agent.id === model.agentKey && agent.enabled && !agent.switchBlockedReason,
+    ),
+  );
 
+function blockedMessage(agent?: ComposerAgentOption): string {
+  return agent?.switchBlockedReason
+    ? t('aiAssistant.composer.switchBlocked.' + agent.switchBlockedReason)
+    : '';
+}
+function browseAgent(agent: ComposerAgentOption) {
+  if (!agent.enabled || agent.switchBlockedReason || props.disabled) return;
+  activeSection.value = agent.id;
+  search.value = '';
+}
 function setMenu(menu: 'models' | 'traits' | 'permissions', opened: boolean) {
   if (opened && props.disabled) return;
   openMenu.value = opened ? menu : null;
@@ -157,7 +186,7 @@ function selectModel(model: ComposerModel) {
   openMenu.value = null;
 }
 function selectAgentWithoutModel(agent: ComposerAgentOption) {
-  if (!agent.enabled || props.disabled || props.loading) return;
+  if (!agent.enabled || agent.switchBlockedReason || props.disabled || props.loading) return;
   emit('selectAgent', agent.id);
   openMenu.value = null;
 }
@@ -195,9 +224,21 @@ function keyboardNavigation(event: KeyboardEvent) {
   rows[next]?.focus();
 }
 watch(
-  () => [props.disabled, hasModelTraits.value] as const,
-  ([disabled, available]) => {
-    if (disabled || (!available && openMenu.value === 'traits')) openMenu.value = null;
+  () =>
+    [
+      props.disabled,
+      hasModelTraits.value,
+      providerUnavailable.value,
+      permissionModes.value.length,
+    ] as const,
+  ([disabled, available, unavailable, modes]) => {
+    if (
+      disabled ||
+      unavailable ||
+      (!available && openMenu.value === 'traits') ||
+      (modes < 2 && openMenu.value === 'permissions')
+    )
+      openMenu.value = null;
   },
 );
 watch(
@@ -224,17 +265,27 @@ watch(
     class="flex min-w-0 max-w-full items-center gap-0.5"
     data-testid="ai-composer-agent-controls"
   >
+    <button
+      v-if="providerUnavailable"
+      type="button"
+      class="flex h-7 items-center gap-1.5 rounded-md px-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      data-testid="ai-composer-provider-unavailable"
+      @click="emit('settings')"
+    >
+      <CircleAlert class="size-3.5 shrink-0" />{{ t('aiAssistant.composer.openProviderSettings') }}
+    </button>
     <!-- T3: one provider-instance + model picker, not two unrelated selects. -->
-    <Popover :open="openMenu === 'models'" @update:open="setMenu('models', $event)">
+    <Popover v-else :open="openMenu === 'models'" @update:open="setMenu('models', $event)">
       <PopoverTrigger as-child>
         <button
           type="button"
           class="flex h-7 min-w-0 max-w-[clamp(6.5rem,40cqw,12.5rem)] items-center gap-1.5 rounded-md px-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
           :disabled="disabled"
           :title="
-            selectedModel
+            blockedMessage(currentAgent) ||
+            (selectedModel
               ? selectedModel.modelName + ' · ' + selectedModel.providerName
-              : t('aiAssistant.composer.chooseModel')
+              : t('aiAssistant.composer.chooseModel'))
           "
           :aria-label="t('aiAssistant.composer.model')"
           data-testid="ai-chat-model-selector"
@@ -256,7 +307,7 @@ watch(
       >
         <div class="flex h-[min(346px,calc(100dvh-80px))] min-h-0" @keydown="keyboardNavigation">
           <nav
-            class="flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
+            class="composer-agent-sidebar flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-border/60 bg-muted/25 px-1 py-2"
             :aria-label="t('aiAssistant.composer.agents')"
             data-testid="ai-model-picker-sidebar"
           >
@@ -292,19 +343,30 @@ watch(
               type="button"
               class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35 disabled:hover:bg-transparent"
               :class="
-                activeSection === agent.id && !search ? 'bg-foreground/10 text-foreground' : ''
+                agent.switchBlockedReason
+                  ? 'opacity-35 hover:bg-transparent hover:text-muted-foreground'
+                  : activeSection === agent.id && !search
+                    ? 'bg-foreground/10 text-foreground'
+                    : ''
               "
               :disabled="!agent.enabled"
-              :title="instanceName(agent)"
-              :aria-label="instanceName(agent)"
+              :title="blockedMessage(agent) || instanceName(agent)"
+              :aria-label="
+                blockedMessage(agent)
+                  ? instanceName(agent) + ' · ' + blockedMessage(agent)
+                  : instanceName(agent)
+              "
+              :aria-disabled="Boolean(agent.switchBlockedReason) || !agent.enabled"
               :aria-pressed="activeSection === agent.id && !search"
               :data-testid="'ai-model-picker-agent-' + agent.id"
-              @click="
-                activeSection = agent.id;
-                search = '';
-              "
+              @click="browseAgent(agent)"
             >
               <AgentDriverIcon :driver="agent.driver" class="size-4" />
+              <LockKeyhole
+                v-if="agent.switchBlockedReason === 'incompatible'"
+                class="absolute bottom-1 right-1 size-2.5"
+                aria-hidden="true"
+              />
               <span
                 v-if="activeSection === agent.id && !search"
                 aria-hidden="true"
@@ -335,7 +397,21 @@ watch(
                 <div
                   v-for="model in visibleModels"
                   :key="modelIdentity(model)"
-                  class="group flex min-w-0 items-center gap-0.5 rounded-lg hover:bg-muted/60"
+                  class="group flex min-w-0 items-center gap-0.5 rounded-lg"
+                  :class="canChooseModel(model) ? 'hover:bg-muted/60' : ''"
+                  :title="blockedMessage(agents.find((agent) => agent.id === model.agentKey))"
+                  :tabindex="
+                    agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
+                      ? 0
+                      : undefined
+                  "
+                  :aria-label="
+                    agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason
+                      ? model.modelName +
+                        ' · ' +
+                        blockedMessage(agents.find((agent) => agent.id === model.agentKey))
+                      : undefined
+                  "
                 >
                   <button
                     type="button"
@@ -344,7 +420,10 @@ watch(
                     data-model-picker-row
                     data-testid="ai-model-picker-option"
                     :data-model-key="model.key"
-                    :title="model.modelName + ' · ' + model.providerName"
+                    :title="
+                      blockedMessage(agents.find((agent) => agent.id === model.agentKey)) ||
+                      model.modelName + ' · ' + model.providerName
+                    "
                     @click="selectModel(model)"
                   >
                     <AgentDriverIcon
@@ -367,6 +446,14 @@ watch(
                       class="mt-0.5 size-3.5 shrink-0 text-primary"
                     />
                   </button>
+                  <LockKeyhole
+                    v-if="
+                      agents.find((agent) => agent.id === model.agentKey)?.switchBlockedReason ===
+                      'incompatible'
+                    "
+                    class="size-3 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
                   <button
                     type="button"
                     class="grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -400,9 +487,7 @@ watch(
                         ? t('aiAssistant.composer.loadingModels')
                         : activeSection === 'favorites'
                           ? t('aiAssistant.composer.noFavorites')
-                          : browsedAgent?.configured
-                            ? t('aiAssistant.composer.noAvailableModels')
-                            : t('aiAssistant.composer.notConfigured')
+                          : t('aiAssistant.composer.noAvailableModels')
                   }}
                 </p>
                 <template v-if="browsedAgent && !search && !loading">
@@ -428,19 +513,6 @@ watch(
                   </button>
                 </template>
               </div>
-            </div>
-            <div class="shrink-0 border-t border-border/65 p-1.5">
-              <button
-                type="button"
-                class="flex h-8 w-full items-center gap-2 rounded-md px-2 text-left text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                data-testid="ai-model-picker-settings"
-                @click="
-                  openMenu = null;
-                  emit('settings');
-                "
-              >
-                <Settings2 class="size-3.5" />{{ t('aiAssistant.composer.configure') }}
-              </button>
             </div>
           </div>
         </div>
@@ -475,12 +547,12 @@ watch(
         class="w-[min(16.5rem,calc(100vw-1.5rem))] max-h-[min(21rem,calc(100dvh-5rem))] overflow-y-auto p-1"
         data-testid="ai-model-traits-menu"
       >
-        <template v-if="selectedModel?.reasoningEfforts?.length">
+        <template v-if="hasReasoningChoices">
           <p class="px-2 pb-1 pt-2 text-[11px] font-medium text-muted-foreground">
             {{ t('aiAssistant.composer.reasoningEffort') }}
           </p>
           <button
-            v-for="effort in selectedModel.reasoningEfforts"
+            v-for="effort in selectedModel?.reasoningEfforts"
             :key="effort"
             type="button"
             class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -500,7 +572,7 @@ watch(
           </button>
         </template>
         <template v-if="selectedModel?.serviceTiers?.length">
-          <div v-if="selectedModel.reasoningEfforts?.length" class="my-1 h-px bg-border/60" />
+          <div v-if="hasReasoningChoices" class="my-1 h-px bg-border/60" />
           <p class="px-2 pb-1 pt-2 text-[11px] font-medium text-muted-foreground">
             {{ t('aiAssistant.composer.serviceTier') }}
           </p>
@@ -528,7 +600,11 @@ watch(
       </PopoverContent>
     </Popover>
 
-    <Popover :open="openMenu === 'permissions'" @update:open="setMenu('permissions', $event)">
+    <Popover
+      v-if="permissionModes.length > 1"
+      :open="openMenu === 'permissions'"
+      @update:open="setMenu('permissions', $event)"
+    >
       <PopoverTrigger as-child>
         <button
           type="button"
@@ -579,3 +655,14 @@ watch(
     </Popover>
   </div>
 </template>
+
+<style scoped>
+.composer-agent-sidebar {
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.composer-agent-sidebar::-webkit-scrollbar {
+  display: none;
+}
+</style>

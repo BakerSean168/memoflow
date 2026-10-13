@@ -75,6 +75,7 @@ export const AssistantRuntimeSelectedEntitySchema = z
 export type AssistantRuntimeSelectedEntity = z.infer<typeof AssistantRuntimeSelectedEntitySchema>;
 
 export const AssistantToolNameSchema = z.enum([
+  'ask_user',
   'knowledge_search',
   'workspace_overview',
   'planner_today_summary',
@@ -107,8 +108,40 @@ export type AssistantRuntimeApprovalCommand = z.infer<typeof AssistantRuntimeApp
 export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boolean() }).strict();
 export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
 
+export const AssistantRuntimeAskUserSuspensionSchema = z.object({
+  approval: z.object({
+    toolName: AssistantToolNameSchema,
+    category: z.enum(['read', 'edit', 'execute']),
+    risk: z.enum(['low', 'high']),
+  }).strict().optional(),
+  runId: z.string().min(1).max(512),
+  toolCallId: z.string().min(1).max(512),
+  question: z.string().trim().min(1).max(2000),
+  options: z.array(z.object({ label: z.string().min(1).max(500), description: z.string().max(1000).optional() }).strict()).max(20).optional(),
+  selectionMode: z.enum(['single_select', 'multi_select']).optional(),
+}).strict();
+export type AssistantRuntimeAskUserSuspension = z.infer<typeof AssistantRuntimeAskUserSuspensionSchema>;
+export const AssistantRuntimeAskUserSuspensionsSchema = z.array(AssistantRuntimeAskUserSuspensionSchema).max(100);
+
+export const AssistantRuntimeToolAnswerResultSchema = z.object({ accepted: z.boolean() }).strict();
+export type AssistantRuntimeToolAnswerResult = z.infer<typeof AssistantRuntimeToolAnswerResultSchema>;
+
+export const AssistantRuntimeToolAnswerCommandSchema = z
+  .object({
+    type: z.literal('tool_answer'),
+    action: z.enum(['answer', 'cancel']).default('answer'),
+    conversationId: z.string().min(1).max(512),
+    runId: z.string().min(1).max(512),
+    toolCallId: z.string().min(1).max(512),
+    answer: z.union([z.string().max(4000), z.array(z.string().max(500)).min(1).max(20)]),
+    identityId: z.never().optional(),
+  })
+  .strict();
+export type AssistantRuntimeToolAnswerCommand = z.infer<typeof AssistantRuntimeToolAnswerCommandSchema>;
+
 export const AssistantRuntimeClientCommandSchema = z
   .discriminatedUnion('type', [
+    AssistantRuntimeToolAnswerCommandSchema,
     AssistantRuntimeApprovalCommandSchema,
     z
       .object({

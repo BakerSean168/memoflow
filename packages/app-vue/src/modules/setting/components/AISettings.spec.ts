@@ -267,6 +267,49 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     expect(localClient.listConnections).not.toHaveBeenCalled();
     expect(wrapper.text()).not.toMatch(/OpenRouter|DeepSeek|Gemini/);
   });
+  it('puts ordinary deletion and built-in restoration in the detail header', async () => {
+    const { wrapper, registry } = await setup({ extra: true });
+    expect(wrapper.find('[data-testid="ai-agent-delete"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-provider-toggle-mastra"]').trigger('click');
+    await flushPromises();
+    const reset = wrapper.get('header [data-testid="ai-agent-reset"]');
+    expect(reset.attributes('title')).toContain('keep model connections');
+    await reset.trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'reset',
+      instanceId: 'mastra',
+      expectedRevision: 1,
+    });
+    await wrapper.get('[data-testid="ai-provider-select-agent:mastra-other"]').trigger('click');
+    expect(wrapper.find('header [data-testid="ai-agent-delete"]').exists()).toBe(true);
+    expect(wrapper.find('footer [data-testid="ai-agent-delete"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-agent-delete"]').trigger('click');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'remove',
+      instanceId: 'mastra-other',
+      expectedRevision: 1,
+    });
+    expect(wrapper.find('[data-testid="ai-provider-select-agent:mastra"]').exists()).toBe(true);
+  });
+  it('keeps the instance editor when an auxiliary request fails, and keeps it on refresh failure', async () => {
+    const { wrapper, client, registry, localClient } = await setup({ native: true, bound: true });
+    client.listProviders.mockRejectedValueOnce(new Error('provider list unavailable'));
+    localClient.listConnections.mockRejectedValueOnce(new Error('native unavailable'));
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-provider-list"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-endpoint"]').element).toHaveProperty(
+      'value',
+      'https://api.example.com/v1',
+    );
+    expect(wrapper.find('[data-testid="ai-provider-error"]').exists()).toBe(true);
+    registry.list.mockRejectedValueOnce(new Error('registry unavailable'));
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-provider-list"]').exists()).toBe(true);
+  });
   it('saves an unconfigured named Mastra and keeps the selection after recheck without credentials', async () => {
     const { wrapper, registry, client, epoch } = await setup();
     await openIdentity(wrapper);

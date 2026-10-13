@@ -8,7 +8,9 @@ import type {
   LocalAgentConversation,
   LocalAgentRequest,
   LocalAgentActivity,
+  AssistantRuntimeToolAnswerCommand,
   GoalPlanDraft,
+  GoalWorkflowLiveAction,
   GoalPlanKnowledge,
   GoalPlanTask,
   QueryKnowledgeRes,
@@ -103,6 +105,7 @@ export type ChatToolApproval = Extract<
   runId: string;
   status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale';
   errorMessage?: string;
+  parked?: boolean;
 };
 
 export type ChatItem = {
@@ -112,6 +115,8 @@ export type ChatItem = {
   status: MessageStatus;
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
+  /** Local receipt emitted only after the native owner successfully applies a command. */
+  businessOperation?: { runId: string; revision: number; operation: 'goal.patch' | GoalWorkflowLiveAction['operation'] };
   toolActivity?: Extract<
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }
@@ -121,6 +126,7 @@ export type ChatItem = {
   nativeActivities?: LocalAgentActivity[];
   localAgentSource?: AssistantRuntimeMessageView['localAgentSource'];
   nativeRequests?: ChatNativeRequest[];
+  askUserRequests?: ChatAskUserRequest[];
 };
 
 export type ChatNativeRequest = {
@@ -130,6 +136,18 @@ export type ChatNativeRequest = {
   status: 'pending' | 'sending' | 'answered' | 'expired';
   errorMessage?: string;
 };
+
+export type ChatAskUserRequest = {
+  toolCallId: string;
+  question: string;
+  options?: { label: string; description?: string }[];
+  selectionMode?: 'single_select' | 'multi_select';
+  conversationId: string;
+  runId: string;
+  status: 'pending' | 'sending' | 'answered' | 'expired';
+  errorMessage?: string;
+};
+export type ChatAskUserAnswer = AssistantRuntimeToolAnswerCommand['answer'];
 
 export type ConversationSummary =
   (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' }) | LocalAgentConversation;

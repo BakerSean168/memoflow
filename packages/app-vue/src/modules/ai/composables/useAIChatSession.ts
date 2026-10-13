@@ -73,6 +73,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     updateLastActiveConversation,
     clearLastActiveConversation,
     loadConversationList,
+    markConversationActivity,
+    syncConversationSummary,
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,
@@ -136,8 +138,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     if (chatLoading.value) return null;
     const pendingContent = chatMessage.value.trim();
     if (!pendingContent) return null;
+    chatLoading.value = true;
     try {
       const conversationId = await ensureConversationCreated(loadService, conversationName);
+      markConversationActivity(conversationId);
+      void loadConversationList(loadService);
       const pendingAttachments = composerAttachments.value.map((attachment) => ({
         mediaType: attachment.mediaType,
         ...(attachment.filename ? { filename: attachment.filename } : {}),
@@ -157,6 +162,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.sendFailed'));
       return null;
+    } finally {
+      chatLoading.value = false;
     }
   }
 
@@ -203,6 +210,8 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     runtimeChoice,
     historyIncomplete,
     respondNativeRequest: stream.respondNativeRequest,
+    answerAskUser: stream.answerAskUser,
+    cancelAskUser: stream.cancelAskUser,
     chatMessage,
     chatLoading,
     chatConversationId,
@@ -228,6 +237,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     clearLastActiveConversation,
     buildConversationTranscript,
     loadConversationList,
+    syncConversationSummary,
     refreshRuntimeUsage,
     selectConversation: selectConversationWithAttention,
     deleteConversation: deleteConversationWithAttention,

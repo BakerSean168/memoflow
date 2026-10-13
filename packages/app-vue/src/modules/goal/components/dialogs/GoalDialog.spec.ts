@@ -81,6 +81,85 @@ function timeframePicker(wrapper: ReturnType<typeof mount>, testId: string) {
 }
 
 describe('GoalDialog vNext surface (GOAL-5101)', () => {
+  it('saves through the scoped owner capability once and rejects a concurrent save', async () => {
+    const created = createMockGoal({ name: 'Scoped Goal' });
+    let complete!: () => void;
+    mocks.createGoal.mockReturnValue(
+      new Promise((resolve) => {
+        complete = () => resolve(created);
+      }),
+    );
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const ai = nativeSession(wrapper).claimControl('run-save');
+    ai.patch({ name: 'Scoped Goal' });
+    const context = {
+      createId: created.id,
+      nativeAiLease: {
+        runId: 'run-save',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 4,
+      },
+      keyResultIds: [],
+      pendingLabelNames: [],
+      expectedDraft: ai.readDraftState().draft,
+    };
+    const saving = ai.requestSubmit(context);
+    await expect(ai.requestSubmit(context)).rejects.toThrow('busy');
+    expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({
+      nativeAiLease: context.nativeAiLease,
+    }));
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    complete();
+    expect(await saving).toEqual(created);
+    expect(() => ai.patch({ name: 'After save' })).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it('renders the same native form inside the business panel without a modal', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    await dom('goal-name-input').setValue('Panel Goal');
+    await dom('goal-form').trigger('submit');
+    expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({ name: 'Panel Goal' }));
+    wrapper.unmount();
+  });
+
+  it('enforces exclusive control in owner commands and releases stale handles', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const user = nativeSession(wrapper);
+    const ai = user.claimControl('run-1');
+    expect(() => user.patch({ name: 'User overwrite' })).toThrow();
+    expect(() => user.claimControl('run-2')).toThrow();
+    ai.patch({ name: 'AI Goal' });
+    expect(() =>
+      ai.patch({ name: 'Bad batch', target: { kind: 'day', date: '2026-02-30' } }),
+    ).toThrow();
+    expect(ai.readDraftState().draft.name).toBe('AI Goal');
+    expect(() => ai.patch({ name: 'x'.repeat(81) })).toThrow();
+    await nextTick();
+    expect((dom('goal-name-input').element as HTMLTextAreaElement).value).toBe('AI Goal');
+    await dom('goal-form').trigger('submit');
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    ai.releaseControl();
+    user.patch({ name: 'Manual Goal' });
+    expect(() => ai.patch({ name: 'Stale AI' })).toThrow();
+    expect(user.readDraftState().draft.name).toBe('Manual Goal');
+    wrapper.unmount();
+  });
   afterEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
@@ -315,8 +394,10 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(source).toContain('LabelPicker');
     expect(source).toContain('initialKeyResults');
     expect(source).toContain('keyResults');
-    expect(source).toContain('ProductDialogShell');
-    expect(source).toContain('recipe="workspace"');
+    expect(source).toContain('GoalFormFrame');
+    const frame = fs.readFileSync(path.resolve(__dirname, 'GoalFormFrame.vue'), 'utf8');
+    expect(frame).toContain('ProductDialogShell');
+    expect(frame).toContain('recipe="workspace"');
     expect(source).toContain('ProductAutoTextarea');
     expect(source).toContain('class="flex min-h-full flex-col gap-6"');
     expect(source).toContain('GoalKeyResultDraftEditor');
@@ -894,6 +975,11 @@ describe('Goal owner native edit session (PVC-AI-8001)', () => {
     expect(session.readDraftState()).toEqual(beforeRejectedPatch);
     const onCreateAttempt = vi.fn();
     const context = () => ({
+      nativeAiLease: {
+        runId: 'review-run',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 2,
+      },
       onCreateAttempt,
       createId:
         'GoalId_550e8400-e29b-41d4-a716-446655440001' as import('../../composables/goalNativeEditSession').GoalNativeSubmitContext['createId'],

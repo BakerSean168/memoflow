@@ -5,7 +5,7 @@ import { GoalMutationReceiptSchema } from './response-schemas';
 export const GoalAgentCreateSchema = z
   .object({
     idempotencyKey: z.string().trim().min(1).max(200),
-    goal: CreateGoalSchema.omit({ id: true }),
+    goal: CreateGoalSchema.omit({ id: true, nativeAiLease: true }),
   })
   .strict();
 export const GoalAgentUpdateSchema = z

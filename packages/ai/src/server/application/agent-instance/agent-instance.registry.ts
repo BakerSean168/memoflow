@@ -79,8 +79,29 @@ export class AgentInstanceRegistry {
     if (!current) throw new AgentRegistryError('NOT_FOUND');
     this.assertDriver(current.driver);
     if (current.revision !== input.expectedRevision) throw new AgentRegistryError('CONFLICT');
+    if (input.action === 'reset') {
+      if (current.instanceId !== current.driver) throw new AgentRegistryError('VALIDATION_ERROR');
+      const defaults = defaultAgentInstance(current.driver);
+      return this.repository.replace(
+        owner,
+        AgentInstanceSchema.parse({
+          ...current,
+          name: defaults.name,
+          accentColor: defaults.accentColor,
+          enabled: defaults.enabled,
+          ...(current.driver !== 'mastra'
+            ? { nativeConfig: { executablePath: current.driver, writeScopes: [] } }
+            : {}),
+          revision: current.revision + 1,
+          createdAt: current.createdAt || Date.now(),
+          updatedAt: Date.now(),
+        }),
+        input.expectedRevision,
+      );
+    }
     if (input.action === 'remove') {
       if (
+        current.instanceId === current.driver ||
         !current.revision ||
         (await this.repository.hasConversationBindings(owner, current.instanceId))
       )
@@ -146,7 +167,7 @@ export class AgentInstanceRegistry {
   /**
    * Claim on first explicitly bound turn. Missing binding rows designate legacy
    * conversations and retain their existing providerId/modelId semantics.
-   * Once claimed, omitting/changing the instance is an error, not a fallback.
+   * Later turns can select another validated Mastra instance. Omitting the instance is never a fallback.
    */
   async assertTurnSelection(input: {
     owner: string;

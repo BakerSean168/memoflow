@@ -31,6 +31,7 @@ export function createAssistantPhaseExecutionRecord(input: {
   readonly identityId: string;
   readonly context?: Pick<ExecutionContext, 'requestId' | 'traceId'>;
   readonly conversationId: string;
+  readonly agentInstanceId?: string;
   readonly model: Pick<ResolvedAIModel, 'providerId' | 'modelId'>;
   readonly runId: string;
   readonly phase: AssistantExecutionPhase;
@@ -44,6 +45,7 @@ export function createAssistantPhaseExecutionRecord(input: {
     operation: `assistant.phase.${input.phase}`,
     outcome,
     conversationId: input.conversationId,
+    ...(input.agentInstanceId ? { agentInstanceId: input.agentInstanceId } : {}),
     runId: input.runId,
     ...(input.context?.requestId ? { requestId: input.context.requestId } : {}),
     ...(input.context?.traceId ? { traceId: input.context.traceId } : {}),
@@ -69,6 +71,7 @@ export function createAssistantExecutionRecord(input: {
   readonly identityId: string;
   readonly context?: Pick<ExecutionContext, 'requestId' | 'traceId'>;
   readonly conversationId: string;
+  readonly agentInstanceId?: string;
   readonly model: Pick<ResolvedAIModel, 'providerId' | 'modelId'>;
   readonly runId: string;
   readonly outcome: AssistantTurnOutcome;
@@ -87,6 +90,7 @@ export function createAssistantExecutionRecord(input: {
     operation: 'assistant.turn',
     outcome: completed ? 'succeeded' : cancelled ? 'cancelled' : 'failed',
     conversationId: input.conversationId,
+    ...(input.agentInstanceId ? { agentInstanceId: input.agentInstanceId } : {}),
     runId: input.runId,
     ...(input.context?.requestId ? { requestId: input.context.requestId } : {}),
     ...(input.context?.traceId ? { traceId: input.context.traceId } : {}),

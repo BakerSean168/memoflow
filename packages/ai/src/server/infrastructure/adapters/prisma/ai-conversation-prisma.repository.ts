@@ -83,4 +83,11 @@ export class AIConversationPrismaRepository implements IAIConversationRepository
       deletedAt: row.deletedAt,
     });
   }
+
+  async recordActivity(identityId: string, id: string, at: number): Promise<void> {
+    await this.prisma.aiConversation.updateMany({
+      where: { id, identityId, deletedAt: null, updatedAt: { lt: new Date(at) } },
+      data: { updatedAt: new Date(at) },
+    });
+  }
 }

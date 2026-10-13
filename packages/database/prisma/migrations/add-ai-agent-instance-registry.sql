@@ -55,7 +55,8 @@ DO $$ BEGIN
       ON DELETE RESTRICT ON UPDATE CASCADE;
   END IF;
 END $$;
--- The first selected Agent owns the conversation until that conversation is deleted.
+-- The binding records the current selection; a later turn may choose another Agent/model.
+-- Per-turn execution provenance is stored separately and must not be rewritten by selection.
 -- A missing row is a legacy conversation; no migration of historical chats is performed.
 CREATE UNIQUE INDEX IF NOT EXISTS "ai_conversations_identity_id_id_key"
   ON "ai_conversations"("identity_id", "id");

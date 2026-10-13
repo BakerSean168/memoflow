@@ -12,6 +12,7 @@ const recordInput = {
   runId: 'run-1',
   requestId: 'request-1',
   traceId: 'trace-1',
+  agentInstanceId: 'mastra-work',
   providerConnectionId: 'provider-1',
   modelId: 'gpt-4o-mini',
   tokenUsage: { promptTokens: 100, completionTokens: 20, totalTokens: 120 },
@@ -48,6 +49,7 @@ describe('AIExecutionRecord indexed usage projection', () => {
         runId: 'run-1',
         requestId: 'request-1',
         traceId: 'trace-1',
+        agentInstanceId: 'mastra-work',
         providerConnectionId: 'provider-1',
         modelId: 'gpt-4o-mini',
         estimatedCostUsd: 0.000027,
@@ -91,6 +93,7 @@ describe('AIExecutionRecord indexed usage projection', () => {
 
     await adapter.record(recordInput);
     expect(execute.mock.calls[0]?.[0]).toContain('provider_connection_id, model_id');
+    expect(execute.mock.calls[0]?.[1]).toContain('mastra-work');
     expect(execute.mock.calls[0]?.[1]).toContain('conversation-1');
     expect(execute.mock.calls[0]?.[1]).toContain('run-1');
 

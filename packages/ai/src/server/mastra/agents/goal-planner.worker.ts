@@ -31,6 +31,8 @@ import {
 } from '../context';
 import type { MastraModelResolver } from '../models/model-resolver';
 import { generateGoalPlanningDecision } from './goal-planner-output';
+import { createGoalLiveActionTools } from './goal-live-action-tools';
+import { GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY } from '../workflows/goal-business-action-journal';
 import {
   normalizeMastraGenerateUsage,
   recordPlannerExecution,
@@ -159,13 +161,16 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       id: 'goal-planner-worker',
       name: 'Goal Planner Worker',
       description: 'Internal structured planner used only by the goal.create durable workflow.',
+      tools: ({ requestContext }) =>
+        requestContext.getRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY) ? createGoalLiveActionTools() : {},
       instructions: ({ requestContext }) => {
         const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
         return [
           'You are an internal MemoFlow planning worker. You are not a user-facing assistant.',
           'Return only the requested structured planning decision. Never claim that any Goal, Key Result, Task or Reminder has been created.',
-          'You have no write tools. Product mutation occurs only after explicit workflow approval.',
+          'You cannot persist Goals, Key Results, Tasks or Reminders. Product mutation occurs only after explicit owner approval.',
+          'When staged Goal form tools are available, call them DURING planning to expose meaningful confirmed fields as you derive them. Stage a name, description, canonical start/target timeframes, and Key Results with stable actionId values. These actions only update a durable preview journal; the final full structured decision remains authoritative and is still required. Do not stage uncertain or ambiguous values: return needs_clarification instead.',
           'Ask clarification only when missing user information materially blocks a safe, useful plan. Ask at most 3 concise questions.',
           'Prefer a concrete draft over cosmetic clarification. The workflow enforces a maximum of 3 clarification rounds.',
           'When the active structured schema allows needs_research, request public-web research only when changing external facts materially affect the plan, such as official eligibility/requirements, deadlines, exam or application rules, or authoritative preparation resources. If the user explicitly asks to verify current or official public facts and grounded external evidence is absent or insufficient, you MUST return needs_research before drafting and must not substitute model memory for that verification. Do not request research for generic productivity or self-improvement advice. Request at most three focused queries and prefer primary/official sources.',

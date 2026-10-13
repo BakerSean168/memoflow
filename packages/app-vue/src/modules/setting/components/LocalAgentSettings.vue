@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, useId, watch } from 'vue';
-import { RefreshCw } from '@lucide/vue';
+import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Input, Switch } from '@memoflow/ui-vue-shadcn';
 import {
@@ -19,6 +19,8 @@ const props = defineProps<{
   enabled?: boolean;
   status?: LocalAgentStatus;
   canProbe?: boolean;
+  isDefault?: boolean;
+  revision?: number;
   busy: boolean;
   error: boolean;
 }>();
@@ -27,6 +29,7 @@ const emit = defineEmits<{
   toggle: [enabled: boolean];
   check: [];
   remove: [];
+  reset: [];
   cancel: [];
 }>();
 const { t } = useI18n();
@@ -83,8 +86,8 @@ function save() {
     class="min-w-0 space-y-6 p-1 sm:p-2"
     @submit.prevent="save"
   >
-    <header class="flex items-center justify-between gap-4 px-3 py-2">
-      <div class="flex min-w-0 items-center gap-3">
+    <header class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2">
+      <div class="flex min-w-0 flex-1 basis-40 items-center gap-3">
         <AgentDriverIcon
           :driver="driver"
           class="size-5"
@@ -94,16 +97,51 @@ function save() {
           <h3 class="truncate text-base font-semibold">
             {{ connection?.name ?? identity?.name ?? names[driver] }}
           </h3>
-          <p class="mt-1 text-xs text-muted-foreground" role="status">{{ statusLabel }}</p>
+          <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span role="status">{{ statusLabel }}</span>
+          </div>
         </div>
       </div>
-      <Switch
-        :model-value="form.enabled"
-        :disabled="busy"
-        :aria-label="t('setting.ai.enableProvider', { name: form.name })"
-        data-testid="ai-provider-detail-toggle"
-        @update:model-value="emit('toggle', $event)"
-      />
+      <div class="ml-auto flex shrink-0 items-center gap-1.5">
+        <span
+          v-if="status?.status === 'ready' && status.version"
+          class="max-w-24 shrink-0 truncate font-mono text-xs text-muted-foreground"
+          data-testid="ai-provider-runtime-version"
+          >v{{ status.version.replace(/^v/, '') }}</span
+        >
+        <Switch
+          :model-value="form.enabled"
+          :disabled="busy"
+          :aria-label="t('setting.ai.enableProvider', { name: form.name })"
+          data-testid="ai-provider-detail-toggle"
+          @update:model-value="emit('toggle', $event)"
+        />
+        <Button
+          v-if="revision ? revision > 0 : Boolean(connection)"
+          type="button"
+          variant="ghost"
+          size="icon"
+          class="size-7 shrink-0 rounded-md text-muted-foreground"
+          :class="
+            isDefault
+              ? 'hover:bg-muted/70 hover:text-foreground'
+              : 'hover:bg-destructive/10 hover:text-destructive'
+          "
+          :disabled="busy"
+          :aria-label="
+            isDefault ? t('setting.agentInstances.resetDefault') : t('setting.ai.deleteProvider')
+          "
+          :title="
+            isDefault
+              ? t('setting.agentInstances.resetDefaultHint')
+              : t('setting.ai.deleteProvider')
+          "
+          :data-testid="isDefault ? 'ai-agent-reset' : 'ai-agent-delete'"
+          @click="isDefault ? emit('reset') : emit('remove')"
+        >
+          <RotateCcw v-if="isDefault" class="size-3.5" /><Trash2 v-else class="size-3.5" />
+        </Button>
+      </div>
     </header>
     <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
       <SettingsPropertyRow
@@ -223,17 +261,7 @@ function save() {
     <p v-if="error" role="alert" class="px-3 text-xs text-destructive">
       {{ t('aiAssistant.local.actionFailed') }}
     </p>
-    <footer class="flex items-center justify-between gap-3 px-3">
-      <Button
-        v-if="connection"
-        type="button"
-        variant="ghost"
-        size="sm"
-        class="text-destructive"
-        :disabled="busy"
-        @click="emit('remove')"
-        >{{ t('setting.ai.deleteProvider') }}</Button
-      ><span v-else />
+    <footer class="flex items-center justify-end gap-3 px-3">
       <div class="flex gap-2">
         <Button
           v-if="connection || canProbe"

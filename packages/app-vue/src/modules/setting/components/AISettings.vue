@@ -71,23 +71,22 @@ async function refresh() {
   const current = ++generation;
   loading.value = true;
   try {
-    const [next, native] = await Promise.all([
+    const [registryResult, nativeResult, providerResult] = await Promise.allSettled([
       registry.list(),
       local ? local.listConnections() : Promise.resolve([]),
       ai.loadProviders(),
     ]);
     if (disposed || current !== generation) return;
-    snapshot.value = next;
-    nativeConnections.value = native;
-    if (!next.instances.some((item) => item.instanceId === selectedId.value))
-      selectedId.value = next.instances[0]?.instanceId ?? '';
-    failure.value = '';
-  } catch (error) {
-    if (!disposed && current === generation) {
-      snapshot.value = null;
-      nativeConnections.value = [];
-      failure.value = failureMessage(error);
+    if (registryResult.status === 'fulfilled') {
+      snapshot.value = registryResult.value;
+      if (!instances.value.some((item) => item.instanceId === selectedId.value))
+        selectedId.value = instances.value[0]?.instanceId ?? '';
     }
+    if (nativeResult.status === 'fulfilled') nativeConnections.value = nativeResult.value;
+    const failed = [registryResult, nativeResult, providerResult].find(
+      (result) => result.status === 'rejected',
+    );
+    failure.value = failed?.status === 'rejected' ? failureMessage(failed.reason) : '';
   } finally {
     if (!disposed && current === generation) loading.value = false;
   }
@@ -186,9 +185,22 @@ async function saveNative(input: LocalAgentConnectionInput) {
     }),
   );
 }
+async function resetSelected() {
+  const current = selected.value;
+  if (!current || current.instanceId !== current.driver) return;
+  await mutate(() =>
+    registry!.execute({
+      action: 'reset',
+      instanceId: current.instanceId,
+      expectedRevision: current.revision,
+    }),
+  );
+  delete statuses.value[current.instanceId];
+  if (selected.value) void probe(selected.value);
+}
 async function removeSelected() {
   const current = selected.value;
-  if (!current?.revision) return;
+  if (!current?.revision || current.instanceId === current.driver) return;
   await mutate(() =>
     registry!.execute({
       action: 'remove',
@@ -337,6 +349,7 @@ onBeforeUnmount(() => {
           @toggle="toggle(selected, $event)"
           @rename="rename"
           @remove="removeSelected"
+          @reset="resetSelected"
         />
         <LocalAgentSettings
           v-else-if="selected"
@@ -351,12 +364,15 @@ onBeforeUnmount(() => {
           :enabled="selected.enabled"
           :status="statuses[selected.instanceId]"
           :can-probe="true"
+          :is-default="selected.instanceId === selected.driver"
+          :revision="selected.revision"
           :busy="busy || Boolean(checking[selected.instanceId])"
           :error="Boolean(failure)"
           @save="saveNative"
           @toggle="toggle(selected, $event)"
           @check="probe(selected)"
           @remove="removeSelected"
+          @reset="resetSelected"
           @cancel="selectedId = instances[0]?.instanceId ?? ''"
         />
       </div>

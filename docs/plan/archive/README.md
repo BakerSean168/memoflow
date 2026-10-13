@@ -29,6 +29,8 @@ updated: 2026-10-10T00:00:00Z
 
 ## 本轮归档
 
+- [2026-10-13 Main branch consolidation](./2026-10-13-main-branch-consolidation.md): useful branches and dirty repairs integrated in PR #449, superseded branch/worktree cleanup audited; final exact-head/main gates tracked by the PR.
+
 - [2026-10-09 Desktop 性能优化实施](./2026-10-09-desktop-performance-implementation.md)：PowerSync 生命周期、Vault 缓存/搜索/虚拟列表、本地启动与通知优化；两轴复审、完整 affected 检查、本地 prod-like 与 Linux 解包产物烟测通过；万篇重复搜索中位数 16.274→4.229 秒，Windows 性能及 AI 历史分页仍为后续范围。
 
 - [2026-10-09 Desktop 性能深入研究](./2026-10-09-desktop-performance-research.md)：0.16.0 源码与上游取证、三组隔离实验、优化纵切与 Windows 验收矩阵；相关现有测试 30/30、governance/docs/diff 检查通过，仅交付研究。

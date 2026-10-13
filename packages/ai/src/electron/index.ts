@@ -75,6 +75,8 @@ import {
   AssistantAttentionAckRequestSchema,
   AssistantAttentionAckResponseSchema,
   AssistantRuntimeApprovalResultSchema,
+  AssistantRuntimeToolAnswerCommandSchema,
+  AssistantRuntimeToolAnswerResultSchema,
   AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
@@ -84,6 +86,8 @@ import {
   AIRuntimeUsageQueryClientRequestSchema,
   AIRuntimeUsageSummarySchema,
   AIWorkflowCancelClientRequestSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   AIWorkflowGetClientRequestSchema,
   AIWorkflowListClientRequestSchema,
   AIWorkflowResumeClientRequestSchema,
@@ -518,6 +522,25 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_START);
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ANSWER, async (_, command) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(command);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
+            return ok(AssistantRuntimeToolAnswerResultSchema.parse({ accepted: await aiModule.mastraRuntime.answerToolSuspension({ context: requestContext, command: parsed.data }) }));
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ANSWER);
+        ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING, async (_, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(request);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid conversation reference' });
+            return ok(await aiModule.mastraRuntime.listAskUserSuspensions({ identityId: requestContext.identityId, conversationId: parsed.data.conversationId }));
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING);
+
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_APPROVAL, async (_, command) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.mastraRuntime)
@@ -529,7 +552,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 message: 'Invalid runtime assistant approval command',
                 details: formatZodErrors(parsed.error.issues),
               });
-            const accepted = aiModule.mastraRuntime.decideToolApproval({
+            const accepted = await aiModule.mastraRuntime.decideToolApproval({
               context: requestContext,
               command: parsed.data,
             });
@@ -844,6 +867,36 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           }),
         );
         installed.push(AIChannels.RUNTIME_WORKFLOW_RESUME);
+        ipcMain.handle(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, async (_, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            if (!aiModule.workflowRuntime) {
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI workflow runtime unavailable' });
+            }
+            const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
+            if (!parsed.success) {
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid Goal surface lease request',
+                details: formatZodErrors(parsed.error.issues),
+              });
+            }
+            try {
+              const result = AIGoalSurfaceLeaseResponseSchema.parse(
+                await aiModule.workflowRuntime.goalSurfaceLease({
+                  identityId: requestContext.identityId, request: parsed.data,
+                }),
+              );
+              return ok(result);
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Goal surface lease failed',
+              });
+              return fail({ code: failure.code, message: failure.message, context: failure.context });
+            }
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE);
         ipcMain.handle(AIChannels.RUNTIME_WORKFLOW_GET, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.workflowRuntime) {

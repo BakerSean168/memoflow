@@ -1,4 +1,4 @@
-import { type AIWorkflowRunView, type GoalPlanDraft } from '@memoflow/contracts/ai';
+import { type AIWorkflowRunView, type GoalPlanDraft, type GoalWorkflowLiveActionRecord } from '@memoflow/contracts/ai';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -11,6 +11,7 @@ import type {
   GoalNativeSubmitContext,
 } from '../../goal/composables/goalNativeEditSession';
 import { getAIErrorMessage, getAIWorkflowTerminalFailureMessage } from './error';
+import { useGoalSurfaceLease } from './useGoalSurfaceLease';
 import {
   buildEditedGoalDraftContent,
   canonicalDraftContent,
@@ -48,12 +49,15 @@ export function useGoalNativeReviewCoordinator(input: {
   const workflowFailureMessage = (run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>) =>
     getAIWorkflowTerminalFailureMessage(run.failure, t);
   const nativeSurface = useGoalNativeSurface();
+  const goalSurfaceConflict = ref(false);
+  const goalSurfaceReady = ref(false);
+  const goalManualHandoff = ref(false);
   const labelCatalog = useLabelCatalog();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   let nativeSession: GoalNativeEditSession | null = null;
   let projectedRunId: string | null = null;
   let projectedRevision: number | null = null;
-  let projectedMode: 'clarification' | 'review' | null = null;
+  let projectedMode: 'clarification' | 'review' | 'live' | null = null;
   let pendingOwnerAttempt: {
     runId: string;
     revision: number;
@@ -75,6 +79,169 @@ export function useGoalNativeReviewCoordinator(input: {
     mode: 'clarification' | 'review';
     promise: Promise<void>;
   } | null = null;
+  const appliedLiveActionIds = new Set<string>();
+  let pendingLiveProjection: { runId: string; lastSequence: number; promise: Promise<void> } | null = null;
+  const surfaceLease = useGoalSurfaceLease(options.workflowRuntime, () => {
+    // An expired/superseded fence must stop all AI patches and Save attempts.
+    // Close only an AI-owned preview, not a user-owned handoff. Leaving the
+    // controlled form 'busy' would permanently trap the Shell navigation.
+    projectionEpoch++;
+    goalSurfaceConflict.value = true;
+    goalSurfaceReady.value = false;
+    if (!goalManualHandoff.value && !pendingOwnerAttempt && !submitted && nativeSession) {
+      try {
+        nativeSession.setEditingBlocked(false);
+        nativeSession.requestCancel();
+      } catch {
+        // A native owner already saving must finish its deterministic replay.
+      }
+      nativeSession = null;
+      projectedRunId = null;
+      projectedMode = null;
+      appliedLiveActionIds.clear();
+    }
+  });
+
+  function recordNativeLiveAction(runId: string, record: GoalWorkflowLiveActionRecord): void {
+    const id = `goal-native-live:${runId}:${record.command.revision}:${record.command.actionId}`;
+    if (options.chatTimeline.value.some((item) => item.id === id)) return;
+    options.chatTimeline.value.push({
+      id,
+      role: 'assistant',
+      status: 'success',
+      content: t('aiAssistant.businessSurface.formUpdated', { revision: record.command.revision }),
+      businessOperation: {
+        runId, revision: record.command.revision, operation: record.command.operation,
+      },
+    });
+  }
+
+  function applyNativeLiveCommand(session: GoalNativeEditSession, record: GoalWorkflowLiveActionRecord): void {
+    const { command } = record;
+    if (command.operation === 'goal.setName') {
+      session.patch({ name: command.value });
+    } else if (command.operation === 'goal.patchDescription') {
+      session.patch({ description: command.value ?? '' });
+    } else if (command.operation === 'goal.setStart') {
+      session.patch({ start: command.value });
+    } else if (command.operation === 'goal.setTarget') {
+      session.patch({ target: command.value });
+    } else if (command.operation === 'goal.patchKeyResults') {
+      const ids = command.value.map((item) =>
+        `workflow-draft-ref:${encodeURIComponent(item.draftRef)}` as GoalNativeSubmitContext['keyResultIds'][number],
+      );
+      session.patch({
+        keyResults: command.value.map((item, index) => ({
+          id: ids[index]!,
+          title: item.title,
+          description: item.description ?? null,
+          calculationMethod: item.aggregationMethod,
+          initialValue: item.initialValue,
+          currentValue: item.currentValue,
+          targetValue: item.targetValue,
+          target: item.target ?? null,
+          unit: item.unit ?? '',
+          weight: item.weight,
+        })),
+      });
+      keyResultRefs = new Map(command.value.map((item, index) => [ids[index]!, item.draftRef]));
+    }
+  }
+
+  async function performLiveProjection(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
+    if (run.status !== 'running' || !run.liveActions?.length ||
+        goalManualHandoff.value || pendingOwnerAttempt || submitted) return;
+    const actions = [...run.liveActions].sort((a, b) => a.sequence - b.sequence);
+    const appliedKey = (record: GoalWorkflowLiveActionRecord) =>
+      `${record.command.revision}:${record.command.actionId}`;
+    const unapplied = actions.filter((record) => !appliedLiveActionIds.has(appliedKey(record)));
+    if (unapplied.length === 0) return;
+    let session = nativeSession;
+    if (session && projectedRunId !== run.runId) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    if (session) {
+      try {
+        session.readDraftState();
+      } catch {
+        session = null;
+        nativeSession = null;
+        appliedLiveActionIds.clear();
+      }
+    }
+    const epoch = ++projectionEpoch;
+    let opened = false;
+    if (!session) {
+      if (!nativeSurface.isAvailable()) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      if (!(await surfaceLease.claim(run.runId))) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      if (epoch !== projectionEpoch) return;
+      try {
+        session = await nativeSurface.openControlledCreate(run.runId);
+        opened = true;
+      } catch (error) {
+        void surfaceLease.release();
+        if (!nativeSurface.isAvailable()) {
+          goalSurfaceConflict.value = true;
+          return;
+        }
+        throw error;
+      }
+    } else if (!(await surfaceLease.verify(run.runId))) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    if (epoch !== projectionEpoch || goalManualHandoff.value || run.runId !== goalWorkflowRun.value?.runId) {
+      if (opened) session.requestCancel();
+      return;
+    }
+    try {
+      session.coordinateSubmit(async () => undefined, () => cancelGoalAgentRun());
+      // Claim control still prevents user edits; AI capability patches only this
+      // mounted native owner draft. No direct Goal persistence occurs here.
+      session.setEditingBlocked(false);
+      for (const record of actions) {
+        if (appliedLiveActionIds.has(appliedKey(record))) continue;
+        applyNativeLiveCommand(session, record);
+        appliedLiveActionIds.add(appliedKey(record));
+        recordNativeLiveAction(run.runId, record);
+      }
+      nativeSession = session;
+      projectedRunId = run.runId;
+      projectedRevision = actions[actions.length - 1]!.command.revision;
+      projectedMode = 'live';
+      goalSurfaceReady.value = true;
+      goalSurfaceConflict.value = false;
+    } catch (error) {
+      if (opened) session.requestCancel();
+      throw error;
+    }
+  }
+
+  function projectLive(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): Promise<void> {
+    const lastSequence = run.liveActions?.[run.liveActions.length - 1]?.sequence ?? 0;
+    if (pendingLiveProjection?.runId === run.runId && pendingLiveProjection.lastSequence === lastSequence)
+      return pendingLiveProjection.promise;
+    const pending = {
+      runId: run.runId,
+      lastSequence,
+      promise: Promise.resolve().then(() => performLiveProjection(run)).finally(() => {
+        if (pendingLiveProjection === pending) pendingLiveProjection = null;
+      }),
+    };
+    pendingLiveProjection = pending;
+    nativeProjection = pending.promise;
+    return pending.promise;
+  }
+
 
   function applyNativeProjection(
     session: GoalNativeEditSession,
@@ -117,8 +284,8 @@ export function useGoalNativeReviewCoordinator(input: {
     });
     pendingLabelNames = existingLabels.filter((item) => !item.label).map((item) => item.name);
     keyResultRefs = new Map(projectedKeyResultIds.map(([ref, id]) => [id, ref]));
-    // During clarification the native owner surface stays editable, but its Save
-    // action is still coordinated to a no-op until workflow review is ready.
+    // The scoped AI capability may patch, but native user commands remain blocked
+    // until the user explicitly takes over in Chat.
     session.setEditingBlocked(false);
   }
 
@@ -147,6 +314,18 @@ export function useGoalNativeReviewCoordinator(input: {
     return pending.promise;
   }
 
+  function recordNativePatch(runId: string, projection: GoalNativeProjection): void {
+    const operationId = `goal-native-patch:${runId}:${projection.revision}:${projection.mode}`;
+    if (options.chatTimeline.value.some((item) => item.id === operationId)) return;
+    options.chatTimeline.value.push({
+      id: operationId,
+      role: 'assistant',
+      status: 'success',
+      content: t('aiAssistant.businessSurface.formUpdated', { revision: projection.revision }),
+      businessOperation: { runId, revision: projection.revision, operation: 'goal.patch' },
+    });
+  }
+
   async function performNativeReview(
     run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
     projection: GoalNativeProjection,
@@ -162,6 +341,10 @@ export function useGoalNativeReviewCoordinator(input: {
         nativeSession = null;
       }
       if (nativeSession && projectedMode === 'review' && projection.mode === 'review') {
+        if (!(await surfaceLease.verify(run.runId))) {
+          goalSurfaceConflict.value = true;
+          return;
+        }
         await nativeSession.focus('name');
         return;
       }
@@ -207,13 +390,18 @@ export function useGoalNativeReviewCoordinator(input: {
     const existing = await labelCatalog.existingNames(projection.draft.goal.labels);
     if (epoch !== projectionEpoch) return;
 
-    if (
-      nativeSession &&
-      projectedRunId === run.runId &&
-      projectedRevision === projection.revision
-    ) {
+    if (nativeSession && projectedRunId === run.runId) {
+      if (goalManualHandoff.value || pendingOwnerAttempt || submitted)
+        throw new Error('Goal revision is frozen by the native owner');
+      if (!(await surfaceLease.verify(run.runId))) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      if (epoch !== projectionEpoch) return;
       nativeSession.setEditingBlocked(false);
       applyNativeProjection(nativeSession, projection, existing);
+      recordNativePatch(run.runId, projection);
+      projectedRevision = projection.revision;
       projectedMode = projection.mode;
       submitted = null;
       goalOwnerSubmitted.value = false;
@@ -221,13 +409,41 @@ export function useGoalNativeReviewCoordinator(input: {
       return;
     }
 
-    const session = await nativeSurface.openCreate();
+    if (!nativeSurface.isAvailable()) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    if (!(await surfaceLease.claim(run.runId))) {
+      goalSurfaceConflict.value = true;
+      return;
+    }
+    if (epoch !== projectionEpoch) return;
+    let session: GoalNativeEditSession;
+    try {
+      session = await nativeSurface.openControlledCreate(run.runId);
+    } catch (error) {
+      void surfaceLease.release();
+      if (!nativeSurface.isAvailable()) {
+        goalSurfaceConflict.value = true;
+        return;
+      }
+      throw error;
+    }
+    goalSurfaceConflict.value = false;
+    goalManualHandoff.value = false;
     if (epoch !== projectionEpoch) {
       session.requestCancel();
       return;
     }
-    applyNativeProjection(session, projection, existing);
+    try {
+      applyNativeProjection(session, projection, existing);
+    } catch (error) {
+      session.releaseControl();
+      throw error;
+    }
+    recordNativePatch(run.runId, projection);
     nativeSession = session;
+    goalSurfaceReady.value = true;
     projectedRunId = run.runId;
     projectedRevision = projection.revision;
     projectedMode = projection.mode;
@@ -235,18 +451,39 @@ export function useGoalNativeReviewCoordinator(input: {
     goalOwnerSubmitted.value = false;
   }
 
+  async function continueGoalSurfaceControl(): Promise<void> {
+    // Recheck the actual owner on every click, not the earlier conflict snapshot.
+    if (goalAgentResuming.value || !nativeSurface.isAvailable()) return;
+    goalSurfaceConflict.value = false;
+    await openGoalNativeReview();
+  }
+
+  function handoffGoalNativeReview(): void {
+    if (goalAgentResuming.value || pendingOwnerAttempt || submitted || !nativeSession) return;
+    nativeSession.releaseControl();
+    nativeSession = nativeSurface.locate();
+    nativeSession?.coordinateSubmit(
+      () => confirmGoalAgentRun(),
+      async () => {
+        goalManualHandoff.value = false;
+        await cancelGoalAgentRun();
+      },
+    );
+    goalManualHandoff.value = true;
+  }
+
   async function openGoalNativeReview(): Promise<void> {
     const run = goalWorkflowRun.value;
     if (
       !run ||
-      run.suspension?.type !== 'goal_draft_review' ||
+      (!goalNativeProjection(run) && !(run.status === 'running' && run.liveActions?.length)) ||
       goalAgentResuming.value ||
       submitted ||
       pendingOwnerAttempt
     )
       return;
     try {
-      nativeProjection = projectNativeReview(run);
+      nativeProjection = run.status === 'running' ? projectLive(run) : projectNativeReview(run);
       await nativeProjection;
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
@@ -264,8 +501,13 @@ export function useGoalNativeReviewCoordinator(input: {
 
   function retireNativeReview(): void {
     pendingProjection = null;
+    pendingLiveProjection = null;
+    appliedLiveActionIds.clear();
     projectionEpoch += 1;
-    if (nativeSession) {
+    void surfaceLease.release();
+    goalSurfaceConflict.value = false;
+    goalSurfaceReady.value = false;
+    if (nativeSession && !goalManualHandoff.value) {
       try {
         nativeSession.setEditingBlocked(false);
         nativeSession.requestCancel();
@@ -274,6 +516,7 @@ export function useGoalNativeReviewCoordinator(input: {
       }
     }
     nativeSession = null;
+    goalManualHandoff.value = false;
     projectedRunId = null;
     submitted = null;
     pendingOwnerAttempt = null;
@@ -302,6 +545,7 @@ export function useGoalNativeReviewCoordinator(input: {
     if (JSON.stringify(edited) === JSON.stringify(canonicalDraftContent(draft))) return run;
 
     const submittedSnapshot = JSON.stringify(liveSession().readDraftState().draft);
+    if (!(await surfaceLease.verify(run.runId))) throw new Error('Goal panel lease was lost');
     const next = await options.workflowRuntime.resume({
       runId: run.runId,
       command: { type: 'edit_structured', patch: edited },
@@ -398,7 +642,13 @@ export function useGoalNativeReviewCoordinator(input: {
   async function submitGoalRevisionResponse(response: string): Promise<boolean> {
     let run = goalWorkflowRun.value;
     const normalized = response.trim();
-    if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value || !normalized)
+    if (
+      !run ||
+      !goalAgentWaitingForApproval.value ||
+      goalAgentResuming.value ||
+      goalManualHandoff.value ||
+      !normalized
+    )
       return false;
     goalAgentResuming.value = true;
     try {
@@ -459,19 +709,25 @@ export function useGoalNativeReviewCoordinator(input: {
   }): Promise<void> {
     let run = goalWorkflowRun.value;
     if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value) return;
-    if (
-      !pendingOwnerAttempt &&
-      !submitted &&
-      (hostOptions?.title || hostOptions?.description !== undefined)
-    )
-      liveSession().patch({
-        ...(hostOptions.title ? { name: hostOptions.title } : {}),
-        ...(hostOptions.description !== undefined ? { summary: hostOptions.description } : {}),
-      });
-
     goalAgentResuming.value = true;
     creatingGoal.value = true;
     try {
+      // A verified deterministic owner save may have happened before reload.
+      // Re-claim a fresh server fence for approval without creating another
+      // native Goal. A competing window still prevents this ownership transfer.
+      const mayContinue = submitted
+        ? await surfaceLease.claim(run.runId)
+        : await surfaceLease.verify(run.runId);
+      if (!mayContinue) throw new Error('Goal panel lease was lost');
+      if (
+        !pendingOwnerAttempt &&
+        !submitted &&
+        (hostOptions?.title || hostOptions?.description !== undefined)
+      )
+        liveSession().patch({
+          ...(hostOptions.title ? { name: hostOptions.title } : {}),
+          ...(hostOptions.description !== undefined ? { summary: hostOptions.description } : {}),
+        });
       if (pendingOwnerAttempt) await reconcileOwnerAttempt();
       // A failed initial projection can be retried independently by opening review.
       await nativeProjection;
@@ -485,12 +741,16 @@ export function useGoalNativeReviewCoordinator(input: {
         const review = run.suspension;
         const session = liveSession();
         const expectedDraft = session.readDraftState().draft;
+        if (!(await surfaceLease.verify(run.runId))) throw new Error('Goal panel lease was lost');
         let saved;
         try {
           // Only the controlled same-revision retry may temporarily release the
           // owner lock. requestSubmit synchronously takes the owner's busy lock.
           if (pendingOwnerAttempt) session.setEditingBlocked(false);
+          const nativeAiLease = surfaceLease.currentGrant(run.runId);
+          if (!nativeAiLease) throw new Error('Goal panel lease was lost before persistence');
           saved = await session.requestSubmit({
+            nativeAiLease,
             onCreateAttempt: () => {
               pendingOwnerAttempt = {
                 runId: run!.runId,
@@ -524,6 +784,7 @@ export function useGoalNativeReviewCoordinator(input: {
       }
       if (!run || run.status !== 'suspended' || run.suspension?.type !== 'goal_draft_review')
         return;
+      if (!(await surfaceLease.verify(run.runId))) throw new Error('Goal panel lease was lost');
       const completed = await options.workflowRuntime.resume({
         runId: run.runId,
         command: { type: 'approve' },
@@ -611,6 +872,12 @@ export function useGoalNativeReviewCoordinator(input: {
   }
   return {
     project,
+    projectLive,
+    goalSurfaceConflict,
+    goalSurfaceReady,
+    goalManualHandoff,
+    continueGoalSurfaceControl,
+    handoffGoalNativeReview,
     goalOwnerSubmitted,
     goalOwnerAttemptPending,
     goalAgentWaitingForClarification,

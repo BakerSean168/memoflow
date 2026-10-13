@@ -16,7 +16,7 @@ import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
 
 const e2ePassword = 'Test123456!';
 const conversationId = 'conv-e2e-mastra-open-chat-1';
-const providerId = 'provider-e2e-openai';
+const providerId = 'AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801';
 const modelId = 'gpt-4.1-mini';
 
 const generateTestEmail = () =>

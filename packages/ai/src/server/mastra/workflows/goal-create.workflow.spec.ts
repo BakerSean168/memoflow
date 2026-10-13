@@ -1,4 +1,12 @@
 import { goalWorkflowEntityId } from './deterministic-entity-id';
+import {
+  GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY,
+  appendGoalWorkflowLiveAction,
+  requireGoalWorkflowLiveActionSink,
+  publishRunningGoalActions,
+} from './goal-business-action-journal';
+import { createGoalLiveActionTools } from '../agents/goal-live-action-tools';
+import { projectGoalCreateRun } from '../runtime/workflow-run-projection';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -23,6 +31,74 @@ import {
   initialGoalCreateWorkflowState,
 } from './goal-create.workflow';
 import type { GoalPlanMutationPort } from './goal-plan-mutation.port';
+
+describe('Goal workflow live draft action journal', () => {
+  it('accepts Mastra semantic tool calls only with a matching workflow identity and a durable sink', async () => {
+    const requestContext = new RequestContext();
+    const append = vi.fn(async (command) => ({ sequence: 1, command }));
+    requestContext.setRaw('identityId', 'identity-1');
+    requestContext.setRaw('workflowRunId', 'run-1');
+    requestContext.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, {
+      identityId: 'identity-1', runId: 'run-1', revision: 2, append,
+    });
+    const tools = createGoalLiveActionTools();
+    const ownerContext = { requestContext, observe: {} as never };
+    await expect(tools.goal_set_name.execute?.({ actionId: 'name-1', value: 'Native Goal' }, ownerContext))
+      .resolves.toEqual({ actionId: 'name-1', sequence: 1, staged: true });
+    expect(append).toHaveBeenCalledWith({ actionId: 'name-1', revision: 2, operation: 'goal.setName', value: 'Native Goal' });
+    requestContext.setRaw('identityId', 'identity-b');
+    await expect(tools.goal_set_name.execute?.({ actionId: 'foreign', value: 'Overwrite' }, ownerContext)).rejects.toThrow('authenticated');
+    expect(append).toHaveBeenCalledTimes(1);
+  });
+
+  const nameCommand = { actionId: 'step-1', revision: 2, operation: 'goal.setName', value: 'Pass JLPT N1' } as const;
+
+  it('records typed semantic actions in order and treats identical retry as a no-op', () => {
+    const first = appendGoalWorkflowLiveAction({ journal: [], command: nameCommand, revision: 2 });
+    expect(first.record).toMatchObject({ sequence: 1, command: nameCommand });
+    expect(first.duplicate).toBe(false);
+    const same = appendGoalWorkflowLiveAction({ journal: first.journal, command: nameCommand, revision: 2 });
+    expect(same).toMatchObject({ duplicate: true, journal: first.journal });
+    const second = appendGoalWorkflowLiveAction({
+      journal: first.journal,
+      command: { actionId: 'step-2', revision: 2, operation: 'goal.patchDescription', value: 'One mock exam every week' },
+      revision: 2,
+    });
+    expect(second.journal).toHaveLength(2);
+    expect(second.record.sequence).toBe(2);
+    expect(first.journal).toHaveLength(1);
+    const nextRevision = appendGoalWorkflowLiveAction({
+      journal: second.journal,
+      command: { ...nameCommand, revision: 3, value: 'New revision' },
+      revision: 3,
+    });
+    expect(nextRevision.duplicate).toBe(false);
+    expect(nextRevision.record.sequence).toBe(3);
+  });
+
+  it('rejects stale revisions, conflicting action IDs and unsupported fields', () => {
+    const first = appendGoalWorkflowLiveAction({ journal: [], command: nameCommand, revision: 2 });
+    expect(() => appendGoalWorkflowLiveAction({ journal: first.journal, command: { ...nameCommand, value: 'Other name' }, revision: 2 })).toThrow('idempotency');
+    expect(() => appendGoalWorkflowLiveAction({ journal: first.journal, command: { ...nameCommand, revision: 3 }, revision: 2 })).toThrow('Stale');
+    expect(() => appendGoalWorkflowLiveAction({ journal: [], command: { ...nameCommand, overrideOwnerId: 'foreign' }, revision: 2 })).toThrow();
+    expect(() => appendGoalWorkflowLiveAction({ journal: [], command: { ...nameCommand, operation: 'goal.persist' }, revision: 2 })).toThrow();
+  });
+
+  it('validates canonical Goal timeframe and unique Key Result references before journal write', () => {
+    expect(() => appendGoalWorkflowLiveAction({
+      journal: [], revision: 1,
+      command: { actionId: 'date-1', revision: 1, operation: 'goal.setTarget', value: { kind: 'day', date: '2026-02-30' } },
+    })).toThrow();
+    const keyResult = {
+      draftRef: 'kr:mock-exams', title: 'Complete exams', aggregationMethod: 'Sum',
+      initialValue: 0, targetValue: 8, weight: 3,
+    };
+    expect(() => appendGoalWorkflowLiveAction({
+      journal: [], revision: 1,
+      command: { actionId: 'kr-1', revision: 1, operation: 'goal.patchKeyResults', value: [keyResult, keyResult] },
+    })).toThrow();
+  });
+});
 
 const createdStores: LibSQLStore[] = [];
 const createdFiles: string[] = [];
@@ -148,6 +224,7 @@ async function harness(planner: GoalPlannerPort, mutations = mutationPort()) {
     const workflow = createGoalCreateWorkflow({
       planner,
       applyService: new ApplyGoalPlanService(mutations),
+      liveActionStorage: storage,
     });
     // Registration is what attaches Mastra storage to a code-defined workflow.
     const mastra = new Mastra({ storage, workflows: { goalCreate: workflow } });
@@ -165,6 +242,108 @@ function stepSuspendPayload(result: unknown): unknown {
 }
 
 describe('ADR-052 goal.create durable Workflow', () => {
+  it('rejects cross-owner and no-longer-running live publication without altering the snapshot', async () => {
+    const planner: GoalPlannerPort = {
+      plan: vi.fn(async () => ({ status: 'draft_ready', reason: 'ready', candidateDraft: draftContent })),
+    };
+    const { storage, buildWorkflow } = await harness(planner);
+    const runId = 'workflow-action-publish-guards';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    await run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('guard-start'),
+    });
+    const journal = appendGoalWorkflowLiveAction({
+      journal: [], revision: 1,
+      command: { actionId: 'guarded', revision: 1, operation: 'goal.setName', value: 'Must not appear' },
+    }).journal;
+    await expect(publishRunningGoalActions({
+      storage, identityId: 'another-identity', runId, journal,
+    })).rejects.toThrow('owner mismatch');
+    await expect(publishRunningGoalActions({
+      storage, identityId: workflowInput.identityId, runId, journal,
+    })).rejects.toThrow('no longer running');
+    const store = await storage.getStore('workflows');
+    const row = await store?.getWorkflowRunById({ workflowName: 'goal-create', runId });
+    expect(row?.snapshot).not.toHaveProperty('goalLiveActions');
+  });
+
+  it('exposes a committed Goal action while the model is still planning, before review', async () => {
+    let release!: () => void;
+    let actionCommitted!: () => void;
+    const waiting = new Promise<void>((resolve) => { actionCommitted = resolve; });
+    const hold = new Promise<void>((resolve) => { release = resolve; });
+    const planner: GoalPlannerPort = {
+      plan: vi.fn(async (_input, context) => {
+        const sink = requireGoalWorkflowLiveActionSink(context);
+        await sink.append({ actionId: 'early-name', revision: 1, operation: 'goal.setName', value: 'Live before final draft' });
+        actionCommitted();
+        await hold;
+        return { status: 'draft_ready', reason: 'Ready', candidateDraft: draftContent };
+      }),
+    };
+    const { storage, buildWorkflow } = await harness(planner);
+    const runId = 'workflow-live-during-planning';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    const execution = run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('while-model-running'),
+    });
+    try {
+      await waiting;
+      const store = await storage.getStore('workflows');
+      const row = await store?.getWorkflowRunById({ workflowName: 'goal-create', runId });
+      expect(row).toBeDefined();
+      expect(projectGoalCreateRun(row!, workflowInput.identityId)).toMatchObject({
+        runId,
+        kind: 'goal.create',
+        status: 'running',
+        liveActions: [{
+          sequence: 1,
+          command: { actionId: 'early-name', revision: 1, operation: 'goal.setName', value: 'Live before final draft' },
+        }],
+      });
+      expect(projectGoalCreateRun(row!, 'another-identity')).toBeNull();
+    } finally {
+      release();
+      await execution;
+    }
+  });
+
+  it('persists real model tool action receipts inside the scoped Mastra workflow state', async () => {
+    const planner: GoalPlannerPort = {
+      plan: vi.fn(async (_request, ctx) => {
+        const sink = requireGoalWorkflowLiveActionSink(ctx);
+        await sink.append({ actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Pass JLPT N1' });
+        const duplicate = await sink.append({ actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Pass JLPT N1' });
+        expect(duplicate.sequence).toBe(1);
+        await sink.append({ actionId: 'description-1', revision: 1, operation: 'goal.patchDescription', value: 'Practice every morning' });
+        return { status: 'draft_ready', reason: 'Ready', candidateDraft: draftContent };
+      }),
+    };
+    const { storage, buildWorkflow } = await harness(planner);
+    const runId = 'workflow-goal-action-journal';
+    const run = await buildWorkflow().createRun({ runId, resourceId: workflowInput.identityId });
+    await run.start({
+      inputData: workflowInput,
+      initialState: initialGoalCreateWorkflowState(workflowInput),
+      requestContext: mastraRequestContext('start-live'),
+    });
+    const store = await storage.getStore('workflows');
+    const row = await store?.getWorkflowRunById({ workflowName: 'goal-create', runId });
+    const snapshot = row?.snapshot as { context?: Record<string, unknown> } | undefined;
+    expect(snapshot).toBeDefined();
+    const state = (snapshot?.value ?? null) as { liveActions?: { sequence: number; command: { actionId: string } }[] } | null;
+    expect(state?.liveActions).toHaveLength(2);
+    expect(state?.liveActions?.map(({ sequence }) => sequence)).toEqual([1, 2]);
+    const persisted = JSON.stringify(snapshot);
+    expect(persisted).toContain('goal.setName');
+    expect(persisted).toContain('goal.patchDescription');
+    expect(persisted.match(/name-1/g)?.length).toBe(1);
+  });
+
   it('publishes fresh deterministic owner hints on natural-language revise and regenerate', async () => {
     const planner: GoalPlannerPort = {
       plan: vi.fn(async () => ({

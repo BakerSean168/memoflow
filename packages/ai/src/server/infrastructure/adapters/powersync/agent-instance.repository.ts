@@ -243,7 +243,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         name: record.name,
         enabled: record.enabled,
         executablePath: record.nativeConfig?.executablePath ?? prior.executablePath,
-        homePath: record.nativeConfig?.homePath ?? prior.homePath,
+        homePath: record.nativeConfig ? record.nativeConfig.homePath : prior.homePath,
         writeScopes: record.nativeConfig?.writeScopes ?? prior.writeScopes,
         instanceSlug: prior.instanceSlug,
         accentColor: record.accentColor,
@@ -400,16 +400,17 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         'INSERT OR IGNORE INTO ai_agent_conversation_bindings (id, identity_id, conversation_id, instance_id) VALUES (?, ?, ?, ?)',
         [key(owner, conversationId), owner, conversationId, instanceId],
       );
-      const row = await tx.getOptional<{ instance_id: string }>(
-        'SELECT instance_id FROM ai_agent_conversation_bindings WHERE id = ? AND identity_id = ?',
-        [key(owner, conversationId), owner],
-      );
-      if (row?.instance_id !== instanceId) throw new AgentRegistryError('CONFLICT');
-      if (providerId && modelId)
-        await tx.execute(
-          'UPDATE ai_agent_conversation_bindings SET provider_id = ?, model_id = ? WHERE id = ? AND identity_id = ?',
-          [providerId, modelId, key(owner, conversationId), owner],
+      if (providerId && modelId) {
+        const binding = await tx.getOptional<{ id: string }>(
+          'SELECT b.id FROM ai_agent_instance_bindings b JOIN ai_provider_configs p ON p.id = b.connection_id AND p.identity_id = b.identity_id WHERE b.identity_id = ? AND b.instance_id = ? AND b.connection_id = ? AND p.deleted_at IS NULL AND p.is_active = 1',
+          [owner, instanceId, providerId],
         );
+        if (!binding) throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
+      }
+      await tx.execute(
+        'UPDATE ai_agent_conversation_bindings SET instance_id = ?, provider_id = ?, model_id = ? WHERE id = ? AND identity_id = ?',
+        [instanceId, providerId ?? null, modelId ?? null, key(owner, conversationId), owner],
+      );
     });
   }
   async hasConnectionBindings(owner: string, connectionId: string): Promise<boolean> {

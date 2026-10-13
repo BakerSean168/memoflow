@@ -1,5 +1,7 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import {
+  AssistantRuntimeToolAnswerCommandSchema,
+  AssistantRuntimeToolAnswerResultSchema,
   AssistantRuntimeApprovalCommandSchema,
   AssistantAttentionListRequestSchema,
   AssistantAttentionListResponseSchema,
@@ -15,6 +17,8 @@ import {
   AIRuntimeUsageQueryClientRequestSchema,
   AIRuntimeUsageSummarySchema,
   AIWorkflowCancelClientRequestSchema,
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   AIWorkflowGetClientRequestSchema,
   AIWorkflowListClientRequestSchema,
   AIWorkflowResumeClientRequestSchema,
@@ -38,7 +42,7 @@ import { ConversationAttentionObserver } from '../../server/application/services
 
 // HTTP hosts only own built-in conversations; a Desktop reference never falls back.
 const AssistantRuntimeClientCommandSchema = AnyAssistantRuntimeClientCommandSchema.refine(
-  (command) => command.type === 'tool_approval' || command.runtimeKind !== 'local_agent',
+  (command) => command.type === 'tool_approval' || command.type === 'tool_answer' || command.runtimeKind !== 'local_agent',
   'Local Agent execution requires Desktop',
 );
 const AssistantRuntimeHistoryClientRequestSchema =
@@ -54,6 +58,8 @@ interface PlatformMiddleware {
 type AssistantRuntimePort = Pick<
   MastraAIRuntime,
   | 'decideToolApproval'
+  | 'answerToolSuspension'
+  | 'listAskUserSuspensions'
   | 'dispatchMessage'
   | 'cancelRun'
   | 'listMessages'
@@ -219,6 +225,17 @@ export function registerAIRuntimeRoutes(
     }
   });
 
+  router.post('/assistant/ask-user/pending', auth, async (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) { res.status(401).json(responseBuilder.unauthorized('未授权，请登录')); return; }
+    if (!runtime) { res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable')); return; }
+    const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues))); return; }
+    try { res.status(200).json(responseBuilder.success(await runtime.listAskUserSuspensions({ identityId, conversationId: parsed.data.conversationId }))); }
+    catch (error) { const failure = toAITransportFailure(error, { fallbackCode: 'AI_RUNTIME_ERROR', fallbackMessage: 'AI runtime request failed' }); res.status(failure.statusCode).json(responseBuilder.error(failure.code, failure.message, undefined, failure.context)); }
+  });
+
   router.post('/assistant/delete', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
     const identityId = authenticatedIdentity(req);
@@ -256,6 +273,30 @@ export function registerAIRuntimeRoutes(
       res
         .status(failure.statusCode)
         .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+    }
+  });
+
+  router.post('/assistant/answer', auth, async (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) { res.status(401).json(responseBuilder.unauthorized('未授权，请登录')); return; }
+    if (!runtime) { res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable')); return; }
+    const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues))); return; }
+    try {
+      const accepted = await runtime.answerToolSuspension({
+        context: extractAiExpressExecutionContext(req),
+        command: parsed.data,
+      });
+      res.status(200).json(responseBuilder.success(AssistantRuntimeToolAnswerResultSchema.parse({ accepted })));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -323,7 +364,7 @@ export function registerAIRuntimeRoutes(
     }
   });
 
-  router.post('/assistant/approval', auth, (req, res) => {
+  router.post('/assistant/approval', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
     if (!authenticatedIdentity(req)) {
       res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
@@ -339,7 +380,7 @@ export function registerAIRuntimeRoutes(
       return;
     }
     try {
-      const accepted = runtime.decideToolApproval({
+      const accepted = await runtime.decideToolApproval({
         context: extractAiExpressExecutionContext(req),
         command: parsed.data,
       });
@@ -491,6 +532,38 @@ export function registerAIRuntimeRoutes(
       res
         .status(failure.statusCode)
         .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+    }
+  });
+
+  router.post('/workflow/goal-surface-lease', auth, async (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    if (!workflowRuntime) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI workflow runtime unavailable'));
+      return;
+    }
+    const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues)));
+      return;
+    }
+    try {
+      const result = AIGoalSurfaceLeaseResponseSchema.parse(
+        await workflowRuntime.goalSurfaceLease({ identityId, request: parsed.data }),
+      );
+      res.status(200).json(responseBuilder.success(result));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Goal surface lease failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 

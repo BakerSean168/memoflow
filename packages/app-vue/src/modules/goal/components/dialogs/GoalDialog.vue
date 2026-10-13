@@ -1,203 +1,46 @@
 <template>
-  <Dialog :open="open" @update:open="setOpen">
-    <ProductDialogShell
-      :open="open"
-      test-id="goal-dialog"
-      recipe="workspace"
-      initial-focus-selector="[data-testid='goal-name-input']"
+  <GoalFormFrame :open="open" :presentation="presentation" @update:open="setOpen">
+    <template #title>
+      {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
+    </template>
+    <template #actions>
+      <Button
+        v-if="mode === 'create'"
+        type="button"
+        variant="ghost"
+        size="sm"
+        :disabled="isBusy"
+        data-testid="goal-create-with-ai"
+        @click="emit('create-with-ai')"
+      >
+        <Sparkles class="mr-1 h-4 w-4" />
+        {{ t('goal.dialog.createWithAI') }}
+      </Button>
+    </template>
+
+    <form
+      id="goal-form"
+      data-testid="goal-form"
+      class="flex min-h-full flex-col gap-6"
+      @submit.prevent="save"
     >
-      <template #title>
-        {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
-      </template>
-      <template #actions>
-        <Button
-          v-if="mode === 'create'"
-          type="button"
-          variant="ghost"
-          size="sm"
-          :disabled="isBusy"
-          data-testid="goal-create-with-ai"
-          @click="emit('create-with-ai')"
-        >
-          <Sparkles class="mr-1 h-4 w-4" />
-          {{ t('goal.dialog.createWithAI') }}
-        </Button>
-      </template>
-
-      <form id="goal-form" class="flex min-h-full flex-col gap-6" @submit.prevent="save">
-        <section
-          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
-          data-testid="goal-identity-section"
-        >
-          <div>
-            <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
-            <ProductAutoTextarea
-              id="goal-name"
-              ref="nameInput"
-              v-model="draft.name"
-              :disabled="isBusy"
-              :max-length="80"
-              :rows="1"
-              data-testid="goal-name-input"
-              class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
-              :placeholder="t('goal.dialog.goalTitlePlaceholder')"
-              @limit-exceeded="nameLimitFeedback.show()"
-            />
-            <Transition
-              enter-active-class="transition-opacity duration-150"
-              leave-active-class="transition-opacity duration-150"
-              enter-from-class="opacity-0"
-              leave-to-class="opacity-0"
-            >
-              <p
-                v-if="nameLimitFeedback.visible.value"
-                class="mt-1 text-xs text-destructive"
-                role="alert"
-                data-testid="goal-name-limit-error"
-              >
-                {{ t('goal.dialog.nameLimitExceeded') }}
-              </p>
-            </Transition>
-          </div>
-
-          <div>
-            <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
-            <ProductAutoTextarea
-              id="goal-summary"
-              ref="summaryInput"
-              v-model="draft.summary"
-              :disabled="isBusy"
-              :max-length="255"
-              :rows="1"
-              data-testid="goal-summary-input"
-              class="min-h-8 text-sm leading-5 text-muted-foreground"
-              :placeholder="t('goal.dialog.summaryPlaceholder')"
-              @limit-exceeded="summaryLimitFeedback.show()"
-            />
-            <Transition
-              enter-active-class="transition-opacity duration-150"
-              leave-active-class="transition-opacity duration-150"
-              enter-from-class="opacity-0"
-              leave-to-class="opacity-0"
-            >
-              <p
-                v-if="summaryLimitFeedback.visible.value"
-                class="mt-1 text-xs text-destructive"
-                role="alert"
-                data-testid="goal-summary-limit-error"
-              >
-                {{ t('goal.dialog.summaryLimitExceeded') }}
-              </p>
-            </Transition>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
-            <GoalStatusPicker
-              v-model="draft.status"
-              :base-status="persistedStatus"
-              :disabled="isBusy"
-            />
-            <GoalTimeframePicker
-              v-model="draft.start"
-              :disabled="isBusy"
-              :label="t('goal.dialog.startDate')"
-              test-id="goal-start-chip"
-              :aria-label="t('goal.dialog.startDate')"
-              :placeholder="t('goal.dialog.startDate')"
-              :max-start-boundary="
-                draft.target ? goalTimeframeEndBoundary(draft.target) : undefined
-              "
-              :constraint-text="t('goal.dialog.startAfterTarget')"
-            />
-
-            <GoalTimeframePicker
-              v-model="draft.target"
-              :disabled="isBusy"
-              test-id="goal-target-chip"
-              :aria-label="t('goal.dialog.target')"
-              :placeholder="t('goal.dialog.target')"
-              :min-end-boundary="draft.start ? goalTimeframeStartBoundary(draft.start) : undefined"
-              :constraint-text="t('goal.dialog.targetBeforeStart')"
-            />
-
-            <LabelPicker
-              v-model="draft.labelIds"
-              :options="labelOptions"
-              :disabled="labelsLoading || isBusy"
-              :placeholder="t('goal.dialog.labels')"
-              :search-placeholder="t('goal.list.searchLabels')"
-              :empty-text="t('goal.list.noLabels')"
-              :create-label="t('goal.dialog.createLabel')"
-              :aria-label="t('goal.dialog.labels')"
-              compact
-              @create="createAndSelectLabel"
-            />
-
-            <GoalReminderChip
-              v-if="mode === 'edit'"
-              v-model="draft.reminderConfig"
-              :disabled="isBusy"
-              :start="draft.start"
-              :target="draft.target"
-            />
-
-            <Popover>
-              <PopoverTrigger as-child>
-                <ProductPropertyChip data-testid="goal-notes-chip">
-                  <template #icon><NotebookText class="h-3.5 w-3.5" /></template>
-                  {{ t('goal.dialog.notes') }}
-                </ProductPropertyChip>
-              </PopoverTrigger>
-              <PopoverContent align="start" class="w-72 space-y-3 p-3">
-                <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
-                <Button
-                  v-if="mode === 'edit' && goal"
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  :disabled="isBusy"
-                  data-testid="goal-notes-open-knowledge"
-                  @click="emit('open-knowledge', String(goal.id))"
-                >
-                  {{ t('goal.dialog.openKnowledge') }}
-                </Button>
-                <Button
-                  v-else
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  :disabled="isBusy"
-                  data-testid="goal-notes-create-with-ai"
-                  @click="emit('create-with-ai')"
-                >
-                  <Sparkles class="mr-1 h-4 w-4" />
-                  {{ t('goal.dialog.createWithAI') }}
-                </Button>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
-            {{ labelCreateError }}
-          </p>
-          <p v-if="formError" role="alert" class="text-xs text-destructive">
-            {{ formError }}
-          </p>
-        </section>
-
-        <section class="space-y-2" data-testid="goal-description-section">
-          <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
+      <section
+        class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
+        data-testid="goal-identity-section"
+      >
+        <div>
+          <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
           <ProductAutoTextarea
-            id="goal-description"
-            ref="descriptionInput"
-            v-model="draft.description"
+            id="goal-name"
+            ref="nameInput"
+            v-model="draft.name"
             :disabled="isBusy"
-            :max-length="10000"
-            :rows="5"
-            data-testid="goal-description-input"
-            class="min-h-32 text-sm leading-6 text-foreground/90"
-            :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
-            @limit-exceeded="descriptionLimitFeedback.show()"
+            :max-length="80"
+            :rows="1"
+            data-testid="goal-name-input"
+            class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
+            :placeholder="t('goal.dialog.goalTitlePlaceholder')"
+            @limit-exceeded="nameLimitFeedback.show()"
           />
           <Transition
             enter-active-class="transition-opacity duration-150"
@@ -206,42 +49,195 @@
             leave-to-class="opacity-0"
           >
             <p
-              v-if="descriptionLimitFeedback.visible.value"
-              class="text-xs text-destructive"
+              v-if="nameLimitFeedback.visible.value"
+              class="mt-1 text-xs text-destructive"
               role="alert"
-              data-testid="goal-description-limit-error"
+              data-testid="goal-name-limit-error"
             >
-              {{ t('goal.dialog.descriptionLimitExceeded') }}
+              {{ t('goal.dialog.nameLimitExceeded') }}
             </p>
           </Transition>
-        </section>
+        </div>
 
-        <GoalKeyResultDraftEditor
-          :key="mode"
-          v-model="draft.keyResults"
-          class="mt-auto"
+        <div>
+          <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
+          <ProductAutoTextarea
+            id="goal-summary"
+            ref="summaryInput"
+            v-model="draft.summary"
+            :disabled="isBusy"
+            :max-length="255"
+            :rows="1"
+            data-testid="goal-summary-input"
+            class="min-h-8 text-sm leading-5 text-muted-foreground"
+            :placeholder="t('goal.dialog.summaryPlaceholder')"
+            @limit-exceeded="summaryLimitFeedback.show()"
+          />
+          <Transition
+            enter-active-class="transition-opacity duration-150"
+            leave-active-class="transition-opacity duration-150"
+            enter-from-class="opacity-0"
+            leave-to-class="opacity-0"
+          >
+            <p
+              v-if="summaryLimitFeedback.visible.value"
+              class="mt-1 text-xs text-destructive"
+              role="alert"
+              data-testid="goal-summary-limit-error"
+            >
+              {{ t('goal.dialog.summaryLimitExceeded') }}
+            </p>
+          </Transition>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
+          <GoalStatusPicker
+            v-model="draft.status"
+            :base-status="persistedStatus"
+            :disabled="isBusy"
+          />
+          <GoalTimeframePicker
+            v-model="draft.start"
+            :disabled="isBusy"
+            :label="t('goal.dialog.startDate')"
+            test-id="goal-start-chip"
+            :aria-label="t('goal.dialog.startDate')"
+            :placeholder="t('goal.dialog.startDate')"
+            :max-start-boundary="draft.target ? goalTimeframeEndBoundary(draft.target) : undefined"
+            :constraint-text="t('goal.dialog.startAfterTarget')"
+          />
+
+          <GoalTimeframePicker
+            v-model="draft.target"
+            :disabled="isBusy"
+            test-id="goal-target-chip"
+            :aria-label="t('goal.dialog.target')"
+            :placeholder="t('goal.dialog.target')"
+            :min-end-boundary="draft.start ? goalTimeframeStartBoundary(draft.start) : undefined"
+            :constraint-text="t('goal.dialog.targetBeforeStart')"
+          />
+
+          <LabelPicker
+            v-model="draft.labelIds"
+            :options="labelOptions"
+            :disabled="labelsLoading || isBusy"
+            :placeholder="t('goal.dialog.labels')"
+            :search-placeholder="t('goal.list.searchLabels')"
+            :empty-text="t('goal.list.noLabels')"
+            :create-label="t('goal.dialog.createLabel')"
+            :aria-label="t('goal.dialog.labels')"
+            compact
+            @create="createAndSelectLabel"
+          />
+
+          <GoalReminderChip
+            v-if="mode === 'edit'"
+            v-model="draft.reminderConfig"
+            :disabled="isBusy"
+            :start="draft.start"
+            :target="draft.target"
+          />
+
+          <Popover>
+            <PopoverTrigger as-child>
+              <ProductPropertyChip data-testid="goal-notes-chip">
+                <template #icon><NotebookText class="h-3.5 w-3.5" /></template>
+                {{ t('goal.dialog.notes') }}
+              </ProductPropertyChip>
+            </PopoverTrigger>
+            <PopoverContent align="start" class="w-72 space-y-3 p-3">
+              <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
+              <Button
+                v-if="mode === 'edit' && goal"
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="isBusy"
+                data-testid="goal-notes-open-knowledge"
+                @click="emit('open-knowledge', String(goal.id))"
+              >
+                {{ t('goal.dialog.openKnowledge') }}
+              </Button>
+              <Button
+                v-else
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="isBusy"
+                data-testid="goal-notes-create-with-ai"
+                @click="emit('create-with-ai')"
+              >
+                <Sparkles class="mr-1 h-4 w-4" />
+                {{ t('goal.dialog.createWithAI') }}
+              </Button>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
+          {{ labelCreateError }}
+        </p>
+        <p v-if="formError" role="alert" class="text-xs text-destructive">
+          {{ formError }}
+        </p>
+      </section>
+
+      <section class="space-y-2" data-testid="goal-description-section">
+        <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
+        <ProductAutoTextarea
+          id="goal-description"
+          ref="descriptionInput"
+          v-model="draft.description"
           :disabled="isBusy"
-          :goal-start="draft.start"
-          :goal-target="draft.target"
-          @editing-change="krEditorOpen = $event"
+          :max-length="10000"
+          :rows="5"
+          data-testid="goal-description-input"
+          class="min-h-32 text-sm leading-6 text-foreground/90"
+          :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
+          @limit-exceeded="descriptionLimitFeedback.show()"
         />
-      </form>
-
-      <template #footer>
-        <Button variant="ghost" :disabled="isBusy" @click="setOpen(false)">
-          {{ t('common.cancel') }}
-        </Button>
-        <Button
-          type="submit"
-          form="goal-form"
-          data-testid="save-goal-button"
-          :disabled="!draft.name.trim() || isBusy || krEditorOpen"
+        <Transition
+          enter-active-class="transition-opacity duration-150"
+          leave-active-class="transition-opacity duration-150"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
         >
-          {{ mode === 'edit' ? t('goal.dialog.saveChanges') : t('goal.dialog.createGoal') }}
-        </Button>
-      </template>
-    </ProductDialogShell>
-  </Dialog>
+          <p
+            v-if="descriptionLimitFeedback.visible.value"
+            class="text-xs text-destructive"
+            role="alert"
+            data-testid="goal-description-limit-error"
+          >
+            {{ t('goal.dialog.descriptionLimitExceeded') }}
+          </p>
+        </Transition>
+      </section>
+
+      <GoalKeyResultDraftEditor
+        :key="mode"
+        v-model="draft.keyResults"
+        class="mt-auto"
+        :disabled="isBusy"
+        :goal-start="draft.start"
+        :goal-target="draft.target"
+        @editing-change="krEditorOpen = $event"
+      />
+    </form>
+
+    <template #footer>
+      <Button variant="ghost" :disabled="interactionBusy" @click="setOpen(false)">
+        {{ t('common.cancel') }}
+      </Button>
+      <Button
+        type="submit"
+        form="goal-form"
+        data-testid="save-goal-button"
+        :disabled="!draft.name.trim() || interactionBusy || krEditorOpen"
+      >
+        {{ mode === 'edit' ? t('goal.dialog.saveChanges') : t('goal.dialog.createGoal') }}
+      </Button>
+    </template>
+  </GoalFormFrame>
 </template>
 
 <script setup lang="ts">
@@ -271,20 +267,14 @@ import {
   type CreateGoalReq,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
-import {
-  Button,
-  Dialog,
-  Label,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@memoflow/ui-vue-shadcn';
+import { Button, Label, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import {
   LabelPicker,
   ProductAutoTextarea,
-  ProductDialogShell,
   ProductPropertyChip,
 } from '../../../../shared/components';
+import { validateGoalNativePatch } from '../../composables/validateGoalNativePatch';
+import GoalFormFrame from './GoalFormFrame.vue';
 import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
@@ -303,8 +293,13 @@ import type {
 } from '../../composables/goalNativeEditSession';
 
 const props = withDefaults(
-  defineProps<{ open: boolean; mode?: 'create' | 'edit'; goal?: GoalClientDTO | null }>(),
-  { mode: 'create', goal: null },
+  defineProps<{
+    open: boolean;
+    mode?: 'create' | 'edit';
+    goal?: GoalClientDTO | null;
+    presentation?: 'dialog' | 'panel';
+  }>(),
+  { mode: 'create', goal: null, presentation: 'dialog' },
 );
 const emit = defineEmits<{
   'session-change': [session: GoalNativeEditSession | null];
@@ -321,7 +316,24 @@ const { t } = useI18n();
 const { createGoal, updateGoal, transitionGoalStatus, isSaving } = useGoal();
 const submitting = ref(false);
 const editingBlocked = ref(false);
-const isBusy = computed(() => submitting.value || isSaving.value || editingBlocked.value);
+// Session-local capability: the scoped AI handle can mutate while user commands cannot.
+// Reload invalidates the handle; the durable workflow restores only through a fresh safety check.
+const control = ref<symbol | null>(null);
+// Once the AI has projected a draft and coordinated submit/cancel, the owner must be
+// able to confirm or dismiss it even though the AI capability still holds `control`.
+// `isBusy` keeps inputs locked during AI patching; `interactionBusy` gates only the
+// Save/Cancel affordances and the close guard so the owner can always settle a review.
+const coordinated = ref(false);
+const isBusy = computed(
+  () => submitting.value || isSaving.value || editingBlocked.value || control.value !== null,
+);
+const interactionBusy = computed(
+  () =>
+    submitting.value ||
+    isSaving.value ||
+    editingBlocked.value ||
+    (control.value !== null && !coordinated.value),
+);
 watch(isBusy, (busy) => emit('busy-change', busy), { immediate: true, flush: 'sync' });
 const {
   options: labelOptions,
@@ -358,81 +370,92 @@ function publishSession(): void {
   invalidateSession = () => {
     active = false;
   };
-  function assertActive(): void {
-    if (!active || !props.open) throw new Error('Goal edit session is closed');
-  }
-  function assertEditable(): void {
-    assertActive();
-    if (isBusy.value) throw new Error('Goal edit session is busy');
-  }
-  const session: GoalNativeEditSession = {
-    setEditingBlocked(blocked) {
+  function makeSession(capability?: symbol): GoalNativeEditSession {
+    function assertActive(): void {
+      if (!active || !props.open || (capability && control.value !== capability))
+        throw new Error('Goal edit session is closed');
+    }
+    function assertAuthority(): void {
       assertActive();
-      editingBlocked.value = blocked;
-    },
-    patch(changes) {
-      assertEditable();
-      // Preflight the whole patch before touching the canonical draft.
-      if (changes.keyResults && krEditorOpen.value)
-        throw new Error('Finish the native Key Result editor first');
-      if (changes.keyResult) {
-        if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
-        const { index } = changes.keyResult;
-        if (!Number.isInteger(index) || !(changes.keyResults ?? draft.keyResults)[index])
-          throw new Error('Key Result position is invalid');
-      }
-      const detached = copyValue(changes);
-      changes = detached;
-      // Explicit field allowlist: arbitrary component state cannot be patched.
-      if (changes.keyResults !== undefined) draft.keyResults = copyValue(changes.keyResults);
-      if (changes.name !== undefined) draft.name = changes.name;
-      if (changes.summary !== undefined) draft.summary = changes.summary;
-      if (changes.description !== undefined) draft.description = changes.description;
-      if (changes.status !== undefined) draft.status = changes.status;
-      if (changes.start !== undefined) draft.start = copyValue(changes.start);
-      if (changes.target !== undefined) draft.target = copyValue(changes.target);
-      if (changes.reminderConfig !== undefined)
-        draft.reminderConfig = copyValue(changes.reminderConfig);
-      if (changes.labelIds !== undefined) draft.labelIds = [...changes.labelIds];
-      if (changes.keyResult) {
-        const { index, changes: childChanges } = changes.keyResult;
-        const child = draft.keyResults[index];
-        const fields = [
-          'title',
-          'description',
-          'calculationMethod',
-          'initialValue',
-          'currentValue',
-          'targetValue',
-          'target',
-          'unit',
-          'weight',
-        ] as const;
-        for (const field of fields) {
-          if (childChanges[field] !== undefined) {
-            Object.assign(child, { [field]: copyValue(childChanges[field]) });
+      if (control.value !== null && control.value !== capability)
+        throw new Error('Goal edit session is controlled by AI');
+    }
+    function assertEditable(): void {
+      assertAuthority();
+      if (submitting.value || isSaving.value || editingBlocked.value)
+        throw new Error('Goal edit session is busy');
+    }
+    const session: GoalNativeEditSession = {
+      claimControl(ownerId) {
+        assertEditable();
+        if (!ownerId.trim() || control.value !== null || krEditorOpen.value)
+          throw new Error('Goal edit session cannot be claimed');
+        const token = Symbol(ownerId);
+        control.value = token;
+        return makeSession(token);
+      },
+      releaseControl() {
+        assertAuthority();
+        if (!capability) return;
+        if (submitting.value || isSaving.value) throw new Error('Goal edit session is busy');
+        control.value = null;
+        editingBlocked.value = false;
+      },
+      setEditingBlocked(blocked) {
+        assertAuthority();
+        editingBlocked.value = blocked;
+      },
+      patch(changes) {
+        assertEditable();
+        // Preflight the whole patch before touching the canonical draft.
+        if (changes.keyResults && krEditorOpen.value)
+          throw new Error('Finish the native Key Result editor first');
+        if (changes.keyResult) {
+          if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+          const { index } = changes.keyResult;
+          if (!Number.isInteger(index) || !(changes.keyResults ?? draft.keyResults)[index])
+            throw new Error('Key Result position is invalid');
+        }
+        const detached = copyValue(changes);
+        if (capability) validateGoalNativePatch(draft, detached, persistedStatus.value);
+        changes = detached;
+        // Explicit field allowlist: arbitrary component state cannot be patched.
+        if (changes.keyResults !== undefined) draft.keyResults = copyValue(changes.keyResults);
+        if (changes.name !== undefined) draft.name = changes.name;
+        if (changes.summary !== undefined) draft.summary = changes.summary;
+        if (changes.description !== undefined) draft.description = changes.description;
+        if (changes.status !== undefined) draft.status = changes.status;
+        if (changes.start !== undefined) draft.start = copyValue(changes.start);
+        if (changes.target !== undefined) draft.target = copyValue(changes.target);
+        if (changes.reminderConfig !== undefined)
+          draft.reminderConfig = copyValue(changes.reminderConfig);
+        if (changes.labelIds !== undefined) draft.labelIds = [...changes.labelIds];
+        if (changes.keyResult) {
+          const { index, changes: childChanges } = changes.keyResult;
+          const child = draft.keyResults[index];
+          const fields = [
+            'title',
+            'description',
+            'calculationMethod',
+            'initialValue',
+            'currentValue',
+            'targetValue',
+            'target',
+            'unit',
+            'weight',
+          ] as const;
+          for (const field of fields) {
+            if (childChanges[field] !== undefined) {
+              Object.assign(child, { [field]: copyValue(childChanges[field]) });
+            }
           }
         }
-      }
-    },
-    addChild(child) {
-      assertEditable();
-      if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
-      const {
-        id,
-        title,
-        description,
-        calculationMethod,
-        initialValue,
-        currentValue,
-        targetValue,
-        target,
-        unit,
-        weight,
-      } = child;
-      draft.keyResults.push(
-        copyValue({
-          ...(id ? { id } : {}),
+      },
+      addChild(child) {
+        assertEditable();
+        if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+        const {
+          id,
           title,
           description,
           calculationMethod,
@@ -442,56 +465,88 @@ function publishSession(): void {
           target,
           unit,
           weight,
-        }),
-      );
-    },
-    removeChild(index) {
-      assertEditable();
-      if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
-      if (!Number.isInteger(index) || !draft.keyResults[index])
-        throw new Error('Key Result position is invalid');
-      draft.keyResults.splice(index, 1);
-    },
-    async focus(field) {
-      assertActive();
-      await nextTick();
-      assertActive();
-      const inputs = { name: nameInput, summary: summaryInput, description: descriptionInput };
-      inputs[field].value?.$el.focus();
-    },
-    coordinateSubmit(submit, cancel) {
-      assertEditable();
-      if (props.mode !== 'create') throw new Error('Submission coordination requires create mode');
-      submitCoordinator = submit;
-      cancelCoordinator = cancel;
-    },
-    async requestSubmit(context) {
-      assertEditable();
-      if (submitCoordinator && !context)
-        throw new Error('Coordinated Goal submit requires owner context');
-      return saveOwner(context);
-    },
-    requestCancel() {
-      assertEditable();
-      // Programmatic owner/workflow cancellation is not a user dismissal.
-      // Bypass the dirty-close prompt so automation cannot deadlock on UI confirmation.
-      publishOpen(false);
-    },
-    readDraftState() {
-      assertActive();
-      return {
-        mode: props.mode,
-        goalId: props.mode === 'edit' && props.goal ? String(props.goal.id) : null,
-        draft: copyValue(draft),
-        dirty: snapshotDraft() !== initialSnapshot.value,
-        busy: isBusy.value,
-        error: formError.value,
-      };
-    },
-  };
-  emit('session-change', session);
+        } = child;
+        if (capability)
+          validateGoalNativePatch(
+            draft,
+            { keyResults: [...draft.keyResults, child] },
+            persistedStatus.value,
+          );
+        draft.keyResults.push(
+          copyValue({
+            ...(id ? { id } : {}),
+            title,
+            description,
+            calculationMethod,
+            initialValue,
+            currentValue,
+            targetValue,
+            target,
+            unit,
+            weight,
+          }),
+        );
+      },
+      removeChild(index) {
+        assertEditable();
+        if (krEditorOpen.value) throw new Error('Finish the native Key Result editor first');
+        if (!Number.isInteger(index) || !draft.keyResults[index])
+          throw new Error('Key Result position is invalid');
+        if (capability)
+          validateGoalNativePatch(
+            draft,
+            { keyResults: draft.keyResults.filter((_item, position) => position !== index) },
+            persistedStatus.value,
+          );
+        draft.keyResults.splice(index, 1);
+      },
+      async focus(field) {
+        assertActive();
+        await nextTick();
+        assertActive();
+        const inputs = { name: nameInput, summary: summaryInput, description: descriptionInput };
+        inputs[field].value?.$el.focus();
+      },
+      coordinateSubmit(submit, cancel) {
+        assertEditable();
+        if (props.mode !== 'create')
+          throw new Error('Submission coordination requires create mode');
+        submitCoordinator = submit;
+        cancelCoordinator = cancel;
+        coordinated.value = true;
+      },
+      async requestSubmit(context) {
+        assertEditable();
+        if (submitCoordinator && !context)
+          throw new Error('Coordinated Goal submit requires owner context');
+        return saveOwner(context, capability);
+      },
+      requestCancel() {
+        assertEditable();
+        // Programmatic owner/workflow cancellation is not a user dismissal.
+        // Bypass the dirty-close prompt so automation cannot deadlock on UI confirmation.
+        publishOpen(false);
+      },
+      readDraftState() {
+        assertActive();
+        return {
+          mode: props.mode,
+          goalId: props.mode === 'edit' && props.goal ? String(props.goal.id) : null,
+          draft: copyValue(draft),
+          dirty: snapshotDraft() !== initialSnapshot.value,
+          busy: isBusy.value,
+          error: formError.value,
+        };
+      },
+    };
+    return session;
+  }
+  emit('session-change', makeSession());
 }
 function retireSession(): void {
+  control.value = null;
+  editingBlocked.value = false;
+  coordinated.value = false;
   invalidateSession?.();
   emit('session-change', null);
 }
@@ -554,12 +609,13 @@ function reset(): void {
   submitCoordinator = null;
   cancelCoordinator = null;
   editingBlocked.value = false;
+  coordinated.value = false;
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
 }
 
 watch(
-  () => [props.open, props.mode, props.goal?.id] as const,
+  () => [props.open, props.mode, props.goal?.id, props.presentation] as const,
   ([isOpen]) => {
     retireSession();
     if (isOpen) {
@@ -573,7 +629,7 @@ watch(draft, () => emit('dirty-change', isDirty.value), { deep: true });
 
 const { requestClose } = useDialogCloseGuard({
   dirty: isDirty,
-  busy: isBusy,
+  busy: interactionBusy,
   onClose: async () => {
     if (cancelCoordinator) {
       await cancelCoordinator();
@@ -637,15 +693,26 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
+  if (submitting.value || isSaving.value || editingBlocked.value) return;
   if (submitCoordinator) {
     await submitCoordinator();
     return;
   }
+  if (control.value !== null) return;
   await saveOwner();
 }
 
-async function saveOwner(context?: GoalNativeSubmitContext): Promise<GoalClientDTO | null> {
-  if (isBusy.value) return null;
+async function saveOwner(
+  context?: GoalNativeSubmitContext,
+  capability?: symbol,
+): Promise<GoalClientDTO | null> {
+  if (
+    submitting.value ||
+    isSaving.value ||
+    editingBlocked.value ||
+    (control.value !== null && control.value !== capability)
+  )
+    return null;
   submitting.value = true;
   try {
     return (await persistDraft(context)) ?? null;
@@ -725,7 +792,7 @@ async function persistDraft(context?: GoalNativeSubmitContext): Promise<GoalClie
 
   const req: CreateGoalReq = {
     ...common,
-    ...(context ? { id: context.createId } : {}),
+    ...(context ? { id: context.createId, nativeAiLease: context.nativeAiLease } : {}),
     ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }, index) => ({
       ...item,

@@ -5,7 +5,10 @@ import {
 import { RequestContext } from '@mastra/core/request-context';
 import type { AIWorkflowStartClientRequest, AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import { randomUUID } from 'node:crypto';
-import { rm } from 'node:fs/promises';
+import { rm, readFile, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { LibSQLStore } from '@mastra/libsql';
@@ -33,9 +36,11 @@ const TEST_USER_TIME_CONTEXT_PORT = {
 const resources: Array<{ runtime: MastraAIRuntime; file: string }> = [];
 
 afterEach(async () => {
+  if (process.env['MEMOFLOW_NATIVE_RESTART_FIXTURE']) return;
   for (const resource of resources.splice(0)) {
     await resource.runtime.dispose().catch(() => undefined);
     await rm(resource.file, { force: true }).catch(() => undefined);
+    await rm(resource.file + '.json', { force: true }).catch(() => undefined);
   }
 });
 
@@ -149,6 +154,7 @@ async function createRuntime(
     ok({ noteId: request.knowledgeDocumentId }),
   );
   const recordExecution = vi.fn(async (_record: AIExecutionRecordInput) => {});
+  const recordActivity = vi.fn(async (_identityId: string, _id: string, _at: number) => {});
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -167,6 +173,7 @@ async function createRuntime(
     storage,
     modelResolver,
     conversationShellSource: { loadShell: vi.fn(async () => ({ title: 'Runtime test' })) },
+    conversationActivity: { recordActivity },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
       readTaskPlan: vi.fn(async () => error('NOT_FOUND', 'Task not created')),
@@ -216,6 +223,7 @@ async function createRuntime(
     createConfirmedKnowledgeNote,
     summarizeUsage,
     recordExecution,
+    recordActivity,
     modelResolver,
     createRoutine,
   };
@@ -411,7 +419,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         expect(runtime.cancelRun({ identityId: 'identity-a', runId: required.runId })).toBe(true);
       else
         expect(
-          runtime.decideToolApproval({
+          await runtime.decideToolApproval({
             context: decisionContext,
             command: {
               type: 'tool_approval',
@@ -465,11 +473,11 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       { ...turn.command, toolCallId: 'other' },
     ]) {
       expect(
-        turn.runtime.decideToolApproval({ context: context('identity-a', 'decision'), command }),
+        await turn.runtime.decideToolApproval({ context: context('identity-a', 'decision'), command }),
       ).toBe(false);
     }
     expect(
-      turn.runtime.decideToolApproval({
+      await turn.runtime.decideToolApproval({
         context: context('foreign', 'decision'),
         command: turn.command,
       }),
@@ -477,7 +485,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const executionContext = context('identity-a', 'decision');
     const results = await Promise.all(
       [0, 1].map(async () =>
-        turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
+        await turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
       ),
     );
     expect(results).toEqual([true, false]);
@@ -488,7 +496,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     );
     expect(turn.decline).not.toHaveBeenCalled();
     expect(
-      turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
+      await turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
     ).toBe(false);
     expect(turn.events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
     expect(turn.events.at(-1)?.type).toBe('assistant.run.completed');
@@ -502,7 +510,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const turn = await parkedTurn();
     const noOp = vi.spyOn(turn.session, 'respondToToolApproval').mockImplementationOnce(() => {});
     expect(
-      turn.runtime.decideToolApproval({
+      await turn.runtime.decideToolApproval({
         context: context('identity-a', 'noop'),
         command: turn.command,
       }),
@@ -511,7 +519,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     noOp.mockRestore();
     turn.session.run.setRunId({ runId: 'successor' });
     expect(
-      turn.runtime.decideToolApproval({
+      await turn.runtime.decideToolApproval({
         context: context('identity-a', 'stale'),
         command: turn.command,
       }),
@@ -524,6 +532,202 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     // Test cleanup only: restore original binding so the real producer can finish.
     turn.session.run.setRunId({ runId: 'native-turn' });
     turn.session.abortRun();
+  });
+
+  it('reserves a conversation before asynchronous model validation and does not mutate selection on failure', async () => {
+    const assertTurnSelection = vi.fn(async () => {});
+    const { runtime, modelResolver } = await createRuntime(undefined, { assertTurnSelection });
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    let rejectModel!: (error: Error) => void;
+    const resolving = new Promise<never>((_resolve, reject) => {
+      rejectModel = reject;
+    });
+    const resolve = vi.spyOn(modelResolver, 'resolve').mockReturnValue(resolving);
+    const first = runtime
+      .dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'same',
+        content: 'first',
+        agentInstanceId: 'first',
+        providerId: 'p',
+        modelId: 'm',
+      })
+      .next();
+    await vi.waitFor(() => expect(resolve).toHaveBeenCalledOnce());
+    const second = runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: 'same',
+      content: 'second',
+      agentInstanceId: 'second',
+      providerId: 'p',
+      modelId: 'm',
+    });
+    await expect(second.next()).rejects.toThrow('active turn');
+    expect(assertTurnSelection).not.toHaveBeenCalled();
+    rejectModel(new Error('invalid model'));
+    await expect(first).rejects.toThrow('invalid model');
+    expect(assertTurnSelection).not.toHaveBeenCalled();
+    resolve.mockRejectedValueOnce(new Error('retry validation'));
+    await expect(
+      runtime
+        .dispatchMessage({ identityId: 'owner', conversationId: 'same', content: 'retry' })
+        .next(),
+    ).rejects.toThrow('retry validation');
+    expect(resolve).toHaveBeenCalledTimes(2);
+  });
+
+  it('projects a real native provider failure after switching models and releases the conversation', async () => {
+    const { runtime, modelResolver, recordExecution } = await createRuntime();
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    vi.spyOn(modelResolver, 'resolve').mockImplementation(
+      async (input) =>
+        ({
+          providerId: 'p',
+          providerName: 'Fixture',
+          modelId: input.modelId!,
+          capabilities: {},
+          model: {
+            specificationVersion: 'v2',
+            provider: 'fixture',
+            modelId: input.modelId!,
+            supportedUrls: {},
+            doStream: async () => ({
+              stream: new ReadableStream({
+                start(controller) {
+                  controller.enqueue({ type: 'stream-start', warnings: [] });
+                  controller.enqueue({
+                    type: 'error',
+                    error: Object.assign(new Error('PRIVATE_RESPONSE_BODY'), { statusCode: 503 }),
+                  });
+                  controller.close();
+                },
+              }),
+            }),
+          },
+        }) as never,
+    );
+    for (const modelId of ['first', 'switched']) {
+      const events: AssistantRuntimeEvent[] = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'retryable-chat',
+        modelId,
+        providerId: 'p',
+        content: 'fixture question',
+        context: context('owner', modelId),
+      }))
+        events.push(event);
+      expect(events.at(-1)).toMatchObject({
+        conversationId: 'retryable-chat',
+        type: 'assistant.run.failed',
+        data: { code: 'SERVICE_UNAVAILABLE', message: 'AI service is unavailable' },
+      });
+      expect(JSON.stringify(events)).not.toContain('PRIVATE_RESPONSE_BODY');
+    }
+    expect(
+      recordExecution.mock.calls
+        .map(([record]) => record)
+        .filter((record) => record.operation === 'assistant.turn'),
+    ).toEqual([
+      expect.objectContaining({ modelId: 'first', errorCategory: 'SERVICE_UNAVAILABLE' }),
+      expect.objectContaining({ modelId: 'switched', errorCategory: 'SERVICE_UNAVAILABLE' }),
+    ]);
+  });
+
+  it('uses two different models and instances with the same native thread and preserves prior context and execution sources', async () => {
+    const assertTurnSelection = vi.fn(async () => {});
+    const { runtime, modelResolver, recordExecution, recordActivity } = await createRuntime(
+      undefined,
+      {
+        assertTurnSelection,
+      },
+    );
+    recordActivity.mockRejectedValueOnce(new Error('activity storage offline'));
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    const prompts: unknown[] = [];
+    const resolve = vi.spyOn(modelResolver, 'resolve').mockImplementation(async (input) => {
+      const modelId = input.modelId!;
+      return {
+        providerId: input.providerId!,
+        providerName: 'Fixture',
+        modelId,
+        capabilities: {},
+        model: {
+          specificationVersion: 'v2',
+          provider: 'fixture',
+          modelId,
+          supportedUrls: {},
+          doStream: async (options: unknown) => {
+            prompts.push(options);
+            return {
+              stream: new ReadableStream({
+                start(controller) {
+                  for (const chunk of [
+                    { type: 'stream-start', warnings: [] },
+                    { type: 'text-start', id: 'reply' },
+                    { type: 'text-delta', id: 'reply', delta: `Reply from ${modelId}` },
+                    { type: 'text-end', id: 'reply' },
+                    {
+                      type: 'finish',
+                      finishReason: 'stop',
+                      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+                    },
+                  ])
+                    controller.enqueue(chunk);
+                  controller.close();
+                },
+              }),
+            };
+          },
+        },
+      } as never;
+    });
+    for (const [agentInstanceId, modelId] of [
+      ['first', 'alpha'],
+      ['second', 'beta'],
+    ]) {
+      const events: AssistantRuntimeEvent[] = [];
+      for await (const event of runtime.dispatchMessage({
+        identityId: 'owner',
+        conversationId: 'continuous-chat',
+        agentInstanceId,
+        providerId: 'p',
+        modelId,
+        content: `Question ${modelId}`,
+        context: context('owner', modelId),
+      }))
+        events.push(event);
+      expect(events.at(-1)?.type).toBe('assistant.run.completed');
+      expect(events).toContainEqual(
+        expect.objectContaining({
+          type: 'assistant.run.started',
+          data: { providerId: 'p', modelId },
+        }),
+      );
+    }
+    expect(resolve).toHaveBeenCalled();
+    expect(recordActivity).toHaveBeenCalledTimes(2);
+    expect(recordActivity).toHaveBeenLastCalledWith('owner', 'continuous-chat', expect.any(Number));
+    expect(JSON.stringify(prompts.at(-1))).toContain('Question alpha');
+    expect(JSON.stringify(prompts.at(-1))).toContain('Reply from alpha');
+    expect(
+      recordExecution.mock.calls
+        .map(([record]) => record)
+        .filter((record) => record.operation === 'assistant.turn'),
+    ).toEqual([
+      expect.objectContaining({
+        conversationId: 'continuous-chat',
+        agentInstanceId: 'first',
+        modelId: 'alpha',
+        providerConnectionId: 'p',
+      }),
+      expect.objectContaining({
+        conversationId: 'continuous-chat',
+        agentInstanceId: 'second',
+        modelId: 'beta',
+        providerConnectionId: 'p',
+      }),
+    ]);
   });
 
   it('filters foreign thread activity and rejects overlapping product turns instead of queueing', async () => {
@@ -547,6 +751,169 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' });
     await turn.finished;
   });
+
+  it('validates parked ask_user answers and resumes through the scoped session', async () => {
+    const file = join(tmpdir(), `memoflow-ask-user-${randomUUID()}.db`);
+    const first = await createRuntime(file);
+    vi.spyOn(first.runtime.history, 'ensureConversation').mockResolvedValue();
+    await first.runtime.init();
+    const suspendedAgent = first.runtime.assistant as never as {
+      listSuspendedRuns: (input: { threadId: string; resourceId: string }) => Promise<{ runs: { runId: string; toolCalls: { toolCallId: string; toolName: string; suspendPayload: unknown }[] }[] }>;
+      resumeStream: (data: unknown, options: unknown) => Promise<unknown>;
+    };
+    vi.spyOn(suspendedAgent, 'listSuspendedRuns').mockResolvedValue({ runs: [{ runId: 'persisted-run', threadId: 'ask-chat', resourceId: 'identity-a', toolCalls: [{ toolCallId: 'question-1', toolName: 'ask_user', suspendPayload: { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] } }] }] });
+    const session = await first.runtime.controller.createSession({ id: 'conversation:ask-chat', ownerId: 'identity-a', resourceId: 'identity-a', threadId: 'ask-chat' });
+    const resume = vi.spyOn(session, 'respondToToolSuspension').mockImplementation(async () => { session.emit({ type: 'tool_end', threadId: 'ask-chat', toolCallId: 'question-1', result: 'A' }); session.emit({ type: 'agent_end', reason: 'complete' }); });
+    const projection = await first.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: 'ask-chat' });
+    expect(projection).toEqual([{ runId: 'persisted-run', toolCallId: 'question-1', question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }]);
+    const command = { type: 'tool_answer' as const, action: 'answer' as const, conversationId: 'ask-chat', runId: 'persisted-run', toolCallId: 'question-1', answer: 'A' };
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command: { ...command, answer: 'not-an-option' } })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command })).resolves.toBe(true);
+    expect(resume).toHaveBeenCalledWith(expect.objectContaining({ resumeData: 'A', toolCallId: 'question-1', requestContext: expect.any(RequestContext) }));
+    expect(resume).toHaveBeenCalledTimes(1);
+  });
+
+  it('scopes persisted ask_user cancellation to the authenticated owner and aborts without resuming', async () => {
+    const first = await createRuntime();
+    await first.runtime.init();
+    const agent = first.runtime.assistant as never as {
+      listSuspendedRuns: (query: unknown) => Promise<unknown>;
+      resumeStream: (value: unknown, options: unknown) => Promise<unknown>;
+    };
+    vi.spyOn(agent, 'listSuspendedRuns').mockResolvedValue({
+      runs: [{
+        runId: 'cancel-run',
+        threadId: 'owner-chat',
+        resourceId: 'identity-a',
+        toolCalls: [{ toolCallId: 'ask-1', toolName: 'ask_user', suspendPayload: { question: 'Continue?' } }],
+      }],
+    } as never);
+    const resume = vi.spyOn(agent, 'resumeStream');
+    const abort = vi.spyOn(first.runtime.assistant, 'abortRunStream').mockReturnValue(true);
+    const session = await first.runtime.controller.createSession({ id: 'conversation:owner-chat', ownerId: 'identity-a', resourceId: 'identity-a', threadId: 'owner-chat' });
+    vi.spyOn(session, 'abortRun').mockImplementation(() => { session.emit({ type: 'tool_end', threadId: 'owner-chat', toolCallId: 'ask-1', result: 'denied', denied: true }); });
+    const command = {
+      type: 'tool_answer' as const, action: 'cancel' as const,
+      conversationId: 'owner-chat', runId: 'cancel-run', toolCallId: 'ask-1', answer: 'cancelled',
+    };
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-b', 'foreign'), command })).resolves.toBe(false);
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'owner'), command: { ...command, conversationId: 'other-chat' } })).resolves.toBe(false);
+    expect(resume).not.toHaveBeenCalled();
+    await expect(first.runtime.answerToolSuspension({ context: context('identity-a', 'owner'), command })).resolves.toBe(true);
+    expect(resume).not.toHaveBeenCalled();
+    expect(abort).toHaveBeenCalledWith('cancel-run');
+  });
+
+  it.skipIf(!process.env['MEMOFLOW_NATIVE_RESTART_FIXTURE'])('writes a native restart fixture', async () => {
+    const file = process.env['MEMOFLOW_NATIVE_RESTART_FIXTURE']!;
+    const { runtime, modelResolver } = await createRuntime(file);
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    const model = {
+      specificationVersion: 'v2', provider: 'test', modelId: 'restart-fixture', supportedUrls: {},
+      doStream: async () => ({ stream: new ReadableStream({ start(controller) {
+        for (const chunk of [
+          { type: 'stream-start', warnings: [] },
+          { type: 'tool-call', toolCallId: 'ask-real', toolName: 'ask_user', input: JSON.stringify({ question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }) },
+          { type: 'finish', finishReason: 'tool-calls', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
+        ]) controller.enqueue(chunk);
+        controller.close();
+      } }) }),
+    };
+    vi.spyOn(modelResolver, 'resolve').mockResolvedValue({ providerId: 'p', providerName: 'test', modelId: model.modelId, model, capabilities: {} } as never);
+    const events: AssistantRuntimeEvent[] = [];
+    for await (const event of runtime.dispatchMessage({ identityId: 'identity-a', conversationId: 'ask-approval', content: 'ask', context: context('identity-a', 'fixture') })) events.push(event);
+    const required = events.find((event) => event.type === 'assistant.ask_user.required');
+    expect(required).toBeDefined();
+    const workflows = await runtime.mastra.getStorage()?.getStore('workflows');
+    await vi.waitFor(async () => {
+      expect((await workflows?.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId: required!.runId }))?.status).toBe('suspended');
+      expect((await workflows?.loadWorkflowSnapshot({ workflowName: 'executionWorkflow', runId: required!.runId }))?.status).toBe('suspended');
+    });
+    await writeFile(file + '.json', JSON.stringify(required));
+  });
+
+  it.each([[false, 'answer', 'supervised'], [true, 'answer', 'supervised'], [false, 'cancel', 'supervised'], [true, 'cancel', 'supervised'], [false, 'answer', 'read-only']] as const)('settles real ask_user through the session without orphaning the run (restart=%s action=%s mode=%s)', async (restart, action, permissionMode) => {
+    const first = await createRuntime();
+    let { runtime, createRoutine } = first;
+    const { modelResolver } = first;
+    vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    let calls = restart ? 1 : 0;
+    const model = {
+      specificationVersion: 'v2', provider: 'test', modelId: 'ask-approval-test', supportedUrls: {},
+      doStream: async () => {
+        const step = calls++;
+        const chunks = step < 2 ? [
+          { type: 'stream-start', warnings: [] },
+          { type: 'tool-call', toolCallId: step === 0 ? 'ask-real' : 'approval-real',
+            toolName: step === 0 ? 'ask_user' : 'routine_create',
+            input: JSON.stringify(step === 0
+              ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }
+              : { name: 'Private routine', trigger: { type: 'Elapsed', timingOwner: 'local-runtime', durationMs: 60000 } }) },
+          { type: 'finish', finishReason: 'tool-calls', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
+        ] : [
+          { type: 'stream-start', warnings: [] }, { type: 'text-start', id: 'text' },
+          { type: 'text-delta', id: 'text', delta: 'Finished' }, { type: 'text-end', id: 'text' },
+          { type: 'finish', finishReason: 'stop', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
+        ];
+        return { stream: new ReadableStream({ start(controller) {
+          for (const chunk of chunks) controller.enqueue(chunk);
+          controller.close();
+        } }) };
+      },
+    };
+    vi.spyOn(modelResolver, 'resolve').mockResolvedValue({ providerId: 'p', providerName: 'test', modelId: model.modelId, model, capabilities: {} } as never);
+    const events: AssistantRuntimeEvent[] = [];
+    if (restart) {
+      await runtime.init();
+      await runtime.dispose();
+      await promisify(execFile)(process.execPath, [fileURLToPath(new URL('../../../../../../node_modules/vitest/vitest.mjs', import.meta.url)), 'run', '--config', 'vitest.config.ts', 'src/server/mastra/runtime/mastra-workflow.runtime.spec.ts', '--testNamePattern=writes.*native.*restart.*fixture'], {
+        cwd: fileURLToPath(new URL('../../../../', import.meta.url)),
+        env: { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('NX_'))), NX_DAEMON: 'false', MEMOFLOW_NATIVE_RESTART_FIXTURE: first.file },
+        timeout: 90000, maxBuffer: 1024 * 1024,
+      }).catch((cause) => { throw new Error(String(cause.stdout) + String(cause.stderr)); });
+      events.push(JSON.parse(await readFile(first.file + '.json', 'utf8')) as AssistantRuntimeEvent);
+      await rm(first.file + '.json');
+      const recovered = await createRuntime(first.file);
+      runtime = recovered.runtime;
+      createRoutine = recovered.createRoutine;
+      vi.spyOn(recovered.modelResolver, 'resolve').mockResolvedValue({ providerId: 'p', providerName: 'test', modelId: model.modelId, model, capabilities: {} } as never);
+    } else {
+      for await (const event of runtime.dispatchMessage({ identityId: 'identity-a', conversationId: 'ask-approval', content: 'create', permissionMode, context: context('identity-a', 'ask-turn') })) events.push(event);
+    }
+    const required = events.find((event) => event.type === 'assistant.ask_user.required');
+    expect(required?.type, JSON.stringify(events)).toBe('assistant.ask_user.required');
+    if (required?.type !== 'assistant.ask_user.required') throw new Error('Missing real suspension');
+    if (action === 'cancel') {
+      await expect(runtime.answerToolSuspension({ context: context('identity-a', 'cancel'), command: { type: 'tool_answer', action: 'cancel', conversationId: required.conversationId, runId: required.runId, toolCallId: required.data.toolCallId, answer: 'cancelled' } })).resolves.toBe(true);
+      expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]);
+      expect(createRoutine).not.toHaveBeenCalled();
+      expect(calls).toBe(1);
+      return;
+    }
+    await expect(runtime.answerToolSuspension({ context: context('identity-a', 'answer'), command: {
+      type: 'tool_answer', action: 'answer', conversationId: required.conversationId,
+      runId: required.runId, toolCallId: required.data.toolCallId, answer: 'A',
+    } })).resolves.toBe(true);
+    expect(createRoutine).not.toHaveBeenCalled();
+    const parked = await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' });
+    if (permissionMode === 'read-only') {
+      expect(parked.runs).toEqual([]);
+      expect(createRoutine).not.toHaveBeenCalled();
+      return;
+    }
+    expect(parked.runs.flatMap((run) => run.toolCalls)).toEqual(expect.arrayContaining([expect.objectContaining({ toolCallId: 'approval-real', toolName: 'routine_create' })]));
+    expect(await runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([expect.objectContaining({ toolCallId: 'approval-real', approval: { toolName: 'routine_create', category: 'edit', risk: 'high' } })]);
+    const approvalCommand = { type: 'tool_approval' as const, conversationId: required.conversationId, runId: required.runId, toolCallId: 'approval-real', decision: 'approve' as const };
+    await expect(runtime.decideToolApproval({ context: context('identity-b', 'foreign'), command: approvalCommand })).resolves.toBe(false);
+    await expect(runtime.decideToolApproval({ context: context('identity-a', 'stale'), command: { ...approvalCommand, toolCallId: 'other' } })).resolves.toBe(false);
+    expect(await Promise.all([0, 1].map(() => runtime.decideToolApproval({ context: context('identity-a', 'approve'), command: approvalCommand })))).toEqual([true, false]);
+    expect(createRoutine).toHaveBeenCalledTimes(1);
+    expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]);
+    expect(await runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
+    const history = await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
+    expect(history.messages.some((message) => message.content.includes('Finished'))).toBe(true);
+  }, 120000);
 
   it('does not start a native turn when the dispatch signal is already aborted', async () => {
     const { runtime, modelResolver } = await createRuntime();
@@ -668,13 +1035,12 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
 
   it('approve-first then immediate Stop never claims execution and native cancellation wins before resume', async () => {
     const turn = await parkedTurn();
-    expect(
-      turn.runtime.decideToolApproval({
+    const deciding = turn.runtime.decideToolApproval({
         context: context('identity-a', 'approve'),
         command: turn.command,
-      }),
-    ).toBe(true);
+      });
     expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
+    await expect(deciding).resolves.toBe(true);
     await turn.finished;
     expect(turn.approve).not.toHaveBeenCalled();
     expect(turn.decline).toHaveBeenCalledTimes(1);
@@ -690,7 +1056,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
   it('declines through the actual parked native gate, never executing', async () => {
     const turn = await parkedTurn();
     expect(
-      turn.runtime.decideToolApproval({
+      await turn.runtime.decideToolApproval({
         context: context('identity-a', 'decline'),
         command: { ...turn.command, decision: 'decline' },
       }),
@@ -710,7 +1076,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const turn = await parkedTurn();
     expect(turn.runtime.cancelRun({ identityId: 'identity-a', runId: 'native-turn' })).toBe(true);
     expect(
-      turn.runtime.decideToolApproval({
+      await turn.runtime.decideToolApproval({
         context: context('identity-a', 'late'),
         command: turn.command,
       }),
@@ -758,7 +1124,7 @@ describe('MastraAIRuntime Assistant tool policy', () => {
       resolveModeActiveTools(session: typeof reused): string[];
     };
     expect(controller.resolveModeActiveTools(reused).sort()).toEqual(
-      Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY).sort(),
+      [...Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY), 'ask_user'].sort(),
     );
     await session.state.set({ yolo: true });
     for (const name of [

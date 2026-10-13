@@ -93,6 +93,7 @@ vi.mock('../modules/ai/selected-entity-context-read.adapter', () => ({
 
 import {
   AIEvaluationReportFileAdapter,
+  AiGoalSurfaceLeasePrismaRepository,
   AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
@@ -229,7 +230,9 @@ describe('API composeAI Mastra-only ownership', () => {
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
       conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
+      conversationActivity: repositories.conversationRepository,
       goalPlanMutationPort: vi.mocked(GoalPlanMutationAdapter).mock.results[0].value,
+      goalSurfaceLeaseRepository: expect.any(AiGoalSurfaceLeasePrismaRepository),
       taskPlanMutationPort: vi.mocked(TaskPlanMutationAdapter).mock.results[0].value,
       knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
         .value,

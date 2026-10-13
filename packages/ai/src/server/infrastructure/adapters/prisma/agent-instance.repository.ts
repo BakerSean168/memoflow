@@ -218,37 +218,30 @@ export class AgentInstancePrismaRepository implements IAgentInstanceRepository {
     providerId?: string,
     modelId?: string,
   ): Promise<void> {
-    try {
-      await this.prisma.$transaction(async (tx) => {
-        const row = await tx.aiAgentConversationBinding.upsert({
-          where: { identityId_conversationId: { identityId: owner, conversationId } },
-          create: { identityId: owner, conversationId, instanceId },
-          update: {},
-        });
-        if (row.instanceId !== instanceId) throw new AgentRegistryError('CONFLICT');
-        if (providerId && modelId)
-          await tx.aiAgentConversationBinding.update({
-            where: { id: row.id },
-            data: { providerId, modelId },
-          });
+    await this.prisma.$transaction(async (tx) => {
+      const instance = await tx.aiAgentInstance.findUnique({
+        where: { identityId_instanceId: { identityId: owner, instanceId } },
       });
-    } catch (cause) {
-      if (isUniqueViolation(cause)) {
-        const claimed = await this.getConversationInstance(owner, conversationId);
-        if (claimed === instanceId) {
-          if (providerId && modelId) {
-            const updated = await this.prisma.aiAgentConversationBinding.updateMany({
-              where: { identityId: owner, conversationId, instanceId },
-              data: { providerId, modelId },
-            });
-            if (updated.count !== 1) throw new AgentRegistryError('CONFLICT');
-          }
-          return;
-        }
-        throw new AgentRegistryError('CONFLICT');
+      if (!instance) throw new AgentRegistryError('NOT_FOUND');
+      if (instance.driver !== 'mastra' || !instance.enabled)
+        throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
+      if (providerId && modelId) {
+        const binding = await tx.aiAgentInstanceBinding.findFirst({
+          where: { identityId: owner, instanceId, connectionId: providerId },
+        });
+        const provider = await tx.aiProviderConfig.findFirst({
+          where: { id: providerId, identityId: owner, deletedAt: null, isActive: true },
+          select: { id: true },
+        });
+        if (!binding || !provider) throw new AgentRegistryError('AI_CONFIGURATION_REQUIRED');
       }
-      throw cause;
-    }
+      const selection = { instanceId, providerId: providerId ?? null, modelId: modelId ?? null };
+      await tx.aiAgentConversationBinding.upsert({
+        where: { identityId_conversationId: { identityId: owner, conversationId } },
+        create: { identityId: owner, conversationId, ...selection },
+        update: selection,
+      });
+    });
   }
   async hasConnectionBindings(owner: string, connectionId: string): Promise<boolean> {
     return Boolean(

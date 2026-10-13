@@ -86,7 +86,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
-  const { service, providers, loadProviders, refreshProviderModels } = useAI();
+  const { service, providers, loadProviders, refreshProviderModels, isLoadingProviders } = useAI();
   const assistantRuntime = useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
   const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
@@ -100,6 +100,16 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
   const modelCatalogs = ref<Record<string, AIModelInfo[]>>({});
   const modelCatalogLoading = ref(false);
+  const composerInitializing = ref(true);
+  const registryLoading = ref(false);
+  const composerLoading = computed(
+    () =>
+      composerInitializing.value ||
+      registryLoading.value ||
+      modelCatalogLoading.value ||
+      isLoadingProviders.value ||
+      localChoices.loading.value,
+  );
   const catalogRequests = new Map<string, Promise<AIModelInfo[]>>();
   function requestCatalog(connectionId: string) {
     let request = catalogRequests.get(connectionId);
@@ -120,6 +130,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   async function loadAgentRegistry() {
     if (!agentRegistryClient) return;
     const generation = ++registryGeneration;
+    registryLoading.value = true;
     try {
       const next = await agentRegistryClient.list();
       if (disposed || generation !== registryGeneration) return;
@@ -158,7 +169,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         modelCatalogs.value = {};
       }
     } finally {
-      if (!disposed && generation === registryGeneration) modelCatalogLoading.value = false;
+      if (!disposed && generation === registryGeneration) {
+        modelCatalogLoading.value = false;
+        registryLoading.value = false;
+      }
     }
   }
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
@@ -365,6 +379,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       driver: instance.driver,
       enabled: instance.enabled,
       accentColor: instance.accentColor,
+      switchBlockedReason: composerSwitchBlockedReason(
+        instance.driver === 'mastra'
+          ? `agent:${instance.instanceId}`
+          : `local:${instance.legacyConnectionId ?? instance.instanceId}`,
+      ),
       configured:
         instance.driver === 'mastra'
           ? Boolean(
@@ -452,50 +471,42 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   watch(chatSession.chatConversationId, (next, previous) => {
     if (previous && next !== previous) permissionMode.value = 'supervised';
   });
+  function composerSwitchBlockedReason(
+    key: string,
+  ): 'incompatible' | 'busy' | 'loading' | undefined {
+    if (chatSession.chatLoading.value || workflowSelectionLocked.value) return 'busy';
+    if (modelSelection.selectionLoading.value) return 'loading';
+    if (!chatSession.chatConversationId.value) return undefined;
+    const choice = chatSession.runtimeChoice.value;
+    if (choice.runtimeKind === 'local_agent')
+      return key === `local:${choice.connectionId}` ? undefined : 'incompatible';
+    return key.startsWith('agent:') ? undefined : 'incompatible';
+  }
   async function selectComposerAgent(key: string) {
-    if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
+    if (composerSwitchBlockedReason(key)) return;
     if (key === selectedComposerAgent.value) return;
     if (key.startsWith('local:')) {
       const id = key.slice(6);
-      const connection = localChoices.connections.value.find(
-        (entry) => entry.id === id && entry.enabled,
-      );
-      if (!connection) {
-        await router.push('/settings?tab=ai');
-        return;
-      }
-      startNewConversation();
+      if (!localChoices.connections.value.some((entry) => entry.id === id && entry.enabled)) return;
       chatSession.runtimeChoice.value = {
         runtimeKind: 'local_agent',
         connectionId: id,
         modelId: '',
       };
-      permissionMode.value = 'supervised';
-      return;
-    }
-    const id = key.slice(6);
-    const eligible = agentRegistrySnapshot.value?.instances.some(
-      (entry) => entry.instanceId === id && entry.driver === 'mastra' && entry.enabled,
-    );
-    if (!eligible) return;
-    const wasNative = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
-    const result = wasNative ? 'new_conversation_required' : modelSelection.selectAgent(id);
-    if (result === 'new_conversation_required') {
-      startNewConversation();
+    } else {
+      if (modelSelection.selectAgent(key.slice(6)) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-      modelSelection.selectAgent(id);
-      toast.info(t('aiAssistant.agentSwitchNewConversation'));
     }
     permissionMode.value = 'supervised';
   }
   async function selectComposerModel(key: string, agentKey: string) {
-    if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
-    const agent = composerAgents.value.find((item) => item.id === agentKey && item.enabled);
-    if (!agent) return;
+    if (composerSwitchBlockedReason(agentKey)) return;
+    if (!composerAgents.value.some((item) => item.id === agentKey && item.enabled)) return;
+    const previousAgent = selectedComposerAgent.value;
     if (agentKey.startsWith('local:')) {
       const connectionId = agentKey.slice(6);
-      const selected = chatSession.runtimeChoice.value;
-      if (selected.runtimeKind !== 'local_agent' || selected.connectionId !== connectionId)
+      const choice = chatSession.runtimeChoice.value;
+      if (choice.runtimeKind !== 'local_agent' || choice.connectionId !== connectionId)
         await selectComposerAgent(agentKey);
       const current = chatSession.runtimeChoice.value;
       if (
@@ -504,33 +515,19 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         localChoices.models.value.some((model) => model.id === key)
       )
         chatSession.runtimeChoice.value = { ...current, modelId: key };
-      return;
-    }
-    const instanceId = agentKey.startsWith('agent:') ? agentKey.slice(6) : '';
-    const target = modelSelection.allModelOptions.value.find(
-      (model) =>
-        model.key === key &&
-        (model.agentInstanceId === instanceId ||
-          // Preserve a historically provider-bound conversation only for its
-          // existing selected model, never grant it another Agent's catalog.
-          (!model.agentInstanceId &&
-            selectedComposerAgent.value === agentKey &&
-            modelSelection.selectedModelKey.value === key)),
-    );
-    if (!target) return;
-    const previousAgent = selectedComposerAgent.value;
-    let needsNewConversation = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
-    if (needsNewConversation) {
-      startNewConversation(toolMode.value);
+    } else {
+      const instanceId = agentKey.slice(6);
+      const target = modelSelection.allModelOptions.value.find(
+        (model) =>
+          model.key === key &&
+          (model.agentInstanceId === instanceId ||
+            (!model.agentInstanceId &&
+              selectedComposerAgent.value === agentKey &&
+              modelSelection.selectedModelKey.value === key)),
+      );
+      if (!target || modelSelection.selectModel(key) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
     }
-    if (modelSelection.selectModel(key) === 'new_conversation_required') {
-      needsNewConversation = true;
-      startNewConversation(toolMode.value);
-      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-      modelSelection.selectModel(key);
-    }
-    if (needsNewConversation) toast.info(t('aiAssistant.agentSwitchNewConversation'));
     if (previousAgent !== agentKey) permissionMode.value = 'supervised';
   }
   function selectPermission(mode: AIChatPermissionMode) {
@@ -544,14 +541,24 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     const nextName = name.trim();
     const currentTitle = chatSession.conversationTitle.value;
     if (!nextName || nextName === currentTitle) return;
+    const conversationId = chatSession.chatConversationId.value;
     chatSession.conversationTitle.value = nextName;
-    await maybeRenameConversation(
+    const renamed = await maybeRenameConversation(
       nextName,
       currentTitle,
-      chatSession.chatConversationId.value,
+      conversationId,
       service,
-      () => chatSession.loadConversationList(service),
+      async (conversation) => {
+        chatSession.syncConversationSummary(conversation);
+        await chatSession.loadConversationList(service);
+      },
     );
+    if (
+      !renamed &&
+      chatSession.chatConversationId.value === conversationId &&
+      chatSession.conversationTitle.value === nextName
+    )
+      chatSession.conversationTitle.value = currentTitle;
   }
 
   const goalWorkflow = useAIGoalWorkflow({
@@ -825,14 +832,36 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       : t(`aiAssistant.chatPage.workflow.tools.${getToolLocaleKey(toolMode.value)}`),
   );
 
+  const workflowSelectionLocked = computed(
+    () =>
+      goalWorkflow.goalAgentResuming.value ||
+      goalWorkflow.goalOwnerAttemptPending.value ||
+      taskWorkflow.taskAgentResuming.value ||
+      taskWorkflow.taskOwnerAttemptPending.value ||
+      knowledgeCaptureWorkflow.knowledgeCaptureResuming.value ||
+      [
+        goalWorkflow.goalWorkflowRun.value,
+        taskWorkflow.taskWorkflowRun.value,
+        knowledgeCaptureWorkflow.knowledgeCaptureRun.value,
+      ].some((run) => run && !['completed', 'failed', 'cancelled'].includes(run.status)),
+  );
   const canSendMessage = computed(
     () =>
       !chatSession.chatLoading.value &&
+      !goalWorkflow.goalAgentLoading.value &&
+      !goalWorkflow.goalAgentResuming.value &&
+      !goalWorkflow.goalManualHandoff.value &&
       (chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
         ? localChoices.canSend.value
         : modelSelection.canSendMessage.value && modelSelection.selectedModel.value !== null),
   );
   function canLeaveWorkflowReview(): boolean {
+    // The handed-off native draft still coordinates deterministic workflow Save.
+    // Do not reset that coordinator while the user is editing it.
+    if (goalWorkflow.goalManualHandoff.value) {
+      toast.info(t('aiAssistant.businessSurface.handedOff'));
+      return false;
+    }
     return canLeaveAIWorkflowReview(
       toolMode.value,
       {
@@ -918,22 +947,26 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     // Reset before the first await: the composer is already visible and users
     // must be able to type a draft while the Agent Registry is still loading.
     chatSession.resetChatSession('chat', getDefaultConversationName);
-    await localChoices.refresh();
-    await loadAgentRegistry();
-    await initializeChatView({
-      initRepository: loadRecentKnowledgeNotes,
-      loadProviders,
-      loadConversationList: loadWorkspaceLists,
-      syncSelectedModel: modelSelection.syncSelectedModel,
-      getPersistedModelKey: modelSelection.getPersistedModelKey,
-      selectConversation,
-      lastActiveConversationId: chatSession.lastActiveConversationId,
-      conversationList: chatSession.conversationList,
-      adjustComposerHeight,
-      toastError: (msg: string) => toast.error(msg),
-      translate: t,
-      nextTick,
-    });
+    try {
+      await localChoices.refresh();
+      await loadAgentRegistry();
+      await initializeChatView({
+        initRepository: loadRecentKnowledgeNotes,
+        loadProviders,
+        loadConversationList: loadWorkspaceLists,
+        syncSelectedModel: modelSelection.syncSelectedModel,
+        getPersistedModelKey: modelSelection.getPersistedModelKey,
+        selectConversation,
+        lastActiveConversationId: chatSession.lastActiveConversationId,
+        conversationList: chatSession.conversationList,
+        adjustComposerHeight,
+        toastError: (msg: string) => toast.error(msg),
+        translate: t,
+        nextTick,
+      });
+    } finally {
+      if (!disposed) composerInitializing.value = false;
+    }
   });
 
   return {
@@ -941,6 +974,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       runtimeChoice: chatSession.runtimeChoice,
       historyIncomplete: chatSession.historyIncomplete,
       respondNativeRequest: chatSession.respondNativeRequest,
+      answerAskUser: chatSession.answerAskUser,
+      cancelAskUser: chatSession.cancelAskUser,
       chatMessage: chatSession.chatMessage,
       chatLoading: chatSession.chatLoading,
       chatConversationId: chatSession.chatConversationId,
@@ -1002,15 +1037,18 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       canSaveNote: Boolean(repository && knowledgeNativeSurface),
       saveNote: saveLocalNote,
       async select(choice: import('@memoflow/contracts/ai').AssistantRuntimeChoice) {
-        if (chatSession.chatLoading.value) return;
-        if (!canLeaveWorkflowReview()) return;
-        const previous = chatSession.runtimeChoice.value;
-        if (!(
-          previous.runtimeKind === 'local_agent' &&
-          choice.runtimeKind === 'local_agent' &&
-          previous.connectionId === choice.connectionId
-        ))
-          startNewConversation();
+        const key =
+          choice.runtimeKind === 'local_agent'
+            ? `local:${choice.connectionId}`
+            : 'agent:' + modelSelection.selectedAgentId.value;
+        if (composerSwitchBlockedReason(key)) return;
+        if (
+          chatSession.runtimeChoice.value.runtimeKind !== choice.runtimeKind ||
+          (choice.runtimeKind === 'local_agent' &&
+            chatSession.runtimeChoice.value.runtimeKind === 'local_agent' &&
+            chatSession.runtimeChoice.value.connectionId !== choice.connectionId)
+        )
+          permissionMode.value = 'supervised';
         chatSession.runtimeChoice.value = choice;
       },
       async setDefault() {
@@ -1028,6 +1066,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       composerModels,
       composerModelKey,
       modelCatalogLoading,
+      composerLoading,
       permissionMode,
       currentNativeModelOptions,
       selectNativeModelOption,
@@ -1038,15 +1077,14 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       modelGroups: modelSelection.modelGroups,
       canSendMessage,
       selectModel(key: string) {
-        if (chatSession.chatLoading.value || !canLeaveWorkflowReview()) return;
-        const fromNative = chatSession.runtimeChoice.value.runtimeKind === 'local_agent';
-        if (fromNative || modelSelection.selectModel(key) === 'new_conversation_required') {
-          if (!modelSelection.allModelOptions.value.some((model) => model.key === key)) return;
-          startNewConversation(toolMode.value);
-          chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-          modelSelection.selectModel(key);
-          toast.info(t('aiAssistant.agentSwitchNewConversation'));
-        }
+        const target = modelSelection.allModelOptions.value.find((model) => model.key === key);
+        if (target)
+          void selectComposerModel(
+            key,
+            target.agentInstanceId
+              ? `agent:${target.agentInstanceId}`
+              : selectedComposerAgent.value,
+          );
       },
     },
     goalWorkflow,

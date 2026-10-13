@@ -179,12 +179,171 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await expect(
     page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Beta' }),
   ).toBeVisible();
+  // Measure after the opening zoom animation; retain strict geometry assertions.
+  await expect
+    .poll(async () => (await page.getByTestId('ai-model-picker').boundingBox())?.width ?? 0)
+    .toBeCloseTo(360, 1);
+  const filledBox = await page.getByTestId('ai-model-picker').boundingBox();
+  await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
+  await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
+    /此 Provider 暂无可用模型|No models are available for this provider/,
+  );
+  await expect(page.getByTestId('ai-model-picker-empty-settings')).toContainText(
+    /打开 Provider 设置|Open provider setup/,
+  );
+  const emptyProviderBox = await page.getByTestId('ai-model-picker').boundingBox();
+  expect(Math.abs(emptyProviderBox!.width - filledBox!.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(emptyProviderBox!.height - filledBox!.height)).toBeLessThanOrEqual(1);
+  await page.getByTestId('ai-model-picker-agent-agent:mastra-parity').click();
   await page.getByTestId('ai-model-picker-search').fill('Model Beta');
   await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(1);
   await expect(page.getByTestId('ai-model-picker-option')).toContainText(providerName);
   await page.getByTestId('ai-model-picker-toggle-favorite').click();
   await expect(page.getByTestId('ai-chat-model-selector')).not.toContainText('E2E Model Beta');
   await page.getByTestId('ai-model-picker-option').click();
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
+  // Real API + fixture inference: two Mastra instances share one product conversation.
+  const registryBeforeSwitch = (await (await page.request.get('/api/v1/ai/agent-instances')).json())
+    .data;
+  const master = registryBeforeSwitch.instances.find(
+    (instance: { instanceId: string }) => instance.instanceId === 'mastra',
+  );
+  const providerId = registryBeforeSwitch.bindings.find(
+    (binding: { instanceId: string }) => binding.instanceId === 'mastra-parity',
+  ).connectionId;
+  const boundMaster = await page.request.post('/api/v1/ai/agent-instances', {
+    data: {
+      action: 'bind',
+      instanceId: 'mastra',
+      expectedRevision: master.revision,
+      connectionId: providerId,
+      modelId: 'e2e-model-alpha',
+    },
+  });
+  expect(boundMaster.ok()).toBe(true);
+  await page.goto('/settings?tab=ai');
+  await expect(page.getByTestId('ai-provider-list')).toBeVisible();
+  await page.getByTestId('settings-return-to-app').first().click();
+  const firstTurn = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/ai/runtime/assistant/sse'),
+  );
+  let releaseFirstTurn!: () => void;
+  const firstTurnGate = new Promise<void>((resolve) => {
+    releaseFirstTurn = resolve;
+  });
+  await page.route(
+    '**/ai/runtime/assistant/sse',
+    async (route) => {
+      await firstTurnGate;
+      await route.continue();
+    },
+    { times: 1 },
+  );
+  await page.getByTestId('ai-chat-composer').fill('First turn with Beta');
+  await page.getByTestId('ai-chat-send-message').click();
+  const conversationId = (await firstTurn).postDataJSON().conversationId;
+  try {
+    await expect(
+      page
+        .getByTestId('conversation-sidebar')
+        .locator(`button[data-keyboard-item="${conversationId}"]`)
+        .first(),
+    ).toBeVisible();
+    await expect(
+      page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+    ).toHaveCount(0);
+    await page.screenshot({ path: testInfo.outputPath('conversation-created-before-reply.png') });
+  } finally {
+    releaseFirstTurn();
+  }
+  await expect(
+    page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId('ai-chat-send-message')).toBeVisible();
+  const firstActivity = (await (await page.request.get('/api/v1/ai/chat/conversations')).json())
+    .data.data[0].updatedAt;
+  await page.getByTestId('ai-chat-model-selector').click();
+  await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
+  await page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Alpha' }).click();
+  await expect(
+    page.getByText('E2E provider connection OK (e2e-model-beta)', { exact: true }),
+  ).toBeVisible();
+  const secondTurn = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/ai/runtime/assistant/sse'),
+  );
+  await page.getByTestId('ai-chat-composer').fill('Second turn with Alpha');
+  await page.getByTestId('ai-chat-send-message').click();
+  expect((await secondTurn).postDataJSON()).toMatchObject({
+    conversationId,
+    agentInstanceId: 'mastra',
+    modelId: 'e2e-model-alpha',
+  });
+  await expect(
+    page.getByText('E2E provider connection OK (e2e-model-alpha)', { exact: true }),
+  ).toBeVisible();
+  const latestSelection = await page.request.post('/api/v1/ai/agent-instances', {
+    data: { action: 'conversation_selection', conversationId },
+  });
+  expect((await latestSelection.json()).data).toMatchObject({
+    agentInstanceId: 'mastra',
+    modelId: 'e2e-model-alpha',
+  });
+  const conversationList = await page.request.get('/api/v1/ai/chat/conversations');
+  expect((await conversationList.json()).data.total).toBe(1);
+  const afterSecondTurn = (await (await page.request.get('/api/v1/ai/chat/conversations')).json())
+    .data.data[0];
+  expect(afterSecondTurn.updatedAt).toBeGreaterThan(firstActivity);
+  await page.route(
+    '**/ai/runtime/assistant/sse',
+    async (route) => {
+      const failure = {
+        eventId: 'e2e-failed-turn:1',
+        runId: 'e2e-failed-turn',
+        conversationId,
+        sequence: 1,
+        createdAt: Date.now(),
+        type: 'assistant.run.failed',
+        data: { code: 'AI_RUNTIME_TRANSPORT_ERROR', message: 'AI runtime request failed' },
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        body: `event: runtime\ndata: ${JSON.stringify(failure)}\n\n`,
+      });
+    },
+    { times: 1 },
+  );
+  await page.getByTestId('ai-chat-composer').fill('Fixture provider failure');
+  await page.getByTestId('ai-chat-send-message').click();
+  await expect(
+    page.getByText('本次回复未能完成，请重试或切换模型。', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('AI runtime request failed', { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId('ai-chat-send-message')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('localized-provider-failure.png') });
+  await page.getByTestId('ai-chat-model-selector').click();
+  await page.getByTestId('ai-model-picker-agent-agent:mastra-parity').click();
+  await page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Beta' }).click();
+  const currentRegistry = (await (await page.request.get('/api/v1/ai/agent-instances')).json())
+    .data;
+  const masterRevision = currentRegistry.instances.find(
+    (instance: { instanceId: string }) => instance.instanceId === 'mastra',
+  ).revision;
+  expect(
+    (
+      await page.request.post('/api/v1/ai/agent-instances', {
+        data: {
+          action: 'unbind',
+          instanceId: 'mastra',
+          expectedRevision: masterRevision,
+          connectionId: providerId,
+        },
+      })
+    ).ok(),
+  ).toBe(true);
+  await page.goto('/settings?tab=ai');
+  await expect(page.getByTestId('ai-provider-list')).toBeVisible();
+  await page.getByTestId('settings-return-to-app').first().click();
   await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
   // Mastra does not declare executable native traits; no inert UI should appear.
   await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
@@ -217,6 +376,14 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     expect(pickerBox!.width).toBeGreaterThanOrEqual(350);
     expect(pickerBox!.height).toBeGreaterThanOrEqual(346);
     await expect(page.getByTestId('ai-model-picker-active-indicator')).toHaveCount(1);
+    await expect(page.getByTestId('ai-model-picker-settings')).toHaveCount(0);
+    const sidebar = page.getByTestId('ai-model-picker-sidebar');
+    expect(
+      await sidebar.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return style.overflowX === 'hidden' && style.scrollbarWidth === 'none';
+      }),
+    ).toBe(true);
     await page.getByTestId('ai-model-picker-search').fill('model-does-not-exist-999');
     await expect(page.getByTestId('ai-model-picker-empty')).toBeVisible();
     const emptyPickerBox = await picker.boundingBox();
@@ -252,14 +419,15 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     ).toBe(true);
   }
   await page.setViewportSize({ width: 1600, height: 900 });
-  await page.getByTestId('ai-chat-model-selector').click();
-  await page.getByTestId('ai-model-picker-settings').click();
+  await page.goto('/settings?tab=ai', { waitUntil: 'domcontentloaded' });
   const aiTab = page.getByTestId('settings-tab-ai');
   if (await aiTab.count()) await aiTab.first().click();
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
   await page.getByTestId('settings-return-to-app').first().click();
-  await expect(page.getByTestId('ai-chat-model-selector')).toContainText(/选择模型|Choose model/i);
+  await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
+  await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
+  await expect(page.getByTestId('ai-chat-permission-selector')).toHaveCount(0);
 });
 
 test('[P0] Agent Registry rejects native Web drivers, stale revisions and cross-owner mutation', async ({

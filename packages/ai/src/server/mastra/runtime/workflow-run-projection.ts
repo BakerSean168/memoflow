@@ -1,6 +1,7 @@
 import {
   AIWorkflowRunViewSchema,
   GoalWorkflowSuspensionSchema,
+  GoalWorkflowLiveActionJournalSchema,
   TaskWorkflowSuspensionSchema,
   KnowledgeWorkflowSuspensionSchema,
   type AIWorkflowRunView,
@@ -45,6 +46,18 @@ export function projectGoalCreateRun(
   const workflowInput = goalCreateInputFromSnapshot(snapshot);
   const lowLevelStatus = snapshot.status;
   const context = snapshot.context as Record<string, unknown>;
+  // During a running step, state.value is still engine-local. A
+  // transactionally published preview is stored separately and never used
+  // as execution authority. On step completion, state.value is canonical.
+  const value = snapshot.value;
+  const authoritative = value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>).liveActions
+    : undefined;
+  const durableActions = GoalWorkflowLiveActionJournalSchema.parse(authoritative ?? []);
+  const runningActions = GoalWorkflowLiveActionJournalSchema.parse(snapshot.goalLiveActions ?? []);
+  const liveActions = lowLevelStatus === 'running' && runningActions.length > durableActions.length
+    ? runningActions
+    : durableActions;
   const lifecycle = context[GOAL_CREATE_LIFECYCLE_STEP_ID];
   const lifecycleRecord =
     lifecycle && typeof lifecycle === 'object' && !Array.isArray(lifecycle)
@@ -102,6 +115,7 @@ export function projectGoalCreateRun(
     conversationId: workflowInput.conversationId,
     status,
     ...(suspension ? { suspension } : {}),
+    ...(liveActions.length ? { liveActions } : {}),
     ...(failure ? { failure } : {}),
     ...(result ? { result } : {}),
     createdAt: new Date(row.createdAt).getTime(),

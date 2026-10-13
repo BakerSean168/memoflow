@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { canonicalizePersistedBusinessRoute } from './persisted-business-route';
 
 describe('canonicalizePersistedBusinessRoute', () => {
+  it('restores a business tab without resurrecting an unowned AI panel form', () => {
+    expect(canonicalizePersistedBusinessRoute('/goals?status=active&goalForm=create#section')).toBe(
+      '/goals?status=active#section',
+    );
+  });
   it('drops a stale Goal dialog and its dialog-owned identity while preserving filters', () => {
     expect(
       canonicalizePersistedBusinessRoute(

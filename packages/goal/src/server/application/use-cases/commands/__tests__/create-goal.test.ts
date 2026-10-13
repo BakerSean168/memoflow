@@ -33,6 +33,72 @@ describe('CreateGoalUseCase', () => {
     useCase = new CreateGoalUseCase(goalRepo, new GoalPolicy());
   });
 
+  it('refuses a fenced native AI create without a transaction-capable repository', async () => {
+    const input = aCreateInput({
+      nativeAiLease: {
+        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 1,
+      },
+    });
+    const outcome = await useCase.execute(input, aContext());
+    expect(outcome).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
+    expect(goalRepo.save).not.toHaveBeenCalled();
+    expect(goalRepo.findByIdForIdentity).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stale fence inside the Goal write transaction, before any owner mutation', async () => {
+    const check = vi.fn().mockResolvedValue(false);
+    const runner = {
+      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) => work({
+        goalRepository: goalRepo,
+        goalRecordRepository: {},
+        assertNativeAiLease: check,
+      })),
+    };
+    useCase = new CreateGoalUseCase(goalRepo, new GoalPolicy(), runner as never);
+    const input = aCreateInput({
+      id: 'IGoalId_550e8400-e29b-41d4-a716-446655440011',
+      nativeAiLease: {
+        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 7,
+      },
+    });
+    const outcome = await useCase.execute(input, aContext());
+    expect(outcome).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
+    expect(check).toHaveBeenCalledExactlyOnceWith(testIdentityId, input.nativeAiLease);
+    expect(goalRepo.findByIdForIdentity).not.toHaveBeenCalled();
+    expect(goalRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('saves under the same valid fenced transaction and retains deterministic idempotency', async () => {
+    const check = vi.fn().mockResolvedValue(true);
+    const runner = {
+      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) => work({
+        goalRepository: goalRepo,
+        goalRecordRepository: {},
+        assertNativeAiLease: check,
+      })),
+    };
+    useCase = new CreateGoalUseCase(goalRepo, new GoalPolicy(), runner as never);
+    const input = aCreateInput({
+      id: 'IGoalId_550e8400-e29b-41d4-a716-446655440011',
+      nativeAiLease: {
+        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 7,
+      },
+    });
+    const first = await useCase.execute(input, aContext());
+    expect(first.ok).toBe(true);
+    expect(goalRepo.save).toHaveBeenCalledOnce();
+    expect(check.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(goalRepo.save).mock.invocationCallOrder[0]!,
+    );
+    if (!first.ok) throw Error('Expected first fenced create');
+    const committed = vi.mocked(goalRepo.save).mock.calls[0]?.[0];
+    vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(committed ?? null);
+    const again = await useCase.execute(input, aContext());
+    expect(again.ok).toBe(true);
+    expect(goalRepo.save).toHaveBeenCalledOnce();
+    expect(check).toHaveBeenCalledTimes(2);
+  });
+
   it('should create a goal and return ok result', async () => {
     const result = await useCase.execute(aCreateInput(), aContext());
 

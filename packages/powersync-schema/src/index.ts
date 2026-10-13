@@ -648,6 +648,7 @@ const ai_execution_records = new Table({
   run_id: column.text,
   request_id: column.text,
   trace_id: column.text,
+  agent_instance_id: column.text,
   provider_connection_id: column.text,
   model_id: column.text,
   error_category: column.text,

@@ -44,6 +44,8 @@ const CURRENT_CHANNELS = [
   AIChannels.RUNTIME_ASSISTANT_START,
   AIChannels.RUNTIME_ASSISTANT_CANCEL,
   AIChannels.RUNTIME_ASSISTANT_APPROVAL,
+  AIChannels.RUNTIME_ASSISTANT_ANSWER,
+  AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING,
   AIChannels.RUNTIME_ASSISTANT_HISTORY,
   AIChannels.RUNTIME_ASSISTANT_DELETE,
   AIChannels.RUNTIME_ASSISTANT_ATTENTION_LIST,
@@ -54,6 +56,7 @@ const CURRENT_CHANNELS = [
   AIChannels.RUNTIME_WORKFLOW_GET,
   AIChannels.RUNTIME_WORKFLOW_LIST,
   AIChannels.RUNTIME_WORKFLOW_CANCEL,
+  AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE,
   AIChannels.KNOWLEDGE_QUERY,
   AIChannels.KNOWLEDGE_EXPAND,
   AIChannels.KNOWLEDGE_REINDEX,
@@ -101,7 +104,8 @@ function createFakeInstance() {
     totalTokens: 125,
     estimatedCost: 0.0000375,
   }));
-  const decideToolApproval = vi.fn(() => false);
+  const decideToolApproval = vi.fn(async () => false);
+  const answerToolSuspension = vi.fn(async () => true);
   const attentionPort = {
     list: vi.fn(async () => []),
     acknowledge: vi.fn(async () => true),
@@ -119,7 +123,7 @@ function createFakeInstance() {
     assistantConversation,
     knowledge,
     evaluationOperations,
-    mastraRuntime: { summarizeUsage, decideToolApproval } as never,
+    mastraRuntime: { summarizeUsage, decideToolApproval, answerToolSuspension } as never,
     conversationAttentionPort: attentionPort,
     workflowRuntime: null,
     start,
@@ -133,6 +137,7 @@ function createFakeInstance() {
     evaluationOperations,
     summarizeUsage,
     decideToolApproval,
+    answerToolSuspension,
     attentionPort,
     start,
     dispose,
@@ -164,6 +169,29 @@ describe('createAIElectronModule lifecycle', () => {
     vi.clearAllMocks();
   });
 
+  it('routes Goal surface lease IPC through authenticated identity and rejects identity injection', async () => {
+    const grant = {
+      status: 'claimed', token: '11111111-1111-4111-8111-111111111111',
+      fence: 2, expiresAt: Date.now() + 30_000,
+    };
+    const goalSurfaceLease = vi.fn(async () => grant);
+    Object.assign(fake.instance, {
+      workflowRuntime: { goalSurfaceLease },
+    });
+    await moduleDef.register(createFakeContext());
+    const handler = mocks.handlers.get(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE)!;
+    const request = { action: 'claim', runId: 'goal-run-1' };
+    expect(await handler(undefined, request)).toMatchObject({ ok: true, data: grant });
+    expect(goalSurfaceLease).toHaveBeenCalledExactlyOnceWith({
+      identityId: 'identity-1', request,
+    });
+    const rejected = await handler(undefined, {
+      action: 'claim', runId: 'goal-run-1', identityId: 'other',
+    });
+    expect(rejected).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(goalSurfaceLease).toHaveBeenCalledTimes(1);
+  });
+
   it('registers only current product + Mastra runtime channels', async () => {
     await moduleDef.register(createFakeContext());
     expect([...mocks.handlers.keys()].sort()).toEqual([...CURRENT_CHANNELS].sort());
@@ -171,6 +199,17 @@ describe('createAIElectronModule lifecycle', () => {
     expect(mocks.handlers.has('ai:agent:run:start')).toBe(false);
     expect(mocks.handlers.has('ai:assistant:dispatch:start')).toBe(false);
     expect(mocks.handlers.has('ai:chat:message:stream:start')).toBe(false);
+  });
+
+  it('awaits native ask_user reply over Desktop IPC before serializing accepted', async () => {
+    await moduleDef.register(createFakeContext());
+    const command = { type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' };
+    const result = await mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ANSWER)!(undefined, command);
+    expect(fake.answerToolSuspension).toHaveBeenCalledWith(expect.objectContaining({
+      context: expect.objectContaining({ identityId: 'identity-1' }),
+      command,
+    }));
+    expect(result).toEqual(ok({ accepted: true }));
   });
 
   it('routes product IPC through the matching capability port', async () => {

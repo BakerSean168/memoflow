@@ -82,4 +82,12 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
       ['Archived', now, now, id, identityId],
     );
   }
+
+  async recordActivity(identityId: string, id: string, at: number): Promise<void> {
+    const timestamp = new Date(at).toISOString();
+    await this.db.execute(
+      'UPDATE ai_conversations SET updated_at = ? WHERE id = ? AND identity_id = ? AND deleted_at IS NULL AND updated_at < ?',
+      [timestamp, id, identityId, timestamp],
+    );
+  }
 }

@@ -96,6 +96,9 @@ interface AppShellState {
   rightPanelOpen: boolean;
   panelSurface: PanelSurface;
   surfaceStatus: PanelSurfaceStatus;
+  /** Transient capability; never persisted. Restore rechecks the real owner before claiming. */
+  businessControl: { ownerId: string; route: string; version: number } | null;
+  businessControlVersion: number;
   layout: ShellLayout;
   layoutReason: ShellLayoutReason;
   /** 全局用户布局偏好；null 表示默认 split，不记录 viewport 临时约束。 */
@@ -152,6 +155,8 @@ export const useAppShellStore = defineStore('app-shell', {
     rightPanelOpen: true,
     panelSurface: 'home',
     surfaceStatus: 'clean',
+    businessControl: null,
+    businessControlVersion: 0,
     layout: 'split',
     layoutReason: 'default',
     layoutPreference: null,
@@ -179,6 +184,25 @@ export const useAppShellStore = defineStore('app-shell', {
   },
 
   actions: {
+    claimBusinessControl(ownerId: string, route: string): number {
+      if (
+        !ownerId.trim() ||
+        this.businessControl ||
+        this.surfaceStatus !== 'clean' ||
+        this.panelSurface !== 'business' ||
+        this.activeTab?.route !== route
+      )
+        throw new Error('Business surface cannot be claimed');
+      const version = ++this.businessControlVersion;
+      this.businessControl = { ownerId, route, version };
+      return version;
+    },
+    releaseBusinessControl(ownerId: string, version: number): boolean {
+      if (this.businessControl?.ownerId !== ownerId || this.businessControl.version !== version)
+        return false;
+      this.businessControl = null;
+      return true;
+    },
     /**
      * 打开一个业务 Tab（V2 §2.3 打开规则 + Phase 1 收敛）。
      * - capsule 意图：同 module 已存在 → 激活并更新为 landing 路由/标题；否则新开。
@@ -194,6 +218,9 @@ export const useAppShellStore = defineStore('app-shell', {
      * 缓存层静默驱逐"（诊断 UI-005）。
      */
     openTab(input: OpenTabInput): OpenTabResult {
+      if (this.businessControl) {
+        return { tabId: this.activeTabId ?? '', evictionCandidateId: null };
+      }
       const now = Date.now();
 
       const existing =
@@ -237,6 +264,7 @@ export const useAppShellStore = defineStore('app-shell', {
 
     /** 激活已存在的 Tab，刷新其 LRU 时间戳。 */
     activateTab(tabId: string): void {
+      if (this.businessControl && tabId !== this.activeTabId) return;
       const tab = this.tabs.find((t) => t.id === tabId);
       if (!tab) return;
       tab.lastActiveAt = Date.now();
@@ -251,6 +279,7 @@ export const useAppShellStore = defineStore('app-shell', {
      * 返回关闭后应导航到的路由（活动 Tab 的路由，或 null 表示回 '/'）。
      */
     closeTab(tabId: string): string | null {
+      if (this.businessControl) return this.activeTab?.route ?? null;
       const index = this.tabs.findIndex((t) => t.id === tabId);
       if (index === -1) return this.activeTab?.route ?? null;
 
@@ -279,6 +308,7 @@ export const useAppShellStore = defineStore('app-shell', {
 
     /** 清空业务 Tab 并回到 Home；右侧面板显隐保持独立。 */
     closeAllTabs(): void {
+      if (this.businessControl) return;
       this.tabs = [];
       this.activeTabId = null;
       this.panelSurface = 'home';
@@ -287,15 +317,18 @@ export const useAppShellStore = defineStore('app-shell', {
 
     /** 用户显式隐藏右侧面板；保留 Tab、surface、草稿和 focus 偏好。 */
     closeRightPanel(): void {
+      if (this.businessControl) return;
       this.rightPanelOpen = false;
     },
 
     toggleRightPanel(): void {
+      if (this.businessControl) return;
       this.rightPanelOpen = !this.rightPanelOpen;
     },
 
     /** 显式回到右侧 Home。业务 Tab 继续保活，可稍后恢复。 */
     showHome(): void {
+      if (this.businessControl) return;
       this.rightPanelOpen = true;
       this.panelSurface = 'home';
       this.surfaceStatus = 'clean';
@@ -360,6 +393,11 @@ export const useAppShellStore = defineStore('app-shell', {
 
     /** 更新某 Tab 的当前路由（Tab 内导航时由 AppShell 回写）。 */
     setTabRoute(tabId: string, route: string): void {
+      if (
+        this.businessControl &&
+        (tabId !== this.activeTabId || route !== this.businessControl.route)
+      )
+        return;
       const tab = this.tabs.find((t) => t.id === tabId);
       if (tab) {
         tab.route = route;

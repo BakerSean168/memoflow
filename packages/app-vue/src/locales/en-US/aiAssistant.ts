@@ -1,5 +1,33 @@
 export default {
+  businessSurface: {
+    requesting: 'Submitting the Goal planning request…',
+    running: 'The Goal planning workflow is running…',
+    resuming: 'Processing your workflow response…',
+    waiting: 'The workflow is paused, awaiting your response.',
+    completed: 'The Goal workflow has completed.',
+    failed: 'The Goal workflow did not complete. Check the error before retrying.',
+    cancelled: 'This AI operation was cancelled.',
+    cancelling: 'Cancellation requested; awaiting workflow confirmation…',
+    cancelUnconfirmed:
+      'Workflow cancellation is not confirmed. Restore the conversation to check its status.',
+    conflict:
+      'You are editing business content. Taking over could lose unsaved changes. Please finish handling it first.',
+    continue: 'I have handled it, start now',
+    pause: 'Pause this operation',
+    formUpdated: 'Applied revision {revision} to the right-panel Goal form (batch update).',
+    saveQuestion: 'The initial form is filled in. Save now or continue editing manually?',
+    save: 'Save now',
+    handoff: 'Do not save yet, I will edit manually',
+    handedOff:
+      'Editing control returned to you. The draft is not saved. Edit and save it in the right panel.',
+  },
   composer: {
+    switchBlocked: {
+      incompatible: 'This conversation cannot switch to this Agent yet. Start a new conversation to use it.',
+      busy: 'Wait for the current reply, tool operation or workflow review to finish before switching.',
+      loading: 'Loading the conversation selection…',
+    },
+    openProviderSettings: 'Open provider settings',
     agent: 'Agent',
     agents: 'Agent instances',
     model: 'Model',
@@ -9,9 +37,9 @@ export default {
     unfavorite: 'Remove from favorites',
     noFavorites: 'No favorite models yet',
     noSearchResults: 'No matching models',
-    noAvailableModels: 'No models are available for this Agent.',
+    noAvailableModels: 'No models are available for this provider.',
     loadingModels: 'Loading models…',
-    openAgentSetup: 'Open Agent setup',
+    openAgentSetup: 'Open provider setup',
     selectAgent: 'Choose this Agent',
     modelOptions: 'Model options',
     reasoningEffort: 'Reasoning',
@@ -67,6 +95,7 @@ export default {
     approveOnce: 'Allow once',
     decline: 'Decline',
     answer: 'Send answer',
+    chooseAnswer: 'Choose an answer',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:
       'Use a locally installed and configured Codex, Claude Code, Pi, or DeepSeek Harness (DSH). The built-in assistant remains available through your model connections.',

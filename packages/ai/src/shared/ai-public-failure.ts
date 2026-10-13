@@ -62,25 +62,71 @@ export function toAIPublicFailure(
     );
   }
 
-  const providerStatus = readProviderStatusCode(error);
-  if (providerStatus === 429) {
-    const code: AIPublicFailureCode = 'RATE_LIMITED';
-    return createPublicFailure(code, safeAIPublicMessage(code), undefined);
-  }
-
   const structured = extractStructuredResultError(error);
   if (structured && isAIPublicFailureCode(structured.code)) {
     const code = structured.code;
     return createPublicFailure(code, safeAIPublicMessage(code), structured.context);
   }
 
+  const { statusCode, timedOut } = readAIProviderFailureDiagnostics(error);
+  const providerCode: AIPublicFailureCode | undefined = timedOut
+    ? 'TIMEOUT'
+    : statusCode === 429
+      ? 'RATE_LIMITED'
+      : statusCode === 401 || statusCode === 403
+        ? 'PROVIDER_AUTH_FAILED'
+        : statusCode === 404
+          ? 'MODEL_NOT_AVAILABLE'
+          : statusCode === 408 || statusCode === 504
+            ? 'TIMEOUT'
+            : statusCode !== undefined && statusCode >= 500
+              ? 'SERVICE_UNAVAILABLE'
+              : undefined;
+  if (providerCode)
+    return createPublicFailure(
+      providerCode,
+      safeAIPublicMessage(providerCode),
+      structured?.context,
+    );
+
   return createPublicFailure(options.fallbackCode, options.fallbackMessage, structured?.context);
 }
 
-function readProviderStatusCode(error: unknown): number | undefined {
-  if (typeof error !== 'object' || error === null || Array.isArray(error)) return undefined;
-  const statusCode = (error as { statusCode?: unknown }).statusCode;
-  return typeof statusCode === 'number' && Number.isInteger(statusCode) ? statusCode : undefined;
+/** Bounded, allowlisted diagnostics: never copy messages, bodies, headers or URLs. */
+export function readAIProviderFailureDiagnostics(error: unknown): {
+  statusCode?: number;
+  timedOut: boolean;
+} {
+  const seen = new Set<unknown>();
+  let current = error;
+  let timedOut = false;
+  for (let depth = 0; depth < 5; depth += 1) {
+    if (
+      typeof current !== 'object' ||
+      current === null ||
+      Array.isArray(current) ||
+      seen.has(current)
+    )
+      break;
+    seen.add(current);
+    const candidate = current as {
+      statusCode?: unknown;
+      name?: unknown;
+      code?: unknown;
+      cause?: unknown;
+      lastError?: unknown;
+    };
+    timedOut ||= candidate.name === 'TimeoutError' || candidate.code === 'ETIMEDOUT';
+    if (
+      typeof candidate.statusCode === 'number' &&
+      Number.isInteger(candidate.statusCode) &&
+      candidate.statusCode >= 400 &&
+      candidate.statusCode <= 599
+    )
+      return { statusCode: candidate.statusCode, timedOut };
+    current = candidate.lastError ?? candidate.cause;
+  }
+  return { timedOut };
 }
 
 function createPublicFailure(code: string, message: string, context: unknown): AIPublicFailure {

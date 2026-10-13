@@ -29,6 +29,35 @@ export function useConversationProjection(input: {
   const conversationTitle = ref('');
   const conversationListLoading = ref(false);
   const conversationList = ref<ConversationSummary[]>([]);
+  let listGeneration = 0;
+  let mutationRevision = 0;
+  const pendingListChanges = new Map<
+    string,
+    { revision: number; item: ConversationSummary | null; runtimeKind: 'builtin' | 'local_agent' }
+  >();
+
+  function sortConversations(items: ConversationSummary[]): ConversationSummary[] {
+    return items.sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0));
+  }
+
+  function upsertConversation(item: ConversationSummary): void {
+    pendingListChanges.set(item.id, {
+      revision: ++mutationRevision,
+      item,
+      runtimeKind: item.runtimeKind ?? 'builtin',
+    });
+    conversationList.value = sortConversations([
+      ...conversationList.value.filter((current) => current.id !== item.id),
+      item,
+    ]);
+  }
+
+  function markConversationActivity(id: string): void {
+    const item = conversationList.value.find((current) => current.id === id);
+    if (item)
+      upsertConversation({ ...item, updatedAt: Math.max(Number(item.updatedAt ?? 0), Date.now()) });
+  }
+
   const lastActiveConversationId = ref('');
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
   const hasWorkflowMessages = computed(() =>
@@ -93,33 +122,53 @@ export function useConversationProjection(input: {
     localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY);
   }
 
-  async function loadConversationList(
-    loadService: AIChatService,
-    listOptions?: { preserveSelection?: boolean },
-  ) {
+  async function loadConversationList(loadService: AIChatService) {
+    const generation = ++listGeneration;
+    const revision = mutationRevision;
     conversationListLoading.value = true;
     try {
       const [builtin, local] = await Promise.allSettled([
         loadService.listConversations({ page: 1, pageSize: 24 }).then(unwrap),
         options.localAgent?.listConversations() ?? Promise.resolve([]),
       ]);
-      conversationList.value = [
-        ...(builtin.status === 'fulfilled' ? (builtin.value.data ?? []) : []),
-        ...(local.status === 'fulfilled' ? local.value : []),
-      ].sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0));
+      if (generation !== listGeneration) return;
+      const merged = new Map<string, ConversationSummary>(
+        [
+          ...(builtin.status === 'fulfilled'
+            ? (builtin.value.data ?? [])
+            : conversationList.value.filter((item) => item.runtimeKind !== 'local_agent')),
+          ...(local.status === 'fulfilled'
+            ? local.value
+            : conversationList.value.filter((item) => item.runtimeKind === 'local_agent')),
+        ].map((item) => [item.id, item]),
+      );
+      for (const [id, change] of pendingListChanges) {
+        const authoritative = merged.get(id);
+        const sourceSucceeded =
+          change.runtimeKind === 'local_agent'
+            ? local.status === 'fulfilled'
+            : builtin.status === 'fulfilled';
+        if (
+          sourceSucceeded &&
+          change.revision <= revision &&
+          (change.item === null
+            ? !authoritative
+            : authoritative &&
+              Number(authoritative.updatedAt ?? 0) >= Number(change.item.updatedAt ?? 0))
+        ) {
+          pendingListChanges.delete(id);
+        } else if (change.item) merged.set(id, change.item);
+        else merged.delete(id);
+      }
+      conversationList.value = sortConversations([...merged.values()]);
       if (builtin.status === 'rejected' || local.status === 'rejected')
         toast.error(t('aiAssistant.dialogs.chat.loadFailed'));
 
-      if (listOptions?.preserveSelection !== false && chatConversationId.value) {
-        const currentConversation = conversationList.value.find(
-          (item) => item.id === chatConversationId.value,
-        );
-        if (!currentConversation) startNewConversation();
-      }
+      // This is a paginated discovery list, not proof that a selected thread was deleted.
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.loadFailed'));
     } finally {
-      conversationListLoading.value = false;
+      if (generation === listGeneration) conversationListLoading.value = false;
     }
   }
 
@@ -129,12 +178,49 @@ export function useConversationProjection(input: {
       kind === 'local_agent'
         ? await options.runtime.listMessages(conversationId, kind)
         : await options.runtime.listMessages(conversationId);
-    if (runtimeChoice.value.runtimeKind !== kind) return;
+    // Ask-user suspensions live in Mastra's durable run store rather than
+    // ordinary text history. Restore them even if the turn never wrote a text
+    // message before pausing, so a reload does not strand the pending answer.
+    const pendingAskUser =
+      kind === 'local_agent'
+        ? []
+        : await options.runtime.listAskUserSuspensions(conversationId).catch(() => []);
+    if (runtimeChoice.value.runtimeKind !== kind || chatConversationId.value !== conversationId)
+      return;
     historyIncomplete.value = history.incomplete ?? false;
-    if (chatConversationId.value !== conversationId) return;
-    chatTimeline.value = history.messages.map((message, index) =>
-      normalizeChatItem(message, index),
-    );
+    const timeline = history.messages.map((message, index) => normalizeChatItem(message, index));
+    for (const suspension of pendingAskUser) {
+      const id = `${suspension.approval ? 'approval' : 'ask-user'}-${suspension.runId}`;
+      let item = timeline.find((candidate) => candidate.id === id);
+      if (!item) {
+        item = { id, role: 'assistant', content: '', status: 'success', askUserRequests: [] };
+        timeline.push(item);
+      }
+      if (suspension.approval) {
+        item.approvals ??= [];
+        if (!item.approvals.some((approval) => approval.toolCallId === suspension.toolCallId))
+          item.approvals.push({
+            ...suspension.approval,
+            runId: suspension.runId,
+            toolCallId: suspension.toolCallId,
+            conversationId,
+            status: 'pending',
+            parked: true,
+          });
+        continue;
+      }
+      if (
+        !item.askUserRequests?.some((candidate) => candidate.toolCallId === suspension.toolCallId)
+      ) {
+        item.askUserRequests ??= [];
+        item.askUserRequests.push({
+          ...suspension,
+          conversationId,
+          status: 'pending',
+        });
+      }
+    }
+    chatTimeline.value = timeline;
   }
 
   async function refreshRuntimeUsage(conversationId: string): Promise<void> {
@@ -205,6 +291,8 @@ export function useConversationProjection(input: {
       }
       onClearWorkflow(id);
       onClearModel(id);
+      pendingListChanges.set(id, { revision: ++mutationRevision, item: null, runtimeKind: kind });
+      conversationList.value = conversationList.value.filter((item) => item.id !== id);
       if (chatConversationId.value === id) startNewConversation();
       if (lastActiveConversationId.value === id) clearLastActiveConversation();
       await loadConversationList(loadService);
@@ -229,8 +317,10 @@ export function useConversationProjection(input: {
         modelId: choice.modelId,
         name: conversationName,
       });
+      upsertConversation(conversation);
       signal?.throwIfAborted();
       chatConversationId.value = conversation.id;
+      conversationTitle.value = conversation.name;
       updateLastActiveConversation(conversation.id);
       return conversation.id;
     }
@@ -239,8 +329,10 @@ export function useConversationProjection(input: {
         name: conversationName,
       }),
     );
+    upsertConversation(conversation);
     signal?.throwIfAborted();
     chatConversationId.value = String(conversation.id);
+    conversationTitle.value = conversation.name;
     updateLastActiveConversation(String(conversation.id));
     options.onConversationCreated?.(String(conversation.id));
     return String(conversation.id);
@@ -261,6 +353,9 @@ export function useConversationProjection(input: {
     updateLastActiveConversation,
     clearLastActiveConversation,
     loadConversationList,
+    refreshRuntimeHistory,
+    markConversationActivity,
+    syncConversationSummary: upsertConversation,
     refreshRuntimeUsage,
     selectConversation,
     deleteConversation,

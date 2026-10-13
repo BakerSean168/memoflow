@@ -42,6 +42,7 @@ model Account {
   notifications                   Notification[]
   aiConversations                 AiConversation[]
   aiExecutionRecords              AiExecutionRecord[]
+  aiGoalSurfaceLeases             AiGoalSurfaceLease[]
   aiConversationAttention         AiConversationAttention[]
   aiKnowledgeIndexEntries         AiKnowledgeIndexEntry[]
   aiProviderConfigs               AiProviderConfig[]

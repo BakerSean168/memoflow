@@ -1951,6 +1951,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/ai/provider-composer-states.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-provider.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/ai/provider-onboarding.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2107,6 +2121,20 @@
         "role": "canonical",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/goal/reference/goal-business-panel.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.goal-reference.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.goal-reference.config.ts"
       }
     },
     {
@@ -3089,6 +3117,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3629,6 +3667,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4009,6 +4057,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4282,6 +4340,14 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/layouts/shell/business-surface-control.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4731,6 +4797,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4740,6 +4814,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -8572,6 +8654,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-native-lease.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8610,6 +8702,14 @@
       "measurementCollectors": [
         "packages/goal/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/goal-native-ai-lease.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/goal/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.integration.test.ts",
@@ -12587,7 +12687,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 106
+      "fileCount": 109
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12615,7 +12715,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 105
+      "fileCount": 106
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12735,7 +12835,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 2,
       "e2eOwnership": {
         "lane": "secure-acceptance",
         "lifecycle": "active",
@@ -12838,7 +12938,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 2,
       "e2eOwnership": {
         "lane": "reference",
         "lifecycle": "active",
@@ -13015,7 +13115,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/label/vitest.integration.config.ts",
@@ -13141,14 +13241,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 106
+      "fileCount": 109
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 290
+      "fileCount": 293
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13197,7 +13297,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 105
+      "fileCount": 106
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -13436,6 +13536,7 @@
       "packages/account/src/server/transport/__tests__/account.controller.test.ts",
       "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
       "packages/ai/src/api/routes/ai-provider-onboarding.routes.spec.ts",
+      "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
@@ -13490,6 +13591,7 @@
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-conversation-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-config-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-onboarding-session-memory.repository.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
@@ -13528,6 +13630,7 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "packages/ai/src/server/mastra/tools/owner-contracts.surface.spec.ts",
@@ -13652,6 +13755,7 @@
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-agent-mutations.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/goal-page-reader.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-native-lease.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
@@ -13897,12 +14001,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1202,
-    "integration": 47,
+    "unit": 1209,
+    "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 48,
+    "e2e": 50,
     "perf": 2,
     "governance": 65
   },
@@ -13913,17 +14017,17 @@
       "desktop": 2,
       "local-validation": 6,
       "nightly": 5,
-      "reference": 5,
+      "reference": 6,
       "required": 22,
-      "secure-acceptance": 2,
+      "secure-acceptance": 3,
       "specialized": 3,
       "visual-artifact": 3
     },
     "countsByRole": {
       "artifact": 3,
       "canonical": 25,
-      "reference": 5,
-      "supplemental": 15
+      "reference": 6,
+      "supplemental": 16
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

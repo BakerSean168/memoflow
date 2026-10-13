@@ -12,6 +12,7 @@ import {
   type GoalPlannerRequest,
 } from './goal-planner.worker';
 import { rememberResolvedPlannerModel } from './planner-observability';
+import { GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY } from '../workflows/goal-business-action-journal';
 
 const contextAssembler = new AIContextAssembler({
   getUserTimeContext: vi.fn(async () => ({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 })),
@@ -39,6 +40,96 @@ function decision() {
 }
 
 describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
+  it('executes native Goal field tools and continues to the canonical decision using a mock provider', async () => {
+    const staged = [];
+    const doGenerate = vi.fn(async (options: { tools?: Array<{ name: string }> }) => {
+      if (doGenerate.mock.calls.length === 1) {
+        expect(options.tools?.some((tool) => tool.name === 'goal_set_name')).toBe(true);
+        return {
+          content: [{
+            type: 'tool-call' as const,
+            toolCallId: 'model-tool-1',
+            toolName: 'goal_set_name',
+            input: JSON.stringify({ actionId: 'model-1', value: 'Native Goal Preview' }),
+          }],
+          finishReason: 'tool-calls' as const,
+          usage: { inputTokens: 10, outputTokens: 12, totalTokens: 22 },
+          warnings: [],
+        };
+      }
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify(decision()) }],
+        finishReason: 'stop' as const,
+        usage: { inputTokens: 10, outputTokens: 20, totalTokens: 30 },
+        warnings: [],
+      };
+    });
+    const model = {
+      specificationVersion: 'v2' as const,
+      provider: 'mock-provider',
+      modelId: 'goal-model',
+      supportedUrls: {},
+      doGenerate,
+      doStream: vi.fn(async () => { throw new Error('Unexpected streaming request'); }),
+    };
+    const resolver = {
+      resolve: vi.fn(async () => ({
+        providerId: 'provider-mock',
+        providerName: 'Mock Provider',
+        modelId: 'goal-model',
+        capabilities: {
+          chat: 'verified', streaming: 'unknown',
+          structuredOutput: 'verified', toolCalling: 'verified', vision: 'unknown',
+        },
+        model,
+      })),
+    };
+    const knowledge: IKnowledgeSourcePort = {
+      listRelevantNotes: vi.fn(async () => []),
+      listIndexableNotes: vi.fn(async () => []),
+      getNoteById: vi.fn(async () => null),
+    };
+    const ctx = new RequestContext();
+    ctx.setRaw('identityId', 'identity-1');
+    ctx.setRaw('workflowRunId', 'run-1');
+    const append = vi.fn(async (command) => {
+      staged.push(command);
+      return { sequence: staged.length, command };
+    });
+    ctx.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, {
+      identityId: 'identity-1', runId: 'run-1', revision: 1, append,
+    });
+    const worker = new GoalPlannerWorker(resolver as never, knowledge, undefined, contextAssembler);
+    await expect(worker.plan(request(), ctx)).resolves.toEqual(decision());
+    expect(doGenerate).toHaveBeenCalledTimes(2);
+    expect(append).toHaveBeenCalledWith({
+      actionId: 'model-1', revision: 1, operation: 'goal.setName', value: 'Native Goal Preview',
+    });
+  });
+
+  it('enables multi-step generation only for a workflow-scoped native action sink', async () => {
+    const knowledge: IKnowledgeSourcePort = {
+      listRelevantNotes: vi.fn(async () => []),
+      listIndexableNotes: vi.fn(async () => []),
+      getNoteById: vi.fn(async () => null),
+    };
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
+    const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({ object: decision() } as never);
+    const regular = new RequestContext();
+    await worker.plan(request(), regular);
+    expect(generate.mock.calls[0]?.[1]).not.toHaveProperty('maxSteps');
+
+    const staged = new RequestContext();
+    staged.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, {
+      identityId: 'identity-1',
+      runId: 'run-1',
+      revision: 1,
+      append: vi.fn(),
+    });
+    await worker.plan(request(), staged);
+    expect(generate.mock.calls[1]?.[1]).toMatchObject({ maxSteps: 12 });
+  });
+
   it('exposes only managed KnowledgeDocument refs as linkExisting candidates', async () => {
     const knowledge: IKnowledgeSourcePort = {
       listRelevantNotes: vi.fn(async () => [

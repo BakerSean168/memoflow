@@ -45,9 +45,9 @@ export class AIExecutionRecordPowerSyncAdapter implements IAIExecutionRecordPort
     await this.db.execute(
       `INSERT INTO ai_execution_records (
          id, identity_id, operation, outcome, conversation_id, run_id, request_id, trace_id,
-         provider_connection_id, model_id, error_category, safe_error, estimated_cost_usd,
+         agent_instance_id, provider_connection_id, model_id, error_category, safe_error, estimated_cost_usd,
          token_usage, latency_ms, created_at, completed_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         input.identityId,
@@ -57,6 +57,7 @@ export class AIExecutionRecordPowerSyncAdapter implements IAIExecutionRecordPort
         input.runId ?? null,
         input.requestId ?? null,
         input.traceId ?? null,
+        input.agentInstanceId ?? null,
         input.providerConnectionId ?? null,
         input.modelId ?? null,
         input.errorCategory ?? null,

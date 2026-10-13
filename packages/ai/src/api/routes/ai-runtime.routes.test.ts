@@ -185,6 +185,43 @@ describe('registerAIRuntimeRoutes', () => {
     expect(runtime.deleteConversation).not.toHaveBeenCalled();
     expect(runtime.cancelRun).not.toHaveBeenCalled();
   });
+  it('awaits native ask_user answers before returning the authenticated HTTP acknowledgement', async () => {
+    const stub = runtimeStub();
+    const answerToolSuspension = vi.fn(async () => true);
+    const runtime = Object.assign(stub.runtime, { answerToolSuspension });
+    const router = registerAIRuntimeRoutes(runtime, { auth });
+    const { res } = response();
+    const command = { type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' };
+
+    await getRouteHandler(router, 'post', '/assistant/answer')(request(command) as never, res as never);
+
+    expect(answerToolSuspension).toHaveBeenCalledWith(expect.objectContaining({
+      context: expect.objectContaining({ identityId: 'identity-1' }),
+      command,
+    }));
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      ok: true,
+      data: { accepted: true },
+    }));
+  });
+
+  it('redacts native ask_user resume failures over HTTP instead of leaking provider diagnostics', async () => {
+    const stub = runtimeStub();
+    const runtime = Object.assign(stub.runtime, {
+      answerToolSuspension: vi.fn(async () => { throw new AIExecutionError('provider_unavailable', 'vault=private-model-key'); }),
+    });
+    const router = registerAIRuntimeRoutes(runtime, { auth });
+    const { res } = response();
+
+    await getRouteHandler(router, 'post', '/assistant/answer')(
+      request({ type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' }) as never,
+      res as never,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(JSON.stringify(res.json.mock.calls)).not.toContain('private-model-key');
+  });
+
   it('streams only canonical vNext events and injects authenticated identity into Mastra runtime', async () => {
     const started: AssistantRuntimeEvent = {
       eventId: 'run-1:1',
@@ -748,7 +785,7 @@ describe('authenticated Assistant attention routes', () => {
 describe('authenticated Assistant approval route', () => {
   it('binds the strict command to server ExecutionContext and fails closed without identity', async () => {
     const stub = runtimeStub();
-    const decideToolApproval = vi.fn(() => false);
+    const decideToolApproval = vi.fn(async () => false);
     Object.assign(stub.runtime, { decideToolApproval });
     const router = registerAIRuntimeRoutes(stub.runtime, { auth: (_req, _res, next) => next() });
     const handler = getRouteHandler(router, 'post', '/assistant/approval');

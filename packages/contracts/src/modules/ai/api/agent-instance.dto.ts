@@ -84,6 +84,7 @@ export const AgentRegistryCommandSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('create'), instance: CreateAgentInstanceSchema }).strict(),
   z.object({ action: z.literal('update'), ...cas, patch: UpdateAgentInstanceSchema }).strict(),
   z.object({ action: z.literal('remove'), ...cas }).strict(),
+  z.object({ action: z.literal('reset'), ...cas }).strict(),
   z
     .object({
       action: z.literal('bind'),
