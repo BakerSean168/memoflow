@@ -85,6 +85,15 @@ S6/S7 现已包含实际代码及定向测试，当前本地候选的四项目 t
 - S6 新增两个独立客户端投影的版本乱序与旧列表交错测试，`useAIChatSession.spec.ts` 39/39 通过。证据 `/tmp/memoflow-s0s7-auto1-crosswindow.log`；不是两个真实浏览器的 E2E。
 - ForgeFlow/Pi 扩展缺少 `pi-subagents/required-child-extensions`，已由 ChatGPT Web 经 Agent Fabric 实施。Docker prod-like 仅完成官方 dry-run，结果为 inconclusive；当前候选未推送 PR #451，也没有对应新 HEAD 的 CI 结果。
 
+## 2026-10-14 · 第二轮续跑（实测）
+
+- 执行入口：ChatGPT Web 经 Agent Fabric → GCP `gcp-dev-01`；原 T3 Codex 线程仍为 quota `failed`，本轮未调用额外 Codex 推理。ForgeFlow 的 ZCode/GLM 配置仅可用于调度规划；Pi 物理模型注册仍不满足派发条件。没有启动第二写入者。
+- S6：重新实际运行 `pnpm nx run app-vue:test --args='src/modules/ai/composables/useAIChatSession.spec.ts'`：39/39 通过，exit 0，Nx cache 0/1。
+- S7：使用隔离端口 `AI_WORKSPACE_E2E_PORT=20380` 运行真实认证、API/PostgreSQL 与 Chromium 的 `web:e2e:ai-workspace --grep=checkpoint`：Goal Checkpoint 刷新恢复、第二窗口 CAS 冲突及稳定 Goal ID 防重创建场景 1/1 通过，exit 0，Nx cache 0/1；仍是受控 Workflow，不代表真实模型调用或 Desktop 实机。
+- 修复 AI Workspace E2E 启动器 `apps/web/e2e/helpers/run-ai-workspace-playwright.ts`：启动前检测 Web 端口占用、Vite 使用 `--strictPort`、API/Vite 子进程提早退出即终止等待，并修正 SIGTERM 后通过 `child.killed` 误判已退出、不能升级 SIGKILL 的问题。曾有一次被默认 4174 端口占用的复测失败（`ERR_CONNECTION_REFUSED`）；新代码在已占用的 20200 端口进行负向探测，会立即给出 `EADDRINUSE` 与明确诊断，不修改或占用该服务。
+- 新启动器的 Prettier 与 `git diff --check` 通过，`web:lint` exit 0、`web:typecheck` exit 0（32 个依赖任务），工程治理检查 exit 0。修改后的独立端口 E2E 首次遭遇并发 Nx daemon `EPIPE`（未进入浏览器），隔离并串行使用 `NX_DAEMON=false` 后，在独立 `20382` 端口、`/tmp/memoflow-auto2b-ai-e2e-*` 报告目录复测：真实 API/PostgreSQL/Chromium 登录与 Goal checkpoint 场景 1/1 通过、exit 0、Nx cache 0/1，Playwright 用时 46.2 秒、Nx 整体约 76 秒。这证明启动器修复并未破坏主要 E2E 流程；此前 `EPIPE` 属 Nx 执行环境并发问题，不能计作产品失败。
+- Git 提交和官方 validate-local-deploy 实际执行入口受到远程工具安全检查拦截，尚无新的 Commit、PR/CI 或 Docker prod-like 部署证据。仍须关闭这些验收缺口；不绕过安全拦截，保留 staged 及 unstaged 修改。
+
 ## S0 历史切片记录
 
 以下记录仅对应 S0 当时的改动，保留其原始验证范围。当前 mounted 草稿保护与 refresh checkpoint 分开验收。

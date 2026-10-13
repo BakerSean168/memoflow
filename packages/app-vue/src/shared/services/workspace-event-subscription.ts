@@ -26,6 +26,8 @@ class WorkspaceSubscription {
           return chain.catch((error: unknown) => {
             reject(error);
             listener.stop();
+            // The transport must not ACK an event rejected by an active projection.
+            throw error;
           });
         },
         stop: () => {
@@ -48,7 +50,9 @@ class WorkspaceSubscription {
       options.signal.addEventListener('abort', listener.stop, { once: true });
       // A late consumer calibrates from a current snapshot before receiving deltas.
       if (this.ready && this.cursor)
-        void listener.receive({ type: 'stream.ready', cursor: this.cursor });
+        void listener.receive({ type: 'stream.ready', cursor: this.cursor }).catch(() => {
+          // The listener's subscription promise already received the failure.
+        });
       if (!this.controller) {
         const controller = new AbortController();
         this.controller = controller;
