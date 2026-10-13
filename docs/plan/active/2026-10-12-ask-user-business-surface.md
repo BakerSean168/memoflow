@@ -227,8 +227,8 @@ Stage B-2 本切片的本地 RED→GREEN 与实现 exact-head CI 门槛已满足
 ### Dev Schema 现实问题与迁移边界
 
 - GCP Dev 的 `MemoFlow` PostgreSQL 经只读 `prisma migrate diff` 验证有多项既有 Schema 漂移，包含 13 张待新增表。全量差异保存在仓库外审计文件 `/home/dev/projects/.memoflow-goal-panel-dev-schema-diff.sql`，本次不盲目执行完整 `db push`。
-- 有明确故障证据的 `ai_goal_surface_leases`、`profile_import_operations` 已分别按两份**定向、幂等、事务化、无数据删除**的 SQL 补齐。审计记录 `/home/dev/projects/.memoflow-goal-pane-schema-audit.json` 验证原 5 个账户数未变，两个新表均空；带 FK 的租约写入/事务回滚验证通过，永久记录数未增加。
-- 原 `ai_goal_surface_leases` 脚本已存在；新添 `add-profile-import-operations.sql` 对齐 Prisma 模型。其余差异（含 OAuth/JWKS 等）保留单独审计，不能冒险由 UI 改造自动同步。
+- 明确故障证据的 `ai_goal_surface_leases`、`profile_import_operations`，以及经运行时依赖扫描确认缺失、被 Chat 会话状态投影使用的 `ai_conversation_attention`，已按三份**定向、幂等、事务化、无数据删除**的 SQL 补齐。审计记录 `/home/dev/projects/.memoflow-goal-pane-schema-audit.json` 验证原 5 个账户、6 条 AI 会话未被改变，三张新表均空；带 FK 的租约写入/事务回滚验证通过，永久记录数未增加。
+- `ai_goal_surface_leases` 和 `ai_conversation_attention` 的迁移脚本已存在；仅新增 `add-profile-import-operations.sql` 对齐 Prisma 模型。其余差异（含 OAuth/JWKS 等）保留单独审计，不能冒险由 UI 改造自动同步。
 
 ### 验收门槛
 
