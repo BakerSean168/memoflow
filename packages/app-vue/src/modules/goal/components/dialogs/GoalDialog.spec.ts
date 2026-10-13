@@ -109,9 +109,11 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     };
     const saving = ai.requestSubmit(context);
     await expect(ai.requestSubmit(context)).rejects.toThrow('busy');
-    expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({
-      nativeAiLease: context.nativeAiLease,
-    }));
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nativeAiLease: context.nativeAiLease,
+      }),
+    );
     expect(mocks.createGoal).toHaveBeenCalledOnce();
     complete();
     expect(await saving).toEqual(created);
@@ -119,7 +121,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     wrapper.unmount();
   });
 
-  it('renders the same native form inside the business panel without a modal', async () => {
+  it('renders the same native form in a pane-local modeless dialog', async () => {
     const wrapper = mount(GoalDialog, {
       props: { open: true, presentation: 'panel' },
       attachTo: document.body,
@@ -127,7 +129,8 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     });
     await nextTick();
     expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-form"]').attributes('aria-modal')).toBe('false');
+    expect(wrapper.get('[data-testid="pane-scoped-dialog-backdrop"]').exists()).toBe(true);
     await dom('goal-name-input').setValue('Panel Goal');
     await dom('goal-form').trigger('submit');
     expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({ name: 'Panel Goal' }));
@@ -399,9 +402,13 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(frame).toContain('ProductDialogShell');
     expect(frame).toContain('recipe="workspace"');
     expect(source).toContain('ProductAutoTextarea');
-    expect(source).toContain('class="flex min-h-full flex-col gap-6"');
+    expect(frame).toContain('PaneScopedDialog');
+    expect(frame).toContain('height-mode="content"');
+    expect(source).toContain("'flex min-h-0 flex-col gap-6'");
+    expect(source).toContain("'flex min-h-full flex-col gap-6'");
     expect(source).toContain('GoalKeyResultDraftEditor');
-    expect(source).toContain('class="mt-auto"');
+    expect(source).toContain("'mt-1'");
+    expect(source).toContain("'mt-auto'");
     expect(source).toContain('GoalStatusPicker');
 
     const keyResultEditorSource = fs.readFileSync(

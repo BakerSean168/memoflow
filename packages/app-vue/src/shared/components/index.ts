@@ -5,6 +5,7 @@ export { default as GlobalCommandPalette } from './GlobalCommandPalette.vue';
 export { default as GlobalProgressBar } from './GlobalProgressBar.vue';
 export { default as ColorPickerField } from './ColorPickerField.vue';
 export { default as ProductDialogShell } from './ProductDialogShell.vue';
+export { default as PaneScopedDialog } from './PaneScopedDialog.vue';
 export { default as ProductPopoverSurface } from './ProductPopoverSurface.vue';
 export { default as ProductSheetSurface } from './ProductSheetSurface.vue';
 export { default as ProductSurfaceState } from './ProductSurfaceState.vue';

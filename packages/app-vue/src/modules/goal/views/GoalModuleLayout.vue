@@ -1,10 +1,11 @@
 <template>
   <div
-    class="flex h-full min-h-0 w-full flex-col overflow-hidden bg-background"
+    class="relative isolate flex h-full min-h-0 w-full flex-col overflow-hidden bg-background"
     data-testid="goal-module-layout"
   >
     <GoalPageToolbar
-      v-if="isListRoute && !panelFormOpen"
+      :inert="panelFormOpen"
+      v-if="isListRoute"
       :system-views="views"
       :active-system-view="systemView"
       :visible-goal-count="goals.length"
@@ -15,23 +16,29 @@
       @select-system-view="setSystemView"
       @update-labels="setLabelIdsAll"
     />
-    <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <router-view v-show="!panelFormOpen" />
-      <GoalDialog
-        presentation="panel"
-        :open="dialogOpen"
-        @session-change="handleSessionChange"
-        @update:open="handleDialogOpenUpdate"
-        :mode="dialogMode"
-        :goal="editingGoal"
-        @dirty-change="goalDialogDirty = $event"
-        @busy-change="goalDialogBusy = $event"
-        @created="handleSaved"
-        @updated="handleSaved"
-        @create-with-ai="openCreateWithAI"
-        @open-knowledge="openKnowledge"
-      />
+    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
+      <div
+        :inert="panelFormOpen"
+        class="min-h-0 flex-1 overflow-hidden"
+        data-testid="goal-background-view"
+      >
+        <router-view />
+      </div>
     </main>
+    <GoalDialog
+      presentation="panel"
+      :open="dialogOpen"
+      @session-change="handleSessionChange"
+      @update:open="handleDialogOpenUpdate"
+      :mode="dialogMode"
+      :goal="editingGoal"
+      @dirty-change="goalDialogDirty = $event"
+      @busy-change="goalDialogBusy = $event"
+      @created="handleSaved"
+      @updated="handleSaved"
+      @create-with-ai="openCreateWithAI"
+      @open-knowledge="openKnowledge"
+    />
   </div>
 </template>
 

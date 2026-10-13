@@ -1,4 +1,8 @@
-import { type AIWorkflowRunView, type GoalPlanDraft, type GoalWorkflowLiveActionRecord } from '@memoflow/contracts/ai';
+import {
+  type AIWorkflowRunView,
+  type GoalPlanDraft,
+  type GoalWorkflowLiveActionRecord,
+} from '@memoflow/contracts/ai';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
@@ -80,7 +84,11 @@ export function useGoalNativeReviewCoordinator(input: {
     promise: Promise<void>;
   } | null = null;
   const appliedLiveActionIds = new Set<string>();
-  let pendingLiveProjection: { runId: string; lastSequence: number; promise: Promise<void> } | null = null;
+  let pendingLiveProjection: {
+    runId: string;
+    lastSequence: number;
+    promise: Promise<void>;
+  } | null = null;
   const surfaceLease = useGoalSurfaceLease(options.workflowRuntime, () => {
     // An expired/superseded fence must stop all AI patches and Save attempts.
     // Close only an AI-owned preview, not a user-owned handoff. Leaving the
@@ -111,12 +119,17 @@ export function useGoalNativeReviewCoordinator(input: {
       status: 'success',
       content: t('aiAssistant.businessSurface.formUpdated', { revision: record.command.revision }),
       businessOperation: {
-        runId, revision: record.command.revision, operation: record.command.operation,
+        runId,
+        revision: record.command.revision,
+        operation: record.command.operation,
       },
     });
   }
 
-  function applyNativeLiveCommand(session: GoalNativeEditSession, record: GoalWorkflowLiveActionRecord): void {
+  function applyNativeLiveCommand(
+    session: GoalNativeEditSession,
+    record: GoalWorkflowLiveActionRecord,
+  ): void {
     const { command } = record;
     if (command.operation === 'goal.setName') {
       session.patch({ name: command.value });
@@ -127,8 +140,9 @@ export function useGoalNativeReviewCoordinator(input: {
     } else if (command.operation === 'goal.setTarget') {
       session.patch({ target: command.value });
     } else if (command.operation === 'goal.patchKeyResults') {
-      const ids = command.value.map((item) =>
-        `workflow-draft-ref:${encodeURIComponent(item.draftRef)}` as GoalNativeSubmitContext['keyResultIds'][number],
+      const ids = command.value.map(
+        (item) =>
+          `workflow-draft-ref:${encodeURIComponent(item.draftRef)}` as GoalNativeSubmitContext['keyResultIds'][number],
       );
       session.patch({
         keyResults: command.value.map((item, index) => ({
@@ -151,8 +165,14 @@ export function useGoalNativeReviewCoordinator(input: {
   async function performLiveProjection(
     run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
   ): Promise<void> {
-    if (run.status !== 'running' || !run.liveActions?.length ||
-        goalManualHandoff.value || pendingOwnerAttempt || submitted) return;
+    if (
+      run.status !== 'running' ||
+      !run.liveActions?.length ||
+      goalManualHandoff.value ||
+      pendingOwnerAttempt ||
+      submitted
+    )
+      return;
     const actions = [...run.liveActions].sort((a, b) => a.sequence - b.sequence);
     const appliedKey = (record: GoalWorkflowLiveActionRecord) =>
       `${record.command.revision}:${record.command.actionId}`;
@@ -199,12 +219,19 @@ export function useGoalNativeReviewCoordinator(input: {
       goalSurfaceConflict.value = true;
       return;
     }
-    if (epoch !== projectionEpoch || goalManualHandoff.value || run.runId !== goalWorkflowRun.value?.runId) {
+    if (
+      epoch !== projectionEpoch ||
+      goalManualHandoff.value ||
+      run.runId !== goalWorkflowRun.value?.runId
+    ) {
       if (opened) session.requestCancel();
       return;
     }
     try {
-      session.coordinateSubmit(async () => undefined, () => cancelGoalAgentRun());
+      session.coordinateSubmit(
+        async () => undefined,
+        () => cancelGoalAgentRun(),
+      );
       // Claim control still prevents user edits; AI capability patches only this
       // mounted native owner draft. No direct Goal persistence occurs here.
       session.setEditingBlocked(false);
@@ -228,20 +255,24 @@ export function useGoalNativeReviewCoordinator(input: {
 
   function projectLive(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): Promise<void> {
     const lastSequence = run.liveActions?.[run.liveActions.length - 1]?.sequence ?? 0;
-    if (pendingLiveProjection?.runId === run.runId && pendingLiveProjection.lastSequence === lastSequence)
+    if (
+      pendingLiveProjection?.runId === run.runId &&
+      pendingLiveProjection.lastSequence === lastSequence
+    )
       return pendingLiveProjection.promise;
     const pending = {
       runId: run.runId,
       lastSequence,
-      promise: Promise.resolve().then(() => performLiveProjection(run)).finally(() => {
-        if (pendingLiveProjection === pending) pendingLiveProjection = null;
-      }),
+      promise: Promise.resolve()
+        .then(() => performLiveProjection(run))
+        .finally(() => {
+          if (pendingLiveProjection === pending) pendingLiveProjection = null;
+        }),
     };
     pendingLiveProjection = pending;
     nativeProjection = pending.promise;
     return pending.promise;
   }
-
 
   function applyNativeProjection(
     session: GoalNativeEditSession,
@@ -345,7 +376,7 @@ export function useGoalNativeReviewCoordinator(input: {
           goalSurfaceConflict.value = true;
           return;
         }
-        await nativeSession.focus('name');
+        // AI owns the data patch, not the user's current keyboard focus in Chat.
         return;
       }
     }
@@ -405,7 +436,7 @@ export function useGoalNativeReviewCoordinator(input: {
       projectedMode = projection.mode;
       submitted = null;
       goalOwnerSubmitted.value = false;
-      await nativeSession.focus('name');
+      // AI owns the data patch, not the user's current keyboard focus in Chat.
       return;
     }
 

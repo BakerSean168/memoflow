@@ -30,9 +30,30 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
     await expect(page.getByTestId('shell-business-pane')).toBeVisible();
     await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
-    await expect(page.getByTestId('goal-list-view')).toBeHidden();
+    // The Goal list stays mounted beneath a visual, pane-local translucent backdrop.
+    const background = page.getByTestId('goal-background-view');
+    const backdrop = page.getByTestId('pane-scoped-dialog-backdrop');
+    await expect(background).toBeVisible();
+    await expect(background).toHaveAttribute('inert', '');
+    await expect(page.getByTestId('goal-list-view')).toBeVisible();
+    await expect(backdrop).toBeVisible();
+    await expect(editor).toHaveAttribute('role', 'dialog');
+    await expect(editor).toHaveAttribute('aria-modal', 'false');
+    const overlayBox = await backdrop.boundingBox();
+    const businessBox = await page.getByTestId('shell-business-pane').boundingBox();
+    const chatBox = await page.getByTestId('shell-ai-column').boundingBox();
+    expect(overlayBox).toBeTruthy();
+    expect(businessBox).toBeTruthy();
+    expect(chatBox).toBeTruthy();
+    expect(overlayBox!.x).toBeGreaterThanOrEqual(businessBox!.x - 1);
+    expect(overlayBox!.x + overlayBox!.width).toBeLessThanOrEqual(
+      businessBox!.x + businessBox!.width + 1,
+    );
+    expect(overlayBox!.x).toBeGreaterThanOrEqual(chatBox!.x + chatBox!.width - 1);
 
     await page.getByTestId('goal-name-input').fill('Editable in parallel');
+    await composer.click();
+    await expect(editor).toBeVisible();
     await composer.fill('Ask the AI to help refine my goal');
     await expect(composer).toHaveValue('Ask the AI to help refine my goal');
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');

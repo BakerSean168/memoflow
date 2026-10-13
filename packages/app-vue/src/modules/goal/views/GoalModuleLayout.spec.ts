@@ -516,9 +516,13 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     const { wrapper, router, host } = await mountNativeHost(initial, true);
     const pane = wrapper.get('[data-testid="goal-panel-form"]');
     expect(pane.attributes('data-editor-presentation')).toBe('pane');
-    expect(pane.attributes('role')).toBe('region');
-    expect(wrapper.find('[data-testid="goal-page-toolbar"]').exists()).toBe(false);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(pane.attributes('role')).toBe('dialog');
+    expect(pane.attributes('aria-modal')).toBe('false');
+    expect(wrapper.find('[data-testid="goal-page-toolbar"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="goal-background-view"]').attributes()).toHaveProperty(
+      'inert',
+    );
+    expect(wrapper.get('[data-testid="pane-scoped-dialog-backdrop"]').exists()).toBe(true);
     expect(host.locate()).not.toBeNull();
     expect(wrapper.get('[data-testid="goal-panel-close"]').attributes('aria-label')).toBe('Close');
     await wrapper.get('[data-testid="goal-panel-close"]').trigger('click');
@@ -583,7 +587,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     const controlled = await host.openControlledCreate('run-1');
     expect(router.currentRoute.value.query.goalForm).toBe('create');
     expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-form"]').attributes('aria-modal')).toBe('false');
     controlled.patch({ name: 'AI Goal' });
     expect(() => host.locate()!.patch({ name: 'User overwrite' })).toThrow('controlled');
     await router.push('/tasks');

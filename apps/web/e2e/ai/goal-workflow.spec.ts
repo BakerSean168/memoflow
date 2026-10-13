@@ -664,6 +664,11 @@ test.describe('AI Goal Workflow', () => {
     const nativeReview = page.getByTestId('goal-panel-form');
     await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
     await expect(nativeReview).toBeVisible();
+    // The AI-owned Goal review is modeless: conversations can still be composed.
+    const composer = page.getByTestId('ai-chat-composer');
+    await expect(composer).toBeEnabled();
+    await composer.fill('Additional context while the Goal editor remains open');
+    await expect(nativeReview).toBeVisible();
     await nativeReview.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
     await page.getByTestId('global-confirm-confirm').click();

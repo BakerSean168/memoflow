@@ -248,43 +248,116 @@ function releasePanelControl() {
   controlledSession = null;
   commandResult.value = 'Handed off without saving';
 }
+function renderGoalEditor() {
+  return h(GoalDialog, {
+    open: creating.value,
+    presentation: panel ? 'panel' : 'dialog',
+    onSessionChange: receiveSession,
+    'onUpdate:open': (open: boolean) => {
+      creating.value = open;
+    },
+    onCreated: async () => {
+      creating.value = false;
+      await router.replace('/goals/goal-reference');
+    },
+  });
+}
+
+function renderReferenceChat() {
+  return h(
+    'aside',
+    {
+      class:
+        'flex h-full w-[44%] shrink-0 flex-col gap-3 border-r border-border/50 bg-background p-5',
+      'data-testid': 'reference-chat-column',
+    },
+    [
+      h('p', { class: 'text-sm font-semibold' }, 'AI Chat'),
+      h(
+        'p',
+        { class: 'text-xs text-muted-foreground' },
+        'Chat remains operable while the Goal editor is open.',
+      ),
+      params.get('control') === 'ai'
+        ? h('div', { class: 'flex flex-col gap-2' }, [
+            h(
+              'button',
+              {
+                class: 'rounded border p-2 text-left',
+                'data-testid': 'business-patch',
+                onClick: applyPanelCommand,
+              },
+              'Apply business command',
+            ),
+            h(
+              'button',
+              {
+                class: 'rounded border p-2 text-left',
+                'data-testid': 'business-handoff',
+                onClick: releasePanelControl,
+              },
+              'Hand off',
+            ),
+            h(
+              'p',
+              { role: 'status', 'data-testid': 'business-command-result' },
+              commandResult.value,
+            ),
+          ])
+        : null,
+      h('textarea', {
+        'data-testid': 'reference-chat-composer',
+        class:
+          'mt-auto min-h-20 w-full resize-none rounded-lg border border-border/70 bg-background p-3 text-sm',
+        placeholder: 'Ask the AI...',
+      }),
+    ],
+  );
+}
+
+function renderReferenceBusinessPanel() {
+  return h(
+    'div',
+    {
+      class:
+        'relative isolate @container/panel h-full min-w-0 flex-1 overflow-hidden bg-background',
+      'data-testid': 'reference-business-pane',
+    },
+    [
+      h(
+        'div',
+        { class: 'flex h-full w-full flex-col', 'data-testid': 'reference-goal-background' },
+        [
+          h(
+            'header',
+            { class: 'shrink-0 border-b border-border/60 px-5 py-3 text-sm font-medium' },
+            'Goals',
+          ),
+          h('div', { class: 'flex flex-col gap-3 p-5 text-sm text-muted-foreground' }, [
+            h('p', 'Goals currently in progress'),
+            h('p', 'Study plan'),
+            h('p', 'Personal development'),
+            h('p', 'Learning and practice'),
+          ]),
+        ],
+      ),
+      renderGoalEditor(),
+    ],
+  );
+}
+
 const app = createApp(
   defineComponent({
     setup: () => () =>
-      h('main', { class: '@container/panel h-screen w-full' }, [
-        creating.value ? null : h(RouterView),
-        panel && params.get('control') === 'ai'
-          ? h('aside', [
-              h(
-                'button',
-                { 'data-testid': 'business-patch', onClick: applyPanelCommand },
-                'Apply business command',
-              ),
-              h(
-                'button',
-                { 'data-testid': 'business-handoff', onClick: releasePanelControl },
-                'Hand off',
-              ),
-              h(
-                'p',
-                { role: 'status', 'data-testid': 'business-command-result' },
-                commandResult.value,
-              ),
-            ])
-          : null,
-        h(GoalDialog, {
-          open: creating.value,
-          presentation: panel ? 'panel' : 'dialog',
-          onSessionChange: receiveSession,
-          'onUpdate:open': (open: boolean) => {
-            creating.value = open;
-          },
-          onCreated: async () => {
-            creating.value = false;
-            await router.replace('/goals/goal-reference');
-          },
-        }),
-      ]),
+      panel
+        ? h('main', { class: 'flex h-screen w-full overflow-hidden' }, [
+            renderReferenceChat(),
+            renderReferenceBusinessPanel(),
+          ])
+        : h('main', { class: '@container/panel h-screen w-full' }, [
+            creating.value ? null : h(RouterView),
+            renderGoalEditor(),
+          ]),
   }),
 );
 app
