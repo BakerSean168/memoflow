@@ -26,9 +26,7 @@
     <form
       id="goal-form"
       data-testid="goal-form"
-      :class="
-        presentation === 'panel' ? 'flex min-h-0 flex-col gap-6' : 'flex min-h-full flex-col gap-6'
-      "
+      class="flex min-h-full flex-col gap-6"
       @submit.prevent="save"
     >
       <section
@@ -223,7 +221,7 @@
       <GoalKeyResultDraftEditor
         :key="mode"
         v-model="draft.keyResults"
-        :class="presentation === 'panel' ? 'mt-1' : 'mt-auto'"
+        class="mt-auto"
         :disabled="isBusy"
         :goal-start="draft.start"
         :goal-target="draft.target"

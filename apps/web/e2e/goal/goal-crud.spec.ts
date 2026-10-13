@@ -67,6 +67,35 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');
   });
 
+  test('[P0] keeps a large Goal card fixed when the key-result editor grows, scrolling inside the pane only', async ({
+    page,
+  }) => {
+    await openCreateGoalDialog(page);
+    const card = goalDialog(page);
+    const scroll = card.locator('[data-scroll-host="pane-dialog"]');
+    const geometry = async () => {
+      const box = await card.boundingBox();
+      expect(box).toBeTruthy();
+      return box!;
+    };
+    const initial = await geometry();
+    const chat = page.getByTestId('ai-chat-composer');
+
+    await card.getByTestId('add-key-result-entry').click();
+    await expect(card.getByTestId('key-result-draft-form')).toBeVisible();
+    await expect
+      .poll(async () => scroll.evaluate((node) => node.scrollHeight - node.clientHeight))
+      .toBeGreaterThan(0);
+    await expect.poll(async () => scroll.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+    const expanded = await geometry();
+    expect(Math.abs(expanded.height - initial.height)).toBeLessThan(1.1);
+    expect(Math.abs(expanded.width - initial.width)).toBeLessThan(1.1);
+    expect(Math.abs(expanded.y - initial.y)).toBeLessThan(1.1);
+    await chat.fill('Chat is still editable after expanding the goal editor');
+    await expect(card).toBeVisible();
+    await expect(chat).toHaveValue('Chat is still editable after expanding the goal editor');
+  });
+
   test('[P0] creates one Goal aggregate with a label and drafted key result', async ({ page }) => {
     const goalName = `E2E Goal vNext ${Date.now()}`;
     const labelName = `Launch-${Date.now()}`;

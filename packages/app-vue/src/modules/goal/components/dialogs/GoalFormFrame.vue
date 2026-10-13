@@ -15,7 +15,7 @@ defineEmits<{ 'update:open': [boolean] }>();
     close-test-id="goal-panel-close"
     :close-disabled="closeDisabled"
     size="wide"
-    height-mode="content"
+    height-mode="workspace"
     @close="$emit('update:open', false)"
   >
     <template #title><slot name="title" /></template>

@@ -403,12 +403,10 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(frame).toContain('recipe="workspace"');
     expect(source).toContain('ProductAutoTextarea');
     expect(frame).toContain('PaneScopedDialog');
-    expect(frame).toContain('height-mode="content"');
-    expect(source).toContain("'flex min-h-0 flex-col gap-6'");
-    expect(source).toContain("'flex min-h-full flex-col gap-6'");
+    expect(frame).toContain('height-mode="workspace"');
+    expect(source).toContain('class="flex min-h-full flex-col gap-6"');
     expect(source).toContain('GoalKeyResultDraftEditor');
-    expect(source).toContain("'mt-1'");
-    expect(source).toContain("'mt-auto'");
+    expect(source).toContain('class="mt-auto"');
     expect(source).toContain('GoalStatusPicker');
 
     const keyResultEditorSource = fs.readFileSync(

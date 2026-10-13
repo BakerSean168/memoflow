@@ -29,13 +29,15 @@ const { t } = useI18n();
 const widthClass = computed(
   () =>
     ({
-      compact: 'max-w-[440px]',
-      standard: 'max-w-[620px]',
-      wide: 'max-w-[760px]',
+      compact: 'w-full max-w-[440px]',
+      standard: 'w-full max-w-[620px]',
+      wide: 'w-[96%] max-w-[960px]',
     })[props.size],
 );
 const heightClass = computed(() =>
-  props.heightMode === 'workspace' ? 'h-full max-h-[900px]' : 'max-h-full',
+  // Occupy a stable fraction of the OWN business pane, capped on tall displays.
+  // The form's content must never determine the workspace dialog's outer size.
+  props.heightMode === 'workspace' ? 'h-[min(88%,900px)]' : 'max-h-full',
 );
 </script>
 
@@ -55,7 +57,7 @@ const heightClass = computed(() =>
     />
     <section
       :class="[widthClass, heightClass]"
-      class="relative flex w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] shadow-[0_24px_72px_-30px_rgba(0,0,0,0.85),0_8px_28px_-15px_rgba(0,0,0,0.55)]"
+      class="relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] shadow-[0_24px_72px_-30px_rgba(0,0,0,0.85),0_8px_28px_-15px_rgba(0,0,0,0.55)]"
       role="dialog"
       aria-modal="false"
       :aria-labelledby="titleId"

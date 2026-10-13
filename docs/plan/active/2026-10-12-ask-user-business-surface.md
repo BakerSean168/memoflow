@@ -217,6 +217,8 @@ Stage B-2 本切片的本地 RED→GREEN 与实现 exact-head CI 门槛已满足
 
 - Goal 创建和编辑是以 **Panel-scoped Modeless Dialog** 呈现的同一套 Native Goal Editor；此 Dialog 有明确卡片边界、圆角、阴影、固定 Header/Footer、独立滚动 Body。
 - **右侧业务内容上的半透明暗色遮罩必须保留**，原目标列表透过遮罩隐约可见。这是纯粹的 UI 样式偏好，不赋予原列表任何所谓「提供上下文」的业务含义。Goal 列表及工具栏保留 DOM/原有状态，编辑期间被设为 inert，不允许操作。
+- **大表单必须保持稳定的外框尺寸**，不能随字段、KR 或扩展区域数量而增长。Goal 使用共享容器的 `heightMode=workspace`，宽度为业务 Pane 可用宽的 96%（封顶 960px），高度为业务 Pane 可用高的 88%（封顶 900px），面板内边距另行保留；仅当 Pane/视口本身调整大小时才重新计算。不是对全局 viewport 计算尺寸。
+- Body 用 `min-height:0; flex:1; overflow-y:auto` 承载内容增加，Header/Footer 固定在外框内；恢复 Goal 主表单 `min-h-full` 与 KR `mt-auto`，不再为视觉紧凑性把 Goal 降级成 content-height。KR 展开定位兼容 Pane-scoped 与旧全局对话框的 scroll host。
 - 遮罩只位于 BusinessPanel 内容区，**绝不进入 AI Chat、全局窗口或 BusinessPanel 顶部 Tab 栏**；点击遮罩、AI Chat 或其他工作区非模态区域不得自动关闭草稿；无全局 Portal/Focus Trap/Pointer Lock，左侧聊天可输入、可滚动。
 - 业务内容内的编辑器元素使用 `role=dialog` 且 `aria-modal=false`；仅右侧原始内容处于 inert。只通过提交、显式关闭或取消退出，继续使用既有 dirty/busy 和 Shell 离开拦截契约。
 - `PaneScopedDialog.vue` 是业务模块复用的 **唯一视觉容器**。不同表单可选择 compact / standard / wide 宽度及 content / workspace 高度，Goal 大表单先完成完整纵切；Record、Task、Routine、Schedule 的宿主仍需逐个迁移并进行全链路测试，不能单凭共用 UI 容器视为已经完成。

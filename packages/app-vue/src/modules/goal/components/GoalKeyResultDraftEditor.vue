@@ -247,7 +247,9 @@ function ensureEditorFullyVisible(): void {
   const panel = editorPanelRef.value;
   if (!panel) return;
 
-  const scrollContainer = panel.closest<HTMLElement>('[data-testid="product-dialog-body"]');
+  const scrollContainer = panel.closest<HTMLElement>(
+    '[data-scroll-host="pane-dialog"], [data-testid="product-dialog-body"]',
+  );
   if (!scrollContainer) return;
 
   if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return;

@@ -34,6 +34,72 @@ test('right-panel Goal form uses a pane-scoped modeless dialog with the real nat
   expect(evidence.goal.name).toBe('Manual panel Goal');
 });
 
+test('large Goal editor holds panel-relative dimensions while a key result expands and only its body scrolls', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1400, height: 800 });
+  await page.goto('/?surface=panel&state=create&locale=en-US&theme=dark');
+
+  const editor = page.getByTestId('goal-panel-form');
+  const body = editor.locator('[data-scroll-host="pane-dialog"]');
+  const measure = async () =>
+    await page.evaluate(() => {
+      const card = document.querySelector<HTMLElement>('[data-testid="goal-panel-form"]')!;
+      const pane = document.querySelector<HTMLElement>('[data-testid="reference-business-pane"]')!;
+      const scroll = card.querySelector<HTMLElement>('[data-scroll-host="pane-dialog"]')!;
+      const footer = card.querySelector<HTMLElement>('footer')!;
+      const cardRect = card.getBoundingClientRect();
+      const paneRect = pane.getBoundingClientRect();
+      const footerRect = footer.getBoundingClientRect();
+      return {
+        card: { x: cardRect.x, y: cardRect.y, width: cardRect.width, height: cardRect.height },
+        pane: { width: paneRect.width, height: paneRect.height },
+        footerY: footerRect.y,
+        scrollHeight: scroll.scrollHeight,
+        clientHeight: scroll.clientHeight,
+        scrollTop: scroll.scrollTop,
+      };
+    });
+
+  const initial = await measure();
+  expect(initial.card.width).toBeGreaterThan(initial.pane.width * 0.78);
+  expect(initial.card.width).toBeLessThanOrEqual(960);
+  expect(initial.card.height).toBeGreaterThan(initial.pane.height * 0.7);
+  expect(initial.card.height).toBeLessThanOrEqual(900);
+
+  await page.getByTestId('add-key-result-entry').click();
+  await expect(page.getByTestId('key-result-draft-form')).toBeVisible();
+  await expect
+    .poll(async () => body.evaluate((el) => el.scrollHeight - el.clientHeight))
+    .toBeGreaterThan(0);
+  await expect.poll(async () => body.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  await page.getByTestId('draft-kr-title-input').fill('Measurable expanded result');
+  const expanded = await measure();
+
+  // Content changes must NEVER change the card or move its persistent action bar.
+  for (const key of ['x', 'y', 'width', 'height'] as const) {
+    expect(Math.abs(expanded.card[key] - initial.card[key])).toBeLessThan(1.1);
+  }
+  expect(Math.abs(expanded.footerY - initial.footerY)).toBeLessThan(1.1);
+
+  // Resizing the business pane / viewport is the ONLY cause for size recomputation.
+  await page.setViewportSize({ width: 1400, height: 580 });
+  const resized = await measure();
+  expect(resized.card.height).toBeLessThan(initial.card.height);
+  expect(resized.card.height).toBeGreaterThan(resized.pane.height * 0.7);
+  expect(resized.card.height).toBeLessThan(resized.pane.height);
+
+  // Large displays must cap the card at the declared pixel limits, not
+  // re-expand when a new KR or long description is added.
+  await page.setViewportSize({ width: 2400, height: 1300 });
+  const capped = await measure();
+  expect(Math.abs(capped.card.width - 960)).toBeLessThan(1.1);
+  expect(Math.abs(capped.card.height - 900)).toBeLessThan(1.1);
+
+  await expect(page.getByTestId('reference-chat-composer')).toBeVisible();
+  await expect(editor).toBeVisible();
+});
+
 test('AI capability updates actual fields and hands off unsaved draft before user save', async ({
   page,
 }) => {
