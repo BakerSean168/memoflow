@@ -154,3 +154,67 @@ it('does not advance a shared cursor when one active projection rejects an event
     vi.useRealTimers();
   }
 });
+
+it('resets the reconnect cursor and calibrates new listeners after a stream epoch reset', async () => {
+  vi.useFakeTimers();
+  try {
+    const starts: WorkspaceEventStreamOptions[] = [];
+    const finish: Array<() => void> = [];
+    const runtime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((input) => {
+        starts.push(input);
+        return new Promise<void>((resolve) => {
+          finish.push(resolve);
+        });
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const first = new AbortController();
+    const second = new AbortController();
+    const receiveFirst = vi.fn(async () => {});
+    const receiveSecond = vi.fn(async () => {});
+    const firstSubscription = subscribeWorkspaceEvents(runtime, {
+      signal: first.signal,
+      onEvent: receiveFirst,
+    });
+    await starts[0]!.onEvent({ type: 'stream.ready', cursor: 'old-epoch' });
+    await starts[0]!.onEvent({
+      type: 'stream.reset_required',
+      cursor: 'reset',
+      reason: 'expired',
+    });
+
+    // The previous epoch cannot be handed to a newly mounted projection.
+    const secondSubscription = subscribeWorkspaceEvents(runtime, {
+      signal: second.signal,
+      onEvent: receiveSecond,
+    });
+    expect(receiveSecond).not.toHaveBeenCalled();
+    finish[0]!();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(starts).toHaveLength(2);
+    expect(starts[1]!.cursor).toBeUndefined();
+
+    await starts[1]!.onEvent({ type: 'stream.ready', cursor: 'new-epoch' });
+    expect(receiveFirst).toHaveBeenLastCalledWith({
+      type: 'stream.ready',
+      cursor: 'new-epoch',
+    });
+    expect(receiveSecond).toHaveBeenCalledOnce();
+    expect(receiveSecond).toHaveBeenCalledWith({
+      type: 'stream.ready',
+      cursor: 'new-epoch',
+    });
+    first.abort();
+    second.abort();
+    finish[1]!();
+    await Promise.all([firstSubscription, secondSubscription]);
+  } finally {
+    vi.useRealTimers();
+  }
+});
