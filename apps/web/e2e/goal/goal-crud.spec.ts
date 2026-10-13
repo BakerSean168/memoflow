@@ -20,6 +20,32 @@ test.describe('Goal vNext product surface', () => {
     });
   });
 
+  test('[P0] keeps chat editable beside the pane Goal editor without a page-wide overlay', async ({
+    page,
+  }) => {
+    await openCreateGoalDialog(page);
+    const editor = goalDialog(page);
+    const composer = page.getByTestId('ai-chat-composer');
+    await expect(editor).toHaveAttribute('data-editor-presentation', 'pane');
+    await expect(page.getByTestId('shell-ai-column')).toBeVisible();
+    await expect(page.getByTestId('shell-business-pane')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
+    await expect(page.getByTestId('goal-list-view')).toBeHidden();
+
+    await page.getByTestId('goal-name-input').fill('Editable in parallel');
+    await composer.fill('Ask the AI to help refine my goal');
+    await expect(composer).toHaveValue('Ask the AI to help refine my goal');
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');
+
+    await page.getByTestId('goal-panel-close').click();
+    const confirmation = page.getByRole('alertdialog');
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
+    await expect(editor).toBeVisible();
+    await expect(composer).toHaveValue('Ask the AI to help refine my goal');
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');
+  });
+
   test('[P0] creates one Goal aggregate with a label and drafted key result', async ({ page }) => {
     const goalName = `E2E Goal vNext ${Date.now()}`;
     const labelName = `Launch-${Date.now()}`;
@@ -284,7 +310,9 @@ test.describe('Goal vNext product surface', () => {
     await openSystemViewMenu(page);
     await expect(page.getByRole('menuitemradio')).toHaveCount(3);
     await expect(page.getByTestId('goal-system-view-filter-active')).toContainText(/Active|进行中/);
-    await expect(page.getByTestId('goal-system-view-filter-completed')).toContainText(/Completed|已完成/);
+    await expect(page.getByTestId('goal-system-view-filter-completed')).toContainText(
+      /Completed|已完成/,
+    );
     await expect(page.getByTestId('goal-system-view-filter-all')).toContainText(/All|全部/);
     await page.keyboard.press('Escape');
 
@@ -385,7 +413,7 @@ async function openCreateGoalDialog(page: Page): Promise<void> {
   if (await stableCreateEntry.isVisible().catch(() => false)) {
     await stableCreateEntry.click();
   } else {
-    await page.goto(WEB_CONFIG.getFullUrl('/goals?dialog=goal'), {
+    await page.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), {
       waitUntil: 'domcontentloaded',
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
@@ -409,7 +437,7 @@ async function chooseGoalStatus(page: Page, name: RegExp): Promise<void> {
 }
 
 function goalDialog(page: Page): Locator {
-  return page.getByTestId('goal-dialog');
+  return page.getByTestId('goal-panel-form');
 }
 
 function goalSubmitButton(page: Page): Locator {

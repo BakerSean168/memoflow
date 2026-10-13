@@ -239,7 +239,7 @@ describe('GoalModuleLayout', () => {
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
     await vi.waitFor(() => {
-      expect(router.currentRoute.value.query.dialog).toBe('goal');
+      expect(router.currentRoute.value.query.goalForm).toBe('create');
     });
     wrapper.unmount();
 
@@ -253,7 +253,7 @@ describe('GoalModuleLayout', () => {
     expect(goalMocks.fetchGoals).not.toHaveBeenCalled();
   });
 
-  it('clears the route-owned create dialog on cancel and can reopen it', async () => {
+  it('closes the route-owned pane editor on cancel and can reopen it', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
@@ -272,20 +272,22 @@ describe('GoalModuleLayout', () => {
     });
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
-    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+    await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
 
     wrapper.findComponent(GoalDialogStub).vm.$emit('update:open', false);
     await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
       expect(router.currentRoute.value.query.dialog).toBeUndefined();
       expect(router.currentRoute.value.query.goalId).toBeUndefined();
       expect(router.currentRoute.value.query.status).toBe('active');
     });
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
-    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+    await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
   });
 
-  it('preserves unrelated route filters when a Goal save closes the dialog', async () => {
+  it('preserves unrelated route filters when a legacy Goal link is saved in the pane', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
@@ -307,6 +309,8 @@ describe('GoalModuleLayout', () => {
     wrapper.findComponent(GoalDialogStub).vm.$emit('created');
 
     await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
       expect(router.currentRoute.value.query.dialog).toBeUndefined();
       expect(router.currentRoute.value.query.goalId).toBeUndefined();
       expect(router.currentRoute.value.query.status).toBe('active');
@@ -487,6 +491,43 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
 }
 
 describe('Goal native surface host (PVC-AI-8001)', () => {
+  it.each([
+    '/goals?goalForm=create',
+    '/goals?dialog=goal',
+    '/goals?goalForm=edit&goalId=goal-edit',
+    '/goals?dialog=goal&goalId=goal-edit',
+  ])('renders %s as a native pane editor with no global modal', async (initial) => {
+    if (initial.includes('goal-edit')) {
+      const goal = createMockGoal({ id: 'goal-edit', name: 'Edit within pane', keyResults: [] });
+      goalMocks.getGoalAggregateView.mockResolvedValue({
+        goal,
+        keyResults: [],
+        records: [],
+        reviews: [],
+        statistics: {
+          totalKeyResults: 0,
+          completedKeyResults: 0,
+          totalRecords: 0,
+          totalReviews: 0,
+          overallProgress: 0,
+        },
+      });
+    }
+    const { wrapper, router, host } = await mountNativeHost(initial, true);
+    const pane = wrapper.get('[data-testid="goal-panel-form"]');
+    expect(pane.attributes('data-editor-presentation')).toBe('pane');
+    expect(pane.attributes('role')).toBe('region');
+    expect(wrapper.find('[data-testid="goal-page-toolbar"]').exists()).toBe(false);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(host.locate()).not.toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-close"]').attributes('aria-label')).toBe('Close');
+    await wrapper.get('[data-testid="goal-panel-close"]').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.query).toEqual({});
+    expect(host.locate()).toBeNull();
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
@@ -555,7 +596,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     wrapper.unmount();
   });
 
-  it.each(['create', 'edit', 'panel'] as const)(
+  it.each(['create', 'edit', 'panel', 'panel-edit'] as const)(
     'preserves the real %s owner draft across route-driven KeepAlive tab switches',
     async (mode) => {
       const goal = createMockGoal({ name: 'Loaded Goal', keyResults: [] });
@@ -576,7 +617,9 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
       const initial =
         mode === 'panel'
           ? '/goals?goalForm=create'
-          : `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
+          : mode === 'panel-edit'
+            ? `/goals?goalForm=edit&goalId=${goal.id}`
+            : `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
       const { wrapper, router, host } = await mountNativeHost(initial, true);
       const session = host.locate()!;
       expect(session).not.toBeNull();

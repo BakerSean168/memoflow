@@ -210,3 +210,12 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 实现提交 `11aa35fa4c490fcb14c9043011941a8e0f3937f3`（`fix(ai): close Ask User answer and parked approval lifecycle`）已推送至原 Draft PR #449。GitHub Actions [CI run 38280422432](https://github.com/BakerSean168/memoflow/actions/runs/38280422432) 的 head_sha 与实现提交完全一致，**19/19 jobs 全部 success**，包含 Unit Tests、Typecheck、Build、Static Analysis、Governance、Web Flow Shard 1–4、各 Oracle 与 Delivery Observation；没有重跑或未分类失败。
 
 Stage B-2 本切片的本地 RED→GREEN 与实现 exact-head CI 门槛已满足。PR 仍保持 Draft；重启审批 gate 收养、跨重启 read-only 许可边界及其余已列后续项不作扩大验收。此文档证据提交不改变实现，推送后的当前 head CI 仍由 T3 watch 独立核对。
+
+## Goal Pane-embedded Editor - UI 收敛（2026-10-13）
+
+- Goal 新建/编辑：业务面板内的 native Goal Editor 是唯一生产 UI，非模态 region，占用右侧 BusinessPanel 内容区；不创建全局 Dialog/Overlay/Focus Trap。左侧 AI Chat 是并行、独立、可输入的常驻 Surface。
+- 路由：手动新建 goalForm=create、手动编辑 goalForm=edit&goalId=…；AI 工作流继续使用已有 openControlledCreate() 打开相同 native owner；旧 dialog=goal 链接仍兼容，但同样使用面板。取消/保存只移除编辑查询参数，保留筛选与 hash。
+- 交互：编辑态隐藏 Goal 列表与工具栏；面板保留固定标题、局部滚动表单、固定保存/取消操作及带 dirty/busy guard 的关闭按钮。仅手动点击新建时聚焦标题，AI 预览不夺取聊天焦点。
+- 所有权：手动与 AI 继续共享 GoalDialog 草稿/验证/保存事务；AI 控制期间不能通过字段竞写，聊天输入仍可用；dirty/busy 离开规则与 lease/fencing 不放宽。
+- 窄屏：保留既有 Workspace focus/viewport 及浮动 Composer 的响应式约束，不强行压缩双面板；宽屏 split 双面板并存。Task/Routine/Schedule 的表单迁移不属于本次 Goal 纵切。
+- 验收：Goal 路由、旧链接、KeepAlive 与 owner 测试；Web 浏览器校验聊天输入与编辑共存、无全局 Goal modal、取消保护及编辑/保存；Dev 预览与 CI 均需要真实验证。

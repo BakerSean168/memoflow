@@ -245,9 +245,9 @@ async function createGoalWithKeyResult(
   await page.getByTestId('draft-kr-target-input').fill('10');
   await page.getByTestId('save-key-result-draft').click();
   await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
-  await expect(page.getByTestId('goal-dialog')).toContainText(input.keyResultName);
+  await expect(page.getByTestId('goal-panel-form')).toContainText(input.keyResultName);
   await page.getByTestId('save-goal-button').click();
-  await expect(page.getByTestId('goal-dialog')).toBeHidden({
+  await expect(page.getByTestId('goal-panel-form')).toBeHidden({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
 

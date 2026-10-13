@@ -40,7 +40,7 @@ test.describe('Local Docker core product Phase D', () => {
     await tabTo(page, createGoal);
     await page.keyboard.press('Enter');
 
-    const goalDialog = page.getByTestId('goal-dialog');
+    const goalDialog = page.getByTestId('goal-panel-form');
     await expect(goalDialog).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
     const startChip = page.getByTestId('goal-start-chip');
@@ -56,7 +56,7 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(page.getByRole('textbox', { name: '目标时间', exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
     await expectDialogGeometry(goalDialog);
-    await expectNoSeriousAxeViolations(page, '[data-testid="goal-dialog"]');
+    await expectNoSeriousAxeViolations(page, '[data-testid="goal-panel-form"]');
 
     await page.getByTestId('goal-name-input').focus();
     await page.keyboard.type(goalName);
@@ -157,8 +157,12 @@ async function expectDialogGeometry(dialog: Locator, noBodyScroll = false): Prom
   const readGeometry = () =>
     dialog.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      const body = element.querySelector<HTMLElement>('[data-testid="product-dialog-body"]');
-      const footer = element.querySelector<HTMLElement>('[data-testid="product-dialog-footer"]');
+      const body =
+        element.querySelector<HTMLElement>('[data-scroll-host="goal-form"]') ??
+        element.querySelector<HTMLElement>('[data-testid="product-dialog-body"]');
+      const footer =
+        element.querySelector<HTMLElement>('footer') ??
+        element.querySelector<HTMLElement>('[data-testid="product-dialog-footer"]');
       const footerRect = footer?.getBoundingClientRect();
       return {
         top: rect.top,

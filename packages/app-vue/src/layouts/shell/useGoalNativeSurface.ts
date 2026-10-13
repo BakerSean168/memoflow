@@ -48,7 +48,9 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       store.surfaceStatus === 'clean' &&
       !live.value &&
       !router.currentRoute.value.query.dialog &&
-      router.currentRoute.value.query.goalForm !== 'create'
+      // Neither create nor edit can be taken over while its native owner
+      // is opening (before it has registered a live session).
+      !router.currentRoute.value.query.goalForm
     );
   }
 

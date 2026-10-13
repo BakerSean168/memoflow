@@ -4,7 +4,7 @@
     data-testid="goal-module-layout"
   >
     <GoalPageToolbar
-      v-if="isListRoute"
+      v-if="isListRoute && !panelFormOpen"
       :system-views="views"
       :active-system-view="systemView"
       :visible-goal-count="goals.length"
@@ -18,7 +18,7 @@
     <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <router-view v-show="!panelFormOpen" />
       <GoalDialog
-        :presentation="panelFormOpen ? 'panel' : 'dialog'"
+        presentation="panel"
         :open="dialogOpen"
         @session-change="handleSessionChange"
         @update:open="handleDialogOpenUpdate"
@@ -54,7 +54,6 @@ import GoalPageToolbar from '../components/GoalPageToolbar.vue';
 import { useGoal } from '../composables/useGoal';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
-import { useRouteDialogState } from '../../../shared/composables/useRouteDialogState';
 
 import { useGoalNativeSurfaceRegistration } from '../../../layouts/shell/useGoalNativeSurface';
 import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
@@ -90,7 +89,6 @@ onUnmounted(() => {
 
 const route = useRoute();
 const router = useRouter();
-const routeDialog = useRouteDialogState({ dialogValue: 'goal', identityQueryKeys: ['goalId'] });
 const { t } = useI18n();
 const {
   goals,
@@ -104,14 +102,15 @@ const {
 } = useGoal();
 const { options: labelOptions, isLoading: labelsLoading } = useLabelCatalog();
 
-// Capture presentation in the active owner, not from the globally changing route:
-// inactive KeepAlive editors must retain their draft when another tab is shown.
+// The route owns the editor; every create/edit entry (including legacy dialog links)
+// renders within the business pane. Inactive KeepAlive owners retain their drafts.
 const panelFormOpen = ref(false);
 async function closeEditor() {
-  if (!panelFormOpen.value) return routeDialog.close();
   const query = { ...route.query };
   delete query.goalForm;
-  await router.replace({ path: route.path, query });
+  delete query.dialog;
+  delete query.goalId;
+  await router.replace({ path: route.path, query, hash: route.hash });
 }
 const dialogOpen = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
@@ -131,8 +130,19 @@ const views = computed(() => [
   { id: 'all' as GoalSystemView, label: t('goal.systemFolders.all') },
 ]);
 
-function openCreate() {
-  void routeDialog.open({ name: 'goal-list' });
+async function openCreate() {
+  const query = { ...route.query };
+  delete query.dialog;
+  delete query.goalId;
+  await router.push({
+    name: 'goal-list',
+    query: { ...query, goalForm: 'create' },
+    hash: route.hash,
+  });
+  // Focus only on an explicit user entry. AI-controlled opening must never steal
+  // keyboard focus from the concurrently visible conversation composer.
+  await nextTick();
+  if (surfaceActive && route.query.goalForm === 'create') await currentSession?.focus('name');
 }
 function handleDialogOpenUpdate(open: boolean) {
   if (open) return;
@@ -161,17 +171,26 @@ function dialogIdentity(): string {
 async function syncDialogFromRoute() {
   if (!surfaceActive || dialogIdentity() === lastSynchronizedIdentity) return;
   lastSynchronizedIdentity = dialogIdentity();
-  panelFormOpen.value = route.name === 'goal-list' && route.query.goalForm === 'create';
+  panelFormOpen.value =
+    route.name === 'goal-list' &&
+    (route.query.goalForm === 'create' ||
+      route.query.goalForm === 'edit' ||
+      route.query.dialog === 'goal');
   const revision = ++loadRevision;
   handleSessionChange(null);
-  if (route.name !== 'goal-list' || (route.query.dialog !== 'goal' && !panelFormOpen.value)) {
+  if (!panelFormOpen.value) {
     dialogOpen.value = false;
     editingGoal.value = null;
     goalDialogDirty.value = false;
     return;
   }
   const goalId = typeof route.query.goalId === 'string' ? route.query.goalId : null;
-  if (!goalId) {
+  if (route.query.goalForm === 'edit' && !goalId) {
+    dialogOpen.value = false;
+    void closeEditor();
+    return;
+  }
+  if (route.query.goalForm === 'create' || !goalId) {
     dialogMode.value = 'create';
     editingGoal.value = null;
     dialogOpen.value = true;

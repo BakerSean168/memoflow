@@ -1,5 +1,10 @@
 <template>
-  <GoalFormFrame :open="open" :presentation="presentation" @update:open="setOpen">
+  <GoalFormFrame
+    :open="open"
+    :presentation="presentation"
+    :close-disabled="interactionBusy"
+    @update:open="setOpen"
+  >
     <template #title>
       {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
     </template>

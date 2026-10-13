@@ -59,9 +59,9 @@ test.describe('Local Docker core product Phase C', () => {
     await expect(panelToggle).toHaveAttribute('aria-pressed', 'false');
 
     await page.getByTestId('ai-welcome-create-goal').click();
-    await page.waitForURL('**/goals?dialog=goal', { timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await page.waitForURL('**/goals?goalForm=create', { timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(panel).toBeVisible();
-    await expect(page.getByTestId('goal-dialog')).toBeVisible();
+    await expect(page.getByTestId('goal-panel-form')).toBeVisible();
     await page.getByTestId('goal-name-input').fill(draftTitle);
 
     let dismissedPrompt = '';
@@ -69,9 +69,8 @@ test.describe('Local Docker core product Phase C', () => {
       dismissedPrompt = dialog.message();
       await dialog.dismiss();
     });
-    // The goal form is intentionally modal, so its overlay owns pointer input. Force the
-    // shell control here to exercise the cross-surface dirty-state contract itself.
-    await panelToggle.dispatchEvent('click');
+    // Pane editor is modeless: ordinary shell pointer interaction must remain usable.
+    await panelToggle.click();
     expect(dismissedPrompt).toContain('未保存内容');
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
@@ -81,15 +80,15 @@ test.describe('Local Docker core product Phase C', () => {
       acceptedPrompt = dialog.message();
       await dialog.accept();
     });
-    await panelToggle.dispatchEvent('click');
+    await panelToggle.click();
     expect(acceptedPrompt).toContain('未保存内容');
     await expect(panel).toBeHidden();
 
-    await panelToggle.dispatchEvent('click');
+    await panelToggle.click();
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
     const cancelGoal = page
-      .getByTestId('goal-dialog')
+      .getByTestId('goal-panel-form')
       .getByRole('button', { name: '取消', exact: true });
     await cancelGoal.click();
     const discardConfirmation = page.getByRole('alertdialog', { name: '放弃未保存的更改？' });
@@ -102,7 +101,7 @@ test.describe('Local Docker core product Phase C', () => {
     await expect(discardConfirmation).toBeVisible();
     await discardConfirmation.getByRole('button', { name: '放弃更改', exact: true }).click();
     await expect(discardConfirmation).toBeHidden();
-    await expect(page.getByTestId('goal-dialog')).toBeHidden();
+    await expect(page.getByTestId('goal-panel-form')).toBeHidden();
 
     await page.getByTestId('business-panel-focus-toggle').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-state', 'focus');
