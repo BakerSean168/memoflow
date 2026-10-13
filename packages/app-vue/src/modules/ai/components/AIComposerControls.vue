@@ -81,6 +81,9 @@ const selectedModel = computed(() =>
     (model) => model.key === props.selectedModelKey && model.agentKey === props.selectedAgentId,
   ),
 );
+defineExpose({
+  openModelPicker() { if (!props.disabled) openMenu.value = 'models'; },
+});
 const providerUnavailable = computed(
   () =>
     !props.loading &&

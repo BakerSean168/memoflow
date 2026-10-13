@@ -29,6 +29,13 @@ function createHarness(isVisible: () => boolean = () => true) {
 }
 
 describe('conversation attention projection', () => {
+  it('shows recoverable interruption as attention and keeps unconfirmed execution distinct', () => {
+    const current = message('interrupted');
+    current.workflowInterruption = { draftPreserved: true, confirmation: 'stopped' };
+    expect(deriveLiveConversationAttention(false, [current])).toBe('failed');
+    current.workflowInterruption.confirmation = 'unconfirmed';
+    expect(deriveLiveConversationAttention(false, [current])).toBe('input');
+  });
   it('prioritizes approval over input, failure and working and hides ordinary success', () => {
     const current = message('generating');
     expect(deriveLiveConversationAttention(true, [current])).toBe('working');

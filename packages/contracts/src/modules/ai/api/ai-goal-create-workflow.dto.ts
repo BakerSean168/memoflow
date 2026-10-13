@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import {
   GoalTimeframeSchema,
-  GoalReminderConfigDTOSchema,
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,
   KEY_RESULT_TITLE_MAX_LENGTH,
   KeyResultCalculationMethod,
+  CreateGoalSchema,
 } from '../../goal';
 import { KnowledgeDocumentRefSchema } from '../../repository';
 import {
@@ -23,30 +23,6 @@ import {
  * owns a stable workflow-local `draftRef`, and no legacy Goal/Task/Reminder DSL
  * is accepted here.
  */
-
-export const GoalCreateClientInputSchema = z
-  .object({
-    idea: z.string().trim().min(1).max(8000),
-    surfaceContext: z
-      .object({
-        currentRoute: z.string().trim().max(500).optional(),
-        timezone: z.string().trim().min(1).max(100).optional(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
-export type GoalCreateClientInput = z.infer<typeof GoalCreateClientInputSchema>;
-
-export const GoalCreateWorkflowInputSchema = GoalCreateClientInputSchema.extend({
-  identityId: z.string().min(1),
-  conversationId: z.string().min(1),
-  locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
-  agentInstanceId: AgentInstanceSlugSchema.optional(),
-  providerId: z.string().min(1).optional(),
-  modelId: z.string().min(1).optional(),
-}).strict();
-export type GoalCreateWorkflowInput = z.infer<typeof GoalCreateWorkflowInputSchema>;
 
 const draftRefSlug = '[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?';
 export const GoalDraftRefSchema = z.literal('goal');
@@ -68,10 +44,10 @@ const LabelNameSchema = z.string().trim().min(1).max(50);
 export const GoalPlanGoalSchema = z
   .object({
     draftRef: GoalDraftRefSchema,
-    name: z.string().trim().min(1).max(256),
-    summary: z.string().trim().max(500).nullable().optional(),
-    description: z.string().trim().max(10000).nullable().optional(),
-    reminderConfig: GoalReminderConfigDTOSchema.nullable().optional(),
+    name: CreateGoalSchema.shape.name,
+    summary: CreateGoalSchema.shape.summary.unwrap().nullable().optional(),
+    description: CreateGoalSchema.shape.description.unwrap().trim().nullable().optional(),
+    reminderConfig: CreateGoalSchema.shape.reminderConfig,
     status: z.enum(['Planned', 'InProgress']).default('Planned'),
     start: GoalTimeframeSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),
@@ -209,6 +185,42 @@ export const GoalPlanDraftContentSchema = z
     });
   });
 export type GoalPlanDraftContent = z.infer<typeof GoalPlanDraftContentSchema>;
+
+/** A partial native draft is planning input, never a persisted Goal. */
+export const GoalPlanningSeedSchema = GoalPlanDraftContentSchema.safeExtend({
+  goal: GoalPlanGoalSchema.extend({ name: z.string().trim().pipe(CreateGoalSchema.shape.name.or(z.literal(''))) }),
+});
+export type GoalPlanningSeed = z.infer<typeof GoalPlanningSeedSchema>;
+
+export const GoalCreateClientInputSchema = z
+  .object({
+    idea: z.string().trim().min(1).max(8000),
+    sourceDraft: z.object({
+      sourceRunId: z.string().min(1),
+      attemptId: z.string().uuid(),
+      draftRevision: z.number().int().nonnegative(),
+      draft: GoalPlanningSeedSchema,
+    }).strict().optional(),
+    surfaceContext: z
+      .object({
+        currentRoute: z.string().trim().max(500).optional(),
+        timezone: z.string().trim().min(1).max(100).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+export type GoalCreateClientInput = z.infer<typeof GoalCreateClientInputSchema>;
+
+export const GoalCreateWorkflowInputSchema = GoalCreateClientInputSchema.extend({
+  identityId: z.string().min(1),
+  conversationId: z.string().min(1),
+  locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
+  agentInstanceId: AgentInstanceSlugSchema.optional(),
+  providerId: z.string().min(1).optional(),
+  modelId: z.string().min(1).optional(),
+}).strict();
+export type GoalCreateWorkflowInput = z.infer<typeof GoalCreateWorkflowInputSchema>;
 
 export const GoalPlanDraftSchema = GoalPlanDraftContentSchema.extend({
   revision: z.number().int().positive(),

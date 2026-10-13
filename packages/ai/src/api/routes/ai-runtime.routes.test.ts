@@ -159,6 +159,19 @@ const messageCommand = {
 };
 
 describe('registerAIRuntimeRoutes', () => {
+  it('requires authentication and a real durable source before opening Workspace SSE', async () => {
+    const stub = runtimeStub();
+    const workflow = workflowRuntimeStub();
+    const router = registerAIRuntimeRoutes(stub.runtime, { auth }, workflow.runtime);
+    const handler = getRouteHandler(router, 'get', '/workspace/sse');
+    const unauthenticated = response();
+    await handler(request({}, '') as unknown as Request, unauthenticated.res as unknown as Response);
+    expect(unauthenticated.res.statusCode).toBe(401);
+    const unavailable = response();
+    await handler(Object.assign(request({}), { header: () => undefined, query: {} }) as unknown as Request, unavailable.res as unknown as Response);
+    expect(unavailable.res.statusCode).toBe(503);
+    expect(unavailable.res.flushHeaders).not.toHaveBeenCalled();
+  });
   it.each([
     [
       '/assistant/sse',

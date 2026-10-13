@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { useDurableConversationAttention } from './useDurableConversationAttention';
 import type { AssistantAttentionView } from '@memoflow/contracts/ai';
 import type { ConversationSummary } from './types';
+import type { WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
 
 const row = (
   id: string,
@@ -23,7 +24,7 @@ const row = (
 const conv = (id: string, kind: 'builtin' | 'local_agent' = 'builtin') =>
   ({ id, name: id, runtimeKind: kind }) as ConversationSummary;
 
-function fixture(list: (ids: string[], kind?: string) => Promise<AssistantAttentionView[]>) {
+function fixture(list: (ids: string[], kind?: string) => Promise<AssistantAttentionView[]>, workspaceRuntime?: WorkflowRuntimeClient) {
   const conversations = ref<ConversationSummary[]>([conv('first'), conv('native', 'local_agent')]);
   const activeConversationId = ref('first');
   const loading = ref(false);
@@ -39,6 +40,7 @@ function fixture(list: (ids: string[], kind?: string) => Promise<AssistantAttent
       setup() {
         state = useDurableConversationAttention({
           runtime: runtime as never,
+          workspaceRuntime,
           conversations,
           activeConversationId,
           loading,
@@ -64,6 +66,37 @@ function fixture(list: (ids: string[], kind?: string) => Promise<AssistantAttent
 }
 
 describe('durable conversation attention projection', () => {
+  it('projects events and tombstones without polling or allowing stale snapshots to resurrect them', async () => {
+    vi.useFakeTimers();
+    let receive!: WorkspaceEventStreamOptions['onEvent'];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        receive = options.onEvent;
+        return new Promise<void>((resolve) => options.signal.addEventListener('abort', () => resolve(), { once: true }));
+      }),
+      start: vi.fn(), resume: vi.fn(), get: vi.fn(), list: vi.fn(), cancel: vi.fn(), goalSurfaceLease: vi.fn(),
+    };
+    const f = fixture(async (_ids, kind) => kind === 'builtin' ? [{ ...row('first', 'working'), resourceVersion: 1 }] : [], workspaceRuntime);
+    try {
+      f.activeConversationId.value = 'native';
+      await receive({ type: 'stream.ready', cursor: 'ready' });
+      expect(f.state.statuses.value.first).toBe('working');
+      await receive({ type: 'attention.changed', cursor: 'done', eventId: 'done', resourceVersion: 2,
+        data: { conversationId: 'first', runtimeKind: 'builtin', attention: { ...row('first', 'done', 3), resourceVersion: 2 } } });
+      expect(f.state.statuses.value.first).toBe('done');
+      await f.state.refresh();
+      expect(f.state.statuses.value.first).toBe('done');
+      await receive({ type: 'attention.changed', cursor: 'deleted', eventId: 'deleted', resourceVersion: 3,
+        data: { conversationId: 'first', runtimeKind: 'builtin', attention: null } });
+      await f.state.refresh();
+      expect(f.state.statuses.value.first).toBeUndefined();
+      const reads = f.runtime.listAttention.mock.calls.length;
+      await vi.advanceTimersByTimeAsync(30_000);
+      expect(f.runtime.listAttention).toHaveBeenCalledTimes(reads);
+      expect(workspaceRuntime.streamWorkspaceEvents).toHaveBeenCalledOnce();
+    } finally { f.wrapper.unmount(); vi.useRealTimers(); }
+  });
+
   it('separates Web/Mastra and native Desktop identities and combines current live priority', async () => {
     const f = fixture(async (ids, kind) =>
       kind === 'builtin' ? [row('first', 'failed')] : [row('native', 'input', 4, 'local_agent')],

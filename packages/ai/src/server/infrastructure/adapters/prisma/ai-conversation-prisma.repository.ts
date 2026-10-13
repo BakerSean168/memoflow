@@ -1,3 +1,4 @@
+import type { ConversationEventSource } from '../../../domain/repositories/conversation-events.port';
 import type { PrismaClient, AiConversation as PrismaAiConversation } from '@memoflow/database';
 import type { IAIConversationRepository } from '../../../domain';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
@@ -10,9 +11,10 @@ import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflo
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);
 
 export class AIConversationPrismaRepository implements IAIConversationRepository {
-  constructor(private readonly prisma: Pick<PrismaClient, 'aiConversation'>) {}
+  constructor(private readonly prisma: Pick<PrismaClient, 'aiConversation'>, readonly events?: ConversationEventSource) {}
 
   async save(conversation: AIConversation): Promise<void> {
+    await this.events?.init();
     const dto = conversation.toServerDTO();
     const existing = await this.prisma.aiConversation.findUnique({
       where: { id: String(dto.id) },
@@ -64,6 +66,7 @@ export class AIConversationPrismaRepository implements IAIConversationRepository
   }
 
   async delete(identityId: string, id: string): Promise<void> {
+    await this.events?.init();
     const updated = await this.prisma.aiConversation.updateMany({
       where: { id, identityId, deletedAt: null },
       data: { status: 'Archived', deletedAt: new Date() },
@@ -85,6 +88,7 @@ export class AIConversationPrismaRepository implements IAIConversationRepository
   }
 
   async recordActivity(identityId: string, id: string, at: number): Promise<void> {
+    await this.events?.init();
     await this.prisma.aiConversation.updateMany({
       where: { id, identityId, deletedAt: null, updatedAt: { lt: new Date(at) } },
       data: { updatedAt: new Date(at) },

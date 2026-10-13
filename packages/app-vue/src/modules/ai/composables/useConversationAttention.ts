@@ -28,6 +28,7 @@ export function deriveLiveConversationAttention(
     return 'input';
   const latestAssistant = [...timeline].reverse().find((message) => message.role === 'assistant');
   if (latestAssistant?.status === 'error') return 'failed';
+  if (latestAssistant?.status === 'interrupted') return latestAssistant.workflowInterruption?.confirmation === 'unconfirmed' ? 'input' : 'failed';
   if (loading) return 'working';
   return null;
 }
@@ -82,7 +83,7 @@ export function useConversationAttention(input: {
       const lastAssistant = [...input.timeline.value]
         .reverse()
         .find((message) => message.role === 'assistant');
-      if (lastAssistant?.status === 'error') terminal[id] = 'failed';
+      if (lastAssistant?.status === 'error' || (lastAssistant?.status === 'interrupted' && lastAssistant.workflowInterruption?.confirmation !== 'unconfirmed')) terminal[id] = 'failed';
       else if (lastAssistant?.status === 'success' && !isVisible()) terminal[id] = 'done';
       else delete terminal[id]; // Abort or a visible successful completion is ordinary.
     },

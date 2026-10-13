@@ -8,8 +8,9 @@ const props = withDefaults(
   defineProps<{
     content: string;
     generating?: boolean;
+    muted?: boolean;
   }>(),
-  { generating: false },
+  { generating: false, muted: false },
 );
 
 const STREAM_MARKDOWN_RENDER_MS = 120;
@@ -82,7 +83,8 @@ onBeforeUnmount(cancelRenderTimer);
 <template>
   <div
     ref="contentElement"
-    class="ai-message-content min-w-0 text-sm leading-7 text-foreground"
+    class="ai-message-content min-w-0 text-sm leading-7"
+    :class="muted ? 'text-muted-foreground' : 'text-foreground'"
     data-testid="ai-message-markdown"
     v-html="rendered"
   />

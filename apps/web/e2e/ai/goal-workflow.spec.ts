@@ -1,4 +1,9 @@
+import { z } from 'zod';
+import { CreateGoalSchema, GoalDraftCheckpointSnapshotSchema } from '@memoflow/contracts/goal';
 import { createHash, randomUUID } from 'node:crypto';
+import { createServer, type ServerResponse } from 'node:http';
+import { once } from 'node:events';
+import type { AddressInfo } from 'node:net';
 import { expect, test, type Page, type Route } from '@playwright/test';
 import {
   AIWorkflowRunViewSchema,
@@ -6,11 +11,13 @@ import {
   AIGoalSurfaceLeaseResponseSchema,
   KnowledgeDraftSchema,
   TaskPlanDraftContentSchema,
+  WorkspaceEventSchema,
 } from '@memoflow/contracts/ai';
 import type {
   AIWorkflowRunView,
   GoalPlanDraft,
   GoalPlanExecutionFailure,
+  GoalWorkflowLiveActionRecord,
 } from '@memoflow/contracts/ai';
 import {
   KnowledgeNoteProjectionClientSchema,
@@ -216,6 +223,169 @@ async function bootstrapGoalWorkflowSession(
 }
 
 test.describe('AI Goal Workflow', () => {
+  test('[P0] restores a native Goal checkpoint after refresh and saves its stable intention once', async ({ page }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page, { landingPath: '/goals?goalForm=create', expectAiVisible: false });
+    const panel = page.getByTestId('goal-panel-form');
+    await expect(panel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(panel.getByTestId('goal-name-input')).toBeEnabled();
+    await panel.getByTestId('goal-name-input').fill('Checkpoint draft');
+    await panel.getByTestId('goal-description-input').fill('Human text survives refresh.');
+    await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(/Draft preserved|草稿已在此设备保留/, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    expect(telemetry.ownerGoalCreateCount).toBe(0);
+    const before = await page.evaluate(async () => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open('memoflow-goal-drafts', 1); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      try {
+        return await new Promise<unknown>((resolve, reject) => { const request = db.transaction('checkpoints').objectStore('checkpoints').getAll(); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      } finally { db.close(); }
+    });
+    const checkpoints = z.array(GoalDraftCheckpointSnapshotSchema).parse(before);
+    const checkpoint = checkpoints.find((item) => item.content?.draft.name === 'Checkpoint draft');
+    expect(checkpoint?.content?.draft.description).toBe('Human text survives refresh.');
+    const createId = checkpoint!.content!.createId;
+    const peer = await page.context().newPage();
+    try {
+      await peer.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), { waitUntil: 'domcontentloaded' });
+      const other = peer.getByTestId('goal-panel-form');
+      await expect(other.getByTestId('goal-name-input')).toHaveValue('Checkpoint draft', { timeout: TIMEOUT_CONFIG.NAVIGATION });
+      await panel.getByTestId('goal-name-input').fill('First window wins');
+      await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(/Draft preserved|草稿已在此设备保留/);
+      await other.getByTestId('goal-name-input').fill('Second window draft');
+      await expect(other.getByTestId('goal-draft-checkpoint-status')).toContainText(/Another window|另一窗口/);
+      await expect(other.getByTestId('goal-name-input')).toHaveValue('Second window draft');
+      await expect(other.getByTestId('save-goal-button')).toBeDisabled();
+      await other.getByRole('button', { name: /Load the preserved draft|加载已保留的草稿/ }).click();
+      await expect(other.getByTestId('goal-name-input')).toHaveValue('First window wins');
+    } finally { await peer.close(); }
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(panel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await expect(panel.getByTestId('goal-name-input')).toHaveValue('First window wins');
+    await expect(panel.getByTestId('goal-description-input')).toHaveValue('Human text survives refresh.');
+    await expect(panel.getByTestId('goal-name-input')).toBeEnabled();
+    await panel.getByTestId('goal-name-input').fill('Recovered human draft');
+    // Commit on the actual API, then lose the response. Recovery must read that
+    // same intention rather than issue another create.
+    let committed = false;
+    await page.route('**/api/v1/goals', async (route) => {
+      if (route.request().method() !== 'POST' || committed) { await route.fallback(); return; }
+      const body = CreateGoalSchema.parse(route.request().postDataJSON());
+      const response = await route.fetch();
+      expect(response.ok()).toBe(true);
+      committed = true;
+      telemetry.ownerGoalCreateCount++;
+      telemetry.lastOwnerGoalCreateBody = body;
+      await route.abort('failed');
+    });
+    await panel.getByTestId('save-goal-button').click();
+    await expect.poll(() => committed).toBe(true);
+    await expect(panel).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    expect(telemetry.ownerGoalCreateCount).toBe(1);
+    expect(telemetry.lastOwnerGoalCreateBody).toMatchObject({ id: createId, name: 'Recovered human draft' });
+    expect(telemetry.lastOwnerGoalCreateBody).not.toHaveProperty('nativeAiLease');
+    expect(telemetry.goalAgentStartCount).toBe(0);
+  });
+
+  test('[P0] streams Goal fields without polling and keeps the failed draft available for native save', async ({ page }) => {
+    const email = generateTestEmail();
+    const telemetry = await bootstrapGoalWorkflowSession(page, { email });
+    const mirror = await createGoalLeaseDbMirror({ email });
+    const responses = new Set<ServerResponse>();
+    const runId = `workflow-sse-${randomUUID()}`;
+    let view: Extract<AIWorkflowRunView, { kind: 'goal.create' }> = {
+      kind: 'goal.create', runId, conversationId: e2eConversationId, status: 'running',
+      resourceVersion: 1, createdAt: Date.now(), updatedAt: Date.now(),
+    };
+    let reads = 0;
+    let head = 0;
+    let journal: GoalWorkflowLiveActionRecord[] = [];
+    let grant: { token: string; fence: number; expiresAt: number } | null = null;
+    const origin = new URL(page.url()).origin;
+    const server = createServer((req, res) => {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Headers', 'Authorization, Last-Event-ID');
+      if (req.method === 'OPTIONS') { res.writeHead(204).end(); return; }
+      res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
+      res.write(`event: workspace\ndata: ${JSON.stringify({ type: 'stream.ready', cursor: `fixture:${head}` })}\n\n`);
+      responses.add(res);
+      res.on('close', () => responses.delete(res));
+    });
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const heartbeat = setInterval(() => { for (const response of responses) response.write(': heartbeat\n\n'); }, 10_000);
+    const publish = (next: Partial<typeof view>, actions: GoalWorkflowLiveActionRecord[] = []) => {
+      const base = journal.length;
+      journal = [...journal, ...actions];
+      head += 1;
+      const parsed = AIWorkflowRunViewSchema.parse({ ...view, ...next, resourceVersion: (view.resourceVersion ?? 0) + 1, liveActions: journal, updatedAt: Date.now() });
+      if (parsed.kind !== 'goal.create') throw new Error('Invalid Goal fixture kind');
+      view = parsed;
+      const event = WorkspaceEventSchema.parse({ type: 'workflow.updated', eventId: `${runId}:${view.resourceVersion}`, cursor: `fixture:${head}`,
+        resourceVersion: view.resourceVersion, data: { ...view, liveActions: undefined }, actions, baseActionSequence: base, lastActionSequence: journal.length });
+      for (const response of responses) response.write(`event: workspace\ndata: ${JSON.stringify(event)}\n\n`);
+    };
+    try {
+      await page.route('**/api/v1/ai/runtime/workspace/sse', (route) => route.continue({ url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/events` }));
+      await page.route('**/api/v1/ai/runtime/workflow/start', async (route) => {
+        const request = route.request().postDataJSON();
+        view = { ...view, conversationId: request.conversationId };
+        await fulfillJson(route, view);
+      });
+      await page.route('**/api/v1/ai/runtime/workflow/get', async (route) => { reads += 1; await fulfillJson(route, view); });
+      await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
+        const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
+        expect(request.runId).toBe(runId);
+        if (request.action === 'claim') {
+          grant = { token: randomUUID(), fence: (grant?.fence ?? 0) + 1, expiresAt: Date.now() + 30_000 };
+          await mirror.claim({ runId, ...grant });
+          await fulfillJson(route, { status: 'claimed', ...grant });
+        } else if (!grant || request.token !== grant.token || request.fence !== grant.fence) {
+          await fulfillJson(route, { status: 'lost' });
+        } else if (request.action === 'renew') {
+          grant.expiresAt = Date.now() + 30_000;
+          await mirror.renew({ runId, ...grant });
+          await fulfillJson(route, { status: 'renewed', expiresAt: grant.expiresAt });
+        } else {
+          await mirror.release({ runId, token: grant.token, fence: grant.fence, now: Date.now() });
+          await fulfillJson(route, { status: 'released' });
+        }
+      });
+      await sendComposerMessage(page, 'Create a structured AI workflow goal and preserve the draft if planning is interrupted.', 'goal-workflow');
+      await expect.poll(() => reads).toBe(1);
+      await expect.poll(() => responses.size).toBe(1);
+      publish({}, [
+        { sequence: 1, command: { actionId: 'name', revision: 1, operation: 'goal.setName', value: 'Preserved streamed draft' } },
+        { sequence: 2, command: { actionId: 'description', revision: 1, operation: 'goal.patchDescription', value: 'Keep this description after the model stops.' } },
+      ]);
+      const form = page.getByTestId('goal-panel-form');
+      await expect(form).toBeVisible();
+      await expect(page.getByTestId('goal-name-input')).toHaveValue('Preserved streamed draft');
+      await expect(page.getByTestId('goal-description-input')).toHaveValue('Keep this description after the model stops.');
+      // A real open SSE connection stays healthy for the network-budget acceptance window.
+      await page.waitForTimeout(30_000);
+      expect(reads).toBe(1);
+      publish({ status: 'failed', failure: { code: 'RATE_LIMITED', message: 'Safe public failure', details: { limitKind: 'quota_exhausted' }, retryHint: { kind: 'after', afterMs: 30_000 } } });
+      const interruption = page.getByTestId('ai-workflow-interruption');
+      await expect(interruption).toHaveCount(1);
+      await expect(interruption).toContainText(/insufficient quota|配额不足/);
+      await expect(interruption).toContainText('30');
+      await expect(form).toBeVisible();
+      await expect(page.getByTestId('goal-name-input')).toHaveValue('Preserved streamed draft');
+      await page.screenshot({ path: test.info().outputPath('goal-interruption-preserved.png'), fullPage: true });
+      await page.getByTestId('goal-name-input').fill('Manually saved preserved draft');
+      const saved = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/v1/goals' && response.request().method() === 'POST');
+      await page.getByTestId('save-goal-button').click();
+      expect((await saved).ok()).toBe(true);
+      expect(telemetry.ownerGoalCreateCount).toBe(1);
+      expect(telemetry.lastOwnerGoalCreateBody).not.toHaveProperty('nativeAiLease');
+      expect(telemetry.lastOwnerGoalCreateBody?.name).toBe('Manually saved preserved draft');
+      expect(telemetry.goalAgentApprovalResumeCount).toBe(0);
+    } finally {
+      clearInterval(heartbeat);
+      for (const response of responses) response.end();
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
   test('[P0] loads the AI Agent Workspace from the root route', async ({ page }) => {
     await bootstrapGoalWorkflowSession(page);
 

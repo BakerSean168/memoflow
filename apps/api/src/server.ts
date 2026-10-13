@@ -367,6 +367,7 @@ async function bootstrap(): Promise<void> {
     userTimeContextPort: settingApiModule.userTimeContextPort,
     labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
+    workspaceEventsDatabase: { connectionString: env.DATABASE_URL },
   });
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,

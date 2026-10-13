@@ -46,6 +46,14 @@ const technicalTables = new Set([
   'desktop_delivery_acks',
   'task_goal_outbox',
   'ai_knowledge_index_entries_local',
+  'ai_conversation_event_metadata',
+  'ai_conversation_event_heads',
+  'ai_conversation_event_states',
+  'ai_conversation_event_log',
+  'ai_attention_event_metadata',
+  'ai_attention_event_heads',
+  'ai_attention_event_states',
+  'ai_attention_event_log',
 ]);
 const powerSyncInternalTables = new Set([
   'ps_buckets',

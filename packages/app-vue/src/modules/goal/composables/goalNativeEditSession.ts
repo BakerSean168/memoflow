@@ -2,25 +2,12 @@ import type {
   CreateGoalReq,
   GoalClientDTO,
   GoalNativeAiLease,
-  GoalReminderConfigDTO,
-  GoalStatus,
-  GoalTimeframe,
-  UpdateGoalReq,
+  GoalNativeDraftDTO,
 } from '@memoflow/contracts/goal';
 import type { OwnerNativeEditSession } from '../../../shared/composables/ownerNativeEditSession';
 
-export type GoalDraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
-export interface GoalNativeDraft {
-  name: string;
-  summary: string;
-  description: string;
-  status: GoalStatus;
-  start: GoalTimeframe | null;
-  target: GoalTimeframe | null;
-  reminderConfig: GoalReminderConfigDTO | null;
-  labelIds: string[];
-  keyResults: GoalDraftKeyResult[];
-}
+export type GoalNativeDraft = GoalNativeDraftDTO;
+export type GoalDraftKeyResult = GoalNativeDraft['keyResults'][number];
 
 /** Child positions refer to the current snapshot, just like the native KR rows. */
 export type GoalNativePatch = Partial<Omit<GoalNativeDraft, 'keyResults'>> & {
@@ -29,6 +16,8 @@ export type GoalNativePatch = Partial<Omit<GoalNativeDraft, 'keyResults'>> & {
 };
 export type GoalNativeField = 'name' | 'summary' | 'description';
 export interface GoalNativeDraftState {
+  revision: number;
+  restoredWorkflowRunId?: string;
   mode: 'create' | 'edit';
   goalId: string | null;
   draft: GoalNativeDraft;
@@ -49,6 +38,8 @@ export type GoalNativeEditSession = OwnerNativeEditSession<
   claimControl(ownerId: string): GoalNativeEditSession;
   /** Releases this handle's control without closing or discarding the native draft. */
   releaseControl(): void;
+  /** Detach a terminated workflow's control and callbacks, preserving the native draft. */
+  detachWorkflow(): void;
   /** Native Save/Enter and user dismissal delegate to workflow coordinators; semantic owner validation remains native. */
   setEditingBlocked(blocked: boolean): void;
   coordinateSubmit(submit: () => Promise<void>, cancel: () => Promise<void>): void;

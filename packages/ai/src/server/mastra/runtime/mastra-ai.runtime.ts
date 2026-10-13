@@ -75,6 +75,7 @@ import {
 import { AssistantHistoryService } from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { getGoalWorkflowEventSource } from './goal-workflow-events.registry';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('MastraAIRuntime');
@@ -244,6 +245,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
   async assertModelSelection(input: AIModelSelectionInput): Promise<void> {
     await this.deps.modelResolver.resolve(input);
+  }
+
+  async goalEvents() {
+    await this.init();
+    return getGoalWorkflowEventSource(this.deps.storage) ?? null;
   }
 
   async init(): Promise<void> {

@@ -1145,6 +1145,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: 0.133.0
         version: 0.133.0(zod@4.6.5)
+      '@libsql/client':
+        specifier: 0.18.0
+        version: 0.18.0
       '@mastra/core':
         specifier: 1.70.0
         version: 1.70.0(@bufbuild/protobuf@2.15.0)(@grpc/grpc-js@1.14.4)(effect@3.20.0)(express@5.2.1(supports-color@10.2.2))(rxjs@7.8.2)(supports-color@10.2.2)(valibot@1.4.2(@typescript/typescript6@6.0.2))(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
@@ -1190,6 +1193,9 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@10.2.2)
+      pg:
+        specifier: 8.23.0
+        version: 8.23.0
       undici:
         specifier: ^8.11.2
         version: 8.11.2

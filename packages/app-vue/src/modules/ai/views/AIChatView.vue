@@ -159,7 +159,7 @@
         ref="messagePanelRef"
         :timeline="chatTimeline"
         :show-workflow-surface="
-          toolMode === 'goal-create' && (goalSurfaceConflict || goalSurfaceReady)
+          toolMode === 'goal-create' && (goalSurfaceConflict || goalSurfaceReady || goalPlanningInterrupted)
         "
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
@@ -178,14 +178,29 @@
       >
         <template #workflow-surface>
           <section
+            v-if="goalPlanningInterrupted && !goalSurfaceConflict"
+            class="flex flex-wrap gap-2"
+            data-testid="ai-goal-interruption-actions"
+          >
+            <Button variant="outline" :disabled="!canRunGoalAgent" @click="startGoalAgentRun()">{{
+              t('aiAssistant.businessSurface.retryPlanning')
+            }}</Button>
+            <Button variant="ghost" :disabled="goalRestartPending" @click="composerControlsRef?.openModelPicker()">{{
+              t('aiAssistant.businessSurface.switchModel')
+            }}</Button>
+            <Button v-if="goalDraftPreserved" variant="ghost" :disabled="goalRestartPending" @click="focusPreservedGoal">{{
+              t('aiAssistant.businessSurface.continueEditing')
+            }}</Button>
+          </section>
+          <section
             v-if="goalSurfaceConflict"
             class="space-y-3 rounded-lg border p-3"
             data-testid="ai-goal-surface-conflict"
           >
-            <p>{{ t('aiAssistant.businessSurface.conflict') }}</p>
+            <p>{{ t(goalSurfaceControlLost ? 'aiAssistant.businessSurface.controlLost' : 'aiAssistant.businessSurface.conflict') }}</p>
             <div class="flex flex-wrap gap-2">
-              <Button :disabled="goalAgentResuming" @click="continueGoalSurfaceControl">{{
-                t('aiAssistant.businessSurface.continue')
+              <Button :disabled="goalAgentResuming || goalSurfaceRecovering" @click="continueGoalSurfaceControl">{{
+                t(goalSurfaceControlLost ? 'aiAssistant.businessSurface.controlRetry' : 'aiAssistant.businessSurface.continue')
               }}</Button>
               <Button variant="outline" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
                 t('aiAssistant.businessSurface.pause')
@@ -254,6 +269,7 @@
         >
           <template #provider-options>
             <AIComposerControls
+              ref="composerControlsRef"
               :agents="composerAgents"
               :selected-agent-id="selectedComposerAgent"
               :models="composerModels"
@@ -386,6 +402,7 @@ const composerDensity = computed<ComposerDensity>(
 
 const messagePanelRef = ref<{ viewport?: HTMLElement | null } | null>(null);
 const composerRef = ref<{ composerTextarea?: HTMLTextAreaElement | null } | null>(null);
+const composerControlsRef = ref<{ openModelPicker: () => void } | null>(null);
 
 const {
   session,
@@ -483,6 +500,13 @@ const {
   goalSurfaceConflict,
   goalSurfaceReady,
   goalManualHandoff,
+  goalSurfaceControlLost,
+  goalSurfaceRecovering,
+  goalRestartPending,
+  goalDraftPreserved,
+  goalPlanningInterrupted,
+  canRunGoalAgent,
+  focusPreservedGoal,
   continueGoalSurfaceControl,
   handoffGoalNativeReview,
   cancelGoalAgentRun,

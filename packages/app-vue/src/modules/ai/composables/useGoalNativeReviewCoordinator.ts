@@ -2,6 +2,7 @@ import {
   type AIWorkflowRunView,
   type GoalPlanDraft,
   type GoalWorkflowLiveActionRecord,
+  type GoalCreateClientInput,
 } from '@memoflow/contracts/ai';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -12,12 +13,14 @@ import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {
   GoalNativeEditSession,
+  GoalNativeDraftState,
   GoalNativeSubmitContext,
 } from '../../goal/composables/goalNativeEditSession';
-import { getAIErrorMessage, getAIWorkflowTerminalFailureMessage } from './error';
+import { getAIErrorMessage } from './error';
 import { useGoalSurfaceLease } from './useGoalSurfaceLease';
 import {
   buildEditedGoalDraftContent,
+  buildGoalPlanningSeed,
   canonicalDraftContent,
   goalNativeProjection,
   type GoalNativeProjection,
@@ -50,12 +53,21 @@ export function useGoalNativeReviewCoordinator(input: {
     projectRun,
   } = input;
   const { t } = useI18n();
-  const workflowFailureMessage = (run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>) =>
-    getAIWorkflowTerminalFailureMessage(run.failure, t);
   const nativeSurface = useGoalNativeSurface();
   const goalSurfaceConflict = ref(false);
   const goalSurfaceReady = ref(false);
   const goalManualHandoff = ref(false);
+  const goalDraftPreserved = ref(false);
+  const goalSurfaceControlLost = ref(false);
+  const goalSurfaceRecovering = ref(false);
+  const goalRestartPending = ref(false);
+  let pendingRestart: {
+    session: GoalNativeEditSession;
+    snapshot: GoalNativeDraftState;
+    source: NonNullable<GoalCreateClientInput['sourceDraft']>;
+    epoch: number;
+    runId?: string;
+  } | null = null;
   const labelCatalog = useLabelCatalog();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   let nativeSession: GoalNativeEditSession | null = null;
@@ -89,26 +101,22 @@ export function useGoalNativeReviewCoordinator(input: {
     lastSequence: number;
     promise: Promise<void>;
   } | null = null;
-  const surfaceLease = useGoalSurfaceLease(options.workflowRuntime, () => {
-    // An expired/superseded fence must stop all AI patches and Save attempts.
-    // Close only an AI-owned preview, not a user-owned handoff. Leaving the
-    // controlled form 'busy' would permanently trap the Shell navigation.
+  function freezeGoalSurfaceControl(): void {
+    // Loss of authority is not loss of business data. Freeze in place until
+    // an explicit recovery obtains a fresh server fence or confirms termination.
     projectionEpoch++;
+    goalSurfaceControlLost.value = true;
     goalSurfaceConflict.value = true;
     goalSurfaceReady.value = false;
-    if (!goalManualHandoff.value && !pendingOwnerAttempt && !submitted && nativeSession) {
+    if (nativeSession) {
       try {
-        nativeSession.setEditingBlocked(false);
-        nativeSession.requestCancel();
+        nativeSession.setEditingBlocked(true);
       } catch {
-        // A native owner already saving must finish its deterministic replay.
+        /* An already closed owner handle has no draft to freeze. */
       }
-      nativeSession = null;
-      projectedRunId = null;
-      projectedMode = null;
-      appliedLiveActionIds.clear();
     }
-  });
+  }
+  const surfaceLease = useGoalSurfaceLease(options.workflowRuntime, freezeGoalSurfaceControl);
 
   function recordNativeLiveAction(runId: string, record: GoalWorkflowLiveActionRecord): void {
     const id = `goal-native-live:${runId}:${record.command.revision}:${record.command.actionId}`;
@@ -124,6 +132,16 @@ export function useGoalNativeReviewCoordinator(input: {
         operation: record.command.operation,
       },
     });
+  }
+
+  function restoredSession(runId: string) {
+    const session = nativeSurface.locate();
+    if (!session) return null;
+    try {
+      const snapshot = session.readDraftState();
+      return snapshot.mode === 'create' && snapshot.goalId === null && !snapshot.busy && snapshot.restoredWorkflowRunId === runId
+        ? { session, snapshot } : null;
+    } catch { return null; }
   }
 
   function applyNativeLiveCommand(
@@ -168,9 +186,11 @@ export function useGoalNativeReviewCoordinator(input: {
     if (
       run.status !== 'running' ||
       !run.liveActions?.length ||
+      goalSurfaceControlLost.value ||
       goalManualHandoff.value ||
       pendingOwnerAttempt ||
-      submitted
+      submitted ||
+      run.result?.referenceMap.goal
     )
       return;
     const actions = [...run.liveActions].sort((a, b) => a.sequence - b.sequence);
@@ -195,19 +215,22 @@ export function useGoalNativeReviewCoordinator(input: {
     const epoch = ++projectionEpoch;
     let opened = false;
     if (!session) {
-      if (!nativeSurface.isAvailable()) {
+      const restored = restoredSession(run.runId);
+      if (!restored && !nativeSurface.isAvailable()) {
         goalSurfaceConflict.value = true;
         return;
       }
       if (!(await surfaceLease.claim(run.runId))) {
-        goalSurfaceConflict.value = true;
+        if (epoch === projectionEpoch) goalSurfaceConflict.value = true;
         return;
       }
       if (epoch !== projectionEpoch) return;
       try {
-        session = await nativeSurface.openControlledCreate(run.runId);
-        opened = true;
+        session = restored ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
+          : await nativeSurface.openControlledCreate(run.runId);
+        opened = !restored;
       } catch (error) {
+        if (epoch !== projectionEpoch) return;
         void surfaceLease.release();
         if (!nativeSurface.isAvailable()) {
           goalSurfaceConflict.value = true;
@@ -216,7 +239,7 @@ export function useGoalNativeReviewCoordinator(input: {
         throw error;
       }
     } else if (!(await surfaceLease.verify(run.runId))) {
-      goalSurfaceConflict.value = true;
+      if (epoch === projectionEpoch) goalSurfaceConflict.value = true;
       return;
     }
     if (
@@ -361,6 +384,7 @@ export function useGoalNativeReviewCoordinator(input: {
     run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
     projection: GoalNativeProjection,
   ): Promise<void> {
+    if (goalSurfaceControlLost.value) return;
     if (
       nativeSession &&
       projectedRunId === run.runId &&
@@ -372,8 +396,9 @@ export function useGoalNativeReviewCoordinator(input: {
         nativeSession = null;
       }
       if (nativeSession && projectedMode === 'review' && projection.mode === 'review') {
+        const epoch = projectionEpoch;
         if (!(await surfaceLease.verify(run.runId))) {
-          goalSurfaceConflict.value = true;
+          if (epoch === projectionEpoch) goalSurfaceConflict.value = true;
           return;
         }
         // AI owns the data patch, not the user's current keyboard focus in Chat.
@@ -425,7 +450,7 @@ export function useGoalNativeReviewCoordinator(input: {
       if (goalManualHandoff.value || pendingOwnerAttempt || submitted)
         throw new Error('Goal revision is frozen by the native owner');
       if (!(await surfaceLease.verify(run.runId))) {
-        goalSurfaceConflict.value = true;
+        if (epoch === projectionEpoch) goalSurfaceConflict.value = true;
         return;
       }
       if (epoch !== projectionEpoch) return;
@@ -440,19 +465,22 @@ export function useGoalNativeReviewCoordinator(input: {
       return;
     }
 
-    if (!nativeSurface.isAvailable()) {
+    const restored = restoredSession(run.runId);
+    if (!restored && !nativeSurface.isAvailable()) {
       goalSurfaceConflict.value = true;
       return;
     }
     if (!(await surfaceLease.claim(run.runId))) {
-      goalSurfaceConflict.value = true;
+      if (epoch === projectionEpoch) goalSurfaceConflict.value = true;
       return;
     }
     if (epoch !== projectionEpoch) return;
     let session: GoalNativeEditSession;
     try {
-      session = await nativeSurface.openControlledCreate(run.runId);
+      session = restored ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
+        : await nativeSurface.openControlledCreate(run.runId);
     } catch (error) {
+      if (epoch !== projectionEpoch) return;
       void surfaceLease.release();
       if (!nativeSurface.isAvailable()) {
         goalSurfaceConflict.value = true;
@@ -460,12 +488,13 @@ export function useGoalNativeReviewCoordinator(input: {
       }
       throw error;
     }
-    goalSurfaceConflict.value = false;
-    goalManualHandoff.value = false;
     if (epoch !== projectionEpoch) {
       session.requestCancel();
       return;
     }
+    goalSurfaceConflict.value = false;
+    goalManualHandoff.value = false;
+    goalDraftPreserved.value = false;
     try {
       applyNativeProjection(session, projection, existing);
     } catch (error) {
@@ -483,6 +512,54 @@ export function useGoalNativeReviewCoordinator(input: {
   }
 
   async function continueGoalSurfaceControl(): Promise<void> {
+    if (pendingRestart) {
+      if (goalSurfaceRecovering.value) return;
+      goalSurfaceRecovering.value = true;
+      const pending = pendingRestart;
+      try {
+        let fresh: AIWorkflowRunView | null;
+        if (pending.runId) fresh = await options.workflowRuntime.get({ runId: pending.runId });
+        else {
+          const matches = (await options.workflowRuntime.list({ conversationId: options.chatConversationId.value }))
+            .filter((item) => item.startRequestId === pending.source.attemptId);
+          fresh = matches.length === 1 ? matches[0]! : null;
+        }
+        if (pendingRestart !== pending || !fresh || fresh.kind !== 'goal.create' ||
+            fresh.conversationId !== options.chatConversationId.value) return;
+        pending.epoch = ++projectionEpoch;
+        await adoptGoalRestart(fresh);
+        await projectRun(fresh);
+      } catch { /* Uncertain start remains read-only until its correlated run can be read. */ }
+      finally { goalSurfaceRecovering.value = false; }
+      return;
+    }
+    if (goalSurfaceControlLost.value) {
+      if (goalSurfaceRecovering.value || goalAgentResuming.value) return;
+      const run = goalWorkflowRun.value;
+      if (!run) return;
+      goalSurfaceRecovering.value = true;
+      const epoch = projectionEpoch;
+      try {
+        const fresh = await options.workflowRuntime.get({ runId: run.runId });
+        if (epoch !== projectionEpoch || !fresh || fresh.kind !== 'goal.create' ||
+            fresh.runId !== run.runId || fresh.conversationId !== run.conversationId) return;
+        if (fresh.status === 'failed') { await projectRun(fresh); return; }
+        if (fresh.status !== 'running' && fresh.status !== 'suspended') return;
+        if (!(await surfaceLease.claim(run.runId)) || epoch !== projectionEpoch) return;
+        // Preserve owner-first replay if any save has already been attempted.
+        if (pendingOwnerAttempt || submitted || fresh.result?.referenceMap.goal) return;
+        goalSurfaceControlLost.value = false;
+        nativeSession?.setEditingBlocked(false);
+        goalSurfaceConflict.value = false;
+        goalSurfaceReady.value = Boolean(nativeSession);
+        await projectRun(fresh);
+      } catch {
+        // Stay read-only on an unavailable snapshot/authority; retry is explicit.
+      } finally {
+        goalSurfaceRecovering.value = false;
+      }
+      return;
+    }
     // Recheck the actual owner on every click, not the earlier conflict snapshot.
     if (goalAgentResuming.value || !nativeSurface.isAvailable()) return;
     goalSurfaceConflict.value = false;
@@ -538,6 +615,8 @@ export function useGoalNativeReviewCoordinator(input: {
     void surfaceLease.release();
     goalSurfaceConflict.value = false;
     goalSurfaceReady.value = false;
+    goalSurfaceControlLost.value = false;
+    goalDraftPreserved.value = false;
     if (nativeSession && !goalManualHandoff.value) {
       try {
         nativeSession.setEditingBlocked(false);
@@ -555,6 +634,113 @@ export function useGoalNativeReviewCoordinator(input: {
     projectedRevision = null;
     projectedMode = null;
     goalOwnerSubmitted.value = false;
+  }
+
+  function detachFailedReview(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): void {
+    projectionEpoch++;
+    pendingProjection = null;
+    pendingLiveProjection = null;
+    void surfaceLease.release();
+    // A failed planner cannot erase an uncertain/already committed owner write.
+    // Keep its deterministic identities and lock instead of enabling another create.
+    if (pendingOwnerAttempt || submitted || run.result?.referenceMap.goal) return;
+    if (nativeSession) {
+      try {
+        nativeSession.detachWorkflow();
+        goalDraftPreserved.value = true;
+      } catch {
+        try {
+          nativeSession.readDraftState();
+          return; // An active owner save must settle before its callbacks can be detached.
+        } catch {
+          /* Owner already retired the handle. */
+        }
+      }
+    }
+    nativeSession = null;
+    projectedRunId = null;
+    projectedRevision = null;
+    projectedMode = null;
+    appliedLiveActionIds.clear();
+    goalSurfaceReady.value = false;
+    goalSurfaceConflict.value = false;
+    goalManualHandoff.value = false;
+    goalSurfaceControlLost.value = false;
+  }
+
+  function prepareGoalRestart(sourceRunId: string): GoalCreateClientInput['sourceDraft'] {
+    if (!goalDraftPreserved.value) return undefined;
+    const session = nativeSurface.locate();
+    if (!session || pendingRestart || pendingOwnerAttempt || submitted)
+      throw new Error('The preserved Goal draft is unavailable for restart');
+    const snapshot = session.readDraftState();
+    if (snapshot.mode !== 'create' || snapshot.busy)
+      throw new Error('The preserved Goal draft is busy');
+    const source = {
+      sourceRunId, attemptId: crypto.randomUUID(), draftRevision: snapshot.revision,
+      draft: buildGoalPlanningSeed({
+        native: snapshot.draft, labels: labelCatalog.labels.value,
+        pendingLabelNames, keyResultRefs, tasks: editableTasks.value, knowledge: editableKnowledge.value,
+      }),
+    };
+    session.setEditingBlocked(true);
+    pendingRestart = { session, snapshot, source, epoch: ++projectionEpoch };
+    goalRestartPending.value = true;
+    return source;
+  }
+
+  function keepGoalRestartReadonly(): void {
+    if (!pendingRestart) return;
+    goalSurfaceControlLost.value = true;
+    goalSurfaceConflict.value = true;
+    goalSurfaceReady.value = false;
+  }
+
+  async function adoptGoalRestart(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): Promise<void> {
+    const pending = pendingRestart;
+    if (!pending) return;
+    pending.runId = run.runId;
+    if (run.result?.referenceMap.goal || run.status === 'completed') {
+      keepGoalRestartReadonly();
+      return;
+    }
+    if (run.status === 'failed' || run.status === 'cancelled') {
+      pending.session.setEditingBlocked(false);
+      pendingRestart = null;
+      goalRestartPending.value = false;
+      goalSurfaceControlLost.value = false;
+      goalSurfaceConflict.value = false;
+      return;
+    }
+    if (!(await surfaceLease.claim(run.runId)) || pendingRestart !== pending || pending.epoch !== projectionEpoch) {
+      keepGoalRestartReadonly();
+      return;
+    }
+    try {
+      pending.session.setEditingBlocked(false);
+      nativeSession = nativeSurface.reclaimControlledCreate(run.runId, pending.session, pending.snapshot);
+    } catch (error) {
+      pending.session.setEditingBlocked(true);
+      void surfaceLease.release();
+      keepGoalRestartReadonly();
+      throw error;
+    }
+    nativeSession.coordinateSubmit(async () => undefined, () => cancelGoalAgentRun());
+    projectedRunId = run.runId;
+    projectedRevision = null;
+    projectedMode = 'live';
+    appliedLiveActionIds.clear();
+    pendingRestart = null;
+    goalRestartPending.value = false;
+    goalDraftPreserved.value = false;
+    goalManualHandoff.value = false;
+    goalSurfaceControlLost.value = false;
+    goalSurfaceConflict.value = false;
+    goalSurfaceReady.value = true;
+  }
+
+  function focusPreservedGoal(): Promise<void> {
+    return nativeSurface.locate()?.focus('name') ?? Promise.resolve();
   }
 
   async function flushStructuredEdits(): Promise<Extract<
@@ -658,7 +844,6 @@ export function useGoalNativeReviewCoordinator(input: {
       });
       await projectRun(next);
       if (next.kind === 'goal.create' && next.status === 'failed') {
-        toast.error(workflowFailureMessage(next));
         return false;
       }
       return true;
@@ -693,7 +878,6 @@ export function useGoalNativeReviewCoordinator(input: {
       });
       await projectRun(next);
       if (next.kind === 'goal.create' && next.status === 'failed') {
-        toast.error(workflowFailureMessage(next));
         return false;
       }
       return true;
@@ -843,24 +1027,27 @@ export function useGoalNativeReviewCoordinator(input: {
     skipHostLifecycle?: boolean;
     revision?: number;
   }): Promise<void> {
-    const run = goalWorkflowRun.value;
+    if (pendingRestart && !pendingRestart.runId) {
+      await continueGoalSurfaceControl();
+      if (pendingRestart && !pendingRestart.runId) return;
+    }
+    const run = pendingRestart?.runId && pendingRestart.runId !== goalWorkflowRun.value?.runId
+      ? await options.workflowRuntime.get({ runId: pendingRestart.runId }) : goalWorkflowRun.value;
     if (!run || goalAgentResuming.value || pendingOwnerAttempt) return;
     goalAgentResuming.value = true;
     try {
       retireNativeReview();
-      if (run.status === 'suspended') {
-        await projectRun(
-          await options.workflowRuntime.resume({
+      const next = run.status === 'suspended'
+        ? await options.workflowRuntime.resume({
             runId: run.runId,
             command:
               run.suspension?.type === 'recovery_required'
                 ? { type: 'cancel_remaining' }
                 : { type: 'cancel' },
-          }),
-        );
-      } else {
-        await projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
-      }
+          })
+        : await options.workflowRuntime.cancel({ runId: run.runId });
+      if (next?.kind === 'goal.create' && next.status === 'cancelled') await adoptGoalRestart(next);
+      await projectRun(next);
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     } finally {
@@ -907,6 +1094,14 @@ export function useGoalNativeReviewCoordinator(input: {
     goalSurfaceConflict,
     goalSurfaceReady,
     goalManualHandoff,
+    goalSurfaceControlLost,
+    freezeGoalSurfaceControl,
+    goalSurfaceRecovering,
+    goalRestartPending,
+    prepareGoalRestart,
+    adoptGoalRestart,
+    keepGoalRestartReadonly,
+    focusPreservedGoal,
     continueGoalSurfaceControl,
     handoffGoalNativeReview,
     goalOwnerSubmitted,
@@ -915,6 +1110,8 @@ export function useGoalNativeReviewCoordinator(input: {
     goalAgentWaitingForApproval,
     openGoalNativeReview,
     retireNativeReview,
+    goalDraftPreserved,
+    detachFailedReview,
     submitGoalClarificationResponse,
     submitGoalRevisionResponse,
     confirmGoalAgentRun,

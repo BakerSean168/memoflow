@@ -6,6 +6,7 @@ import type {
   AIWorkflowStartClientRequest,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { GoalWorkflowEventSource } from '../../application/ports/goal-workflow-events.port';
 
 /**
  * Stable MemoFlow workflow runtime seam.
@@ -14,6 +15,7 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
  * never depend on framework-private snapshots, run handles, or suspend payloads.
  */
 export interface AIWorkflowRuntimePort {
+  goalEvents?(): Promise<GoalWorkflowEventSource | null>;
   start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;

@@ -1,20 +1,52 @@
-import type { AIWorkflowExecutionFailure, AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import { AIRateLimitPublicFailureSchema, type AIWorkflowExecutionFailure, type AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import { extractStructuredResultError } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
+import type { ChatItem } from './types';
 
 export function getAIErrorMessage(error: unknown, t: (key: string) => string, fallbackKey: string) {
   return translateResultError(error, t, { fallbackKey });
 }
 
+export function workflowInterruptionFailure(error: unknown): AIWorkflowTerminalFailure {
+  const structured = extractStructuredResultError(error);
+  const rateLimit = AIRateLimitPublicFailureSchema.safeParse(structured?.failure);
+  return {
+    code: structured?.code ?? 'AI_WORKFLOW_RUNTIME_ERROR',
+    message: 'Workflow request interrupted',
+    ...(rateLimit.success && rateLimit.data.details ? { details: rateLimit.data.details } : {}),
+    ...(rateLimit.success && rateLimit.data.retryHint ? { retryHint: rateLimit.data.retryHint } : {}),
+  };
+}
+
 /** Stable UI text for a terminal workflow failure; raw provider details stay server-side. */
 export function getAIWorkflowTerminalFailureMessage(
   failure: AIWorkflowTerminalFailure | undefined,
-  t: (key: string) => string,
+  t: (key: string, params?: Record<string, unknown>) => string,
 ): string {
+  if (failure?.code === 'RATE_LIMITED') {
+    const kind = failure.details?.limitKind ?? 'unknown';
+    const message = t(`aiAssistant.businessSurface.${kind === 'quota_exhausted' ? 'quotaExhausted' : kind === 'rate_limit' ? 'rateLimited' : 'limitUnknown'}`);
+    return failure.retryHint?.kind === 'after'
+      ? `${message} ${t('aiAssistant.businessSurface.retryAfter', { seconds: Math.ceil(failure.retryHint.afterMs / 1000) })}`
+      : message;
+  }
   return getAIErrorMessage(
     failure ?? { code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' },
     t,
     'aiAssistant.errors.workflowExecutionFailed',
   );
+}
+
+export function getGoalWorkflowInterruptionMessage(
+  interruption: NonNullable<ChatItem['workflowInterruption']>,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): string {
+  return [
+    t(`aiAssistant.businessSurface.${interruption.confirmation === 'unconfirmed' ? 'interruptionUnconfirmed' : 'interrupted'}`),
+    ...(interruption.requestedModel ? [t('aiAssistant.businessSurface.selectedModelContext', { model: interruption.requestedModel.name, provider: interruption.requestedModel.provider })] : []),
+    getAIWorkflowTerminalFailureMessage(interruption.failure, t),
+    ...(interruption.draftPreserved ? [t('aiAssistant.businessSurface.draftPreserved')] : []),
+  ].join('\n\n');
 }
 
 /**

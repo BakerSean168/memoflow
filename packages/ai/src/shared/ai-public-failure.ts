@@ -1,6 +1,8 @@
 import { extractStructuredResultError } from '@memoflow/contracts/result';
 import { LocalAgentError, LOCAL_AGENT_FAILURES } from './local-agent-error';
 import { isAIExecutionError, type AIExecutionErrorKind } from './ai-execution-error';
+import type { AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import { readAIProviderRateLimit } from './ai-provider-rate-limit';
 
 /** Public AI failure codes accepted at the runtime boundary. */
 export const AI_PUBLIC_FAILURE_CODES = [
@@ -33,6 +35,8 @@ export interface AIPublicFailure {
   readonly code: string;
   readonly message: string;
   readonly context?: AIPublicFailureContext;
+  readonly details?: AIWorkflowTerminalFailure['details'];
+  readonly retryHint?: AIWorkflowTerminalFailure['retryHint'];
 }
 
 export interface AIPublicFailureOptions {
@@ -55,17 +59,17 @@ export function toAIPublicFailure(
     return { code: error.code, message: LOCAL_AGENT_FAILURES[error.code] };
   if (isAIExecutionError(error)) {
     const code = mapAIExecutionCategory(error.category);
-    return createPublicFailure(
+    return withRateLimitMetadata(createPublicFailure(
       code,
       safeAIPublicMessage(code),
       error.requestId ? { requestId: error.requestId } : undefined,
-    );
+    ), error);
   }
 
   const structured = extractStructuredResultError(error);
   if (structured && isAIPublicFailureCode(structured.code)) {
     const code = structured.code;
-    return createPublicFailure(code, safeAIPublicMessage(code), structured.context);
+    return withRateLimitMetadata(createPublicFailure(code, safeAIPublicMessage(code), structured.context), error);
   }
 
   const { statusCode, timedOut } = readAIProviderFailureDiagnostics(error);
@@ -83,13 +87,17 @@ export function toAIPublicFailure(
               ? 'SERVICE_UNAVAILABLE'
               : undefined;
   if (providerCode)
-    return createPublicFailure(
+    return withRateLimitMetadata(createPublicFailure(
       providerCode,
       safeAIPublicMessage(providerCode),
       structured?.context,
-    );
+    ), error);
 
   return createPublicFailure(options.fallbackCode, options.fallbackMessage, structured?.context);
+}
+
+function withRateLimitMetadata(failure: AIPublicFailure, error: unknown): AIPublicFailure {
+  return failure.code === 'RATE_LIMITED' ? { ...failure, ...readAIProviderRateLimit(error) } : failure;
 }
 
 /** Bounded, allowlisted diagnostics: never copy messages, bodies, headers or URLs. */

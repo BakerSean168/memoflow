@@ -24,7 +24,7 @@ export default {
   NOT_FOUND: '请求的内容不存在或已被移除',
   CONFLICT: '当前操作与现有数据冲突，请稍后再试',
   VALIDATION_ERROR: '提交信息不合法，请检查后重试',
-  RATE_LIMITED: '请求过于频繁，请稍后再试',
+  RATE_LIMITED: '请求或配额受限，请稍后再试。',
   SERVICE_UNAVAILABLE: '服务暂不可用，请稍后再试',
   INTERNAL_ERROR: '服务出现异常，请稍后再试',
   TIMEOUT: '请求超时，请稍后再试',

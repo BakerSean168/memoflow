@@ -1,3 +1,4 @@
+import type { AttentionEventSource } from '../../../application/ports/attention-events.port';
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@memoflow/database';
 import type { AssistantAttentionView } from '@memoflow/contracts/ai';
@@ -12,9 +13,13 @@ import {
 
 /** Transaction-free optimistic CAS: no older run or out-of-order event can roll the row back. */
 export class ConversationAttentionPrismaAdapter implements IConversationAttentionPort {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    readonly events?: AttentionEventSource,
+  ) {}
 
   async transition(input: AssistantAttentionTransition): Promise<void> {
+    await this.events?.init();
     const where = {
       identityId_runtimeKind_conversationId: {
         identityId: input.identityId,
@@ -74,6 +79,7 @@ export class ConversationAttentionPrismaAdapter implements IConversationAttentio
   }
 
   async heartbeat(input: AssistantAttentionIdentity & { runId: string }): Promise<void> {
+    await this.events?.init();
     await this.prisma.aiConversationAttention.updateMany({
       where: {
         identityId: input.identityId,
@@ -88,6 +94,14 @@ export class ConversationAttentionPrismaAdapter implements IConversationAttentio
 
   async list(input: AssistantAttentionLookup): Promise<AssistantAttentionView[]> {
     if (!input.conversationIds.length) return [];
+    if (this.events) {
+      await this.events.init();
+      return this.events.snapshot(
+        input.identityId,
+        [...new Set(input.conversationIds)].slice(0, 100),
+        input.runtimeKind,
+      );
+    }
     const rows = await this.prisma.aiConversationAttention.findMany({
       where: {
         identityId: input.identityId,
@@ -117,6 +131,7 @@ export class ConversationAttentionPrismaAdapter implements IConversationAttentio
   }
 
   async acknowledge(input: AssistantAttentionAcknowledge): Promise<boolean> {
+    await this.events?.init();
     // No future revision may be acknowledged: it could mask a newer result.
     const result = await this.prisma.aiConversationAttention.updateMany({
       where: {
@@ -132,6 +147,7 @@ export class ConversationAttentionPrismaAdapter implements IConversationAttentio
   }
 
   async forget(input: AssistantAttentionIdentity): Promise<void> {
+    await this.events?.init();
     await this.prisma.aiConversationAttention.deleteMany({
       where: {
         identityId: input.identityId,

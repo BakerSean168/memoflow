@@ -25,9 +25,16 @@ export class ListConversationsUseCase {
       const offset = (page - 1) * limit;
       const paginatedConversations = allConversations.slice(offset, offset + limit);
 
-      const conversations = paginatedConversations.map((conversation) =>
-        conversation.toClientDTO(),
-      );
+      let conversations = paginatedConversations.map((conversation) => conversation.toClientDTO());
+      const events = this.conversationRepository.events;
+      if (events) {
+        await events.init();
+        const snapshots = [];
+        for (let index = 0; index < conversations.length; index += 100)
+          snapshots.push(...await events.snapshot(cx.identityId, conversations.slice(index, index + 100).map((item) => String(item.id))));
+        // A deletion between discovery and snapshot must not revive a shell.
+        conversations = snapshots;
+      }
 
       logger.info('Conversations listed', {
         identityId: cx.identityId,

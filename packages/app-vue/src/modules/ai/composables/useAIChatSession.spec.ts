@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
-import type { AssistantRuntimeClient, RuntimeUsageClient } from '@memoflow/ai/client';
+import type { AssistantRuntimeClient, RuntimeUsageClient, WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
 import { useAIChatSession, type UseAIChatSessionOptions } from './useAIChatSession';
 import type { ChatModelOption } from './types';
 import enErrors from '../../../locales/en-US/errors';
@@ -205,6 +205,43 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it('shares the Workspace stream, merges titles by server version and never resurrects deletion from a late list', async () => {
+    let receive!: WorkspaceEventStreamOptions['onEvent'];
+    let streamSignal!: AbortSignal;
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        receive = options.onEvent;
+        streamSignal = options.signal;
+        return new Promise<void>((resolve) => options.signal.addEventListener('abort', () => resolve(), { once: true }));
+      }),
+      start: vi.fn(), resume: vi.fn(), get: vi.fn(), list: vi.fn(), cancel: vi.fn(), goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    service.listConversations.mockResolvedValue(ok({ data: [{ ...createConversationDTO('conv-1'), resourceVersion: 1 }], total: 1, page: 1, pageSize: 24 }));
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), { workspaceRuntime });
+    await receive({ type: 'stream.ready', cursor: 'ready' });
+    session.chatConversationId.value = 'conv-1';
+    const reads = service.listConversations.mock.calls.length;
+    await receive({ type: 'conversation.updated', eventId: 'title', cursor: 'title', resourceVersion: 2,
+      data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: { ...createConversationDTO('conv-1'), name: 'Server title', updatedAt: 0, resourceVersion: 2 } } });
+    expect(session.conversationTitle.value).toBe('Server title');
+    expect(service.listConversations).toHaveBeenCalledTimes(reads);
+    // An older client clock can never outrank the newer server revision.
+    await session.loadConversationList(service as never);
+    expect(session.conversationList.value[0]?.name).toBe('Server title');
+    let complete!: (value: unknown) => void;
+    service.listConversations.mockImplementationOnce(() => new Promise((resolve) => { complete = resolve; }));
+    const list = session.loadConversationList(service as never);
+    await receive({ type: 'conversation.updated', eventId: 'deleted', cursor: 'deleted', resourceVersion: 3,
+      data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: null } });
+    complete(ok({ data: [{ ...createConversationDTO('conv-1'), resourceVersion: 2 }], total: 1, page: 1, pageSize: 24 }));
+    await list;
+    expect(session.conversationList.value).toEqual([]);
+    expect(session.chatConversationId.value).toBe('');
+    expect(workspaceRuntime.streamWorkspaceEvents).toHaveBeenCalledOnce();
+    expect(streamSignal.aborted).toBe(false);
+  });
+
   it('projects live stream and approval events to sidebar without inventing unread history', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

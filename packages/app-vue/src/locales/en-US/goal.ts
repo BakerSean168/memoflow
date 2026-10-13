@@ -460,6 +460,18 @@ export default {
     export: 'Export',
   },
   dialog: {
+    checkpointKeyResultEditing: 'Confirm the current key result edit to include it in the preserved draft.',
+    checkpointLoading: 'Loading the preserved draft…',
+    checkpointSaving: 'Preserving the draft…',
+    checkpointSaved: 'Draft preserved on this device.',
+    checkpointConflict: 'Another window preserved a newer draft. Your current form is still here.',
+    checkpointUnavailable: 'The draft could not be preserved. Keep this form open and retry before submitting.',
+    checkpointPending: 'Draft preserved. Checking the previous save result.',
+    checkpointWorkflow: 'Draft restored. Verify the AI state to continue.',
+    checkpointReload: 'Load the preserved draft',
+    checkpointCheck: 'Check status',
+    checkpointRetrySave: 'Retry the same save',
+
     status: 'Status',
     editGoal: 'Edit Goal',
     titleCreate: 'Create goal',

@@ -5,7 +5,8 @@ import {
   type AssistantRuntimeChoice,
 } from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { subscribeWorkspaceEvents } from '../../../shared/services/workspace-event-subscription';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
@@ -31,9 +32,12 @@ export function useConversationProjection(input: {
   const conversationList = ref<ConversationSummary[]>([]);
   let listGeneration = 0;
   let mutationRevision = 0;
+  const versions = new Map<string, number>();
+  const streamController = new AbortController();
+  let listRequest: Promise<void> | null = null;
   const pendingListChanges = new Map<
     string,
-    { revision: number; item: ConversationSummary | null; runtimeKind: 'builtin' | 'local_agent' }
+    { revision: number; resourceVersion?: number; item: ConversationSummary | null; runtimeKind: 'builtin' | 'local_agent' }
   >();
 
   function sortConversations(items: ConversationSummary[]): ConversationSummary[] {
@@ -41,9 +45,17 @@ export function useConversationProjection(input: {
   }
 
   function upsertConversation(item: ConversationSummary): void {
+    if (item.runtimeKind !== 'local_agent') {
+      const version = item.resourceVersion;
+      if (version !== undefined && version < (versions.get(item.id) ?? 0)) return;
+      const pending = pendingListChanges.get(item.id);
+      if (pending?.item === null && (version ?? 0) <= (versions.get(item.id) ?? 0)) return;
+      if (version !== undefined) versions.set(item.id, version);
+    }
     pendingListChanges.set(item.id, {
       revision: ++mutationRevision,
       item,
+      resourceVersion: item.runtimeKind === 'local_agent' ? undefined : item.resourceVersion,
       runtimeKind: item.runtimeKind ?? 'builtin',
     });
     conversationList.value = sortConversations([
@@ -54,9 +66,46 @@ export function useConversationProjection(input: {
 
   function markConversationActivity(id: string): void {
     const item = conversationList.value.find((current) => current.id === id);
-    if (item)
-      upsertConversation({ ...item, updatedAt: Math.max(Number(item.updatedAt ?? 0), Date.now()) });
+    if (item) conversationList.value = sortConversations(conversationList.value.map((current) =>
+      current.id === id ? { ...current, updatedAt: Math.max(Number(current.updatedAt ?? 0), Date.now()) } : current));
   }
+
+  onMounted(() => {
+    if (!options.workspaceRuntime?.streamWorkspaceEvents) return;
+    void subscribeWorkspaceEvents(options.workspaceRuntime, {
+      signal: streamController.signal,
+      onEvent: async (event) => {
+        if (streamController.signal.aborted) return;
+        if (event.type === 'stream.reset_required') {
+          versions.clear();
+          // Pending native mutations survive reset; drop ordering metadata from the old epoch.
+          for (const change of pendingListChanges.values()) {
+            change.resourceVersion = undefined;
+            if (change.item && change.item.runtimeKind !== 'local_agent') change.item = { ...change.item, resourceVersion: undefined };
+          }
+          conversationList.value = conversationList.value.map((item) => item.runtimeKind === 'local_agent' ? item : { ...item,resourceVersion:undefined });
+          await loadConversationList(options.service);
+        } else if (event.type === 'stream.ready') {
+          if (listRequest) await listRequest;
+          else await loadConversationList(options.service);
+        } else if (event.type === 'conversation.updated') {
+          const id = event.data.conversationId;
+          if (event.resourceVersion <= (versions.get(id) ?? 0)) return;
+          if (event.data.conversation) {
+            upsertConversation(event.data.conversation);
+            if (chatConversationId.value === id) conversationTitle.value = event.data.conversation.name;
+          } else {
+            versions.set(id,event.resourceVersion);
+            pendingListChanges.set(id,{revision:++mutationRevision,resourceVersion:event.resourceVersion,item:null,runtimeKind:'builtin'});
+            conversationList.value = conversationList.value.filter((item) => item.id!==id);
+            if (chatConversationId.value===id) startNewConversation();
+            if (lastActiveConversationId.value===id) clearLastActiveConversation();
+          }
+        }
+      },
+    }).catch(() => { /* Explicit refresh remains available after transport or projection loss. */ });
+  });
+  onUnmounted(() => { streamController.abort(); listGeneration++; });
 
   const lastActiveConversationId = ref('');
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
@@ -122,7 +171,14 @@ export function useConversationProjection(input: {
     localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY);
   }
 
-  async function loadConversationList(loadService: AIChatService) {
+  function loadConversationList(loadService: AIChatService): Promise<void> {
+    const request = performLoadConversationList(loadService);
+    listRequest = request;
+    void request.finally(() => { if (listRequest === request) listRequest = null; });
+    return request;
+  }
+
+  async function performLoadConversationList(loadService: AIChatService) {
     const generation = ++listGeneration;
     const revision = mutationRevision;
     conversationListLoading.value = true;
@@ -153,12 +209,21 @@ export function useConversationProjection(input: {
           change.revision <= revision &&
           (change.item === null
             ? !authoritative
-            : authoritative &&
-              Number(authoritative.updatedAt ?? 0) >= Number(change.item.updatedAt ?? 0))
+            : authoritative && (change.runtimeKind === 'local_agent' ||
+              (authoritative.runtimeKind !== 'local_agent' &&
+                (authoritative.resourceVersion ?? 0) >= (change.resourceVersion ?? 0))))
         ) {
           pendingListChanges.delete(id);
         } else if (change.item) merged.set(id, change.item);
         else merged.delete(id);
+      }
+      for (const [id,item] of merged) {
+        if (item.runtimeKind === 'local_agent') continue;
+        const currentVersion = versions.get(id) ?? 0;
+        if ((item.resourceVersion ?? 0) < currentVersion) {
+          const current = conversationList.value.find((value) => value.id === id);
+          if (current) merged.set(id,current); else merged.delete(id);
+        } else if (item.resourceVersion !== undefined) versions.set(id,item.resourceVersion);
       }
       conversationList.value = sortConversations([...merged.values()]);
       if (builtin.status === 'rejected' || local.status === 'rejected')
@@ -295,7 +360,6 @@ export function useConversationProjection(input: {
       conversationList.value = conversationList.value.filter((item) => item.id !== id);
       if (chatConversationId.value === id) startNewConversation();
       if (lastActiveConversationId.value === id) clearLastActiveConversation();
-      await loadConversationList(loadService);
       toast.success(t('aiAssistant.dialogs.chat.deleted'));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));

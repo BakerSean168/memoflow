@@ -29,7 +29,8 @@ export class CreateConversationUseCase {
         name: conversation.name,
       });
 
-      return ok(conversation.toClientDTO());
+      const snapshots = await this.conversationRepository.events?.snapshot(cx.identityId, [String(conversation.id)]);
+      return ok(snapshots?.[0] ?? conversation.toClientDTO());
     } catch (err) {
       logger.error('Failed to create conversation', { error: err, identityId: cx.identityId, title });
       return error('INTERNAL_ERROR', err instanceof Error ? err.message : 'Failed to create conversation');

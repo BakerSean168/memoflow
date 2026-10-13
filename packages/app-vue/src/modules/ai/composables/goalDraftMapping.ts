@@ -1,5 +1,7 @@
 import {
   GoalPlanDraftContentSchema,
+  GoalPlanningSeedSchema,
+  GoalPlanGoalSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
   type GoalPlanDraftContent,
@@ -68,6 +70,21 @@ export function buildEditedGoalDraftContent(input: {
   tasks: readonly EditableGoalTask[];
   knowledge: readonly EditableGoalKnowledge[];
 }): GoalPlanDraftContent {
+  return GoalPlanDraftContentSchema.parse(editedGoalDraftContent(input));
+}
+
+export function buildGoalPlanningSeed(input: Omit<Parameters<typeof buildEditedGoalDraftContent>[0], 'draft'>) {
+  const status = GoalPlanGoalSchema.shape.status.parse(input.native.status);
+  return GoalPlanningSeedSchema.parse(editedGoalDraftContent({
+    ...input,
+    draft: {
+      revision: 1, goal: { draftRef: 'goal', name: input.native.name, status, labels: [] },
+      keyResults: [], tasks: [], knowledge: [], rationale: '', warnings: [],
+    },
+  }));
+}
+
+function editedGoalDraftContent(input: Parameters<typeof buildEditedGoalDraftContent>[0]) {
   const { draft, native, labels, pendingLabelNames, keyResultRefs } = input;
   const goal = {
     ...draft.goal,
@@ -89,7 +106,7 @@ export function buildEditedGoalDraftContent(input: {
       ]),
     ],
   };
-  const used = new Set(draft.keyResults.map((item) => item.draftRef));
+  const used = new Set([...draft.keyResults.map((item) => item.draftRef), ...keyResultRefs.values()]);
   const keyResults = native.keyResults.map((item) => {
     let draftRef = item.id ? keyResultRefs.get(item.id) : undefined;
     if (!draftRef) {
@@ -111,12 +128,12 @@ export function buildEditedGoalDraftContent(input: {
       weight: item.weight,
     };
   });
-  return GoalPlanDraftContentSchema.parse({
+  return {
     goal,
     keyResults,
     tasks: input.tasks,
     knowledge: input.knowledge,
     rationale: draft.rationale,
     warnings: [...draft.warnings],
-  });
+  };
 }

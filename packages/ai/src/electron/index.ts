@@ -94,7 +94,11 @@ import {
   AIWorkflowRunViewSchema,
   AIWorkflowStartClientRequestSchema,
   LocalAgentClientCommandSchema,
+  WorkspaceStreamRequestSchema,
+  WorkspaceStreamAckSchema,
+  WorkspaceStreamStopSchema,
 } from '@memoflow/contracts/ai';
+import { workspaceEventStream } from '../server/transport/workspace-event-stream';
 import { fail, ok } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -169,6 +173,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
   }
   let state: ModuleHandleState = 'created';
   const activeStreamSessions = new Map<string, StreamSession>();
+  const workspaceOwners = new Map<string, { identityId: string; webContentsId: number }>();
+  const workspaceAcks = new Map<string, { cursor: string; resolve: () => void }>();
   const ownedChannels: string[] = [];
 
   return {
@@ -190,6 +196,83 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
           : null;
         const { providerManagement, assistantConversation, knowledge, evaluationOperations } =
           aiModule;
+
+        ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_START, async (event, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = WorkspaceStreamRequestSchema.safeParse(request);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace subscription' });
+            const { streamId, cursor } = parsed.data;
+            if (activeStreamSessions.has(streamId) || [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)) {
+              return fail({ code: 'CONFLICT', message: 'Workspace subscription already active' });
+            }
+            let source;
+            try { source = await aiModule.workflowRuntime?.goalEvents?.(); await aiModule.conversationAttentionPort?.events?.init(); await aiModule.conversationEvents?.init(); }
+            catch { return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' }); }
+            if (!source && !aiModule.conversationAttentionPort?.events && !aiModule.conversationEvents) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
+            if (event.sender.isDestroyed() || activeStreamSessions.has(streamId) || [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)) {
+              return fail({ code: 'CONFLICT', message: 'Workspace subscription unavailable' });
+            }
+            const abortController = new AbortController();
+            const close = () => abortController.abort();
+            activeStreamSessions.set(streamId, { abortController, webContentsId: event.sender.id });
+            workspaceOwners.set(streamId, { identityId: requestContext.identityId, webContentsId: event.sender.id });
+            event.sender.once('destroyed', close);
+            void (async () => {
+              try {
+                for await (const update of workspaceEventStream({ source: source ?? null, attention: aiModule.conversationAttentionPort?.events, conversations: aiModule.conversationEvents, identityId: requestContext.identityId, cursor, signal: abortController.signal })) {
+                  if (abortController.signal.aborted || event.sender.isDestroyed()) break;
+                  await new Promise<void>((resolve) => {
+                    const timeout = setTimeout(close, 30_000);
+                    const done = () => {
+                      clearTimeout(timeout);
+                      workspaceAcks.delete(streamId);
+                      abortController.signal.removeEventListener('abort', done);
+                      resolve();
+                    };
+                    workspaceAcks.set(streamId, { cursor: update.cursor, resolve: done });
+                    abortController.signal.addEventListener('abort', done, { once: true });
+                    try { event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, { streamId, event: update }); }
+                    catch { close(); }
+                  });
+                }
+              } catch { /* The client reconnects to durable state; no business failure is synthesized. */ }
+              finally {
+                close();
+                event.sender.removeListener('destroyed', close);
+                workspaceAcks.delete(streamId);
+                workspaceOwners.delete(streamId);
+                activeStreamSessions.delete(streamId);
+                try { if (!event.sender.isDestroyed()) event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_END, { streamId }); }
+                catch { /* The renderer may disappear between the check and the send. */ }
+              }
+            })();
+            return ok({ accepted: true });
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_WORKSPACE_START);
+        ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_ACK, async (event, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = WorkspaceStreamAckSchema.safeParse(request);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace acknowledgement' });
+            const owner = workspaceOwners.get(parsed.data.streamId);
+            if (owner?.identityId !== requestContext.identityId || owner.webContentsId !== event.sender.id) return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
+            const pending = workspaceAcks.get(parsed.data.streamId);
+            if (pending?.cursor === parsed.data.cursor) pending.resolve();
+            return ok({ accepted: Boolean(pending?.cursor === parsed.data.cursor) });
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_WORKSPACE_ACK);
+        ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_STOP, async (event, request) =>
+          withAuthenticatedValue(ctx, async (requestContext) => {
+            const parsed = WorkspaceStreamStopSchema.safeParse(request);
+            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace cancellation' });
+            const owner = workspaceOwners.get(parsed.data.streamId);
+            if (owner?.identityId !== requestContext.identityId || owner.webContentsId !== event.sender.id) return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
+            activeStreamSessions.get(parsed.data.streamId)?.abortController.abort();
+            return ok({ accepted: true });
+          }),
+        );
+        installed.push(AIChannels.RUNTIME_WORKSPACE_STOP);
 
         // -- Provider Config --
         ipcMain.handle(AIChannels.CAPABILITIES_GET, async () =>
@@ -639,6 +722,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -688,6 +772,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -783,6 +868,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -824,6 +910,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -862,6 +949,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -928,6 +1016,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -964,6 +1053,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),
@@ -1000,6 +1090,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 code: failure.code,
                 message: failure.message,
                 context: failure.context,
+                failure: failure.failure,
               });
             }
           }),

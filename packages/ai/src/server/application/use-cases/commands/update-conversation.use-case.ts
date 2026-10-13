@@ -21,6 +21,7 @@ export class UpdateConversationUseCase {
 
     conversation.rename(request.name);
     await this.conversationRepository.save(conversation);
-    return ok(conversation.toClientDTO());
+    const snapshots = await this.conversationRepository.events?.snapshot(identityId, [String(conversation.id)]);
+      return ok(snapshots?.[0] ?? conversation.toClientDTO());
   }
 }

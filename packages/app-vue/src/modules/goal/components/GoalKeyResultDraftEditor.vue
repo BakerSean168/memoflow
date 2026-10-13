@@ -148,13 +148,12 @@ import {
   goalTimeframeLabel,
   KeyResultCalculationMethod,
   type GoalTimeframe,
-  type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
-type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
+type DraftKeyResult = import('../composables/goalNativeEditSession').GoalDraftKeyResult;
 type KrId = DraftKeyResult['id'];
 
 const props = withDefaults(

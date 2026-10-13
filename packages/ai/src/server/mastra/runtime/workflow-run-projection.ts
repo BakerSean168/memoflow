@@ -2,6 +2,7 @@ import {
   AIWorkflowRunViewSchema,
   GoalWorkflowSuspensionSchema,
   GoalWorkflowLiveActionJournalSchema,
+  GoalPlanExecutionReceiptSchema,
   TaskWorkflowSuspensionSchema,
   KnowledgeWorkflowSuspensionSchema,
   type AIWorkflowRunView,
@@ -22,12 +23,16 @@ import {
 } from './workflow-run-snapshot';
 import { toAIPublicFailure } from '../../../shared/ai-public-failure';
 
-function publicRuntimeError(error?: unknown): { code: string; message: string } {
+function publicRuntimeError(error?: unknown): NonNullable<AIWorkflowRunView['failure']> {
   const failure = toAIPublicFailure(error, {
     fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
     fallbackMessage: 'AI runtime request failed',
   });
-  return { code: failure.code, message: failure.message };
+  return {
+    code: failure.code, message: failure.message,
+    ...(failure.details ? { details: failure.details } : {}),
+    ...(failure.retryHint ? { retryHint: failure.retryHint } : {}),
+  };
 }
 
 // Read-only owner-specific projections; no execution or persistence authority.
@@ -64,14 +69,35 @@ export function projectGoalCreateRun(
       ? (lifecycle as Record<string, unknown>)
       : undefined;
 
+  return projectGoalWorkflowPublicState({
+    runId: row.runId, conversationId: workflowInput.conversationId,
+    startRequestId: workflowInput.sourceDraft?.attemptId,
+    status: lowLevelStatus, suspension: lifecycleRecord?.suspendPayload,
+    result: snapshot.result, liveActions,
+    receipt: value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>).priorReceipt : undefined,
+    failure: lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire' ? publicRuntimeError(snapshot.error) : undefined,
+    createdAt: new Date(row.createdAt).getTime(), updatedAt: new Date(row.updatedAt).getTime(),
+  });
+}
+
+/** Shared read projection for the engine row and its transactionally derived event read model. */
+export function projectGoalWorkflowPublicState(input: {
+  runId: string; conversationId: string; startRequestId?: string;
+  status: unknown; suspension?: unknown; result?: unknown; liveActions?: unknown; receipt?: unknown;
+  failure?: AIWorkflowRunView['failure']; resourceVersion?: number;
+  createdAt: number; updatedAt: number;
+}): Extract<AIWorkflowRunView, { kind: 'goal.create' }> {
+  const lowLevelStatus = input.status;
+  const liveActions = GoalWorkflowLiveActionJournalSchema.parse(input.liveActions ?? []);
   let status: AIWorkflowRunView['status'];
   let suspension: AIWorkflowRunView['suspension'];
   let failure: AIWorkflowRunView['failure'];
   let result: Extract<AIWorkflowRunView, { kind: 'goal.create' }>['result'];
+  if (input.receipt != null) result = GoalPlanExecutionReceiptSchema.parse(input.receipt);
 
   if (lowLevelStatus === 'suspended') {
     status = 'suspended';
-    const parsed = GoalWorkflowSuspensionSchema.safeParse(lifecycleRecord?.suspendPayload);
+    const parsed = GoalWorkflowSuspensionSchema.safeParse(input.suspension);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     suspension = parsed.data;
     if (suspension.type === 'recovery_required' && suspension.receipt?.kind === 'goal.create') {
@@ -81,13 +107,13 @@ export function projectGoalCreateRun(
     status = 'cancelled';
   } else if (lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire') {
     status = 'failed';
-    failure = publicRuntimeError(snapshot.error);
+    failure = input.failure ?? publicRuntimeError();
   } else if (
     lowLevelStatus === 'success' ||
     lowLevelStatus === 'bailed' ||
     lowLevelStatus === 'skipped'
   ) {
-    const parsed = GoalCreateWorkflowOutputSchema.safeParse(snapshot.result);
+    const parsed = GoalCreateWorkflowOutputSchema.safeParse(input.result);
     if (!parsed.success) throw new Error('AI_WORKFLOW_SNAPSHOT_CORRUPT');
     if (parsed.data.outcome === 'cancelled') {
       status = 'cancelled';
@@ -109,18 +135,22 @@ export function projectGoalCreateRun(
     };
   }
 
-  return AIWorkflowRunViewSchema.parse({
-    runId: row.runId,
+  const projected = AIWorkflowRunViewSchema.parse({
+    runId: input.runId,
     kind: 'goal.create',
-    conversationId: workflowInput.conversationId,
+    ...(input.startRequestId ? { startRequestId: input.startRequestId } : {}),
+    conversationId: input.conversationId,
     status,
     ...(suspension ? { suspension } : {}),
     ...(liveActions.length ? { liveActions } : {}),
     ...(failure ? { failure } : {}),
     ...(result ? { result } : {}),
-    createdAt: new Date(row.createdAt).getTime(),
-    updatedAt: new Date(row.updatedAt).getTime(),
+    createdAt: input.createdAt,
+    updatedAt: input.updatedAt,
+    ...(input.resourceVersion ? { resourceVersion: input.resourceVersion } : {}),
   });
+  if (projected.kind !== 'goal.create') throw new Error('Goal projection kind mismatch');
+  return projected;
 }
 
 export function projectTaskCreateRun(

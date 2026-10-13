@@ -391,6 +391,7 @@ describe('GoalModuleLayout', () => {
 const sessionProbe: GoalNativeEditSession = {
   claimControl: vi.fn(),
   releaseControl: vi.fn(),
+  detachWorkflow: vi.fn(),
   patch: vi.fn(),
   addChild: vi.fn(),
   removeChild: vi.fn(),
@@ -446,6 +447,7 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
         'openControlledCreate',
         'openCreate',
         'openExisting',
+        'reclaimControlledCreate',
       ]);
       return () => null;
     },
@@ -557,6 +559,45 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
       window.confirm = originalConfirm;
       wrapper.unmount();
     }
+  });
+
+  it('detaches a failed workflow without closing the pane or retaining the shell control lock', async () => {
+    const { wrapper, router, host } = await mountNativeHost('/tasks', true);
+    const ai = await host.openControlledCreate('failed-run');
+    ai.coordinateSubmit(vi.fn(async () => {}), vi.fn(async () => {}));
+    ai.patch({ name: 'Keep this pane draft' });
+    const route = router.currentRoute.value.fullPath;
+    const owner = host.locate()!;
+    ai.detachWorkflow();
+    await flushPromises();
+    expect(useAppShellStore().businessControl).toBeNull();
+    expect(router.currentRoute.value.fullPath).toBe(route);
+    expect(host.locate()).toBe(owner);
+    expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
+    expect(owner.readDraftState().draft.name).toBe('Keep this pane draft');
+    expect(owner.readDraftState().dirty).toBe(true);
+    expect(owner.readDraftState().busy).toBe(false);
+    owner.patch({ summary: 'User can edit again' });
+    expect(() => ai.patch({ name: 'Late overwrite' })).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it('reclaims an explicitly chosen preserved draft atomically and refuses a changed snapshot', async () => {
+    const { wrapper, host } = await mountNativeHost('/tasks', true);
+    const ai = await host.openControlledCreate('old-run');
+    ai.patch({ name: 'Preserved draft' });
+    ai.detachWorkflow();
+    const owner = host.locate()!;
+    const expected = owner.readDraftState();
+    owner.patch({ name: 'User changed draft' });
+    expect(() => host.reclaimControlledCreate('new-run', owner, expected)).toThrow('changed');
+    const fresh = owner.readDraftState();
+    const reclaimed = host.reclaimControlledCreate('new-run', owner, fresh);
+    expect(reclaimed.readDraftState().draft.name).toBe('User changed draft');
+    expect(useAppShellStore().businessControl?.ownerId).toBe('new-run');
+    expect(() => owner.patch({ name: 'Overwrite' })).toThrow('controlled by AI');
+    reclaimed.detachWorkflow();
+    wrapper.unmount();
   });
 
   it('releases owner control when its shell host is disposed, without discarding the draft', async () => {

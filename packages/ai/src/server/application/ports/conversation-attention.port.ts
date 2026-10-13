@@ -1,3 +1,4 @@
+import type { AttentionEventSource } from './attention-events.port';
 import type {
   AssistantAttentionState,
   AssistantAttentionRuntimeKind,
@@ -31,6 +32,7 @@ export interface AssistantAttentionAcknowledge extends AssistantAttentionIdentit
 }
 
 export interface IConversationAttentionPort {
+  readonly events?: AttentionEventSource;
   transition(input: AssistantAttentionTransition): Promise<void>;
   heartbeat(input: AssistantAttentionIdentity & { runId: string }): Promise<void>;
   list(input: AssistantAttentionLookup): Promise<AssistantAttentionView[]>;

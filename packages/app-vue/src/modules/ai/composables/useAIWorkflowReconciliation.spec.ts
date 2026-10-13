@@ -6,7 +6,7 @@ import { useAIWorkflowReconciliation } from './useAIWorkflowReconciliation';
 const running: AIWorkflowRunView = {
   runId: 'r',
   conversationId: 'c',
-  kind: 'goal.create',
+  kind: 'task.create',
   status: 'running',
   createdAt: 1,
   updatedAt: 1,

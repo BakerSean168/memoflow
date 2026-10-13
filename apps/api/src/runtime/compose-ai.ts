@@ -90,6 +90,8 @@ export interface ComposeAIDependencies {
   readonly userTimeContextPort: UserTimeContextPort;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
+  /** Primary business database used for atomic Conversation/Attention change capture. */
+  readonly workspaceEventsDatabase?: { connectionString: string; businessSchema?: string };
 }
 
 /**
@@ -105,7 +107,9 @@ export interface ComposeAIDependencies {
  * 5. createAIApiModule({ instance }) — bind the instance to an IApiModule handle.
  */
 export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
-  const repositorySet = createAIPrismaRepositories(dependencies.db);
+  const repositorySet = dependencies.workspaceEventsDatabase
+    ? createAIPrismaRepositories(dependencies.db, dependencies.workspaceEventsDatabase)
+    : createAIPrismaRepositories(dependencies.db);
   const goalRepositories = createGoalPrismaRepositories(dependencies.db);
   const taskRepositories = createTaskPrismaRepositories(dependencies.db);
   const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);

@@ -170,6 +170,7 @@ export {
   createWorkflowRuntimeHttpClient,
   createWorkflowRuntimeIpcClient,
   type WorkflowRuntimeClient,
+  type WorkspaceEventStreamOptions,
 } from './runtime-workflow';
 
 export {

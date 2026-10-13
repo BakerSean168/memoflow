@@ -1,4 +1,4 @@
-import { errorCodeToHttpStatus, fail } from '@memoflow/contracts/result';
+import { errorCodeToHttpStatus, fail, type PublicFailure } from '@memoflow/contracts/result';
 import { toAIPublicFailure, type AIPublicFailureOptions } from '../../shared/ai-public-failure';
 
 export interface AITransportFailure {
@@ -6,6 +6,7 @@ export interface AITransportFailure {
   readonly message: string;
   readonly statusCode: number;
   readonly context?: Record<string, unknown>;
+  readonly failure?: PublicFailure;
 }
 
 export type AITransportFailureOptions = AIPublicFailureOptions;
@@ -20,6 +21,7 @@ export function toAIControllerFailure(error: unknown, fallbackMessage: string) {
     code: failure.code,
     message: failure.message,
     context: failure.context,
+    failure: failure.failure,
     cause: error,
   });
 }
@@ -39,5 +41,10 @@ export function toAITransportFailure(
     message: failure.message,
     ...(failure.context ? { context: { requestId: failure.context.requestId } } : {}),
     statusCode: errorCodeToHttpStatus(failure.code),
+    ...(failure.code === 'RATE_LIMITED' ? { failure: {
+      code: 'RATE_LIMITED', category: 'rate_limited' as const,
+      ...(failure.details ? { details: failure.details } : {}),
+      ...(failure.retryHint ? { retryHint: failure.retryHint } : {}),
+    } } : {}),
   };
 }

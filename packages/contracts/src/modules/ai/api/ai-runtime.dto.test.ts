@@ -446,6 +446,17 @@ describe('AI vNext runtime contracts', () => {
       status: 'failed',
       failure: { code: 'RATE_LIMITED' },
     });
+    const enriched = { ...parsed, failure: {
+      ...parsed.failure, details: { limitKind: 'quota_exhausted' },
+      retryHint: { kind: 'after', afterMs: 30000 },
+    } };
+    expect(AIWorkflowRunViewSchema.safeParse(enriched).success).toBe(true);
+    expect(AIWorkflowRunViewSchema.safeParse({ ...enriched, failure: {
+      ...enriched.failure, details: { limitKind: 'quota_exhausted', apiKey: 'SECRET' },
+    } }).success).toBe(false);
+    expect(AIWorkflowRunViewSchema.safeParse({ ...enriched, failure: {
+      ...enriched.failure, retryHint: { kind: 'after', afterMs: -1 },
+    } }).success).toBe(false);
   });
 
   it('projects only product workflow state and not framework snapshots', () => {

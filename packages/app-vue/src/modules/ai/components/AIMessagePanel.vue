@@ -163,7 +163,9 @@
               </details>
               <AIMessageContent
                 v-if="item.content.trim()"
-                :content="item.content"
+                :content="item.workflowInterruption ? getGoalWorkflowInterruptionMessage(item.workflowInterruption, t) : item.content"
+                :muted="item.status === 'interrupted'"
+                v-bind="item.status === 'interrupted' ? { role: 'status', 'data-testid': 'ai-workflow-interruption' } : {}"
                 :generating="item.status === 'generating'"
               />
               <p v-else class="text-sm leading-7 text-muted-foreground">
@@ -396,6 +398,7 @@ import {
 } from '../composables/types';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
 import { useAIFormatters } from '../composables/useAIFormatters';
+import { getGoalWorkflowInterruptionMessage } from '../composables/error';
 
 withDefaults(
   defineProps<{

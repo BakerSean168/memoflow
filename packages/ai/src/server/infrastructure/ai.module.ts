@@ -30,6 +30,7 @@
  */
 
 import { ok, error } from '@memoflow/contracts/result';
+import type { ConversationEventSource } from '../domain/repositories/conversation-events.port';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../domain';
 import type {
@@ -329,6 +330,7 @@ export interface AIModuleInstance {
   /** Mastra-native Assistant execution surface. */
   readonly mastraRuntime: MastraAIRuntime | null;
   readonly conversationAttentionPort: IConversationAttentionPort | null;
+  readonly conversationEvents?: ConversationEventSource;
   readonly localAgentRuntime?: LocalAgentRuntime | null;
   /** Canonical Workflow execution surface; null until a Mastra workflow runtime is composed. */
   readonly workflowRuntime: AIWorkflowRuntimePort | null;
@@ -345,6 +347,7 @@ export type AITransportModuleInstance = Pick<
   | 'evaluationOperations'
   | 'mastraRuntime'
   | 'conversationAttentionPort'
+  | 'conversationEvents'
   | 'localAgentRuntime'
   | 'agentRegistry'
   | 'workflowRuntime'
@@ -803,7 +806,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       if (result.data === null) {
         return error('NOT_FOUND', 'Conversation not found');
       }
-      return ok(result.data.toClientDTO());
+      const snapshots = await conversationRepository.events?.snapshot(cx.identityId, [id]);
+      return ok(snapshots?.[0] ?? result.data.toClientDTO());
     },
     deleteConversation: (id, cx) =>
       services.conversationServices.deleteConversation.execute(cx.identityId, id),
@@ -831,6 +835,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
     conversationAttentionPort: dependencies.conversationAttentionPort ?? null,
+    conversationEvents: conversationRepository.events,
     localAgentRuntime: dependencies.localAgentRuntime ?? null,
     agentRegistry,
     workflowRuntime: dependencies.workflowRuntime ?? null,
@@ -877,7 +882,11 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
         try {
           await dependencies.mastraRuntime?.dispose();
         } finally {
-          await providerSafeFetch.close();
+          try {
+            try { await dependencies.conversationAttentionPort?.events?.dispose(); }
+            finally { await conversationRepository.events?.dispose(); }
+          }
+          finally { await providerSafeFetch.close(); }
         }
       }
     },

@@ -3,6 +3,8 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import AIMessagePanel from './AIMessagePanel.vue';
 import { semanticElevationClass } from '../../../shared/constants/semantic-elevation';
+import enAI from '../../../locales/en-US/aiAssistant';
+import zhAI from '../../../locales/zh-CN/aiAssistant';
 
 const i18n = createI18n({
   legacy: false,
@@ -75,6 +77,31 @@ const i18n = createI18n({
 });
 
 describe('AIMessagePanel (V2 §6.0 welcome)', () => {
+  it('renders a localized interruption once with muted status and no send-failure alert', async () => {
+    const locale = createI18n({ legacy: false, locale: 'en-US', messages: {
+      'en-US': { aiAssistant: enAI }, 'zh-CN': { aiAssistant: zhAI },
+    } });
+    const wrapper = mount(AIMessagePanel, { props: {
+      toolMode: 'goal-create', timeline: [{ id: 'run-status', role: 'assistant', status: 'interrupted',
+        content: 'An interrupted request', workflowInterruption: { draftPreserved: true, failure: {
+          code: 'RATE_LIMITED', message: 'PRIVATE_BODY', details: { limitKind: 'quota_exhausted' },
+          retryHint: { kind: 'after', afterMs: 30000 },
+        } },
+      }],
+    }, global: { plugins: [locale] } });
+    expect(wrapper.findAll('[data-testid="ai-workflow-interruption"]')).toHaveLength(1);
+    const status = wrapper.get('[data-testid="ai-workflow-interruption"]');
+    expect(status.attributes('role')).toBe('status');
+    expect(status.classes()).toContain('text-muted-foreground');
+    expect(status.text()).toContain('insufficient quota');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('PRIVATE_BODY');
+    locale.global.locale.value = 'zh-CN';
+    await wrapper.vm.$nextTick();
+    expect(status.text()).toContain('配额不足');
+    expect(status.text()).toContain('草稿已保留');
+    wrapper.unmount();
+  });
   it('renders compact workflow shortcuts without owning the shell today overview', () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
