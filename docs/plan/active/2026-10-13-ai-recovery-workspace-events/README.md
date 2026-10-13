@@ -21,7 +21,7 @@ description: Goal Embedded 后续优化：失败恢复、原生草稿交接与�
 
 本轮首先实施 S0：Goal 规划失败后保留当前打开表单，解除失效的 AI capability 与提交/取消协调关系，恢复原生编辑和保存。已有 owner 写入或结果不明时继续冻结、校准，禁止借交接再次创建 Goal。
 
-S0 已在本分支工作区实现并通过 93 文件 / 902 测试、app-vue typecheck/lint 与治理检查。当前改动尚未提交或推送；验证细节见验收文档。此切片保留 owner 不确定性冻结状态，不新增终止 run 的人工核验入口。
+S0 已在本分支工作区实现并通过 93 文件 / 902 测试、app-vue typecheck/lint 与治理检查。相关实现已纳入本地检查点 `9f6e9e33237`，尚未推送；验证细节见验收文档。此切片保留 owner 不确定性冻结状态，不新增终止 run 的人工核验入口。
 
 S1 已实现安全限额分类、HTTP/IPC 失败契约、一处轻量中断提示和失权时保留只读表单。S2 已实现基于原生草稿的新 run、启动关联标识、原地重新授权和取消/迟到响应保护；未知启动结果先核验，不能直接再次创建。相关定向测试已通过，仍需最终集成验收。
 
@@ -29,6 +29,6 @@ S3/S4 已接通 Goal 的持久化事件、认证 Workspace SSE 与 Desktop IPC�
 
 S5 已接通 Attention 的 PostgreSQL 原生事务触发器与 Desktop PowerSync 原生写入事务，包含已读确认、心跳、租约到期投影和删除。Goal/Attention 共用认证 SSE/IPC、分别记录两份持久化游标，前端按 host runtime 共用一条订阅；Attention 的 5 秒 interval 已删除。真实双存储补齐、PowerSync 反应式查询/到期通知、PG 晚提交及前端 30 秒请求预算已有定向证据，整体类型检查、浏览器与部署仍待最终验证。
 
-S6 Conversation 精确事件同步与 S7 独立人工草稿检查点现已有工作区代码及定向测试。2026-10-14 续跑已验证 Conversation 的 PowerSync 版本事件、独立测试 PostgreSQL 事务/删除和 Workspace 多 owner 游标；Goal 检查点的原生保存回归与 Workflow 已创建 Goal 的字符串 ID 恢复核验也已通过。当前实现仍未提交或推送，完整 Web/Desktop 集成、prod-like 部署与当前候选 CI 尚未全面通过，不能宣称 S0–S7 最终交付；详见验收文档。
+S6 Conversation 精确事件同步与 S7 独立人工草稿检查点现已有工作区代码及定向测试。2026-10-14 续跑已验证 Conversation 的 PowerSync 版本事件、独立测试 PostgreSQL 事务/删除和 Workspace 多 owner 游标；Goal 检查点的原生保存回归与 Workflow 已创建 Goal 的字符串 ID 恢复核验也已通过。当前实现已在本地提交 `9f6e9e33237`、尚未推送，完整 Desktop 集成、prod-like 部署与当前候选 CI 尚未全面通过，不能宣称 S0–S7 最终交付；详见验收文档。
 
 这是 [AI Interaction / Goal Workflow Convergence](../2026-10-04-ai-interaction-goal-workflow-convergence.md) 与 [Ask User + Goal Business Surface](../2026-10-12-ask-user-business-surface.md) 的后续专项；旧文档中的阶段性能力和验证记录不能替代本分支现状。

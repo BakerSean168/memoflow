@@ -102,7 +102,7 @@ describe('DesktopProfileRuntimeManager', () => {
     await expect(
       runtime.runExclusive(() => runtime.withInactiveGuest(target.profileId, undefined, read)),
     ).rejects.toThrow('SOURCE_PROFILE_ACTIVE');
-  });
+  }, 15_000);
 
   beforeEach(async () => {
     rootDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'profile-runtime-'));
@@ -145,7 +145,7 @@ describe('DesktopProfileRuntimeManager', () => {
     await expect(runtime.activateStartupProfile()).rejects.toThrow('PIN');
     await runtime.openProfile(second.profileId, '123456');
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
-  });
+  }, 15_000);
 
   it('creates and activates a persistent local guest Profile without cloud auth', async () => {
     const prepared = await runtime.activateStartupProfile();

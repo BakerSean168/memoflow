@@ -50,7 +50,7 @@ S3/S5 增加 Postgres/LibSQL persistence fault tests、真实 HTTP SSE 双进程
 
 ## 当前实施与验证状态
 
-S0–S7 均已有工作区实现；尚未提交/推送。S6/S7 由 2026-10-14 定向验证补充证据，但仍未满足全部正式交付门禁。下面记录的是本工作区执行证据，不代表生产部署或 PR 已通过。
+S0–S7 均已有实现，2026-10-14 已在现有 PR #451 分支形成本地检查点 `9f6e9e33237`，尚未推送。S6/S7 由 2026-10-14 定向验证补充证据，但仍未满足全部正式交付门禁。下面记录的是本工作区执行证据，不代表生产部署或 PR 已通过。
 
 - S1/S2：安全 provider 错误分类、原生草稿重启与迟到响应保护的定向测试通过；真实 runtime 范围 3 文件 / 134 通过 / 1 跳过。
 - S3/S4：真实 HTTP SSE 另一个 Node 进程写入 LibSQL、即时推送、终止状态续传、认证隔离测试通过；PG 事务回滚、晚提交与连接恢复测试通过。HTTP/IPC/持久化范围 5 文件 / 45 通过。
@@ -60,7 +60,7 @@ S0–S7 均已有工作区实现；尚未提交/推送。S6/S7 由 2026-10-14 �
 - 共享前端订阅与 Goal/Attention 投影：4 文件 / 66 通过；覆盖最后一个消费者释放才关闭传输、全部投影完成后推进游标、旧快照不能复活 Attention tombstone，30 秒无周期 attention/list/workflow/get。
 - API composition：2 文件 / 13 通过。
 
-S6/S7 现已包含实际代码及定向测试，但当前候选的整体 typecheck/lint、完整 prod-like 验证、浏览器复验和 PR CI 仍待完成。A19、A21、A22 有局部证据，尚未完成全部跨客户端/真实恢复验收；身份切换、跨窗口及 Desktop 实机验收不能仅凭定向测试宣称交付。
+S6/S7 现已包含实际代码及定向测试，当前本地候选的四项目 typecheck/lint、Goal checkpoint 浏览器复验均通过，但完整受影响项目测试、prod-like 与 PR CI 仍待完成。A19、A21、A22 有局部证据，尚未完成全部跨客户端/真实恢复验收；身份切换、跨窗口及 Desktop 实机验收不能仅凭定向测试宣称交付。
 
 ## 2026-10-14 · ChatGPT Web 续跑实际证据
 
@@ -74,9 +74,16 @@ S6/S7 现已包含实际代码及定向测试，但当前候选的整体 typeche
 - `ai, app-vue, api, desktop` 四项目的 Typecheck（及 31 项依赖任务）和四项目 Lint 均通过；日志 `/tmp/memoflow-s0s7-20261014-typecheck-final.log`、`/tmp/memoflow-s0s7-20261014-lint.log`。
 - 更新 `tools/test-system-v2/test-inventory.json`，生成清单现覆盖 1406 个测试文件，并核验 `inventory.mjs --check` 通过；`workspaceEventSubscription.ts` 改为 `workspace-event-subscription.ts` 并更新五处导入后，`pnpm nx run memoflow:governance-check` 最终 exit 0（`/tmp/memoflow-s0s7-20261014-governance-afterrename.log`）。
 - 最新 Playwright：`pnpm nx run web:e2e:ai-workspace --args='--grep=checkpoint'` 1/1 通过，约 45.5 秒，使用真实认证/API/Chromium，覆盖刷新草稿恢复、跨窗口 CAS 竞争、保存成功后响应丢失且不重复创建 Goal（`/tmp/memoflow-s0s7-20261014-checkpoint-e2e.log`）；测试使用受控 Workflow，不代表真实模型推理或 Desktop 实机验收。
-- `git diff --check`：通过。仍缺全部受影响测试、Docker prod-like、当前 PR CI 和发布验证，不以定向测试通过代替完整交付。
+- `git diff --check`：通过；形成本地提交 `9f6e9e33237`（133 文件，7,599 增行 / 446 删行），提交后工作树干净，分支领先远端 1 个提交，尚未推送。仍缺完整受影响范围测试、Docker prod-like、PR CI 和发布验证，不以定向测试通过代替完整交付。
 
-下一轮优先事项：① 补齐 Conversation 前端跨窗口、乱序与列表快照交错的回归；② 在当前候选上运行完整受影响测试和必要的 Desktop IPC/真实数据库集成；③ 按仓库 `validate-local-deploy` 入口完成 Docker prod-like 验证，确认不会与现有开发/测试服务冲突；④ 审核当前 100+ 文件集成改动的提交/PR 边界，并根据真实门禁结果分批交付。
+下一轮优先事项：① 五项目全量测试已通过（`/tmp/memoflow-s0s7-auto1-full-retest.log`），Desktop IPC 52/52 已通过，S6 双实例并发回归 39/39 已通过；② 补齐真实浏览器双窗口与 Desktop 实机验收；③ 在不干扰现有服务且磁盘有足够余量时完成 Docker prod-like 验证；④ 验证当前候选的全部门禁与 CI 后推送现有 PR #451，不创建多余分支或合并未验证代码。
+
+## 2026-10-14 · 本轮增量验收证据
+
+- 首次五项目测试在 app-vue 出现两个过期 `Rate limited` 文案断言失败，Desktop PIN 测试遇到默认 5 秒超时。已更新 Task/Knowledge 安全文案测试及两个长 PIN 场景的 15 秒预算，不改变业务逻辑。定向复测 42/42 和 18/18 通过。
+- 修复后五项目全量 `run-many --target=test` exit 0（Nx 4/6 命中缓存）；治理检查 exit 0；Desktop IPC 8 文件/52 测试 exit 0。证据分别为 `/tmp/memoflow-s0s7-auto1-full-retest.log`、`/tmp/memoflow-s0s7-auto1-governance.log`、`/tmp/memoflow-s0s7-auto1-desktop-ipc.log`。
+- S6 新增两个独立客户端投影的版本乱序与旧列表交错测试，`useAIChatSession.spec.ts` 39/39 通过。证据 `/tmp/memoflow-s0s7-auto1-crosswindow.log`；不是两个真实浏览器的 E2E。
+- ForgeFlow/Pi 扩展缺少 `pi-subagents/required-child-extensions`，已由 ChatGPT Web 经 Agent Fabric 实施。Docker prod-like 仅完成官方 dry-run，结果为 inconclusive；当前候选未推送 PR #451，也没有对应新 HEAD 的 CI 结果。
 
 ## S0 历史切片记录
 

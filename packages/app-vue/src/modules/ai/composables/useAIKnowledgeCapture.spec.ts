@@ -25,7 +25,10 @@ const i18n = createI18n({
   messages: {
     'en-US': {
       errors: { RATE_LIMITED: 'Rate limited' },
-      aiAssistant: { errors: { workflowExecutionFailed: 'Failed' } },
+      aiAssistant: {
+        errors: { workflowExecutionFailed: 'Failed' },
+        businessSurface: { limitUnknown: 'The model service reached a request or quota limit.' },
+      },
     },
   },
 });
@@ -309,7 +312,8 @@ describe('useAIKnowledgeCapture native Repository orchestration', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'knowledge-capture-workflow-failure-run-1',
-          content: 'Rate limited',
+          content: 'The model service reached a request or quota limit.',
+          errorMessage: 'The model service reached a request or quota limit.',
           status: 'error',
         }),
       ]),

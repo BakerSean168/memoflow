@@ -4,7 +4,12 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
 import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
-import type { AssistantRuntimeClient, RuntimeUsageClient, WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
+import type {
+  AssistantRuntimeClient,
+  RuntimeUsageClient,
+  WorkflowRuntimeClient,
+  WorkspaceEventStreamOptions,
+} from '@memoflow/ai/client';
 import { useAIChatSession, type UseAIChatSessionOptions } from './useAIChatSession';
 import type { ChatModelOption } from './types';
 import enErrors from '../../../locales/en-US/errors';
@@ -212,34 +217,179 @@ describe('useAIChatSession Mastra-native open chat', () => {
       streamWorkspaceEvents: vi.fn((options) => {
         receive = options.onEvent;
         streamSignal = options.signal;
-        return new Promise<void>((resolve) => options.signal.addEventListener('abort', () => resolve(), { once: true }));
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
       }),
-      start: vi.fn(), resume: vi.fn(), get: vi.fn(), list: vi.fn(), cancel: vi.fn(), goalSurfaceLease: vi.fn(),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
     };
     const service = createServiceStub();
-    service.listConversations.mockResolvedValue(ok({ data: [{ ...createConversationDTO('conv-1'), resourceVersion: 1 }], total: 1, page: 1, pageSize: 24 }));
-    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), { workspaceRuntime });
+    service.listConversations.mockResolvedValue(
+      ok({
+        data: [{ ...createConversationDTO('conv-1'), resourceVersion: 1 }],
+        total: 1,
+        page: 1,
+        pageSize: 24,
+      }),
+    );
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
     await receive({ type: 'stream.ready', cursor: 'ready' });
     session.chatConversationId.value = 'conv-1';
     const reads = service.listConversations.mock.calls.length;
-    await receive({ type: 'conversation.updated', eventId: 'title', cursor: 'title', resourceVersion: 2,
-      data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: { ...createConversationDTO('conv-1'), name: 'Server title', updatedAt: 0, resourceVersion: 2 } } });
+    await receive({
+      type: 'conversation.updated',
+      eventId: 'title',
+      cursor: 'title',
+      resourceVersion: 2,
+      data: {
+        conversationId: 'conv-1',
+        runtimeKind: 'builtin',
+        conversation: {
+          ...createConversationDTO('conv-1'),
+          name: 'Server title',
+          updatedAt: 0,
+          resourceVersion: 2,
+        },
+      },
+    });
     expect(session.conversationTitle.value).toBe('Server title');
     expect(service.listConversations).toHaveBeenCalledTimes(reads);
     // An older client clock can never outrank the newer server revision.
     await session.loadConversationList(service as never);
     expect(session.conversationList.value[0]?.name).toBe('Server title');
     let complete!: (value: unknown) => void;
-    service.listConversations.mockImplementationOnce(() => new Promise((resolve) => { complete = resolve; }));
+    service.listConversations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+    );
     const list = session.loadConversationList(service as never);
-    await receive({ type: 'conversation.updated', eventId: 'deleted', cursor: 'deleted', resourceVersion: 3,
-      data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: null } });
-    complete(ok({ data: [{ ...createConversationDTO('conv-1'), resourceVersion: 2 }], total: 1, page: 1, pageSize: 24 }));
+    await receive({
+      type: 'conversation.updated',
+      eventId: 'deleted',
+      cursor: 'deleted',
+      resourceVersion: 3,
+      data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: null },
+    });
+    complete(
+      ok({
+        data: [{ ...createConversationDTO('conv-1'), resourceVersion: 2 }],
+        total: 1,
+        page: 1,
+        pageSize: 24,
+      }),
+    );
     await list;
     expect(session.conversationList.value).toEqual([]);
     expect(session.chatConversationId.value).toBe('');
     expect(workspaceRuntime.streamWorkspaceEvents).toHaveBeenCalledOnce();
     expect(streamSignal.aborted).toBe(false);
+  });
+
+  it('keeps independent browser sessions converged across reordered events and late list snapshots', async () => {
+    const services = [createServiceStub(), createServiceStub()];
+    const seed = { ...createConversationDTO('conv-1'), name: 'Original', resourceVersion: 1 };
+    for (const service of services) {
+      service.listConversations.mockResolvedValue(
+        ok({ data: [seed], total: 1, page: 1, pageSize: 24 }),
+      );
+    }
+    const receivers: Array<WorkspaceEventStreamOptions['onEvent']> = [];
+    const runtimes = [0, 1].map((index): WorkflowRuntimeClient => ({
+      streamWorkspaceEvents: vi.fn((options) => {
+        receivers[index] = options.onEvent;
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    }));
+    const sessions = services.map((service, index) =>
+      mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+        workspaceRuntime: runtimes[index],
+      }),
+    );
+    await Promise.all(
+      receivers.map((receive, index) =>
+        receive({ type: 'stream.ready', cursor: `ready-${index}` }),
+      ),
+    );
+    for (const session of sessions) session.chatConversationId.value = 'conv-1';
+
+    const updated = {
+      type: 'conversation.updated' as const,
+      eventId: 'version-2',
+      cursor: 'version-2',
+      resourceVersion: 2,
+      data: {
+        conversationId: 'conv-1',
+        runtimeKind: 'builtin' as const,
+        conversation: { ...seed, name: 'Remote revision', updatedAt: 0, resourceVersion: 2 },
+      },
+    };
+    await Promise.all(receivers.map((receive) => receive(updated)));
+    await Promise.all(
+      receivers.map((receive) =>
+        receive({
+          ...updated,
+          eventId: 'stale-version-1',
+          resourceVersion: 1,
+          data: { ...updated.data, conversation: seed },
+        }),
+      ),
+    );
+    for (const session of sessions) {
+      expect(session.conversationTitle.value).toBe('Remote revision');
+      expect(session.conversationList.value[0]).toMatchObject({
+        name: 'Remote revision',
+        resourceVersion: 2,
+      });
+    }
+
+    const completeLists: Array<(value: unknown) => void> = [];
+    const pendingLists = services.map((service, index) => {
+      service.listConversations.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            completeLists[index] = resolve;
+          }),
+      );
+      return sessions[index].loadConversationList(service as never);
+    });
+    await Promise.all(
+      receivers.map((receive) =>
+        receive({
+          type: 'conversation.updated',
+          eventId: 'version-3-deleted',
+          cursor: 'version-3',
+          resourceVersion: 3,
+          data: { conversationId: 'conv-1', runtimeKind: 'builtin', conversation: null },
+        }),
+      ),
+    );
+    for (const complete of completeLists) {
+      complete(ok({ data: [updated.data.conversation], total: 1, page: 1, pageSize: 24 }));
+    }
+    await Promise.all(pendingLists);
+    for (const session of sessions) {
+      expect(session.conversationList.value).toEqual([]);
+      expect(session.chatConversationId.value).toBe('');
+    }
+    expect(runtimes[0].streamWorkspaceEvents).toHaveBeenCalledOnce();
+    expect(runtimes[1].streamWorkspaceEvents).toHaveBeenCalledOnce();
   });
 
   it('projects live stream and approval events to sidebar without inventing unread history', async () => {
