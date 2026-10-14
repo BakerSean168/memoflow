@@ -17,17 +17,35 @@ export function useLocalAssistantChoices(
   const loading = ref(false);
   const error = ref(false);
   let generation = 0;
+  let refreshGeneration = 0;
   async function refresh() {
     if (!client) return;
+    const request = ++refreshGeneration;
+    // A new configuration/identity snapshot must never inherit the previous
+    // Profile's successful model probe (even if a connection ID is reused).
+    ++generation;
+    status.value = null;
+    loading.value = false;
     try {
       const [items, saved] = await Promise.all([
         client.listConnections(),
         client.getDefaultChoice(),
       ]);
+      if (request !== refreshGeneration) return;
       connections.value = items;
       defaultChoice.value = saved;
       error.value = false;
+      const selected = choice.value;
+      if (
+        selected.runtimeKind === 'local_agent' &&
+        items.some((connection) => connection.id === selected.connectionId && connection.enabled)
+      )
+        void probe(selected.connectionId);
     } catch {
+      if (request !== refreshGeneration) return;
+      // Fail closed instead of advertising a previously usable connection.
+      connections.value = [];
+      defaultChoice.value = { runtimeKind: 'builtin' };
       error.value = true;
     }
   }
