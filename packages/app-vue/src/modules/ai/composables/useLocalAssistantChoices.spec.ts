@@ -122,6 +122,45 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(options.error.value).toBe(false);
   });
 
+  it('does not allow an explicit probe during a pending profile refresh', async () => {
+    const nextSnapshot = deferred<LocalAgentConnection[]>();
+    const listConnections = vi
+      .fn<LocalAgentClient['listConnections']>()
+      .mockResolvedValueOnce([connection('Profile A')])
+      .mockImplementationOnce(() => nextSnapshot.promise);
+    const probeConnection = vi
+      .fn<LocalAgentClient['probeConnection']>()
+      .mockResolvedValueOnce(ready('model-a'))
+      .mockResolvedValueOnce(ready('model-b'));
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: 'shared-connection',
+      modelId: 'model-a',
+    });
+    const options = useLocalAssistantChoices(
+      clientStub({ listConnections, probeConnection }),
+      choice,
+    );
+    await options.refresh();
+    await Promise.resolve();
+    expect(options.canSend.value).toBe(true);
+    expect(probeConnection).toHaveBeenCalledTimes(1);
+
+    const next = options.refresh();
+    await options.probe('shared-connection');
+    await Promise.resolve();
+    expect(options.status.value).toBeNull();
+    expect(options.canSend.value).toBe(false);
+    expect(probeConnection).toHaveBeenCalledTimes(1);
+
+    nextSnapshot.resolve([connection('Profile B')]);
+    await next;
+    await Promise.resolve();
+    expect(probeConnection).toHaveBeenCalledTimes(2);
+    expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
+    expect(options.canSend.value).toBe(false);
+  });
+
   it('fails closed on a snapshot error and keeps stale probe results non-sendable', async () => {
     const staleProbe = deferred<LocalAgentStatus>();
     const listConnections = vi

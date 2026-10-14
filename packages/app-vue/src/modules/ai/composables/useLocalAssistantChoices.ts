@@ -18,9 +18,11 @@ export function useLocalAssistantChoices(
   const error = ref(false);
   let generation = 0;
   let refreshGeneration = 0;
+  let refreshingConfiguration = false;
   async function refresh() {
     if (!client) return;
     const request = ++refreshGeneration;
+    refreshingConfiguration = true;
     // A new configuration/identity snapshot must never inherit the previous
     // Profile's successful model probe (even if a connection ID is reused).
     ++generation;
@@ -35,6 +37,8 @@ export function useLocalAssistantChoices(
       connections.value = items;
       defaultChoice.value = saved;
       error.value = false;
+      // Only the current Profile snapshot may initiate a fresh model probe.
+      refreshingConfiguration = false;
       const selected = choice.value;
       if (
         selected.runtimeKind === 'local_agent' &&
@@ -47,10 +51,14 @@ export function useLocalAssistantChoices(
       connections.value = [];
       defaultChoice.value = { runtimeKind: 'builtin' };
       error.value = true;
+    } finally {
+      if (request === refreshGeneration) refreshingConfiguration = false;
     }
   }
   async function probe(connectionId: string) {
-    if (!client) return;
+    // An explicit check or selection watch during a Profile refresh must not
+    // resurrect an old Profile's catalog before its new registry is loaded.
+    if (!client || refreshingConfiguration) return;
     const request = ++generation;
     loading.value = true;
     status.value = null;
