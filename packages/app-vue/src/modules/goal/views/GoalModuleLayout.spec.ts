@@ -262,6 +262,7 @@ describe('GoalModuleLayout', () => {
     await router.isReady();
 
     const wrapper = mount(GoalModuleLayout, {
+      attachTo: document.body,
       global: {
         plugins: [router, i18n],
         stubs: {
@@ -271,7 +272,9 @@ describe('GoalModuleLayout', () => {
       },
     });
 
-    await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
+    const opener = wrapper.get('[data-testid="create-goal-entry"]');
+    (opener.element as HTMLButtonElement).focus();
+    await opener.trigger('click');
     await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
 
     wrapper.findComponent(GoalDialogStub).vm.$emit('update:open', false);
@@ -282,9 +285,13 @@ describe('GoalModuleLayout', () => {
       expect(router.currentRoute.value.query.goalId).toBeUndefined();
       expect(router.currentRoute.value.query.status).toBe('active');
     });
+    // Only an explicit keyboard/user opener restores focus; AI-owned openings
+    // deliberately leave the conversation composer alone.
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener.element));
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
     await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
+    wrapper.unmount();
   });
 
   it('preserves unrelated route filters when a legacy Goal link is saved in the pane', async () => {
@@ -564,7 +571,10 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
   it('detaches a failed workflow without closing the pane or retaining the shell control lock', async () => {
     const { wrapper, router, host } = await mountNativeHost('/tasks', true);
     const ai = await host.openControlledCreate('failed-run');
-    ai.coordinateSubmit(vi.fn(async () => {}), vi.fn(async () => {}));
+    ai.coordinateSubmit(
+      vi.fn(async () => {}),
+      vi.fn(async () => {}),
+    );
     ai.patch({ name: 'Keep this pane draft' });
     const route = router.currentRoute.value.fullPath;
     const owner = host.locate()!;

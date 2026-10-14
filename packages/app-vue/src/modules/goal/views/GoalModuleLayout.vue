@@ -112,12 +112,22 @@ const { options: labelOptions, isLoading: labelsLoading } = useLabelCatalog();
 // The route owns the editor; every create/edit entry (including legacy dialog links)
 // renders within the business pane. Inactive KeepAlive owners retain their drafts.
 const panelFormOpen = ref(false);
+let returnFocusTarget: HTMLElement | null = null;
 async function closeEditor() {
+  const focusTarget = returnFocusTarget;
+  returnFocusTarget = null;
   const query = { ...route.query };
   delete query.goalForm;
   delete query.dialog;
   delete query.goalId;
   await router.replace({ path: route.path, query, hash: route.hash });
+  await nextTick();
+  // Only explicit user-triggered creation restores focus. Workflow-controlled
+  // openings never steal focus from the AI conversation; route exits never
+  // focus a detached or inert toolbar.
+  if (focusTarget?.isConnected && !focusTarget.closest('[inert]')) {
+    focusTarget.focus({ preventScroll: true });
+  }
 }
 const dialogOpen = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
@@ -138,6 +148,7 @@ const views = computed(() => [
 ]);
 
 async function openCreate() {
+  returnFocusTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const query = { ...route.query };
   delete query.dialog;
   delete query.goalId;

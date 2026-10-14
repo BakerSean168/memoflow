@@ -147,23 +147,17 @@ test.describe('Local Docker core product Phase B', () => {
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await showPlansSurface(page);
-    await taskCard(page, recurringPlanName)
-      .getByRole('button', { name: '编辑', exact: true })
-      .click();
-    await expect(page.getByTestId('task-plan-update-impact')).toContainText(
-      /将更新 \d+ 个尚未开始的待办任务/,
-    );
-    await expect(page.getByTestId('task-plan-property-chips')).toBeVisible();
-    await expect(page.getByTestId('task-importance-popover')).toHaveCount(0);
-    await page.getByTestId('task-importance-chip').click();
-    await expect(page.getByTestId('task-importance-popover')).toBeVisible();
-    await page
-      .getByTestId('task-importance-popover')
-      .getByRole('button', { name: '高', exact: true })
-      .click();
+    // The current Task owner edits properties inline on its detail workspace.
+    await taskCard(page, recurringPlanName).getByRole('button').click();
+    await page.waitForURL(new RegExp(`/tasks/${recurringCreation.plan.id}$`), {
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('task-plan-workspace')).toBeVisible();
+    await page.getByTestId('task-detail-importance-chip').click();
     const updatePromise = waitForTemplateWrite(page, 'PATCH');
-    await page.getByTestId('task-dialog-save-button').click();
+    await page.getByRole('button', { name: '高', exact: true }).click();
     await expectApiData<unknown>(await updatePromise);
+    await expect(page.getByTestId('task-detail-importance-chip')).toContainText('高');
 
     await expect
       .poll(
@@ -218,7 +212,7 @@ test.describe('Local Docker core product Phase B', () => {
 
 function taskCard(page: Page, title: string): Locator {
   return page
-    .getByTestId('task-plan-card')
+    .getByTestId('task-plan-row')
     .filter({ has: page.getByText(title, { exact: true }) })
     .first();
 }

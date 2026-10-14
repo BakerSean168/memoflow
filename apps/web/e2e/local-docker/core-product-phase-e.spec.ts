@@ -1,5 +1,9 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
-import type { AIWorkflowRunView, GoalPlanDraft } from '@memoflow/contracts/ai';
+import {
+  AIWorkflowRunViewSchema,
+  type AIWorkflowRunView,
+  type GoalPlanDraft,
+} from '@memoflow/contracts/ai';
 import { TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
@@ -68,7 +72,13 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(approvalPanel).toContainText(/suspended/i);
     await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
-    await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
+    // Native owner owns approval cancellation; no second legacy diagnostics path.
+    await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
+    await page.getByTestId('goal-open-native-review').click();
+    await expect(page.getByTestId('goal-panel-form')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Phase E 待审批目标');
     await expectNoHorizontalOverflow(page);
 
     await testInfo.attach('phase-e-configured-workflow-1440x900', {
@@ -184,7 +194,7 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
       name: 'Phase E 待审批目标',
       summary: '验证 clean shell 自动恢复 canonical Mastra goal.create workflow。',
       status: 'Planned',
-      startDate: '2026-09-19',
+      start: { kind: 'day', date: '2026-09-19' },
       target: { kind: 'day', date: '2026-09-26' },
       labels: [],
     },
@@ -217,6 +227,12 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
       draft,
       warnings: draft.warnings,
       revision: draft.revision,
+      // The owner receipt identities must cover every Key Result in the current
+      // review revision, even when this E2E only inspects the recovery surface.
+      ownerCreate: {
+        goalId: `IGoalId_${input.runId}`,
+        keyResultIds: { 'kr:phase-e-approval': `IKeyResultId_${input.runId}` },
+      },
     },
     createdAt: now,
     updatedAt: now,
@@ -225,7 +241,7 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
   return {
     conversationId: input.conversationId,
     runId: input.runId,
-    runView,
+    runView: AIWorkflowRunViewSchema.parse(runView),
     workflowEntry: { activeRunId: input.runId },
   };
 }

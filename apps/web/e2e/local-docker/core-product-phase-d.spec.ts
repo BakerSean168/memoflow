@@ -42,6 +42,9 @@ test.describe('Local Docker core product Phase D', () => {
 
     const goalDialog = page.getByTestId('goal-panel-form');
     await expect(goalDialog).toBeVisible();
+    // The native editor is modeless: opening it must not steal focus from AI Chat.
+    // Verify its title can instead be reached using only the keyboard.
+    await tabTo(page, page.getByTestId('goal-name-input'));
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
     const startChip = page.getByTestId('goal-start-chip');
     await expect(startChip).toBeVisible();

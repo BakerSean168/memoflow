@@ -46,6 +46,7 @@ test.describe('Local Docker core product Phase A', () => {
       goalId: fixture.id,
       keyResultId: null,
       progressRule: null,
+      contribution: null,
     });
 
     const keyResultOnly = await createTaskPlanWithContext(
@@ -58,6 +59,7 @@ test.describe('Local Docker core product Phase A', () => {
       goalId: fixture.id,
       keyResultId: fixture.keyResultId,
       progressRule: null,
+      contribution: null,
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -158,6 +160,7 @@ test.describe('Local Docker core product Phase A', () => {
           goalId: string;
           keyResultId: string;
           progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
+          contribution: { value: number; trigger: string } | null;
         } | null;
       };
       occurrenceCount: number;
@@ -168,16 +171,17 @@ test.describe('Local Docker core product Phase A', () => {
       goalId: primary.id,
       keyResultId: primary.keyResultId,
       progressRule: { mode: 'Fixed', value: 1, trigger: 'EachCompletion' },
+      contribution: { value: 1, trigger: 'EachCompletion' },
     });
 
     await page.getByTestId('task-surface-trigger').click();
     await page.getByTestId('task-surface-plans').click();
     const taskCard = page
-      .getByTestId('task-plan-card')
+      .getByTestId('task-plan-row')
       .filter({ has: page.getByText(taskName, { exact: true }) })
       .first();
     await expect(taskCard).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await taskCard.getByText(taskName, { exact: true }).click();
+    await taskCard.getByRole('button').click();
 
     await page.waitForURL(new RegExp(`/tasks/${creation.plan.id}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
@@ -295,6 +299,7 @@ async function createTaskPlanWithContext(
     goalId: string;
     keyResultId: string | null;
     progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
+    contribution: { value: number; trigger: string } | null;
   } | null;
 }> {
   await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
@@ -343,6 +348,7 @@ async function createTaskPlanWithContext(
         goalId: string;
         keyResultId: string | null;
         progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
+        contribution: { value: number; trigger: string } | null;
       } | null;
     };
     occurrenceCount: number;
