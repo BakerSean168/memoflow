@@ -357,6 +357,8 @@ export default {
     "modelInventoryHint": "Recheck to load the available models.",
     "modelReasoning": "Reasoning",
     "modelServiceTiers": "Service tier",
+    "showModel": "Show",
+    "showModelNamed": "Show model in chat: {name}",
     "authenticatedAs": "Authenticated as",
     "chatgptAccount": "ChatGPT account",
     "apiKeyAccount": "API key",

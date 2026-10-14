@@ -11,6 +11,8 @@ import {
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
+import { useNativeModelVisibility } from '../../ai/composables/native-model-visibility';
+import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
@@ -33,6 +35,19 @@ const emit = defineEmits<{
 }>();
 const { t } = useI18n();
 const uid = `ai-native-${useId()}`;
+const modelVisibility = useNativeModelVisibility(useServerStateIdentityScope());
+const visibilityInstanceId = computed(
+  () =>
+    props.identity?.instanceSlug ??
+    props.connection?.instanceSlug ??
+    props.connection?.id ??
+    props.driver,
+);
+function updateModelVisibility(modelId: string, event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!modelVisibility.setVisible(visibilityInstanceId.value, modelId, input.checked))
+    input.checked = !input.checked;
+}
 const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DSH' };
 const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
@@ -305,7 +320,21 @@ function save() {
           class="min-w-0 border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
           data-testid="ai-native-model"
         >
-          <p class="truncate font-medium" :title="model.name">{{ model.name }}</p>
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <p class="min-w-0 truncate font-medium" :title="model.name">{{ model.name }}</p>
+            <label class="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+              <input
+                type="checkbox"
+                class="accent-primary"
+                :checked="modelVisibility.isVisible(visibilityInstanceId, model.id)"
+                :disabled="busy || enabled === false || !modelVisibility.canPersist.value"
+                :aria-label="t('setting.ai.showModelNamed', { name: model.name })"
+                :data-testid="`ai-native-model-visible:${model.id}`"
+                @change="updateModelVisibility(model.id, $event)"
+              />
+              {{ t('setting.ai.showModel') }}
+            </label>
+          </div>
           <p
             class="mt-0.5 break-all font-mono text-[11px] text-muted-foreground"
             data-testid="ai-native-model-id"

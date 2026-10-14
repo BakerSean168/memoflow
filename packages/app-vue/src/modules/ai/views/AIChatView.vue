@@ -670,6 +670,9 @@ function stopGenerating() {
 
 async function handleComposerSend() {
   if (chatLoading.value || goalAgentLoading.value || goalAgentResuming.value) return;
+  // Hidden native models retain their historical identity, but cannot launch a
+  // new inference turn, including through keyboard/programmatic submission.
+  if (runtimeChoice.value.runtimeKind === 'local_agent' && !localAssistant.canSend.value) return;
   // Native execution stays native; read-only chats never launch write workflows.
   if (runtimeChoice.value.runtimeKind === 'local_agent' || permissionMode.value === 'read-only') {
     if (workflowInProgress.value) return;

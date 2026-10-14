@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { LocalAgentClient } from '@memoflow/ai/client';
 import type {
   AssistantRuntimeChoice,
@@ -8,6 +8,7 @@ import type {
 } from '@memoflow/contracts/ai';
 import { LocalAgentConnectionSchema } from '@memoflow/contracts/ai';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
+import { useNativeModelVisibility } from './native-model-visibility';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -56,6 +57,35 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
 }
 
 describe('local assistant choices: profile and discovery isolation', () => {
+  afterEach(() => localStorage.clear());
+
+  it('hiding an Agent model immediately blocks new sends without changing a saved conversation choice', async () => {
+    const scope = ref('desktop-profile-a');
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: 'shared-connection',
+      modelId: 'model-a',
+    });
+    const options = useLocalAssistantChoices(clientStub(), choice, () => scope.value);
+    await options.refresh();
+    await Promise.resolve();
+    expect(options.models.value.map((model) => model.id)).toEqual(['model-a']);
+    expect(options.canSend.value).toBe(true);
+
+    const settings = useNativeModelVisibility(() => scope.value);
+    expect(settings.setVisible('shared-connection', 'model-a', false)).toBe(true);
+    expect(options.models.value).toEqual([]);
+    expect(options.canSend.value).toBe(false);
+    expect(choice.value).toMatchObject({ modelId: 'model-a' });
+    // A different Desktop Profile cannot inherit the visibility preference.
+    scope.value = 'desktop-profile-b';
+    await nextTick();
+    expect(options.models.value.map((model) => model.id)).toEqual(['model-a']);
+    expect(options.canSend.value).toBe(true);
+    scope.value = 'desktop-profile-a';
+    await nextTick();
+    expect(options.canSend.value).toBe(false);
+  });
   it('ignores an old in-flight probe when refreshing a reused connection ID', async () => {
     const previousProbe = deferred<LocalAgentStatus>();
     const nextSnapshot = deferred<LocalAgentConnection[]>();

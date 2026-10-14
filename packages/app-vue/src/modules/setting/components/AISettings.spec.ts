@@ -23,10 +23,14 @@ import {
 } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import AISettings from './AISettings.vue';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '../../../platform/server-state';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 
 const wrappers: VueWrapper[] = [];
-afterEach(() => wrappers.splice(0).forEach((wrapper) => wrapper.unmount()));
+afterEach(() => {
+  wrappers.splice(0).forEach((wrapper) => wrapper.unmount());
+  localStorage.clear();
+});
 function provider(id = '11111111-1111-4111-8111-111111111111', name = 'Saved service') {
   return AIProviderConfigClientDTOSchema.parse({
     id,
@@ -231,6 +235,7 @@ async function setup(
       provide: {
         [AI_CLIENT_KEY as symbol]: client,
         [AI_CONFIGURATION_REVISION_KEY as symbol]: epoch,
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'desktop-profile-a',
         ...(options.native ? { [AI_LOCAL_AGENT_KEY as symbol]: localClient } : {}),
         ...(!options.noRegistry ? { [AI_AGENT_REGISTRY_KEY as symbol]: registry } : {}),
       },
@@ -499,6 +504,31 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     expect(rows[1].get('[data-testid="ai-native-model-id"]').text()).toBe('other-native-model');
     expect(rows[1].find('[data-testid="ai-native-model-reasoning"]').exists()).toBe(false);
     expect(rows[1].find('[data-testid="ai-native-model-service-tier"]').exists()).toBe(false);
+  });
+
+  it('stores a per-Agent model visibility preference while keeping the discovered catalog intact', async () => {
+    const { wrapper, localClient } = await setup({ native: true });
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [
+        { id: 'model-a', name: 'Model A' },
+        { id: 'model-b', name: 'Model B' },
+      ],
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    await flushPromises();
+    const toggle = wrapper.get('[data-testid="ai-native-model-visible:model-a"]');
+    expect((toggle.element as HTMLInputElement).checked).toBe(true);
+    await toggle.setValue(false);
+    expect((toggle.element as HTMLInputElement).checked).toBe(false);
+    expect(wrapper.findAll('[data-testid="ai-native-model"]')).toHaveLength(2);
+    expect(localStorage.getItem('ai:native-model-hidden:v1:desktop-profile-a:codex')).toBe(
+      '["model-a"]',
+    );
+    await toggle.setValue(true);
+    expect(localStorage.getItem('ai:native-model-hidden:v1:desktop-profile-a:codex')).toBe('[]');
   });
 
   it('masks authenticated account identity until explicitly revealed', async () => {

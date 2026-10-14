@@ -1,4 +1,5 @@
 import { computed, ref, watch, type Ref } from 'vue';
+import { useNativeModelVisibility } from './native-model-visibility';
 import type { LocalAgentClient } from '@memoflow/ai/client';
 import type {
   AssistantRuntimeChoice,
@@ -10,7 +11,9 @@ import type {
 export function useLocalAssistantChoices(
   client: LocalAgentClient | undefined,
   choice: Ref<AssistantRuntimeChoice>,
+  resolveIdentity: () => string = () => '',
 ) {
+  const modelVisibility = useNativeModelVisibility(resolveIdentity);
   const connections = ref<LocalAgentConnection[]>([]);
   const defaultChoice = ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' });
   const status = ref<LocalAgentStatus | null>(null);
@@ -83,7 +86,13 @@ export function useLocalAssistantChoices(
       if (id) void probe(id);
     },
   );
-  const models = computed(() => (status.value?.status === 'ready' ? status.value.models : []));
+  const models = computed(() => {
+    if (status.value?.status !== 'ready' || choice.value.runtimeKind !== 'local_agent') return [];
+    const id = choice.value.connectionId;
+    const instanceId =
+      connections.value.find((connection) => connection.id === id)?.instanceSlug ?? id;
+    return status.value.models.filter((model) => modelVisibility.isVisible(instanceId, model.id));
+  });
   const canSend = computed(
     () =>
       choice.value.runtimeKind === 'local_agent' &&

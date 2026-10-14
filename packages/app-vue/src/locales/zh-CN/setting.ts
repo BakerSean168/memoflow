@@ -357,6 +357,8 @@ export default {
     "modelInventoryHint": "重新检查以加载可用模型。",
     "modelReasoning": "推理",
     "modelServiceTiers": "服务等级",
+    "showModel": "显示",
+    "showModelNamed": "在对话中显示模型：{name}",
     "authenticatedAs": "已认证为",
     "chatgptAccount": "ChatGPT 账户",
     "apiKeyAccount": "API Key",

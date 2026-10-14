@@ -30,6 +30,7 @@ import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
+import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { getAIErrorMessage } from './error';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
@@ -320,7 +321,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     onConversationCreated: persistWorkflowAndModel,
   });
 
-  const localChoices = useLocalAssistantChoices(localAgent, chatSession.runtimeChoice);
+  const localChoices = useLocalAssistantChoices(
+    localAgent,
+    chatSession.runtimeChoice,
+    useServerStateIdentityScope(),
+  );
   const selectedNativeModel = computed(() => {
     const choice = chatSession.runtimeChoice.value;
     return choice.runtimeKind === 'local_agent'
