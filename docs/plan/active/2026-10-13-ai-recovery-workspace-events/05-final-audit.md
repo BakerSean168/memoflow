@@ -72,7 +72,7 @@ description: S0–S7 接管审计、当前候选验收矩阵和交付证据
 
 RED 证据：`conversation-red.log`（2 项预期失败）、`attention-red.log`（1 项预期失败）。
 GREEN：`recovery-final-candidate.log`（4 文件 / 60 项通过）、`attention-bounded.log`（6 项通过）。
-S7 RED：`checkpoint-calibration-red.log`（4 项预期失败）；最终 GREEN 见 `checkpoint-calibration-final.log`。
+S7 RED：`checkpoint-calibration-red.log`（4 项预期失败）；GREEN：`checkpoint-calibration-final.log`（GoalDialog 全量 53/53）。独立只读复核确认原阻塞闭合，未发现新增并发阻塞。
 真实登录恢复与完整浏览器：`accepted-browser.log`（17/17）。
 
 ## 工程和交付门禁
