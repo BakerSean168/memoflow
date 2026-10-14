@@ -11,6 +11,9 @@ import type { AddressInfo } from 'node:net';
 import { expect, test, type Page } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
+import { GoalChannels } from '@memoflow/contracts/electron';
+import { QueryGoalsResSchema } from '@memoflow/contracts/goal';
+import { z } from 'zod';
 
 async function launchDesktop(
   userDataPath: string,
@@ -199,6 +202,64 @@ function captureRendererConsole(page: Page): void {
     console.log(`[electron-renderer:${message.type()}] ${message.text()}`);
   });
 }
+
+test('native Goal checkpoint survives an Electron restart and saves once through the real local owner', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-goal-checkpoint-e2e-'));
+  let app: ElectronApplication | null = null;
+  try {
+    const launch = () => launchDesktop(path.join(root, 'user-data'), path.join(root, 'user-files'));
+    app = await launch();
+    let page = await app.firstWindow();
+    const openDraft = async () => {
+      await expect(page.getByTestId('app-shell')).toBeVisible();
+      await page.evaluate(() => {
+        window.location.hash = '/goals?goalForm=create';
+      });
+      await expect(page.getByTestId('goal-name-input')).toBeEnabled();
+    };
+    const goals = async () => {
+      const result = await page.evaluate(async (channel) => {
+        const bridge = (
+          window as Window & {
+            electronAPI: { invoke(channel: string, input: unknown): Promise<unknown> };
+          }
+        ).electronAPI;
+        return bridge.invoke(channel, {});
+      }, GoalChannels.LIST);
+      return z.object({ ok: z.literal(true), data: QueryGoalsResSchema }).parse(result).data;
+    };
+    await openDraft();
+    expect((await goals()).pagination.total).toBe(0);
+    await page.getByTestId('goal-name-input').fill('Electron checkpoint draft');
+    await page
+      .getByTestId('goal-description-input')
+      .fill('Human edits survive a real process restart');
+    await expect(page.getByTestId('goal-draft-checkpoint-status')).toContainText(
+      /Draft preserved|草稿已在此设备保留/,
+    );
+    expect((await goals()).pagination.total).toBe(0);
+    await app.close();
+    app = await launch();
+    page = await app.firstWindow();
+    await openDraft();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Electron checkpoint draft');
+    await expect(page.getByTestId('goal-description-input')).toHaveValue(
+      'Human edits survive a real process restart',
+    );
+    await page.getByTestId('save-goal-button').click();
+    await expect(page.getByTestId('goal-panel-form')).toBeHidden();
+    const saved = await goals();
+    expect(saved.pagination.total).toBe(1);
+    expect(saved.data[0]).toMatchObject({ name: 'Electron checkpoint draft' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await openDraft();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('');
+    expect((await goals()).pagination.total).toBe(1);
+  } finally {
+    if (app) await app.close();
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test('persistent guest works offline, survives lock, and reopens with edited profile data', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-desktop-e2e-'));
@@ -443,8 +504,9 @@ test('guest copy preview persists across restart and waits for local content wit
   // Inventory lists this suite before runtime libraries are built. Load the
   // fixture helper only when the E2E runs, after desktop:e2e builds its closure.
   const portabilityPackage = '@memoflow/data-portability';
-  const { profileImportDigest }: typeof import('@memoflow/data-portability') =
-    await import(portabilityPackage);
+  const { profileImportDigest }: typeof import('@memoflow/data-portability') = await import(
+    portabilityPackage
+  );
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-copy-e2e-'));
   const userData = path.join(root, 'user-data');
   const userFiles = path.join(root, 'user-files');
