@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.19.0](https://github.com/BakerSean168/memoflow/compare/v0.18.0...v0.19.0) (2026-10-14)
+
+
+### Features
+
+* **ai:** add controlled Goal business-panel draft review ([5654868](https://github.com/BakerSean168/memoflow/commit/5654868f173e6d88dc3cd7e4c654db009050a682))
+* **ai:** add fenced Goal panel lease across web and desktop ([5cd7f53](https://github.com/BakerSean168/memoflow/commit/5cd7f53f6d095df4b21434c86dcf2b65c00205bd))
+* **ai:** capability-aware T3-style composer and native traits ([#447](https://github.com/BakerSean168/memoflow/issues/447)) ([171b81a](https://github.com/BakerSean168/memoflow/commit/171b81a3fc5507464b1c898f7ecb90d03c3de63a))
+* **ai:** checkpoint workspace events and Goal draft recovery ([9f6e9e3](https://github.com/BakerSean168/memoflow/commit/9f6e9e3323705d43edae39d5cbecef2105224878))
+* **ai:** connect native Mastra ask user suspension ([a5661a1](https://github.com/BakerSean168/memoflow/commit/a5661a13f223d410df695196f1973c7fb7300dbb))
+* **ai:** consolidate conversation lifecycle and native business workflows ([a54d4fe](https://github.com/BakerSean168/memoflow/commit/a54d4feb4044dd7969633c40afa1e80e41826a4e))
+* **ai:** durable conversation attention in Workspace sidebar (P72-P73) ([4ba621d](https://github.com/BakerSean168/memoflow/commit/4ba621daab03d02dafdbc95fb7ac207b56406c4f))
+* **ai:** persist conversation attention and sync sidebar ([000cd7a](https://github.com/BakerSean168/memoflow/commit/000cd7ac2376d3ceb9c895bae5311cb4214798c9))
+* **ai:** show live conversation attention in sidebar ([bc76118](https://github.com/BakerSean168/memoflow/commit/bc76118307ac042ae98586328e66b21d1ed6d958))
+* **ai:** stage live Goal planner actions in native owner panel ([cc7f73d](https://github.com/BakerSean168/memoflow/commit/cc7f73d4a28d8373da2eaf80b8f3626400cc58a4))
+* **goal:** embed native create and edit forms in business pane ([eb6045e](https://github.com/BakerSean168/memoflow/commit/eb6045e7abba89d4862a96dd7f1c32b417484b57))
+* **goal:** fence native AI Goal create inside the write transaction ([212d248](https://github.com/BakerSean168/memoflow/commit/212d24837b27d6fa3320dcdcb7e216cc1799fa72))
+* **ui:** pane-scoped modeless Goal editor and AI lease repair ([37461b5](https://github.com/BakerSean168/memoflow/commit/37461b56bbea783ab3daf3f3e028eba48183913b))
+* **ui:** scope modeless business editor and repair Goal dev lease ([56d221a](https://github.com/BakerSean168/memoflow/commit/56d221a1a56f46e52f6f3d2d013d7dff2c1e8101))
+
+
+### Bug Fixes
+
+* **ai:** bound Attention acknowledgement cache to visible conversations ([eb3fdb6](https://github.com/BakerSean168/memoflow/commit/eb3fdb69126c6d30b775175d43b103e75bf28d66))
+* **ai:** close Ask User answer and parked approval lifecycle ([11aa35f](https://github.com/BakerSean168/memoflow/commit/11aa35fa4c490fcb14c9043011941a8e0f3937f3))
+* **ai:** deliver workspace ready to late subscribers and verify Goal SSE ([20b4c81](https://github.com/BakerSean168/memoflow/commit/20b4c81a4409feeca4386aa449ed14d34c5e3ac3))
+* **ai:** keep suspended ask_user questions answerable after the turn releases ([bf5a212](https://github.com/BakerSean168/memoflow/commit/bf5a212d9417a6f1a1ee9fa0ea44f40d054bc984))
+* **ai:** preserve reviewed provider and conversation lifecycle repairs ([4c84016](https://github.com/BakerSean168/memoflow/commit/4c84016f2ca1488d4973826056cd6f7c61a6b4d9))
+* **ai:** reconcile merged registry and browser acceptance contracts ([4fa8476](https://github.com/BakerSean168/memoflow/commit/4fa8476f8e0cbe7cb4d9c5d685927f4079900524))
+* **ai:** recover failed workspace snapshots without losing projections ([c221f7f](https://github.com/BakerSean168/memoflow/commit/c221f7fe84b2eca8e1ea5b6103f52a325b794dcb))
+* **ai:** restore and complete native ask user answers ([d4603c4](https://github.com/BakerSean168/memoflow/commit/d4603c49a0bd0c8b9ec43ecd6e394ea13230a3dc))
+* **ai:** retain workspace cursor on rejected projections ([bfc3ca1](https://github.com/BakerSean168/memoflow/commit/bfc3ca1ccaeea48fd58c2f6d45a03b61a9942c29))
+* **ai:** stabilize model picker geometry and empty states ([#448](https://github.com/BakerSean168/memoflow/issues/448)) ([1e79cbb](https://github.com/BakerSean168/memoflow/commit/1e79cbbadc4416af239b1206f071323e5549c246))
+* **ai:** T3-style Agent settings and composer lifecycle ([#445](https://github.com/BakerSean168/memoflow/issues/445)) ([d381bf4](https://github.com/BakerSean168/memoflow/commit/d381bf442be34d49a1aa0c5b681564bfc2ffec64))
+* **goal:** enable owner confirm/cancel during AI-controlled review ([ab272ac](https://github.com/BakerSean168/memoflow/commit/ab272ac9475d65cc3f210f619cfe0d620220f8ac))
+* **goal:** keep pane editor dimensions stable during form expansion ([18210ad](https://github.com/BakerSean168/memoflow/commit/18210ad0f9fa89dd9b5e1e259cee34bf28a93d95))
+* **goal:** recalibrate restored checkpoints after newer workspace boundaries ([b729f58](https://github.com/BakerSean168/memoflow/commit/b729f58330a21b830ca3b38ba8fb4d5066dfd039))
+* **goal:** recover fenced native review and restore focus after pane unblocks ([7b1f55d](https://github.com/BakerSean168/memoflow/commit/7b1f55d81617c35ab49ad7de59f092afda1c2a8e))
+* **goal:** restore user focus and verify modern Task and workflow contracts ([a1f9c7f](https://github.com/BakerSean168/memoflow/commit/a1f9c7fc1e8b6b084f3b37fc688a887dd406ea11))
+* **i18n:** drop duplicate aiAssistant.local.cancel key ([5f8fa09](https://github.com/BakerSean168/memoflow/commit/5f8fa09d5ab570470d2226cf3d529174b3f9b534))
+* **shell:** restore accessible workbench actions and align Docker E2E ([c5857e5](https://github.com/BakerSean168/memoflow/commit/c5857e538018a0b49cb1b07cfc5680a073aff353))
+
 ## [0.18.0](https://github.com/BakerSean168/memoflow/compare/v0.17.0...v0.18.0) (2026-10-10)
 
 
