@@ -16,6 +16,7 @@ import {
 } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity } from './native-identity';
+import { nativeFailure } from './native-failure';
 
 export type NativeAgentEvent =
   | { type: 'session'; nativeSessionId: string; accountFingerprint: string }
@@ -317,7 +318,11 @@ export class CodexDriver {
       const value = z
         .object({
           threadId: z.string(),
-          turn: z.object({ id: z.string(), status: z.string().optional() }),
+          turn: z.object({
+            id: z.string(),
+            status: z.string().optional(),
+            error: z.object({ message: z.string() }).nullable().optional(),
+          }),
         })
         .parse(params);
       if (value.threadId !== this.threadId) return;
@@ -329,6 +334,8 @@ export class CodexDriver {
       if (this.turnId && this.turnId !== value.turn.id) return;
       if (value.turn.status === 'completed') emit({ type: 'completed' });
       else if (value.turn.status === 'interrupted') emit({ type: 'cancelled' });
+      else if (value.turn.status === 'failed' && value.turn.error?.message)
+        throw nativeFailure(value.turn.error.message);
       else throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     } else if (method === 'item/agentMessage/delta') {
       const value = scopedSchema.extend({ delta: z.string().max(200_000) }).parse(params);

@@ -17,5 +17,17 @@ export function nativeFailure(diagnostic: unknown): LocalAgentError {
     )
   )
     return new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+  if (
+    /insufficient[_ -]?quota|quota[_ -]?(?:exhausted|exceeded|reached)|credits?[_ -]?(?:exhausted|depleted)/i.test(
+      value,
+    )
+  )
+    return new LocalAgentError('LOCAL_AGENT_QUOTA_EXHAUSTED');
+  if (
+    /\b429\b|rate[_ -]?limit(?:[_ -]?(?:ed|ing|exceeded|reached))?|too many requests|requests per minute exceeded/i.test(
+      value,
+    )
+  )
+    return new LocalAgentError('LOCAL_AGENT_RATE_LIMITED');
   return new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
 }

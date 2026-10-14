@@ -5,6 +5,10 @@ export const LOCAL_AGENT_FAILURES = {
   LOCAL_AGENT_NOT_INSTALLED: 'The configured Agent executable could not be started.',
   LOCAL_AGENT_LOGIN_REQUIRED: 'Sign in using the Agent’s native login command, then refresh.',
   LOCAL_AGENT_UNAVAILABLE: 'The local Agent is unavailable. Check its native configuration.',
+  LOCAL_AGENT_RATE_LIMITED:
+    'The Agent provider is rate limiting requests. Try again later or choose another model.',
+  LOCAL_AGENT_QUOTA_EXHAUSTED:
+    'The Agent provider has insufficient quota. Switch provider or retry after the quota resets.',
   LOCAL_AGENT_MODEL_UNSUPPORTED: 'The selected model is not available from this Agent.',
   LOCAL_AGENT_SESSION_UNAVAILABLE:
     'The native session cannot be resumed with this connection. Start a new conversation.',

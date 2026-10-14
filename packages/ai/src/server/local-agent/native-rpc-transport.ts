@@ -183,7 +183,9 @@ export class NativeRpcTransport {
             pending.reject(
               frame.error.code >= -32700 && frame.error.code <= -32600
                 ? new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR')
-                : nativeFailure(frame.error.message),
+                : nativeFailure(
+                    frame.error.code === 429 ? `429 ${frame.error.message}` : frame.error.message,
+                  ),
             );
           else pending.resolve(frame.result);
         }

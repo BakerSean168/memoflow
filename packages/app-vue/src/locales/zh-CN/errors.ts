@@ -13,6 +13,8 @@ export default {
   AI_WORKFLOW_STATUS_UNSUPPORTED: '此工作流状态已不受支持，请重新创建工作流。',
   AI_RUNTIME_ERROR: '本次回复未能完成，请重试或切换模型。',
   AI_RUNTIME_TRANSPORT_ERROR: '本次回复未能完成，请重试或切换模型。',
+  LOCAL_AGENT_RATE_LIMITED: '当前 Agent 渠道请求过于频繁，请稍后再试或切换模型。',
+  LOCAL_AGENT_QUOTA_EXHAUSTED: '当前 Agent 渠道配额已耗尽，请切换渠道或等待额度恢复。',
   PROVIDER_AUTH_FAILED: '模型服务拒绝访问，请检查 Provider 的密钥和访问权限。',
   MODEL_NOT_AVAILABLE: '当前模型不可用，请切换模型或检查 Provider 配置。',
   AI_CONFIGURATION_REQUIRED: '请先在 Provider 设置中配置可用的模型服务。',
