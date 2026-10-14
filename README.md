@@ -1,6 +1,6 @@
 # MemoFlow
 
-> **AI-first personal productivity workspace** — keeping conversations, goals, tasks, knowledge, schedules, reminders, and execution outcomes inside one continuous workflow.
+> An AI workspace that carries you from thinking to doing: ideas from a conversation become goals, tasks, notes and schedules, with reminders on time and a record of what got done.
 
 <p align="left">
   <strong>Language:</strong> English · <a href="./docs/zh-CN/README.md">Simplified Chinese</a>
