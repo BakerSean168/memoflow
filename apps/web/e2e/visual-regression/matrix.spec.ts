@@ -110,11 +110,21 @@ test('UI-9002 narrow shell target, keyboard and scroll ownership', async ({ page
   await waitForVisualLayout(page);
   const panel = page.getByTestId('business-panel');
   expect((await panel.boundingBox())!.width).toBeCloseTo(520, 0);
-  await expect(panel.getByRole('tab')).toHaveCount(8);
+  // The workbench is a labelled button group, not an ARIA tablist: each
+  // workbench item contains both an activation button and a close button.
+  // Requiring role=tab would regress the accessible structure fixed in V2.
+  const tabList = panel.getByTestId('business-panel-tab-list');
+  await expect(tabList).toHaveAttribute('role', 'group');
+  await expect(tabList).toHaveAccessibleName(/.+/);
+  const tabs = tabList.locator('button[data-business-tab-id]');
+  await expect(tabs).toHaveCount(8);
   await expect(panel).toHaveAttribute('data-tab-density', 'icon');
-  const tab = panel.getByRole('tab').first();
+  const tab = tabs.first();
+  await expect(tab).toHaveRole('button');
   await expect(tab).toHaveAccessibleName(/.+/);
   await tab.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(1)).toBeFocused();
   await page.keyboard.press('Home');
   await expect(tab).toBeFocused();
   const controls = panel.locator(
