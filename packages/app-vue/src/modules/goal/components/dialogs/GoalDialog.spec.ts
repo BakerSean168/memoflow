@@ -1,5 +1,7 @@
 /** @vitest-environment happy-dom */
 
+import type { WorkspaceEventStreamOptions } from '@memoflow/ai/client';
+import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/contracts/ai';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
@@ -245,6 +247,177 @@ it('reconciles a committed workflow receipt by its string Goal ID without creati
     vi.clearAllMocks();
   }
 });
+
+describe('restored workflow checkpoint calibration', () => {
+  it.each(['workflow.updated', 'stream.ready', 'stream.reset_required'] as const)(
+    'reconciles %s after an older running snapshot without freezing the draft',
+    async (type) => {
+      const f = restoredCheckpointFixture();
+      try {
+        await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+        const event: WorkspaceEvent =
+          type === 'workflow.updated'
+            ? {
+                type,
+                eventId: 'run:2',
+                cursor: 'terminal',
+                resourceVersion: 2,
+                data: f.failed,
+                actions: [],
+                baseActionSequence: 0,
+                lastActionSequence: 0,
+              }
+            : type === 'stream.ready'
+              ? { type, cursor: 'ready' }
+              : { type, cursor: 'reset', reason: 'expired' };
+        const calibration = f.receive(event);
+        f.resolveInitial!(f.running);
+        await calibration;
+        await flushPromises();
+        expect(dom('goal-name-input').attributes('disabled')).toBeUndefined();
+        expect(dom('goal-name-input').element).toHaveProperty('value', 'Human draft');
+        expect(f.current().content?.workflowRunId).toBeNull();
+        expect(mocks.createGoal).not.toHaveBeenCalled();
+      } finally {
+        f.wrapper.unmount();
+        vi.clearAllMocks();
+      }
+    },
+  );
+
+  it('does not ACK a completed run before its Goal receipt is available', async () => {
+    const created = createMockGoal({ name: 'Saved Goal' });
+    const getGoal = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, error: { code: 'NOT_FOUND' } })
+      .mockResolvedValue({ ok: true, data: { toDTO: () => created } });
+    const f = restoredCheckpointFixture(getGoal);
+    try {
+      await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+      f.resolveInitial!(f.running);
+      await flushPromises();
+      f.get.mockResolvedValue({
+        ...f.running,
+        status: 'completed',
+        result: { referenceMap: { goal: created.id } },
+      });
+      await expect(f.receive({ type: 'stream.ready', cursor: 'missing-receipt' })).rejects.toThrow(
+        'Goal receipt unavailable',
+      );
+      expect(f.current().content).not.toBeNull();
+      await f.receive({ type: 'stream.ready', cursor: 'receipt-visible' });
+      expect(f.current().content).toBeNull();
+      expect(f.wrapper.emitted('created')?.at(-1)?.[0]).toMatchObject({ id: created.id });
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+    } finally {
+      f.wrapper.unmount();
+      vi.clearAllMocks();
+    }
+  });
+
+  it('rejects failed ready calibration and recovers on a subsequent ready', async () => {
+    const f = restoredCheckpointFixture();
+    try {
+      await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+      f.resolveInitial!(f.running);
+      await flushPromises();
+      f.get.mockRejectedValueOnce(new Error('Workflow snapshot unavailable'));
+      await expect(f.receive({ type: 'stream.ready', cursor: 'offline' })).rejects.toThrow(
+        'Workflow snapshot unavailable',
+      );
+      expect(dom('goal-name-input').attributes('disabled')).toBeDefined();
+      await f.receive({ type: 'stream.ready', cursor: 'recovered' });
+      expect(f.current().content?.workflowRunId).toBeNull();
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+    } finally {
+      f.wrapper.unmount();
+      vi.clearAllMocks();
+    }
+  });
+});
+
+function restoredCheckpointFixture(getGoal = vi.fn()) {
+  const running: AIWorkflowRunView = {
+    kind: 'goal.create',
+    runId: 'restored-run',
+    conversationId: 'conversation',
+    status: 'running',
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  const failed: AIWorkflowRunView = { ...running, status: 'failed', updatedAt: 2 };
+  let current: GoalDraftCheckpointSnapshot = {
+    scope: 'identity',
+    version: 1,
+    content: GoalDraftCheckpointContentSchema.parse({
+      createId: crypto.randomUUID(),
+      workflowRunId: running.runId,
+      phase: 'editing',
+      draft: {
+        name: 'Human draft',
+        summary: '',
+        description: '',
+        status: GoalStatus.Planned,
+        start: null,
+        target: null,
+        reminderConfig: null,
+        labelIds: [],
+        keyResults: [],
+      },
+    }),
+  };
+  const store: GoalDraftCheckpointStore = {
+    scope: () => 'identity',
+    load: async () => current,
+    write: async (scope, version, content) => {
+      if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+      current = { scope, version: version + 1, content };
+      return current;
+    },
+  };
+  let resolveInitial: ((run: AIWorkflowRunView) => void) | undefined;
+  let receive!: WorkspaceEventStreamOptions['onEvent'];
+  const get = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise<AIWorkflowRunView>((resolve) => {
+          resolveInitial = resolve;
+        }),
+    )
+    .mockResolvedValue(failed);
+  const wrapper = mount(GoalDialog, {
+    props: { open: true, presentation: 'panel' },
+    attachTo: document.body,
+    global: {
+      plugins: [i18n],
+      provide: {
+        [GOAL_DRAFT_CHECKPOINT_KEY]: store,
+        [GOAL_SERVICE_KEY]: { getGoal },
+        [AI_WORKFLOW_RUNTIME_KEY]: {
+          get,
+          streamWorkspaceEvents: (options: WorkspaceEventStreamOptions) => {
+            receive = options.onEvent;
+            return new Promise<void>((resolve) =>
+              options.signal.addEventListener('abort', () => resolve(), { once: true }),
+            );
+          },
+        },
+      },
+    },
+  });
+  return {
+    wrapper,
+    get,
+    running,
+    failed,
+    current: () => current,
+    get resolveInitial() {
+      return resolveInitial;
+    },
+    receive: (event: WorkspaceEvent) => receive(event),
+  };
+}
 
 function dom(testId: string): DOMWrapper<Element> {
   const element = document.querySelector(`[data-testid="${testId}"]`);

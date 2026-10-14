@@ -782,13 +782,15 @@ watch(
     void subscribeWorkspaceEvents(workflowRuntime, {
       signal: controller.signal,
       onEvent: async (event) => {
-        if (
+        if (checkpoint.status.value !== 'workflow' && checkpoint.status.value !== 'pending') return;
+        if (event.type === 'stream.ready' || event.type === 'stream.reset_required') {
+          await checkCheckpoint(undefined, true);
+        } else if (
           event.type === 'workflow.updated' &&
           event.data.kind === 'goal.create' &&
-          event.data.runId === runId &&
-          (checkpoint.status.value === 'workflow' || checkpoint.status.value === 'pending')
+          event.data.runId === runId
         )
-          await checkCheckpoint(event.data);
+          await checkCheckpoint(event.data, true);
       },
     }).catch(() => {
       /* Explicit checking remains available; loss is not a failed Goal. */
@@ -809,11 +811,23 @@ async function reloadCheckpoint(): Promise<void> {
 }
 
 let checkpointCheck: Promise<void> | null = null;
-function checkCheckpoint(run?: import('@memoflow/contracts/ai').AIWorkflowRunView): Promise<void> {
-  if (checkpointCheck) return checkpointCheck;
+async function checkCheckpoint(
+  run?: import('@memoflow/contracts/ai').AIWorkflowRunView,
+  required = false,
+): Promise<void> {
   const epoch = checkpointEpoch;
+  // A pre-watermark read cannot settle a newer event or reconnect boundary.
+  // Serialize calibrations, then read again (or apply the terminal payload).
+  while (checkpointCheck) {
+    try {
+      await checkpointCheck;
+    } catch {
+      /* The next calibration can recover. */
+    }
+    if (epoch !== checkpointEpoch) return;
+  }
   const record = checkpoint.content.value;
-  checkpointCheck = (async () => {
+  const operation = (async () => {
     if (!record || !props.open || props.mode !== 'create') return;
     const active = () =>
       epoch === checkpointEpoch &&
@@ -835,7 +849,10 @@ function checkCheckpoint(run?: import('@memoflow/contracts/ai').AIWorkflowRunVie
         await settleReceipt(record.createId, result.data.toDTO());
         return;
       }
-      if (result.error.code !== 'NOT_FOUND') return;
+      if (result.error.code !== 'NOT_FOUND') {
+        if (required) throw new Error('Goal receipt unavailable');
+        return;
+      }
       receiptMissing = true;
       // A missing manual receipt permits replay of this exact ID and payload,
       // never a new create intention or an automatic replacement of the draft.
@@ -853,7 +870,10 @@ function checkCheckpoint(run?: import('@memoflow/contracts/ai').AIWorkflowRunVie
           await settleReceipt(record.createId, receipt.data.toDTO());
           return;
         }
-        if (receipt.error.code !== 'NOT_FOUND') return;
+        if (receipt.error.code !== 'NOT_FOUND') {
+          if (required) throw new Error('Goal receipt unavailable');
+          return;
+        }
       }
       if (await checkpoint.allowEditing()) {
         controlOwnerId.value = null;
@@ -867,6 +887,7 @@ function checkCheckpoint(run?: import('@memoflow/contracts/ai').AIWorkflowRunVie
       const id = snapshot.result.referenceMap.goal;
       const receipt = await ownerService.getGoal(id);
       if (receipt.ok) await settleReceipt(id, receipt.data.toDTO());
+      else if (required) throw new Error('Goal receipt unavailable');
       return;
     }
     if (snapshot.status === 'failed' || snapshot.status === 'cancelled') {
@@ -877,14 +898,17 @@ function checkCheckpoint(run?: import('@memoflow/contracts/ai').AIWorkflowRunVie
     } else if (snapshot.status === 'running' || snapshot.status === 'suspended') {
       restoredWorkflowRunId.value = record.workflowRunId;
     }
-  })()
-    .catch(() => {
-      /* Unknown authority remains frozen without clearing fields. */
-    })
-    .finally(() => {
-      checkpointCheck = null;
-    });
-  return checkpointCheck;
+  })();
+  checkpointCheck = operation;
+  try {
+    await operation;
+  } catch (error) {
+    // Unknown authority keeps the draft frozen; stream calibration must also
+    // reject so the transport cannot ACK a snapshot it failed to establish.
+    if (required) throw error;
+  } finally {
+    if (checkpointCheck === operation) checkpointCheck = null;
+  }
 }
 
 const { requestClose } = useDialogCloseGuard({
