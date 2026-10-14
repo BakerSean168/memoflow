@@ -186,10 +186,12 @@ test.describe('Local Docker core product Phase A', () => {
     await page.waitForURL(new RegExp(`/tasks/${creation.plan.id}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-    await expect(page.getByTestId('task-plan-overview')).toContainText('已绑定 Goal');
-    await expect(page.getByTestId('task-plan-workspace-properties')).toContainText(
-      '已配置 Goal 贡献',
-    );
+    // Task detail now shows canonical owner and KR context, not an old progress
+    // summary string. The exact Fixed/EachCompletion rule was asserted on POST.
+    const goalContext = page.getByTestId('task-goal-row');
+    await expect(goalContext).toContainText(primary.name);
+    await expect(goalContext).toContainText(primary.keyResultName);
+    await expect(page.getByTestId('task-detail-goal-chip')).toBeVisible();
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);

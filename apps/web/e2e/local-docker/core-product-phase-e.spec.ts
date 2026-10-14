@@ -1,5 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
 import {
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
   AIWorkflowRunViewSchema,
   type AIWorkflowRunView,
   type GoalPlanDraft,
@@ -20,9 +23,18 @@ test.describe('Local Docker core product Phase E', () => {
     const conversationId = `pm-phase-e-conversation-${suffix}`;
     const runId = `pm-phase-e-run-${suffix}`;
     const approval = createApprovalFixture({ conversationId, runId });
-    const consoleErrors: string[] = [];
+    const consoleErrors: Array<{ text: string; sourceUrl: string }> = [];
     const pageErrors: string[] = [];
     collectBrowserErrors(page, consoleErrors, pageErrors);
+    // Owner-first restore probes the deterministic Goal ID to decide whether
+    // the native owner has already committed. A 404 for this exact synthetic
+    // identity means no previous commit; any other console error still fails.
+    const missingOwnerPath = `/api/v1/goals/${approval.ownerGoalId}/aggregate`;
+    const ownerProbeStatuses: number[] = [];
+    page.on('response', (response) => {
+      if (new URL(response.url()).pathname === missingOwnerPath)
+        ownerProbeStatuses.push(response.status());
+    });
 
     await registerAndLogin(page, {
       email: `pm-phase-e-approval-${suffix}@test.com`,
@@ -86,8 +98,19 @@ test.describe('Local Docker core product Phase E', () => {
       contentType: 'image/png',
     });
 
+    expect(ownerProbeStatuses).toEqual([404]);
     expect(pageErrors).toEqual([]);
-    expect(consoleErrors).toEqual([]);
+    expect(
+      consoleErrors.filter(
+        ({ text, sourceUrl }) =>
+          !(
+            text.includes('Failed to load resource') &&
+            text.includes('404') &&
+            sourceUrl !== '' &&
+            new URL(sourceUrl).pathname === missingOwnerPath
+          ),
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -95,9 +118,14 @@ function testSuffix(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function collectBrowserErrors(page: Page, consoleErrors: string[], pageErrors: string[]): void {
+function collectBrowserErrors(
+  page: Page,
+  consoleErrors: Array<{ text: string; sourceUrl: string }>,
+  pageErrors: string[],
+): void {
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error')
+      consoleErrors.push({ text: message.text(), sourceUrl: message.location().url });
   });
   page.on('pageerror', (error) => pageErrors.push(error.message));
 }
@@ -183,10 +211,61 @@ async function installApprovalRestoreMocks(page: Page, fixture: ApprovalFixture)
   await page.route('**/api/v1/ai/runtime/workflow/get', async (route) => {
     await fulfillJson(route, runView);
   });
+
+  // The mocked Mastra run needs a matching, server-shaped lease. Leaving this
+  // endpoint real returns 'lost' for the synthetic run and correctly blocks the
+  // native editor. Keep the real claim/renew/release fencing semantics in the
+  // fixture instead of disabling the product's fail-closed ownership checks.
+  let fence = 0;
+  let activeGrant: { token: string; fence: number; expiresAt: number } | null = null;
+  await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
+    const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
+    const now = Date.now();
+    if (request.runId !== runView.runId) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'claim') {
+      if (activeGrant && activeGrant.expiresAt > now) {
+        await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'busy' }));
+        return;
+      }
+      const granted = { token: randomUUID(), fence: ++fence, expiresAt: now + 30_000 };
+      activeGrant = granted;
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({ status: 'claimed', ...granted }),
+      );
+      return;
+    }
+    if (
+      !activeGrant ||
+      request.token !== activeGrant.token ||
+      request.fence !== activeGrant.fence ||
+      (request.action === 'renew' && activeGrant.expiresAt <= now)
+    ) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'renew') {
+      activeGrant.expiresAt = now + 30_000;
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'renewed',
+          expiresAt: activeGrant.expiresAt,
+        }),
+      );
+      return;
+    }
+    activeGrant = null;
+    await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'released' }));
+  });
 }
 
 function createApprovalFixture(input: { conversationId: string; runId: string }) {
   const now = Date.now();
+  const ownerGoalId = `IGoalId_${randomUUID()}`;
   const draft: GoalPlanDraft = {
     revision: 1,
     goal: {
@@ -230,8 +309,10 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
       // The owner receipt identities must cover every Key Result in the current
       // review revision, even when this E2E only inspects the recovery surface.
       ownerCreate: {
-        goalId: `IGoalId_${input.runId}`,
-        keyResultIds: { 'kr:phase-e-approval': `IKeyResultId_${input.runId}` },
+        // Owner identities use canonical prefixed UUIDs (GoalNativePatch
+        // validates these independently of the WorkflowRunView envelope).
+        goalId: ownerGoalId,
+        keyResultIds: { 'kr:phase-e-approval': `IKeyResultId_${randomUUID()}` },
       },
     },
     createdAt: now,
@@ -241,6 +322,7 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
   return {
     conversationId: input.conversationId,
     runId: input.runId,
+    ownerGoalId,
     runView: AIWorkflowRunViewSchema.parse(runView),
     workflowEntry: { activeRunId: input.runId },
   };

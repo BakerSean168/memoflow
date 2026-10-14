@@ -107,10 +107,11 @@ const RouteContentProbe = defineComponent({
 
 const ToolbarStub = defineComponent({
   name: 'GoalPageToolbar',
+  props: { inert: { type: Boolean, default: false } },
   emits: ['create-goal', 'update-labels', 'select-system-view'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     return () =>
-      h('header', { 'data-testid': 'goal-page-toolbar' }, [
+      h('header', { 'data-testid': 'goal-page-toolbar', inert: props.inert ? '' : undefined }, [
         h('button', {
           'data-primary-action': 'create-goal',
           'data-testid': 'create-goal-entry',

@@ -87,10 +87,12 @@ onActivated(() => {
 });
 onDeactivated(() => {
   surfaceActive = false;
+  returnFocusTarget = null;
   handleSessionChange(null);
 });
 onUnmounted(() => {
   surfaceActive = false;
+  returnFocusTarget = null;
   handleSessionChange(null);
 });
 
@@ -113,21 +115,31 @@ const { options: labelOptions, isLoading: labelsLoading } = useLabelCatalog();
 // renders within the business pane. Inactive KeepAlive owners retain their drafts.
 const panelFormOpen = ref(false);
 let returnFocusTarget: HTMLElement | null = null;
+// Restore keyboard focus only after the route watcher removes the toolbar's
+// inert attribute. A single nextTick after router.replace is not sufficient:
+// syncDialogFromRoute itself yields a tick before unblocking the native pane.
+watch(
+  panelFormOpen,
+  (open) => {
+    if (open || !returnFocusTarget) return;
+    void nextTick().then(() => {
+      if (panelFormOpen.value || !surfaceActive || route.name !== 'goal-list') return;
+      const target = returnFocusTarget;
+      returnFocusTarget = null;
+      if (target?.isConnected && !target.closest('[inert]')) {
+        target.focus({ preventScroll: true });
+      }
+    });
+  },
+  { flush: 'post' },
+);
+
 async function closeEditor() {
-  const focusTarget = returnFocusTarget;
-  returnFocusTarget = null;
   const query = { ...route.query };
   delete query.goalForm;
   delete query.dialog;
   delete query.goalId;
   await router.replace({ path: route.path, query, hash: route.hash });
-  await nextTick();
-  // Only explicit user-triggered creation restores focus. Workflow-controlled
-  // openings never steal focus from the AI conversation; route exits never
-  // focus a detached or inert toolbar.
-  if (focusTarget?.isConnected && !focusTarget.closest('[inert]')) {
-    focusTarget.focus({ preventScroll: true });
-  }
 }
 const dialogOpen = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
@@ -148,7 +160,9 @@ const views = computed(() => [
 ]);
 
 async function openCreate() {
-  returnFocusTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  // The explicit toolbar action is the correct return target even if a mouse
+  // click did not make it document.activeElement.
+  returnFocusTarget = document.querySelector<HTMLElement>('[data-testid="create-goal-entry"]');
   const query = { ...route.query };
   delete query.dialog;
   delete query.goalId;
