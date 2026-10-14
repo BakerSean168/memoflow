@@ -1,5 +1,6 @@
 import type {
   AssistantRuntimeClient,
+  WorkflowRuntimeClient,
   RuntimeUsageClient,
   LocalAgentClient,
 } from '@memoflow/ai/client';
@@ -25,6 +26,7 @@ export interface UseAIChatSessionOptions {
   getDefaultRuntimeChoice?: () => import('@memoflow/contracts/ai').AssistantRuntimeChoice;
   /** Mastra-native authoritative history/stream/cancel client. */
   runtime: AssistantRuntimeClient;
+  workspaceRuntime?: WorkflowRuntimeClient;
   /** Durable conversation/run usage projection. */
   usageRuntime: RuntimeUsageClient;
   /** Host-provided Assistant surface tag (web / desktop / server). */
@@ -89,6 +91,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
   });
   const durableAttention = useDurableConversationAttention({
     runtime: options.runtime,
+    workspaceRuntime: options.workspaceRuntime,
     conversations: conversationList,
     activeConversationId: chatConversationId,
     local: attention.statuses,

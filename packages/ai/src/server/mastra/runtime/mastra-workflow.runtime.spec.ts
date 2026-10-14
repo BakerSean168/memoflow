@@ -1532,6 +1532,31 @@ describe('MastraAIRuntime goal.create product projection', () => {
     expect(JSON.stringify(failed)).not.toContain('PRIVATE_PROVIDER_DIAGNOSTICS');
   });
 
+  it('starts a fresh owner-scoped Goal run from a failed run and seeds its planner with user edits', async () => {
+    const { runtime } = await createRuntime();
+    vi.mocked(runtime.goalPlanner.plan).mockRejectedValueOnce({ statusCode: 503 });
+    const failed = await runtime.start({ context: context('restart-owner', 'first-request'), request: {
+      kind: 'goal.create', conversationId: 'restart-thread', input: { idea: 'Plan a goal' },
+    } });
+    expect(failed.status).toBe('failed');
+    const { revision: _revision, ...content } = draft;
+    const sourceDraft = {
+      sourceRunId: failed.runId, attemptId: '11111111-1111-4111-8111-111111111111', draftRevision: 7,
+      draft: { ...content, goal: { ...content.goal, name: 'Manual user goal', description: 'User description' } },
+    };
+    await expect(runtime.start({ context: context('foreign-owner', 'foreign-request'), request: {
+      kind: 'goal.create', conversationId: 'restart-thread', input: { idea: 'Restart', sourceDraft },
+    } })).rejects.toMatchObject({ category: 'conflict' });
+    const restarted = await runtime.start({ context: context('restart-owner', 'second-request'), request: {
+      kind: 'goal.create', conversationId: 'restart-thread', input: { idea: 'Restart', sourceDraft },
+    } });
+    expect(restarted.runId).not.toBe(failed.runId);
+    expect(restarted.startRequestId).toBe(sourceDraft.attemptId);
+    expect(vi.mocked(runtime.goalPlanner.plan).mock.calls.at(-1)?.[0]).toMatchObject({
+      currentDraft: { goal: { name: 'Manual user goal', description: 'User description' }, revision: 1 },
+    });
+  });
+
   it('persists Task and Knowledge main-Composer clarification turns before workflow resume', async () => {
     const { runtime } = await createRuntime();
 

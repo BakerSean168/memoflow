@@ -449,6 +449,18 @@ export default {
     export: '导出',
   },
   dialog: {
+    checkpointKeyResultEditing: '确认当前关键结果编辑后，其内容会保留到草稿中。',
+    checkpointLoading: '正在读取已保留的草稿…',
+    checkpointSaving: '正在保留草稿…',
+    checkpointSaved: '草稿已在此设备保留。',
+    checkpointConflict: '另一窗口已保留更新的草稿。当前内容仍在此表单中。',
+    checkpointUnavailable: '暂时无法保留草稿。请保持表单打开，重试后再提交目标。',
+    checkpointPending: '草稿已保留，正在确认上次保存结果。',
+    checkpointWorkflow: '草稿已恢复。核验本轮 AI 状态后可继续。',
+    checkpointReload: '加载已保留的草稿',
+    checkpointCheck: '核验状态',
+    checkpointRetrySave: '重试同一次保存',
+
     status: '状态',
     editGoal: '编辑目标',
     titleCreate: '创建目标',

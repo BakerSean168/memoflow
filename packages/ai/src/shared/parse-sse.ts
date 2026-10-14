@@ -51,19 +51,25 @@ export async function* parseSSE(
     }
   };
 
-  while (true) {
-    const { done, value } = await reader.read();
-    // Residual 1333: some runtimes deliver the final chunk with done=true.
-    // Decode that last value and flush framed events before exiting.
-    if (value) {
-      buffer += decoder.decode(value, { stream: !done });
-    }
-    if (done) {
-      buffer += decoder.decode();
-      yield* emitBufferedEvents();
-      break;
-    }
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      // Residual 1333: some runtimes deliver the final chunk with done=true.
+      // Decode that last value and flush framed events before exiting.
+      if (value) {
+        buffer += decoder.decode(value, { stream: !done });
+        if (buffer.length > 1_048_576) throw new Error('AI SSE frame exceeds the supported size');
+      }
+      if (done) {
+        buffer += decoder.decode();
+        yield* emitBufferedEvents();
+        break;
+      }
 
-    yield* emitBufferedEvents();
+      yield* emitBufferedEvents();
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
   }
 }

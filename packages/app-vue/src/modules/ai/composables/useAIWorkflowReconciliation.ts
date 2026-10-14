@@ -14,7 +14,7 @@ export function useAIWorkflowReconciliation(options: {
   watch(
     options.current,
     (run, _previous, onCleanup) => {
-      if (!run || run.status !== 'running') return;
+      if (!run || run.kind === 'goal.create' || run.status !== 'running') return;
       let cancelled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
       let delayMs = 500;

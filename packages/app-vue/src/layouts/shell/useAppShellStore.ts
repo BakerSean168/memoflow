@@ -184,11 +184,11 @@ export const useAppShellStore = defineStore('app-shell', {
   },
 
   actions: {
-    claimBusinessControl(ownerId: string, route: string): number {
+    claimBusinessControl(ownerId: string, route: string, allowDirtyDraft = false): number {
       if (
         !ownerId.trim() ||
         this.businessControl ||
-        this.surfaceStatus !== 'clean' ||
+        (this.surfaceStatus !== 'clean' && !(allowDirtyDraft && this.surfaceStatus === 'dirty')) ||
         this.panelSurface !== 'business' ||
         this.activeTab?.route !== route
       )

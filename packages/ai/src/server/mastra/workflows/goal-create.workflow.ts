@@ -1,4 +1,5 @@
 import { goalWorkflowEntityId } from './deterministic-entity-id';
+import { AIWorkflowPublicError } from '../../../shared/ai-workflow-error';
 import type { MastraCompositeStore } from '@mastra/core/storage';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
@@ -68,6 +69,8 @@ export function initialGoalCreateWorkflowState(
     planningMode: 'initial',
     targetRevision: 1,
     researchEvidence: [],
+    ...(input.sourceDraft && GoalPlanDraftSchema.safeParse({ ...input.sourceDraft.draft, revision: 1 }).success
+      ? { draft: { ...input.sourceDraft.draft, revision: 1 } } : {}),
   });
 }
 
@@ -333,6 +336,8 @@ export function createGoalCreateWorkflow(input: {
             await persist({ ...current, researchEvidence });
           }
           return handlePlanningDecision(decision, options.targetRevision);
+        } catch (error) {
+          throw new AIWorkflowPublicError(error);
         } finally {
           accepting = false;
           requestContext.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, null);

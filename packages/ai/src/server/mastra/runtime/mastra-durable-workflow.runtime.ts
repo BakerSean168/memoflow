@@ -16,6 +16,7 @@ import {
   type AIWorkflowResumeClientRequest,
   type AIWorkflowRunView,
   type AIWorkflowStartClientRequest,
+  type GoalCreateWorkflowInput,
   type AIGoalSurfaceLeaseRequest,
   type AIGoalSurfaceLeaseResponse,
 } from '@memoflow/contracts/ai';
@@ -38,6 +39,7 @@ import {
 } from '../workflows';
 import type { AssistantHistoryService } from './assistant-history.service';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { getGoalWorkflowEventSource } from './goal-workflow-events.registry';
 import { workflowInputFromSnapshot } from './workflow-run-snapshot';
 import {
   projectGoalCreateRun,
@@ -124,6 +126,8 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     kind: AIWorkflowRunView['kind'];
     conversationId: string;
     createdAt?: number;
+    startRequestId?: string;
+    awaitAfterVersion?: number;
   }): AIWorkflowRunView {
     const now = Date.now();
     return AIWorkflowRunViewSchema.parse({
@@ -132,6 +136,8 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       conversationId: input.conversationId,
       status: 'running',
       createdAt: input.createdAt ?? now,
+      ...(input.startRequestId ? { startRequestId: input.startRequestId } : {}),
+      ...(input.awaitAfterVersion ? { awaitAfterVersion: input.awaitAfterVersion } : {}),
       updatedAt: now,
     });
   }
@@ -140,6 +146,14 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     const store = await this.deps.storage.getStore('workflows');
     if (!store) throw new Error('AI_WORKFLOW_STORAGE_UNAVAILABLE');
     return store;
+  }
+
+  private async assertGoalRestartSource(input: GoalCreateWorkflowInput): Promise<void> {
+    if (!input.sourceDraft) return;
+    const source = await this.get({ identityId: input.identityId, runId: input.sourceDraft.sourceRunId });
+    if (!source || source.kind !== 'goal.create' || source.conversationId !== input.conversationId ||
+        !['failed', 'cancelled'].includes(source.status) || source.result?.referenceMap.goal)
+      throw new AIExecutionError('conflict', 'Goal restart source is unavailable or already saved');
   }
 
   async start(input: {
@@ -161,6 +175,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     await this.assertWorkflowSelection(input.context, workflowInput);
     if (input.request.kind === 'goal.create') {
       const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
+      await this.assertGoalRestartSource(goalInput);
       const workflowTurn = input.request.workflowTurn;
       if (workflowTurn)
         await this.deps.history.appendUserTurn({
@@ -252,6 +267,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     await this.assertWorkflowSelection(input.context, workflowInput);
     if (input.request.kind === 'goal.create') {
       const goalInput = GoalCreateWorkflowInputSchema.parse(workflowInput);
+      await this.assertGoalRestartSource(goalInput);
       if (input.request.workflowTurn) {
         await this.deps.history.appendUserTurn({
           ...input.request,
@@ -271,6 +287,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
         runId: run.runId,
         kind: 'goal.create',
         conversationId: goalInput.conversationId,
+        startRequestId: goalInput.sourceDraft?.attemptId,
       });
     }
 
@@ -487,6 +504,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       kind: before.kind,
       conversationId: before.conversationId,
       createdAt: before.createdAt,
+      ...(before.kind === 'goal.create' && before.resourceVersion ? { awaitAfterVersion: before.resourceVersion } : {}),
     });
   }
 
@@ -518,8 +536,10 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       runId: input.runId,
     });
     if (goalRow) {
+      if (goalRow.resourceId !== input.identityId) return null;
+      const source = getGoalWorkflowEventSource(this.deps.storage);
       return this.attachWorkflowUsage(
-        projectGoalCreateRun(goalRow, input.identityId),
+        source ? await source.snapshot(input.identityId, input.runId) : projectGoalCreateRun(goalRow, input.identityId),
         input.identityId,
       );
     }

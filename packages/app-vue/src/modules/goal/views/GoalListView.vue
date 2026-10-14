@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Target } from '@lucide/vue';
 import { ScrollArea, Skeleton, useConfirm } from '@memoflow/ui-vue-shadcn';
@@ -72,21 +72,31 @@ import GoalProgressRow from '../components/GoalProgressRow.vue';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import { useGoal } from '../composables/useGoal';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
-import { useRouteDialogState } from '../../../shared/composables/useRouteDialogState';
 
 const { t } = useI18n();
 const router = useRouter();
-const goalDialogRoute = useRouteDialogState({ dialogValue: 'goal', identityQueryKeys: ['goalId'] });
+const route = useRoute();
 const { goals, isLoading, systemView, deleteGoal } = useGoal();
 
 function openCreate() {
-  void goalDialogRoute.open({ name: 'goal-list' });
+  openGoalEditor('create');
+}
+
+function openGoalEditor(mode: 'create' | 'edit', goalId?: string) {
+  const query = { ...route.query };
+  delete query.dialog;
+  delete query.goalId;
+  void router.push({
+    name: 'goal-list',
+    query: { ...query, goalForm: mode, ...(goalId ? { goalId } : {}) },
+    hash: route.hash,
+  });
 }
 function handleViewGoal(goal: GoalClientDTO) {
   void router.push({ name: 'goal-detail', params: { id: goal.id } });
 }
 function handleEditGoal(goal: GoalClientDTO) {
-  void goalDialogRoute.open({ name: 'goal-list' }, { goalId: String(goal.id) });
+  openGoalEditor('edit', String(goal.id));
 }
 async function handleDeleteGoal(id: string) {
   const confirmed = await useConfirm({

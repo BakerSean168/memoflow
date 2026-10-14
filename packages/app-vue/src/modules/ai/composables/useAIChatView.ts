@@ -304,6 +304,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const chatSession = useAIChatSession({
     service,
     runtime: assistantRuntime,
+    workspaceRuntime: workflowRuntime,
     localAgent,
     getPermissionMode: () => permissionMode.value,
     getNativeModelOptions: () => currentNativeModelOptions.value,
@@ -542,6 +543,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     const currentTitle = chatSession.conversationTitle.value;
     if (!nextName || nextName === currentTitle) return;
     const conversationId = chatSession.chatConversationId.value;
+    const before = chatSession.conversationList.value.find((item) => item.id === conversationId);
+    const versionBefore = before?.runtimeKind === 'local_agent' ? undefined : before?.resourceVersion;
     chatSession.conversationTitle.value = nextName;
     const renamed = await maybeRenameConversation(
       nextName,
@@ -550,13 +553,13 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       service,
       async (conversation) => {
         chatSession.syncConversationSummary(conversation);
-        await chatSession.loadConversationList(service);
       },
     );
     if (
       !renamed &&
       chatSession.chatConversationId.value === conversationId &&
-      chatSession.conversationTitle.value === nextName
+      chatSession.conversationTitle.value === nextName &&
+      !chatSession.conversationList.value.some((item) => item.id === conversationId && item.runtimeKind !== 'local_agent' && (item.resourceVersion ?? 0) > (versionBefore ?? 0))
     )
       chatSession.conversationTitle.value = currentTitle;
   }
@@ -836,6 +839,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     () =>
       goalWorkflow.goalAgentResuming.value ||
       goalWorkflow.goalOwnerAttemptPending.value ||
+      goalWorkflow.goalRestartPending.value ||
+      goalWorkflow.goalSurfaceControlLost.value ||
       taskWorkflow.taskAgentResuming.value ||
       taskWorkflow.taskOwnerAttemptPending.value ||
       knowledgeCaptureWorkflow.knowledgeCaptureResuming.value ||
@@ -865,7 +870,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     return canLeaveAIWorkflowReview(
       toolMode.value,
       {
-        goal: goalWorkflow.goalAgentResuming.value || goalWorkflow.goalOwnerAttemptPending.value,
+        goal: goalWorkflow.goalAgentResuming.value || goalWorkflow.goalOwnerAttemptPending.value ||
+          goalWorkflow.goalRestartPending.value || goalWorkflow.goalSurfaceControlLost.value,
         task: taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value,
         knowledge: knowledgeCaptureWorkflow.knowledgeCaptureResuming.value,
       },

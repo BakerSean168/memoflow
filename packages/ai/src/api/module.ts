@@ -170,6 +170,7 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
           middleware,
           options.instance.workflowRuntime,
           options.instance.conversationAttentionPort,
+          options.instance.conversationEvents,
         );
         const knowledgeQueryRoutes = registerAIKnowledgeQueryRoutes(
           knowledgeQueryController,

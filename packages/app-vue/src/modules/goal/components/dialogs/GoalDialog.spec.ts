@@ -1,5 +1,7 @@
 /** @vitest-environment happy-dom */
 
+import type { WorkspaceEventStreamOptions } from '@memoflow/ai/client';
+import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/contracts/ai';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
@@ -10,6 +12,8 @@ import { productionLocaleMessages } from '../../../../locales/production-message
 import { createMockGoal, createMockKeyResult } from '@memoflow/contracts/mocks';
 import {
   CreateGoalSchema,
+  GoalDraftCheckpointContentSchema,
+  type GoalDraftCheckpointSnapshot,
   GoalStatus,
   KeyResultCalculationMethod,
   ReminderTriggerType,
@@ -22,8 +26,18 @@ import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalDialog from './GoalDialog.vue';
 import type { GoalNativeEditSession } from '../../composables/goalNativeEditSession';
+import {
+  GOAL_DRAFT_CHECKPOINT_KEY,
+  GOAL_SERVICE_KEY,
+  AI_WORKFLOW_RUNTIME_KEY,
+} from '../../../../di/keys';
+import {
+  GoalDraftCheckpointConflict,
+  type GoalDraftCheckpointStore,
+} from '../../infrastructure/goal-draft-checkpoint.indexeddb';
 
 const mocks = vi.hoisted(() => ({
+  validationRejected: false,
   createGoal: vi.fn(),
   updateGoal: vi.fn(),
   transitionGoalStatus: vi.fn(async (goal) => goal),
@@ -39,6 +53,11 @@ vi.mock('../../composables/useGoal', async () => {
       updateGoal: mocks.updateGoal,
       transitionGoalStatus: mocks.transitionGoalStatus,
       isSaving: ref(false),
+      lastCreateRejected: {
+        get value() {
+          return mocks.validationRejected;
+        },
+      },
     }),
   };
 });
@@ -65,6 +84,340 @@ const i18n = createI18n({
   fallbackWarn: false,
   messages: productionLocaleMessages,
 });
+
+it('restores the same native manual draft and submits its durable create ID without workflow callbacks', async () => {
+  const initial = GoalDraftCheckpointContentSchema.parse({
+    createId: crypto.randomUUID(),
+    workflowRunId: null,
+    phase: 'editing',
+    draft: {
+      name: 'Preserved draft',
+      summary: '',
+      description: 'Human content',
+      status: GoalStatus.Planned,
+      start: null,
+      target: null,
+      reminderConfig: null,
+      labelIds: [],
+      keyResults: [],
+    },
+  });
+  let current: GoalDraftCheckpointSnapshot = { scope: 'identity', version: 1, content: initial };
+  const store: GoalDraftCheckpointStore = {
+    scope: () => 'identity',
+    load: vi.fn(async () => current),
+    write: vi.fn(async (scope, version, content) => {
+      if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+      current = { scope, version: version + 1, content };
+      return current;
+    }),
+  };
+  const created = createMockGoal({ id: initial.createId, name: 'Edited draft' });
+  mocks.createGoal.mockResolvedValue(created);
+  const wrapper = mount(GoalDialog, {
+    props: { open: true, presentation: 'panel' },
+    attachTo: document.body,
+    global: { plugins: [i18n], provide: { [GOAL_DRAFT_CHECKPOINT_KEY]: store } },
+  });
+  try {
+    await flushPromises();
+    expect(dom('goal-name-input').element).toHaveProperty('value', 'Preserved draft');
+    await dom('goal-name-input').setValue('Edited draft');
+    await flushPromises();
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: initial.createId,
+        name: 'Edited draft',
+        description: 'Human content',
+      }),
+    );
+    expect(mocks.createGoal.mock.calls.at(-1)![0]).not.toHaveProperty('nativeAiLease');
+    expect(current.content).toBeNull();
+    expect(wrapper.emitted('created')?.at(-1)?.[0]).toMatchObject({ id: initial.createId });
+  } finally {
+    wrapper.unmount();
+    vi.clearAllMocks();
+  }
+});
+
+it('keeps a rejected manual save editable while retaining the same durable create ID', async () => {
+  let current: GoalDraftCheckpointSnapshot = { scope: 'identity', version: 0, content: null };
+  const store: GoalDraftCheckpointStore = {
+    scope: () => 'identity',
+    load: async () => current,
+    write: async (scope, version, content) => {
+      if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+      current = { scope, version: version + 1, content };
+      return current;
+    },
+  };
+  mocks.validationRejected = true;
+  mocks.createGoal.mockResolvedValue(null);
+  const wrapper = mount(GoalDialog, {
+    props: { open: true, presentation: 'panel' },
+    attachTo: document.body,
+    global: { plugins: [i18n], provide: { [GOAL_DRAFT_CHECKPOINT_KEY]: store } },
+  });
+  try {
+    await flushPromises();
+    await dom('goal-name-input').setValue('Fixable goal');
+    await flushPromises();
+    const intent = current.content!.createId;
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+    expect(current.content).toMatchObject({
+      createId: intent,
+      phase: 'editing',
+      draft: { name: 'Fixable goal' },
+    });
+    expect(dom('goal-name-input').attributes('disabled')).toBeUndefined();
+    await dom('goal-name-input').setValue('Corrected goal');
+    await flushPromises();
+    expect(current.content?.createId).toBe(intent);
+    expect(wrapper.emitted('created')).toBeUndefined();
+  } finally {
+    wrapper.unmount();
+    mocks.validationRejected = false;
+    vi.clearAllMocks();
+  }
+});
+
+it('reconciles a committed workflow receipt by its string Goal ID without creating again', async () => {
+  const created = createMockGoal({ name: 'Recovered Goal' });
+  const runId = 'run-committed-goal';
+  let current: GoalDraftCheckpointSnapshot = {
+    scope: 'identity',
+    version: 1,
+    content: GoalDraftCheckpointContentSchema.parse({
+      createId: created.id,
+      workflowRunId: runId,
+      phase: 'editing',
+      draft: {
+        name: created.name,
+        summary: '',
+        description: '',
+        status: GoalStatus.Planned,
+        start: null,
+        target: null,
+        reminderConfig: null,
+        labelIds: [],
+        keyResults: [],
+      },
+    }),
+  };
+  const store: GoalDraftCheckpointStore = {
+    scope: () => 'identity',
+    load: vi.fn(async () => current),
+    write: vi.fn(async (scope, version, content) => {
+      if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+      current = { scope, version: version + 1, content };
+      return current;
+    }),
+  };
+  const getGoal = vi.fn(async () => ({ ok: true as const, data: { toDTO: () => created } }));
+  const getRun = vi.fn(async () => ({
+    kind: 'goal.create',
+    runId,
+    status: 'completed',
+    result: { referenceMap: { goal: created.id } },
+  }));
+  const wrapper = mount(GoalDialog, {
+    props: { open: true, presentation: 'panel' },
+    attachTo: document.body,
+    global: {
+      plugins: [i18n],
+      provide: {
+        [GOAL_DRAFT_CHECKPOINT_KEY]: store,
+        [GOAL_SERVICE_KEY]: { getGoal },
+        [AI_WORKFLOW_RUNTIME_KEY]: { get: getRun },
+      },
+    },
+  });
+  try {
+    await vi.waitFor(() => expect(getGoal).toHaveBeenCalledWith(created.id));
+    await flushPromises();
+    expect(getRun).toHaveBeenCalledWith({ runId });
+    expect(current.content).toBeNull();
+    expect(wrapper.emitted('created')?.at(-1)?.[0]).toMatchObject({ id: created.id });
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+  } finally {
+    wrapper.unmount();
+    vi.clearAllMocks();
+  }
+});
+
+describe('restored workflow checkpoint calibration', () => {
+  it.each(['workflow.updated', 'stream.ready', 'stream.reset_required'] as const)(
+    'reconciles %s after an older running snapshot without freezing the draft',
+    async (type) => {
+      const f = restoredCheckpointFixture();
+      try {
+        await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+        const event: WorkspaceEvent =
+          type === 'workflow.updated'
+            ? {
+                type,
+                eventId: 'run:2',
+                cursor: 'terminal',
+                resourceVersion: 2,
+                data: f.failed,
+                actions: [],
+                baseActionSequence: 0,
+                lastActionSequence: 0,
+              }
+            : type === 'stream.ready'
+              ? { type, cursor: 'ready' }
+              : { type, cursor: 'reset', reason: 'expired' };
+        const calibration = f.receive(event);
+        f.resolveInitial!(f.running);
+        await calibration;
+        await flushPromises();
+        expect(dom('goal-name-input').attributes('disabled')).toBeUndefined();
+        expect(dom('goal-name-input').element).toHaveProperty('value', 'Human draft');
+        expect(f.current().content?.workflowRunId).toBeNull();
+        expect(mocks.createGoal).not.toHaveBeenCalled();
+      } finally {
+        f.wrapper.unmount();
+        vi.clearAllMocks();
+      }
+    },
+  );
+
+  it('does not ACK a completed run before its Goal receipt is available', async () => {
+    const created = createMockGoal({ name: 'Saved Goal' });
+    const getGoal = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, error: { code: 'NOT_FOUND' } })
+      .mockResolvedValue({ ok: true, data: { toDTO: () => created } });
+    const f = restoredCheckpointFixture(getGoal);
+    try {
+      await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+      f.resolveInitial!(f.running);
+      await flushPromises();
+      f.get.mockResolvedValue({
+        ...f.running,
+        status: 'completed',
+        result: { referenceMap: { goal: created.id } },
+      });
+      await expect(f.receive({ type: 'stream.ready', cursor: 'missing-receipt' })).rejects.toThrow(
+        'Goal receipt unavailable',
+      );
+      expect(f.current().content).not.toBeNull();
+      await f.receive({ type: 'stream.ready', cursor: 'receipt-visible' });
+      expect(f.current().content).toBeNull();
+      expect(f.wrapper.emitted('created')?.at(-1)?.[0]).toMatchObject({ id: created.id });
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+    } finally {
+      f.wrapper.unmount();
+      vi.clearAllMocks();
+    }
+  });
+
+  it('rejects failed ready calibration and recovers on a subsequent ready', async () => {
+    const f = restoredCheckpointFixture();
+    try {
+      await vi.waitFor(() => expect(f.resolveInitial).toBeDefined());
+      f.resolveInitial!(f.running);
+      await flushPromises();
+      f.get.mockRejectedValueOnce(new Error('Workflow snapshot unavailable'));
+      await expect(f.receive({ type: 'stream.ready', cursor: 'offline' })).rejects.toThrow(
+        'Workflow snapshot unavailable',
+      );
+      expect(dom('goal-name-input').attributes('disabled')).toBeDefined();
+      await f.receive({ type: 'stream.ready', cursor: 'recovered' });
+      expect(f.current().content?.workflowRunId).toBeNull();
+      expect(mocks.createGoal).not.toHaveBeenCalled();
+    } finally {
+      f.wrapper.unmount();
+      vi.clearAllMocks();
+    }
+  });
+});
+
+function restoredCheckpointFixture(getGoal = vi.fn()) {
+  const running: AIWorkflowRunView = {
+    kind: 'goal.create',
+    runId: 'restored-run',
+    conversationId: 'conversation',
+    status: 'running',
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  const failed: AIWorkflowRunView = { ...running, status: 'failed', updatedAt: 2 };
+  let current: GoalDraftCheckpointSnapshot = {
+    scope: 'identity',
+    version: 1,
+    content: GoalDraftCheckpointContentSchema.parse({
+      createId: crypto.randomUUID(),
+      workflowRunId: running.runId,
+      phase: 'editing',
+      draft: {
+        name: 'Human draft',
+        summary: '',
+        description: '',
+        status: GoalStatus.Planned,
+        start: null,
+        target: null,
+        reminderConfig: null,
+        labelIds: [],
+        keyResults: [],
+      },
+    }),
+  };
+  const store: GoalDraftCheckpointStore = {
+    scope: () => 'identity',
+    load: async () => current,
+    write: async (scope, version, content) => {
+      if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+      current = { scope, version: version + 1, content };
+      return current;
+    },
+  };
+  let resolveInitial: ((run: AIWorkflowRunView) => void) | undefined;
+  let receive!: WorkspaceEventStreamOptions['onEvent'];
+  const get = vi
+    .fn()
+    .mockImplementationOnce(
+      () =>
+        new Promise<AIWorkflowRunView>((resolve) => {
+          resolveInitial = resolve;
+        }),
+    )
+    .mockResolvedValue(failed);
+  const wrapper = mount(GoalDialog, {
+    props: { open: true, presentation: 'panel' },
+    attachTo: document.body,
+    global: {
+      plugins: [i18n],
+      provide: {
+        [GOAL_DRAFT_CHECKPOINT_KEY]: store,
+        [GOAL_SERVICE_KEY]: { getGoal },
+        [AI_WORKFLOW_RUNTIME_KEY]: {
+          get,
+          streamWorkspaceEvents: (options: WorkspaceEventStreamOptions) => {
+            receive = options.onEvent;
+            return new Promise<void>((resolve) =>
+              options.signal.addEventListener('abort', () => resolve(), { once: true }),
+            );
+          },
+        },
+      },
+    },
+  });
+  return {
+    wrapper,
+    get,
+    running,
+    failed,
+    current: () => current,
+    get resolveInitial() {
+      return resolveInitial;
+    },
+    receive: (event: WorkspaceEvent) => receive(event),
+  };
+}
 
 function dom(testId: string): DOMWrapper<Element> {
   const element = document.querySelector(`[data-testid="${testId}"]`);
@@ -108,10 +461,13 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       expectedDraft: ai.readDraftState().draft,
     };
     const saving = ai.requestSubmit(context);
+    expect(() => ai.detachWorkflow()).toThrow('busy');
     await expect(ai.requestSubmit(context)).rejects.toThrow('busy');
-    expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({
-      nativeAiLease: context.nativeAiLease,
-    }));
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nativeAiLease: context.nativeAiLease,
+      }),
+    );
     expect(mocks.createGoal).toHaveBeenCalledOnce();
     complete();
     expect(await saving).toEqual(created);
@@ -119,7 +475,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     wrapper.unmount();
   });
 
-  it('renders the same native form inside the business panel without a modal', async () => {
+  it('renders the same native form in a pane-local modeless dialog', async () => {
     const wrapper = mount(GoalDialog, {
       props: { open: true, presentation: 'panel' },
       attachTo: document.body,
@@ -127,7 +483,8 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     });
     await nextTick();
     expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-form"]').attributes('aria-modal')).toBe('false');
+    expect(wrapper.get('[data-testid="pane-scoped-dialog-backdrop"]').exists()).toBe(true);
     await dom('goal-name-input').setValue('Panel Goal');
     await dom('goal-form').trigger('submit');
     expect(mocks.createGoal).toHaveBeenCalledWith(expect.objectContaining({ name: 'Panel Goal' }));
@@ -163,7 +520,15 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    for (const mock of Object.values(mocks)) mock.mockReset();
+    for (const mock of [
+      mocks.createGoal,
+      mocks.updateGoal,
+      mocks.transitionGoalStatus,
+      mocks.createLabel,
+      mocks.resolveNames,
+    ])
+      mock.mockReset();
+    mocks.validationRejected = false;
     mocks.transitionGoalStatus.mockImplementation(async (goal) => goal);
   });
 
@@ -399,6 +764,8 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(frame).toContain('ProductDialogShell');
     expect(frame).toContain('recipe="workspace"');
     expect(source).toContain('ProductAutoTextarea');
+    expect(frame).toContain('PaneScopedDialog');
+    expect(frame).toContain('height-mode="workspace"');
     expect(source).toContain('class="flex min-h-full flex-col gap-6"');
     expect(source).toContain('GoalKeyResultDraftEditor');
     expect(source).toContain('class="mt-auto"');
@@ -933,6 +1300,81 @@ function nativeSession(wrapper: ReturnType<typeof mount>): GoalNativeEditSession
 }
 
 describe('Goal owner native edit session (PVC-AI-8001)', () => {
+  it('detaches a failed workflow in place and saves through the native owner', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const user = nativeSession(wrapper);
+    const ai = user.claimControl('failed-run');
+    const submit = vi.fn(async () => {});
+    const cancel = vi.fn(async () => {});
+    ai.coordinateSubmit(submit, cancel);
+    ai.patch({ name: 'Preserved Goal', description: 'Keep this content' });
+    ai.addChild({
+      title: 'Preserved KR',
+      calculationMethod: KeyResultCalculationMethod.Sum,
+      initialValue: 0,
+      currentValue: 0,
+      targetValue: 12,
+      weight: 3,
+    });
+    const before = ai.readDraftState();
+    expect(() => user.detachWorkflow()).toThrow('controlled by AI');
+    ai.detachWorkflow();
+    await nextTick();
+    expect(user.readDraftState()).toEqual({ ...before, busy: false });
+    expect(wrapper.emitted('update:open')).toBeUndefined();
+    expect(() => ai.patch({ name: 'Late AI patch' })).toThrow('closed');
+    await expect(ai.requestSubmit()).rejects.toThrow('closed');
+    user.patch({ name: 'Manually edited Goal' });
+    mocks.createGoal.mockResolvedValue(createMockGoal({ name: 'Manually edited Goal' }));
+    await dom('goal-form').trigger('submit');
+    await flushPromises();
+    expect(submit).not.toHaveBeenCalled();
+    expect(cancel).not.toHaveBeenCalled();
+    expect(mocks.createGoal).toHaveBeenCalledOnce();
+    expect(mocks.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Manually edited Goal',
+        description: 'Keep this content',
+        initialKeyResults: [expect.objectContaining({ title: 'Preserved KR' })],
+      }),
+    );
+    expect(mocks.createGoal.mock.calls[0][0]).not.toHaveProperty('nativeAiLease');
+    wrapper.unmount();
+  });
+
+  it('clears stale callbacks after an already released handoff and retains native validation', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    const user = nativeSession(wrapper);
+    const ai = user.claimControl('failed-review');
+    const submit = vi.fn(async () => {});
+    const cancel = vi.fn(async () => {});
+    ai.coordinateSubmit(submit, cancel);
+    ai.patch({ name: 'Draft' });
+    ai.releaseControl();
+    user.detachWorkflow();
+    user.patch({ start: { kind: 'year', year: 2028 }, target: { kind: 'year', year: 2027 } });
+    await user.requestSubmit();
+    expect(mocks.createGoal).not.toHaveBeenCalled();
+    expect(user.readDraftState().error).toBeTruthy();
+    user.patch({ start: null, target: null });
+    // Clearing the dirty content allows user dismissal without the dirty-close prompt.
+    user.patch({ name: '' });
+    await wrapper.getComponent(Dialog).vm.$emit('update:open', false);
+    await flushPromises();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(submit).not.toHaveBeenCalled();
+    expect(cancel).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it('coordinates native Save/Enter and resolves pending labels only after validation on typed owner submit', async () => {
     const wrapper = mount(GoalDialog, {
       props: { open: true },

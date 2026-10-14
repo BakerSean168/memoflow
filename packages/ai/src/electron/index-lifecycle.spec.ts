@@ -3,6 +3,8 @@ import { AIChannels, type IElectronModuleContext } from '@memoflow/contracts/ele
 import { ok } from '@memoflow/contracts/result';
 import type { AIModuleInstance } from '../server/infrastructure';
 import { AIExecutionError } from '../shared/ai-execution-error';
+import { EventEmitter } from 'node:events';
+import type { GoalWorkflowEventSource } from '../server/application/ports/goal-workflow-events.port';
 
 const mocks = vi.hoisted(() => {
   const handlers = new Map<string, (...args: unknown[]) => unknown>();
@@ -52,6 +54,9 @@ const CURRENT_CHANNELS = [
   AIChannels.RUNTIME_ASSISTANT_ATTENTION_ACK,
   AIChannels.RUNTIME_USAGE_GET,
   AIChannels.RUNTIME_WORKFLOW_START,
+  AIChannels.RUNTIME_WORKSPACE_START,
+  AIChannels.RUNTIME_WORKSPACE_ACK,
+  AIChannels.RUNTIME_WORKSPACE_STOP,
   AIChannels.RUNTIME_WORKFLOW_RESUME,
   AIChannels.RUNTIME_WORKFLOW_GET,
   AIChannels.RUNTIME_WORKFLOW_LIST,
@@ -167,6 +172,32 @@ describe('createAIElectronModule lifecycle', () => {
     }
     mocks.handlers.clear();
     vi.clearAllMocks();
+  });
+
+  it('bounds Workspace IPC delivery with sender-owned acknowledgements and releases subscriptions on stop', async () => {
+    const unsubscribe = vi.fn();
+    const source: GoalWorkflowEventSource = {
+      epoch: '11111111-1111-4111-8111-111111111111', init: vi.fn(async () => {}),
+      head: vi.fn(async () => ({ first: 1, last: 0 })), read: vi.fn(async () => []),
+      snapshot: vi.fn(async () => null), subscribe: vi.fn(() => unsubscribe), dispose: vi.fn(async () => {}),
+    };
+    Object.assign(fake.instance, { workflowRuntime: { goalEvents: async () => source } });
+    await moduleDef.register(createFakeContext());
+    const sender = Object.assign(new EventEmitter(), { id: 7, send: vi.fn(), isDestroyed: () => false });
+    const start = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_START)!;
+    const ack = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_ACK)!;
+    const stop = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_STOP)!;
+    expect(await start({ sender }, { streamId: 'workspace-1', identityId: 'other' })).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(await start({ sender }, { streamId: 'workspace-1' })).toMatchObject({ ok: true });
+    await vi.waitFor(() => expect(sender.send).toHaveBeenCalled());
+    const payload = sender.send.mock.calls[0]![1] as { event: { cursor: string } };
+    expect(await ack({ sender: { id: 8 } }, { streamId: 'workspace-1', cursor: payload.event.cursor })).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    expect(await ack({ sender }, { streamId: 'workspace-1', cursor: 'wrong' })).toMatchObject({ ok: true, data: { accepted: false } });
+    expect(await ack({ sender }, { streamId: 'workspace-1', cursor: payload.event.cursor })).toMatchObject({ ok: true, data: { accepted: true } });
+    expect(await stop({ sender: { id: 8 } }, { streamId: 'workspace-1' })).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    expect(await stop({ sender }, { streamId: 'workspace-1' })).toMatchObject({ ok: true });
+    await vi.waitFor(() => expect(unsubscribe).toHaveBeenCalledOnce());
+    expect(sender.listenerCount('destroyed')).toBe(0);
   });
 
   it('routes Goal surface lease IPC through authenticated identity and rejects identity injection', async () => {

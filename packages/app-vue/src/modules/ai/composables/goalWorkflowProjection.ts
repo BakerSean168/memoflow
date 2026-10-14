@@ -7,16 +7,7 @@ export function goalWorkflowTimelineItem(
   run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
   t: Parameters<typeof getAIWorkflowTerminalFailureMessage>[1],
 ): ChatItem | null {
-  if (run.status === 'failed') {
-    const message = getAIWorkflowTerminalFailureMessage(run.failure, t);
-    return {
-      id: `goal-workflow-failure-${run.runId}`,
-      role: 'assistant',
-      content: message,
-      status: 'error',
-      errorMessage: message,
-    };
-  }
+  if (run.status === 'failed') return null; // The existing runtime item owns the interruption.
   const suspension = run.suspension;
   if (suspension?.type === 'clarification_required') {
     const content = suspension.questions

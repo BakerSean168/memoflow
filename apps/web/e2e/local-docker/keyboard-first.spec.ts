@@ -49,10 +49,10 @@ test('Keyboard-first V1: preview, input protection, commands and device override
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/goals$/);
   await page.goto('/goals?dialog=goal');
-  await expect(page.getByTestId('goal-dialog')).toBeVisible();
+  await expect(page.getByTestId('goal-panel-form')).toBeVisible();
   await page.getByTestId('goal-name-input').fill(`Keyboard goal ${suffix}`);
   await page.getByTestId('save-goal-button').click();
-  await expect(page.getByTestId('goal-dialog')).toBeHidden();
+  await expect(page.getByTestId('goal-panel-form')).toBeHidden();
   const goalRow = page
     .getByTestId('goal-progress-row')
     .filter({ hasText: `Keyboard goal ${suffix}` });

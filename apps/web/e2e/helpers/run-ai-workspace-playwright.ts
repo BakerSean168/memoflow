@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { createServer } from 'node:net';
 import { delay } from '@memoflow/utils/frontend';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,15 +21,43 @@ const apiUrl = new URL(apiOrigin);
 const apiPort = apiUrl.port || (apiUrl.protocol === 'https:' ? '443' : '80');
 const apiHealthUrl = `${apiOrigin.replace(/\/$/, '')}/healthz`;
 
+/** A busy E2E port must fail before the API build, never connect to an unrelated Vite server. */
+async function assertWebPortAvailable(): Promise<void> {
+  await new Promise<void>((resolveAvailable, rejectAvailable) => {
+    const probe = createServer();
+    probe.once('error', (error) => {
+      rejectAvailable(
+        new Error(`AI workspace E2E web port ${webHost}:${webPort} is unavailable`, {
+          cause: error,
+        }),
+      );
+    });
+    probe.listen(webPort, webHost, () => {
+      probe.close((error) => {
+        if (error) rejectAvailable(error);
+        else resolveAvailable();
+      });
+    });
+  });
+}
+
 /** Residual 1192: dual delay retired onto @memoflow/utils/frontend sole. */
 
-async function waitForServer(url: string, timeoutMs: number): Promise<void> {
+async function waitForServer(url: string, timeoutMs: number, child?: ChildProcess): Promise<void> {
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
+    if (child && (child.exitCode !== null || child.signalCode !== null)) {
+      throw new Error(
+        `Server exited before ${url} became ready (exit=${String(child.exitCode)}, signal=${String(child.signalCode)})`,
+      );
+    }
     try {
       const response = await fetch(url, { method: 'GET' });
       if (response.ok) {
+        if (child && (child.exitCode !== null || child.signalCode !== null)) {
+          throw new Error(`Server exited during startup for ${url}`);
+        }
         return;
       }
     } catch {
@@ -57,7 +86,7 @@ function spawnChild(
 }
 
 async function killProcessTree(child: ChildProcess | undefined): Promise<void> {
-  if (!child?.pid || child.exitCode !== null || child.killed) {
+  if (!child?.pid || child.exitCode !== null || child.signalCode !== null) {
     return;
   }
 
@@ -75,7 +104,7 @@ async function killProcessTree(child: ChildProcess | undefined): Promise<void> {
   child.kill('SIGTERM');
   await delay(250);
 
-  if (child.exitCode === null && !child.killed) {
+  if (child.exitCode === null && child.signalCode === null) {
     child.kill('SIGKILL');
   }
 }
@@ -118,6 +147,7 @@ async function main(): Promise<void> {
   process.once('SIGTERM', signalHandler);
 
   try {
+    await assertWebPortAvailable();
     // Residual 1337: register/login needs the e2e API (same as default web:e2e webServer).
     // CORS must allow the external Vite origin (4174), not only the default 5173 e2e web.
     const corsOrigins = [
@@ -140,11 +170,20 @@ async function main(): Promise<void> {
         CORS_ORIGIN: [...new Set(corsOrigins)].join(','),
       },
     });
-    await waitForServer(apiHealthUrl, 300_000);
+    await waitForServer(apiHealthUrl, 300_000, apiServer);
 
     viteServer = spawnChild(
       process.execPath,
-      [viteBinPath, '--config', 'vite.config.ts', '--host', webHost, '--port', String(webPort)],
+      [
+        viteBinPath,
+        '--config',
+        'vite.config.ts',
+        '--host',
+        webHost,
+        '--port',
+        String(webPort),
+        '--strictPort',
+      ],
       {
         cwd: webRoot,
         env: {
@@ -155,7 +194,7 @@ async function main(): Promise<void> {
       },
     );
 
-    await waitForServer(`${webBaseUrl}/`, 30_000);
+    await waitForServer(`${webBaseUrl}/`, 30_000, viteServer);
 
     playwrightProcess = spawnChild(
       process.execPath,

@@ -13,6 +13,8 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
+- [AI 失败恢复与 Workspace 事件同步](./2026-10-13-ai-recovery-workspace-events/README.md)：PR #451 后续专项；评审、设计、实施切片和验收文档已形成，Goal 失败后的原生草稿脱离已实现并通过 902 测试及静态检查；轻量中断、事件系统与刷新检查点待后续切片。
+
 2026-10-13 repository consolidation: these plans also retain pending product acceptance and historical checkpoints; their presence is not evidence of a running implementation task. Useful existing code is consolidated through PR #449 rather than held on idle branches. See the [consolidation audit](../archive/2026-10-13-main-branch-consolidation.md) for verified scope and explicit remaining acceptance limits.
 
 - [Ask User + Goal Business Surface](./2026-10-12-ask-user-business-surface.md)：右侧原生表单、owner capability、冲突/保存/接手 UI 与真实运行状态切片已实现；SDK 原生 ask_user、生成期间增量操作、跨窗口 durable control 尚未闭合，不可按完整功能验收。

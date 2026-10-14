@@ -35,3 +35,5 @@ export {
 
 // ===== Startup Hook =====
 export { createGoalStartupHook } from './initialization';
+
+export { createGoalDraftCheckpointStore } from './infrastructure/goal-draft-checkpoint.indexeddb';

@@ -148,13 +148,12 @@ import {
   goalTimeframeLabel,
   KeyResultCalculationMethod,
   type GoalTimeframe,
-  type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';
 
-type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
+type DraftKeyResult = import('../composables/goalNativeEditSession').GoalDraftKeyResult;
 type KrId = DraftKeyResult['id'];
 
 const props = withDefaults(
@@ -247,7 +246,9 @@ function ensureEditorFullyVisible(): void {
   const panel = editorPanelRef.value;
   if (!panel) return;
 
-  const scrollContainer = panel.closest<HTMLElement>('[data-testid="product-dialog-body"]');
+  const scrollContainer = panel.closest<HTMLElement>(
+    '[data-scroll-host="pane-dialog"], [data-testid="product-dialog-body"]',
+  );
   if (!scrollContainer) return;
 
   if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 1) return;

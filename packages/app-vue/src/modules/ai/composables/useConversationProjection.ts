@@ -5,7 +5,11 @@ import {
   type AssistantRuntimeChoice,
 } from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import {
+  resetWorkspaceEvents,
+  subscribeWorkspaceEvents,
+} from '../../../shared/services/workspace-event-subscription';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
@@ -13,6 +17,8 @@ import type { AIChatService, ChatItem, ConversationSummary } from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
 const LAST_CONVERSATION_STORAGE_KEY = 'ai:last-conversation-id';
+const LIST_LIMIT = 24;
+const MAX_TRACKED_CONVERSATIONS = 512;
 type DeleteConversationId = Parameters<AIChatService['deleteConversation']>[0];
 export function useConversationProjection(input: {
   options: UseAIChatSessionOptions;
@@ -31,19 +37,37 @@ export function useConversationProjection(input: {
   const conversationList = ref<ConversationSummary[]>([]);
   let listGeneration = 0;
   let mutationRevision = 0;
+  const versions = new Map<string, number>();
+  const streamController = new AbortController();
+  let listRequest: Promise<boolean> | null = null;
   const pendingListChanges = new Map<
     string,
-    { revision: number; item: ConversationSummary | null; runtimeKind: 'builtin' | 'local_agent' }
+    {
+      revision: number;
+      resourceVersion?: number;
+      item: ConversationSummary | null;
+      runtimeKind: 'builtin' | 'local_agent';
+    }
   >();
 
   function sortConversations(items: ConversationSummary[]): ConversationSummary[] {
-    return items.sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0));
+    return items
+      .sort((a, b) => Number(b.updatedAt ?? 0) - Number(a.updatedAt ?? 0))
+      .slice(0, LIST_LIMIT);
   }
 
   function upsertConversation(item: ConversationSummary): void {
+    if (item.runtimeKind !== 'local_agent') {
+      const version = item.resourceVersion;
+      if (version !== undefined && version < (versions.get(item.id) ?? 0)) return;
+      const pending = pendingListChanges.get(item.id);
+      if (pending?.item === null && (version ?? 0) <= (versions.get(item.id) ?? 0)) return;
+      if (version !== undefined) versions.set(item.id, version);
+    }
     pendingListChanges.set(item.id, {
       revision: ++mutationRevision,
       item,
+      resourceVersion: item.runtimeKind === 'local_agent' ? undefined : item.resourceVersion,
       runtimeKind: item.runtimeKind ?? 'builtin',
     });
     conversationList.value = sortConversations([
@@ -55,8 +79,83 @@ export function useConversationProjection(input: {
   function markConversationActivity(id: string): void {
     const item = conversationList.value.find((current) => current.id === id);
     if (item)
-      upsertConversation({ ...item, updatedAt: Math.max(Number(item.updatedAt ?? 0), Date.now()) });
+      conversationList.value = sortConversations(
+        conversationList.value.map((current) =>
+          current.id === id
+            ? { ...current, updatedAt: Math.max(Number(current.updatedAt ?? 0), Date.now()) }
+            : current,
+        ),
+      );
   }
+
+  onMounted(() => {
+    if (!options.workspaceRuntime?.streamWorkspaceEvents) return;
+    void subscribeWorkspaceEvents(options.workspaceRuntime, {
+      signal: streamController.signal,
+      onEvent: async (event) => {
+        if (streamController.signal.aborted) return;
+        if (event.type === 'stream.reset_required') {
+          versions.clear();
+          // Pending native mutations survive reset; drop ordering metadata from the old epoch.
+          for (const change of pendingListChanges.values()) {
+            change.resourceVersion = undefined;
+            if (change.item && change.item.runtimeKind !== 'local_agent')
+              change.item = { ...change.item, resourceVersion: undefined };
+          }
+          conversationList.value = conversationList.value.map((item) =>
+            item.runtimeKind === 'local_agent' ? item : { ...item, resourceVersion: undefined },
+          );
+          await loadConversationList(options.service, true, mutationRevision);
+        } else if (event.type === 'stream.ready') {
+          // A discovery request may have read before the stream watermark.
+          // Only a snapshot started after ready closes that initial race.
+          if (listRequest) await listRequest;
+          const beforeCalibration = mutationRevision;
+          // Every reconnect snapshot is authoritative for completed mutations
+          // before it, including resets requested by a different consumer.
+          await loadConversationList(options.service, true, beforeCalibration);
+          // Completed mutations now belong to this post-watermark snapshot.
+          for (const [id, change] of pendingListChanges) {
+            if (change.revision <= beforeCalibration) pendingListChanges.delete(id);
+          }
+          versions.clear();
+          for (const item of conversationList.value) {
+            if (item.runtimeKind !== 'local_agent' && item.resourceVersion !== undefined)
+              versions.set(item.id, item.resourceVersion);
+          }
+        } else if (event.type === 'conversation.updated') {
+          const id = event.data.conversationId;
+          if (!versions.has(id) && versions.size >= MAX_TRACKED_CONVERSATIONS) {
+            resetWorkspaceEvents(options.workspaceRuntime!);
+            return;
+          }
+          if (event.resourceVersion <= (versions.get(id) ?? 0)) return;
+          if (event.data.conversation) {
+            upsertConversation(event.data.conversation);
+            if (chatConversationId.value === id)
+              conversationTitle.value = event.data.conversation.name;
+          } else {
+            versions.set(id, event.resourceVersion);
+            pendingListChanges.set(id, {
+              revision: ++mutationRevision,
+              resourceVersion: event.resourceVersion,
+              item: null,
+              runtimeKind: 'builtin',
+            });
+            conversationList.value = conversationList.value.filter((item) => item.id !== id);
+            if (chatConversationId.value === id) startNewConversation();
+            if (lastActiveConversationId.value === id) clearLastActiveConversation();
+          }
+        }
+      },
+    }).catch(() => {
+      /* Explicit refresh remains available after transport or projection loss. */
+    });
+  });
+  onUnmounted(() => {
+    streamController.abort();
+    listGeneration++;
+  });
 
   const lastActiveConversationId = ref('');
   const lastRuntimeUsage = ref<AIRuntimeUsage | null>(null);
@@ -122,16 +221,28 @@ export function useConversationProjection(input: {
     localStorage.removeItem(LAST_CONVERSATION_STORAGE_KEY);
   }
 
-  async function loadConversationList(loadService: AIChatService) {
+  async function loadConversationList(
+    loadService: AIChatService,
+    required = false,
+    compactRevision?: number,
+  ): Promise<void> {
+    const request = listRequest ?? performLoadConversationList(loadService, compactRevision);
+    listRequest = request;
+    const success = await request;
+    if (listRequest === request) listRequest = null;
+    if (required && !success) throw new Error('Conversation snapshot unavailable');
+  }
+
+  async function performLoadConversationList(loadService: AIChatService, compactRevision?: number) {
     const generation = ++listGeneration;
     const revision = mutationRevision;
     conversationListLoading.value = true;
     try {
       const [builtin, local] = await Promise.allSettled([
-        loadService.listConversations({ page: 1, pageSize: 24 }).then(unwrap),
+        loadService.listConversations({ page: 1, pageSize: LIST_LIMIT }).then(unwrap),
         options.localAgent?.listConversations() ?? Promise.resolve([]),
       ]);
-      if (generation !== listGeneration) return;
+      if (generation !== listGeneration) return false;
       const merged = new Map<string, ConversationSummary>(
         [
           ...(builtin.status === 'fulfilled'
@@ -148,25 +259,42 @@ export function useConversationProjection(input: {
           change.runtimeKind === 'local_agent'
             ? local.status === 'fulfilled'
             : builtin.status === 'fulfilled';
+        // Completed mutations from before a fresh stream boundary are now
+        // owned by its snapshot, including deletion while we were disconnected.
+        if (compactRevision !== undefined && change.revision <= compactRevision && sourceSucceeded)
+          continue;
         if (
           sourceSucceeded &&
           change.revision <= revision &&
           (change.item === null
             ? !authoritative
             : authoritative &&
-              Number(authoritative.updatedAt ?? 0) >= Number(change.item.updatedAt ?? 0))
+              (change.runtimeKind === 'local_agent' ||
+                (authoritative.runtimeKind !== 'local_agent' &&
+                  (authoritative.resourceVersion ?? 0) >= (change.resourceVersion ?? 0))))
         ) {
           pendingListChanges.delete(id);
         } else if (change.item) merged.set(id, change.item);
         else merged.delete(id);
+      }
+      for (const [id, item] of merged) {
+        if (item.runtimeKind === 'local_agent') continue;
+        const currentVersion = compactRevision === undefined ? (versions.get(id) ?? 0) : 0;
+        if ((item.resourceVersion ?? 0) < currentVersion) {
+          const current = conversationList.value.find((value) => value.id === id);
+          if (current) merged.set(id, current);
+          else merged.delete(id);
+        } else if (item.resourceVersion !== undefined) versions.set(id, item.resourceVersion);
       }
       conversationList.value = sortConversations([...merged.values()]);
       if (builtin.status === 'rejected' || local.status === 'rejected')
         toast.error(t('aiAssistant.dialogs.chat.loadFailed'));
 
       // This is a paginated discovery list, not proof that a selected thread was deleted.
+      return builtin.status === 'fulfilled' && local.status === 'fulfilled';
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.loadFailed'));
+      return false;
     } finally {
       if (generation === listGeneration) conversationListLoading.value = false;
     }
@@ -295,7 +423,6 @@ export function useConversationProjection(input: {
       conversationList.value = conversationList.value.filter((item) => item.id !== id);
       if (chatConversationId.value === id) startNewConversation();
       if (lastActiveConversationId.value === id) clearLastActiveConversation();
-      await loadConversationList(loadService);
       toast.success(t('aiAssistant.dialogs.chat.deleted'));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.deleteFailed'));

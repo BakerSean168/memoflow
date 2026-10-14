@@ -1,3 +1,4 @@
+import type { AttentionEventsPowerSync } from './attention-events.powersync';
 import { randomUUID } from 'node:crypto';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { AssistantAttentionView } from '@memoflow/contracts/ai';
@@ -26,9 +27,13 @@ interface AttentionRow {
 
 /** The Desktop Profile PowerSync table stays local for native Agent conversations. */
 export class ConversationAttentionPowerSyncAdapter implements IConversationAttentionPort {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(
+    private readonly db: IElectronDatabase,
+    readonly events?: AttentionEventsPowerSync,
+  ) {}
 
   async transition(input: AssistantAttentionTransition): Promise<void> {
+    await this.events?.init();
     // Transactionally serialized per local Profile; no read-modify-write races.
     await this.db.writeTransaction(async (tx) => {
       const old = await tx.getOptional<AttentionRow>(
@@ -55,6 +60,7 @@ export class ConversationAttentionPowerSyncAdapter implements IConversationAtten
             now,
           ],
         );
+        await this.events?.capture(tx, input.identityId, input.runtimeKind, input.conversationId);
         return;
       }
       const newRun = old.run_id !== input.runId;
@@ -77,21 +83,30 @@ export class ConversationAttentionPowerSyncAdapter implements IConversationAtten
           input.identityId,
         ],
       );
+      await this.events?.capture(tx, input.identityId, input.runtimeKind, input.conversationId);
     });
   }
 
   async heartbeat(input: AssistantAttentionIdentity & { runId: string }): Promise<void> {
-    await this.db.execute(
-      `UPDATE ai_conversation_attention SET updated_at = ?
+    await this.events?.init();
+    await this.db.writeTransaction(async (tx) => {
+      await tx.execute(
+        `UPDATE ai_conversation_attention SET updated_at = ?
        WHERE identity_id = ? AND runtime_kind = ? AND conversation_id = ?
          AND run_id = ? AND state IN ('working','input','approval')`,
-      [Date.now(), input.identityId, input.runtimeKind, input.conversationId, input.runId],
-    );
+        [Date.now(), input.identityId, input.runtimeKind, input.conversationId, input.runId],
+      );
+      await this.events?.capture(tx, input.identityId, input.runtimeKind, input.conversationId);
+    });
   }
 
   async list(input: AssistantAttentionLookup): Promise<AssistantAttentionView[]> {
     if (!input.conversationIds.length) return [];
     const ids = [...new Set(input.conversationIds)].slice(0, 100);
+    if (this.events) {
+      await this.events.init();
+      return this.events.snapshot(input.identityId, ids, input.runtimeKind);
+    }
     const rows = await this.db.getAll<AttentionRow>(
       `SELECT * FROM ai_conversation_attention
        WHERE identity_id = ? AND runtime_kind = ?
@@ -120,26 +135,42 @@ export class ConversationAttentionPowerSyncAdapter implements IConversationAtten
   }
 
   async acknowledge(input: AssistantAttentionAcknowledge): Promise<boolean> {
-    const result = await this.db.execute(
-      `UPDATE ai_conversation_attention SET seen_revision = ?
+    await this.events?.init();
+    return this.db.writeTransaction(async (tx) => {
+      // PowerSync exposes logical views; trigger-backed updates do not report
+      // the underlying row count. Read the guarded row inside this same transaction.
+      const current = await tx.getOptional<AttentionRow>(
+        'SELECT * FROM ai_conversation_attention WHERE identity_id=? AND runtime_kind=? AND conversation_id=?',
+        [input.identityId, input.runtimeKind, input.conversationId],
+      );
+      if (!current || current.revision < input.revision || current.seen_revision >= input.revision)
+        return false;
+      await tx.execute(
+        `UPDATE ai_conversation_attention SET seen_revision = ?
        WHERE identity_id = ? AND runtime_kind = ? AND conversation_id = ?
          AND revision >= ? AND seen_revision < ?`,
-      [
-        input.revision,
-        input.identityId,
-        input.runtimeKind,
-        input.conversationId,
-        input.revision,
-        input.revision,
-      ],
-    );
-    return result.rowsAffected === 1;
+        [
+          input.revision,
+          input.identityId,
+          input.runtimeKind,
+          input.conversationId,
+          input.revision,
+          input.revision,
+        ],
+      );
+      await this.events?.capture(tx, input.identityId, input.runtimeKind, input.conversationId);
+      return true;
+    });
   }
 
   async forget(input: AssistantAttentionIdentity): Promise<void> {
-    await this.db.execute(
-      'DELETE FROM ai_conversation_attention WHERE identity_id = ? AND runtime_kind = ? AND conversation_id = ?',
-      [input.identityId, input.runtimeKind, input.conversationId],
-    );
+    await this.events?.init();
+    await this.db.writeTransaction(async (tx) => {
+      await tx.execute(
+        'DELETE FROM ai_conversation_attention WHERE identity_id = ? AND runtime_kind = ? AND conversation_id = ?',
+        [input.identityId, input.runtimeKind, input.conversationId],
+      );
+      await this.events?.capture(tx, input.identityId, input.runtimeKind, input.conversationId);
+    });
   }
 }

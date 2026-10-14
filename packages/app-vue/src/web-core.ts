@@ -2,6 +2,7 @@ export {
   ACCOUNT_SERVICE_KEY,
   AUTH_SERVICE_KEY,
   GOAL_SERVICE_KEY,
+  GOAL_DRAFT_CHECKPOINT_KEY,
   GOAL_KNOWLEDGE_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
@@ -25,3 +26,5 @@ export {
 export { defaultModuleCapsules } from './di/navigation';
 
 export { useAuthenticationStore } from './modules/authentication/stores/authentication-store';
+
+export { createGoalDraftCheckpointStore } from './modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';

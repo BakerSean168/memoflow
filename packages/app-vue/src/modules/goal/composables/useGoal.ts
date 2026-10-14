@@ -12,10 +12,10 @@
  * - goalOperations: 共享 orchestration helpers
  */
 
-import { computed, ref } from 'vue';
+import { computed, ref, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useGoalStore } from '../stores/goal-store';
-import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { GOAL_SERVICE_KEY, GOAL_DRAFT_CHECKPOINT_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
 import {
@@ -37,8 +37,10 @@ type GoalEntityLike = { toDTO(): GoalClientDTO };
 export function useGoal() {
   const store = useGoalStore();
   const service = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  const checkpointStore = inject(GOAL_DRAFT_CHECKPOINT_KEY, undefined);
   const { t } = useI18n();
   const savingId = ref<string | null>(null);
+  const lastCreateRejected = ref(false);
 
   const goals = computed(() => store.goals);
   const selectedGoal = computed(() => store.selectedGoal);
@@ -90,15 +92,21 @@ export function useGoal() {
   }
 
   async function createGoal(req: CreateGoalReq) {
+    const identityScope = checkpointStore?.scope();
+    lastCreateRejected.value = false;
     savingId.value = 'new';
     store.setError(null);
     try {
-      const data = await executeGoalOperation(() => service.createGoal(sanitizeForIpc(req)), {
+      const data = await executeGoalOperation(async () => {
+        const result = await service.createGoal(sanitizeForIpc(req));
+        lastCreateRejected.value = !result.ok && result.error.code === 'VALIDATION_ERROR';
+        return result;
+      }, {
         ...opOpts,
         fallbackKey: 'goal.error.createFailed',
         scope: 'createGoal',
       });
-      if (data) {
+      if (data && checkpointStore?.scope() === identityScope) {
         store.applyGoalMutationReceipt(data);
         return data.readModel;
       }
@@ -109,6 +117,7 @@ export function useGoal() {
   }
 
   async function updateGoal(id: string, req: UpdateGoalReq) {
+    const identityScope = checkpointStore?.scope();
     savingId.value = id;
     store.setError(null);
     try {
@@ -117,7 +126,7 @@ export function useGoal() {
         fallbackKey: 'goal.error.updateFailed',
         scope: 'updateGoal',
       });
-      if (data) {
+      if (data && checkpointStore?.scope() === identityScope) {
         store.applyGoalMutationReceipt(data);
         return data.readModel;
       }
@@ -294,6 +303,7 @@ export function useGoal() {
     // Goal CRUD
     fetchGoals,
     createGoal,
+    lastCreateRejected,
     updateGoal,
     deleteGoal,
     planGoal,

@@ -1,3 +1,4 @@
+import type { ConversationEventsPowerSync } from './conversation-events.powersync';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { AIEventMap } from '@memoflow/contracts/ai';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
@@ -8,15 +9,21 @@ import { PowerSyncAIConversationMapper, type PowerSyncAIConversationRow } from '
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);
 
 export class PowerSyncAIConversationRepository implements IAIConversationRepository {
-  constructor(private readonly db: IElectronDatabase) {}
+  constructor(
+    private readonly db: IElectronDatabase,
+    readonly events?: ConversationEventsPowerSync,
+  ) {}
 
   async save(conversation: AIConversation): Promise<void> {
+    await this.events?.init();
     const persisted = PowerSyncAIConversationMapper.toPersistence(conversation);
     await this.db.writeTransaction(async (tx) => {
-      const existing = await tx.getOptional<{ id: string }>(
-        `SELECT id FROM ai_conversations WHERE id = ? LIMIT 1`,
+      const existing = await tx.getOptional<{ id: string; identity_id: string }>(
+        `SELECT id, identity_id FROM ai_conversations WHERE id = ? LIMIT 1`,
         [persisted.id],
       );
+      if (existing && existing.identity_id !== persisted.identity_id)
+        throw new Error('Conversation not found for the current identity.');
       if (existing) {
         await tx.execute(
           `UPDATE ai_conversations
@@ -49,6 +56,7 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
           ],
         );
       }
+      await this.events?.capture(tx, persisted.identity_id, persisted.id);
     });
     flushDomainEvents(aiEventPublisher, conversation);
   }
@@ -74,20 +82,28 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
   }
 
   async delete(identityId: string, id: string): Promise<void> {
+    await this.events?.init();
     const existing = await this.findByIdForIdentity(identityId, id);
     if (!existing) throw new Error('Conversation not found for the current identity.');
     const now = new Date().toISOString();
-    await this.db.execute(
-      `UPDATE ai_conversations SET status = ?, deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?`,
-      ['Archived', now, now, id, identityId],
-    );
+    await this.db.writeTransaction(async (tx) => {
+      await tx.execute(
+        `UPDATE ai_conversations SET status = ?, deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?`,
+        ['Archived', now, now, id, identityId],
+      );
+      await this.events?.capture(tx, identityId, id);
+    });
   }
 
   async recordActivity(identityId: string, id: string, at: number): Promise<void> {
+    await this.events?.init();
     const timestamp = new Date(at).toISOString();
-    await this.db.execute(
-      'UPDATE ai_conversations SET updated_at = ? WHERE id = ? AND identity_id = ? AND deleted_at IS NULL AND updated_at < ?',
-      [timestamp, id, identityId, timestamp],
-    );
+    await this.db.writeTransaction(async (tx) => {
+      await tx.execute(
+        'UPDATE ai_conversations SET updated_at = ? WHERE id = ? AND identity_id = ? AND deleted_at IS NULL AND updated_at < ?',
+        [timestamp, id, identityId, timestamp],
+      );
+      await this.events?.capture(tx, identityId, id);
+    });
   }
 }

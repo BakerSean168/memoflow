@@ -32,6 +32,8 @@ export const AssistantAttentionViewSchema = z
     seenRevision: z.number().int().nonnegative(),
     runId: z.string().nullable(),
     updatedAt: z.number().int().nonnegative(),
+    /** Event ordering version, independent of the revision acknowledged by the user. */
+    resourceVersion: z.number().int().positive().optional(),
   })
   .strict();
 export const AssistantAttentionListResponseSchema = z

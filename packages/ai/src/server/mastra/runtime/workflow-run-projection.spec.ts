@@ -50,6 +50,26 @@ function row(snapshot: unknown, resourceId: string | undefined = 'owner') {
 }
 
 describe('goal.create live model tool action projection', () => {
+  it('retains a committed Goal receipt when subsequent workflow execution fails', () => {
+    const committed = { ...receipt, referenceMap: { goal: 'already-created-goal' } };
+    const view = projectGoalCreateRun(row({ status: 'failed',
+      context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
+      value: { priorReceipt: committed }, error: { code: 'RATE_LIMITED' },
+    }), 'owner');
+    expect(view).toMatchObject({ status: 'failed', result: { referenceMap: { goal: 'already-created-goal' } } });
+  });
+  it('preserves safe quota classification and delay from a durable failed snapshot', () => {
+    const run = projectGoalCreateRun(row({ status: 'failed',
+      context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
+      error: { statusCode: 429, responseBody: JSON.stringify({ error: {
+        code: 'insufficient_quota', message: 'PRIVATE_KEY',
+      } }), responseHeaders: { 'retry-after': '30' } },
+    }), 'owner');
+    expect(run?.failure).toMatchObject({ code: 'RATE_LIMITED',
+      details: { limitKind: 'quota_exhausted' }, retryHint: { kind: 'after', afterMs: 30000 },
+    });
+    expect(JSON.stringify(run)).not.toContain('PRIVATE_KEY');
+  });
   const action = {
     sequence: 1,
     command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Pass JLPT N1' },

@@ -66,6 +66,8 @@ const fixture = await vi.hoisted(async () => {
       goalAgentWaitingForClarification: ref(false),
       goalAgentWaitingForApproval: ref(false),
       goalSurfaceConflict: ref(false),
+      goalRestartPending: ref(false),
+      goalSurfaceControlLost: ref(false),
       goalSurfaceReady: ref(false),
       goalManualHandoff: ref(false),
       continueGoalSurfaceControl: vi.fn(),

@@ -107,10 +107,11 @@ const RouteContentProbe = defineComponent({
 
 const ToolbarStub = defineComponent({
   name: 'GoalPageToolbar',
+  props: { inert: { type: Boolean, default: false } },
   emits: ['create-goal', 'update-labels', 'select-system-view'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     return () =>
-      h('header', { 'data-testid': 'goal-page-toolbar' }, [
+      h('header', { 'data-testid': 'goal-page-toolbar', inert: props.inert ? '' : undefined }, [
         h('button', {
           'data-primary-action': 'create-goal',
           'data-testid': 'create-goal-entry',
@@ -239,7 +240,7 @@ describe('GoalModuleLayout', () => {
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
     await vi.waitFor(() => {
-      expect(router.currentRoute.value.query.dialog).toBe('goal');
+      expect(router.currentRoute.value.query.goalForm).toBe('create');
     });
     wrapper.unmount();
 
@@ -253,7 +254,7 @@ describe('GoalModuleLayout', () => {
     expect(goalMocks.fetchGoals).not.toHaveBeenCalled();
   });
 
-  it('clears the route-owned create dialog on cancel and can reopen it', async () => {
+  it('closes the route-owned pane editor on cancel and can reopen it', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
@@ -262,6 +263,7 @@ describe('GoalModuleLayout', () => {
     await router.isReady();
 
     const wrapper = mount(GoalModuleLayout, {
+      attachTo: document.body,
       global: {
         plugins: [router, i18n],
         stubs: {
@@ -271,21 +273,29 @@ describe('GoalModuleLayout', () => {
       },
     });
 
-    await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
-    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+    const opener = wrapper.get('[data-testid="create-goal-entry"]');
+    (opener.element as HTMLButtonElement).focus();
+    await opener.trigger('click');
+    await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
 
     wrapper.findComponent(GoalDialogStub).vm.$emit('update:open', false);
     await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
       expect(router.currentRoute.value.query.dialog).toBeUndefined();
       expect(router.currentRoute.value.query.goalId).toBeUndefined();
       expect(router.currentRoute.value.query.status).toBe('active');
     });
+    // Only an explicit keyboard/user opener restores focus; AI-owned openings
+    // deliberately leave the conversation composer alone.
+    await vi.waitFor(() => expect(document.activeElement).toBe(opener.element));
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
-    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+    await vi.waitFor(() => expect(router.currentRoute.value.query.goalForm).toBe('create'));
+    wrapper.unmount();
   });
 
-  it('preserves unrelated route filters when a Goal save closes the dialog', async () => {
+  it('preserves unrelated route filters when a legacy Goal link is saved in the pane', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
@@ -307,6 +317,8 @@ describe('GoalModuleLayout', () => {
     wrapper.findComponent(GoalDialogStub).vm.$emit('created');
 
     await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
+      expect(router.currentRoute.value.query.goalForm).toBeUndefined();
       expect(router.currentRoute.value.query.dialog).toBeUndefined();
       expect(router.currentRoute.value.query.goalId).toBeUndefined();
       expect(router.currentRoute.value.query.status).toBe('active');
@@ -387,6 +399,7 @@ describe('GoalModuleLayout', () => {
 const sessionProbe: GoalNativeEditSession = {
   claimControl: vi.fn(),
   releaseControl: vi.fn(),
+  detachWorkflow: vi.fn(),
   patch: vi.fn(),
   addChild: vi.fn(),
   removeChild: vi.fn(),
@@ -442,6 +455,7 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
         'openControlledCreate',
         'openCreate',
         'openExisting',
+        'reclaimControlledCreate',
       ]);
       return () => null;
     },
@@ -487,6 +501,47 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
 }
 
 describe('Goal native surface host (PVC-AI-8001)', () => {
+  it.each([
+    '/goals?goalForm=create',
+    '/goals?dialog=goal',
+    '/goals?goalForm=edit&goalId=goal-edit',
+    '/goals?dialog=goal&goalId=goal-edit',
+  ])('renders %s as a native pane editor with no global modal', async (initial) => {
+    if (initial.includes('goal-edit')) {
+      const goal = createMockGoal({ id: 'goal-edit', name: 'Edit within pane', keyResults: [] });
+      goalMocks.getGoalAggregateView.mockResolvedValue({
+        goal,
+        keyResults: [],
+        records: [],
+        reviews: [],
+        statistics: {
+          totalKeyResults: 0,
+          completedKeyResults: 0,
+          totalRecords: 0,
+          totalReviews: 0,
+          overallProgress: 0,
+        },
+      });
+    }
+    const { wrapper, router, host } = await mountNativeHost(initial, true);
+    const pane = wrapper.get('[data-testid="goal-panel-form"]');
+    expect(pane.attributes('data-editor-presentation')).toBe('pane');
+    expect(pane.attributes('role')).toBe('dialog');
+    expect(pane.attributes('aria-modal')).toBe('false');
+    expect(wrapper.find('[data-testid="goal-page-toolbar"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="goal-background-view"]').attributes()).toHaveProperty(
+      'inert',
+    );
+    expect(wrapper.get('[data-testid="pane-scoped-dialog-backdrop"]').exists()).toBe(true);
+    expect(host.locate()).not.toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-close"]').attributes('aria-label')).toBe('Close');
+    await wrapper.get('[data-testid="goal-panel-close"]').trigger('click');
+    await flushPromises();
+    expect(router.currentRoute.value.query).toEqual({});
+    expect(host.locate()).toBeNull();
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
@@ -512,6 +567,48 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
       window.confirm = originalConfirm;
       wrapper.unmount();
     }
+  });
+
+  it('detaches a failed workflow without closing the pane or retaining the shell control lock', async () => {
+    const { wrapper, router, host } = await mountNativeHost('/tasks', true);
+    const ai = await host.openControlledCreate('failed-run');
+    ai.coordinateSubmit(
+      vi.fn(async () => {}),
+      vi.fn(async () => {}),
+    );
+    ai.patch({ name: 'Keep this pane draft' });
+    const route = router.currentRoute.value.fullPath;
+    const owner = host.locate()!;
+    ai.detachWorkflow();
+    await flushPromises();
+    expect(useAppShellStore().businessControl).toBeNull();
+    expect(router.currentRoute.value.fullPath).toBe(route);
+    expect(host.locate()).toBe(owner);
+    expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
+    expect(owner.readDraftState().draft.name).toBe('Keep this pane draft');
+    expect(owner.readDraftState().dirty).toBe(true);
+    expect(owner.readDraftState().busy).toBe(false);
+    owner.patch({ summary: 'User can edit again' });
+    expect(() => ai.patch({ name: 'Late overwrite' })).toThrow('closed');
+    wrapper.unmount();
+  });
+
+  it('reclaims an explicitly chosen preserved draft atomically and refuses a changed snapshot', async () => {
+    const { wrapper, host } = await mountNativeHost('/tasks', true);
+    const ai = await host.openControlledCreate('old-run');
+    ai.patch({ name: 'Preserved draft' });
+    ai.detachWorkflow();
+    const owner = host.locate()!;
+    const expected = owner.readDraftState();
+    owner.patch({ name: 'User changed draft' });
+    expect(() => host.reclaimControlledCreate('new-run', owner, expected)).toThrow('changed');
+    const fresh = owner.readDraftState();
+    const reclaimed = host.reclaimControlledCreate('new-run', owner, fresh);
+    expect(reclaimed.readDraftState().draft.name).toBe('User changed draft');
+    expect(useAppShellStore().businessControl?.ownerId).toBe('new-run');
+    expect(() => owner.patch({ name: 'Overwrite' })).toThrow('controlled by AI');
+    reclaimed.detachWorkflow();
+    wrapper.unmount();
   });
 
   it('releases owner control when its shell host is disposed, without discarding the draft', async () => {
@@ -542,7 +639,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     const controlled = await host.openControlledCreate('run-1');
     expect(router.currentRoute.value.query.goalForm).toBe('create');
     expect(wrapper.find('[data-testid="goal-panel-form"]').exists()).toBe(true);
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(wrapper.get('[data-testid="goal-panel-form"]').attributes('aria-modal')).toBe('false');
     controlled.patch({ name: 'AI Goal' });
     expect(() => host.locate()!.patch({ name: 'User overwrite' })).toThrow('controlled');
     await router.push('/tasks');
@@ -555,7 +652,7 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
     wrapper.unmount();
   });
 
-  it.each(['create', 'edit', 'panel'] as const)(
+  it.each(['create', 'edit', 'panel', 'panel-edit'] as const)(
     'preserves the real %s owner draft across route-driven KeepAlive tab switches',
     async (mode) => {
       const goal = createMockGoal({ name: 'Loaded Goal', keyResults: [] });
@@ -576,7 +673,9 @@ describe('Goal native surface host (PVC-AI-8001)', () => {
       const initial =
         mode === 'panel'
           ? '/goals?goalForm=create'
-          : `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
+          : mode === 'panel-edit'
+            ? `/goals?goalForm=edit&goalId=${goal.id}`
+            : `/goals?dialog=goal${mode === 'edit' ? `&goalId=${goal.id}` : ''}`;
       const { wrapper, router, host } = await mountNativeHost(initial, true);
       const session = host.locate()!;
       expect(session).not.toBeNull();

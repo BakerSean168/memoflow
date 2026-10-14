@@ -163,6 +163,9 @@ export const AIChannels = {
   RUNTIME_USAGE_GET: 'ai:runtime:usage:get',
   /** AI vNext canonical Workflow request/response surface. */
   RUNTIME_WORKFLOW_START: 'ai:runtime:workflow:start',
+  RUNTIME_WORKSPACE_START: 'ai:runtime:workspace:start',
+  RUNTIME_WORKSPACE_ACK: 'ai:runtime:workspace:ack',
+  RUNTIME_WORKSPACE_STOP: 'ai:runtime:workspace:stop',
   RUNTIME_WORKFLOW_RESUME: 'ai:runtime:workflow:resume',
   RUNTIME_WORKFLOW_GET: 'ai:runtime:workflow:get',
   RUNTIME_WORKFLOW_LIST: 'ai:runtime:workflow:list',
@@ -178,6 +181,8 @@ export const AIChannels = {
 export const AIStreamChannels = {
   /** AI vNext canonical runtime events plus transport-only fatal framing. */
   RUNTIME_ASSISTANT_EVENT: 'ai:runtime:assistant:event',
+  RUNTIME_WORKSPACE_EVENT: 'ai:runtime:workspace:event',
+  RUNTIME_WORKSPACE_END: 'ai:runtime:workspace:end',
   RUNTIME_ASSISTANT_ERROR: 'ai:runtime:assistant:error',
 } as const;
 

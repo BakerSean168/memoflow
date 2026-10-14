@@ -30,6 +30,7 @@ import {
   ACCOUNT_SERVICE_KEY,
   DESKTOP_CLOUD_AUTH_SERVICE_KEY,
   GOAL_SERVICE_KEY,
+  GOAL_DRAFT_CHECKPOINT_KEY,
   GOAL_KNOWLEDGE_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   TASK_SERVICE_KEY,
@@ -57,6 +58,7 @@ import {
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
+import { createGoalDraftCheckpointStore } from '@memoflow/app-vue/modules/goal';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { useAccountStore } from '@memoflow/app-vue/modules/account';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
@@ -140,6 +142,7 @@ export function installDesktopAppServices(
     snapshotGeneration++;
   });
   app.provide(DESKTOP_ACCESS_SNAPSHOT_KEY, desktopAccessSnapshot);
+  app.provide(GOAL_DRAFT_CHECKPOINT_KEY, createGoalDraftCheckpointStore(() => { const snapshot=desktopAccessSnapshot.value;return snapshot?.unlockState==='UNLOCKED' && snapshot.profile ? `desktop:${snapshot.profile.profileId}` : null; }));
   void readDesktopAccessSnapshot(bridge, { refreshCloud: true })
     .then((snapshot) => {
       if (refreshGeneration === snapshotGeneration) desktopAccessSnapshot.value = snapshot;

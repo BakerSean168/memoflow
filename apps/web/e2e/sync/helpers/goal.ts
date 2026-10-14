@@ -51,7 +51,7 @@ export async function createGoal(
   await openGoalList(page, surface);
   await page.getByTestId('create-goal-entry').click();
 
-  const dialog = page.getByTestId('goal-dialog');
+  const dialog = page.getByTestId('goal-panel-form');
   await expect(dialog).toBeVisible();
   await page.getByTestId('goal-name-input').fill(data.name);
   await page.getByTestId('goal-description-input').fill(data.description);
@@ -66,7 +66,7 @@ export async function editGoal(
 ): Promise<void> {
   await openContextMenuAction(page, goalName, /编辑|Edit/i);
 
-  const dialog = page.getByTestId('goal-dialog');
+  const dialog = page.getByTestId('goal-panel-form');
   await expect(dialog).toBeVisible();
 
   if (updates.name !== undefined) {
@@ -115,13 +115,16 @@ export async function waitForGoalVisible(
   goalName: string,
 ): Promise<void> {
   await expect
-    .poll(async () => {
-      await refreshWebGoalList(page, surface);
-      return await goalExists(page, goalName);
-    }, {
-      timeout: 30_000,
-      message: `Timed out waiting for goal "${goalName}" to appear.`,
-    })
+    .poll(
+      async () => {
+        await refreshWebGoalList(page, surface);
+        return await goalExists(page, goalName);
+      },
+      {
+        timeout: 30_000,
+        message: `Timed out waiting for goal "${goalName}" to appear.`,
+      },
+    )
     .toBe(true);
 }
 
@@ -131,13 +134,16 @@ export async function waitForGoalHidden(
   goalName: string,
 ): Promise<void> {
   await expect
-    .poll(async () => {
-      await refreshWebGoalList(page, surface);
-      return await goalExists(page, goalName);
-    }, {
-      timeout: 30_000,
-      message: `Timed out waiting for goal "${goalName}" to disappear.`,
-    })
+    .poll(
+      async () => {
+        await refreshWebGoalList(page, surface);
+        return await goalExists(page, goalName);
+      },
+      {
+        timeout: 30_000,
+        message: `Timed out waiting for goal "${goalName}" to disappear.`,
+      },
+    )
     .toBe(false);
 }
 

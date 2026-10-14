@@ -1,5 +1,12 @@
+import { randomUUID } from 'node:crypto';
 import { expect, test, type Page, type Route } from '@playwright/test';
-import type { AIWorkflowRunView, GoalPlanDraft } from '@memoflow/contracts/ai';
+import {
+  AIGoalSurfaceLeaseRequestSchema,
+  AIGoalSurfaceLeaseResponseSchema,
+  AIWorkflowRunViewSchema,
+  type AIWorkflowRunView,
+  type GoalPlanDraft,
+} from '@memoflow/contracts/ai';
 import { TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
@@ -16,9 +23,18 @@ test.describe('Local Docker core product Phase E', () => {
     const conversationId = `pm-phase-e-conversation-${suffix}`;
     const runId = `pm-phase-e-run-${suffix}`;
     const approval = createApprovalFixture({ conversationId, runId });
-    const consoleErrors: string[] = [];
+    const consoleErrors: Array<{ text: string; sourceUrl: string }> = [];
     const pageErrors: string[] = [];
     collectBrowserErrors(page, consoleErrors, pageErrors);
+    // Owner-first restore probes the deterministic Goal ID to decide whether
+    // the native owner has already committed. A 404 for this exact synthetic
+    // identity means no previous commit; any other console error still fails.
+    const missingOwnerPath = `/api/v1/goals/${approval.ownerGoalId}/aggregate`;
+    const ownerProbeStatuses: number[] = [];
+    page.on('response', (response) => {
+      if (new URL(response.url()).pathname === missingOwnerPath)
+        ownerProbeStatuses.push(response.status());
+    });
 
     await registerAndLogin(page, {
       email: `pm-phase-e-approval-${suffix}@test.com`,
@@ -57,11 +73,10 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(page.getByTestId('ai-chat-add-context')).toBeEnabled();
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
     await expect(page.getByTestId('business-panel')).toBeVisible();
-    await expect(page.getByTestId('business-panel-workflow')).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
-    await expect(page.getByTestId('shell-workflow-surface')).toBeVisible();
+    // Workflow details live in the optional Chat context, not a retired business-panel tab.
+    await expect(page.getByTestId('business-panel-workflow')).toHaveCount(0);
+    await expect(page.getByTestId('shell-workflow-surface')).toHaveCount(0);
+    await page.getByTestId('ai-desktop-context-panel-toggle').click();
 
     const approvalPanel = page.getByTestId('goal-workflow-panel');
     await expect(approvalPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
@@ -69,7 +84,13 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(approvalPanel).toContainText(/suspended/i);
     await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
-    await expect(page.getByTestId('goal-agent-cancel-run')).toBeVisible();
+    // Native owner owns approval cancellation; no second legacy diagnostics path.
+    await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
+    await page.getByTestId('goal-open-native-review').click();
+    await expect(page.getByTestId('goal-panel-form')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Phase E 待审批目标');
     await expectNoHorizontalOverflow(page);
 
     await testInfo.attach('phase-e-configured-workflow-1440x900', {
@@ -77,8 +98,19 @@ test.describe('Local Docker core product Phase E', () => {
       contentType: 'image/png',
     });
 
+    expect(ownerProbeStatuses).toEqual([404]);
     expect(pageErrors).toEqual([]);
-    expect(consoleErrors).toEqual([]);
+    expect(
+      consoleErrors.filter(
+        ({ text, sourceUrl }) =>
+          !(
+            text.includes('Failed to load resource') &&
+            text.includes('404') &&
+            sourceUrl !== '' &&
+            new URL(sourceUrl).pathname === missingOwnerPath
+          ),
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -86,9 +118,14 @@ function testSuffix(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function collectBrowserErrors(page: Page, consoleErrors: string[], pageErrors: string[]): void {
+function collectBrowserErrors(
+  page: Page,
+  consoleErrors: Array<{ text: string; sourceUrl: string }>,
+  pageErrors: string[],
+): void {
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text());
+    if (message.type() === 'error')
+      consoleErrors.push({ text: message.text(), sourceUrl: message.location().url });
   });
   page.on('pageerror', (error) => pageErrors.push(error.message));
 }
@@ -174,10 +211,61 @@ async function installApprovalRestoreMocks(page: Page, fixture: ApprovalFixture)
   await page.route('**/api/v1/ai/runtime/workflow/get', async (route) => {
     await fulfillJson(route, runView);
   });
+
+  // The mocked Mastra run needs a matching, server-shaped lease. Leaving this
+  // endpoint real returns 'lost' for the synthetic run and correctly blocks the
+  // native editor. Keep the real claim/renew/release fencing semantics in the
+  // fixture instead of disabling the product's fail-closed ownership checks.
+  let fence = 0;
+  let activeGrant: { token: string; fence: number; expiresAt: number } | null = null;
+  await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
+    const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
+    const now = Date.now();
+    if (request.runId !== runView.runId) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'claim') {
+      if (activeGrant && activeGrant.expiresAt > now) {
+        await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'busy' }));
+        return;
+      }
+      const granted = { token: randomUUID(), fence: ++fence, expiresAt: now + 30_000 };
+      activeGrant = granted;
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({ status: 'claimed', ...granted }),
+      );
+      return;
+    }
+    if (
+      !activeGrant ||
+      request.token !== activeGrant.token ||
+      request.fence !== activeGrant.fence ||
+      (request.action === 'renew' && activeGrant.expiresAt <= now)
+    ) {
+      await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'lost' }));
+      return;
+    }
+    if (request.action === 'renew') {
+      activeGrant.expiresAt = now + 30_000;
+      await fulfillJson(
+        route,
+        AIGoalSurfaceLeaseResponseSchema.parse({
+          status: 'renewed',
+          expiresAt: activeGrant.expiresAt,
+        }),
+      );
+      return;
+    }
+    activeGrant = null;
+    await fulfillJson(route, AIGoalSurfaceLeaseResponseSchema.parse({ status: 'released' }));
+  });
 }
 
 function createApprovalFixture(input: { conversationId: string; runId: string }) {
   const now = Date.now();
+  const ownerGoalId = `IGoalId_${randomUUID()}`;
   const draft: GoalPlanDraft = {
     revision: 1,
     goal: {
@@ -185,7 +273,7 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
       name: 'Phase E 待审批目标',
       summary: '验证 clean shell 自动恢复 canonical Mastra goal.create workflow。',
       status: 'Planned',
-      startDate: '2026-09-19',
+      start: { kind: 'day', date: '2026-09-19' },
       target: { kind: 'day', date: '2026-09-26' },
       labels: [],
     },
@@ -218,6 +306,14 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
       draft,
       warnings: draft.warnings,
       revision: draft.revision,
+      // The owner receipt identities must cover every Key Result in the current
+      // review revision, even when this E2E only inspects the recovery surface.
+      ownerCreate: {
+        // Owner identities use canonical prefixed UUIDs (GoalNativePatch
+        // validates these independently of the WorkflowRunView envelope).
+        goalId: ownerGoalId,
+        keyResultIds: { 'kr:phase-e-approval': `IKeyResultId_${randomUUID()}` },
+      },
     },
     createdAt: now,
     updatedAt: now,
@@ -226,7 +322,8 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
   return {
     conversationId: input.conversationId,
     runId: input.runId,
-    runView,
+    ownerGoalId,
+    runView: AIWorkflowRunViewSchema.parse(runView),
     workflowEntry: { activeRunId: input.runId },
   };
 }

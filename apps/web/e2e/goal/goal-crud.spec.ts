@@ -20,6 +20,82 @@ test.describe('Goal vNext product surface', () => {
     });
   });
 
+  test('[P0] keeps chat editable beside the pane Goal editor without a page-wide overlay', async ({
+    page,
+  }) => {
+    await openCreateGoalDialog(page);
+    const editor = goalDialog(page);
+    const composer = page.getByTestId('ai-chat-composer');
+    await expect(editor).toHaveAttribute('data-editor-presentation', 'pane');
+    await expect(page.getByTestId('shell-ai-column')).toBeVisible();
+    await expect(page.getByTestId('shell-business-pane')).toBeVisible();
+    await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
+    // The Goal list stays mounted beneath a visual, pane-local translucent backdrop.
+    const background = page.getByTestId('goal-background-view');
+    const backdrop = page.getByTestId('pane-scoped-dialog-backdrop');
+    await expect(background).toBeVisible();
+    await expect(background).toHaveAttribute('inert', '');
+    await expect(page.getByTestId('goal-list-view')).toBeVisible();
+    await expect(backdrop).toBeVisible();
+    await expect(editor).toHaveAttribute('role', 'dialog');
+    await expect(editor).toHaveAttribute('aria-modal', 'false');
+    const overlayBox = await backdrop.boundingBox();
+    const businessBox = await page.getByTestId('shell-business-pane').boundingBox();
+    const chatBox = await page.getByTestId('shell-ai-column').boundingBox();
+    expect(overlayBox).toBeTruthy();
+    expect(businessBox).toBeTruthy();
+    expect(chatBox).toBeTruthy();
+    expect(overlayBox!.x).toBeGreaterThanOrEqual(businessBox!.x - 1);
+    expect(overlayBox!.x + overlayBox!.width).toBeLessThanOrEqual(
+      businessBox!.x + businessBox!.width + 1,
+    );
+    expect(overlayBox!.x).toBeGreaterThanOrEqual(chatBox!.x + chatBox!.width - 1);
+
+    await page.getByTestId('goal-name-input').fill('Editable in parallel');
+    await composer.click();
+    await expect(editor).toBeVisible();
+    await composer.fill('Ask the AI to help refine my goal');
+    await expect(composer).toHaveValue('Ask the AI to help refine my goal');
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');
+
+    await page.getByTestId('goal-panel-close').click();
+    const confirmation = page.getByRole('alertdialog');
+    await expect(confirmation).toBeVisible();
+    await confirmation.getByRole('button', { name: /^(Cancel|取消)$/ }).click();
+    await expect(editor).toBeVisible();
+    await expect(composer).toHaveValue('Ask the AI to help refine my goal');
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Editable in parallel');
+  });
+
+  test('[P0] keeps a large Goal card fixed when the key-result editor grows, scrolling inside the pane only', async ({
+    page,
+  }) => {
+    await openCreateGoalDialog(page);
+    const card = goalDialog(page);
+    const scroll = card.locator('[data-scroll-host="pane-dialog"]');
+    const geometry = async () => {
+      const box = await card.boundingBox();
+      expect(box).toBeTruthy();
+      return box!;
+    };
+    const initial = await geometry();
+    const chat = page.getByTestId('ai-chat-composer');
+
+    await card.getByTestId('add-key-result-entry').click();
+    await expect(card.getByTestId('key-result-draft-form')).toBeVisible();
+    await expect
+      .poll(async () => scroll.evaluate((node) => node.scrollHeight - node.clientHeight))
+      .toBeGreaterThan(0);
+    await expect.poll(async () => scroll.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+    const expanded = await geometry();
+    expect(Math.abs(expanded.height - initial.height)).toBeLessThan(1.1);
+    expect(Math.abs(expanded.width - initial.width)).toBeLessThan(1.1);
+    expect(Math.abs(expanded.y - initial.y)).toBeLessThan(1.1);
+    await chat.fill('Chat is still editable after expanding the goal editor');
+    await expect(card).toBeVisible();
+    await expect(chat).toHaveValue('Chat is still editable after expanding the goal editor');
+  });
+
   test('[P0] creates one Goal aggregate with a label and drafted key result', async ({ page }) => {
     const goalName = `E2E Goal vNext ${Date.now()}`;
     const labelName = `Launch-${Date.now()}`;
@@ -284,7 +360,9 @@ test.describe('Goal vNext product surface', () => {
     await openSystemViewMenu(page);
     await expect(page.getByRole('menuitemradio')).toHaveCount(3);
     await expect(page.getByTestId('goal-system-view-filter-active')).toContainText(/Active|进行中/);
-    await expect(page.getByTestId('goal-system-view-filter-completed')).toContainText(/Completed|已完成/);
+    await expect(page.getByTestId('goal-system-view-filter-completed')).toContainText(
+      /Completed|已完成/,
+    );
     await expect(page.getByTestId('goal-system-view-filter-all')).toContainText(/All|全部/);
     await page.keyboard.press('Escape');
 
@@ -385,7 +463,7 @@ async function openCreateGoalDialog(page: Page): Promise<void> {
   if (await stableCreateEntry.isVisible().catch(() => false)) {
     await stableCreateEntry.click();
   } else {
-    await page.goto(WEB_CONFIG.getFullUrl('/goals?dialog=goal'), {
+    await page.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), {
       waitUntil: 'domcontentloaded',
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
@@ -409,7 +487,7 @@ async function chooseGoalStatus(page: Page, name: RegExp): Promise<void> {
 }
 
 function goalDialog(page: Page): Locator {
-  return page.getByTestId('goal-dialog');
+  return page.getByTestId('goal-panel-form');
 }
 
 function goalSubmitButton(page: Page): Locator {

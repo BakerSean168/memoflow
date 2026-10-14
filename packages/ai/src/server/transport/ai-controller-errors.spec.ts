@@ -1,4 +1,4 @@
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException, fail, toHttpResponse, toIpcResult } from '@memoflow/contracts/result';
 import { describe, expect, it } from 'vitest';
 import { AIExecutionError } from '../../shared/ai-execution-error';
 import {
@@ -13,6 +13,55 @@ const fallback = {
 } as const;
 
 describe('AI public failure projection', () => {
+  it('preserves identical typed rate-limit metadata through HTTP and IPC envelopes', () => {
+    const mapped = toAITransportFailure({ statusCode: 429,
+      responseBody: JSON.stringify({ error: { code: 'rate_limit_exceeded', message: 'SECRET' } }),
+      responseHeaders: { 'retry-after': '30' },
+    }, fallback);
+    const result = fail({ code: mapped.code, message: mapped.message, failure: mapped.failure });
+    expect(toHttpResponse(result).error?.failure).toEqual(toIpcResult(result).error?.failure);
+    expect(mapped.failure).toMatchObject({ code: 'RATE_LIMITED', category: 'rate_limited',
+      details: { limitKind: 'rate_limit' }, retryHint: { kind: 'after', afterMs: 30000 },
+    });
+    expect(JSON.stringify({ http: toHttpResponse(result), ipc: toIpcResult(result) })).not.toContain('SECRET');
+  });
+  it('projects structured quota and retry information without provider text or metadata', () => {
+    const failure = toAIPublicFailure({ statusCode: 429, responseBody: JSON.stringify({ error: {
+      message: 'SECRET_API_KEY', details: [
+        { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [
+          { quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', quotaValue: '0', description: 'SECRET_API_KEY' },
+        ] },
+        { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '30.25s' },
+      ],
+    } }) }, fallback);
+    expect(failure).toMatchObject({
+      code: 'RATE_LIMITED', details: { limitKind: 'quota_exhausted' },
+      retryHint: { kind: 'after', afterMs: 30250 },
+    });
+    expect(JSON.stringify(failure)).not.toContain('SECRET_API_KEY');
+    expect(JSON.stringify(failure)).not.toContain('quotaId');
+  });
+
+  it.each([
+    ['insufficient_quota', 'quota_exhausted'],
+    ['rate_limit_exceeded', 'rate_limit'],
+  ])('classifies structured provider %s and safe retry-after', (code, limitKind) => {
+    expect(toAIPublicFailure({ lastError: {
+      statusCode: 429, responseBody: JSON.stringify({ error: { code, message: 'SECRET' } }),
+      responseHeaders: { 'retry-after': '15' },
+    } }, fallback)).toMatchObject({
+      details: { limitKind }, retryHint: { kind: 'after', afterMs: 15000 },
+    });
+  });
+
+  it('does not infer a quota reason from text or fabricate an invalid retry hint', () => {
+    const failure = toAIPublicFailure({ statusCode: 429,
+      responseBody: 'insufficient_quota: secret', responseHeaders: { 'retry-after': '-5' },
+    }, fallback);
+    expect(failure).not.toHaveProperty('details');
+    expect(failure).not.toHaveProperty('retryHint');
+  });
+
   it('classifies a retry-wrapped provider failure and bounds cyclic unknown causes', () => {
     const upstream = { statusCode: 503, responseBody: 'private provider details' };
     expect(toAIPublicFailure({ lastError: upstream }, fallback).code).toBe('SERVICE_UNAVAILABLE');

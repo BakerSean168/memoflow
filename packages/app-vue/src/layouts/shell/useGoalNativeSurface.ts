@@ -9,7 +9,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { GoalNativeEditSession } from '../../modules/goal/composables/goalNativeEditSession';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '../../modules/goal/composables/goalNativeEditSession';
 import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativeEditSession';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
@@ -17,6 +17,8 @@ import { useAppShellStore } from './useAppShellStore';
 export interface GoalAIEditSurface extends OwnerNativeEditSurface<GoalNativeEditSession> {
   isAvailable(): boolean;
   openControlledCreate(ownerId: string): Promise<GoalNativeEditSession>;
+  /** Explicit restart intent may reclaim this exact mounted user draft without reopening it. */
+  reclaimControlledCreate(ownerId: string, session: GoalNativeEditSession, snapshot: GoalNativeDraftState): GoalNativeEditSession;
 }
 interface GoalNativeSurfaceHost extends GoalAIEditSurface {
   register(fullPath: string, session: GoalNativeEditSession): () => void;
@@ -48,7 +50,9 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       store.surfaceStatus === 'clean' &&
       !live.value &&
       !router.currentRoute.value.query.dialog &&
-      router.currentRoute.value.query.goalForm !== 'create'
+      // Neither create nor edit can be taken over while its native owner
+      // is opening (before it has registered a live session).
+      !router.currentRoute.value.query.goalForm
     );
   }
 
@@ -130,15 +134,8 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
     });
   }
 
-  const host: GoalNativeSurfaceHost = {
-    isAvailable,
-    async openControlledCreate(ownerId) {
-      await nextTick();
-      if (!isAvailable()) throw new Error('Business surface conflict');
-      const session = await open(undefined, true);
-      const state = session.readDraftState();
-      if (state.dirty || state.busy) throw new Error('Business surface changed while opening');
-      const version = store.claimBusinessControl(ownerId, router.currentRoute.value.fullPath);
+  function claimSession(ownerId: string, session: GoalNativeEditSession, allowDirty = false) {
+      const version = store.claimBusinessControl(ownerId, router.currentRoute.value.fullPath, allowDirty);
       let controlled: GoalNativeEditSession;
       try {
         controlled = session.claimControl(ownerId);
@@ -162,11 +159,35 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
           controlled.releaseControl();
           release();
         },
+        detachWorkflow() {
+          controlled.detachWorkflow();
+          release();
+        },
         requestCancel() {
           controlled.requestCancel();
           release();
         },
       };
+  }
+
+  const host: GoalNativeSurfaceHost = {
+    isAvailable,
+    async openControlledCreate(ownerId) {
+      await nextTick();
+      if (!isAvailable()) throw new Error('Business surface conflict');
+      const session = await open(undefined, true);
+      const state = session.readDraftState();
+      if (state.dirty || state.busy) throw new Error('Business surface changed while opening');
+      return claimSession(ownerId, session);
+    },
+    reclaimControlledCreate(ownerId, session, snapshot) {
+      const current = session.readDraftState();
+      if (disposed.value || locate() !== session || current.mode !== 'create' || current.busy ||
+          current.revision !== snapshot.revision || JSON.stringify(current.draft) !== JSON.stringify(snapshot.draft))
+        throw new Error('Goal surface changed before restart');
+      // The native snapshot is authoritative; its busy/dirty publication may still be queued.
+      store.setSurfaceStatus(current.dirty ? 'dirty' : 'clean');
+      return claimSession(ownerId, session, true);
     },
     openCreate: () => open(),
     openExisting: (id) => {
@@ -199,6 +220,7 @@ export function useGoalNativeSurface(): GoalAIEditSurface {
     locate: host.locate,
     isAvailable: host.isAvailable,
     openControlledCreate: host.openControlledCreate,
+    reclaimControlledCreate: host.reclaimControlledCreate,
   };
 }
 

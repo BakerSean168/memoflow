@@ -45,6 +45,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(goalOnly.goalBinding).toEqual({
       goalId: fixture.id,
       keyResultId: null,
+      progressRule: null,
       contribution: null,
     });
 
@@ -57,6 +58,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(keyResultOnly.goalBinding).toEqual({
       goalId: fixture.id,
       keyResultId: fixture.keyResultId,
+      progressRule: null,
       contribution: null,
     });
 
@@ -140,10 +142,9 @@ test.describe('Local Docker core product Phase A', () => {
     }
     await toggle.click();
     await selectBinding(page, primary);
-    const contributionToggle = page.getByTestId('task-goal-contribution-toggle');
-    await expect(contributionToggle).toHaveAttribute('data-state', 'unchecked');
-    await contributionToggle.click();
-    await expect(contributionToggle).toHaveAttribute('data-state', 'checked');
+    await expect(page.getByTestId('task-goal-mode')).toContainText('仅关联');
+    await page.getByTestId('task-goal-mode').click();
+    await page.getByTestId('task-goal-mode-FixedAutomatic').click();
     await page.getByTestId('task-goal-increment-input').fill('1');
 
     const createResponsePromise = page.waitForResponse(
@@ -158,6 +159,7 @@ test.describe('Local Docker core product Phase A', () => {
         goalBinding: {
           goalId: string;
           keyResultId: string;
+          progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
           contribution: { value: number; trigger: string } | null;
         } | null;
       };
@@ -168,25 +170,28 @@ test.describe('Local Docker core product Phase A', () => {
     expect(creation.plan.goalBinding).toEqual({
       goalId: primary.id,
       keyResultId: primary.keyResultId,
+      progressRule: { mode: 'Fixed', value: 1, trigger: 'EachCompletion' },
       contribution: { value: 1, trigger: 'EachCompletion' },
     });
 
     await page.getByTestId('task-surface-trigger').click();
     await page.getByTestId('task-surface-plans').click();
     const taskCard = page
-      .getByTestId('task-plan-card')
+      .getByTestId('task-plan-row')
       .filter({ has: page.getByText(taskName, { exact: true }) })
       .first();
     await expect(taskCard).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await taskCard.getByText(taskName, { exact: true }).click();
+    await taskCard.getByRole('button').click();
 
     await page.waitForURL(new RegExp(`/tasks/${creation.plan.id}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-    await expect(page.getByTestId('task-plan-overview')).toContainText('已绑定 Goal');
-    await expect(page.getByTestId('task-plan-workspace-properties')).toContainText(
-      '已配置 Goal 贡献',
-    );
+    // Task detail now shows canonical owner and KR context, not an old progress
+    // summary string. The exact Fixed/EachCompletion rule was asserted on POST.
+    const goalContext = page.getByTestId('task-goal-row');
+    await expect(goalContext).toContainText(primary.name);
+    await expect(goalContext).toContainText(primary.keyResultName);
+    await expect(page.getByTestId('task-detail-goal-chip')).toBeVisible();
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);
@@ -245,9 +250,9 @@ async function createGoalWithKeyResult(
   await page.getByTestId('draft-kr-target-input').fill('10');
   await page.getByTestId('save-key-result-draft').click();
   await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
-  await expect(page.getByTestId('goal-dialog')).toContainText(input.keyResultName);
+  await expect(page.getByTestId('goal-panel-form')).toContainText(input.keyResultName);
   await page.getByTestId('save-goal-button').click();
-  await expect(page.getByTestId('goal-dialog')).toBeHidden({
+  await expect(page.getByTestId('goal-panel-form')).toBeHidden({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
 
@@ -295,6 +300,7 @@ async function createTaskPlanWithContext(
   goalBinding: {
     goalId: string;
     keyResultId: string | null;
+    progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
     contribution: { value: number; trigger: string } | null;
   } | null;
 }> {
@@ -326,10 +332,11 @@ async function createTaskPlanWithContext(
     await expect(keyResultTrigger).toContainText(fixture.keyResultName);
   }
 
-  await expect(page.getByTestId('task-goal-contribution-toggle')).toHaveAttribute(
-    'data-state',
-    'unchecked',
-  );
+  if (level === 'keyResult') {
+    await expect(page.getByTestId('task-goal-mode')).toContainText('仅关联');
+  } else {
+    await expect(page.getByTestId('task-goal-mode')).toBeHidden();
+  }
   const responsePromise = page.waitForResponse(
     (response) =>
       response.request().method() === 'POST' &&
@@ -342,6 +349,7 @@ async function createTaskPlanWithContext(
       goalBinding: {
         goalId: string;
         keyResultId: string | null;
+        progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
         contribution: { value: number; trigger: string } | null;
       } | null;
     };

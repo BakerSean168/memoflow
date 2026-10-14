@@ -11,6 +11,7 @@ import type {
   AssistantRuntimeToolAnswerCommand,
   GoalPlanDraft,
   GoalWorkflowLiveAction,
+  AIWorkflowTerminalFailure,
   GoalPlanKnowledge,
   GoalPlanTask,
   QueryKnowledgeRes,
@@ -78,7 +79,7 @@ export interface UseAIKnowledgeQaWorkflowOptions {
 export type WorkflowMode =
   'chat' | 'goal-create' | 'task-create' | 'knowledge-capture' | 'knowledge-qa';
 
-export type MessageStatus = 'generating' | 'success' | 'error' | 'aborted';
+export type MessageStatus = 'generating' | 'success' | 'error' | 'aborted' | 'interrupted';
 
 export type ChatAttachmentView = {
   mediaType: string;
@@ -115,6 +116,12 @@ export type ChatItem = {
   status: MessageStatus;
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
+  workflowInterruption?: {
+    failure?: AIWorkflowTerminalFailure;
+    draftPreserved: boolean;
+    confirmation?: 'stopped' | 'unconfirmed';
+    requestedModel?: { name: string; provider: string };
+  };
   /** Local receipt emitted only after the native owner successfully applies a command. */
   businessOperation?: { runId: string; revision: number; operation: 'goal.patch' | GoalWorkflowLiveAction['operation'] };
   toolActivity?: Extract<

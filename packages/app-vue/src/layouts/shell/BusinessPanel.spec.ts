@@ -110,7 +110,7 @@ describe('BusinessPanel surfaces', () => {
 
     const strip = wrapper.get('[data-testid="business-panel-tab-strip"]');
     const tabList = wrapper.get('[data-testid="business-panel-tab-list"]');
-    const activeTab = wrapper.get('[role="tab"]');
+    const activeTab = wrapper.get('[data-business-tab-id]');
 
     expect(strip.classes()).toContain('h-9');
     expect(tabList.classes()).toContain('overflow-hidden');
@@ -118,7 +118,9 @@ describe('BusinessPanel surfaces', () => {
     expect(wrapper.get('[data-testid="business-panel"]').attributes('data-tab-density')).toBe(
       'comfortable',
     );
-    expect(activeTab.attributes('aria-selected')).toBe('true');
+    expect(tabList.attributes('role')).toBe('group');
+    expect(activeTab.attributes('aria-pressed')).toBe('true');
+    expect(wrapper.get('[data-testid="business-panel-tab-close"]').element.tagName).toBe('BUTTON');
     expect(activeTab.attributes('tabindex')).toBe('0');
   });
 
@@ -135,21 +137,23 @@ describe('BusinessPanel surfaces', () => {
       const wrapper = mountPanel(panelSurface);
       await wrapper.setProps({ tabs: [...tabs, secondTab], activeTabId: secondTab.id });
 
-      expect(wrapper.findAll('[role="tab"][tabindex="0"]')).toHaveLength(1);
-      expect(wrapper.get('[role="tab"][tabindex="0"]').attributes('data-business-tab-id')).toBe(
-        tabs[0].id,
-      );
-      expect(wrapper.findAll('[role="tab"][aria-selected="true"]')).toHaveLength(0);
+      expect(wrapper.findAll('[data-business-tab-id][tabindex="0"]')).toHaveLength(1);
+      expect(
+        wrapper.get('[data-business-tab-id][tabindex="0"]').attributes('data-business-tab-id'),
+      ).toBe(tabs[0].id);
+      expect(wrapper.findAll('[data-business-tab-id][aria-pressed="true"]')).toHaveLength(0);
 
       await wrapper.setProps({ panelSurface: 'business' });
 
-      expect(wrapper.findAll('[role="tab"][tabindex="0"]')).toHaveLength(1);
-      expect(wrapper.get('[role="tab"][tabindex="0"]').attributes('data-business-tab-id')).toBe(
-        secondTab.id,
-      );
-      expect(wrapper.findAll('[role="tab"][aria-selected="true"]')).toHaveLength(1);
+      expect(wrapper.findAll('[data-business-tab-id][tabindex="0"]')).toHaveLength(1);
       expect(
-        wrapper.get('[role="tab"][aria-selected="true"]').attributes('data-business-tab-id'),
+        wrapper.get('[data-business-tab-id][tabindex="0"]').attributes('data-business-tab-id'),
+      ).toBe(secondTab.id);
+      expect(wrapper.findAll('[data-business-tab-id][aria-pressed="true"]')).toHaveLength(1);
+      expect(
+        wrapper
+          .get('[data-business-tab-id][aria-pressed="true"]')
+          .attributes('data-business-tab-id'),
       ).toBe(secondTab.id);
     },
   );
@@ -257,7 +261,7 @@ describe('BusinessPanel narrow keyboard contract', () => {
       resize?.([{ contentRect: { width: 520 } } as ResizeObserverEntry], {} as ResizeObserver);
       await nextTick();
       expect(wrapper.attributes('data-tab-density')).toBe('icon');
-      const tabButtons = wrapper.findAll('[role="tab"]');
+      const tabButtons = wrapper.findAll('[data-business-tab-id]');
       expect(tabButtons.filter((tab) => tab.attributes('tabindex') === '0')).toHaveLength(1);
       for (const [index, tab] of tabButtons.entries()) {
         expect(tab.attributes('aria-label')).toBe(`Goal ${index}`);

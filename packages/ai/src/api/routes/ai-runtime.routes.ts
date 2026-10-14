@@ -1,3 +1,4 @@
+import type { ConversationEventSource } from '../../server/domain/repositories/conversation-events.port';
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import {
   AssistantRuntimeToolAnswerCommandSchema,
@@ -39,6 +40,8 @@ import {
 import { toAITransportFailure } from '../../server/transport';
 import type { IConversationAttentionPort } from '../../server/application/ports/conversation-attention.port';
 import { ConversationAttentionObserver } from '../../server/application/services/conversation-attention-observer';
+import { workspaceEventStream } from '../../server/transport/workspace-event-stream';
+import { once } from 'node:events';
 
 // HTTP hosts only own built-in conversations; a Desktop reference never falls back.
 const AssistantRuntimeClientCommandSchema = AnyAssistantRuntimeClientCommandSchema.refine(
@@ -93,10 +96,62 @@ export function registerAIRuntimeRoutes(
   middleware: PlatformMiddleware,
   workflowRuntime: AIWorkflowRuntimePort | null = null,
   attentionPort: IConversationAttentionPort | null = null,
+  conversationEvents?: ConversationEventSource,
 ): Router {
   const router = Router();
   const { auth } = middleware;
   const attentionObserver = attentionPort ? new ConversationAttentionObserver(attentionPort) : null;
+
+  router.get('/workspace/sse', auth, async (req, res) => {
+    const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
+    const identityId = authenticatedIdentity(req);
+    if (!identityId) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    const cursor = req.header('Last-Event-ID') ?? req.query.cursor;
+    if (cursor !== undefined && (typeof cursor !== 'string' || cursor.length > 2048)) {
+      res.status(400).json(responseBuilder.error('VALIDATION_ERROR', 'Invalid workspace cursor'));
+      return;
+    }
+    let source;
+    try { source = await workflowRuntime?.goalEvents?.(); await attentionPort?.events?.init(); await conversationEvents?.init(); }
+    catch {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
+      return;
+    }
+    if (!source && !attentionPort?.events && !conversationEvents) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
+      return;
+    }
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders?.();
+    const controller = new AbortController();
+    const close = () => controller.abort();
+    req.on('aborted', close);
+    res.on('close', close);
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded && !res.write(': heartbeat\n\n')) close();
+    }, 15_000);
+    try {
+      for await (const event of workspaceEventStream({ source: source ?? null, attention: attentionPort?.events, conversations: conversationEvents, identityId, cursor, signal: controller.signal })) {
+        if (controller.signal.aborted || res.writableEnded) break;
+        if (!res.write(`id: ${event.cursor}\nevent: workspace\ndata: ${JSON.stringify(event)}\n\n`)) {
+          await once(res, 'drain', { signal: controller.signal });
+        }
+      }
+    } catch { /* Disconnects recover through the persisted cursor, never a fabricated business failure. */ }
+    finally {
+      clearInterval(heartbeat);
+      close();
+      req.removeListener('aborted', close);
+      res.removeListener('close', close);
+      if (!res.writableEnded) res.end();
+    }
+  });
 
   router.post('/assistant/sse', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
@@ -221,7 +276,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -233,7 +288,7 @@ export function registerAIRuntimeRoutes(
     const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues))); return; }
     try { res.status(200).json(responseBuilder.success(await runtime.listAskUserSuspensions({ identityId, conversationId: parsed.data.conversationId }))); }
-    catch (error) { const failure = toAITransportFailure(error, { fallbackCode: 'AI_RUNTIME_ERROR', fallbackMessage: 'AI runtime request failed' }); res.status(failure.statusCode).json(responseBuilder.error(failure.code, failure.message, undefined, failure.context)); }
+    catch (error) { const failure = toAITransportFailure(error, { fallbackCode: 'AI_RUNTIME_ERROR', fallbackMessage: 'AI runtime request failed' }); res.status(failure.statusCode).json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure)); }
   });
 
   router.post('/assistant/delete', auth, async (req, res) => {
@@ -272,7 +327,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -295,7 +350,7 @@ export function registerAIRuntimeRoutes(
         fallbackMessage: 'AI runtime request failed',
       });
       res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure),
       );
     }
   });
@@ -394,7 +449,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -457,7 +512,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -494,7 +549,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -531,7 +586,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -562,7 +617,7 @@ export function registerAIRuntimeRoutes(
         fallbackMessage: 'Goal surface lease failed',
       });
       res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure),
       );
     }
   });
@@ -597,7 +652,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -634,7 +689,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 
@@ -668,7 +723,7 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context));
+        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
     }
   });
 

@@ -1,5 +1,6 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
+import { FailureRetryHintSchema, FailureReferenceSchema, strictFailureDetails } from '../../../result';
 import { CreateTaskPlanSchema } from '../../task';
 import {
   GoalCreateClientInputSchema,
@@ -295,18 +296,37 @@ export const AIWorkflowCancelClientRequestSchema = z
   .strict();
 export type AIWorkflowCancelClientRequest = z.infer<typeof AIWorkflowCancelClientRequestSchema>;
 
+export const AIRateLimitDetailsSchema = strictFailureDetails({
+  limitKind: z.enum(['rate_limit', 'quota_exhausted', 'unknown']),
+});
+export const AIRateLimitPublicFailureSchema = z.object({
+  code: z.literal('RATE_LIMITED'),
+  category: z.literal('rate_limited'),
+  details: AIRateLimitDetailsSchema.optional(),
+  retryHint: FailureRetryHintSchema.optional(),
+  reference: FailureReferenceSchema.optional(),
+}).strict();
+
 export const AIWorkflowTerminalFailureSchema = z
   .object({
     code: z.string().min(1),
     message: z.string().min(1),
+    details: AIRateLimitDetailsSchema.optional(),
+    retryHint: FailureRetryHintSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine((failure) => !failure.details || failure.code === 'RATE_LIMITED', {
+    message: 'Rate-limit details require RATE_LIMITED',
+  });
 export type AIWorkflowTerminalFailure = z.infer<typeof AIWorkflowTerminalFailureSchema>;
 
 const WorkflowRunViewBaseShape = {
   runId: z.string().min(1),
   conversationId: z.string().min(1),
   status: AIWorkflowStatusSchema,
+  startRequestId: z.string().uuid().optional(),
+  /** Version of the committed workflow projection, independent of draft revision and lease fence. */
+  resourceVersion: z.number().int().positive().optional(),
   failure: AIWorkflowTerminalFailureSchema.optional(),
   usage: AIRuntimeUsageSchema.optional(),
   createdAt: z.number().int().nonnegative(),
@@ -317,6 +337,8 @@ export const AIWorkflowRunViewSchema = z.discriminatedUnion('kind', [
   z.object({
     ...WorkflowRunViewBaseShape,
     kind: z.literal('goal.create'),
+    /** A detached resume acknowledgement waits for a newer committed state than this version. */
+    awaitAfterVersion: z.number().int().positive().optional(),
     suspension: GoalWorkflowSuspensionSchema.optional(),
     liveActions: GoalWorkflowLiveActionJournalSchema.optional(),
     result: GoalPlanExecutionReceiptSchema.optional(),

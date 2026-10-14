@@ -210,3 +210,30 @@ T3 PR watch 报告 #449 与 main 冲突；在唯一写入 worktree 中合并 mai
 实现提交 `11aa35fa4c490fcb14c9043011941a8e0f3937f3`（`fix(ai): close Ask User answer and parked approval lifecycle`）已推送至原 Draft PR #449。GitHub Actions [CI run 38280422432](https://github.com/BakerSean168/memoflow/actions/runs/38280422432) 的 head_sha 与实现提交完全一致，**19/19 jobs 全部 success**，包含 Unit Tests、Typecheck、Build、Static Analysis、Governance、Web Flow Shard 1–4、各 Oracle 与 Delivery Observation；没有重跑或未分类失败。
 
 Stage B-2 本切片的本地 RED→GREEN 与实现 exact-head CI 门槛已满足。PR 仍保持 Draft；重启审批 gate 收养、跨重启 read-only 许可边界及其余已列后续项不作扩大验收。此文档证据提交不改变实现，推送后的当前 head CI 仍由 T3 watch 独立核对。
+
+## Goal / Business Pane Scoped Modeless Dialog - 视觉与交互收敛（2026-10-13）
+
+### 用户确认的最终视觉契约
+
+- Goal 创建和编辑是以 **Panel-scoped Modeless Dialog** 呈现的同一套 Native Goal Editor；此 Dialog 有明确卡片边界、圆角、阴影、固定 Header/Footer、独立滚动 Body。
+- **右侧业务内容上的半透明暗色遮罩必须保留**，原目标列表透过遮罩隐约可见。这是纯粹的 UI 样式偏好，不赋予原列表任何所谓「提供上下文」的业务含义。Goal 列表及工具栏保留 DOM/原有状态，编辑期间被设为 inert，不允许操作。
+- **大表单必须保持稳定的外框尺寸**，不能随字段、KR 或扩展区域数量而增长。Goal 使用共享容器的 `heightMode=workspace`，宽度为业务 Pane 可用宽的 96%（封顶 960px），高度为业务 Pane 可用高的 88%（封顶 900px），面板内边距另行保留；仅当 Pane/视口本身调整大小时才重新计算。不是对全局 viewport 计算尺寸。
+- Body 用 `min-height:0; flex:1; overflow-y:auto` 承载内容增加，Header/Footer 固定在外框内；恢复 Goal 主表单 `min-h-full` 与 KR `mt-auto`，不再为视觉紧凑性把 Goal 降级成 content-height。KR 展开定位兼容 Pane-scoped 与旧全局对话框的 scroll host。
+- 遮罩只位于 BusinessPanel 内容区，**绝不进入 AI Chat、全局窗口或 BusinessPanel 顶部 Tab 栏**；点击遮罩、AI Chat 或其他工作区非模态区域不得自动关闭草稿；无全局 Portal/Focus Trap/Pointer Lock，左侧聊天可输入、可滚动。
+- 业务内容内的编辑器元素使用 `role=dialog` 且 `aria-modal=false`；仅右侧原始内容处于 inert。只通过提交、显式关闭或取消退出，继续使用既有 dirty/busy 和 Shell 离开拦截契约。
+- `PaneScopedDialog.vue` 是业务模块复用的 **唯一视觉容器**。不同表单可选择 compact / standard / wide 宽度及 content / workspace 高度，Goal 大表单先完成完整纵切；Record、Task、Routine、Schedule 的宿主仍需逐个迁移并进行全链路测试，不能单凭共用 UI 容器视为已经完成。
+- 手动新建 `goalForm=create`、手动编辑 `goalForm=edit&goalId=...`；AI 工作流调用既有 `openControlledCreate()`；旧 `dialog=goal` 路由继续映射同一个原生 Owner。保存/取消保留业务筛选与路由 hash。
+- AI 在更新 native 草稿时不得 `focus('name')` 抢走聊天输入焦点；仅显式手动点击「新建目标」可主动聚焦标题字段。
+- 单栏 / 窄视口遵守既有 Shell focus 和 GlobalComposer 布局，不强行将双栏压成不可用宽度；宽屏 split 应同时显示 Chat 和右侧悬浮编辑器。
+
+### Dev Schema 现实问题与迁移边界
+
+- GCP Dev 的 `MemoFlow` PostgreSQL 经只读 `prisma migrate diff` 验证有多项既有 Schema 漂移，包含 13 张待新增表。全量差异保存在仓库外审计文件 `/home/dev/projects/.memoflow-goal-panel-dev-schema-diff.sql`，本次不盲目执行完整 `db push`。
+- 明确故障证据的 `ai_goal_surface_leases`、`profile_import_operations`，以及经运行时依赖扫描确认缺失、被 Chat 会话状态投影使用的 `ai_conversation_attention`，已按三份**定向、幂等、事务化、无数据删除**的 SQL 补齐。审计记录 `/home/dev/projects/.memoflow-goal-pane-schema-audit.json` 验证原 5 个账户、6 条 AI 会话未被改变，三张新表均空；带 FK 的租约写入/事务回滚验证通过，永久记录数未增加。
+- `ai_goal_surface_leases` 和 `ai_conversation_attention` 的迁移脚本已存在；仅新增 `add-profile-import-operations.sql` 对齐 Prisma 模型。其余差异（含 OAuth/JWKS 等）保留单独审计，不能冒险由 UI 改造自动同步。
+
+### 验收门槛
+
+- 严格检查 Goal 手动/旧路由/AI 共享 native session、租约与 fenced patch、已编辑草稿离开保护。
+- 真实 Chromium 同时验证背景半透明层只在右侧、左侧 Chat 可持续输入、点击 Chat 和遮罩均不关闭编辑器、AI 更新不夺焦、取消放弃后保存草稿、创建/编辑正确提交。
+- GCP Dev HTTPS 预览和 PR exact-head CI 全部验证通过后方可合并 main；不要为扩展容器到其他模块降低边界测试标准。

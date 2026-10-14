@@ -3147,6 +3147,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/client/runtime-assistant.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3697,6 +3707,26 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/attention-events.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/conversation-events.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3728,6 +3758,26 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/prisma/attention-events.postgres.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/prisma/conversation-events.postgres.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4057,6 +4107,26 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/goal-workflow-events.persistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/runtime/goal-workflow-events.postgres.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4178,6 +4248,16 @@
     },
     {
       "path": "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/transport/workspace-event-stream.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4829,7 +4909,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4992,6 +5088,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6874,6 +6978,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/local-agent.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/workspace-event.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -12687,7 +12799,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 109
+      "fileCount": 117
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13241,14 +13353,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 109
+      "fileCount": 117
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 293
+      "fileCount": 296
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13269,7 +13381,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 95
+      "fileCount": 96
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13539,6 +13651,7 @@
       "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
+      "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
       "packages/ai/src/client/runtime-usage.spec.ts",
       "packages/ai/src/client/runtime-workflow.spec.ts",
@@ -13594,10 +13707,14 @@
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-goal-surface-lease.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/attention-events.powersync.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/conversation-events.powersync.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/local-agent.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-ownership.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
+      "packages/ai/src/server/infrastructure/adapters/prisma/attention-events.postgres.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/prisma/conversation-events.postgres.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-web-research.adapter.spec.ts",
@@ -13630,6 +13747,8 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
+      "packages/ai/src/server/mastra/runtime/goal-workflow-events.persistence.spec.ts",
+      "packages/ai/src/server/mastra/runtime/goal-workflow-events.postgres.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
@@ -13643,6 +13762,7 @@
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
+      "packages/ai/src/server/transport/workspace-event-stream.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
       "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
@@ -14001,7 +14121,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1209,
+    "unit": 1221,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,

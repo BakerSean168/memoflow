@@ -1,3 +1,5 @@
+import { ConversationEventsPostgres } from './adapters/prisma/conversation-events.postgres';
+import { AttentionEventsPostgres } from './adapters/prisma/attention-events.postgres';
 /**
  * AI Module — Prisma persistence ingredients for the API lane.
  *
@@ -42,14 +44,14 @@ export interface AIPrismaRepositorySet {
   readonly providerSecretVault: IAIProviderSecretVault;
 }
 
-export function createAIPrismaRepositories(db: PrismaClient): AIPrismaRepositorySet {
+export function createAIPrismaRepositories(db: PrismaClient, eventsConfig?: { connectionString: string; businessSchema?: string }): AIPrismaRepositorySet {
   return {
     agentInstanceRepository: new AgentInstancePrismaRepository(db),
-    conversationRepository: new AIConversationPrismaRepository(db),
+    conversationRepository: new AIConversationPrismaRepository(db, eventsConfig ? new ConversationEventsPostgres(eventsConfig) : undefined),
     providerConfigRepository: new AIProviderConfigPrismaRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPrismaRepository(db),
     executionRecordPort: new AIExecutionRecordPrismaAdapter(db),
-    conversationAttentionPort: new ConversationAttentionPrismaAdapter(db),
+    conversationAttentionPort: new ConversationAttentionPrismaAdapter(db, eventsConfig ? new AttentionEventsPostgres(eventsConfig) : undefined),
     providerOnboardingSessionRepository: new AIProviderOnboardingSessionPrismaRepository(db),
     providerOnboardingCommitPort: new AIProviderOnboardingCommitPrismaAdapter(db),
     providerSecretVault: new AIProviderSecretPrismaVault(db),

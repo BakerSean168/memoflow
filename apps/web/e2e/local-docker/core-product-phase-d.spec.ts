@@ -40,8 +40,11 @@ test.describe('Local Docker core product Phase D', () => {
     await tabTo(page, createGoal);
     await page.keyboard.press('Enter');
 
-    const goalDialog = page.getByTestId('goal-dialog');
+    const goalDialog = page.getByTestId('goal-panel-form');
     await expect(goalDialog).toBeVisible();
+    // The native editor is modeless: opening it must not steal focus from AI Chat.
+    // Verify its title can instead be reached using only the keyboard.
+    await tabTo(page, page.getByTestId('goal-name-input'));
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
     const startChip = page.getByTestId('goal-start-chip');
     await expect(startChip).toBeVisible();
@@ -56,7 +59,7 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(page.getByRole('textbox', { name: '目标时间', exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
     await expectDialogGeometry(goalDialog);
-    await expectNoSeriousAxeViolations(page, '[data-testid="goal-dialog"]');
+    await expectNoSeriousAxeViolations(page, '[data-testid="goal-panel-form"]');
 
     await page.getByTestId('goal-name-input').focus();
     await page.keyboard.type(goalName);
@@ -116,9 +119,20 @@ test.describe('Local Docker core product Phase D', () => {
       'true',
     );
     await expect(page.getByTestId('task-reminder-popover')).toBeVisible();
-    await expect(page.getByRole('heading', { name: '提醒设置', exact: true })).toBeVisible();
+    // The compact property editor is an accessible named dialog, not a page
+    // section with an extra visual heading. Check the actual dialog and its
+    // labelled switch rather than requiring a redundant '提醒设置' heading.
+    const reminderDialog = page.getByRole('dialog', { name: '提醒设置', exact: true });
+    await expect(reminderDialog).toBeVisible();
+    await expect(reminderDialog.getByRole('switch', { name: '启用提醒' })).toBeVisible();
     await expectDialogGeometry(taskDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="task-plan-dialog"]');
+    await expectNoSeriousAxeViolations(page, '[data-testid="task-reminder-popover"]');
+    // The nested reminder dialog owns focus until dismissed. Close this
+    // transient property editor using Escape before keyboard traversal resumes
+    // in the parent plan dialog; otherwise Tab intentionally remains trapped.
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('task-reminder-popover')).toBeHidden();
 
     await tabTo(page, page.getByTestId('task-dialog-save-button'));
     await page.keyboard.press('Enter');
@@ -157,8 +171,12 @@ async function expectDialogGeometry(dialog: Locator, noBodyScroll = false): Prom
   const readGeometry = () =>
     dialog.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      const body = element.querySelector<HTMLElement>('[data-testid="product-dialog-body"]');
-      const footer = element.querySelector<HTMLElement>('[data-testid="product-dialog-footer"]');
+      const body =
+        element.querySelector<HTMLElement>('[data-scroll-host="goal-form"]') ??
+        element.querySelector<HTMLElement>('[data-testid="product-dialog-body"]');
+      const footer =
+        element.querySelector<HTMLElement>('footer') ??
+        element.querySelector<HTMLElement>('[data-testid="product-dialog-footer"]');
       const footerRect = footer?.getBoundingClientRect();
       return {
         top: rect.top,
