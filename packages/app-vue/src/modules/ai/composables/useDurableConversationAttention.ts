@@ -136,6 +136,7 @@ export function useDurableConversationAttention(input: {
       } else if (incoming?.resourceVersion) versions.set(id, incoming.resourceVersion);
     }
     for (const id of versions.keys()) if (!requested.has(id)) versions.delete(id);
+    for (const id of acknowledged.keys()) if (!requested.has(id)) acknowledged.delete(id);
     snapshots.value = next;
     const current = input.activeConversationId.value;
     if (current && isVisible()) void acknowledge(current);
