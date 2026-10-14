@@ -256,11 +256,11 @@ async function configure(wrapper: VueWrapper) {
 }
 
 describe('T3-style Agent settings and direct endpoint configuration', () => {
-  it('shows a real default Mastra with both row and detail enable switches and no vendor catalogue', async () => {
+  it('shows a real default Mastra with a single list enable switch and no vendor catalogue', async () => {
     const { wrapper, client, localClient } = await setup();
     expect(wrapper.findAll('[role="listitem"]')).toHaveLength(1);
     expect(wrapper.find('[data-testid="ai-provider-toggle-mastra"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="ai-provider-detail-toggle"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-provider-detail-toggle"]').exists()).toBe(false);
     expect(wrapper.get('[data-testid="ai-endpoint"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="ai-api-key"]').attributes('type')).toBe('password');
     expect(client.getProviderCatalog).not.toHaveBeenCalled();
@@ -401,10 +401,10 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
       expectedRevision: 0,
       patch: { enabled: false },
     });
-    expect(wrapper.get('[data-testid="ai-provider-detail-toggle"]').attributes('data-state')).toBe(
+    expect(wrapper.get('[data-testid="ai-provider-toggle-mastra"]').attributes('data-state')).toBe(
       'unchecked',
     );
-    await wrapper.get('[data-testid="ai-provider-detail-toggle"]').trigger('click');
+    await wrapper.get('[data-testid="ai-provider-toggle-mastra"]').trigger('click');
     await flushPromises();
     expect(registry.execute).toHaveBeenLastCalledWith({
       action: 'update',
@@ -431,10 +431,43 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     });
     expect(localClient.saveConnection).not.toHaveBeenCalled();
     await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
-    expect(wrapper.get('[data-testid="ai-provider-detail-toggle"]').attributes('data-state')).toBe(
+    expect(wrapper.get('[data-testid="ai-provider-toggle-codex"]').attributes('data-state')).toBe(
       'unchecked',
     );
   });
+  it('clears native probe metadata while reloading a Registry for another Desktop profile', async () => {
+    const { wrapper, registry, localClient } = await setup({ native: true });
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [{ id: 'codex-model', name: 'Codex model' }],
+      version: '9.9.9',
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:codex"]').text()).toContain('9.9.9');
+    const previous = await registry.list();
+    let resolveRegistry!: (value: typeof previous) => void;
+    registry.list.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRegistry = resolve;
+        }),
+    );
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'not_installed',
+      message: 'Not installed for new profile',
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    expect(wrapper.findAll('[data-testid="ai-provider-list-runtime-version"]')).toHaveLength(0);
+    expect(wrapper.html()).not.toContain('9.9.9');
+    resolveRegistry(previous);
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-provider-select-agent:codex"]').text()).toContain(
+      'Not installed for new profile',
+    );
+    expect(wrapper.findAll('[data-testid="ai-provider-list-runtime-version"]')).toHaveLength(0);
+  });
+
   it('rejects an empty native name, preserves write scopes and current native identity during save', async () => {
     const { wrapper, registry } = await setup({ native: true });
     await wrapper.get('[data-testid="ai-provider-select-agent:claude"]').trigger('click');

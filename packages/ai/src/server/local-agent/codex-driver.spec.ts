@@ -83,6 +83,21 @@ describe('Codex native driver', () => {
     ).toMatchObject({ status: 'login_required' });
   });
 
+  it('reports only the actual Codex CLI version from initialize.userAgent', async () => {
+    const native = driver(`if(frame.method === 'initialize') {
+      initialized = true;
+      reply({userAgent:'codex/0.154.0 (Windows; x86_64)'});
+      return;
+    }`);
+    expect(await native.probe()).toMatchObject({
+      status: 'ready',
+      version: '0.154.0',
+      models: [{ id: 'model', name: 'Fixture' }],
+    });
+    // Unknown or untrusted handshake text is not a CLI version.
+    expect(await driver().probe()).not.toHaveProperty('version');
+  });
+
   it('projects the live catalog effort and service-tier metadata without guessing options', async () => {
     const native = driver(`if(frame.method === 'model/list') {
       reply({data:[{id:'model',model:'model',displayName:'Fixture',

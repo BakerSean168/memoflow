@@ -30,6 +30,7 @@ import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
+import { getAIErrorMessage } from './error';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
 import { useAIGoalWorkflow } from './useAIGoalWorkflow';
@@ -102,11 +103,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const modelCatalogLoading = ref(false);
   const composerInitializing = ref(true);
   const registryLoading = ref(false);
+  const nativeSelectionPending = ref(false);
+  // A late default-choice read may not override an explicit Composer selection.
+  let explicitRuntimeSelection = 0;
   const composerLoading = computed(
     () =>
       composerInitializing.value ||
       registryLoading.value ||
       modelCatalogLoading.value ||
+      nativeSelectionPending.value ||
       isLoadingProviders.value ||
       localChoices.loading.value,
   );
@@ -476,7 +481,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     key: string,
   ): 'incompatible' | 'busy' | 'loading' | undefined {
     if (chatSession.chatLoading.value || workflowSelectionLocked.value) return 'busy';
-    if (modelSelection.selectionLoading.value) return 'loading';
+    if (modelSelection.selectionLoading.value || nativeSelectionPending.value) return 'loading';
     if (!chatSession.chatConversationId.value) return undefined;
     const choice = chatSession.runtimeChoice.value;
     if (choice.runtimeKind === 'local_agent')
@@ -486,9 +491,67 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   async function selectComposerAgent(key: string) {
     if (composerSwitchBlockedReason(key)) return;
     if (key === selectedComposerAgent.value) return;
+    const selectionRequest = ++explicitRuntimeSelection;
+    const selectedConversationId = chatSession.chatConversationId.value;
     if (key.startsWith('local:')) {
-      const id = key.slice(6);
-      if (!localChoices.connections.value.some((entry) => entry.id === id && entry.enabled)) return;
+      const instance = agentRegistrySnapshot.value?.instances.find(
+        (entry) =>
+          entry.driver !== 'mastra' &&
+          entry.enabled &&
+          `local:${entry.legacyConnectionId ?? entry.instanceId}` === key,
+      );
+      if (!instance || !localAgent) return;
+      let id = instance.legacyConnectionId;
+      if (!id) {
+        // Only an explicit user choice materializes the implicit default. A
+        // Registry read or a probe must never create a persistent connection.
+        if (!agentRegistryClient || instance.instanceId !== instance.driver) return;
+        nativeSelectionPending.value = true;
+        try {
+          let updated;
+          try {
+            updated = await agentRegistryClient.execute({
+              action: 'update',
+              instanceId: instance.instanceId,
+              expectedRevision: instance.revision,
+              patch: {},
+            });
+          } catch (error) {
+            // Another window may have materialized the same default first.
+            // Reuse its identity only when the fresh Registry confirms it.
+            const latest = (await agentRegistryClient.list()).instances.find(
+              (entry) => entry.instanceId === instance.instanceId,
+            );
+            if (!latest?.enabled || !latest.legacyConnectionId) throw error;
+            updated = latest;
+          }
+          if (
+            !updated ||
+            !('instanceId' in updated) ||
+            updated.instanceId !== instance.instanceId ||
+            !('legacyConnectionId' in updated) ||
+            !updated.legacyConnectionId
+          )
+            throw new Error('Native Agent connection could not be resolved');
+          id = updated.legacyConnectionId;
+          await Promise.all([localChoices.refresh(), loadAgentRegistry()]);
+        } catch (error) {
+          toast.error(getAIErrorMessage(error, t, 'aiAssistant.local.actionFailed'));
+          return;
+        } finally {
+          nativeSelectionPending.value = false;
+        }
+      }
+      if (
+        disposed ||
+        selectionRequest !== explicitRuntimeSelection ||
+        chatSession.chatConversationId.value !== selectedConversationId ||
+        !id ||
+        !localChoices.connections.value.some(
+          (entry) => entry.id === id && entry.enabled && entry.driver === instance.driver,
+        )
+      )
+        return;
       chatSession.runtimeChoice.value = {
         runtimeKind: 'local_agent',
         connectionId: id,
@@ -503,6 +566,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   async function selectComposerModel(key: string, agentKey: string) {
     if (composerSwitchBlockedReason(agentKey)) return;
     if (!composerAgents.value.some((item) => item.id === agentKey && item.enabled)) return;
+    ++explicitRuntimeSelection;
     const previousAgent = selectedComposerAgent.value;
     if (agentKey.startsWith('local:')) {
       const connectionId = agentKey.slice(6);
@@ -544,7 +608,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     if (!nextName || nextName === currentTitle) return;
     const conversationId = chatSession.chatConversationId.value;
     const before = chatSession.conversationList.value.find((item) => item.id === conversationId);
-    const versionBefore = before?.runtimeKind === 'local_agent' ? undefined : before?.resourceVersion;
+    const versionBefore =
+      before?.runtimeKind === 'local_agent' ? undefined : before?.resourceVersion;
     chatSession.conversationTitle.value = nextName;
     const renamed = await maybeRenameConversation(
       nextName,
@@ -559,7 +624,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       !renamed &&
       chatSession.chatConversationId.value === conversationId &&
       chatSession.conversationTitle.value === nextName &&
-      !chatSession.conversationList.value.some((item) => item.id === conversationId && item.runtimeKind !== 'local_agent' && (item.resourceVersion ?? 0) > (versionBefore ?? 0))
+      !chatSession.conversationList.value.some(
+        (item) =>
+          item.id === conversationId &&
+          item.runtimeKind !== 'local_agent' &&
+          (item.resourceVersion ?? 0) > (versionBefore ?? 0),
+      )
     )
       chatSession.conversationTitle.value = currentTitle;
   }
@@ -870,8 +940,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     return canLeaveAIWorkflowReview(
       toolMode.value,
       {
-        goal: goalWorkflow.goalAgentResuming.value || goalWorkflow.goalOwnerAttemptPending.value ||
-          goalWorkflow.goalRestartPending.value || goalWorkflow.goalSurfaceControlLost.value,
+        goal:
+          goalWorkflow.goalAgentResuming.value ||
+          goalWorkflow.goalOwnerAttemptPending.value ||
+          goalWorkflow.goalRestartPending.value ||
+          goalWorkflow.goalSurfaceControlLost.value,
         task: taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value,
         knowledge: knowledgeCaptureWorkflow.knowledgeCaptureResuming.value,
       },
@@ -953,8 +1026,24 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     // Reset before the first await: the composer is already visible and users
     // must be able to type a draft while the Agent Registry is still loading.
     chatSession.resetChatSession('chat', getDefaultConversationName);
+    const selectionAtStart = explicitRuntimeSelection;
     try {
       await localChoices.refresh();
+      const savedDefault = localChoices.defaultChoice.value;
+      if (
+        !disposed &&
+        selectionAtStart === explicitRuntimeSelection &&
+        !chatSession.chatConversationId.value &&
+        chatSession.runtimeChoice.value.runtimeKind === 'builtin' &&
+        savedDefault.runtimeKind === 'local_agent' &&
+        localChoices.connections.value.some(
+          (entry) => entry.id === savedDefault.connectionId && entry.enabled,
+        )
+      ) {
+        // The initial reset happens before async I/O so drafts remain editable.
+        // Apply the loaded native default without resetting the Composer again.
+        chatSession.runtimeChoice.value = { ...savedDefault };
+      }
       await loadAgentRegistry();
       await initializeChatView({
         initRepository: loadRecentKnowledgeNotes,
@@ -1048,6 +1137,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
             ? `local:${choice.connectionId}`
             : 'agent:' + modelSelection.selectedAgentId.value;
         if (composerSwitchBlockedReason(key)) return;
+        ++explicitRuntimeSelection;
         if (
           chatSession.runtimeChoice.value.runtimeKind !== choice.runtimeKind ||
           (choice.runtimeKind === 'local_agent' &&

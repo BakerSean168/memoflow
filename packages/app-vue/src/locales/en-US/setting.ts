@@ -56,6 +56,7 @@ export default {
     catalogUnavailable: 'Model service catalog unavailable. Close and retry.',
     needsConfig: 'Needs model configuration',
     unchecked: 'Status not checked',
+    discoveredModels: 'Discovered {count} models · inference not tested',
     builtinDetail: 'The built-in Agent uses a verified model API service connection.',
     configure: 'Configure model service',
     serviceTitle: 'Mastra model API service',

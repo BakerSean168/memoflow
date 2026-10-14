@@ -10,6 +10,7 @@ import {
   SHELL_COMPOSER_MOUNT_KEY,
   AI_CONFIGURATION_REVISION_KEY,
   AI_AGENT_REGISTRY_KEY,
+  AI_LOCAL_AGENT_KEY,
 } from '../../../di/keys';
 
 const fixture = await vi.hoisted(async () => {
@@ -271,6 +272,125 @@ describe('AI conversation restoration and business navigation', () => {
       'My draft during an unfinished registry request',
     );
     wrapper.unmount();
+  });
+
+  it('applies a discovered saved native default without clearing a Composer draft or resetting twice', async () => {
+    const native = {
+      id: 'native-codex-01',
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      writeScopes: [],
+    };
+    let resolveDefault!: (choice: AssistantRuntimeChoice) => void;
+    const local = {
+      listConnections: vi.fn(async () => [native]),
+      getDefaultChoice: vi.fn(
+        () => new Promise<AssistantRuntimeChoice>((resolve) => (resolveDefault = resolve)),
+      ),
+      probeConnection: vi.fn(async () => ({
+        status: 'ready',
+        models: [{ id: 'native-model', name: 'Real native model' }],
+      })),
+    };
+    const { wrapper } = await mountView({ [AI_LOCAL_AGENT_KEY as symbol]: local });
+    fixture.session.chatMessage.value = 'Keep my unsent draft';
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+
+    resolveDefault({
+      runtimeKind: 'local_agent',
+      connectionId: native.id,
+      modelId: 'native-model',
+    });
+    await flushPromises();
+    expect(fixture.session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: native.id,
+      modelId: 'native-model',
+    });
+    expect(fixture.session.chatMessage.value).toBe('Keep my unsent draft');
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+    expect(local.probeConnection).toHaveBeenCalledWith(native.id);
+    expect(wrapper.vm.canSendMessage).toBe(true);
+  });
+
+  it('materializes a default Codex only on explicit selection and maps its real model to a sendable Connection', async () => {
+    const implicit = {
+      instanceId: 'codex',
+      driver: 'codex' as const,
+      name: 'Codex',
+      accentColor: '#6469da',
+      enabled: true,
+      revision: 0,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    const connection = {
+      id: 'native-codex-uuid',
+      driver: 'codex' as const,
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 10,
+      updatedAt: 10,
+      writeScopes: [],
+    };
+    const materialized = { ...implicit, legacyConnectionId: connection.id, revision: 1 };
+    let saved = false;
+    const registry = {
+      list: vi.fn(async () => ({ instances: [saved ? materialized : implicit], bindings: [] })),
+      execute: vi.fn(async () => {
+        saved = true;
+        return materialized;
+      }),
+    };
+    const local = {
+      listConnections: vi.fn(async () => (saved ? [connection] : [])),
+      getDefaultChoice: vi.fn(async () => ({ runtimeKind: 'builtin' as const })),
+      probeConnection: vi.fn(async () => ({
+        status: 'ready',
+        models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
+      })),
+    };
+    const { wrapper } = await mountView({
+      [AI_AGENT_REGISTRY_KEY as symbol]: registry,
+      [AI_LOCAL_AGENT_KEY as symbol]: local,
+    });
+    await flushPromises();
+    expect(registry.execute).not.toHaveBeenCalled();
+    expect(wrapper.vm.composerAgents).toEqual([
+      expect.objectContaining({ id: 'local:codex', configured: false }),
+    ]);
+
+    await wrapper.vm.selectComposerAgent('local:codex');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledOnce();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'update',
+      instanceId: 'codex',
+      expectedRevision: 0,
+      patch: {},
+    });
+    expect(fixture.session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: connection.id,
+      modelId: '',
+    });
+    expect(wrapper.vm.composerModels).toEqual([
+      expect.objectContaining({ modelId: 'real-codex-model', agentKey: 'local:' + connection.id }),
+    ]);
+    await wrapper.vm.selectComposerModel('real-codex-model', 'local:' + connection.id);
+    expect(fixture.session.runtimeChoice.value).toMatchObject({
+      connectionId: connection.id,
+      modelId: 'real-codex-model',
+    });
+    expect(wrapper.vm.canSendMessage).toBe(true);
+    expect(registry.execute).toHaveBeenCalledOnce();
   });
 
   it('refreshes the persistent composer after settings invalidates the app configuration', async () => {

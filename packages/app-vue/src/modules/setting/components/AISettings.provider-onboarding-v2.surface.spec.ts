@@ -57,6 +57,6 @@ describe('Agent Settings direct connection surface (secure onboarding reused wit
     expect(source).toContain('expectedRevision: instance.revision');
     expect(source).toContain('ai-provider-toggle-');
     expect(source).not.toContain("instance.instanceId !== 'mastra'");
-    expect(connection).toContain('ai-provider-detail-toggle');
+    expect(connection).not.toContain('ai-provider-detail-toggle');
   });
 });

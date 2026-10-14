@@ -56,6 +56,7 @@ export default {
     catalogUnavailable: '模型服务目录不可用，请关闭后重试。',
     needsConfig: '需要配置模型',
     unchecked: '尚未检查状态',
+    discoveredModels: '已发现 {count} 个模型 · 尚未验证实际推理',
     builtinDetail: '内置 Agent 使用已验证的模型 API 服务连接。',
     configure: '配置模型服务',
     serviceTitle: 'Mastra 模型 API 服务',

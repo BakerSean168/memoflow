@@ -44,6 +44,14 @@ const accountSchema = z.object({
   account: z.object({ type: z.string(), email: z.string().optional() }).nullable(),
   requiresOpenaiAuth: z.boolean(),
 });
+/** Handshake metadata is untrusted; expose only a recognized Codex CLI version. */
+function codexVersion(handshake: unknown): string | undefined {
+  const parsed = z.object({ userAgent: z.string().max(240).optional() }).safeParse(handshake);
+  if (!parsed.success) return undefined;
+  return parsed.data.userAgent?.match(
+    /\bcodex(?:[-_](?:cli|app[-_]?server))?[\/ ]v?(\d+\.\d+\.\d+(?:[-+][a-z0-9.-]+)?)/iu,
+  )?.[1];
+}
 const optionValue = LocalAgentModelOptionValueSchema;
 const catalogSchema = z.object({
   data: z
@@ -78,6 +86,7 @@ const scopedSchema = z.object({ threadId: z.string(), turnId: z.string() });
 /** Native Codex execution only. MemoFlow does not reconstruct or rerun native tool calls. */
 export class CodexDriver {
   private transport?: NativeRpcTransport;
+  private version?: string;
   private threadId?: string;
   private turnId?: string;
   private cancelled = false;
@@ -105,10 +114,12 @@ export class CodexDriver {
       },
     });
     this.transport = transport;
-    await transport.request('initialize', {
-      clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
-      capabilities: { experimentalApi: true },
-    });
+    this.version = codexVersion(
+      await transport.request('initialize', {
+        clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
+        capabilities: { experimentalApi: true },
+      }),
+    );
     transport.notify('initialized');
     const account = accountSchema.parse(
       await transport.request('account/read', { refreshToken: false }),
@@ -166,7 +177,11 @@ export class CodexDriver {
           throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
         if (cursor) cursors.add(cursor);
       } while (cursor);
-      return { status: 'ready', models };
+      return {
+        status: 'ready',
+        models,
+        ...(this.version ? { version: this.version } : {}),
+      };
     } catch (error) {
       const code = error instanceof LocalAgentError ? error.code : 'LOCAL_AGENT_PROTOCOL_ERROR';
       return {

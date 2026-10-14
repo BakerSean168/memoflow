@@ -19,6 +19,7 @@ import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 import { SettingsStatusBlock } from '../../../components/shared/settings';
+import { sortAgentInstances } from './ai-provider-instance-sort';
 
 const { t } = useI18n();
 const registry = inject(AI_AGENT_REGISTRY_KEY, undefined);
@@ -35,7 +36,7 @@ const loading = ref(false);
 const failure = ref('');
 let generation = 0;
 let disposed = false;
-const instances = computed(() => snapshot.value?.instances ?? []);
+const instances = computed(() => sortAgentInstances(snapshot.value?.instances ?? []));
 const selected = computed(
   () => instances.value.find((item) => item.instanceId === selectedId.value) ?? null,
 );
@@ -60,8 +61,12 @@ function statusLabel(instance: AgentInstance) {
       : t('setting.agentInstances.needsConfig');
   const status = statuses.value[instance.instanceId];
   return status?.status === 'ready'
-    ? t('aiAssistant.local.ready', { count: status.models.length })
+    ? t('setting.agentInstances.discoveredModels', { count: status.models.length })
     : (status?.message ?? t('setting.agentInstances.unchecked'));
+}
+function statusVersion(instanceId: string): string | undefined {
+  const status = statuses.value[instanceId];
+  return status?.status === 'ready' ? status.version : undefined;
 }
 async function refresh() {
   if (!registry) {
@@ -69,6 +74,10 @@ async function refresh() {
     return;
   }
   const current = ++generation;
+  // A refresh may cross Desktop identities or Native Homes. Never expose a
+  // previous profile's probe/account snapshot while a new Registry is loading.
+  statuses.value = {};
+  checking.value = {};
   loading.value = true;
   try {
     const [registryResult, nativeResult, providerResult] = await Promise.allSettled([
@@ -214,6 +223,7 @@ async function probe(instance: AgentInstance) {
     !local ||
     instance.driver === 'mastra' ||
     !instance.enabled ||
+    loading.value ||
     checking.value[instance.instanceId]
   )
     return;
@@ -231,7 +241,7 @@ async function probe(instance: AgentInstance) {
         message: t('aiAssistant.local.actionFailed'),
       };
   } finally {
-    if (!disposed) checking.value[instance.instanceId] = false;
+    if (!disposed && epoch === generation) checking.value[instance.instanceId] = false;
   }
 }
 async function recheck() {
@@ -304,14 +314,18 @@ onBeforeUnmount(() => {
           v-for="instance in instances"
           :key="instance.instanceId"
           role="listitem"
-          class="flex min-h-20 items-center gap-2 border-b border-[hsl(var(--border-subtle))] px-3 py-2.5 last:border-b-0"
+          class="flex h-20 min-h-0 items-center gap-2 overflow-hidden border-b border-[hsl(var(--border-subtle))] px-3 py-2 last:border-b-0"
           :class="selectedId === instance.instanceId ? 'bg-muted/50' : 'hover:bg-muted/25'"
         >
           <button
             type="button"
             class="flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1.5 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            :class="selectedId === instance.instanceId ? 'ring-1 ring-inset ring-primary/65' : ''"
+            :class="[
+              selectedId === instance.instanceId ? 'ring-1 ring-inset ring-primary/65' : '',
+              !instance.enabled ? 'opacity-45' : '',
+            ]"
             :aria-current="selectedId === instance.instanceId ? 'true' : undefined"
+            :aria-label="`${instance.name} · ${statusLabel(instance)}`"
             :data-testid="`ai-provider-select-agent:${instance.instanceId}`"
             @click="select(instance)"
           >
@@ -321,10 +335,20 @@ onBeforeUnmount(() => {
               :style="{ color: instance.accentColor }"
             />
             <span class="min-w-0 flex-1"
-              ><span class="block truncate text-[13px] font-semibold">{{ instance.name }}</span
-              ><span class="mt-1 block line-clamp-2 text-[11px] leading-4 text-muted-foreground">{{
-                statusLabel(instance)
-              }}</span></span
+              ><span class="flex min-w-0 items-baseline gap-1.5"
+                ><span class="min-w-0 truncate text-[13px] font-semibold">{{ instance.name }}</span
+                ><span
+                  v-if="statusVersion(instance.instanceId)"
+                  class="max-w-20 shrink-0 truncate font-mono text-[10px] text-muted-foreground"
+                  :title="statusVersion(instance.instanceId)"
+                  data-testid="ai-provider-list-runtime-version"
+                  >{{ statusVersion(instance.instanceId) }}</span
+                ></span
+              ><span
+                class="mt-1 block max-w-full truncate whitespace-nowrap text-[11px] leading-4 text-muted-foreground"
+                :title="statusLabel(instance)"
+                >{{ statusLabel(instance) }}</span
+              ></span
             >
           </button>
           <Switch
@@ -346,7 +370,6 @@ onBeforeUnmount(() => {
           :all-bindings="snapshot?.bindings ?? []"
           :busy="busy"
           @changed="configured"
-          @toggle="toggle(selected, $event)"
           @rename="rename"
           @remove="removeSelected"
           @reset="resetSelected"

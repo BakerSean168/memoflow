@@ -2,7 +2,7 @@
 import { computed, reactive, useId, watch } from 'vue';
 import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Input, Switch } from '@memoflow/ui-vue-shadcn';
+import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
   type LocalAgentConnection,
@@ -26,7 +26,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   save: [input: LocalAgentConnectionInput];
-  toggle: [enabled: boolean];
   check: [];
   remove: [];
   reset: [];
@@ -66,7 +65,7 @@ const statusLabel = computed(() =>
   !form.enabled
     ? t('setting.ai.inactiveProvider')
     : props.status?.status === 'ready'
-      ? t('aiAssistant.local.ready', { count: props.status.models.length })
+      ? t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
       : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
 const validated = computed(() =>
@@ -109,13 +108,6 @@ function save() {
           data-testid="ai-provider-runtime-version"
           >v{{ status.version.replace(/^v/, '') }}</span
         >
-        <Switch
-          :model-value="form.enabled"
-          :disabled="busy"
-          :aria-label="t('setting.ai.enableProvider', { name: form.name })"
-          data-testid="ai-provider-detail-toggle"
-          @update:model-value="emit('toggle', $event)"
-        />
         <Button
           v-if="revision ? revision > 0 : Boolean(connection)"
           type="button"
