@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, useId, watch } from 'vue';
+import { computed, reactive, ref, useId, watch } from 'vue';
 import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
@@ -61,6 +61,38 @@ watch(
   { immediate: true },
 );
 const models = computed(() => (props.status?.status === 'ready' ? props.status.models : []));
+const account = computed(() =>
+  props.enabled !== false && props.status?.status === 'ready' ? props.status.account : undefined,
+);
+const showAccount = ref(false);
+watch(
+  () => [props.connection?.id, props.identity?.instanceSlug, props.driver, props.status],
+  () => {
+    showAccount.value = false;
+  },
+);
+const accountLabel = computed(() => {
+  const current = account.value;
+  if (!current) return '';
+  if (current.email) {
+    if (showAccount.value) return current.email;
+    const at = current.email.indexOf('@');
+    return `${current.email[0]}***${current.email.slice(at)}`;
+  }
+  return t(
+    current.type === 'chatgpt'
+      ? 'setting.ai.chatgptAccount'
+      : current.type === 'api_key'
+        ? 'setting.ai.apiKeyAccount'
+        : 'setting.ai.connectedAccount',
+  );
+});
+const accountPlan = computed(() => {
+  const current = account.value;
+  if (current?.type !== 'chatgpt' || !current.planType || current.planType === 'free')
+    return undefined;
+  return `ChatGPT ${current.planType[0].toUpperCase()}${current.planType.slice(1)}`;
+});
 const statusLabel = computed(() =>
   !form.enabled
     ? t('setting.ai.inactiveProvider')
@@ -161,6 +193,32 @@ function save() {
           class="h-8 rounded-lg text-xs text-muted-foreground"
       /></SettingsPropertyRow>
     </div>
+    <div
+      v-if="account"
+      class="flex flex-wrap items-center gap-2 px-3 text-xs text-muted-foreground"
+      data-testid="ai-native-auth-summary"
+    >
+      <span>{{ t('setting.ai.authenticatedAs') }}</span>
+      <span
+        class="min-w-0 break-all font-medium text-foreground"
+        data-testid="ai-native-auth-identity"
+      >
+        {{ accountLabel }}
+      </span>
+      <span v-if="accountPlan" data-testid="ai-native-auth-plan">· {{ accountPlan }}</span>
+      <Button
+        v-if="account.email"
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="h-6 px-1.5 text-xs"
+        :aria-label="t(showAccount ? 'setting.ai.hideAccount' : 'setting.ai.revealAccount')"
+        :disabled="busy"
+        data-testid="ai-native-auth-toggle"
+        @click="showAccount = !showAccount"
+        >{{ t(showAccount ? 'setting.ai.hideAccount' : 'setting.ai.revealAccount') }}</Button
+      >
+    </div>
     <section class="space-y-3">
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
         {{ t('aiAssistant.local.runtime') }}
@@ -244,9 +302,35 @@ function save() {
         <div
           v-for="model in models"
           :key="model.id"
-          class="truncate border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
+          class="min-w-0 border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
+          data-testid="ai-native-model"
         >
-          {{ model.name }}
+          <p class="truncate font-medium" :title="model.name">{{ model.name }}</p>
+          <p
+            class="mt-0.5 break-all font-mono text-[11px] text-muted-foreground"
+            data-testid="ai-native-model-id"
+          >
+            {{ model.id }}
+          </p>
+          <div
+            v-if="model.reasoningEfforts?.length || model.serviceTiers?.length"
+            class="mt-1.5 flex flex-wrap gap-1.5"
+          >
+            <span
+              v-if="model.reasoningEfforts?.length"
+              class="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              :title="model.reasoningEfforts.join(', ')"
+              data-testid="ai-native-model-reasoning"
+              >{{ t('setting.ai.modelReasoning') }}</span
+            >
+            <span
+              v-if="model.serviceTiers?.length"
+              class="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              :title="model.serviceTiers.map((tier) => tier.name).join(', ')"
+              data-testid="ai-native-model-service-tier"
+              >{{ t('setting.ai.modelServiceTiers') }}</span
+            >
+          </div>
         </div>
       </div>
     </section>

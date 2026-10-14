@@ -468,6 +468,61 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     expect(wrapper.findAll('[data-testid="ai-provider-list-runtime-version"]')).toHaveLength(0);
   });
 
+  it('shows only native-reported model capabilities and preserves exact model IDs', async () => {
+    const { wrapper, localClient } = await setup({ native: true });
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [
+        {
+          id: 'native-precision-v1',
+          name: 'Precision',
+          reasoningEfforts: ['low', 'high'],
+          defaultReasoningEffort: 'low',
+          serviceTiers: [{ id: 'priority', name: 'Fast mode' }],
+        },
+        { id: 'other-native-model', name: 'Other' },
+      ],
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    await flushPromises();
+    const rows = wrapper.findAll('[data-testid="ai-native-model"]');
+    expect(rows).toHaveLength(2);
+    expect(rows[0].get('[data-testid="ai-native-model-id"]').text()).toBe('native-precision-v1');
+    expect(rows[0].get('[data-testid="ai-native-model-reasoning"]').attributes('title')).toBe(
+      'low, high',
+    );
+    expect(rows[0].get('[data-testid="ai-native-model-service-tier"]').attributes('title')).toBe(
+      'Fast mode',
+    );
+    expect(rows[1].get('[data-testid="ai-native-model-id"]').text()).toBe('other-native-model');
+    expect(rows[1].find('[data-testid="ai-native-model-reasoning"]').exists()).toBe(false);
+    expect(rows[1].find('[data-testid="ai-native-model-service-tier"]').exists()).toBe(false);
+  });
+
+  it('masks authenticated account identity until explicitly revealed', async () => {
+    const { wrapper, localClient } = await setup({ native: true });
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [{ id: 'verified-model', name: 'Verified' }],
+      account: { type: 'chatgpt', email: 'alice@fixture.invalid', planType: 'team' },
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-native-auth-identity"]').text()).toBe(
+      'a***@fixture.invalid',
+    );
+    expect(wrapper.get('[data-testid="ai-native-auth-plan"]').text()).toContain('ChatGPT Team');
+    expect(wrapper.html()).not.toContain('alice@fixture.invalid');
+    await wrapper.get('[data-testid="ai-native-auth-toggle"]').trigger('click');
+    expect(wrapper.get('[data-testid="ai-native-auth-identity"]').text()).toBe(
+      'alice@fixture.invalid',
+    );
+  });
+
   it('rejects an empty native name, preserves write scopes and current native identity during save', async () => {
     const { wrapper, registry } = await setup({ native: true });
     await wrapper.get('[data-testid="ai-provider-select-agent:claude"]').trigger('click');

@@ -7,8 +7,12 @@ import type {
   LocalAgentStatus,
   LocalAgentModel,
   LocalAgentModelOptions,
+  LocalAgentAccountSummary,
 } from '@memoflow/contracts/ai';
-import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
+import {
+  LocalAgentModelOptionValueSchema,
+  LocalAgentAccountSummarySchema,
+} from '@memoflow/contracts/ai';
 import {
   NativeRpcTransport,
   type NativeProcessOptions,
@@ -42,7 +46,9 @@ export interface NativeAgentRunInput {
 }
 type NativeResponse = LocalAgentRequestResponse['response'];
 const accountSchema = z.object({
-  account: z.object({ type: z.string(), email: z.string().optional() }).nullable(),
+  account: z
+    .object({ type: z.string(), email: z.string().nullish(), planType: z.string().nullish() })
+    .nullable(),
   requiresOpenaiAuth: z.boolean(),
 });
 /** Handshake metadata is untrusted; expose only a recognized Codex CLI version. */
@@ -88,6 +94,7 @@ const scopedSchema = z.object({ threadId: z.string(), turnId: z.string() });
 export class CodexDriver {
   private transport?: NativeRpcTransport;
   private version?: string;
+  private account?: LocalAgentAccountSummary;
   private threadId?: string;
   private turnId?: string;
   private cancelled = false;
@@ -115,6 +122,7 @@ export class CodexDriver {
       },
     });
     this.transport = transport;
+    this.account = undefined;
     this.version = codexVersion(
       await transport.request('initialize', {
         clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
@@ -127,7 +135,31 @@ export class CodexDriver {
     );
     if (account.requiresOpenaiAuth && !account.account)
       throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
-    return nativeIdentity('codex', this.connection.homePath, account.account);
+    if (account.account) {
+      const { type, email, planType } = account.account;
+      const safeType: LocalAgentAccountSummary['type'] =
+        type === 'chatgpt' ? 'chatgpt' : type === 'apiKey' ? 'api_key' : 'other';
+      const summary: LocalAgentAccountSummary = { type: safeType };
+      const verifiedEmail = LocalAgentAccountSummarySchema.shape.email.safeParse(email);
+      if (verifiedEmail.success && verifiedEmail.data) summary.email = verifiedEmail.data;
+      const verifiedPlan = LocalAgentAccountSummarySchema.shape.planType.safeParse(
+        planType?.toLowerCase(),
+      );
+      if (safeType === 'chatgpt' && verifiedPlan.success && verifiedPlan.data)
+        summary.planType = verifiedPlan.data;
+      this.account = summary;
+    }
+    // Display-only plan metadata must not change an existing session identity fingerprint.
+    return nativeIdentity(
+      'codex',
+      this.connection.homePath,
+      account.account
+        ? {
+            type: account.account.type,
+            ...(account.account.email ? { email: account.account.email } : {}),
+          }
+        : null,
+    );
   }
 
   async probe(): Promise<LocalAgentStatus> {
@@ -182,6 +214,7 @@ export class CodexDriver {
         status: 'ready',
         models,
         ...(this.version ? { version: this.version } : {}),
+        ...(this.account ? { account: this.account } : {}),
       };
     } catch (error) {
       const code = error instanceof LocalAgentError ? error.code : 'LOCAL_AGENT_PROTOCOL_ERROR';

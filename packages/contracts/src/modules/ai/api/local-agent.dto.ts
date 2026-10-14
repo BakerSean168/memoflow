@@ -116,12 +116,23 @@ export const LocalAgentModelSchema = z
   })
   .strict();
 export type LocalAgentModel = z.infer<typeof LocalAgentModelSchema>;
+/** Ephemeral Desktop probe metadata, never a persisted connection or a credential. */
+export const LocalAgentAccountSummarySchema = z
+  .object({
+    type: z.enum(['chatgpt', 'api_key', 'other']),
+    email: z.email().max(254).optional(),
+    planType: z.enum(['free', 'plus', 'pro', 'team', 'business', 'enterprise']).optional(),
+  })
+  .strict();
+export type LocalAgentAccountSummary = z.infer<typeof LocalAgentAccountSummarySchema>;
+
 export const LocalAgentStatusSchema = z.discriminatedUnion('status', [
   z
     .object({
       status: z.literal('ready'),
       models: z.array(LocalAgentModelSchema).max(2000),
       version: z.string().max(240).optional(),
+      account: LocalAgentAccountSummarySchema.optional(),
     })
     .strict(),
   z

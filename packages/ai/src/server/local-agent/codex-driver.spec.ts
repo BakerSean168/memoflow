@@ -25,7 +25,7 @@ function driver(extra = '') {
       if (frame.method === 'initialize') { initialized = true; reply({userAgent:'test'}); }
       else if (frame.method === 'initialized') {}
       else if (!initialized) process.exit(9);
-      else if (frame.method === 'account/read') reply({account:{type:'chatgpt',email:'fixture@example.test'},requiresOpenaiAuth:true});
+      else if (frame.method === 'account/read') reply({account:{type:'chatgpt',email:'fixture@example.test',planType:'team'},requiresOpenaiAuth:true});
       else if (frame.method === 'model/list') reply({data:[{id:'model',model:'model',displayName:'Fixture'}],nextCursor:null});
       else if (frame.method === 'thread/start' || frame.method === 'thread/resume') {
         if (frame.params.config.mcp_servers.memoflow.http_headers.Authorization !== 'Bearer fixture') process.exit(8);
@@ -71,6 +71,37 @@ describe('Codex native driver', () => {
     await run.next();
     await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_UNAVAILABLE' });
   });
+  it('classifies a native turn/start JSON-RPC 429 without exposing raw diagnostics', async () => {
+    const native = driver(`if(frame.method === 'turn/start') {
+      send({id:frame.id,error:{code:429,message:'Upstream rate limit with internal account details'}});
+      return;
+    }`);
+    const run = native.run({
+      modelId: 'model',
+      content: 'Hi',
+      mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+    });
+    await expect(run.next()).resolves.toMatchObject({ value: { type: 'session' } });
+    await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_RATE_LIMITED' });
+  });
+
+  it('classifies a failed native turn quota exhaustion with a sanitized public error', async () => {
+    const native = driver(`if(frame.method === 'turn/start') {
+      reply({turn:{id:'turn-1'}});
+      setTimeout(() => send({method:'turn/completed',params:{
+        threadId:'native-1',turn:{id:'turn-1',status:'failed',
+          error:{message:'insufficient_quota: internal diagnostic details'}}}}),10);
+      return;
+    }`);
+    const run = native.run({
+      modelId: 'model',
+      content: 'Hi',
+      mcp: { url: 'http://127.0.0.1/mcp', token: 'fixture' },
+    });
+    await expect(run.next()).resolves.toMatchObject({ value: { type: 'session' } });
+    await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' });
+  });
+
   it('queries native account and catalog without starting inference', async () => {
     expect(await driver().probe()).toMatchObject({
       status: 'ready',
