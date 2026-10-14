@@ -57,11 +57,10 @@ test.describe('Local Docker core product Phase E', () => {
     await expect(page.getByTestId('ai-chat-add-context')).toBeEnabled();
     await expect(page.getByTestId('shell-ai-column')).toBeVisible();
     await expect(page.getByTestId('business-panel')).toBeVisible();
-    await expect(page.getByTestId('business-panel-workflow')).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
-    await expect(page.getByTestId('shell-workflow-surface')).toBeVisible();
+    // Workflow details live in the optional Chat context, not a retired business-panel tab.
+    await expect(page.getByTestId('business-panel-workflow')).toHaveCount(0);
+    await expect(page.getByTestId('shell-workflow-surface')).toHaveCount(0);
+    await page.getByTestId('ai-desktop-context-panel-toggle').click();
 
     const approvalPanel = page.getByTestId('goal-workflow-panel');
     await expect(approvalPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });

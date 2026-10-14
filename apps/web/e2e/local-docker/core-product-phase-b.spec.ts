@@ -62,6 +62,10 @@ test.describe('Local Docker core product Phase B', () => {
       .getByTestId('task-plan-dialog')
       .getByRole('button', { name: '取消', exact: true })
       .click();
+    const discard = page.getByRole('alertdialog');
+    await expect(discard).toBeVisible();
+    await discard.getByRole('button', { name: '放弃更改', exact: true }).click();
+    await expect(page.getByTestId('task-plan-dialog')).toBeHidden();
     await page.getByTestId('create-task-plan-button').click();
     await expect(page.getByTestId('task-plan-title-input')).toHaveValue('');
     await expect(page.getByTestId('task-plan-description-input')).toHaveValue('');

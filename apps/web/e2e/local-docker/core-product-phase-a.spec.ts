@@ -45,7 +45,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(goalOnly.goalBinding).toEqual({
       goalId: fixture.id,
       keyResultId: null,
-      contribution: null,
+      progressRule: null,
     });
 
     const keyResultOnly = await createTaskPlanWithContext(
@@ -57,7 +57,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(keyResultOnly.goalBinding).toEqual({
       goalId: fixture.id,
       keyResultId: fixture.keyResultId,
-      contribution: null,
+      progressRule: null,
     });
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -140,10 +140,9 @@ test.describe('Local Docker core product Phase A', () => {
     }
     await toggle.click();
     await selectBinding(page, primary);
-    const contributionToggle = page.getByTestId('task-goal-contribution-toggle');
-    await expect(contributionToggle).toHaveAttribute('data-state', 'unchecked');
-    await contributionToggle.click();
-    await expect(contributionToggle).toHaveAttribute('data-state', 'checked');
+    await expect(page.getByTestId('task-goal-mode')).toContainText('仅关联');
+    await page.getByTestId('task-goal-mode').click();
+    await page.getByTestId('task-goal-mode-FixedAutomatic').click();
     await page.getByTestId('task-goal-increment-input').fill('1');
 
     const createResponsePromise = page.waitForResponse(
@@ -158,7 +157,7 @@ test.describe('Local Docker core product Phase A', () => {
         goalBinding: {
           goalId: string;
           keyResultId: string;
-          contribution: { value: number; trigger: string } | null;
+          progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
         } | null;
       };
       occurrenceCount: number;
@@ -168,7 +167,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(creation.plan.goalBinding).toEqual({
       goalId: primary.id,
       keyResultId: primary.keyResultId,
-      contribution: { value: 1, trigger: 'EachCompletion' },
+      progressRule: { mode: 'Fixed', value: 1, trigger: 'EachCompletion' },
     });
 
     await page.getByTestId('task-surface-trigger').click();
@@ -295,7 +294,7 @@ async function createTaskPlanWithContext(
   goalBinding: {
     goalId: string;
     keyResultId: string | null;
-    contribution: { value: number; trigger: string } | null;
+    progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
   } | null;
 }> {
   await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
@@ -326,10 +325,11 @@ async function createTaskPlanWithContext(
     await expect(keyResultTrigger).toContainText(fixture.keyResultName);
   }
 
-  await expect(page.getByTestId('task-goal-contribution-toggle')).toHaveAttribute(
-    'data-state',
-    'unchecked',
-  );
+  if (level === 'keyResult') {
+    await expect(page.getByTestId('task-goal-mode')).toContainText('仅关联');
+  } else {
+    await expect(page.getByTestId('task-goal-mode')).toBeHidden();
+  }
   const responsePromise = page.waitForResponse(
     (response) =>
       response.request().method() === 'POST' &&
@@ -342,7 +342,7 @@ async function createTaskPlanWithContext(
       goalBinding: {
         goalId: string;
         keyResultId: string | null;
-        contribution: { value: number; trigger: string } | null;
+        progressRule: { mode: 'Fixed'; value: number; trigger: string } | null;
       } | null;
     };
     occurrenceCount: number;

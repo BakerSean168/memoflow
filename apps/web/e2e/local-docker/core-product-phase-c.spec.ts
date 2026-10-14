@@ -59,7 +59,7 @@ test.describe('Local Docker core product Phase C', () => {
     await expect(panelToggle).toHaveAttribute('aria-pressed', 'false');
 
     await page.getByTestId('ai-welcome-create-goal').click();
-    await page.waitForURL('**/goals?goalForm=create', { timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await page.waitForURL('**/goals?dialog=goal', { timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-panel-form')).toBeVisible();
     await page.getByTestId('goal-name-input').fill(draftTitle);

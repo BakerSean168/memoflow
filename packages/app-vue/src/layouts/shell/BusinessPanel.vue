@@ -174,7 +174,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
         <div
           ref="tabListEl"
           class="flex min-w-0 flex-1 items-end gap-px overflow-hidden"
-          role="tablist"
+          role="group"
           :aria-label="t('shell.moduleNav')"
           data-testid="business-panel-tab-list"
         >
@@ -192,14 +192,13 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           >
             <button
               type="button"
-              role="tab"
               class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
               :class="[
                 showTabLabel(tab) ? 'pr-9' : 'justify-center px-0',
                 tabDensity === 'comfortable' ? 'font-medium' : 'font-normal',
               ]"
               :data-business-tab-id="tab.id"
-              :aria-selected="isActiveTab(tab)"
+              :aria-pressed="isActiveTab(tab)"
               :tabindex="
                 (panelSurface === 'business' ? isActiveTab(tab) : tab.id === tabs[0]?.id) ? 0 : -1
               "
