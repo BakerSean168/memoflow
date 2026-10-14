@@ -29,7 +29,7 @@ import { CreateTaskPlanSchema, type CreateTaskPlanReq } from '@memoflow/contract
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { login, registerAndLogin } from '../helpers/testHelpers';
 import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
 import { createGoalLeaseDbMirror, type GoalLeaseDbMirror } from '../helpers/goalLeaseDbMirror';
 
@@ -223,20 +223,105 @@ async function bootstrapGoalWorkflowSession(
 }
 
 test.describe('AI Goal Workflow', () => {
-  test('[P0] restores a native Goal checkpoint after refresh and saves its stable intention once', async ({ page }) => {
-    const telemetry = await bootstrapGoalWorkflowSession(page, { landingPath: '/goals?goalForm=create', expectAiVisible: false });
+  test('[P0] isolates native checkpoints across logout and restores them after the original identity logs in again', async ({
+    page,
+  }) => {
+    const firstEmail = generateTestEmail();
+    const secondEmail = generateTestEmail();
+    let creates = 0;
+    page.on('request', (request) => {
+      if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/v1/goals')
+        creates++;
+    });
+    const openDraft = async () => {
+      await page.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), {
+        waitUntil: 'domcontentloaded',
+      });
+      await expect(page.getByTestId('goal-name-input')).toBeEnabled({
+        timeout: TIMEOUT_CONFIG.NAVIGATION,
+      });
+    };
+    const logout = async () => {
+      await page.goto(WEB_CONFIG.getFullUrl('/account/center'), { waitUntil: 'domcontentloaded' });
+      await expect(page.getByTestId('account-center-view')).toBeVisible({
+        timeout: TIMEOUT_CONFIG.NAVIGATION,
+      });
+      await page.getByTestId('account-logout-button').click();
+      const confirmation = page.getByRole('alertdialog', {
+        name: /log out of your account|确认退出登录/i,
+      });
+      await confirmation.getByRole('button', { name: /log out|退出登录/i }).click();
+      await page.waitForURL((url) => url.pathname.includes(WEB_CONFIG.LOGIN_PATH), {
+        timeout: TIMEOUT_CONFIG.LOGIN,
+      });
+    };
+    const goalSnapshot = async () => {
+      const response = await page.request.get(`${new URL(page.url()).origin}/api/v1/goals`);
+      expect(response.ok()).toBe(true);
+      return z.object({ data: z.unknown() }).parse(await response.json()).data;
+    };
+    await registerAndLogin(page, { email: firstEmail, password: e2ePassword });
+    const before = await goalSnapshot();
+    await openDraft();
+    await page.getByTestId('goal-name-input').fill('Identity A private checkpoint');
+    await page
+      .getByTestId('goal-description-input')
+      .fill('Restored only for the original identity');
+    await expect(page.getByTestId('goal-draft-checkpoint-status')).toContainText(
+      /Draft preserved|草稿已在此设备保留/,
+    );
+    await logout();
+    await registerAndLogin(page, { email: secondEmail, password: e2ePassword });
+    await openDraft();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('');
+    await expect(page.getByTestId('goal-description-input')).toHaveValue('');
+    await page.getByTestId('goal-name-input').fill('Identity B private checkpoint');
+    await expect(page.getByTestId('goal-draft-checkpoint-status')).toContainText(
+      /Draft preserved|草稿已在此设备保留/,
+    );
+    await logout();
+    await login(page, firstEmail, e2ePassword);
+    await openDraft();
+    await expect(page.getByTestId('goal-name-input')).toHaveValue('Identity A private checkpoint');
+    await expect(page.getByTestId('goal-description-input')).toHaveValue(
+      'Restored only for the original identity',
+    );
+    expect(await goalSnapshot()).toEqual(before);
+    expect(creates).toBe(0);
+  });
+
+  test('[P0] restores a native Goal checkpoint after refresh and saves its stable intention once', async ({
+    page,
+  }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page, {
+      landingPath: '/goals?goalForm=create',
+      expectAiVisible: false,
+    });
     const panel = page.getByTestId('goal-panel-form');
     await expect(panel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(panel.getByTestId('goal-name-input')).toBeEnabled();
     await panel.getByTestId('goal-name-input').fill('Checkpoint draft');
     await panel.getByTestId('goal-description-input').fill('Human text survives refresh.');
-    await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(/Draft preserved|草稿已在此设备保留/, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(
+      /Draft preserved|草稿已在此设备保留/,
+      { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
+    );
     expect(telemetry.ownerGoalCreateCount).toBe(0);
     const before = await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => { const request = indexedDB.open('memoflow-goal-drafts', 1); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('memoflow-goal-drafts', 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
       try {
-        return await new Promise<unknown>((resolve, reject) => { const request = db.transaction('checkpoints').objectStore('checkpoints').getAll(); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
-      } finally { db.close(); }
+        return await new Promise<unknown>((resolve, reject) => {
+          const request = db.transaction('checkpoints').objectStore('checkpoints').getAll();
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      } finally {
+        db.close();
+      }
     });
     const checkpoints = z.array(GoalDraftCheckpointSnapshotSchema).parse(before);
     const checkpoint = checkpoints.find((item) => item.content?.draft.name === 'Checkpoint draft');
@@ -244,29 +329,46 @@ test.describe('AI Goal Workflow', () => {
     const createId = checkpoint!.content!.createId;
     const peer = await page.context().newPage();
     try {
-      await peer.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), { waitUntil: 'domcontentloaded' });
+      await peer.goto(WEB_CONFIG.getFullUrl('/goals?goalForm=create'), {
+        waitUntil: 'domcontentloaded',
+      });
       const other = peer.getByTestId('goal-panel-form');
-      await expect(other.getByTestId('goal-name-input')).toHaveValue('Checkpoint draft', { timeout: TIMEOUT_CONFIG.NAVIGATION });
+      await expect(other.getByTestId('goal-name-input')).toHaveValue('Checkpoint draft', {
+        timeout: TIMEOUT_CONFIG.NAVIGATION,
+      });
       await panel.getByTestId('goal-name-input').fill('First window wins');
-      await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(/Draft preserved|草稿已在此设备保留/);
+      await expect(panel.getByTestId('goal-draft-checkpoint-status')).toContainText(
+        /Draft preserved|草稿已在此设备保留/,
+      );
       await other.getByTestId('goal-name-input').fill('Second window draft');
-      await expect(other.getByTestId('goal-draft-checkpoint-status')).toContainText(/Another window|另一窗口/);
+      await expect(other.getByTestId('goal-draft-checkpoint-status')).toContainText(
+        /Another window|另一窗口/,
+      );
       await expect(other.getByTestId('goal-name-input')).toHaveValue('Second window draft');
       await expect(other.getByTestId('save-goal-button')).toBeDisabled();
-      await other.getByRole('button', { name: /Load the preserved draft|加载已保留的草稿/ }).click();
+      await other
+        .getByRole('button', { name: /Load the preserved draft|加载已保留的草稿/ })
+        .click();
       await expect(other.getByTestId('goal-name-input')).toHaveValue('First window wins');
-    } finally { await peer.close(); }
+    } finally {
+      await peer.close();
+    }
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(panel).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(panel.getByTestId('goal-name-input')).toHaveValue('First window wins');
-    await expect(panel.getByTestId('goal-description-input')).toHaveValue('Human text survives refresh.');
+    await expect(panel.getByTestId('goal-description-input')).toHaveValue(
+      'Human text survives refresh.',
+    );
     await expect(panel.getByTestId('goal-name-input')).toBeEnabled();
     await panel.getByTestId('goal-name-input').fill('Recovered human draft');
     // Commit on the actual API, then lose the response. Recovery must read that
     // same intention rather than issue another create.
     let committed = false;
     await page.route('**/api/v1/goals', async (route) => {
-      if (route.request().method() !== 'POST' || committed) { await route.fallback(); return; }
+      if (route.request().method() !== 'POST' || committed) {
+        await route.fallback();
+        return;
+      }
       const body = CreateGoalSchema.parse(route.request().postDataJSON());
       const response = await route.fetch();
       expect(response.ok()).toBe(true);
@@ -279,18 +381,28 @@ test.describe('AI Goal Workflow', () => {
     await expect.poll(() => committed).toBe(true);
     await expect(panel).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     expect(telemetry.ownerGoalCreateCount).toBe(1);
-    expect(telemetry.lastOwnerGoalCreateBody).toMatchObject({ id: createId, name: 'Recovered human draft' });
+    expect(telemetry.lastOwnerGoalCreateBody).toMatchObject({
+      id: createId,
+      name: 'Recovered human draft',
+    });
     expect(telemetry.lastOwnerGoalCreateBody).not.toHaveProperty('nativeAiLease');
     expect(telemetry.goalAgentStartCount).toBe(0);
   });
 
-  test('[P0] streams Goal fields without polling and keeps the failed draft available for native save', async ({ page }) => {
+  test('[P0] streams Goal fields without polling and keeps the failed draft available for native save', async ({
+    page,
+  }) => {
     const email = generateTestEmail();
     const responses = new Set<ServerResponse>();
     const runId = `workflow-sse-${randomUUID()}`;
     let view: Extract<AIWorkflowRunView, { kind: 'goal.create' }> = {
-      kind: 'goal.create', runId, conversationId: e2eConversationId, status: 'running',
-      resourceVersion: 1, createdAt: Date.now(), updatedAt: Date.now(),
+      kind: 'goal.create',
+      runId,
+      conversationId: e2eConversationId,
+      status: 'running',
+      resourceVersion: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
     let reads = 0;
     let head = 0;
@@ -302,28 +414,54 @@ test.describe('AI Goal Workflow', () => {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Headers', 'Authorization, Last-Event-ID');
-      if (req.method === 'OPTIONS') { res.writeHead(204).end(); return; }
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204).end();
+        return;
+      }
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
-      res.write(`event: workspace\ndata: ${JSON.stringify({ type: 'stream.ready', cursor: `fixture:${head}` })}\n\n`);
+      res.write(
+        `event: workspace\ndata: ${JSON.stringify({ type: 'stream.ready', cursor: `fixture:${head}` })}\n\n`,
+      );
       responses.add(res);
       res.on('close', () => responses.delete(res));
     });
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
-    const heartbeat = setInterval(() => { for (const response of responses) response.write(': heartbeat\n\n'); }, 10_000);
+    const heartbeat = setInterval(() => {
+      for (const response of responses) response.write(': heartbeat\n\n');
+    }, 10_000);
     const publish = (next: Partial<typeof view>, actions: GoalWorkflowLiveActionRecord[] = []) => {
       const base = journal.length;
       journal = [...journal, ...actions];
       head += 1;
-      const parsed = AIWorkflowRunViewSchema.parse({ ...view, ...next, resourceVersion: (view.resourceVersion ?? 0) + 1, liveActions: journal, updatedAt: Date.now() });
+      const parsed = AIWorkflowRunViewSchema.parse({
+        ...view,
+        ...next,
+        resourceVersion: (view.resourceVersion ?? 0) + 1,
+        liveActions: journal,
+        updatedAt: Date.now(),
+      });
       if (parsed.kind !== 'goal.create') throw new Error('Invalid Goal fixture kind');
       view = parsed;
-      const event = WorkspaceEventSchema.parse({ type: 'workflow.updated', eventId: `${runId}:${view.resourceVersion}`, cursor: `fixture:${head}`,
-        resourceVersion: view.resourceVersion, data: { ...view, liveActions: undefined }, actions, baseActionSequence: base, lastActionSequence: journal.length });
-      for (const response of responses) response.write(`event: workspace\ndata: ${JSON.stringify(event)}\n\n`);
+      const event = WorkspaceEventSchema.parse({
+        type: 'workflow.updated',
+        eventId: `${runId}:${view.resourceVersion}`,
+        cursor: `fixture:${head}`,
+        resourceVersion: view.resourceVersion,
+        data: { ...view, liveActions: undefined },
+        actions,
+        baseActionSequence: base,
+        lastActionSequence: journal.length,
+      });
+      for (const response of responses)
+        response.write(`event: workspace\ndata: ${JSON.stringify(event)}\n\n`);
     };
     try {
-      await page.route('**/api/v1/ai/runtime/workspace/sse', (route) => route.continue({ url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/events` }));
+      await page.route('**/api/v1/ai/runtime/workspace/sse', (route) =>
+        route.continue({
+          url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/events`,
+        }),
+      );
       const telemetry = await bootstrapGoalWorkflowSession(page, { email });
       const mirror = await createGoalLeaseDbMirror({ email });
       await page.route('**/api/v1/ai/runtime/workflow/start', async (route) => {
@@ -331,12 +469,19 @@ test.describe('AI Goal Workflow', () => {
         view = { ...view, conversationId: request.conversationId };
         await fulfillJson(route, view);
       });
-      await page.route('**/api/v1/ai/runtime/workflow/get', async (route) => { reads += 1; await fulfillJson(route, view); });
+      await page.route('**/api/v1/ai/runtime/workflow/get', async (route) => {
+        reads += 1;
+        await fulfillJson(route, view);
+      });
       await page.route('**/api/v1/ai/runtime/workflow/goal-surface-lease', async (route) => {
         const request = AIGoalSurfaceLeaseRequestSchema.parse(route.request().postDataJSON());
         expect(request.runId).toBe(runId);
         if (request.action === 'claim') {
-          grant = { token: randomUUID(), fence: (grant?.fence ?? 0) + 1, expiresAt: Date.now() + 30_000 };
+          grant = {
+            token: randomUUID(),
+            fence: (grant?.fence ?? 0) + 1,
+            expiresAt: Date.now() + 30_000,
+          };
           await mirror.claim({ runId, ...grant });
           await fulfillJson(route, { status: 'claimed', ...grant });
         } else if (!grant || request.token !== grant.token || request.fence !== grant.fence) {
@@ -350,30 +495,67 @@ test.describe('AI Goal Workflow', () => {
           await fulfillJson(route, { status: 'released' });
         }
       });
-      await sendComposerMessage(page, 'Create a structured AI workflow goal and preserve the draft if planning is interrupted.', 'goal-workflow');
+      await sendComposerMessage(
+        page,
+        'Create a structured AI workflow goal and preserve the draft if planning is interrupted.',
+        'goal-workflow',
+      );
       await expect.poll(() => reads).toBe(1);
       await expect.poll(() => responses.size).toBe(1);
       publish({}, [
-        { sequence: 1, command: { actionId: 'name', revision: 1, operation: 'goal.setName', value: 'Preserved streamed draft' } },
-        { sequence: 2, command: { actionId: 'description', revision: 1, operation: 'goal.patchDescription', value: 'Keep this description after the model stops.' } },
+        {
+          sequence: 1,
+          command: {
+            actionId: 'name',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'Preserved streamed draft',
+          },
+        },
+        {
+          sequence: 2,
+          command: {
+            actionId: 'description',
+            revision: 1,
+            operation: 'goal.patchDescription',
+            value: 'Keep this description after the model stops.',
+          },
+        },
       ]);
       const form = page.getByTestId('goal-panel-form');
       await expect(form).toBeVisible();
       await expect(page.getByTestId('goal-name-input')).toHaveValue('Preserved streamed draft');
-      await expect(page.getByTestId('goal-description-input')).toHaveValue('Keep this description after the model stops.');
+      await expect(page.getByTestId('goal-description-input')).toHaveValue(
+        'Keep this description after the model stops.',
+      );
       // A real open SSE connection stays healthy for the network-budget acceptance window.
       await page.waitForTimeout(30_000);
       expect(reads).toBe(1);
-      publish({ status: 'failed', failure: { code: 'RATE_LIMITED', message: 'Safe public failure', details: { limitKind: 'quota_exhausted' }, retryHint: { kind: 'after', afterMs: 30_000 } } });
+      publish({
+        status: 'failed',
+        failure: {
+          code: 'RATE_LIMITED',
+          message: 'Safe public failure',
+          details: { limitKind: 'quota_exhausted' },
+          retryHint: { kind: 'after', afterMs: 30_000 },
+        },
+      });
       const interruption = page.getByTestId('ai-workflow-interruption');
       await expect(interruption).toHaveCount(1);
       await expect(interruption).toContainText(/insufficient quota|配额不足/);
       await expect(interruption).toContainText('30');
       await expect(form).toBeVisible();
       await expect(page.getByTestId('goal-name-input')).toHaveValue('Preserved streamed draft');
-      await page.screenshot({ path: test.info().outputPath('goal-interruption-preserved.png'), fullPage: true });
+      await page.screenshot({
+        path: test.info().outputPath('goal-interruption-preserved.png'),
+        fullPage: true,
+      });
       await page.getByTestId('goal-name-input').fill('Manually saved preserved draft');
-      const saved = page.waitForResponse((response) => new URL(response.url()).pathname === '/api/v1/goals' && response.request().method() === 'POST');
+      const saved = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === '/api/v1/goals' &&
+          response.request().method() === 'POST',
+      );
       await page.getByTestId('save-goal-button').click();
       expect((await saved).ok()).toBe(true);
       expect(telemetry.ownerGoalCreateCount).toBe(1);
@@ -387,6 +569,100 @@ test.describe('AI Goal Workflow', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
   });
+  test('[P0] converges Conversation create, rename and deletion across two authenticated browser sessions', async ({
+    page,
+    browser,
+  }) => {
+    const email = generateTestEmail();
+    await registerAndLogin(page, { email, password: e2ePassword });
+    const secondContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+    const peer = await secondContext.newPage();
+    try {
+      await login(peer, email, e2ePassword);
+      const sessions = [page, peer];
+      const metrics = sessions.map(() => ({ lists: 0, completed: 0 }));
+      for (const [index, session] of sessions.entries()) {
+        session.on('request', (request) => {
+          if (
+            request.method() === 'GET' &&
+            new URL(request.url()).pathname === '/api/v1/ai/chat/conversations'
+          ) {
+            metrics[index]!.lists += 1;
+          }
+        });
+        session.on('requestfinished', (request) => {
+          if (
+            request.method() === 'GET' &&
+            new URL(request.url()).pathname === '/api/v1/ai/chat/conversations'
+          ) {
+            metrics[index]!.completed += 1;
+          }
+        });
+      }
+      // Both Vue projections must establish their own authenticated SSE before the mutation.
+      const ready = sessions.map((session) =>
+        session.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === '/api/v1/ai/runtime/workspace/sse' &&
+            response.status() === 200,
+          { timeout: TIMEOUT_CONFIG.NAVIGATION },
+        ),
+      );
+      await Promise.all(
+        sessions.map((session) => session.reload({ waitUntil: 'domcontentloaded' })),
+      );
+      await Promise.all(ready);
+      for (const session of sessions) {
+        await expect(session.getByTestId('app-shell')).toBeVisible();
+      }
+      // Discovery can predate ready. Wait for the subsequent authoritative
+      // calibration response before fixing the no-refetch baseline.
+      await expect
+        .poll(() =>
+          metrics.every((entry) => entry.completed >= 2 && entry.completed === entry.lists),
+        )
+        .toBe(true);
+      const listCounts = metrics.map((entry) => entry.lists);
+      const row = (session: Page, title: string) =>
+        session.locator('[data-sidebar-presentation="docked"]').getByRole('button', {
+          name: title,
+          exact: true,
+        });
+      // Use the same proxy origin as the app so its authenticated cookie is
+      // included even when localhost and 127.0.0.1 differ in the test profile.
+      const endpoint = `${new URL(page.url()).origin}/api/v1/ai/chat/conversations`;
+      const firstTitle = `Two-session Conversation ${randomUUID()}`;
+      const created = await page.request.post(endpoint, { data: { name: firstTitle } });
+      expect(created.status()).toBe(201);
+      const creation = z
+        .object({ data: z.object({ id: z.string().min(1) }) })
+        .parse(await created.json());
+      for (const session of sessions) {
+        await expect(row(session, firstTitle)).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+      }
+      const nextTitle = `Updated Conversation ${randomUUID()}`;
+      const renamed = await page.request.patch(`${endpoint}/${creation.data.id}`, {
+        data: { name: nextTitle },
+      });
+      expect(renamed.status()).toBe(200);
+      for (const session of sessions) {
+        await expect(row(session, nextTitle)).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+        await expect(row(session, firstTitle)).toHaveCount(0);
+      }
+      const deleted = await page.request.delete(`${endpoint}/${creation.data.id}`);
+      expect(deleted.status()).toBe(200);
+      for (const session of sessions) {
+        await expect(row(session, nextTitle)).toHaveCount(0, {
+          timeout: TIMEOUT_CONFIG.NAVIGATION,
+        });
+      }
+      // No business list refetch is required for any of the three committed deltas.
+      expect(metrics.map((entry) => entry.lists)).toEqual(listCounts);
+    } finally {
+      await secondContext.close();
+    }
+  });
+
   test('[P0] loads the AI Agent Workspace from the root route', async ({ page }) => {
     await bootstrapGoalWorkflowSession(page);
 

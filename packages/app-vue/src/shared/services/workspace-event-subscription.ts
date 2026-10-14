@@ -13,22 +13,35 @@ class WorkspaceSubscription {
   private ready = false;
   constructor(private readonly runtime: WorkflowRuntimeClient) {}
 
+  reset(): void {
+    this.controller?.abort();
+    clearTimeout(this.timer);
+    this.timer = undefined;
+    this.ready = false;
+    this.cursor = undefined;
+    if (!this.listeners.size) {
+      this.controller = null;
+      return;
+    }
+    const controller = new AbortController();
+    this.controller = controller;
+    void this.connect(controller, 0);
+  }
+
   listen(options: WorkspaceEventStreamOptions): Promise<void> {
     if (options.signal.aborted) return Promise.resolve();
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       let chain = Promise.resolve();
       let stopped = false;
       const listener: Listener = {
         receive: (event) => {
-          chain = chain.then(async () => {
+          const deliver = async () => {
             if (!stopped) await options.onEvent(event);
-          });
-          return chain.catch((error: unknown) => {
-            reject(error);
-            listener.stop();
-            // The transport must not ACK an event rejected by an active projection.
-            throw error;
-          });
+          };
+          chain = chain.then(deliver, deliver);
+          // Keep the projection registered for reconnect calibration. Rejection
+          // propagates to the transport so it cannot ACK this cursor.
+          return chain;
         },
         stop: () => {
           if (stopped) return;
@@ -51,7 +64,9 @@ class WorkspaceSubscription {
       // A late consumer calibrates from a current snapshot before receiving deltas.
       if (this.ready && this.cursor)
         void listener.receive({ type: 'stream.ready', cursor: this.cursor }).catch(() => {
-          // The listener's subscription promise already received the failure.
+          // Synthetic ready has no transport callback to reject. Re-establish
+          // the live/snapshot boundary for this still-active late consumer.
+          if (!stopped) this.reset();
         });
       if (!this.controller) {
         const controller = new AbortController();
@@ -124,4 +139,9 @@ export function subscribeWorkspaceEvents(
     subscriptions.set(runtime, subscription);
   }
   return subscription.listen(options);
+}
+
+/** Establish a fresh live/snapshot boundary before dropping bounded projection metadata. */
+export function resetWorkspaceEvents(runtime: WorkflowRuntimeClient): void {
+  subscriptions.get(runtime)?.reset();
 }

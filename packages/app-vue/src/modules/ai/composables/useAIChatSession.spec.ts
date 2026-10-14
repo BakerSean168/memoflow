@@ -14,6 +14,7 @@ import { useAIChatSession, type UseAIChatSessionOptions } from './useAIChatSessi
 import type { ChatModelOption } from './types';
 import enErrors from '../../../locales/en-US/errors';
 import zhErrors from '../../../locales/zh-CN/errors';
+import { subscribeWorkspaceEvents } from '../../../shared/services/workspace-event-subscription';
 
 const toastMocks = vi.hoisted(() => ({
   success: vi.fn(),
@@ -210,6 +211,198 @@ async function send(
 }
 
 describe('useAIChatSession Mastra-native open chat', () => {
+  it('does not revive old pending summaries after another consumer resets the shared connection', async () => {
+    const transports: WorkspaceEventStreamOptions[] = [];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        transports.push(options);
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    service.listConversations.mockResolvedValue(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
+    await transports[0]!.onEvent({ type: 'stream.ready', cursor: 'before' });
+    await transports[0]!.onEvent({
+      type: 'conversation.updated',
+      eventId: 'visible',
+      cursor: 'visible',
+      resourceVersion: 1,
+      data: {
+        conversationId: 'deleted-before-new-head',
+        runtimeKind: 'builtin',
+        conversation: { ...createConversationDTO('deleted-before-new-head'), resourceVersion: 1 },
+      },
+    });
+    const late = new AbortController();
+    const subscription = subscribeWorkspaceEvents(workspaceRuntime, {
+      signal: late.signal,
+      onEvent: vi.fn(async () => {}).mockRejectedValueOnce(new Error('late snapshot unavailable')),
+    });
+    try {
+      await vi.waitFor(() => expect(transports).toHaveLength(2));
+      await transports[1]!.onEvent({ type: 'stream.ready', cursor: 'after-deletion' });
+      expect(session.conversationList.value).toEqual([]);
+    } finally {
+      late.abort();
+      await subscription;
+    }
+  });
+
+  it('bounds Conversation replay metadata by recovering at a fresh stream boundary', async () => {
+    const transports: WorkspaceEventStreamOptions[] = [];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        transports.push(options);
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    service.listConversations.mockResolvedValue(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
+    const ready = { type: 'stream.ready', cursor: 'head' } as const;
+    await transports[0]!.onEvent(ready);
+    // This update is committed before the new connection, but its subsequent
+    // deletion falls before that connection's head and is absent from replay.
+    await transports[0]!.onEvent({
+      type: 'conversation.updated',
+      eventId: 'was-visible',
+      cursor: 'was-visible',
+      resourceVersion: 1,
+      data: {
+        conversationId: 'was-visible',
+        runtimeKind: 'builtin',
+        conversation: { ...createConversationDTO('was-visible'), resourceVersion: 1 },
+      },
+    });
+    const deleted = (id: string) =>
+      ({
+        type: 'conversation.updated',
+        eventId: id,
+        cursor: id,
+        resourceVersion: 2,
+        data: { conversationId: id, runtimeKind: 'builtin', conversation: null },
+      }) as const;
+    for (let index = 0; index < 512; index++)
+      await transports[0]!.onEvent(deleted(`deleted-${index}`));
+    expect(transports).toHaveLength(2);
+    expect(transports[0]!.signal.aborted).toBe(true);
+    expect(transports[1]!.cursor).toBeUndefined();
+    // Failed calibration must retain the recovery requirement; the same
+    // consumer gets another chance and metadata is compacted only on success.
+    service.listConversations.mockRejectedValueOnce(new Error('offline'));
+    await expect(transports[1]!.onEvent(ready)).rejects.toThrow();
+    await transports[1]!.onEvent(ready);
+    const reads = service.listConversations.mock.calls.length;
+    await transports[0]!.onEvent({
+      ...deleted('deleted-0'),
+      resourceVersion: 1,
+      data: {
+        conversationId: 'deleted-0',
+        runtimeKind: 'builtin',
+        conversation: { ...createConversationDTO('deleted-0'), resourceVersion: 1 },
+      },
+    });
+    expect(session.conversationList.value).toEqual([]);
+    for (let index = 0; index < 512; index++)
+      await transports[1]!.onEvent(deleted(`next-${index}`));
+    expect(transports).toHaveLength(2);
+    expect(service.listConversations).toHaveBeenCalledTimes(reads);
+  });
+
+  it('calibrates after ready even when a discovery request predates the stream watermark', async () => {
+    let receive!: WorkspaceEventStreamOptions['onEvent'];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        receive = options.onEvent;
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
+    let finish!: (value: unknown) => void;
+    service.listConversations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const discovery = session.loadConversationList(service as never);
+    service.listConversations.mockResolvedValue(
+      ok({
+        data: [{ ...createConversationDTO('between-snapshot-and-ready'), resourceVersion: 1 }],
+        total: 1,
+        page: 1,
+        pageSize: 24,
+      }),
+    );
+    const ready = receive({ type: 'stream.ready', cursor: 'watermark' });
+    finish(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await Promise.all([discovery, ready]);
+    expect(session.conversationList.value.map((item) => item.id)).toEqual([
+      'between-snapshot-and-ready',
+    ]);
+  });
+
+  it('rejects a failed ready snapshot and can recover the same projection after an outage', async () => {
+    let receive!: WorkspaceEventStreamOptions['onEvent'];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        receive = options.onEvent;
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
+    await receive({ type: 'stream.ready', cursor: 'before' });
+    service.listConversations.mockRejectedValueOnce(new Error('snapshot unavailable'));
+    await expect(receive({ type: 'stream.ready', cursor: 'after-deletion' })).rejects.toThrow();
+    expect(session.conversationList.value).toHaveLength(1);
+    service.listConversations.mockResolvedValue(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await receive({ type: 'stream.ready', cursor: 'recovered' });
+    expect(session.conversationList.value).toEqual([]);
+  });
+
   it('shares the Workspace stream, merges titles by server version and never resurrects deletion from a late list', async () => {
     let receive!: WorkspaceEventStreamOptions['onEvent'];
     let streamSignal!: AbortSignal;
@@ -519,7 +712,7 @@ describe('useAIChatSession Mastra-native open chat', () => {
     await sending;
   });
 
-  it('ignores an older overlapping list load and retains entries on request failure', async () => {
+  it('coalesces overlapping list loads and retains entries on request failure', async () => {
     const service = createServiceStub();
     const session = mountComposable(service, createRuntimeStub());
     let resolveOld!: (value: unknown) => void;
@@ -530,6 +723,10 @@ describe('useAIChatSession Mastra-native open chat', () => {
         }),
     );
     const old = session.loadConversationList(service as never);
+    const overlapping = session.loadConversationList(service as never);
+    expect(service.listConversations).toHaveBeenCalledOnce();
+    resolveOld(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await Promise.all([old, overlapping]);
     service.listConversations.mockResolvedValueOnce(
       ok({
         data: [{ id: 'newer', name: 'Newer', updatedAt: 10 }],
@@ -539,8 +736,6 @@ describe('useAIChatSession Mastra-native open chat', () => {
       }),
     );
     await session.loadConversationList(service as never);
-    resolveOld(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
-    await old;
     expect(session.conversationList.value.map((item) => item.id)).toEqual(['newer']);
     service.listConversations.mockRejectedValueOnce(new Error('offline'));
     await session.loadConversationList(service as never);

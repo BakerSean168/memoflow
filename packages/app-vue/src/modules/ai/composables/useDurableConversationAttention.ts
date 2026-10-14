@@ -27,6 +27,7 @@ export function useDurableConversationAttention(input: {
   const streamController = new AbortController();
   let epoch = 0;
   let alive = true;
+  let refreshRequest: Promise<boolean> | null = null;
   const isVisible =
     input.isVisible ??
     (() => typeof document === 'undefined' || document.visibilityState !== 'hidden');
@@ -62,10 +63,21 @@ export function useDurableConversationAttention(input: {
     }
   }
 
-  async function refresh(): Promise<void> {
+  async function refresh(required = false): Promise<void> {
+    const request = refreshRequest ?? performRefresh();
+    refreshRequest = request;
+    const success = await request;
+    if (refreshRequest === request) refreshRequest = null;
+    if (required && !success) throw new Error('Attention snapshot unavailable');
+  }
+
+  async function performRefresh(): Promise<boolean> {
     // Support older test/runtime surfaces without falsely projecting a status.
-    if (typeof input.runtime.listAttention !== 'function') return;
+    if (typeof input.runtime.listAttention !== 'function') return true;
     const currentEpoch = ++epoch;
+    const conversationScope = JSON.stringify(
+      input.conversations.value.map((item) => [item.id, item.runtimeKind]),
+    );
     const versionsBefore = new Map(versions);
     const lists: Record<AssistantAttentionRuntimeKind, string[]> = {
       builtin: [],
@@ -84,7 +96,14 @@ export function useDurableConversationAttention(input: {
     const results = await Promise.allSettled(
       batches.map(({ kind, ids }) => input.runtime.listAttention(ids, kind)),
     );
-    if (!alive || currentEpoch !== epoch) return;
+    if (!alive || currentEpoch !== epoch) return false;
+    // A newly discovered conversation must receive its own snapshot even if
+    // its watcher joined a request that was already in flight.
+    if (
+      conversationScope !==
+      JSON.stringify(input.conversations.value.map((item) => [item.id, item.runtimeKind]))
+    )
+      return performRefresh();
     const next: Record<string, AttentionItem> = {};
     const requested = new Set(input.conversations.value.map((item) => String(item.id)));
     for (let index = 0; index < batches.length; index++) {
@@ -108,8 +127,10 @@ export function useDurableConversationAttention(input: {
       const incoming = next[id];
       const currentVersion = versions.get(id) ?? 0;
       const snapshotVersion = incoming?.resourceVersion ?? 0;
-      if ((incoming && snapshotVersion < currentVersion) ||
-          (!incoming && currentVersion !== (versionsBefore.get(id) ?? 0))) {
+      if (
+        (incoming && snapshotVersion < currentVersion) ||
+        (!incoming && currentVersion !== (versionsBefore.get(id) ?? 0))
+      ) {
         if (snapshots.value[id]) next[id] = snapshots.value[id]!;
         else delete next[id];
       } else if (incoming?.resourceVersion) versions.set(id, incoming.resourceVersion);
@@ -118,6 +139,7 @@ export function useDurableConversationAttention(input: {
     snapshots.value = next;
     const current = input.activeConversationId.value;
     if (current && isVisible()) void acknowledge(current);
+    return results.every((result) => result.status === 'fulfilled');
   }
 
   function onAttentionVisible() {
@@ -128,7 +150,8 @@ export function useDurableConversationAttention(input: {
   }
 
   watch(
-    () => JSON.stringify(input.conversations.value.map((item) => [String(item.id), item.runtimeKind])),
+    () =>
+      JSON.stringify(input.conversations.value.map((item) => [String(item.id), item.runtimeKind])),
     () => {
       void refresh();
     },
@@ -151,19 +174,31 @@ export function useDurableConversationAttention(input: {
           if (event.type === 'stream.reset_required') {
             versions.clear();
             snapshots.value = {};
-            await refresh();
-          } else if (event.type === 'stream.ready') await refresh();
-          else if (event.type === 'attention.changed') {
+            await refresh(true);
+          } else if (event.type === 'stream.ready') {
+            if (refreshRequest) await refreshRequest;
+            await refresh(true);
+          } else if (event.type === 'attention.changed') {
             const { conversationId: id, runtimeKind, attention } = event.data;
-            if (!input.conversations.value.some((item) => String(item.id) === id) || kindOf(id) !== runtimeKind ||
-                event.resourceVersion <= (versions.get(id) ?? 0)) return;
+            if (
+              !input.conversations.value.some((item) => String(item.id) === id) ||
+              kindOf(id) !== runtimeKind ||
+              event.resourceVersion <= (versions.get(id) ?? 0)
+            )
+              return;
             versions.set(id, event.resourceVersion);
             if (attention) snapshots.value = { ...snapshots.value, [id]: attention };
-            else { const next = { ...snapshots.value }; delete next[id]; snapshots.value = next; }
+            else {
+              const next = { ...snapshots.value };
+              delete next[id];
+              snapshots.value = next;
+            }
             if (id === input.activeConversationId.value && isVisible()) void acknowledge(id);
           }
         },
-      }).catch(() => { /* Foreground or explicit refresh can recover a failed projection. */ });
+      }).catch(() => {
+        /* Foreground or explicit refresh can recover a failed projection. */
+      });
     } else void refresh();
     if (typeof document !== 'undefined')
       document.addEventListener('visibilitychange', onAttentionVisible);

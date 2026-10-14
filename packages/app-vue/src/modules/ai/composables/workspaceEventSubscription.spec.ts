@@ -2,6 +2,48 @@ import { expect, it, vi } from 'vitest';
 import type { WorkflowRuntimeClient, WorkspaceEventStreamOptions } from '@memoflow/ai/client';
 import { subscribeWorkspaceEvents } from '../../../shared/services/workspace-event-subscription';
 
+it('reconnects when a late consumer rejects its synthetic ready snapshot', async () => {
+  const starts: WorkspaceEventStreamOptions[] = [];
+  const runtime: WorkflowRuntimeClient = {
+    streamWorkspaceEvents: vi.fn((options) => {
+      starts.push(options);
+      return new Promise<void>((resolve) =>
+        options.signal.addEventListener('abort', () => resolve(), { once: true }),
+      );
+    }),
+    start: vi.fn(),
+    resume: vi.fn(),
+    get: vi.fn(),
+    list: vi.fn(),
+    cancel: vi.fn(),
+    goalSurfaceLease: vi.fn(),
+  };
+  const first = new AbortController();
+  const second = new AbortController();
+  const firstSubscription = subscribeWorkspaceEvents(runtime, {
+    signal: first.signal,
+    onEvent: async () => {},
+  });
+  await starts[0]!.onEvent({ type: 'stream.ready', cursor: 'before' });
+  const projection = vi.fn(async () => {}).mockRejectedValueOnce(new Error('snapshot unavailable'));
+  const secondSubscription = subscribeWorkspaceEvents(runtime, {
+    signal: second.signal,
+    onEvent: projection,
+  });
+  try {
+    await vi.waitFor(() => expect(starts).toHaveLength(2));
+    expect(starts[0]!.signal.aborted).toBe(true);
+    expect(starts[1]!.cursor).toBeUndefined();
+    await starts[1]!.onEvent({ type: 'stream.ready', cursor: 'recovered' });
+    expect(projection).toHaveBeenLastCalledWith({ type: 'stream.ready', cursor: 'recovered' });
+    expect(projection).toHaveBeenCalledTimes(2);
+  } finally {
+    first.abort();
+    second.abort();
+    await Promise.all([firstSubscription, secondSubscription]);
+  }
+});
+
 it('shares one transport, calibrates late subscribers, and closes only after the last consumer leaves', async () => {
   let options!: WorkspaceEventStreamOptions;
   const stream = vi.fn((input: WorkspaceEventStreamOptions) => {
@@ -82,8 +124,7 @@ it('awaits all active projections before committing the reconnect cursor', async
         }),
     });
     const delivery = starts[0]!.onEvent({ type: 'stream.ready', cursor: 'committed' });
-    await Promise.resolve();
-    expect(complete).toBeDefined();
+    await vi.waitFor(() => expect(complete).toBeDefined());
     complete();
     await delivery;
     end();
@@ -139,17 +180,21 @@ it('does not advance a shared cursor when one active projection rejects an event
       resourceVersion: 1,
       data: { conversationId: 'conversation', runtimeKind: 'builtin', attention: null },
     } as const;
-    const subscriptionFailure = failedSubscription.catch((error: unknown) => error);
     await expect(starts[0]!.onEvent(event)).rejects.toThrow('projection refused');
-    expect(await subscriptionFailure).toMatchObject({ message: 'projection refused' });
     expect(survivingProjection).toHaveBeenCalledWith(event);
     finish[0]!();
     await vi.advanceTimersByTimeAsync(1000);
     expect(starts).toHaveLength(2);
     expect(starts[1]!.cursor).toBe('previous');
+    await starts[1]!.onEvent({ type: 'stream.ready', cursor: 'recovered' });
+    expect(failedProjection).toHaveBeenLastCalledWith({
+      type: 'stream.ready',
+      cursor: 'recovered',
+    });
+    failedController.abort();
     survivingController.abort();
     finish[1]!();
-    await survivingSubscription;
+    await Promise.all([failedSubscription, survivingSubscription]);
   } finally {
     vi.useRealTimers();
   }
