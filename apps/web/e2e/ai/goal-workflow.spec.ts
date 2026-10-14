@@ -614,15 +614,17 @@ test.describe('AI Goal Workflow', () => {
       await Promise.all(ready);
       for (const session of sessions) {
         await expect(session.getByTestId('app-shell')).toBeVisible();
+        // Fresh identities have no providers. This state appears only after
+        // registry, provider and workspace discovery initialization finishes.
+        await expect(session.getByTestId('ai-composer-provider-unavailable')).toBeVisible({
+          timeout: TIMEOUT_CONFIG.NAVIGATION,
+        });
       }
-      // Discovery can predate ready. Wait for the subsequent authoritative
-      // calibration response before fixing the no-refetch baseline.
       await expect
         .poll(() =>
-          metrics.every((entry) => entry.completed >= 2 && entry.completed === entry.lists),
+          metrics.every((entry) => entry.completed >= 1 && entry.completed === entry.lists),
         )
         .toBe(true);
-      const listCounts = metrics.map((entry) => entry.lists);
       const row = (session: Page, title: string) =>
         session.locator('[data-sidebar-presentation="docked"]').getByRole('button', {
           name: title,
@@ -631,6 +633,21 @@ test.describe('AI Goal Workflow', () => {
       // Use the same proxy origin as the app so its authenticated cookie is
       // included even when localhost and 127.0.0.1 differ in the test profile.
       const endpoint = `${new URL(page.url()).origin}/api/v1/ai/chat/conversations`;
+      // Prove both projections crossed their live/snapshot boundary before
+      // measuring deltas. Initialization may legitimately coalesce list reads.
+      const barrierTitle = `Ready barrier ${randomUUID()}`;
+      const barrierResponse = await page.request.post(endpoint, { data: { name: barrierTitle } });
+      expect(barrierResponse.status()).toBe(201);
+      const barrier = z
+        .object({ data: z.object({ id: z.string().min(1) }) })
+        .parse(await barrierResponse.json());
+      for (const session of sessions) {
+        await expect(row(session, barrierTitle)).toBeVisible({
+          timeout: TIMEOUT_CONFIG.NAVIGATION,
+        });
+      }
+      await expect.poll(() => metrics.every((entry) => entry.completed === entry.lists)).toBe(true);
+      const listCounts = metrics.map((entry) => entry.lists);
       const firstTitle = `Two-session Conversation ${randomUUID()}`;
       const created = await page.request.post(endpoint, { data: { name: firstTitle } });
       expect(created.status()).toBe(201);
@@ -658,6 +675,7 @@ test.describe('AI Goal Workflow', () => {
       }
       // No business list refetch is required for any of the three committed deltas.
       expect(metrics.map((entry) => entry.lists)).toEqual(listCounts);
+      expect((await page.request.delete(`${endpoint}/${barrier.data.id}`)).status()).toBe(200);
     } finally {
       await secondContext.close();
     }
