@@ -11,7 +11,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
 } from '@memoflow/ui-vue-shadcn';
 import type {
   AgentInstance,
@@ -35,7 +34,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   changed: [];
-  toggle: [enabled: boolean];
   rename: [name: string];
   remove: [];
   reset: [];
@@ -339,13 +337,7 @@ onBeforeUnmount(() => {
                 ? t('setting.agentInstances.connectionReady')
                 : t('setting.agentInstances.needsConfig')
           }}</Badge
-        ><Switch
-          :model-value="instance.enabled"
-          :disabled="busy"
-          :aria-label="t('setting.ai.enableProvider', { name: instance.name })"
-          data-testid="ai-provider-detail-toggle"
-          @update:model-value="emit('toggle', $event)"
-        />
+        >
         <Button
           v-if="instance.revision > 0"
           size="icon"

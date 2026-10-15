@@ -7,15 +7,20 @@ import type {
   LocalAgentStatus,
   LocalAgentModel,
   LocalAgentModelOptions,
+  LocalAgentAccountSummary,
 } from '@memoflow/contracts/ai';
-import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
+import {
+  LocalAgentModelOptionValueSchema,
+  LocalAgentAccountSummarySchema,
+} from '@memoflow/contracts/ai';
 import {
   NativeRpcTransport,
   type NativeProcessOptions,
   type NativeServerRequest,
 } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
+import { nativeFailure } from './native-failure';
 
 export type NativeAgentEvent =
   | { type: 'session'; nativeSessionId: string; accountFingerprint: string }
@@ -41,9 +46,19 @@ export interface NativeAgentRunInput {
 }
 type NativeResponse = LocalAgentRequestResponse['response'];
 const accountSchema = z.object({
-  account: z.object({ type: z.string(), email: z.string().optional() }).nullable(),
+  account: z
+    .object({ type: z.string(), email: z.string().nullish(), planType: z.string().nullish() })
+    .nullable(),
   requiresOpenaiAuth: z.boolean(),
 });
+/** Handshake metadata is untrusted; expose only a recognized Codex CLI version. */
+function codexVersion(handshake: unknown): string | undefined {
+  const parsed = z.object({ userAgent: z.string().max(240).optional() }).safeParse(handshake);
+  if (!parsed.success) return undefined;
+  return parsed.data.userAgent?.match(
+    /\bcodex(?:[-_](?:cli|app[-_]?server))?[\/ ]v?(\d+\.\d+\.\d+(?:[-+][a-z0-9.-]+)?)/iu,
+  )?.[1];
+}
 const optionValue = LocalAgentModelOptionValueSchema;
 const catalogSchema = z.object({
   data: z
@@ -78,6 +93,8 @@ const scopedSchema = z.object({ threadId: z.string(), turnId: z.string() });
 /** Native Codex execution only. MemoFlow does not reconstruct or rerun native tool calls. */
 export class CodexDriver {
   private transport?: NativeRpcTransport;
+  private version?: string;
+  private account?: LocalAgentAccountSummary;
   private threadId?: string;
   private turnId?: string;
   private cancelled = false;
@@ -105,22 +122,49 @@ export class CodexDriver {
       },
     });
     this.transport = transport;
-    await transport.request('initialize', {
-      clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
-      capabilities: { experimentalApi: true },
-    });
+    this.account = undefined;
+    this.version = codexVersion(
+      await transport.request('initialize', {
+        clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
+        capabilities: { experimentalApi: true },
+      }),
+    );
     transport.notify('initialized');
     const account = accountSchema.parse(
       await transport.request('account/read', { refreshToken: false }),
     );
     if (account.requiresOpenaiAuth && !account.account)
       throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
-    return nativeIdentity('codex', this.connection.homePath, account.account);
+    if (account.account) {
+      const { type, email, planType } = account.account;
+      const safeType: LocalAgentAccountSummary['type'] =
+        type === 'chatgpt' ? 'chatgpt' : type === 'apiKey' ? 'api_key' : 'other';
+      const summary: LocalAgentAccountSummary = { type: safeType };
+      const verifiedEmail = LocalAgentAccountSummarySchema.shape.email.safeParse(email);
+      if (verifiedEmail.success && verifiedEmail.data) summary.email = verifiedEmail.data;
+      const verifiedPlan = LocalAgentAccountSummarySchema.shape.planType.safeParse(
+        planType?.toLowerCase(),
+      );
+      if (safeType === 'chatgpt' && verifiedPlan.success && verifiedPlan.data)
+        summary.planType = verifiedPlan.data;
+      this.account = summary;
+    }
+    // Display-only plan metadata must not change an existing session identity fingerprint.
+    return nativeIdentity(
+      'codex',
+      this.connection.homePath,
+      account.account
+        ? {
+            type: account.account.type,
+            ...(account.account.email ? { email: account.account.email } : {}),
+          }
+        : null,
+    );
   }
 
   async probe(): Promise<LocalAgentStatus> {
     try {
-      await this.connect();
+      const fingerprint = await this.connect();
       const models: LocalAgentModel[] = [];
       let cursor: string | undefined;
       const cursors = new Set<string>();
@@ -166,7 +210,15 @@ export class CodexDriver {
           throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
         if (cursor) cursors.add(cursor);
       } while (cursor);
-      return { status: 'ready', models };
+      return {
+        status: 'ready',
+        models,
+        ...(this.account?.type === 'chatgpt' && this.account.email
+          ? { modelVisibilityContext: nativeModelVisibilityContext(this.connection, fingerprint) }
+          : {}),
+        ...(this.version ? { version: this.version } : {}),
+        ...(this.account ? { account: this.account } : {}),
+      };
     } catch (error) {
       const code = error instanceof LocalAgentError ? error.code : 'LOCAL_AGENT_PROTOCOL_ERROR';
       return {
@@ -302,7 +354,11 @@ export class CodexDriver {
       const value = z
         .object({
           threadId: z.string(),
-          turn: z.object({ id: z.string(), status: z.string().optional() }),
+          turn: z.object({
+            id: z.string(),
+            status: z.string().optional(),
+            error: z.object({ message: z.string() }).nullable().optional(),
+          }),
         })
         .parse(params);
       if (value.threadId !== this.threadId) return;
@@ -314,6 +370,8 @@ export class CodexDriver {
       if (this.turnId && this.turnId !== value.turn.id) return;
       if (value.turn.status === 'completed') emit({ type: 'completed' });
       else if (value.turn.status === 'interrupted') emit({ type: 'cancelled' });
+      else if (value.turn.status === 'failed' && value.turn.error?.message)
+        throw nativeFailure(value.turn.error.message);
       else throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     } else if (method === 'item/agentMessage/delta') {
       const value = scopedSchema.extend({ delta: z.string().max(200_000) }).parse(params);

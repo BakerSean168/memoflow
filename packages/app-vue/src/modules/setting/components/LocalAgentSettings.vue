@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive, useId, watch } from 'vue';
+import { computed, reactive, ref, useId, watch } from 'vue';
 import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Input, Switch } from '@memoflow/ui-vue-shadcn';
+import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
   type LocalAgentConnection,
@@ -10,7 +10,10 @@ import {
   type LocalAgentDriver,
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
+import { getNativeAgentExecutionFailureMessage } from '../../ai/composables/error';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
+import { useNativeModelVisibility } from '../../ai/composables/nativeModelVisibility';
+import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
@@ -26,7 +29,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   save: [input: LocalAgentConnectionInput];
-  toggle: [enabled: boolean];
   check: [];
   remove: [];
   reset: [];
@@ -34,6 +36,21 @@ const emit = defineEmits<{
 }>();
 const { t } = useI18n();
 const uid = `ai-native-${useId()}`;
+const modelVisibility = useNativeModelVisibility(useServerStateIdentityScope(), () =>
+  props.status?.status === 'ready' ? props.status.modelVisibilityContext : undefined,
+);
+const visibilityInstanceId = computed(
+  () =>
+    props.identity?.instanceSlug ??
+    props.connection?.instanceSlug ??
+    props.connection?.id ??
+    props.driver,
+);
+function updateModelVisibility(modelId: string, event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!modelVisibility.setVisible(visibilityInstanceId.value, modelId, input.checked))
+    input.checked = !input.checked;
+}
 const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DSH' };
 const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
@@ -62,11 +79,44 @@ watch(
   { immediate: true },
 );
 const models = computed(() => (props.status?.status === 'ready' ? props.status.models : []));
+const account = computed(() =>
+  props.enabled !== false && props.status?.status === 'ready' ? props.status.account : undefined,
+);
+const showAccount = ref(false);
+watch(
+  () => [props.connection?.id, props.identity?.instanceSlug, props.driver, props.status],
+  () => {
+    showAccount.value = false;
+  },
+);
+const accountLabel = computed(() => {
+  const current = account.value;
+  if (!current) return '';
+  if (current.email) {
+    if (showAccount.value) return current.email;
+    const at = current.email.indexOf('@');
+    return `${current.email[0]}***${current.email.slice(at)}`;
+  }
+  return t(
+    current.type === 'chatgpt'
+      ? 'setting.ai.chatgptAccount'
+      : current.type === 'api_key'
+        ? 'setting.ai.apiKeyAccount'
+        : 'setting.ai.connectedAccount',
+  );
+});
+const accountPlan = computed(() => {
+  const current = account.value;
+  if (current?.type !== 'chatgpt' || !current.planType || current.planType === 'free')
+    return undefined;
+  return `ChatGPT ${current.planType[0].toUpperCase()}${current.planType.slice(1)}`;
+});
 const statusLabel = computed(() =>
   !form.enabled
     ? t('setting.ai.inactiveProvider')
     : props.status?.status === 'ready'
-      ? t('aiAssistant.local.ready', { count: props.status.models.length })
+      ? getNativeAgentExecutionFailureMessage(props.status.lastExecutionFailure, t) ||
+        t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
       : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
 const validated = computed(() =>
@@ -109,13 +159,6 @@ function save() {
           data-testid="ai-provider-runtime-version"
           >v{{ status.version.replace(/^v/, '') }}</span
         >
-        <Switch
-          :model-value="form.enabled"
-          :disabled="busy"
-          :aria-label="t('setting.ai.enableProvider', { name: form.name })"
-          data-testid="ai-provider-detail-toggle"
-          @update:model-value="emit('toggle', $event)"
-        />
         <Button
           v-if="revision ? revision > 0 : Boolean(connection)"
           type="button"
@@ -168,6 +211,32 @@ function save() {
           readonly
           class="h-8 rounded-lg text-xs text-muted-foreground"
       /></SettingsPropertyRow>
+    </div>
+    <div
+      v-if="account"
+      class="flex flex-wrap items-center gap-2 px-3 text-xs text-muted-foreground"
+      data-testid="ai-native-auth-summary"
+    >
+      <span>{{ t('setting.ai.authenticatedAs') }}</span>
+      <span
+        class="min-w-0 break-all font-medium text-foreground"
+        data-testid="ai-native-auth-identity"
+      >
+        {{ accountLabel }}
+      </span>
+      <span v-if="accountPlan" data-testid="ai-native-auth-plan">· {{ accountPlan }}</span>
+      <Button
+        v-if="account.email"
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="h-6 px-1.5 text-xs"
+        :aria-label="t(showAccount ? 'setting.ai.hideAccount' : 'setting.ai.revealAccount')"
+        :disabled="busy"
+        data-testid="ai-native-auth-toggle"
+        @click="showAccount = !showAccount"
+        >{{ t(showAccount ? 'setting.ai.hideAccount' : 'setting.ai.revealAccount') }}</Button
+      >
     </div>
     <section class="space-y-3">
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
@@ -249,16 +318,68 @@ function save() {
         <p v-if="!models.length" class="text-xs leading-5 text-muted-foreground">
           {{ t('setting.ai.modelInventoryHint') }}
         </p>
+        <p
+          v-if="models.length && !modelVisibility.canPersist.value"
+          data-testid="ai-native-model-visibility-unavailable"
+          class="mb-2 text-xs leading-5 text-muted-foreground"
+        >
+          {{ t('setting.ai.modelVisibilityContextUnavailable') }}
+        </p>
         <div
           v-for="model in models"
           :key="model.id"
-          class="truncate border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
+          class="min-w-0 border-b border-[hsl(var(--border-subtle))] py-2 text-xs last:border-b-0"
+          data-testid="ai-native-model"
         >
-          {{ model.name }}
+          <div class="flex min-w-0 items-center justify-between gap-2">
+            <p class="min-w-0 truncate font-medium" :title="model.name">{{ model.name }}</p>
+            <label class="flex shrink-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+              <input
+                type="checkbox"
+                class="accent-primary"
+                :checked="modelVisibility.isVisible(visibilityInstanceId, model.id)"
+                :disabled="busy || enabled === false || !modelVisibility.canPersist.value"
+                :aria-label="t('setting.ai.showModelNamed', { name: model.name })"
+                :data-testid="`ai-native-model-visible:${model.id}`"
+                @change="updateModelVisibility(model.id, $event)"
+              />
+              {{ t('setting.ai.showModel') }}
+            </label>
+          </div>
+          <p
+            class="mt-0.5 break-all font-mono text-[11px] text-muted-foreground"
+            data-testid="ai-native-model-id"
+          >
+            {{ model.id }}
+          </p>
+          <div
+            v-if="model.reasoningEfforts?.length || model.serviceTiers?.length"
+            class="mt-1.5 flex flex-wrap gap-1.5"
+          >
+            <span
+              v-if="model.reasoningEfforts?.length"
+              class="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              :title="model.reasoningEfforts.join(', ')"
+              data-testid="ai-native-model-reasoning"
+              >{{ t('setting.ai.modelReasoning') }}</span
+            >
+            <span
+              v-if="model.serviceTiers?.length"
+              class="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              :title="model.serviceTiers.map((tier) => tier.name).join(', ')"
+              data-testid="ai-native-model-service-tier"
+              >{{ t('setting.ai.modelServiceTiers') }}</span
+            >
+          </div>
         </div>
       </div>
     </section>
-    <p v-if="error" role="alert" class="px-3 text-xs text-destructive">
+    <p
+      v-if="error"
+      role="alert"
+      class="min-w-0 truncate whitespace-nowrap px-3 text-xs leading-5 text-muted-foreground"
+      :title="t('aiAssistant.local.actionFailed')"
+    >
       {{ t('aiAssistant.local.actionFailed') }}
     </p>
     <footer class="flex items-center justify-end gap-3 px-3">

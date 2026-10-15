@@ -116,14 +116,45 @@ export const LocalAgentModelSchema = z
   })
   .strict();
 export type LocalAgentModel = z.infer<typeof LocalAgentModelSchema>;
+/** Ephemeral Desktop probe metadata, never a persisted connection or a credential. */
+export const LocalAgentAccountSummarySchema = z
+  .object({
+    type: z.enum(['chatgpt', 'api_key', 'other']),
+    email: z.email().max(254).optional(),
+    planType: z.enum(['free', 'plus', 'pro', 'team', 'business', 'enterprise']).optional(),
+  })
+  .strict();
+export type LocalAgentAccountSummary = z.infer<typeof LocalAgentAccountSummarySchema>;
+
+/** Server-produced, domain-separated digest of a verified native account/configuration snapshot.
+ * Display preference partition only; never an authorization or execution capability.
+ */
+export const LocalAgentModelVisibilityContextSchema = z.string().regex(/^mvc1:[0-9a-f]{64}$/u);
+
+/** Last observed request limit; independent of catalog discovery and never a quota balance. */
+export const LocalAgentExecutionFailureSchema = z
+  .object({
+    code: z.enum(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED']),
+    modelId: id,
+    occurredAt: z.number().int().nonnegative(),
+  })
+  .strict();
+export type LocalAgentExecutionFailure = z.infer<typeof LocalAgentExecutionFailureSchema>;
+
 export const LocalAgentStatusSchema = z.discriminatedUnion('status', [
   z
     .object({
       status: z.literal('ready'),
       models: z.array(LocalAgentModelSchema).max(2000),
       version: z.string().max(240).optional(),
+      account: LocalAgentAccountSummarySchema.optional(),
+      modelVisibilityContext: LocalAgentModelVisibilityContextSchema.optional(),
+      lastExecutionFailure: LocalAgentExecutionFailureSchema.optional(),
     })
-    .strict(),
+    .strict()
+    .refine((value) => !value.lastExecutionFailure || Boolean(value.modelVisibilityContext), {
+      message: 'Execution failure requires a verified native context',
+    }),
   z
     .object({
       status: z.enum(['not_installed', 'login_required', 'unavailable']),

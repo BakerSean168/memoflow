@@ -1,3 +1,8 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { ok } from '@memoflow/contracts/result';
+import { createNativeAgentFlowFixture } from '@memoflow/ai/testing';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
@@ -5,11 +10,20 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/contracts/ai';
 import AIChatView from '../views/AIChatView.vue';
+import enAI from '../../../locales/en-US/aiAssistant';
+import enErrors from '../../../locales/en-US/errors';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '../../../platform/server-state';
+import type { UseAIChatSessionOptions } from './useAIChatSession';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import {
   SHELL_COMPOSER_MOUNT_KEY,
   AI_CONFIGURATION_REVISION_KEY,
   AI_AGENT_REGISTRY_KEY,
+  AI_LOCAL_AGENT_KEY,
+  AI_ASSISTANT_RUNTIME_KEY,
+  AI_RUNTIME_USAGE_KEY,
+  AI_WORKFLOW_RUNTIME_KEY,
+  ASSISTANT_SURFACE_KEY,
 } from '../../../di/keys';
 
 const fixture = await vi.hoisted(async () => {
@@ -51,6 +65,9 @@ const fixture = await vi.hoisted(async () => {
     loadConversationList: vi.fn(),
   };
   return {
+    realSession: false,
+    service: {} as import('./types').AIChatService,
+    nativeRunSettled: vi.fn<(connectionId: string) => void>(),
     getRun: vi.fn(),
     providers: ref<import('@memoflow/contracts/ai').AIProviderConfigClientDTO[]>([]),
     loadProviders: vi.fn(async () => undefined),
@@ -124,7 +141,7 @@ vi.mock('./useAI', async () => {
   const { ref } = await import('vue');
   return {
     useAI: () => ({
-      service: {},
+      service: fixture.service,
       providers: fixture.providers,
       isLoadingProviders: ref(false),
       loadProviders: fixture.loadProviders,
@@ -156,20 +173,38 @@ vi.mock('../../repository/composables/useReferenceableKnowledgeNotes', async () 
     useReferenceableKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn(), cancel: vi.fn() }),
   };
 });
-vi.mock('../../../shared/utils/useStrictInject', () => ({
-  useStrictInject: () => ({ get: fixture.getRun }),
-}));
-vi.mock('./useAIChatSession', () => ({ useAIChatSession: () => fixture.session }));
+vi.mock('../../../shared/utils/useStrictInject', async (original) => {
+  const actual = await original<typeof import('../../../shared/utils/useStrictInject')>();
+  return {
+    useStrictInject: (...args: Parameters<typeof actual.useStrictInject>) =>
+      fixture.realSession ? actual.useStrictInject(...args) : { get: fixture.getRun },
+  };
+});
+vi.mock('./useAIChatSession', async (original) => {
+  const actual = await original<typeof import('./useAIChatSession')>();
+  return {
+    useAIChatSession: (options: UseAIChatSessionOptions) => {
+      if (fixture.realSession) return actual.useAIChatSession(options);
+      fixture.nativeRunSettled.mockImplementation(options.onNativeRunSettled ?? (() => {}));
+      return fixture.session;
+    },
+  };
+});
 vi.mock('./useAIGoalWorkflow', () => ({ useAIGoalWorkflow: () => fixture.goal }));
 vi.mock('./useAITaskWorkflow', () => ({ useAITaskWorkflow: () => fixture.task }));
 vi.mock('./useAIKnowledgeCapture', () => ({ useAIKnowledgeCapture: () => fixture.knowledge }));
 vi.mock('./useAIKnowledgeQaWorkflow', () => ({
   useAIKnowledgeQaWorkflow: () => ({ resetKnowledgeAnswer: vi.fn() }),
 }));
-vi.mock('./chatViewHelpers', async (original) => ({
-  ...(await original<typeof import('./chatViewHelpers')>()),
-  initializeChatView: vi.fn(),
-}));
+vi.mock('./chatViewHelpers', async (original) => {
+  const actual = await original<typeof import('./chatViewHelpers')>();
+  return {
+    ...actual,
+    initializeChatView: vi.fn((...args: Parameters<typeof actual.initializeChatView>) =>
+      fixture.realSession ? actual.initializeChatView(...args) : undefined,
+    ),
+  };
+});
 
 const disposeViews: Array<() => void> = [];
 const initialConfirm = window.confirm;
@@ -195,7 +230,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
         createI18n({
           legacy: false,
           locale: 'en',
-          messages: { en: {} },
+          messages: { en: { aiAssistant: enAI, errors: enErrors } },
           missingWarn: false,
           fallbackWarn: false,
         }),
@@ -217,6 +252,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
 describe('AI conversation restoration and business navigation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    fixture.realSession = false;
     fixture.goal.goalWorkflowRun.value = null;
     fixture.task.taskWorkflowRun.value = null;
     fixture.knowledge.knowledgeCaptureRun.value = null;
@@ -271,6 +307,179 @@ describe('AI conversation restoration and business navigation', () => {
       'My draft during an unfinished registry request',
     );
     wrapper.unmount();
+  });
+
+  it('refreshes the observed native limit once and renders it without changing draft, route or catalog', async () => {
+    const native = {
+      id: 'native-codex-01',
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      writeScopes: [],
+    };
+    const choice = {
+      runtimeKind: 'local_agent' as const,
+      connectionId: native.id,
+      modelId: 'native-model',
+    };
+    const ready = {
+      status: 'ready' as const,
+      models: [{ id: 'native-model', name: 'Real native model' }],
+      modelVisibilityContext: `mvc1:${'a'.repeat(64)}`,
+    };
+    const local = {
+      listConnections: vi.fn(async () => [native]),
+      getDefaultChoice: vi.fn(async () => choice),
+      probeConnection: vi.fn(async () => ready),
+    };
+    const { wrapper } = await mountView({ [AI_LOCAL_AGENT_KEY as symbol]: local });
+    await flushPromises();
+    fixture.session.chatMessage.value = 'Keep the next draft';
+    const probesBefore = local.probeConnection.mock.calls.length;
+    local.probeConnection.mockResolvedValueOnce({
+      ...ready,
+      lastExecutionFailure: {
+        code: 'LOCAL_AGENT_QUOTA_EXHAUSTED',
+        modelId: 'native-model',
+        occurredAt: 123,
+      },
+    } as typeof ready);
+    fixture.nativeRunSettled(native.id);
+    await flushPromises();
+    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 1);
+    expect(wrapper.get('[data-testid="ai-native-execution-status"]').text()).toContain(
+      'insufficient quota',
+    );
+    expect(fixture.session.chatMessage.value).toBe('Keep the next draft');
+    expect(fixture.session.runtimeChoice.value).toEqual(choice);
+    expect(wrapper.vm.canSendMessage).toBe(true);
+    fixture.nativeRunSettled(native.id);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-native-execution-status"]').exists()).toBe(false);
+    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 2);
+  });
+
+  it('applies a discovered saved native default without clearing a Composer draft or resetting twice', async () => {
+    const native = {
+      id: 'native-codex-01',
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      writeScopes: [],
+    };
+    let resolveDefault!: (choice: AssistantRuntimeChoice) => void;
+    const local = {
+      listConnections: vi.fn(async () => [native]),
+      getDefaultChoice: vi.fn(
+        () => new Promise<AssistantRuntimeChoice>((resolve) => (resolveDefault = resolve)),
+      ),
+      probeConnection: vi.fn(async () => ({
+        status: 'ready',
+        models: [{ id: 'native-model', name: 'Real native model' }],
+      })),
+    };
+    const { wrapper } = await mountView({ [AI_LOCAL_AGENT_KEY as symbol]: local });
+    fixture.session.chatMessage.value = 'Keep my unsent draft';
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+
+    resolveDefault({
+      runtimeKind: 'local_agent',
+      connectionId: native.id,
+      modelId: 'native-model',
+    });
+    await flushPromises();
+    expect(fixture.session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: native.id,
+      modelId: 'native-model',
+    });
+    expect(fixture.session.chatMessage.value).toBe('Keep my unsent draft');
+    expect(fixture.session.resetChatSession).toHaveBeenCalledOnce();
+    expect(local.probeConnection).toHaveBeenCalledWith(native.id);
+    expect(wrapper.vm.canSendMessage).toBe(true);
+  });
+
+  it('materializes a default Codex only on explicit selection and maps its real model to a sendable Connection', async () => {
+    const implicit = {
+      instanceId: 'codex',
+      driver: 'codex' as const,
+      name: 'Codex',
+      accentColor: '#6469da',
+      enabled: true,
+      revision: 0,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    const connection = {
+      id: 'native-codex-uuid',
+      driver: 'codex' as const,
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 10,
+      updatedAt: 10,
+      writeScopes: [],
+    };
+    const materialized = { ...implicit, legacyConnectionId: connection.id, revision: 1 };
+    let saved = false;
+    const registry = {
+      list: vi.fn(async () => ({ instances: [saved ? materialized : implicit], bindings: [] })),
+      execute: vi.fn(async () => {
+        saved = true;
+        return materialized;
+      }),
+    };
+    const local = {
+      listConnections: vi.fn(async () => (saved ? [connection] : [])),
+      getDefaultChoice: vi.fn(async () => ({ runtimeKind: 'builtin' as const })),
+      probeConnection: vi.fn(async () => ({
+        status: 'ready',
+        models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
+      })),
+    };
+    const { wrapper } = await mountView({
+      [AI_AGENT_REGISTRY_KEY as symbol]: registry,
+      [AI_LOCAL_AGENT_KEY as symbol]: local,
+    });
+    await flushPromises();
+    expect(registry.execute).not.toHaveBeenCalled();
+    expect(wrapper.vm.composerAgents).toEqual([
+      expect.objectContaining({ id: 'local:codex', configured: false }),
+    ]);
+
+    await wrapper.vm.selectComposerAgent('local:codex');
+    await flushPromises();
+    expect(registry.execute).toHaveBeenCalledOnce();
+    expect(registry.execute).toHaveBeenCalledWith({
+      action: 'update',
+      instanceId: 'codex',
+      expectedRevision: 0,
+      patch: {},
+    });
+    expect(fixture.session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: connection.id,
+      modelId: '',
+    });
+    expect(wrapper.vm.composerModels).toEqual([
+      expect.objectContaining({ modelId: 'real-codex-model', agentKey: 'local:' + connection.id }),
+    ]);
+    await wrapper.vm.selectComposerModel('real-codex-model', 'local:' + connection.id);
+    expect(fixture.session.runtimeChoice.value).toMatchObject({
+      connectionId: connection.id,
+      modelId: 'real-codex-model',
+    });
+    expect(wrapper.vm.canSendMessage).toBe(true);
+    expect(registry.execute).toHaveBeenCalledOnce();
   });
 
   it('refreshes the persistent composer after settings invalidates the app configuration', async () => {
@@ -579,3 +788,213 @@ describe('AI conversation restoration and business navigation', () => {
     wrapper.unmount();
   });
 });
+
+/** Real renderer clients/DTOs + Registry/SQLite/Runtime/Driver. Only Electron IPC
+ * delivery and the external Codex process are fixtures; no native executable or
+ * private Home is used. The unrelated business workflow projections above stay stubbed.
+ */
+async function nativeFlow() {
+  const directory = await mkdtemp(join(tmpdir(), 'memoflow-native-flow-'));
+  vi.stubEnv('CODEX_HOME', directory);
+  const flow = createNativeAgentFlowFixture(directory);
+  fixture.goal.goalWorkflowRun.value = null;
+  fixture.task.taskWorkflowRun.value = null;
+  fixture.knowledge.knowledgeCaptureRun.value = null;
+  fixture.realSession = true;
+  fixture.service = {
+    listConversations: vi.fn(async () => ok({ data: [], total: 0, page: 1, pageSize: 24 })),
+    createConversation: vi.fn(() => {
+      throw new Error('Native chat must not use builtin creation');
+    }),
+    updateConversation: vi.fn(async () => ok(null)),
+  } as unknown as import('./types').AIChatService;
+  return {
+    ...flow,
+    provide: {
+      [AI_AGENT_REGISTRY_KEY as symbol]: flow.registryClient,
+      [AI_LOCAL_AGENT_KEY as symbol]: flow.local,
+      [AI_ASSISTANT_RUNTIME_KEY as symbol]: flow.assistant,
+      [AI_RUNTIME_USAGE_KEY as symbol]: { get: vi.fn() },
+      [AI_WORKFLOW_RUNTIME_KEY as symbol]: {
+        get: vi.fn(),
+        streamWorkspaceEvents: vi.fn(async () => {}),
+      },
+      [ASSISTANT_SURFACE_KEY as symbol]: 'desktop',
+      [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: flow.identity,
+    },
+    async close() {
+      await flow.close();
+      vi.unstubAllEnvs();
+      fixture.realSession = false;
+      await rm(directory, { recursive: true, force: true });
+    },
+  };
+}
+
+it.each(['implicit default', 'saved instance'])(
+  'integrates Registry → Probe → Select → Connection → Compose → Send for %s with Profile and quota isolation',
+  async (kind) => {
+    localStorage.clear();
+    const flow = await nativeFlow();
+    let wrapper: Awaited<ReturnType<typeof mountView>>['wrapper'] | undefined;
+    try {
+      if (kind === 'saved instance') {
+        await flow.registry.execute('profile-a', {
+          action: 'update',
+          instanceId: 'codex',
+          expectedRevision: 0,
+          patch: {},
+        });
+      }
+      const before = await flow.store.listConnections('profile-a');
+      const probe = before.length
+        ? await flow.local.probeConnection(before[0].id)
+        : await flow.local.probeDefaultDriver('codex');
+      expect(probe).toMatchObject({ status: 'ready', models: [{ id: 'fixture-model' }] });
+      expect(
+        (await flow.registry.list('profile-a')).instances.find((i) => i.instanceId === 'codex')
+          ?.enabled,
+      ).toBe(true);
+      expect(await flow.store.listConnections('profile-a')).toEqual(before);
+      expect(flow.requests.some(([method]) => method === 'turn/start')).toBe(false);
+
+      if (kind === 'saved instance') {
+        await flow.local.setDefaultChoice({
+          runtimeKind: 'local_agent',
+          connectionId: before[0].id,
+          modelId: 'fixture-model',
+        });
+      }
+      const configured = await flow.store.listConnections('profile-a');
+      ({ wrapper } = await mountView(flow.provide));
+      await flushPromises();
+      if (kind === 'saved instance') {
+        await vi.waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
+        expect(wrapper.vm.runtimeChoice).toMatchObject({
+          connectionId: before[0].id,
+          modelId: 'fixture-model',
+        });
+      }
+      expect(await flow.store.listConnections('profile-a')).toEqual(configured);
+      const instance = (await flow.registry.list('profile-a')).instances.find(
+        (i) => i.instanceId === 'codex',
+      )!;
+      await wrapper.vm.selectComposerAgent(`local:${instance.legacyConnectionId ?? 'codex'}`);
+      await vi.waitFor(() => expect(wrapper!.vm.composerModels).toHaveLength(1));
+      const [connection] = await flow.store.listConnections('profile-a');
+      expect(await flow.store.listConnections('profile-a')).toHaveLength(1);
+      expect(connection.instanceSlug).toBe('codex');
+      await wrapper.vm.selectComposerModel('fixture-model', `local:${connection.id}`);
+      await flushPromises();
+      expect(wrapper.vm.runtimeChoice).toEqual({
+        runtimeKind: 'local_agent',
+        connectionId: connection.id,
+        modelId: 'fixture-model',
+      });
+      const composer = wrapper.findComponent({ name: 'AIFooterComposer' });
+      expect(composer.props('canSend')).toBe(true);
+      expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(0);
+      composer.vm.$emit('update:modelValue', 'Hello from profile A');
+      composer.vm.$emit('send');
+      await vi.waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
+      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await flushPromises();
+      expect(wrapper.vm.chatTimeline.at(-1)?.content).toBe('Fixture answer');
+      expect(wrapper.vm.chatTimeline.at(-1)?.status).toBe('success');
+      const conversationId = wrapper.vm.chatConversationId;
+      expect(await flow.store.getConversation('profile-a', conversationId)).toMatchObject({
+        connectionId: connection.id,
+        modelId: 'fixture-model',
+      });
+      const turns = flow.requests.filter(([method]) => method === 'turn/start');
+      expect(turns).toHaveLength(1);
+      expect(turns[0][1]).toMatchObject({
+        model: 'fixture-model',
+        input: [{ type: 'text', text: expect.stringContaining('Hello from profile A') }],
+      });
+      expect(fixture.service.createConversation).not.toHaveBeenCalled();
+
+      await vi.waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
+      flow.setFailure();
+      wrapper
+        .findComponent({ name: 'AIFooterComposer' })
+        .vm.$emit('update:modelValue', 'Preserve this limited request');
+      expect(wrapper.vm.chatMessage).toBe('Preserve this limited request');
+      wrapper.findComponent({ name: 'AIFooterComposer' }).vm.$emit('send');
+      await vi.waitFor(() =>
+        expect(wrapper!.vm.chatTimeline.at(-1)?.errorMessage).toBe(
+          enErrors.LOCAL_AGENT_QUOTA_EXHAUSTED,
+        ),
+      );
+      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await flushPromises();
+      expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(2);
+      expect(wrapper.vm.chatTimeline.at(-1)?.errorMessage).toBe(
+        enErrors.LOCAL_AGENT_QUOTA_EXHAUSTED,
+      );
+      expect(wrapper.vm.chatMessage).toBe('Preserve this limited request');
+      await vi.waitFor(() =>
+        expect(wrapper!.find('[data-testid="ai-native-execution-status"]').exists()).toBe(true),
+      );
+      expect(wrapper.get('[data-testid="ai-native-execution-status"]').text()).toContain(
+        'insufficient quota',
+      );
+      expect(wrapper.vm.runtimeChoice).toMatchObject({
+        connectionId: connection.id,
+        modelId: 'fixture-model',
+      });
+      expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(2);
+
+      wrapper.unmount();
+      await flow.switchProfile();
+      ({ wrapper } = await mountView(flow.provide));
+      await flushPromises();
+      expect(wrapper.vm.runtimeChoice).toEqual({ runtimeKind: 'builtin' });
+      expect(wrapper.find('[data-testid="ai-native-execution-status"]').exists()).toBe(false);
+      expect(await flow.store.listConnections('profile-b')).toEqual([]);
+      expect(await flow.local.listConversations()).toEqual([]);
+      await expect(flow.store.getConversation('profile-b', conversationId)).rejects.toThrow();
+      await wrapper.vm.selectComposerAgent('local:codex');
+      await vi.waitFor(() => expect(wrapper!.vm.composerModels).toHaveLength(1));
+      const [otherConnection] = await flow.store.listConnections('profile-b');
+      expect(otherConnection.id).not.toBe(connection.id);
+      await expect(flow.store.getConnection('profile-b', connection.id)).rejects.toThrow();
+      const otherProbe = await flow.local.probeConnection(otherConnection.id);
+      expect(otherProbe).toMatchObject({
+        status: 'ready',
+        account: { email: 'profile-b@example.test' },
+      });
+      expect(otherProbe).not.toHaveProperty('lastExecutionFailure');
+      await wrapper.vm.selectComposerModel('fixture-model', `local:${otherConnection.id}`);
+      await flushPromises();
+      const otherComposer = wrapper.findComponent({ name: 'AIFooterComposer' });
+      expect(otherComposer.props('canSend')).toBe(true);
+      otherComposer.vm.$emit('update:modelValue', 'Hello from profile B');
+      otherComposer.vm.$emit('send');
+      await vi.waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
+      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await flushPromises();
+      expect(wrapper.vm.chatTimeline.at(-1)?.content).toBe('Fixture answer');
+      expect(wrapper.vm.runtimeChoice).toMatchObject({
+        connectionId: otherConnection.id,
+        modelId: 'fixture-model',
+      });
+      expect(wrapper.vm.chatConversationId).not.toBe(conversationId);
+      expect(wrapper.find('[data-testid="ai-native-execution-status"]').exists()).toBe(false);
+      expect((await flow.local.listConversations()).map((item) => item.id)).toEqual([
+        wrapper.vm.chatConversationId,
+      ]);
+      expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(3);
+
+      expect(
+        (await flow.store.listMessages('profile-a', conversationId)).messages
+          .filter((m) => m.role === 'user')
+          .map((m) => m.content),
+      ).toEqual(['Hello from profile A', 'Preserve this limited request']);
+      expect(fixture.service.createConversation).not.toHaveBeenCalled();
+    } finally {
+      wrapper?.unmount();
+      await flow.close();
+    }
+  },
+);

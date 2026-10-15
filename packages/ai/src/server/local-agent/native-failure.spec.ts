@@ -10,6 +10,10 @@ it.each([
   ['Claude Code executable not found at private-path', 'LOCAL_AGENT_NOT_INSTALLED'],
   ['Thread native-id not found', 'LOCAL_AGENT_SESSION_UNAVAILABLE'],
   ['native server error with private configuration', 'LOCAL_AGENT_UNAVAILABLE'],
+  ['429 Too Many Requests; private context', 'LOCAL_AGENT_RATE_LIMITED'],
+  ['rate_limit_exceeded; private context', 'LOCAL_AGENT_RATE_LIMITED'],
+  ['insufficient_quota; private context', 'LOCAL_AGENT_QUOTA_EXHAUSTED'],
+  ['429 quota_exceeded; private context', 'LOCAL_AGENT_QUOTA_EXHAUSTED'],
 ])('maps a native error to a bounded public category (%s)', (diagnostic, code) => {
   const failure = nativeFailure(diagnostic);
   expect(failure.code).toBe(code);

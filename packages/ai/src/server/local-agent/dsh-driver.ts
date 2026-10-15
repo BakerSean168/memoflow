@@ -11,6 +11,7 @@ import { NativeRpcTransport, type NativeProcessOptions } from './native-rpc-tran
 import { NativeEventQueue } from './native-event-queue';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity } from './native-identity';
+import { nativeVersion } from './native-executable';
 
 const MODEL_CONFIG_ID = 'model';
 const configOption = z.object({
@@ -30,6 +31,7 @@ const configState = z.object({
 });
 const initSchema = z.object({
   protocolVersion: z.literal(1),
+  agentInfo: z.object({ version: z.string().optional() }).passthrough().optional(),
   agentCapabilities: z.object({
     mcpCapabilities: z.object({ http: z.boolean().optional() }).optional(),
     sessionCapabilities: z
@@ -157,18 +159,21 @@ export class DshDriver {
       : await transport.request('session/new', { cwd: this.cwd, mcpServers });
     const sessionId = input?.nativeSessionId ?? sessionResponse.parse(session).sessionId;
     const state = modelsFromOptions(session);
+    // ACP initialize.agentInfo is the Agent-reported version; protocol v1 is
+    // not the DSH executable version. Never display the protocol as a CLI build.
+    const version = nativeVersion(init.agentInfo?.version);
     this.sessionId = sessionId;
-    return { sessionId, fingerprint, ...state };
+    return { sessionId, fingerprint, ...state, ...(version ? { version } : {}) };
   }
 
   async probe(): Promise<LocalAgentStatus> {
     try {
-      const { models } = await this.connect();
+      const { models, version } = await this.connect();
       return models.length > 0
-        ? { status: 'ready', models, version: 'ACP v1 / DeepSeek Harness' }
+        ? { status: 'ready', models, ...(version ? { version } : {}) }
         : {
-            status: 'login_required',
-            message: new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED').message,
+            status: 'unavailable',
+            message: new LocalAgentError('LOCAL_AGENT_UNAVAILABLE').message,
           };
     } catch (error) {
       const failure =

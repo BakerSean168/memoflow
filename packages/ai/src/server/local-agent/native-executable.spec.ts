@@ -1,5 +1,7 @@
-import { expect, it } from 'vitest';
-import { resolveNativeExecutable } from './native-executable';
+import { afterEach, expect, it, vi } from 'vitest';
+import { execFile } from 'node:child_process';
+import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import { nativeVersion, probeNativeVersion, resolveNativeExecutable } from './native-executable';
 it('resolves Windows npm launchers with space paths to Node argv without a shell', () => {
   const root = 'C:\\Users\\Test User\\AppData\\Roaming\\npm';
   const files = new Set([
@@ -67,3 +69,88 @@ it('uses an installed DSH npm binary instead of executing the Windows cmd shim',
     sdkPath: `${root}\\node_modules\\@deepseek-ai\\dsh\\lib\\bin.js`,
   });
 });
+
+const versionResponse = vi.hoisted((): { error: Error | null; stdout: string } => ({
+  error: null,
+  stdout: '',
+}));
+vi.mock('node:child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('node:child_process')>()),
+  execFile: vi.fn(
+    (
+      _file: string,
+      _args: string[],
+      _options: object,
+      callback: (error: Error | null, stdout: string, stderr: string) => void,
+    ) => callback(versionResponse.error, versionResponse.stdout, 'private diagnostic'),
+  ),
+}));
+afterEach(() => {
+  versionResponse.error = null;
+  versionResponse.stdout = '';
+});
+
+const versionConnection: LocalAgentConnection = {
+  id: 'test',
+  driver: 'claude',
+  name: 'Test',
+  executablePath: process.execPath,
+  homePath: '/isolated/native home',
+  enabled: true,
+  writeScopes: [],
+  revision: 1,
+  createdAt: 1,
+  updatedAt: 1,
+};
+it('runs only --version on the selected executable with bounded output and the instance home', async () => {
+  versionResponse.stdout = '2.1.31 (Claude Code)\n';
+  expect(await probeNativeVersion(versionConnection, '/tmp')).toBe('2.1.31');
+  expect(execFile).toHaveBeenLastCalledWith(
+    process.execPath,
+    ['--version'],
+    expect.objectContaining({
+      cwd: '/tmp',
+      shell: false,
+      windowsHide: true,
+      timeout: 2000,
+      maxBuffer: 4096,
+      killSignal: 'SIGKILL',
+      env: expect.objectContaining({ CLAUDE_CONFIG_DIR: '/isolated/native home' }),
+    }),
+    expect.any(Function),
+  );
+  versionResponse.stdout = '1.0.3\n';
+  expect(
+    await probeNativeVersion({ ...versionConnection, driver: 'pi', homePath: '/other/pi' }, '/tmp'),
+  ).toBe('1.0.3');
+  expect(execFile).toHaveBeenLastCalledWith(
+    process.execPath,
+    ['--version'],
+    expect.objectContaining({
+      env: expect.objectContaining({ PI_CODING_AGENT_DIR: '/other/pi' }),
+    }),
+    expect.any(Function),
+  );
+});
+it('omits failed, timed out or oversized version-command output instead of exposing diagnostics', async () => {
+  versionResponse.error = new Error('command failed, timed out or exceeded maxBuffer');
+  versionResponse.stdout = '2.1.31';
+  expect(await probeNativeVersion(versionConnection, '/tmp')).toBeUndefined();
+});
+it.each([
+  'SDK 0.3.295',
+  'ACP v1',
+  '2.4.1\nprivate diagnostic',
+  '2.4.1\u2028private diagnostic',
+  '2.4.1\u001b[31m',
+  '1'.repeat(81),
+  null,
+])('does not turn arbitrary metadata %j into a version', (value) => {
+  expect(nativeVersion(value)).toBeUndefined();
+});
+it.each(['2.4.1', 'v1.0.3', '1.2.3-rc.1+build.2'])(
+  'preserves a recognized native version %s',
+  (value) => {
+    expect(nativeVersion(value)).toBe(value.replace(/^v/u, ''));
+  },
+);

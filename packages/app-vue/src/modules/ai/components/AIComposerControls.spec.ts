@@ -142,7 +142,11 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
   });
 
   it('replaces all dependent controls with provider settings only after availability settles', async () => {
-    const wrapper = setup({ models: [], loading: true });
+    const wrapper = setup({
+      models: [],
+      loading: true,
+      agents: agents.filter((agent) => agent.driver === 'mastra'),
+    });
     expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(false);
     await wrapper.setProps({ loading: false });
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
@@ -154,6 +158,22 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
       agents: agents.map((agent) => ({ ...agent, enabled: false })),
     });
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps the picker reachable when only the implicit native Codex is enabled', async () => {
+    const wrapper = setup({
+      agents: [agents[2]],
+      models: [],
+      selectedAgentId: '',
+      selectedModelKey: '',
+    });
+    expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
+    await openModels(wrapper);
+    expect(wrapper.get('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
+    expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
     wrapper.unmount();
   });
 

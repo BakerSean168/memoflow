@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 
 it('fences changed provider configuration or accounts while tolerating identified OAuth refresh', async () => {
   const home = await mkdtemp(join(tmpdir(), 'memoflow-native-identity-'));
@@ -15,13 +15,28 @@ it('fences changed provider configuration or accounts while tolerating identifie
       }),
     );
     const first = await nativeIdentity('codex', home, { email: 'a@example.test' });
+    const connection = {
+      id: 'test',
+      driver: 'codex' as const,
+      name: 'Test',
+      executablePath: 'codex',
+      homePath: home,
+      enabled: true,
+      writeScopes: [],
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    };
+    const context = nativeModelVisibilityContext(connection, first);
     await writeFile(
       file,
       JSON.stringify({
         tokens: { account_id: 'account-a', access_token: 'second', refresh_token: 'second' },
       }),
     );
-    expect(await nativeIdentity('codex', home, { email: 'a@example.test' })).toBe(first);
+    const refreshed = await nativeIdentity('codex', home, { email: 'a@example.test' });
+    expect(refreshed).toBe(first);
+    expect(nativeModelVisibilityContext(connection, refreshed)).toBe(context);
     await writeFile(join(home, 'config.toml'), 'model_provider = "another"');
     expect(await nativeIdentity('codex', home, { email: 'a@example.test' })).not.toBe(first);
     await rm(join(home, 'config.toml'));
@@ -29,7 +44,12 @@ it('fences changed provider configuration or accounts while tolerating identifie
       file,
       JSON.stringify({ tokens: { account_id: 'account-b', access_token: 'second' } }),
     );
-    expect(await nativeIdentity('codex', home, { email: 'a@example.test' })).not.toBe(first);
+    const changedAccount = await nativeIdentity('codex', home, { email: 'a@example.test' });
+    expect(changedAccount).not.toBe(first);
+    expect(nativeModelVisibilityContext(connection, changedAccount)).not.toBe(context);
+    expect(context).toMatch(/^mvc1:[0-9a-f]{64}$/);
+    expect(context).not.toContain(home);
+    expect(context).not.toContain('a@example.test');
   } finally {
     await rm(home, { recursive: true, force: true });
   }

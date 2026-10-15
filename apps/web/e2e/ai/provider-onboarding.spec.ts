@@ -34,7 +34,8 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
     timeout: TIMEOUT_CONFIG.NAVIGATION,
   });
   await expect(page.getByTestId('ai-provider-toggle-mastra')).toBeVisible();
-  await expect(page.getByTestId('ai-provider-detail-toggle')).toBeVisible();
+  // #457: the enable Switch is unique to the left provider list item; the right-side duplicate was removed and must not return.
+  await expect(page.getByTestId('ai-provider-detail-toggle')).toHaveCount(0);
   expect(await providerCount(page)).toBe(0);
   await page.getByTestId('ai-provider-add').click();
   const dialog = page.getByTestId('ai-agent-wizard');

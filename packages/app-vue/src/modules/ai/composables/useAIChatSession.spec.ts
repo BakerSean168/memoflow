@@ -2,7 +2,7 @@ import { defineComponent, h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok, ResultErrorException } from '@memoflow/contracts/result';
 import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import type {
   AssistantRuntimeClient,
@@ -1828,4 +1828,156 @@ describe('Assistant inline approval projection', () => {
     finish();
     await sending;
   });
+});
+
+it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'])(
+  'restores the untouched native prompt after streamed %s without changing its conversation or route',
+  async (code) => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const localAgent = {
+      createConversation: vi.fn(async () => ({
+        id: 'native-chat',
+        runtimeKind: 'local_agent',
+        connectionId: 'codex',
+        modelId: 'native-model',
+        name: 'Native',
+        driver: 'codex',
+        createdAt: 1,
+        updatedAt: 1,
+      })),
+    };
+    const onNativeRunSettled = vi.fn();
+    const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+      localAgent: localAgent as never,
+      onNativeRunSettled,
+    });
+    session.runtimeChoice.value = {
+      runtimeKind: 'local_agent',
+      connectionId: 'codex',
+      modelId: 'native-model',
+    };
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent({
+        ...event(1, 'assistant.run.started', { providerId: 'codex', modelId: 'native-model' }),
+        conversationId: 'native-chat',
+      });
+      handlers.onEvent({
+        ...event(2, 'assistant.run.failed', { code, message: 'PRIVATE_DIAGNOSTIC' }),
+        conversationId: 'native-chat',
+      });
+    });
+    session.chatMessage.value = '  Preserve this native draft  ';
+    await session.handleSendChat(service as never, null, 'Native', () => {});
+    expect(session.chatMessage.value).toBe('  Preserve this native draft  ');
+    expect(session.chatConversationId.value).toBe('native-chat');
+    expect(session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: 'codex',
+      modelId: 'native-model',
+    });
+    expect(session.chatTimeline.value.at(-1)?.errorMessage).toBe(
+      enErrors[code as keyof typeof enErrors],
+    );
+    expect(onNativeRunSettled).toHaveBeenCalledWith('codex');
+    expect(runtime.streamMessage).toHaveBeenCalledOnce();
+    expect(service.createConversation).not.toHaveBeenCalled();
+  },
+);
+
+it.each(['new draft', '', 'partial reply', 'transport rejection'])(
+  'protects native draft boundaries on quota failure: %s',
+  async (scenario) => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const onNativeRunSettled = vi.fn();
+    const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+      localAgent: {} as never,
+      onNativeRunSettled,
+    });
+    session.chatConversationId.value = 'native-chat';
+    session.runtimeChoice.value = {
+      runtimeKind: 'local_agent',
+      connectionId: 'codex',
+      modelId: 'native-model',
+    };
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      if (scenario === 'transport rejection') {
+        throw new ResultErrorException('PRIVATE_DIAGNOSTIC', 'LOCAL_AGENT_QUOTA_EXHAUSTED');
+      }
+      handlers.onEvent({ ...event(1, 'assistant.run.started', {}), conversationId: 'native-chat' });
+      if (scenario === 'partial reply') {
+        handlers.onEvent({
+          ...event(2, 'assistant.message.delta', { content: 'Partial answer' }),
+          conversationId: 'native-chat',
+        });
+      } else {
+        session.chatMessage.value = 'new draft';
+        session.chatMessage.value = scenario;
+      }
+      handlers.onEvent({
+        ...event(3, 'assistant.run.failed', { code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' }),
+        conversationId: 'native-chat',
+      });
+    });
+    session.chatMessage.value = 'Original prompt';
+    await session.handleSendChat(service as never, null, 'Native', () => {});
+    expect(session.chatMessage.value).toBe(
+      scenario === 'transport rejection'
+        ? 'Original prompt'
+        : scenario === 'partial reply'
+          ? ''
+          : scenario,
+    );
+    if (scenario === 'partial reply') {
+      expect(session.chatTimeline.value.at(-1)?.content).toBe('Partial answer');
+    }
+    expect(onNativeRunSettled).toHaveBeenCalledExactlyOnceWith('codex');
+    expect(runtime.streamMessage).toHaveBeenCalledOnce();
+  },
+);
+
+it('preserves a new draft typed while a native conversation is being created', async () => {
+  const service = createServiceStub();
+  const runtime = createRuntimeStub();
+  let finishCreating!: (value: unknown) => void;
+  const localAgent = {
+    createConversation: vi.fn(
+      () =>
+        new Promise((resolve) => {
+          finishCreating = resolve;
+        }),
+    ),
+  };
+  const session = mountComposable(service, runtime, 'desktop', createUsageRuntimeStub(), {
+    localAgent: localAgent as never,
+  });
+  session.runtimeChoice.value = {
+    runtimeKind: 'local_agent',
+    connectionId: 'codex',
+    modelId: 'native-model',
+  };
+  runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+    handlers.onEvent({
+      ...event(1, 'assistant.run.failed', { code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' }),
+      conversationId: 'native-chat',
+    });
+  });
+  session.chatMessage.value = 'Original prompt';
+  const sending = session.handleSendChat(service as never, null, 'Native', () => {});
+  await vi.waitFor(() => expect(localAgent.createConversation).toHaveBeenCalledOnce());
+  session.chatMessage.value = 'Next prompt typed during creation';
+  finishCreating({
+    id: 'native-chat',
+    runtimeKind: 'local_agent',
+    connectionId: 'codex',
+    modelId: 'native-model',
+    name: 'Native',
+    driver: 'codex',
+    createdAt: 1,
+    updatedAt: 1,
+  });
+  await sending;
+  expect(session.chatMessage.value).toBe('Next prompt typed during creation');
+  expect(runtime.streamMessage).toHaveBeenCalledOnce();
 });

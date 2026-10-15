@@ -1,17 +1,29 @@
 <script setup lang="ts">
-import { computed, type Component } from 'vue';
-import { Asterisk, Bot, Pi, Terminal, Zap } from '@lucide/vue';
+import { computed } from 'vue';
+import { Bot } from '@lucide/vue';
 import type { AgentDriverKind } from '@memoflow/contracts/ai';
+import { agentBrandGlyphs, brandGlyphTransform } from './agent-brand-glyphs';
+
 const props = defineProps<{ driver: AgentDriverKind | string }>();
-const icons: Record<string, Component> = {
-  mastra: Bot,
-  codex: Terminal,
-  claude: Asterisk,
-  pi: Pi,
-  dsh: Zap,
-};
-const icon = computed(() => icons[props.driver] ?? Bot);
+
+const glyph = computed(
+  () =>
+    (agentBrandGlyphs as Record<string, (typeof agentBrandGlyphs)[string] | undefined>)[
+      props.driver
+    ],
+);
 </script>
 <template>
-  <component :is="icon" class="size-4 shrink-0" aria-hidden="true" />
+  <svg
+    v-if="glyph"
+    :viewBox="glyph.viewBox"
+    fill="currentColor"
+    aria-hidden="true"
+    class="size-4 shrink-0"
+  >
+    <g :transform="brandGlyphTransform(glyph)">
+      <path v-for="sourcePath of glyph.paths" :key="sourcePath" :d="sourcePath" />
+    </g>
+  </svg>
+  <Bot v-else class="size-4 shrink-0" aria-hidden="true" />
 </template>

@@ -202,3 +202,69 @@ describe('local instance identity', () => {
     );
   });
 });
+
+it('accepts only an opaque native visibility context on a ready probe, never on saved configuration', () => {
+  const context = 'mvc1:' + 'a'.repeat(64);
+  expect(
+    LocalAgentStatusSchema.parse({ status: 'ready', models: [], modelVisibilityContext: context }),
+  ).toHaveProperty('modelVisibilityContext', context);
+  for (const modelVisibilityContext of [
+    '/private/home',
+    'alice@example.test',
+    'api-key',
+    'mvc1:bad',
+  ]) {
+    expect(
+      LocalAgentStatusSchema.safeParse({ status: 'ready', models: [], modelVisibilityContext })
+        .success,
+    ).toBe(false);
+  }
+  expect(
+    LocalAgentStatusSchema.safeParse({
+      status: 'unavailable',
+      message: 'Offline',
+      modelVisibilityContext: context,
+    }).success,
+  ).toBe(false);
+  expect(
+    LocalAgentConnectionInputSchema.safeParse({
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      modelVisibilityContext: context,
+    }).success,
+  ).toBe(false);
+});
+
+it('keeps a bound request limit separate from discovery without allowing raw diagnostics or authentication guesses', () => {
+  const status = {
+    status: 'ready',
+    models: [{ id: 'model', name: 'Model' }],
+    modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+    lastExecutionFailure: {
+      code: 'LOCAL_AGENT_QUOTA_EXHAUSTED',
+      modelId: 'model',
+      occurredAt: 123,
+    },
+  };
+  expect(LocalAgentStatusSchema.parse(status)).toEqual(status);
+  for (const lastExecutionFailure of [
+    { ...status.lastExecutionFailure, code: 'LOCAL_AGENT_LOGIN_REQUIRED' },
+    { ...status.lastExecutionFailure, message: 'PRIVATE_DIAGNOSTIC' },
+    { ...status.lastExecutionFailure, occurredAt: -1 },
+  ])
+    expect(LocalAgentStatusSchema.safeParse({ ...status, lastExecutionFailure }).success).toBe(
+      false,
+    );
+  expect(
+    LocalAgentStatusSchema.safeParse({ ...status, modelVisibilityContext: undefined }).success,
+  ).toBe(false);
+  expect(
+    LocalAgentStatusSchema.safeParse({
+      status: 'login_required',
+      message: 'Login',
+      lastExecutionFailure: status.lastExecutionFailure,
+    }).success,
+  ).toBe(false);
+});

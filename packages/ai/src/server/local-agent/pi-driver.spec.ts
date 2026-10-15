@@ -1,4 +1,5 @@
-import { expect, it } from 'vitest';
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,6 +7,13 @@ import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { PiDriver } from './pi-driver';
 import { NativeRpcTransport } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';
+import { probeNativeVersion } from './native-executable';
+
+vi.mock('./native-executable', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./native-executable')>()),
+  probeNativeVersion: vi.fn(async () => undefined),
+}));
+
 const connection: LocalAgentConnection = {
   id: 'pi',
   driver: 'pi',
@@ -43,10 +51,14 @@ it('reads native models, resumes a session and handles extension UI with scoped 
         }),
     );
   try {
-    expect(await create().probe()).toMatchObject({
+    vi.mocked(probeNativeVersion).mockResolvedValueOnce('1.0.3');
+    const catalog = await create().probe();
+    expect(catalog).toMatchObject({
       status: 'ready',
       models: [{ id: 'provider/model', name: 'Model', provider: 'provider' }],
     });
+    expect(catalog).toHaveProperty('version', '1.0.3');
+    expect(probeNativeVersion).toHaveBeenLastCalledWith({ ...connection, homePath: cwd }, cwd);
     const driver = create();
     const events = [];
     for await (const event of driver.run({
@@ -167,3 +179,81 @@ it('expires a timed native UI request and rejects a late answer', async () => {
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+it.each([
+  { models: [], expected: 'unavailable' },
+  { models: [{ id: 'model', provider: 'provider', name: 'Model' }], expected: 'ready' },
+])(
+  'reports $expected for an unversioned catalog without guessing authentication',
+  async ({ models, expected }) => {
+    const driver = new PiDriver(
+      connection,
+      tmpdir(),
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: [
+            '-e',
+            `
+        require('readline').createInterface({input:process.stdin}).on('line', line => {
+          const frame = JSON.parse(line);
+          const data = frame.type === 'get_state' ? {sessionId:'native'} : ${JSON.stringify({ models })};
+          process.stdout.write(JSON.stringify({type:'response',id:frame.id,success:true,data})+'\\n');
+        });`,
+          ],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    const result = await driver.probe();
+    expect(result).toMatchObject({ status: expected });
+    expect(result).not.toHaveProperty('version');
+    expect(result).not.toHaveProperty('account');
+  },
+);
+
+it.each([
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'Native connection failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])(
+  'sanitizes pi native RPC %s before publishing the status DTO',
+  async (prefix, status, message) => {
+    const cwd = await mkdtemp(join(tmpdir(), 'memoflow-pi-privacy-'));
+    const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+    const script = `
+    const diagnostic = ${JSON.stringify(diagnostic)};
+    require('readline').createInterface({input:process.stdin}).on('line', line => {
+      const frame = JSON.parse(line);
+      process.stderr.write(diagnostic);
+      process.stdout.write(JSON.stringify({type:'response',id:frame.id,success:false,error:diagnostic}) + '\\n');
+    });
+  `;
+    const driver = new PiDriver(
+      { ...connection, homePath: cwd },
+      cwd,
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: ['-e', script],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    try {
+      const result = await driver.probe();
+      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+    } finally {
+      await driver.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
+  },
+);

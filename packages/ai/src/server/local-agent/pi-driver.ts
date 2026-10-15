@@ -14,6 +14,7 @@ import { NativeEventQueue } from './native-event-queue';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeFailure } from './native-failure';
 import { nativeIdentity } from './native-identity';
+import { probeNativeVersion } from './native-executable';
 
 const modelsSchema = z.object({
   models: z
@@ -113,19 +114,22 @@ export class PiDriver {
   async probe(): Promise<LocalAgentStatus> {
     try {
       const { models } = await this.connect();
+      const version = models.length
+        ? await probeNativeVersion(this.connection, this.cwd)
+        : undefined;
       return models.length
         ? {
             status: 'ready',
+            ...(version ? { version } : {}),
             models: models.map((model) => ({
               id: `${model.provider}/${model.id}`,
               name: model.name,
               provider: model.provider,
             })),
-            version: 'Pi RPC / native model registry',
           }
         : {
-            status: 'login_required',
-            message: new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED').message,
+            status: 'unavailable',
+            message: new LocalAgentError('LOCAL_AGENT_UNAVAILABLE').message,
           };
     } catch (error) {
       const failure =

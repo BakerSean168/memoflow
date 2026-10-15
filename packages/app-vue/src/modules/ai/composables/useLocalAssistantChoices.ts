@@ -1,4 +1,5 @@
 import { computed, ref, watch, type Ref } from 'vue';
+import { useNativeModelVisibility } from './nativeModelVisibility';
 import type { LocalAgentClient } from '@memoflow/ai/client';
 import type {
   AssistantRuntimeChoice,
@@ -10,29 +11,59 @@ import type {
 export function useLocalAssistantChoices(
   client: LocalAgentClient | undefined,
   choice: Ref<AssistantRuntimeChoice>,
+  resolveIdentity: () => string = () => '',
 ) {
   const connections = ref<LocalAgentConnection[]>([]);
   const defaultChoice = ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' });
   const status = ref<LocalAgentStatus | null>(null);
+  const modelVisibility = useNativeModelVisibility(resolveIdentity, () =>
+    status.value?.status === 'ready' ? status.value.modelVisibilityContext : undefined,
+  );
   const loading = ref(false);
   const error = ref(false);
   let generation = 0;
+  let refreshGeneration = 0;
+  let refreshingConfiguration = false;
   async function refresh() {
     if (!client) return;
+    const request = ++refreshGeneration;
+    refreshingConfiguration = true;
+    // A new configuration/identity snapshot must never inherit the previous
+    // Profile's successful model probe (even if a connection ID is reused).
+    ++generation;
+    status.value = null;
+    loading.value = false;
     try {
       const [items, saved] = await Promise.all([
         client.listConnections(),
         client.getDefaultChoice(),
       ]);
+      if (request !== refreshGeneration) return;
       connections.value = items;
       defaultChoice.value = saved;
       error.value = false;
+      // Only the current Profile snapshot may initiate a fresh model probe.
+      refreshingConfiguration = false;
+      const selected = choice.value;
+      if (
+        selected.runtimeKind === 'local_agent' &&
+        items.some((connection) => connection.id === selected.connectionId && connection.enabled)
+      )
+        void probe(selected.connectionId);
     } catch {
+      if (request !== refreshGeneration) return;
+      // Fail closed instead of advertising a previously usable connection.
+      connections.value = [];
+      defaultChoice.value = { runtimeKind: 'builtin' };
       error.value = true;
+    } finally {
+      if (request === refreshGeneration) refreshingConfiguration = false;
     }
   }
   async function probe(connectionId: string) {
-    if (!client) return;
+    // An explicit check or selection watch during a Profile refresh must not
+    // resurrect an old Profile's catalog before its new registry is loaded.
+    if (!client || refreshingConfiguration) return;
     const request = ++generation;
     loading.value = true;
     status.value = null;
@@ -57,7 +88,20 @@ export function useLocalAssistantChoices(
       if (id) void probe(id);
     },
   );
-  const models = computed(() => (status.value?.status === 'ready' ? status.value.models : []));
+  const models = computed(() => {
+    if (status.value?.status !== 'ready' || choice.value.runtimeKind !== 'local_agent') return [];
+    const id = choice.value.connectionId;
+    const instanceId =
+      connections.value.find((connection) => connection.id === id)?.instanceSlug ?? id;
+    return status.value.models.filter((model) => modelVisibility.isVisible(instanceId, model.id));
+  });
+  const lastExecutionFailure = computed(() =>
+    status.value?.status === 'ready' &&
+    choice.value.runtimeKind === 'local_agent' &&
+    status.value.lastExecutionFailure?.modelId === choice.value.modelId
+      ? status.value.lastExecutionFailure
+      : undefined,
+  );
   const canSend = computed(
     () =>
       choice.value.runtimeKind === 'local_agent' &&
@@ -78,6 +122,7 @@ export function useLocalAssistantChoices(
     connections,
     defaultChoice,
     status,
+    lastExecutionFailure,
     loading,
     error,
     models,

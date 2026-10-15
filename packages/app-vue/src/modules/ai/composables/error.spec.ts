@@ -4,7 +4,7 @@ import enErrors from '../../../locales/en-US/errors';
 import zhErrors from '../../../locales/zh-CN/errors';
 import zhAI from '../../../locales/zh-CN/aiAssistant';
 import enAI from '../../../locales/en-US/aiAssistant';
-import { getAIErrorMessage, getAIWorkflowTerminalFailureMessage, getGoalWorkflowInterruptionMessage } from './error';
+import { getNativeAgentExecutionFailureMessage, getAIErrorMessage, getAIWorkflowTerminalFailureMessage, getGoalWorkflowInterruptionMessage } from './error';
 
 describe('AI public failure presentation', () => {
   it('keeps an unconfirmed transport interruption distinct from a stopped run and names the requested model', () => {
@@ -75,3 +75,27 @@ describe('unsupported workflow state presentation', () => {
     ).toBe(expected);
   });
 });
+
+it.each(['en-US', 'zh-CN'])(
+  'uses the same safe native limit summary in Settings and Composer for %s',
+  (locale) => {
+    const i18n = createI18n({
+      legacy: false,
+      locale,
+      messages: {
+        'en-US': { errors: enErrors, aiAssistant: enAI },
+        'zh-CN': { errors: zhErrors, aiAssistant: zhAI },
+      },
+    });
+    for (const code of ['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const) {
+      const text = getNativeAgentExecutionFailureMessage(
+        { code, modelId: 'exact-model', occurredAt: 1 },
+        i18n.global.t,
+      );
+      expect(text).toContain('exact-model');
+      expect(text).toContain(locale === 'zh-CN' ? '当前 Agent 渠道' : 'This Agent channel');
+      expect(text).not.toContain('配置');
+      expect(text).not.toContain('login');
+    }
+  },
+);

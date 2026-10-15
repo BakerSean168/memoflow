@@ -81,6 +81,7 @@ export default {
   agentSwitchNewConversation:
     'Started a new conversation for the selected Agent. Your previous conversation keeps its original Agent.',
   local: {
+    lastRequestFailed: 'Last request ({model}):',
     toolHistory: 'Agent tool activity',
     goalWrites: 'Create and update goals',
     taskWrites: 'Create, update and complete tasks',

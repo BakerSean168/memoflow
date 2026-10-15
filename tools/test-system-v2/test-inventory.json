@@ -918,6 +918,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/packaged-runtime/provider-layout-window.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "packaged-runtime",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/src/main/__tests__/bootstrap.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -4741,6 +4755,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4766,6 +4788,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4910,6 +4940,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5718,6 +5756,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/ai-provider-instance-sort.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12932,7 +12978,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 2,
+      "fileCount": 3,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -13360,7 +13406,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 296
+      "fileCount": 300
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14121,12 +14167,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1221,
+    "unit": 1225,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 50,
+    "e2e": 51,
     "perf": 2,
     "governance": 65
   },
@@ -14134,7 +14180,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 2,
+      "desktop": 3,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14147,7 +14193,7 @@
       "artifact": 3,
       "canonical": 25,
       "reference": 6,
-      "supplemental": 16
+      "supplemental": 17
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

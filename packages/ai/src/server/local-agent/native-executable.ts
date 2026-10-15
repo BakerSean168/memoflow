@@ -1,6 +1,7 @@
 import { statSync } from 'node:fs';
+import { execFile } from 'node:child_process';
 import { win32 } from 'node:path';
-import type { LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/contracts/ai';
 import { LocalAgentError } from '../../shared/local-agent-error';
 
 const npmEntries: Record<LocalAgentDriver, string[]> = {
@@ -70,4 +71,56 @@ export function resolveNativeExecutable(
       sdkPath: executable,
     };
   return { executable, args: [], env: {}, sdkPath: executable };
+}
+
+/** Accept version tokens only; diagnostics and protocol names never become UI metadata. */
+export function nativeVersion(value: unknown): string | undefined {
+  if (typeof value !== 'string' || value.length > 80) return undefined;
+  return value.trim().match(/^v?(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?)$/u)?.[1];
+}
+
+/** Optional, prompt-free metadata from this instance's executable. Never relay stdout/stderr. */
+export async function probeNativeVersion(
+  connection: LocalAgentConnection,
+  cwd: string,
+): Promise<string | undefined> {
+  if (connection.driver !== 'claude' && connection.driver !== 'pi') return undefined;
+  try {
+    const launch = resolveNativeExecutable(connection.executablePath, connection.driver);
+    const homeVariable =
+      connection.driver === 'claude' ? 'CLAUDE_CONFIG_DIR' : 'PI_CODING_AGENT_DIR';
+    return await new Promise((resolve) => {
+      execFile(
+        launch.executable,
+        [...launch.args, '--version'],
+        {
+          cwd,
+          env: {
+            ...process.env,
+            ...launch.env,
+            ...(connection.homePath ? { [homeVariable]: connection.homePath } : {}),
+          },
+          shell: false,
+          windowsHide: true,
+          timeout: 2000,
+          killSignal: 'SIGKILL',
+          maxBuffer: 4096,
+          encoding: 'utf8',
+        },
+        (error, stdout) =>
+          resolve(
+            error
+              ? undefined
+              : nativeVersion(
+                  connection.driver === 'claude'
+                    ? stdout.trim().replace(/ \(Claude Code\)$/u, '')
+                    : stdout,
+                ),
+          ),
+      );
+    });
+  } catch {
+    // Unsupported version commands must not discard an otherwise valid native catalog.
+    return undefined;
+  }
 }

@@ -82,13 +82,20 @@ const selectedModel = computed(() =>
   ),
 );
 defineExpose({
-  openModelPicker() { if (!props.disabled) openMenu.value = 'models'; },
+  openModelPicker() {
+    if (!props.disabled) openMenu.value = 'models';
+  },
 });
 const providerUnavailable = computed(
   () =>
     !props.loading &&
     !props.models.some((model) =>
       props.agents.some((agent) => agent.id === model.agentKey && agent.enabled),
+    ) &&
+    // An implicit Desktop Agent has no catalog until explicitly selected.
+    // Do not hide the only route to materializing/probing that Agent.
+    !props.agents.some(
+      (agent) => agent.driver !== 'mastra' && agent.enabled && !agent.switchBlockedReason,
     ),
 );
 const hasReasoningChoices = computed(

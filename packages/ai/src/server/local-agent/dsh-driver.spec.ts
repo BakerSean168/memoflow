@@ -1,7 +1,11 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it } from 'vitest';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { DshDriver } from './dsh-driver';
-import type { NativeProcessOptions, NativeRpcTransport } from './native-rpc-transport';
+import { type NativeProcessOptions, NativeRpcTransport } from './native-rpc-transport';
 
 const route = JSON.stringify(['ollama', 'gpt-oss:20b']);
 const models = [
@@ -36,6 +40,10 @@ class FakeAcp {
   onRequest?: (request: { id: number; method: string; params?: unknown }) => void;
   onFailure?: (error: never) => void;
   private finishPermission?: () => void;
+  agentInfo: { name: string; version: string } | undefined = {
+    name: 'DeepSeek Harness',
+    version: '2.4.1',
+  };
 
   constructor(readonly options: NativeProcessOptions) {}
 
@@ -44,6 +52,7 @@ class FakeAcp {
     if (method === 'initialize')
       return {
         protocolVersion: 1,
+        ...(this.agentInfo ? { agentInfo: this.agentInfo } : {}),
         agentCapabilities: {
           mcpCapabilities: { http: true },
           sessionCapabilities: { list: {}, close: {}, resume: {} },
@@ -121,6 +130,7 @@ it('discovers DSH models through ACP without invoking inference', async () => {
   expect(await driver.probe()).toMatchObject({
     status: 'ready',
     models: [{ id: route, name: 'gpt-oss 20B', provider: 'Ollama' }],
+    version: '2.4.1',
   });
   expect(instances).toHaveLength(1);
   expect(instances[0].options).toMatchObject({ protocol: 'acp', args: ['--profile', 'acp'] });
@@ -129,6 +139,20 @@ it('discovers DSH models through ACP without invoking inference', async () => {
     'session/new',
     'session/close',
   ]);
+  expect(instances[0].closed).toBe(true);
+});
+
+it('does not present an ACP protocol version as the DSH executable version', async () => {
+  const instances: FakeAcp[] = [];
+  const driver = new DshDriver(connection, '/tmp', (options) => {
+    const fake = new FakeAcp(options);
+    fake.agentInfo = undefined;
+    instances.push(fake);
+    return fake as unknown as NativeRpcTransport;
+  });
+  const status = await driver.probe();
+  expect(status.status).toBe('ready');
+  expect(status).not.toHaveProperty('version');
   expect(instances[0].closed).toBe(true);
 });
 
@@ -295,3 +319,66 @@ it('never turns a rejected ACP permission into a write grant', async () => {
     driver.respond(permissionRequestId, { type: 'permission', decision: 'approve_once' }),
   ).toBe(false);
 });
+
+it.each([
+  '',
+  'ACP v1',
+  '2.4.1\nprivate diagnostic',
+  '2.4.1\u2028private diagnostic',
+  'x'.repeat(500),
+])('omits untrusted DSH version metadata %j without losing its catalog', async (version) => {
+  const driver = new DshDriver(connection, '/tmp', (options) => {
+    const fake = new FakeAcp(options);
+    fake.agentInfo = { name: 'DeepSeek Harness', version };
+    return fake as unknown as NativeRpcTransport;
+  });
+  const result = await driver.probe();
+  expect(result).toMatchObject({ status: 'ready', models: [{ id: route }] });
+  expect(result).not.toHaveProperty('version');
+});
+
+it.each([
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'Native connection failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])(
+  'sanitizes dsh native RPC %s before publishing the status DTO',
+  async (prefix, status, message) => {
+    const cwd = await mkdtemp(join(tmpdir(), 'memoflow-dsh-privacy-'));
+    const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+    const script = `
+    const diagnostic = ${JSON.stringify(diagnostic)};
+    require('readline').createInterface({input:process.stdin}).on('line', line => {
+      const frame = JSON.parse(line);
+      process.stderr.write(diagnostic);
+      process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:frame.id,error:{code:401,message:diagnostic}}) + '\\n');
+    });
+  `;
+    const driver = new DshDriver(
+      { ...connection, homePath: cwd },
+      cwd,
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: ['-e', script],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    try {
+      const result = await driver.probe();
+      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+    } finally {
+      await driver.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
+  },
+);

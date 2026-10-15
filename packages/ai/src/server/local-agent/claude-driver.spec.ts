@@ -1,8 +1,19 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
 import { nativeIdentity } from './native-identity';
+
+import { probeNativeVersion } from './native-executable';
+
+const privacyLogs = vi.hoisted(() => ({ warn: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => privacyLogs }));
+
+vi.mock('./native-executable', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./native-executable')>()),
+  probeNativeVersion: vi.fn(async () => undefined),
+}));
 
 const connection: LocalAgentConnection = {
   id: 'claude',
@@ -72,10 +83,13 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
     };
   };
   const driver = new ClaudeDriver(connection, '/tmp', factory);
-  expect(await driver.probe()).toMatchObject({
+  const result = await driver.probe();
+  expect(result).toMatchObject({
     status: 'ready',
     models: [{ id: 'sonnet', name: 'Sonnet', reasoningEfforts: ['low', 'medium', 'high'] }],
   });
+  // SDK package version is not proof of the installed Claude CLI version.
+  expect(result).not.toHaveProperty('version');
   expect(prompts).toBe(0);
   expect(closed).toBe(true);
 });
@@ -313,4 +327,140 @@ it('retires a permission card when the native request signal expires', async () 
     resolution: 'cancelled',
   });
   expect(driver.respond(expiredId, { type: 'permission', decision: 'approve_once' })).toBe(false);
+});
+
+it('does not report an authenticated but empty catalog as ready', async () => {
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return { account: { tokenSource: 'oauth' }, models: [] };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {},
+  });
+  expect(await new ClaudeDriver(connection, '/tmp', factory).probe()).toMatchObject({
+    status: 'unavailable',
+  });
+});
+
+it('reports the selected Claude executable version independently of the SDK catalog', async () => {
+  vi.mocked(probeNativeVersion).mockResolvedValueOnce('2.1.31');
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return {
+        account: { tokenSource: 'oauth' },
+        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+      };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {},
+  });
+  expect(await new ClaudeDriver(connection, '/tmp', factory).probe()).toMatchObject({
+    status: 'ready',
+    version: '2.1.31',
+  });
+  expect(probeNativeVersion).toHaveBeenLastCalledWith(connection, '/tmp');
+});
+
+it('scopes visibility only when SDK initialization reports an account identity', async () => {
+  async function probe(email?: string) {
+    const factory: ClaudeQueryFactory = () => ({
+      async initializationResult() {
+        return {
+          account: { tokenSource: 'oauth', ...(email ? { email } : {}) },
+          models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+        };
+      },
+      async interrupt() {},
+      close() {},
+      async *[Symbol.asyncIterator]() {},
+    });
+    return new ClaudeDriver(connection, '/tmp', factory).probe();
+  }
+  const first = await probe('a@example.test');
+  expect(first.status).toBe('ready');
+  if (first.status !== 'ready') throw new Error('Expected catalog');
+  expect(first.modelVisibilityContext).toMatch(/^mvc1:[0-9a-f]{64}$/);
+  expect(await probe('a@example.test')).toHaveProperty(
+    'modelVisibilityContext',
+    first.modelVisibilityContext,
+  );
+  const changed = await probe('b@example.test');
+  if (changed.status !== 'ready') throw new Error('Expected catalog');
+  expect(changed.modelVisibilityContext).not.toBe(first.modelVisibilityContext);
+  expect(await probe()).not.toHaveProperty('modelVisibilityContext');
+});
+
+it.each([
+  ['spawn ENOENT', 'not_installed', 'The configured Agent executable could not be started.'],
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'SDK initialization failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])('normalizes Claude %s before publishing the status DTO', async (prefix, status, message) => {
+  const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+  const factory: ClaudeQueryFactory = ({ options }) => {
+    options.stderr?.(diagnostic);
+    throw new Error(diagnostic);
+  };
+  const result = await new ClaudeDriver(connection, '/tmp', factory).probe();
+  expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+  expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+});
+
+it('logs only schema paths/codes when a private Claude frame is rejected', async () => {
+  privacyLogs.warn.mockClear();
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return {
+        account: { tokenSource: 'oauth' },
+        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+      };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {
+      yield {
+        type: 'stream_event',
+        session_id: 'fixture-session',
+        event: {
+          type: 'content_block_delta',
+          delta: {
+            type: 'text_delta',
+            text: {
+              diagnostic:
+                'C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test PRIVATE_KEY_FIXTURE',
+            },
+          },
+        },
+      };
+    },
+  });
+  const driver = new ClaudeDriver(connection, '/tmp', factory);
+  try {
+    const run = driver.run({ modelId: 'sonnet', content: 'Synthetic prompt' });
+    await expect(
+      (async () => {
+        for await (const _event of run) {
+          /* drain */
+        }
+      })(),
+    ).rejects.toMatchObject({
+      code: 'LOCAL_AGENT_PROTOCOL_ERROR',
+      message: 'The local Agent returned an unsupported or invalid protocol message.',
+    });
+    expect(privacyLogs.warn).toHaveBeenCalledWith('Native protocol shape rejected', {
+      issues: [{ path: ['delta', 'text'], code: 'invalid_type' }],
+    });
+    expect(JSON.stringify(privacyLogs.warn.mock.calls)).not.toContain('PRIVATE_');
+  } finally {
+    await driver.close();
+  }
 });

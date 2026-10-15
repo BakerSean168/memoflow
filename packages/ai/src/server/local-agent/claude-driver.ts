@@ -12,9 +12,9 @@ import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeEventQueue } from './native-event-queue';
-import { resolveNativeExecutable } from './native-executable';
+import { probeNativeVersion, resolveNativeExecutable } from './native-executable';
 import { nativeFailure } from './native-failure';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
 
 // Each MemoFlow MCP call is classified here rather than relying on Claude's
@@ -269,6 +269,7 @@ export class ClaudeDriver {
             : {}),
         })),
         fingerprint: await nativeIdentity('claude', this.connection.homePath, account),
+        hasAccountIdentity: z.email().safeParse(account.email).success,
       };
     } finally {
       if (timer) clearTimeout(timer);
@@ -277,10 +278,20 @@ export class ClaudeDriver {
   async probe(): Promise<LocalAgentStatus> {
     try {
       const init = await this.connect();
+      if (!init.models.length) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+      const version = await probeNativeVersion(this.connection, this.cwd);
       return {
         status: 'ready',
         models: init.models,
-        version: 'SDK 0.3.295 / native initialization catalog',
+        ...(init.hasAccountIdentity
+          ? {
+              modelVisibilityContext: nativeModelVisibilityContext(
+                this.connection,
+                init.fingerprint,
+              ),
+            }
+          : {}),
+        ...(version ? { version } : {}),
       };
     } catch (error) {
       const failure =
