@@ -4741,6 +4741,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13384,7 +13392,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 299
+      "fileCount": 300
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14145,7 +14153,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1224,
+    "unit": 1225,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
