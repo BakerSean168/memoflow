@@ -77,7 +77,13 @@ function probeResult(): ProbeAIProviderConnectionRes {
   };
 }
 async function setup(
-  options: { native?: boolean; bound?: boolean; extra?: boolean; noRegistry?: boolean } = {},
+  options: {
+    native?: boolean;
+    bound?: boolean;
+    extra?: boolean;
+    noRegistry?: boolean;
+    dom?: boolean;
+  } = {},
 ) {
   let instances: AgentInstance[] = [instance('mastra')];
   if (options.native)
@@ -229,8 +235,9 @@ async function setup(
     }),
   };
   const wrapper = mount(AISettings, {
+    attachTo: options.dom ? document.body : undefined,
     global: {
-      stubs: { teleport: true, DialogContent: { template: '<div><slot /></div>' } },
+      stubs: { teleport: !options.dom, DialogContent: { template: '<div><slot /></div>' } },
       plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
       provide: {
         [AI_CLIENT_KEY as symbol]: client,
@@ -831,3 +838,99 @@ it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const)(
     expect(localClient.saveConnection).not.toHaveBeenCalled();
   },
 );
+
+it.each([
+  'Safe startup diagnostic: native path redacted. ',
+  '启动失败；本机路径与账号信息已隐藏。',
+  'SafeUnbrokenDiagnostic',
+])('shows the full safe 500-character status on focus and hover: %s', async (seed) => {
+  const { wrapper, localClient } = await setup({ native: true, dom: true });
+  const message = seed.repeat(Math.ceil(500 / seed.length)).slice(0, 500);
+  const publicResult = {
+    status: 'unavailable' as const,
+    message,
+    // Simulate ignored internal transport metadata, never part of the public message.
+    stderr: 'PRIVATE_STDERR_FIXTURE',
+    privatePath: 'C:\\Users\\PRIVATE_HOME_FIXTURE',
+    token: 'PRIVATE_TOKEN_FIXTURE',
+  };
+  localClient.probeDefaultDriver.mockResolvedValue(publicResult);
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  const button = wrapper.get('[data-testid="ai-provider-select-agent:codex"]');
+  const row = button.element.closest('[role="listitem"]')!;
+  const inline = button.get('.whitespace-nowrap');
+  expect(message).toHaveLength(500);
+  expect(inline.text()).toBe(message);
+  expect(inline.classes()).toContain('truncate');
+  expect(row.classList.contains('h-20')).toBe(true); // Existing 20 × 4px = 80px layout token.
+  expect(button.attributes('disabled')).toBeUndefined();
+
+  (button.element as HTMLButtonElement).focus();
+  await vi.waitFor(() =>
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(message),
+  );
+  const description = document.getElementById(button.attributes('aria-describedby'))!;
+  expect(description.getAttribute('role')).toBe('tooltip');
+  expect(row.contains(description)).toBe(false); // Portal cannot change row height or be clipped by it.
+  expect(button.attributes('aria-label')).toBe('codex');
+  expect(inline.attributes('title')).toBeUndefined(); // Avoid a competing mouse-only browser tooltip.
+  const popup = description.parentElement!;
+  expect(popup.classList.contains('whitespace-pre-wrap')).toBe(true);
+  expect(popup.classList.contains('break-words')).toBe(true);
+  await button.trigger('keydown', { key: 'Escape' });
+  await vi.waitFor(() => expect(document.querySelector('[role="tooltip"]')).toBeNull());
+  expect(document.activeElement).toBe(button.element);
+  (button.element as HTMLButtonElement).blur();
+  button.element.dispatchEvent(
+    new PointerEvent('pointermove', { pointerType: 'mouse', bubbles: true }),
+  );
+  await vi.waitFor(() =>
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(message),
+  );
+  for (const marker of [
+    'PRIVATE_STDERR_FIXTURE',
+    'PRIVATE_HOME_FIXTURE',
+    'PRIVATE_TOKEN_FIXTURE',
+  ]) {
+    expect(document.body.innerHTML).not.toContain(marker);
+  }
+  localClient.probeDefaultDriver.mockResolvedValue({ status: 'ready', models: [] });
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  expect(button.get('.whitespace-nowrap').text()).not.toBe(message);
+  expect(document.body.textContent).not.toContain(message);
+  expect(
+    wrapper.findAll('[role="listitem"]').every((item) => item.classes().includes('h-20')),
+  ).toBe(true);
+});
+
+it('keeps disabled row status focusable, selectable and its switch keyboard-operable', async () => {
+  const { wrapper, registry } = await setup({ native: true, dom: true });
+  await wrapper.get('[data-testid="ai-provider-toggle-codex"]').trigger('click');
+  await flushPromises();
+  const button = wrapper.get('[data-testid="ai-provider-select-agent:codex"]');
+  expect(button.classes()).toContain('opacity-45');
+  expect(button.attributes('disabled')).toBeUndefined();
+  expect(button.classes()).not.toContain('pointer-events-none');
+  (button.element as HTMLButtonElement).focus();
+  await vi.waitFor(() =>
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toBe('Inactive'),
+  );
+  await button.trigger('keydown', { key: 'Escape' });
+  await button.trigger('click');
+  await flushPromises();
+  expect(button.attributes('aria-current')).toBe('true');
+  expect(wrapper.find('[data-testid="ai-provider-detail"]').exists()).toBe(true);
+  const toggle = wrapper.get('[data-testid="ai-provider-toggle-codex"]');
+  expect(toggle.attributes('data-state')).toBe('unchecked');
+  await toggle.trigger('keydown', { key: 'Enter' });
+  await flushPromises();
+  expect(registry.execute).toHaveBeenLastCalledWith({
+    action: 'update',
+    instanceId: 'codex',
+    expectedRevision: 1,
+    patch: { enabled: true },
+  });
+  expect(toggle.attributes('data-state')).toBe('checked');
+});

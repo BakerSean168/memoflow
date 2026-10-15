@@ -2,7 +2,14 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Plus, RefreshCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { Button, Switch } from '@memoflow/ui-vue-shadcn';
+import {
+  Button,
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@memoflow/ui-vue-shadcn';
 import type {
   AgentInstance,
   AgentRegistrySnapshot,
@@ -308,62 +315,77 @@ onBeforeUnmount(() => {
       v-if="instances.length"
       class="grid min-h-[34rem] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] lg:grid-cols-[15.5rem_minmax(0,1fr)]"
     >
-      <div
-        class="max-h-[18rem] overflow-y-auto border-b border-[hsl(var(--border-subtle))] bg-muted/10 lg:max-h-none lg:border-b-0 lg:border-r"
-        role="list"
-        :aria-label="t('setting.ai.providerList')"
-        data-testid="ai-provider-list"
-      >
+      <TooltipProvider :delay-duration="300">
         <div
-          v-for="instance in instances"
-          :key="instance.instanceId"
-          role="listitem"
-          class="flex h-20 min-h-0 items-center gap-2 overflow-hidden border-b border-[hsl(var(--border-subtle))] px-3 py-2 last:border-b-0"
-          :class="selectedId === instance.instanceId ? 'bg-muted/50' : 'hover:bg-muted/25'"
+          class="max-h-[18rem] overflow-y-auto border-b border-[hsl(var(--border-subtle))] bg-muted/10 lg:max-h-none lg:border-b-0 lg:border-r"
+          role="list"
+          :aria-label="t('setting.ai.providerList')"
+          data-testid="ai-provider-list"
         >
-          <button
-            type="button"
-            class="flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1.5 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            :class="[
-              selectedId === instance.instanceId ? 'ring-1 ring-inset ring-primary/65' : '',
-              !instance.enabled ? 'opacity-45' : '',
-            ]"
-            :aria-current="selectedId === instance.instanceId ? 'true' : undefined"
-            :aria-label="`${instance.name} · ${statusLabel(instance)}`"
-            :data-testid="`ai-provider-select-agent:${instance.instanceId}`"
-            @click="select(instance)"
+          <div
+            v-for="instance in instances"
+            :key="instance.instanceId"
+            role="listitem"
+            class="flex h-20 min-h-0 items-center gap-2 overflow-hidden border-b border-[hsl(var(--border-subtle))] px-3 py-2 last:border-b-0"
+            :class="selectedId === instance.instanceId ? 'bg-muted/50' : 'hover:bg-muted/25'"
           >
-            <AgentDriverIcon
-              :driver="instance.driver"
-              class="mt-0.5 size-4"
-              :style="{ color: instance.accentColor }"
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <button
+                  type="button"
+                  class="flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1.5 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  :class="[
+                    selectedId === instance.instanceId ? 'ring-1 ring-inset ring-primary/65' : '',
+                    !instance.enabled ? 'opacity-45' : '',
+                  ]"
+                  :aria-current="selectedId === instance.instanceId ? 'true' : undefined"
+                  :aria-label="instance.name"
+                  :data-testid="`ai-provider-select-agent:${instance.instanceId}`"
+                  @click="select(instance)"
+                >
+                  <AgentDriverIcon
+                    :driver="instance.driver"
+                    class="mt-0.5 size-4"
+                    :style="{ color: instance.accentColor }"
+                  />
+                  <span class="min-w-0 flex-1"
+                    ><span class="flex min-w-0 items-baseline gap-1.5"
+                      ><span class="min-w-0 truncate text-[13px] font-semibold">{{
+                        instance.name
+                      }}</span
+                      ><span
+                        v-if="statusVersion(instance.instanceId)"
+                        class="max-w-20 shrink-0 truncate font-mono text-[10px] text-muted-foreground"
+                        :title="statusVersion(instance.instanceId)"
+                        data-testid="ai-provider-list-runtime-version"
+                        >{{ statusVersion(instance.instanceId) }}</span
+                      ></span
+                    ><span
+                      class="mt-1 block max-w-full truncate whitespace-nowrap text-[11px] leading-4 text-muted-foreground"
+                      >{{ statusLabel(instance) }}</span
+                    ></span
+                  >
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                align="start"
+                class="max-w-[min(28rem,calc(100vw-2rem))] whitespace-pre-wrap break-words text-left [overflow-wrap:anywhere]"
+                :aria-label="statusLabel(instance)"
+              >
+                {{ statusLabel(instance) }}
+              </TooltipContent>
+            </Tooltip>
+            <Switch
+              :model-value="instance.enabled"
+              :disabled="busy || loading"
+              :aria-label="t('setting.ai.enableProvider', { name: instance.name })"
+              :data-testid="`ai-provider-toggle-${instance.instanceId}`"
+              @update:model-value="toggle(instance, $event)"
             />
-            <span class="min-w-0 flex-1"
-              ><span class="flex min-w-0 items-baseline gap-1.5"
-                ><span class="min-w-0 truncate text-[13px] font-semibold">{{ instance.name }}</span
-                ><span
-                  v-if="statusVersion(instance.instanceId)"
-                  class="max-w-20 shrink-0 truncate font-mono text-[10px] text-muted-foreground"
-                  :title="statusVersion(instance.instanceId)"
-                  data-testid="ai-provider-list-runtime-version"
-                  >{{ statusVersion(instance.instanceId) }}</span
-                ></span
-              ><span
-                class="mt-1 block max-w-full truncate whitespace-nowrap text-[11px] leading-4 text-muted-foreground"
-                :title="statusLabel(instance)"
-                >{{ statusLabel(instance) }}</span
-              ></span
-            >
-          </button>
-          <Switch
-            :model-value="instance.enabled"
-            :disabled="busy || loading"
-            :aria-label="t('setting.ai.enableProvider', { name: instance.name })"
-            :data-testid="`ai-provider-toggle-${instance.instanceId}`"
-            @update:model-value="toggle(instance, $event)"
-          />
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
       <div class="min-w-0 p-3 sm:p-4">
         <MastraAgentSettings
           v-if="selected?.driver === 'mastra'"
