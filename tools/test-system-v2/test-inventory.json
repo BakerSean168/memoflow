@@ -4773,6 +4773,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4910,6 +4918,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5718,6 +5734,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/ai-provider-instance-sort.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13360,7 +13384,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 296
+      "fileCount": 299
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14121,7 +14145,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1221,
+    "unit": 1224,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,

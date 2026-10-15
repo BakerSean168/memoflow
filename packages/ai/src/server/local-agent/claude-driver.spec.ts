@@ -1,8 +1,15 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
 import { nativeIdentity } from './native-identity';
+
+import { probeNativeVersion } from './native-executable';
+
+vi.mock('./native-executable', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./native-executable')>()),
+  probeNativeVersion: vi.fn(async () => undefined),
+}));
 
 const connection: LocalAgentConnection = {
   id: 'claude',
@@ -72,10 +79,13 @@ it('uses SDK initialization for a model catalog without sending a probe prompt',
     };
   };
   const driver = new ClaudeDriver(connection, '/tmp', factory);
-  expect(await driver.probe()).toMatchObject({
+  const result = await driver.probe();
+  expect(result).toMatchObject({
     status: 'ready',
     models: [{ id: 'sonnet', name: 'Sonnet', reasoningEfforts: ['low', 'medium', 'high'] }],
   });
+  // SDK package version is not proof of the installed Claude CLI version.
+  expect(result).not.toHaveProperty('version');
   expect(prompts).toBe(0);
   expect(closed).toBe(true);
 });
@@ -313,4 +323,38 @@ it('retires a permission card when the native request signal expires', async () 
     resolution: 'cancelled',
   });
   expect(driver.respond(expiredId, { type: 'permission', decision: 'approve_once' })).toBe(false);
+});
+
+it('does not report an authenticated but empty catalog as ready', async () => {
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return { account: { tokenSource: 'oauth' }, models: [] };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {},
+  });
+  expect(await new ClaudeDriver(connection, '/tmp', factory).probe()).toMatchObject({
+    status: 'unavailable',
+  });
+});
+
+it('reports the selected Claude executable version independently of the SDK catalog', async () => {
+  vi.mocked(probeNativeVersion).mockResolvedValueOnce('2.1.31');
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return {
+        account: { tokenSource: 'oauth' },
+        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+      };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {},
+  });
+  expect(await new ClaudeDriver(connection, '/tmp', factory).probe()).toMatchObject({
+    status: 'ready',
+    version: '2.1.31',
+  });
+  expect(probeNativeVersion).toHaveBeenLastCalledWith(connection, '/tmp');
 });

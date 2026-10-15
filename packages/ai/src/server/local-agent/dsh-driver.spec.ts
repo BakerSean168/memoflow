@@ -36,6 +36,10 @@ class FakeAcp {
   onRequest?: (request: { id: number; method: string; params?: unknown }) => void;
   onFailure?: (error: never) => void;
   private finishPermission?: () => void;
+  agentInfo: { name: string; version: string } | undefined = {
+    name: 'DeepSeek Harness',
+    version: '2.4.1',
+  };
 
   constructor(readonly options: NativeProcessOptions) {}
 
@@ -44,6 +48,7 @@ class FakeAcp {
     if (method === 'initialize')
       return {
         protocolVersion: 1,
+        ...(this.agentInfo ? { agentInfo: this.agentInfo } : {}),
         agentCapabilities: {
           mcpCapabilities: { http: true },
           sessionCapabilities: { list: {}, close: {}, resume: {} },
@@ -121,6 +126,7 @@ it('discovers DSH models through ACP without invoking inference', async () => {
   expect(await driver.probe()).toMatchObject({
     status: 'ready',
     models: [{ id: route, name: 'gpt-oss 20B', provider: 'Ollama' }],
+    version: '2.4.1',
   });
   expect(instances).toHaveLength(1);
   expect(instances[0].options).toMatchObject({ protocol: 'acp', args: ['--profile', 'acp'] });
@@ -129,6 +135,20 @@ it('discovers DSH models through ACP without invoking inference', async () => {
     'session/new',
     'session/close',
   ]);
+  expect(instances[0].closed).toBe(true);
+});
+
+it('does not present an ACP protocol version as the DSH executable version', async () => {
+  const instances: FakeAcp[] = [];
+  const driver = new DshDriver(connection, '/tmp', (options) => {
+    const fake = new FakeAcp(options);
+    fake.agentInfo = undefined;
+    instances.push(fake);
+    return fake as unknown as NativeRpcTransport;
+  });
+  const status = await driver.probe();
+  expect(status.status).toBe('ready');
+  expect(status).not.toHaveProperty('version');
   expect(instances[0].closed).toBe(true);
 });
 
@@ -294,4 +314,21 @@ it('never turns a rejected ACP permission into a write grant', async () => {
   expect(
     driver.respond(permissionRequestId, { type: 'permission', decision: 'approve_once' }),
   ).toBe(false);
+});
+
+it.each([
+  '',
+  'ACP v1',
+  '2.4.1\nprivate diagnostic',
+  '2.4.1\u2028private diagnostic',
+  'x'.repeat(500),
+])('omits untrusted DSH version metadata %j without losing its catalog', async (version) => {
+  const driver = new DshDriver(connection, '/tmp', (options) => {
+    const fake = new FakeAcp(options);
+    fake.agentInfo = { name: 'DeepSeek Harness', version };
+    return fake as unknown as NativeRpcTransport;
+  });
+  const result = await driver.probe();
+  expect(result).toMatchObject({ status: 'ready', models: [{ id: route }] });
+  expect(result).not.toHaveProperty('version');
 });

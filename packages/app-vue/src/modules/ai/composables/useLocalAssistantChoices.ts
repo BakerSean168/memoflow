@@ -1,5 +1,5 @@
 import { computed, ref, watch, type Ref } from 'vue';
-import { useNativeModelVisibility } from './native-model-visibility';
+import { useNativeModelVisibility } from './nativeModelVisibility';
 import type { LocalAgentClient } from '@memoflow/ai/client';
 import type {
   AssistantRuntimeChoice,

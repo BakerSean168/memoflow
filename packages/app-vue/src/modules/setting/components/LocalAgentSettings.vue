@@ -11,7 +11,7 @@ import {
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
-import { useNativeModelVisibility } from '../../ai/composables/native-model-visibility';
+import { useNativeModelVisibility } from '../../ai/composables/nativeModelVisibility';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 const props = defineProps<{

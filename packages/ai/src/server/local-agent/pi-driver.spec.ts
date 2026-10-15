@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -6,6 +6,13 @@ import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { PiDriver } from './pi-driver';
 import { NativeRpcTransport } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';
+import { probeNativeVersion } from './native-executable';
+
+vi.mock('./native-executable', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./native-executable')>()),
+  probeNativeVersion: vi.fn(async () => undefined),
+}));
+
 const connection: LocalAgentConnection = {
   id: 'pi',
   driver: 'pi',
@@ -43,10 +50,14 @@ it('reads native models, resumes a session and handles extension UI with scoped 
         }),
     );
   try {
-    expect(await create().probe()).toMatchObject({
+    vi.mocked(probeNativeVersion).mockResolvedValueOnce('1.0.3');
+    const catalog = await create().probe();
+    expect(catalog).toMatchObject({
       status: 'ready',
       models: [{ id: 'provider/model', name: 'Model', provider: 'provider' }],
     });
+    expect(catalog).toHaveProperty('version', '1.0.3');
+    expect(probeNativeVersion).toHaveBeenLastCalledWith({ ...connection, homePath: cwd }, cwd);
     const driver = create();
     const events = [];
     for await (const event of driver.run({
@@ -167,3 +178,35 @@ it('expires a timed native UI request and rejects a late answer', async () => {
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+it.each([
+  { models: [], expected: 'unavailable' },
+  { models: [{ id: 'model', provider: 'provider', name: 'Model' }], expected: 'ready' },
+])(
+  'reports $expected for an unversioned catalog without guessing authentication',
+  async ({ models, expected }) => {
+    const driver = new PiDriver(
+      connection,
+      tmpdir(),
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: [
+            '-e',
+            `
+        require('readline').createInterface({input:process.stdin}).on('line', line => {
+          const frame = JSON.parse(line);
+          const data = frame.type === 'get_state' ? {sessionId:'native'} : ${JSON.stringify({ models })};
+          process.stdout.write(JSON.stringify({type:'response',id:frame.id,success:true,data})+'\\n');
+        });`,
+          ],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    const result = await driver.probe();
+    expect(result).toMatchObject({ status: expected });
+    expect(result).not.toHaveProperty('version');
+    expect(result).not.toHaveProperty('account');
+  },
+);

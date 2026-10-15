@@ -12,7 +12,7 @@ import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeEventQueue } from './native-event-queue';
-import { resolveNativeExecutable } from './native-executable';
+import { probeNativeVersion, resolveNativeExecutable } from './native-executable';
 import { nativeFailure } from './native-failure';
 import { nativeIdentity } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
@@ -277,10 +277,12 @@ export class ClaudeDriver {
   async probe(): Promise<LocalAgentStatus> {
     try {
       const init = await this.connect();
+      if (!init.models.length) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+      const version = await probeNativeVersion(this.connection, this.cwd);
       return {
         status: 'ready',
         models: init.models,
-        version: 'SDK 0.3.295 / native initialization catalog',
+        ...(version ? { version } : {}),
       };
     } catch (error) {
       const failure =

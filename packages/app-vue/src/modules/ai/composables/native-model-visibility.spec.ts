@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { computed, nextTick, ref } from 'vue';
 import { afterEach, describe, expect, it } from 'vitest';
-import { useNativeModelVisibility } from './native-model-visibility';
+import { useNativeModelVisibility } from './nativeModelVisibility';
 
 afterEach(() => localStorage.clear());
 

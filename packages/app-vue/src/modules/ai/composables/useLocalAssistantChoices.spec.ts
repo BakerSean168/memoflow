@@ -8,7 +8,7 @@ import type {
 } from '@memoflow/contracts/ai';
 import { LocalAgentConnectionSchema } from '@memoflow/contracts/ai';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
-import { useNativeModelVisibility } from './native-model-visibility';
+import { useNativeModelVisibility } from './nativeModelVisibility';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
