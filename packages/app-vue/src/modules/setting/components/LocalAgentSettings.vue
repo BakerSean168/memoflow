@@ -363,7 +363,12 @@ function save() {
         </div>
       </div>
     </section>
-    <p v-if="error" role="alert" class="px-3 text-xs text-destructive">
+    <p
+      v-if="error"
+      role="alert"
+      class="min-w-0 truncate whitespace-nowrap px-3 text-xs leading-5 text-muted-foreground"
+      :title="t('aiAssistant.local.actionFailed')"
+    >
       {{ t('aiAssistant.local.actionFailed') }}
     </p>
     <footer class="flex items-center justify-end gap-3 px-3">
