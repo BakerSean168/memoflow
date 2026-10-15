@@ -75,3 +75,27 @@ updated: 2026-10-15T00:00:00Z
 当前实现以原生初始化报告的账号及现有会话身份指纹作为上下文来源，不声称账号在线授权、模型额度或真实推理可用。上下文不是权限。API-key-only、Pi/DSH 和缺失账号元数据暂不保存偏好；后续须提供该 Driver 可核验的身份来源后才能接入相同契约，禁止拿 model catalog、套餐或掩码邮箱替代。外部账号/Home 环境在 probe 之间改变时，需重新检查/现有配置刷新才能观察；本轮没有增加后台探活。Windows 安装版、真实多账号/Home 切换、真实 OAuth 刷新及旧会话消息的安装版回归仍待验收。历史消息存储及运行会话绑定没有变更。
 
 第二轮必要治理：`node tools/docs/check-docs-config.mjs` 与 `node tools/governance/public-surface-audit.mjs` 均通过；`git diff --check` 通过。没有重跑或扩大主治理门禁，测试文件集合未变。
+
+## 第四轮：Registry 到 Native Send 的跨层回归
+
+基线 `d9c358857ac4e25916a9dbbb3b425ad5d3113310`，同一 T3 线程、同一工作树，当前 Codex Team / gpt-6.1-sol 独占实施。第三轮的限额观测及草稿保护保持原实现。
+
+原有生命周期测试替换了 Session，Session 测试替换了 Runtime，Runtime 测试替换了 Driver；它们分别覆盖了默认物化、首次默认加载和发送，却没有证明这些模块接起来后真正抵达 Codex turn/start。本轮在现有生命周期 spec 中增加两个跨层场景，通过 `@memoflow/ai/testing` 提供 Node 专用夹具，避免跨项目导入内部源码。真实执行的模块包括 Vue View/Session/初始化与选择逻辑、三个 IPC Client 及其 DTO 校验、AgentInstanceRegistry、SQLite Repository、LocalAgentRuntime、CodexDriver 和 NativeRpcTransport；Electron 投递与外部 Codex JSON-RPC 进程是假实现，外围业务 Workflow 投影沿用原测试桩。
+
+- 隐式默认 Codex：Registry 中 enabled、探测目录 ready；读 Registry、探测和挂载不写 Connection、不执行 turn/start。显式选择后只物化一个 Connection，选择原生目录模型，经 Composer 的 v-model/send 事件发送，断言实际 RPC 的模型及用户文本和持久化会话选择。
+- 已保存默认 Codex：显式保存默认选择后重新挂载，真实初始化自动加载该 Connection/模型；无需重新配置即可从 Composer 发送，读初始化不再物化 Connection。
+- 注入假原生 RPC 429/insufficient_quota：Conversation 与 Composer 显示安全限额结果，恢复原草稿，保留 Connection/模型；完成目录复查后仍可显式重试，RPC 计数证明没有自动重试。
+- 模拟 Desktop Profile 切换：卸载旧 View、dispose 旧 Profile Runtime，保留同一 SQLite 的身份分区并挂载新 View。新 Profile 看不到旧连接、会话或限额；重新选择后独立物化并发送，获得新账号摘要。旧 Profile 的模型及两条用户消息保留。此项覆盖重挂载路径，不等同于 Electron 实机 Profile 切换验收。
+
+本轮没有复现当前源码中的“已发现 Codex 目录而新会话仍报 AI 未配置”，因此没有再次修改默认物化、首次加载或其他生产行为。测试开发中发现的是夹具断言边界：Native prompt 会附带当前 Goal 引用、保存默认选择会更新 defaultModelId、原生目录复查包含异步进程 I/O。断言已分别按现有契约和真实终态等待修正；这些不是业务修复，也不作为已修复故障计功。
+
+最终校验：
+
+- `pnpm nx run ai:test --skipNxCache -- src/server/local-agent src/server/application/agent-instance/agent-instance.registry.spec.ts src/client/runtime-assistant.spec.ts`：13 文件 **122/122**。
+- `pnpm nx run app-vue:test --skipNxCache -- src/modules/ai/composables/useAIChatSession.spec.ts src/modules/ai/composables/error.spec.ts src/modules/ai/composables/useLocalAssistantChoices.spec.ts src/modules/setting/components/AISettings.spec.ts src/modules/setting/components/AISettings.provider-onboarding-v2.surface.spec.ts src/modules/ai/composables/useAIChatView.lifecycle.spec.ts src/modules/ai/composables/native-model-visibility.spec.ts src/locales/i18n-key-completeness.spec.ts`：8 文件 **134/134**。包含原草稿、新编辑草稿、部分回复、历史选择、可见性与身份隔离回归。
+- `pnpm nx run-many -t typecheck -p ai app-vue --parallel=1`：通过，29 tasks；AI/App-Vue 当前类型检查实际运行，25 个无关依赖构建命中缓存。
+- 改动 TypeScript/配置定向 ESLint、public-surface 审计和差异检查通过；保持现有 spec 文件集合，不扩大测试清单或全仓治理。记录补充后另运行 docs-config 检查。
+
+所有 Native 推理均为本机 Node 假进程，测试显式使用空临时 CODEX_HOME 并移除继承的提供商认证环境变量；未读取真实 Native Home、未执行真实 Codex CLI、未调用付费模型、未切换模型渠道。未修改品牌图标，未 push/PR/合并/部署/发布。
+
+剩余门禁：Windows Desktop 安装包必须在本轮提交的 exact SHA 上验证实际 Registry/IPC/Preload、npm launcher、真实账号/Home/Profile 切换、Composer 键盘/点击发送及布局；mock 通过不替代该证据。此前 #456 缺少已验证会话身份的早期失败投影、执行结果的持久化与完整权威状态契约也未在本轮扩展。目录 ready 仍不证明授权、余额或真实模型可执行。
