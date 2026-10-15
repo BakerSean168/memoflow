@@ -109,3 +109,33 @@ updated: 2026-10-15T00:00:00Z
 - 脱敏权威边界：源端归一化（driver probe 分类 + transport 边界重映射 + renderer 固定 fallback 文案）是唯一脱敏点；`LocalAgentStatusSchema`/IPC DTO 仅校验形状与长度上限，**不做自动文本清洗** —— 若未来源端路径漏归一化，DTO 校验不会兜底，必须依赖上述 driver/transport 回归守住。真实 IPC client 解析 DTO 只代表形状可信，不代表文本已脱敏。
 - 本轮串行验证（`--no-file-parallelism`，环境注入临时 `CODEX_HOME`）：`pnpm nx run ai:test --skipNxCache -- src/server/local-agent src/server/transport/ai-controller-errors.spec.ts src/server/application/agent-instance/agent-instance.registry.spec.ts src/client/runtime-assistant.spec.ts`：14 文件 **147/147**，含脱敏新用例与原有 Registry/发送集成。`pnpm nx run app-vue:test --skipNxCache -- src/modules/setting/components/AISettings.spec.ts`：**36/36**（上轮并发压力下曾超时，串行模式稳定通过）。`git diff --check` 通过。App-Vue/AI typecheck 与变更 ESLint 由本轮前段交接完成并报告通过，本次收口未重复执行全量治理。
 - 测试全程仅用模拟启动 stderr、虚构路径与假 RPC 子进程；未读取私有本机 Native Home、未使用环境密钥、未发起真实服务请求。未改品牌图标，未 cherry-pick 其他工作树提交，未 push/PR/合并/部署。
+
+
+## 第七轮：双模型整合、治理验收与 Windows 发布门槛
+
+此节是此前历史里程碑的后续结果，不应把早期“图标未落地”“只有 Codex 编写”等陈述解释为最新状态。2026-10-15 的实施实际分成独立 T3 Code 工作线：Codex Team/Codex 完成 #456 请求失败状态与草稿保护、跨层集成、#457 Tooltip 回归；其工作空间额度耗尽后，WindHub Direct/GLM-5.3 经 ZCode 接续第六轮隐私测试并独立完成品牌图标。两个工作树分别写入，最终由调度者逐个提交并 cherry-pick 到 `feat/ai-provider-contract-456-457-20261014`，无交叉覆盖。
+
+### 已整合的结果
+
+- #456 请求限额/额度耗尽投影与草稿恢复：`d9c358857ac`；跨 Registry/IPC/Composer/真实 fake RPC 的发送闭环回归：`0e437bc94b0`；#457 状态 Tooltip 键盘聚焦/单行固定 80px 回归：`f030e3bdee6`。
+- WindHub 接续模拟 Native 错误脱敏的 7 个测试/夹具文件，追加计划证据：`3bd88861400`。仅模拟 ENOENT/stderr/RPC、注入虚构路径与认证标记，不触达用户 Home、真实密钥或付费推理。
+- GLM 原品牌分支 `83f606f60f8`、`2c59b362c59` 提供五个 Driver 的可追溯 SVG 字形、fallback、尺寸数学回归与来源证明；分别以 `06997ffa53b`、`25a7b653f84` 整合。第三方 MIT 声明 `48b5b8f8a80`，Pi Press Kit 版权署名更正 `a0f6d30f0d4`。
+- 治理测试清单增加 AgentDriverIcon spec：`1f1c0076085`；`agentBrandGlyphs.ts` 依仓库文件名规则改为 `agent-brand-glyphs.ts`，同步 import 与许可引用：`36b75d22d91`。
+- 以上在最后本地治理时均位于同一特性分支，`origin/main` 的最新提交 `8ea3c78ee87` 是其祖先（merge-base 与 origin/main 一致，`origin/main...HEAD` 为 0 落后、20 领先），无须再次合并基线。
+
+### 最终本地测试证据
+
+- 第六轮 Native Agent + Registry + Transport：14 文件 **147/147**，Vue AISettings：**36/36**；两个测试由 WindHub 接续后以隔离环境串行通过。
+- 整合后的相关 Vue UI 与 Composer：4 文件 **65/65**（图标/Settings/Tooltip/Composer）；重命名后再跑 **65/65**。
+- AI/App-Vue typecheck 与重命名后的 App-Vue typecheck 通过；相关 Vue/TS 变更 ESLint 零错误。
+- `pnpm test:inventory` 更新到 unit 1225，新增 spec 已入账；`pnpm nx run memoflow:governance-check --parallel=1` 在修复 kebab-case 文件名后整套 **退出 0**，包括文件命名、公开接口、架构边界、测试治理等审计。Nx 报告 test-system-v2:test 先前存在 flaky 记录，此次最终治理未失败。
+- `git diff --check` 通过，用户真实 Provider/Auth/聊天数据与其他仓库未改动，未运行真正 Native 推理。自动生成的 `.zcode/` 已加入本机 Git info/exclude（不入库）。
+
+### 尚未完成，不能宣称发布完成
+
+1. **Windows exact-SHA 安装包验证**：需在干净隔离 Profile 中覆盖 Registry -> Probe -> Select -> Connection -> Compose -> Send、Windows npm launcher、初次加载、重启、账号/Native Home/Profile 切换和历史消息完整性；模拟 Native RPC 通过不等同于真实渠道额度/认证验收。该操作须避免读取或改写实际用户登录资料。
+2. **界面实际几何验收**：840/1280/1600px，固定列表行高、Tooltip/焦点、详情面板与深浅主题；现有 Vue/happy-dom 单测不是实际浏览器或 Windows 截图证据。
+3. **PR exact-SHA CI**：本地绿测不替代 GitHub CI；保持 Draft PR 直至 CI 和实机门槛通过。不得因为发布流水线存在而自动晋升 `staging-latest` 或发布生产版本。
+4. **真实额度状态**：已观察到 Codex Team 这个 T3 实施工作空间提示 out of credits，不能将其概括为所有 Codex 账号/渠道不可用。WindHub/ZCode 可用于后续独立验证/开发；昆友本轮不参与。
+
+Windows 工作站（WSL `forest`）在此轮确认可由 Agent Fabric 连通；Windows 11 已安装 Desktop 0.19.0 且未运行。安装版仍是旧构建，不能以其结果冒充此分支 exact-SHA。Windows Node 24.12.0 可用，但 pnpm 尚未安装；如准备隔离构建应先核对工作区、磁盘、CLI 和数据目录的隔离性，不直接覆盖当前安装。
