@@ -1,5 +1,6 @@
 import { ResultErrorException, fail, toHttpResponse, toIpcResult } from '@memoflow/contracts/result';
 import { describe, expect, it } from 'vitest';
+import { LocalAgentError } from '../../shared/local-agent-error';
 import { AIExecutionError } from '../../shared/ai-execution-error';
 import {
   readAIProviderFailureDiagnostics,
@@ -179,4 +180,23 @@ describe('AI public failure projection', () => {
       context: { requestId: 'request-ai-1' },
     });
   });
+});
+
+it.each([
+  ['LOCAL_AGENT_LOGIN_REQUIRED', 'Sign in using the Agent’s native login command, then refresh.'],
+  ['LOCAL_AGENT_UNAVAILABLE', 'The local Agent is unavailable. Check its native configuration.'],
+] as const)('re-maps a tainted %s exception at the final public transport boundary', (code, message) => {
+  const error = new LocalAgentError(code);
+  error.message = 'C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE';
+  expect(toAITransportFailure(error, fallback)).toMatchObject({ code, message });
+  expect(JSON.stringify(toAITransportFailure(error, fallback))).not.toContain('PRIVATE_');
+});
+
+it('uses the fixed Desktop fallback for an unknown private native exception', () => {
+  const error = new Error('PRIVATE_STDERR_FIXTURE C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_KEY_FIXTURE');
+  const failure = toAITransportFailure(error, {
+    fallbackCode: 'INTERNAL_ERROR', fallbackMessage: 'Local Agent operation failed',
+  });
+  expect(failure).toEqual({ code: 'INTERNAL_ERROR', message: 'Local Agent operation failed', statusCode: 500 });
+  expect(JSON.stringify(failure)).not.toContain('PRIVATE_');
 });

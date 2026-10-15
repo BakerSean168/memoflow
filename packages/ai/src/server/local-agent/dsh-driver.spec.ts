@@ -1,7 +1,11 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it } from 'vitest';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { DshDriver } from './dsh-driver';
-import type { NativeProcessOptions, NativeRpcTransport } from './native-rpc-transport';
+import { type NativeProcessOptions, NativeRpcTransport } from './native-rpc-transport';
 
 const route = JSON.stringify(['ollama', 'gpt-oss:20b']);
 const models = [
@@ -332,3 +336,49 @@ it.each([
   expect(result).toMatchObject({ status: 'ready', models: [{ id: route }] });
   expect(result).not.toHaveProperty('version');
 });
+
+it.each([
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'Native connection failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])(
+  'sanitizes dsh native RPC %s before publishing the status DTO',
+  async (prefix, status, message) => {
+    const cwd = await mkdtemp(join(tmpdir(), 'memoflow-dsh-privacy-'));
+    const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+    const script = `
+    const diagnostic = ${JSON.stringify(diagnostic)};
+    require('readline').createInterface({input:process.stdin}).on('line', line => {
+      const frame = JSON.parse(line);
+      process.stderr.write(diagnostic);
+      process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:frame.id,error:{code:401,message:diagnostic}}) + '\\n');
+    });
+  `;
+    const driver = new DshDriver(
+      { ...connection, homePath: cwd },
+      cwd,
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: ['-e', script],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    try {
+      const result = await driver.probe();
+      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+    } finally {
+      await driver.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
+  },
+);

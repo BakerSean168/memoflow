@@ -1,10 +1,14 @@
 import { expect, it, vi } from 'vitest';
 import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
 import { nativeIdentity } from './native-identity';
 
 import { probeNativeVersion } from './native-executable';
+
+const privacyLogs = vi.hoisted(() => ({ warn: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => privacyLogs }));
 
 vi.mock('./native-executable', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./native-executable')>()),
@@ -386,4 +390,77 @@ it('scopes visibility only when SDK initialization reports an account identity',
   if (changed.status !== 'ready') throw new Error('Expected catalog');
   expect(changed.modelVisibilityContext).not.toBe(first.modelVisibilityContext);
   expect(await probe()).not.toHaveProperty('modelVisibilityContext');
+});
+
+it.each([
+  ['spawn ENOENT', 'not_installed', 'The configured Agent executable could not be started.'],
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'SDK initialization failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])('normalizes Claude %s before publishing the status DTO', async (prefix, status, message) => {
+  const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+  const factory: ClaudeQueryFactory = ({ options }) => {
+    options.stderr?.(diagnostic);
+    throw new Error(diagnostic);
+  };
+  const result = await new ClaudeDriver(connection, '/tmp', factory).probe();
+  expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+  expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+});
+
+it('logs only schema paths/codes when a private Claude frame is rejected', async () => {
+  privacyLogs.warn.mockClear();
+  const factory: ClaudeQueryFactory = () => ({
+    async initializationResult() {
+      return {
+        account: { tokenSource: 'oauth' },
+        models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+      };
+    },
+    async interrupt() {},
+    close() {},
+    async *[Symbol.asyncIterator]() {
+      yield {
+        type: 'stream_event',
+        session_id: 'fixture-session',
+        event: {
+          type: 'content_block_delta',
+          delta: {
+            type: 'text_delta',
+            text: {
+              diagnostic:
+                'C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test PRIVATE_KEY_FIXTURE',
+            },
+          },
+        },
+      };
+    },
+  });
+  const driver = new ClaudeDriver(connection, '/tmp', factory);
+  try {
+    const run = driver.run({ modelId: 'sonnet', content: 'Synthetic prompt' });
+    await expect(
+      (async () => {
+        for await (const _event of run) {
+          /* drain */
+        }
+      })(),
+    ).rejects.toMatchObject({
+      code: 'LOCAL_AGENT_PROTOCOL_ERROR',
+      message: 'The local Agent returned an unsupported or invalid protocol message.',
+    });
+    expect(privacyLogs.warn).toHaveBeenCalledWith('Native protocol shape rejected', {
+      issues: [{ path: ['delta', 'text'], code: 'invalid_type' }],
+    });
+    expect(JSON.stringify(privacyLogs.warn.mock.calls)).not.toContain('PRIVATE_');
+  } finally {
+    await driver.close();
+  }
 });

@@ -99,3 +99,13 @@ updated: 2026-10-15T00:00:00Z
 所有 Native 推理均为本机 Node 假进程，测试显式使用空临时 CODEX_HOME 并移除继承的提供商认证环境变量；未读取真实 Native Home、未执行真实 Codex CLI、未调用付费模型、未切换模型渠道。未修改品牌图标，未 push/PR/合并/部署/发布。
 
 剩余门禁：Windows Desktop 安装包必须在本轮提交的 exact SHA 上验证实际 Registry/IPC/Preload、npm launcher、真实账号/Home/Profile 切换、Composer 键盘/点击发送及布局；mock 通过不替代该证据。此前 #456 缺少已验证会话身份的早期失败投影、执行结果的持久化与完整权威状态契约也未在本轮扩展。目录 ready 仍不证明授权、余额或真实模型可执行。
+
+## 第六轮：原生失败状态 / Tooltip 隐私回归收口
+
+基线 `f030e3bdee6`。上轮 Codex 因上游 Team 工作空间余额耗尽停止，留下 7 个已实现未提交测试文件；本轮 T3 线程（WindHub GLM-5.3）复核保留原成果、不重构不重写，仅串行收口验证并提交。
+
+- 夹具增量（`@memoflow/ai/testing`）：`createNativeAgentFlowFixture` 新增 `NativeProbeFailure` 与 `setProbeFailure`，可注入 spawn ENOENT（临时目录内虚构路径）、stderr 诊断、RPC 错误码（401/503/-32603）三类探针失败；其余行为不变，原 Registry → Composer 发送集成不受影响。
+- 回归断言：Claude/Dsh/Pi driver spec 用合成 stderr（`PRIVATE_*_FIXTURE` 标记的虚构 Home/账号/密钥）验证探针失败先归一化为固定文案再发布状态 DTO；transport 最终公共边界对被污染的 `LocalAgentError`/未知异常重映射为固定 code+message；`AISettings.spec.ts` 通过真实 Runtime/Registry/RpcTransport 夹具断言 Runtime → DTO → Tooltip → detail 全链路无 `PRIVATE_` 泄漏（结果 JSON、DOM、console 日志），且失败探针不触发 `turn/start`。
+- 脱敏权威边界：源端归一化（driver probe 分类 + transport 边界重映射 + renderer 固定 fallback 文案）是唯一脱敏点；`LocalAgentStatusSchema`/IPC DTO 仅校验形状与长度上限，**不做自动文本清洗** —— 若未来源端路径漏归一化，DTO 校验不会兜底，必须依赖上述 driver/transport 回归守住。真实 IPC client 解析 DTO 只代表形状可信，不代表文本已脱敏。
+- 本轮串行验证（`--no-file-parallelism`，环境注入临时 `CODEX_HOME`）：`pnpm nx run ai:test --skipNxCache -- src/server/local-agent src/server/transport/ai-controller-errors.spec.ts src/server/application/agent-instance/agent-instance.registry.spec.ts src/client/runtime-assistant.spec.ts`：14 文件 **147/147**，含脱敏新用例与原有 Registry/发送集成。`pnpm nx run app-vue:test --skipNxCache -- src/modules/setting/components/AISettings.spec.ts`：**36/36**（上轮并发压力下曾超时，串行模式稳定通过）。`git diff --check` 通过。App-Vue/AI typecheck 与变更 ESLint 由本轮前段交接完成并报告通过，本次收口未重复执行全量治理。
+- 测试全程仅用模拟启动 stderr、虚构路径与假 RPC 子进程；未读取私有本机 Native Home、未使用环境密钥、未发起真实服务请求。未改品牌图标，未 cherry-pick 其他工作树提交，未 push/PR/合并/部署。

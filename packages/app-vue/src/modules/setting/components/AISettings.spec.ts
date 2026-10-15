@@ -1,3 +1,7 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createNativeAgentFlowFixture, type NativeProbeFailure } from '@memoflow/ai/testing';
 import { ref } from 'vue';
 import { mount, flushPromises, type VueWrapper } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -7,6 +11,7 @@ import {
   AgentRegistryCommandSchema,
   AIProviderConfigClientDTOSchema,
   LocalAgentConnectionSchema,
+  LocalAgentStatusSchema,
   type AgentInstance,
   type AgentInstanceModelBinding,
   type AIProviderConfigClientDTO,
@@ -933,4 +938,106 @@ it('keeps disabled row status focusable, selectable and its switch keyboard-oper
     patch: { enabled: true },
   });
   expect(toggle.attributes('data-state')).toBe('checked');
+});
+
+// Source-side normalization is the privacy authority. The real IPC client parses
+// the DTO but that schema only bounds/validates shape; it is not a text scrubber.
+it.each([
+  ['spawn', 'not_installed', 'The configured Agent executable could not be started.', undefined],
+  [
+    'stderr',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+    undefined,
+  ],
+  ['rpc', 'login_required', 'Sign in using the Agent’s native login command, then refresh.', 401],
+  ['rpc', 'unavailable', 'The local Agent is unavailable. Check its native configuration.', 503],
+  [
+    'rpc',
+    'unavailable',
+    'The local Agent returned an unsupported or invalid protocol message.',
+    -32603,
+  ],
+] as const)(
+  'keeps %s/%s probe diagnostics private through Runtime, DTO, Tooltip and detail',
+  async (kind, status, message, code) => {
+    const directory = await mkdtemp(join(tmpdir(), 'memoflow-probe-privacy-'));
+    vi.stubEnv('CODEX_HOME', directory);
+    const flow = createNativeAgentFlowFixture(directory);
+    const diagnostics =
+      'PRIVATE_STDERR_FIXTURE C:\\Users\\PRIVATE_HOME_FIXTURE user@PRIVATE_ACCOUNT_FIXTURE.test api_key=PRIVATE_KEY_FIXTURE';
+    const prefix = code === 401 ? '401 Unauthorized ' : 'Native startup or RPC failed ';
+    flow.setProbeFailure({
+      kind,
+      ...(code === undefined ? {} : { code }),
+      message: prefix + diagnostics,
+    } as NativeProbeFailure);
+    const logs = (['debug', 'info', 'log', 'warn', 'error'] as const).map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => {}),
+    );
+    try {
+      const { wrapper, localClient } = await setup({ native: true, dom: true });
+      localClient.probeDefaultDriver.mockImplementation(async (driver) =>
+        driver === 'codex'
+          ? flow.local.probeDefaultDriver(driver)
+          : { status: 'not_installed', message: 'Other fixture Agent not installed' },
+      );
+      await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+      await vi.waitFor(() => expect(localClient.probeDefaultDriver).toHaveBeenCalledWith('codex'));
+      const result = await flow.local.probeDefaultDriver('codex');
+      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+      await vi.waitFor(() =>
+        expect(wrapper.get('[data-testid="ai-provider-select-agent:codex"]').text()).toContain(
+          message,
+        ),
+      );
+      const button = wrapper.get('[data-testid="ai-provider-select-agent:codex"]');
+      await button.trigger('click');
+      await flushPromises();
+      expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(message);
+      (button.element as HTMLButtonElement).focus();
+      await vi.waitFor(() =>
+        expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(message),
+      );
+      for (const marker of [
+        'PRIVATE_STDERR_FIXTURE',
+        'PRIVATE_HOME_FIXTURE',
+        'PRIVATE_ACCOUNT_FIXTURE',
+        'PRIVATE_KEY_FIXTURE',
+      ]) {
+        expect(JSON.stringify(result)).not.toContain(marker);
+        expect(document.body.innerHTML).not.toContain(marker);
+        expect(JSON.stringify(logs.flatMap((log) => log.mock.calls))).not.toContain(marker);
+      }
+      expect(flow.requests.some(([method]) => method === 'turn/start')).toBe(false);
+    } finally {
+      wrappers.splice(0).forEach((wrapper) => wrapper.unmount());
+      await flow.close();
+      logs.forEach((log) => log.mockRestore());
+      vi.unstubAllEnvs();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
+it('uses the renderer fallback when a rejected probe carries a private exception', async () => {
+  const { wrapper, localClient } = await setup({ native: true, dom: true });
+  localClient.probeDefaultDriver.mockRejectedValue(
+    new Error(
+      'PRIVATE_STDERR_FIXTURE C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE',
+    ),
+  );
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  const message = 'The local Agent operation failed. Check the connection and retry.';
+  const button = wrapper.get('[data-testid="ai-provider-select-agent:codex"]');
+  expect(button.text()).toContain(message);
+  await button.trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(message);
+  (button.element as HTMLButtonElement).focus();
+  await vi.waitFor(() =>
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(message),
+  );
+  expect(document.body.innerHTML).not.toContain('PRIVATE_');
 });

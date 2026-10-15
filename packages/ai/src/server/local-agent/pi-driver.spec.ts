@@ -1,3 +1,4 @@
+import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it, vi } from 'vitest';
 import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -208,5 +209,51 @@ it.each([
     expect(result).toMatchObject({ status: expected });
     expect(result).not.toHaveProperty('version');
     expect(result).not.toHaveProperty('account');
+  },
+);
+
+it.each([
+  [
+    '401 Unauthorized',
+    'login_required',
+    'Sign in using the Agent’s native login command, then refresh.',
+  ],
+  [
+    'Native connection failed',
+    'unavailable',
+    'The local Agent is unavailable. Check its native configuration.',
+  ],
+])(
+  'sanitizes pi native RPC %s before publishing the status DTO',
+  async (prefix, status, message) => {
+    const cwd = await mkdtemp(join(tmpdir(), 'memoflow-pi-privacy-'));
+    const diagnostic = `${prefix} C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE`;
+    const script = `
+    const diagnostic = ${JSON.stringify(diagnostic)};
+    require('readline').createInterface({input:process.stdin}).on('line', line => {
+      const frame = JSON.parse(line);
+      process.stderr.write(diagnostic);
+      process.stdout.write(JSON.stringify({type:'response',id:frame.id,success:false,error:diagnostic}) + '\\n');
+    });
+  `;
+    const driver = new PiDriver(
+      { ...connection, homePath: cwd },
+      cwd,
+      (options) =>
+        new NativeRpcTransport({
+          ...options,
+          executable: process.execPath,
+          args: ['-e', script],
+          requestTimeoutMs: 1000,
+        }),
+    );
+    try {
+      const result = await driver.probe();
+      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+      expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+    } finally {
+      await driver.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
   },
 );

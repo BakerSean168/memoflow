@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { ok } from '@memoflow/contracts/result';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import {
@@ -17,6 +18,9 @@ import { LocalAgentRuntime } from '../server/local-agent/local-agent-runtime';
 import { CodexDriver } from '../server/local-agent/codex-driver';
 import { NativeRpcTransport } from '../server/local-agent/native-rpc-transport';
 
+export type NativeProbeFailure =
+  { kind: 'spawn' | 'stderr'; message: string } | { kind: 'rpc'; code: number; message: string };
+
 /** Node-only cross-layer fixture for #456: real AI implementation, synthetic
  * Electron delivery and Codex JSON-RPC process. Callers must unset provider auth
  * environment variables and supply an empty temporary CODEX_HOME.
@@ -30,6 +34,7 @@ export function createNativeAgentFlowFixture(directory: string) {
   const registry = new AgentInstanceRegistry(new AgentInstancePowerSyncRepository(db), 'desktop');
   let profile = 'profile-a';
   let failure: 'none' | 'quota' = 'none';
+  let probeFailure: NativeProbeFailure | undefined;
   const requests: Array<[string, unknown]> = [];
   const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
   function createRuntime() {
@@ -40,11 +45,25 @@ export function createNativeAgentFlowFixture(directory: string) {
       isActive: () => profile === owner,
       createDriver: (connection) =>
         new CodexDriver(connection, directory, (options) => {
+          if (probeFailure?.kind === 'spawn')
+            return new NativeRpcTransport({
+              ...options,
+              executable: join(directory, 'PRIVATE_HOME_FIXTURE', 'missing-codex'),
+              args: [],
+              requestTimeoutMs: 2000,
+            });
           const script = `
           const send = value => process.stdout.write(JSON.stringify(value) + '\\n');
           require('readline').createInterface({input:process.stdin}).on('line', line => {
             const frame = JSON.parse(line);
             const reply = result => send({id:frame.id,result});
+            const probeFailure = ${JSON.stringify(probeFailure ?? null)};
+            if (frame.method === 'initialize' && probeFailure) {
+              process.stderr.write(probeFailure.message);
+              if (probeFailure.kind === 'rpc') send({id:frame.id,error:{code:probeFailure.code,message:probeFailure.message}});
+              else process.exit(17);
+              return;
+            }
             if (frame.method === 'initialize') reply({userAgent:'codex/0.154.0 (fixture)'});
             else if (frame.method === 'account/read') reply({account:{type:'chatgpt',email:'${owner}@example.test',planType:'team'},requiresOpenaiAuth:true});
             else if (frame.method === 'model/list') reply({data:[{id:'fixture-model',model:'fixture-model',displayName:'Fixture model'}],nextCursor:null});
@@ -146,6 +165,9 @@ export function createNativeAgentFlowFixture(directory: string) {
     registryClient: createAgentRegistryIpcClient(port),
     assistant: createAssistantRuntimeIpcClient(port),
     identity: () => profile,
+    setProbeFailure: (value: NativeProbeFailure) => {
+      probeFailure = value;
+    },
     setFailure: () => {
       failure = 'quota';
     },
