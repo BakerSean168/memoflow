@@ -1,6 +1,6 @@
 # AgentDriverIcon 品牌字形来源证明（#457）
 
-`AgentDriverIcon.vue` 渲染的每个品牌字形都必须来自**已核实允许再分发**的官方或开源资产；路径数据逐字节复制自下列来源，不做手绘或臆造修改。本文件是新增或修改 `agentBrandGlyphs.ts` 中任何字形时的强制伴随证据；无来源与许可证明的字形不得合入。
+`AgentDriverIcon.vue` 渲染的每个品牌字形都必须来自**已核实允许再分发**的官方或开源资产；路径数据逐字节复制自下列来源，不做手绘或臆造修改。本文件是新增或修改 `agent-brand-glyphs.ts` 中任何字形时的强制伴随证据；无来源与许可证明的字形不得合入。
 
 五个 `AgentDriverKind`（codex、claude、pi、dsh、mastra）全部使用已核实品牌字形；合同枚举之外的任意 driver 字符串回退到通用 Lucide `Bot` 占位。
 
@@ -64,7 +64,7 @@
 | dsh | 0 0 24 24 | 0, 3, 24, 17.66 |
 | mastra | 0 0 24 24 | 0.084, 0.083, 23.811, 23.813 |
 
-测量方式：把逐字节复制的 path 放入本地临时 HTML（无 transform、无 CSS 缩放），在 T3 Code 协作浏览器中执行 `getBBox()` 读取。测得值作为 `agentBrandGlyphs.ts` 中 `bbox` 常量的来源；`AgentDriverIcon.spec.ts` 回归验证 transform 与 bbox 的数学关系。
+测量方式：把逐字节复制的 path 放入本地临时 HTML（无 transform、无 CSS 缩放），在 T3 Code 协作浏览器中执行 `getBBox()` 读取。测得值作为 `agent-brand-glyphs.ts` 中 `bbox` 常量的来源；`AgentDriverIcon.spec.ts` 回归验证 transform 与 bbox 的数学关系。
 
 ### 渲染级尺寸实测（同日，`getBoundingClientRect()`，含归一化 transform）
 

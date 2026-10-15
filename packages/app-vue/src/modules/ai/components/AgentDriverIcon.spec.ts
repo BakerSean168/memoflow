@@ -7,7 +7,7 @@ import {
   agentBrandGlyphs,
   brandGlyphTransform,
   type AgentBrandGlyph,
-} from './agentBrandGlyphs';
+} from './agent-brand-glyphs';
 
 /** First path tokens of the verified source assets; pins glyph identity. */
 const verifiedPathPrefixes: Record<string, string> = {

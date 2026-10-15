@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { Bot } from '@lucide/vue';
 import type { AgentDriverKind } from '@memoflow/contracts/ai';
-import { agentBrandGlyphs, brandGlyphTransform } from './agentBrandGlyphs';
+import { agentBrandGlyphs, brandGlyphTransform } from './agent-brand-glyphs';
 
 const props = defineProps<{ driver: AgentDriverKind | string }>();
 
