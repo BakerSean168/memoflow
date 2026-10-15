@@ -21,20 +21,6 @@ const { t } = useI18n();
 
 <template>
   <div class="flex h-full min-h-0 flex-col bg-sidebar/70" data-testid="settings-navigation">
-    <div class="shrink-0 px-3 pb-2 pt-3">
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        class="w-full justify-start gap-2 px-2 text-muted-foreground"
-        data-testid="settings-return-to-app"
-        @click="emit('return-to-app')"
-      >
-        <ArrowLeft class="h-4 w-4" />
-        {{ t('shell.settings.returnToApp') }}
-      </Button>
-    </div>
-
     <nav
       class="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2"
       :aria-label="t('setting.title')"
@@ -50,5 +36,23 @@ const { t } = useI18n();
         @click="emit('select', item.value)"
       />
     </nav>
+
+    <!-- 同主会话侧栏底部账户区共享位置、边框和 44px 高度 -->
+    <div
+      class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5"
+      data-testid="settings-navigation-footer"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="h-8 max-w-full justify-start gap-2 rounded-md px-1.5 text-muted-foreground hover:text-foreground"
+        data-testid="settings-return-to-app"
+        @click="emit('return-to-app')"
+      >
+        <ArrowLeft class="h-4 w-4 shrink-0" />
+        <span class="truncate">{{ t('shell.settings.returnToApp') }}</span>
+      </Button>
+    </div>
   </div>
 </template>

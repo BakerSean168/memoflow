@@ -31,6 +31,17 @@ describe('Settings scene three-state responsive contract', () => {
     expect(navigation).toContain('LinearSidebarItem');
   });
 
+  it('aligns the fixed Settings footer with the conversation account footer', () => {
+    const navStart = navigation.indexOf('<nav');
+    const navEnd = navigation.indexOf('</nav>');
+    const footer = navigation.indexOf('data-testid="settings-navigation-footer"');
+    expect(navStart).toBeGreaterThan(0);
+    expect(footer).toBeGreaterThan(navEnd);
+    expect(navigation).toContain('class="flex h-11 shrink-0 items-center border-t');
+    expect(navigation).toContain('data-testid="settings-return-to-app"');
+    expect(navigation).toContain("emit('return-to-app')");
+  });
+
   it('makes the settings content area the sole vertical scroll owner', () => {
     expect(view).toContain('data-testid="settings-content-scroll"');
     expect(view).toContain('min-h-0 flex-1 overflow-y-auto');
