@@ -13,6 +13,18 @@ import {
 const verifiedPathPrefixes: Record<string, string> = {
   codex: 'M8.086.457',
   claude: 'M4.709 15.955',
+  pi: 'M420 280H280V140H0V0H420V280Z',
+  dsh: 'M23.748 4.482',
+  mastra: 'M14.74 9.977',
+};
+
+/** Where each glyph's verbatim asset must come from. */
+const verifiedSources: Record<string, RegExp> = {
+  codex: /@lobehub\/icons@5\.23\.1.*Codex\/components\/Mono\.mjs/,
+  claude: /@lobehub\/icons@5\.23\.1.*Claude\/components\/Mono\.mjs/,
+  pi: /pi\.dev\/press-kit/,
+  dsh: /@lobehub\/icons@5\.23\.1.*DeepSeek\/components\/Mono\.mjs/,
+  mastra: /@lobehub\/icons@5\.23\.1.*Mastra\/components\/Mono\.mjs/,
 };
 
 function mountIcon(driver: string, attrs: Record<string, unknown> = {}) {
@@ -20,55 +32,37 @@ function mountIcon(driver: string, attrs: Record<string, unknown> = {}) {
 }
 
 describe('AgentDriverIcon', () => {
-  it('renders the verified brand glyph for the codex driver', () => {
-    const wrapper = mountIcon('codex');
-    const svg = wrapper.find('svg');
+  it('renders a verified brand glyph for every agent driver kind', () => {
+    const driverKinds = AgentDriverKindSchema.options;
+    expect(Object.keys(agentBrandGlyphs).sort()).toEqual([...driverKinds].sort());
 
-    expect(svg.exists()).toBe(true);
-    expect(svg.attributes('viewBox')).toBe('0 0 24 24');
-    expect(svg.attributes('fill')).toBe('currentColor');
-    expect(svg.attributes('aria-hidden')).toBe('true');
-    expect(svg.classes()).toContain('size-4');
-    expect(svg.classes()).toContain('shrink-0');
-    expect(svg.find('g').attributes('transform')).toMatch(/^translate\(/);
-    const paths = wrapper.findAll('path');
-    expect(paths).toHaveLength(1);
-    expect(paths[0].attributes('d').startsWith(verifiedPathPrefixes.codex)).toBe(true);
-  });
-
-  it('renders the verified brand glyph for the claude driver', () => {
-    const wrapper = mountIcon('claude');
-    const svg = wrapper.find('svg');
-
-    expect(svg.exists()).toBe(true);
-    expect(svg.attributes('viewBox')).toBe('0 0 24 24');
-    expect(svg.attributes('fill')).toBe('currentColor');
-    expect(svg.attributes('aria-hidden')).toBe('true');
-    expect(svg.find('g').attributes('transform')).toMatch(/^translate\(/);
-    const paths = wrapper.findAll('path');
-    expect(paths).toHaveLength(1);
-    expect(paths[0].attributes('d').startsWith(verifiedPathPrefixes.claude)).toBe(true);
-  });
-
-  it('keeps the Lucide placeholder for drivers whose brand glyph has not landed', () => {
-    for (const driver of ['mastra', 'pi', 'dsh'] as const) {
+    for (const driver of driverKinds) {
+      const glyph = agentBrandGlyphs[driver];
       const wrapper = mountIcon(driver);
       const svg = wrapper.find('svg');
 
       expect(svg.exists()).toBe(true);
-      expect(svg.attributes('stroke')).toBe('currentColor');
-      expect(svg.attributes('fill')).toBe('none');
+      expect(svg.attributes('viewBox')).toBe(glyph.viewBox);
+      expect(svg.attributes('fill')).toBe('currentColor');
       expect(svg.attributes('aria-hidden')).toBe('true');
-      expect(svg.find('g').exists()).toBe(false);
+      expect(svg.attributes('stroke')).toBeUndefined();
+      expect(svg.classes()).toContain('size-4');
+      expect(svg.classes()).toContain('shrink-0');
+      expect(svg.find('g').attributes('transform')).toMatch(/^translate\(/);
+
+      const paths = wrapper.findAll('path');
+      expect(paths).toHaveLength(glyph.paths.length);
+      expect(paths[0].attributes('d').startsWith(verifiedPathPrefixes[driver])).toBe(true);
     }
   });
 
-  it('falls back to the generic placeholder for unknown driver strings', () => {
+  it('falls back to the generic Lucide placeholder for unknown driver strings', () => {
     const wrapper = mountIcon('not-a-real-driver');
     const svg = wrapper.find('svg');
 
     expect(svg.exists()).toBe(true);
     expect(svg.attributes('stroke')).toBe('currentColor');
+    expect(svg.attributes('fill')).toBe('none');
     expect(svg.attributes('aria-hidden')).toBe('true');
     expect(svg.find('g').exists()).toBe(false);
   });
@@ -86,27 +80,19 @@ describe('AgentDriverIcon', () => {
     expect(svg.classes()).toContain('text-primary');
     expect(svg.attributes('style')).toMatch(/color/i);
   });
-
-  it('only maps glyphs for real agent driver kinds', () => {
-    const driverKinds = AgentDriverKindSchema.options;
-    expect(Object.keys(agentBrandGlyphs).length).toBeGreaterThan(0);
-    for (const key of Object.keys(agentBrandGlyphs)) {
-      expect(driverKinds).toContain(key);
-    }
-  });
 });
 
 describe('brand glyph normalization', () => {
   const glyphs = Object.entries(agentBrandGlyphs) as [string, AgentBrandGlyph][];
 
   it('keeps provenance and license evidence for every landed glyph', () => {
-    expect(glyphs.length).toBeGreaterThanOrEqual(2);
+    expect(glyphs.length).toBe(AgentDriverKindSchema.options.length);
     for (const [driver, glyph] of glyphs) {
       const verifiedPrefix = verifiedPathPrefixes[driver];
       expect(verifiedPrefix).toBeDefined();
       expect(glyph.paths.length).toBeGreaterThan(0);
       expect(glyph.paths[0].startsWith(verifiedPrefix)).toBe(true);
-      expect(glyph.provenance.source).toContain('@lobehub/icons@5.23.1');
+      expect(glyph.provenance.source).toMatch(verifiedSources[driver]);
       expect(glyph.provenance.license).toContain('MIT');
       expect(glyph.provenance.retrievedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(glyph.bbox.w).toBeGreaterThan(0);
@@ -128,8 +114,8 @@ describe('brand glyph normalization', () => {
       const mappedCenterY = ty + scale * (glyph.bbox.y + glyph.bbox.h / 2);
       const mappedLongEdge = Math.max(scale * glyph.bbox.w, scale * glyph.bbox.h);
 
-      // brandGlyphTransform rounds transform components to 4 decimals, so the
-      // mapped box may drift up to ~0.002 viewBox units from the exact target.
+      // brandGlyphTransform rounds transform components to 6 decimals, so the
+      // mapped box may drift by well under 0.005 viewBox units from target.
       expect(mappedCenterX).toBeCloseTo(half, 2);
       expect(mappedCenterY).toBeCloseTo(half, 2);
       expect(mappedLongEdge).toBeCloseTo(glyph.viewBoxSize * AGENT_BRAND_GLYPH_BOX_RATIO, 2);
