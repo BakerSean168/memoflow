@@ -95,6 +95,13 @@ export function useLocalAssistantChoices(
       connections.value.find((connection) => connection.id === id)?.instanceSlug ?? id;
     return status.value.models.filter((model) => modelVisibility.isVisible(instanceId, model.id));
   });
+  const lastExecutionFailure = computed(() =>
+    status.value?.status === 'ready' &&
+    choice.value.runtimeKind === 'local_agent' &&
+    status.value.lastExecutionFailure?.modelId === choice.value.modelId
+      ? status.value.lastExecutionFailure
+      : undefined,
+  );
   const canSend = computed(
     () =>
       choice.value.runtimeKind === 'local_agent' &&
@@ -115,6 +122,7 @@ export function useLocalAssistantChoices(
     connections,
     defaultChoice,
     status,
+    lastExecutionFailure,
     loading,
     error,
     models,

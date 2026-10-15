@@ -1,6 +1,7 @@
 import { AIRateLimitPublicFailureSchema, type AIWorkflowExecutionFailure, type AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
 import { extractStructuredResultError } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
+import type { LocalAgentExecutionFailure } from '@memoflow/contracts/ai';
 import type { ChatItem } from './types';
 
 export function getAIErrorMessage(error: unknown, t: (key: string) => string, fallbackKey: string) {
@@ -63,4 +64,14 @@ export function getAIWorkflowFailureMessage(
   const fallback = t('aiAssistant.errors.workflowExecutionFailed');
   const code = failure.code.trim();
   return code ? `${fallback} (${code})` : fallback;
+}
+
+/** Shared native request observation for Settings and Composer; never upstream diagnostics. */
+export function getNativeAgentExecutionFailureMessage(
+  failure: LocalAgentExecutionFailure | undefined,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): string {
+  return failure
+    ? `${t('aiAssistant.local.lastRequestFailed', { model: failure.modelId })} ${t(`errors.${failure.code}`)}`
+    : '';
 }

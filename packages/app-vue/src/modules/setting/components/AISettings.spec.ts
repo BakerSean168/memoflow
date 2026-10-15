@@ -792,3 +792,42 @@ it('keeps an unverified native catalog readable but disables storing a contextle
   );
   expect(localStorage.length).toBe(0);
 });
+
+it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const)(
+  'shows the observed %s while preserving the native catalog and enabled intent',
+  async (code) => {
+    const { wrapper, localClient, registry } = await setup({ native: true });
+    // Execution observations belong to a saved Connection, never the implicit default driver.
+    await registry.execute({
+      action: 'update',
+      instanceId: 'codex',
+      expectedRevision: 0,
+      patch: { enabled: true },
+    });
+    localClient.probeConnection.mockResolvedValue({
+      status: 'ready',
+      models: [{ id: 'native-model', name: 'Native' }],
+      modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+      lastExecutionFailure: { code, modelId: 'native-model', occurredAt: 1 },
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+    await flushPromises();
+    const row = wrapper.get('[data-testid="ai-provider-select-agent:codex"]');
+    expect(localClient.probeConnection).toHaveBeenCalledWith('native-codex');
+    expect(row.text()).toContain('Last request (native-model)');
+    expect(row.text()).toContain(
+      code === 'LOCAL_AGENT_RATE_LIMITED' ? 'rate limiting' : 'insufficient quota',
+    );
+    expect(row.get('.whitespace-nowrap').classes()).toContain('truncate');
+    expect(wrapper.get('[data-testid="ai-provider-toggle-codex"]').attributes('data-state')).toBe(
+      'checked',
+    );
+    expect(wrapper.findAll('[data-testid="ai-native-model"]')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="ai-provider-detail"]').text()).toContain(
+      'Last request (native-model)',
+    );
+    expect(localClient.saveConnection).not.toHaveBeenCalled();
+  },
+);

@@ -31,7 +31,7 @@ import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentK
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
-import { getAIErrorMessage } from './error';
+import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
 import { useAIGoalWorkflow } from './useAIGoalWorkflow';
@@ -312,6 +312,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     runtime: assistantRuntime,
     workspaceRuntime: workflowRuntime,
     localAgent,
+    onNativeRunSettled: (connectionId) => {
+      const selected = chatSession.runtimeChoice.value;
+      if (selected.runtimeKind === 'local_agent' && selected.connectionId === connectionId)
+        void localChoices.probe(connectionId);
+    },
     getPermissionMode: () => permissionMode.value,
     getNativeModelOptions: () => currentNativeModelOptions.value,
     getDefaultRuntimeChoice: () => localChoices.defaultChoice.value,
@@ -1134,6 +1139,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     },
     localAssistant: {
       ...localChoices,
+      executionFailureMessage: computed(() =>
+        getNativeAgentExecutionFailureMessage(localChoices.lastExecutionFailure.value, t),
+      ),
       canSaveNote: Boolean(repository && knowledgeNativeSurface),
       saveNote: saveLocalNote,
       async select(choice: import('@memoflow/contracts/ai').AssistantRuntimeChoice) {

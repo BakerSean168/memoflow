@@ -266,3 +266,35 @@ it('uses the current probe context and preserves the selected historical model a
   expect(client.setDefaultChoice).not.toHaveBeenCalled();
   expect(client.saveConnection).not.toHaveBeenCalled();
 });
+
+it('retains the catalog after a request limit and scopes its observation to the selected model', async () => {
+  const choice = ref<AssistantRuntimeChoice>({
+    runtimeKind: 'local_agent',
+    connectionId: 'shared-connection',
+    modelId: 'model-a',
+  });
+  const client = clientStub({
+    probeConnection: vi.fn(async () => ({
+      ...ready('model-a'),
+      lastExecutionFailure: {
+        code: 'LOCAL_AGENT_QUOTA_EXHAUSTED' as const,
+        modelId: 'model-a',
+        occurredAt: 1,
+      },
+    })),
+  });
+  const options = useLocalAssistantChoices(client, choice, () => 'profile');
+  await options.refresh();
+  await Promise.resolve();
+  expect(options.lastExecutionFailure.value?.code).toBe('LOCAL_AGENT_QUOTA_EXHAUSTED');
+  expect(options.models.value.map((m) => m.id)).toEqual(['model-a']);
+  expect(options.canSend.value).toBe(true); // An explicit user retry remains possible; discovery is not quota proof.
+  choice.value = {
+    runtimeKind: 'local_agent',
+    connectionId: 'shared-connection',
+    modelId: 'different-model',
+  };
+  await nextTick();
+  await Promise.resolve();
+  expect(options.lastExecutionFailure.value).toBeUndefined();
+});

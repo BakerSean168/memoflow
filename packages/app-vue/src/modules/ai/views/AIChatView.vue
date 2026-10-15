@@ -243,6 +243,15 @@
         </template>
       </AIMessagePanel>
 
+      <p
+        v-if="localAssistant.executionFailureMessage.value"
+        data-testid="ai-native-execution-status"
+        role="status"
+        class="min-w-0 truncate px-4 text-xs text-muted-foreground"
+        :title="localAssistant.executionFailureMessage.value"
+      >
+        {{ localAssistant.executionFailureMessage.value }}
+      </p>
       <Teleport :to="shellComposerMount ?? 'body'" :disabled="!shellComposerMount">
         <AIFooterComposer
           ref="composerRef"

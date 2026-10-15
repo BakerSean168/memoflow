@@ -21,6 +21,8 @@ export interface UseAIChatSessionOptions {
   /** Transitional shell/workflow client. Open-chat transcript execution never uses it. */
   service: AIChatService;
   localAgent?: LocalAgentClient;
+  /** Refresh a native discovery snapshot once after an observed terminal result; never retry inference. */
+  onNativeRunSettled?: (connectionId: string) => void;
   getPermissionMode?: () => AIChatPermissionMode;
   getNativeModelOptions?: () => import('@memoflow/contracts/ai').LocalAgentModelOptions | undefined;
   getDefaultRuntimeChoice?: () => import('@memoflow/contracts/ai').AssistantRuntimeChoice;

@@ -236,3 +236,35 @@ it('accepts only an opaque native visibility context on a ready probe, never on 
     }).success,
   ).toBe(false);
 });
+
+it('keeps a bound request limit separate from discovery without allowing raw diagnostics or authentication guesses', () => {
+  const status = {
+    status: 'ready',
+    models: [{ id: 'model', name: 'Model' }],
+    modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+    lastExecutionFailure: {
+      code: 'LOCAL_AGENT_QUOTA_EXHAUSTED',
+      modelId: 'model',
+      occurredAt: 123,
+    },
+  };
+  expect(LocalAgentStatusSchema.parse(status)).toEqual(status);
+  for (const lastExecutionFailure of [
+    { ...status.lastExecutionFailure, code: 'LOCAL_AGENT_LOGIN_REQUIRED' },
+    { ...status.lastExecutionFailure, message: 'PRIVATE_DIAGNOSTIC' },
+    { ...status.lastExecutionFailure, occurredAt: -1 },
+  ])
+    expect(LocalAgentStatusSchema.safeParse({ ...status, lastExecutionFailure }).success).toBe(
+      false,
+    );
+  expect(
+    LocalAgentStatusSchema.safeParse({ ...status, modelVisibilityContext: undefined }).success,
+  ).toBe(false);
+  expect(
+    LocalAgentStatusSchema.safeParse({
+      status: 'login_required',
+      message: 'Login',
+      lastExecutionFailure: status.lastExecutionFailure,
+    }).success,
+  ).toBe(false);
+});

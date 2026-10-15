@@ -8,6 +8,7 @@ import type {
   LocalAgentConnectionInput,
   LocalAgentDriver,
   LocalAgentStatus,
+  LocalAgentExecutionFailure,
   LocalAgentModelOptions,
   LocalAgentConversationCreate,
   LocalAgentRequestResponse,
@@ -20,6 +21,7 @@ import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';
 import { DshDriver } from './dsh-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
+import { nativeModelVisibilityContext } from './native-identity';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 
 type Driver = Pick<CodexDriver, 'probe' | 'run' | 'respond' | 'cancel' | 'close'>;
@@ -41,6 +43,8 @@ interface ActiveRun {
   identityId: string;
   conversationId: string;
   connectionId?: string;
+  modelId?: string;
+  accountContext?: string;
   runId: string;
   driver?: Driver;
   grant?: LocalAgentToolGrant;
@@ -69,6 +73,11 @@ type ConversationInput = { identityId: string; conversationId: string };
 /** One Desktop Profile's native resources; no inference, retry or checkpoint authority. */
 export class LocalAgentRuntime {
   private readonly runs = new Map<string, ActiveRun>();
+  // Ephemeral Profile-owned observation, not configuration, authentication or retry authority.
+  private readonly executionFailures = new Map<
+    string,
+    { context: string; failure: LocalAgentExecutionFailure }
+  >();
   private readonly probes = new Set<Driver>();
   private pendingProbes = 0;
   private stopped = false;
@@ -137,9 +146,15 @@ export class LocalAgentRuntime {
   }
   /** Probe an existing saved instance without mutating its configuration. */
   async probeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
-    return this.runProbe(() =>
+    const status = await this.runProbe(() =>
       this.persist(() => this.options.store.getConnection(identityId, id)),
     );
+    const previous = this.executionFailures.get(JSON.stringify([identityId, id]));
+    return status.status === 'ready' &&
+      previous &&
+      previous.context === status.modelVisibilityContext
+      ? { ...status, lastExecutionFailure: previous.failure }
+      : status;
   }
 
   /**
@@ -330,6 +345,7 @@ export class LocalAgentRuntime {
       this.assertActive();
       const modelId = input.modelId ?? conversation.modelId;
       run.connectionId = connection.id;
+      run.modelId = modelId;
       if (input.signal?.aborted) run.abort.abort();
       await mkdir(this.options.cwd, { recursive: true });
       this.assertActive();
@@ -399,6 +415,7 @@ export class LocalAgentRuntime {
           return;
         }
         if (event.type === 'session') {
+          run.accountContext = nativeModelVisibilityContext(connection, event.accountFingerprint);
           await this.persist(() =>
             this.options.store.bindSession(
               input.identityId,
@@ -473,6 +490,9 @@ export class LocalAgentRuntime {
             data: { requestId: event.requestId, resolution: event.resolution },
           };
         } else if (event.type === 'completed') {
+          const key = JSON.stringify([input.identityId, connection.id]);
+          if (this.executionFailures.get(key)?.context === run.accountContext)
+            this.executionFailures.delete(key);
           await this.persist(() =>
             this.options.store.saveMessage(input.identityId, assistant!, true),
           );
@@ -500,6 +520,32 @@ export class LocalAgentRuntime {
       }
       const failure =
         error instanceof LocalAgentError ? error : new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+      if (
+        run.connectionId &&
+        run.modelId &&
+        run.accountContext &&
+        !run.abort.signal.aborted &&
+        !this.stopped &&
+        this.options.isActive?.() !== false
+      ) {
+        const key = JSON.stringify([input.identityId, run.connectionId]);
+        if (
+          failure.code === 'LOCAL_AGENT_RATE_LIMITED' ||
+          failure.code === 'LOCAL_AGENT_QUOTA_EXHAUSTED'
+        ) {
+          this.executionFailures.delete(key);
+          this.executionFailures.set(key, {
+            context: run.accountContext,
+            failure: { code: failure.code, modelId: run.modelId, occurredAt: Date.now() },
+          });
+        } else if (this.executionFailures.get(key)?.context === run.accountContext) {
+          this.executionFailures.delete(key);
+        }
+        if (this.executionFailures.size > 100) {
+          const oldest = this.executionFailures.keys().next().value;
+          if (oldest !== undefined) this.executionFailures.delete(oldest);
+        }
+      }
       yield {
         ...envelope(),
         type: 'assistant.run.failed',
@@ -539,6 +585,7 @@ export class LocalAgentRuntime {
   }
   dispose(): Promise<void> {
     this.stopped = true;
+    this.executionFailures.clear();
     this.disposing ??= (async () => {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);

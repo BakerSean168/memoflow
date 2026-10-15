@@ -13,7 +13,10 @@ import type {
 } from '@memoflow/contracts/ai';
 import { AI_AGENT_REGISTRY_KEY, AI_LOCAL_AGENT_KEY } from '../../../di/keys';
 import { useAI } from '../../ai/composables/useAI';
-import { getAIErrorMessage } from '../../ai/composables/error';
+import {
+  getAIErrorMessage,
+  getNativeAgentExecutionFailureMessage,
+} from '../../ai/composables/error';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
@@ -61,7 +64,8 @@ function statusLabel(instance: AgentInstance) {
       : t('setting.agentInstances.needsConfig');
   const status = statuses.value[instance.instanceId];
   return status?.status === 'ready'
-    ? t('setting.agentInstances.discoveredModels', { count: status.models.length })
+    ? getNativeAgentExecutionFailureMessage(status.lastExecutionFailure, t) ||
+        t('setting.agentInstances.discoveredModels', { count: status.models.length })
     : (status?.message ?? t('setting.agentInstances.unchecked'));
 }
 function statusVersion(instanceId: string): string | undefined {

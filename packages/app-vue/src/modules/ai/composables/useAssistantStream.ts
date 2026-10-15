@@ -1,9 +1,10 @@
+import { extractStructuredResultError } from '@memoflow/contracts/result';
 import type {
   AssistantRuntimeEvent,
   AssistantRuntimeSelectedEntity,
   LocalAgentRequestResponse,
 } from '@memoflow/contracts/ai';
-import { nextTick, ref, shallowRef, type Ref } from 'vue';
+import { nextTick, ref, shallowRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
@@ -536,6 +537,39 @@ export function useAssistantStream(input: {
     let assistantDraftId = '';
     let streamController: AbortController | null = null;
     let conversationId = '';
+    const originalDraft = chatMessage.value;
+    let draftEdited = false;
+    let draftConsumed = false;
+    let stopWatchingDraft: (() => void) | undefined;
+    let nativeLimitCode: string | undefined;
+    let notified = false;
+    const isCurrentNativeTurn = () =>
+      choice.runtimeKind === 'local_agent' &&
+      runtimeChoice.value.runtimeKind === 'local_agent' &&
+      runtimeChoice.value.connectionId === choice.connectionId &&
+      runtimeChoice.value.modelId === choice.modelId &&
+      chatConversationId.value === conversationId &&
+      activeStreamAbortController.value === streamController &&
+      !streamController?.signal.aborted;
+    const notifyNativeSettled = () => {
+      if (!notified && isCurrentNativeTurn() && choice.runtimeKind === 'local_agent') {
+        notified = true;
+        options.onNativeRunSettled?.(choice.connectionId);
+      }
+    };
+    const restoreLimitedDraft = () => {
+      const assistant = chatTimeline.value.find((item) => item.id === assistantDraftId);
+      if (
+        isCurrentNativeTurn() &&
+        draftConsumed &&
+        !draftEdited &&
+        !chatMessage.value &&
+        !assistant?.content &&
+        (nativeLimitCode === 'LOCAL_AGENT_RATE_LIMITED' ||
+          nativeLimitCode === 'LOCAL_AGENT_QUOTA_EXHAUSTED')
+      )
+        chatMessage.value = originalDraft;
+    };
     const permissionMode = options.getPermissionMode?.() ?? 'supervised';
     const nativeModelOptions =
       choice.runtimeKind === 'local_agent' ? options.getNativeModelOptions?.() : undefined;
@@ -551,6 +585,13 @@ export function useAssistantStream(input: {
       if (!pendingUserMessage && pendingAttachments.length === 0) return;
 
       chatLoading.value = true;
+      stopWatchingDraft = watch(
+        chatMessage,
+        () => {
+          draftEdited = true;
+        },
+        { flush: 'sync' },
+      );
       streamController = new AbortController();
       activeStreamAbortController.value = streamController;
       activeRuntimeRunId.value = null;
@@ -582,8 +623,12 @@ export function useAssistantStream(input: {
         },
         { id: assistantDraftId, role: 'assistant', content: '', status: 'generating' },
       );
-      chatMessage.value = '';
-      clearComposerTurnState();
+      if (!draftEdited) {
+        chatMessage.value = '';
+        draftEdited = false; // The synchronous watch observed our own consumption.
+        draftConsumed = true;
+        clearComposerTurnState();
+      }
       await nextTick();
       adjustComposerHeight();
 
@@ -615,12 +660,22 @@ export function useAssistantStream(input: {
             if (
               activeStreamAbortController.value === streamController &&
               !streamController?.signal.aborted
-            )
+            ) {
               applyRuntimeEvent(event, assistantDraftId);
+              if (event.type === 'assistant.run.failed') nativeLimitCode = event.data.code;
+              if (
+                event.type === 'assistant.run.failed' ||
+                event.type === 'assistant.run.completed' ||
+                event.type === 'assistant.run.cancelled'
+              )
+                notifyNativeSettled();
+            }
           },
         },
         streamController.signal,
       );
+
+      restoreLimitedDraft();
 
       // Retain the live turn: persisted history may still lag behind the stream.
       // Explicit conversation reload/reselect remains authoritative.
@@ -636,6 +691,9 @@ export function useAssistantStream(input: {
         }
         if (userDraft) userDraft.status = 'success';
       } else {
+        nativeLimitCode = extractStructuredResultError(error)?.code;
+        restoreLimitedDraft();
+        notifyNativeSettled();
         const errorMessage = getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.sendFailed');
         if (assistantDraft) {
           assistantDraft.status = 'error';
@@ -645,6 +703,7 @@ export function useAssistantStream(input: {
         toast.error(errorMessage);
       }
     } finally {
+      stopWatchingDraft?.();
       if (conversationId) void loadConversationList(loadService);
       if (assistantDraftId) flushPendingStreamDelta(assistantDraftId);
       if (assistantDraftId)

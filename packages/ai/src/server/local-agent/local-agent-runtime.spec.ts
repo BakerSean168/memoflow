@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { LocalAgentRuntime } from './local-agent-runtime';
+import { LocalAgentError } from '../../shared/local-agent-error';
+import { nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
@@ -535,3 +537,91 @@ describe('local Agent conversation execution', () => {
     expect((await store.listMessages('owner', conversation.id)).incomplete).toBe(true);
   });
 });
+
+it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const)(
+  'retains %s separately from discovery and fences it by instance/account until a successful request',
+  async (code) => {
+    const { store, conversation } = await setup();
+    const connection = await store.getConnection('owner', conversation.connectionId);
+    let fingerprint = 'a'.repeat(64);
+    let fail = true;
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: '/tmp',
+      createDriver: (current) => ({
+        async probe() {
+          return {
+            status: 'ready' as const,
+            models: [{ id: 'model', name: 'Model' }],
+            modelVisibilityContext: nativeModelVisibilityContext(current, fingerprint),
+          };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          yield {
+            type: 'session',
+            nativeSessionId: 'fixture-session',
+            accountFingerprint: fingerprint,
+          };
+          if (fail) throw new LocalAgentError(code);
+          yield { type: 'completed' };
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+    expect(await runtime.probeConnection('owner', connection.id)).not.toHaveProperty(
+      'lastExecutionFailure',
+    );
+    const events = [];
+    for await (const event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Keep my prompt',
+    }))
+      events.push(event);
+    expect(events.at(-1)).toMatchObject({ type: 'assistant.run.failed', data: { code } });
+    const status = await runtime.probeConnection('owner', connection.id);
+    expect(status).toMatchObject({
+      status: 'ready',
+      models: [{ id: 'model' }],
+      lastExecutionFailure: { code, modelId: 'model', occurredAt: expect.any(Number) },
+    });
+    // Another connection, even with the same native Home/account, owns its own request result.
+    const other = await store.createConnection('owner', {
+      driver: 'codex',
+      name: 'Other',
+      executablePath: connection.executablePath,
+      enabled: true,
+      writeScopes: [],
+    });
+    expect(await runtime.probeConnection('owner', other.id)).not.toHaveProperty(
+      'lastExecutionFailure',
+    );
+    fingerprint = 'b'.repeat(64);
+    expect(await runtime.probeConnection('owner', connection.id)).not.toHaveProperty(
+      'lastExecutionFailure',
+    );
+    fingerprint = 'a'.repeat(64);
+    expect(await runtime.probeConnection('owner', connection.id)).toHaveProperty(
+      'lastExecutionFailure',
+    );
+    fail = false;
+    for await (const _event of runtime.dispatchMessage({
+      identityId: 'owner',
+      conversationId: conversation.id,
+      content: 'Explicit retry',
+    })) {
+    }
+    expect(await runtime.probeConnection('owner', connection.id)).not.toHaveProperty(
+      'lastExecutionFailure',
+    );
+    expect((await store.getConversation('owner', conversation.id)).modelId).toBe('model');
+    expect(
+      (await store.listMessages('owner', conversation.id)).messages
+        .filter((m) => m.role === 'user')
+        .map((m) => m.content),
+    ).toEqual(['Keep my prompt', 'Explicit retry']);
+    await runtime.dispose();
+  },
+);

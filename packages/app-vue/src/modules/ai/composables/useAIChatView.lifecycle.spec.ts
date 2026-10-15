@@ -5,6 +5,9 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AIWorkflowRunView, AssistantRuntimeChoice } from '@memoflow/contracts/ai';
 import AIChatView from '../views/AIChatView.vue';
+import enAI from '../../../locales/en-US/aiAssistant';
+import enErrors from '../../../locales/en-US/errors';
+import type { UseAIChatSessionOptions } from './useAIChatSession';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import {
   SHELL_COMPOSER_MOUNT_KEY,
@@ -52,6 +55,7 @@ const fixture = await vi.hoisted(async () => {
     loadConversationList: vi.fn(),
   };
   return {
+    nativeRunSettled: vi.fn<(connectionId: string) => void>(),
     getRun: vi.fn(),
     providers: ref<import('@memoflow/contracts/ai').AIProviderConfigClientDTO[]>([]),
     loadProviders: vi.fn(async () => undefined),
@@ -160,7 +164,12 @@ vi.mock('../../repository/composables/useReferenceableKnowledgeNotes', async () 
 vi.mock('../../../shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ get: fixture.getRun }),
 }));
-vi.mock('./useAIChatSession', () => ({ useAIChatSession: () => fixture.session }));
+vi.mock('./useAIChatSession', () => ({
+  useAIChatSession: (options: UseAIChatSessionOptions) => {
+    fixture.nativeRunSettled.mockImplementation(options.onNativeRunSettled ?? (() => {}));
+    return fixture.session;
+  },
+}));
 vi.mock('./useAIGoalWorkflow', () => ({ useAIGoalWorkflow: () => fixture.goal }));
 vi.mock('./useAITaskWorkflow', () => ({ useAITaskWorkflow: () => fixture.task }));
 vi.mock('./useAIKnowledgeCapture', () => ({ useAIKnowledgeCapture: () => fixture.knowledge }));
@@ -196,7 +205,7 @@ async function mountView(extraProvide: Record<symbol, unknown> = {}) {
         createI18n({
           legacy: false,
           locale: 'en',
-          messages: { en: {} },
+          messages: { en: { aiAssistant: enAI, errors: enErrors } },
           missingWarn: false,
           fallbackWarn: false,
         }),
@@ -272,6 +281,60 @@ describe('AI conversation restoration and business navigation', () => {
       'My draft during an unfinished registry request',
     );
     wrapper.unmount();
+  });
+
+  it('refreshes the observed native limit once and renders it without changing draft, route or catalog', async () => {
+    const native = {
+      id: 'native-codex-01',
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      revision: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      writeScopes: [],
+    };
+    const choice = {
+      runtimeKind: 'local_agent' as const,
+      connectionId: native.id,
+      modelId: 'native-model',
+    };
+    const ready = {
+      status: 'ready' as const,
+      models: [{ id: 'native-model', name: 'Real native model' }],
+      modelVisibilityContext: `mvc1:${'a'.repeat(64)}`,
+    };
+    const local = {
+      listConnections: vi.fn(async () => [native]),
+      getDefaultChoice: vi.fn(async () => choice),
+      probeConnection: vi.fn(async () => ready),
+    };
+    const { wrapper } = await mountView({ [AI_LOCAL_AGENT_KEY as symbol]: local });
+    await flushPromises();
+    fixture.session.chatMessage.value = 'Keep the next draft';
+    const probesBefore = local.probeConnection.mock.calls.length;
+    local.probeConnection.mockResolvedValueOnce({
+      ...ready,
+      lastExecutionFailure: {
+        code: 'LOCAL_AGENT_QUOTA_EXHAUSTED',
+        modelId: 'native-model',
+        occurredAt: 123,
+      },
+    } as typeof ready);
+    fixture.nativeRunSettled(native.id);
+    await flushPromises();
+    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 1);
+    expect(wrapper.get('[data-testid="ai-native-execution-status"]').text()).toContain(
+      'insufficient quota',
+    );
+    expect(fixture.session.chatMessage.value).toBe('Keep the next draft');
+    expect(fixture.session.runtimeChoice.value).toEqual(choice);
+    expect(wrapper.vm.canSendMessage).toBe(true);
+    fixture.nativeRunSettled(native.id);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-native-execution-status"]').exists()).toBe(false);
+    expect(local.probeConnection).toHaveBeenCalledTimes(probesBefore + 2);
   });
 
   it('applies a discovered saved native default without clearing a Composer draft or resetting twice', async () => {

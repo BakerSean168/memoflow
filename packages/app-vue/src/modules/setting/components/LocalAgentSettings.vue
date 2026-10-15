@@ -10,6 +10,7 @@ import {
   type LocalAgentDriver,
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
+import { getNativeAgentExecutionFailureMessage } from '../../ai/composables/error';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
 import { useNativeModelVisibility } from '../../ai/composables/nativeModelVisibility';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
@@ -114,7 +115,8 @@ const statusLabel = computed(() =>
   !form.enabled
     ? t('setting.ai.inactiveProvider')
     : props.status?.status === 'ready'
-      ? t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
+      ? getNativeAgentExecutionFailureMessage(props.status.lastExecutionFailure, t) ||
+        t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
       : (props.status?.message ?? t('setting.agentInstances.unchecked')),
 );
 const validated = computed(() =>
