@@ -4,6 +4,7 @@ import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { expect, test } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
+import { createIsolatedNativeAgentEnvironment } from './isolated-native-env';
 
 function appendLog(logs: string[], source: string, value: unknown): void {
   logs.push(`[${source}] ${typeof value === 'string' ? value : String(value)}`);
@@ -96,7 +97,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       executablePath,
       args,
       env: {
-        ...process.env,
+        ...createIsolatedNativeAgentEnvironment(runtimeRoot),
         MEMOFLOW_DESKTOP_USER_DATA_PATH: userDataPath,
         MEMOFLOW_DESKTOP_USER_FILES_PATH: userFilesPath,
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',

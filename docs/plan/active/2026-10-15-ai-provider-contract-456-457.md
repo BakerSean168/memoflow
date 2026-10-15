@@ -139,3 +139,24 @@ updated: 2026-10-15T00:00:00Z
 4. **真实额度状态**：已观察到 Codex Team 这个 T3 实施工作空间提示 out of credits，不能将其概括为所有 Codex 账号/渠道不可用。WindHub/ZCode 可用于后续独立验证/开发；昆友本轮不参与。
 
 Windows 工作站（WSL `forest`）在此轮确认可由 Agent Fabric 连通；Windows 11 已安装 Desktop 0.19.0 且未运行。安装版仍是旧构建，不能以其结果冒充此分支 exact-SHA。Windows Node 24.12.0 可用，但 pnpm 尚未安装；如准备隔离构建应先核对工作区、磁盘、CLI 和数据目录的隔离性，不直接覆盖当前安装。
+
+
+## 第八轮：Draft PR 458 CI 与 Windows 打包版验收
+
+本轮延续上述 #456 / #457 目标，继续维持 PR [#458](https://github.com/BakerSean168/memoflow/pull/458) 的 **Draft** 与非发布状态。首个 PR HEAD `824949be7dd` 的 CI run `38722844360` 中，所有类型检查、主构建、Governance、Unit 与三个 Web 分片通过，Web Flow Shard 1/4 的 Secure AI Provider acceptance 因过时的右侧启停按钮断言失败；这是 #457 已明确移除右侧重复开关后未同步 Playwright 脚本，并非恢复该按钮的理由。WindHub GLM-5.3/ZCode 在 T3 Code 中将 `apps/web/e2e/ai/provider-onboarding.spec.ts` 的该断言修为 `toHaveCount(0)`、保留左侧启停可见断言；`b58ae40871e` 已推送。其 exact-SHA CI run [38727267014](https://github.com/BakerSean168/memoflow/actions/runs/38727267014) **全绿**（包括 Secure AI Provider、4 个 Web 分片、Unit、Governance、Typecheck、Build、所有相关 Oracle）。
+
+### Windows 实机证据与严格边界
+
+- Windows 工作站 `forest` 上使用 **D 盘隔离目录** `D:\AgentValidation\MemoFlow-PR458-824949be`，取源码 SHA `824949be7dd5943bf191adaf41f088ab84d3fe4b`，原有 MemoFlow 0.19.0 安装与正常用户 Profile 未更改；原 WSL main 也未改。Windows Node 24.12.0、pnpm 11.20.0（临时调用、未全局安装）。
+- `desktop:build --skipNxCache` 与 31 个依赖任务在 Windows 原生 **通过**；`desktop:package` 长任务被取消，不宣称整条 target 成功。产生的 `win-unpacked/memoflow.exe` 和 `resources/app.asar` 由 `verify-packaged-runtime-deps.mjs` **独立通过**，核验 80 个运行时依赖包与关键 archive entry/integrity。
+- `apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts` 对上述实际 Win unpacked 运行了启动/Renderer、Provider 创建与删除、模拟缺失 CLI、重启持久化和快捷键冒烟。新增 `provider-layout-window.spec.ts` 在 840/1280/1600px × dark/light 六个场景中实际断言：五个 Driver 顺序、每行 80px、无横向溢出、宽屏横向详情/窄屏上下、右侧无重复启停 Switch、键盘聚焦 Tooltip 的 `data-state`/`aria-describedby`/portal DOM 可见及 Escape 恢复焦点。
+- 第二阶段收敛了安全性：**只隔离 MemoFlow Profile 不会隔离本机 Native Codex Home**；首轮 Windows 应用曾只读探测本地真实 Codex 模型目录和脱敏账号状态（未推理、未输出或改写凭据）。现新增共享 `isolated-native-env.ts`，两项 packaged E2E 都显式设置临时 CODEX_HOME / CLAUDE_CONFIG_DIR / PI_CODING_AGENT_DIR / DSH_HOME，并移除 inherited secret/auth/key 与相关 Provider API 端点环境字段。后续 Windows 复测 **2/2 通过，共 11.2 秒**，退出后无 MemoFlow 进程残留；新增视觉回归也断言没有显示真实账号认证摘要。
+- 新 Windows Playwright spec 按仓库测试治理声明 `tools/test-system-v2/e2e-ownership.json`（desktop lane、packaged-runtime surface、supplemental role），更新测试清单（1411 个测试文件、E2E 51 个），避免“unowned spec”治理失败。测试仅在 Windows 平台执行，非 Windows 运行时明确 skip。
+
+**精确版本说明**：上述 Windows App 二进制由 `824949be7dd` 的产品源码生成；后续 `b58ae40871e` 只修改 Web E2E 测试，Desktop / AI / Vue / Contracts 产品源码与构建版本相同。因此 Windows 实测证明这些产品源码在该平台运行有效，但不冒充新版 PR 测试 commit 的 exact-SHA 安装版出厂证据。
+
+### 仍不能解除的门槛
+
+1. Windows **最终发布 SHA 的正式安装包**、真实 Profile / Home / 多账号切换及旧会话迁移实测仍未完成（当前验证的是隔离的 unpacked 程序，而非 NSIS 安装版）。
+2. 本轮完全不执行真实 Codex Team / WindHub 推理、额度/429 验证；目录就绪不代表推理授权或余额充足。跨 Registry/IPC/Composer 到 Fake Native RPC 的代码集成已测，但本轮未完成真实 Agent turn/start 的无风险渠道验收。
+3. 即使当前代码和 PR CI 绿灯，也保持 Draft，不因工作树提交/PR push 自动合并 `main`、晋升 `staging-latest` 或部署 Prod-like / Production；必须先对最终提交重新核对 CI 与安全发布证据。
