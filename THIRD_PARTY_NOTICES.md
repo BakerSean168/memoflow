@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-MemoFlow is currently a private, unlicensed repository. This file records third-party software adopted or studied during the cloud authentication and Desktop Profile Access rewrite.
+MemoFlow is currently a private, unlicensed repository. This file records third-party software and brand assets adopted or studied by MemoFlow.
 
 ## Better Auth
 
@@ -11,6 +11,86 @@ MemoFlow is currently a private, unlicensed repository. This file records third-
 - Use: Runtime dependency for cloud email/password, OAuth, session, bearer, and Prisma adapter functionality.
 
 The distributed dependency retains its upstream license and copyright information.
+
+## LobeHub Icons (@lobehub/icons)
+
+- Project: LobeHub Icons
+- Source: https://github.com/lobehub/lobe-icons (npm package `@lobehub/icons`)
+- Version used: 5.23.1
+- License: MIT (c) 2023 LobeHub
+- Use: Path data of the Codex, Claude, DeepSeek and Mastra monochrome brand marks (package files `es/Codex/components/Mono.mjs`, `es/Claude/components/Mono.mjs`, `es/DeepSeek/components/Mono.mjs`, `es/Mastra/components/Mono.mjs`) is copied verbatim into `packages/app-vue/src/modules/ai/components/agentBrandGlyphs.ts` for the `AgentDriverIcon` component (#457). No package code or React components are distributed; only the SVG path data of the four marks is reproduced. Retrieval evidence, exact upstream URLs and license notes: [`AgentDriverIcon.SOURCES.md`](packages/app-vue/src/modules/ai/components/AgentDriverIcon.SOURCES.md).
+
+Upstream license text (npm package `LICENSE`, verbatim):
+
+```text
+MIT License
+
+Copyright (c) 2023 LobeHub
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The MIT license covers the copyright of these icon assets and their
+redistribution. The Codex, Claude, DeepSeek and Mastra marks themselves remain
+trademarks of their respective owners (OpenAI, Anthropic, DeepSeek, Mastra);
+MemoFlow displays them only to identify the corresponding agent integrations
+and claims no endorsement.
+
+## Pi coding agent brand assets (official press kit)
+
+- Project: Pi (coding agent) — Earendil Inc. & Contributors
+- Source: official press kit at https://pi.dev/press-kit (square badge mark `https://pi.dev/favicon.svg`)
+- License: MIT — the press-kit page states "Earendil Inc. & Contributors — Press Kit — MIT License"
+- Use: The three path segments of the monochrome square badge mark are copied verbatim into `packages/app-vue/src/modules/ai/components/agentBrandGlyphs.ts` for the `pi` driver of the `AgentDriverIcon` component (#457). The badge's original explicit light/dark fills are rendered with `currentColor` instead; the geometry is unmodified. Retrieval evidence and notes: [`AgentDriverIcon.SOURCES.md`](packages/app-vue/src/modules/ai/components/AgentDriverIcon.SOURCES.md).
+
+The press-kit page declares the MIT license but does not reprint the full
+license text there; the canonical MIT text of the same project (repository
+`earendil-works/pi`, `LICENSE`, Copyright (c) 2025 Mario Zechner) is
+reproduced verbatim below and applies to the press-kit assets as declared on
+that page:
+
+```text
+MIT License
+
+Copyright (c) 2025 Mario Zechner
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The Pi logo remains a trademark of Earendil Inc.; MemoFlow displays it only to
+identify the Pi coding agent integration and claims no endorsement.
 
 ## Architecture References
 
