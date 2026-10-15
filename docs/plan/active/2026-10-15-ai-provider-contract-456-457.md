@@ -50,3 +50,28 @@ updated: 2026-10-15T00:00:00Z
 重命名后五个 Vue 测试文件再次 **52/52** 通过；`pnpm nx run app-vue:typecheck` 通过（28 tasks，当前 Vue 类型检查与 ai build 实际执行，25 个无关依赖构建命中本地缓存）。
 
 最终 `pnpm nx run memoflow:governance-check --parallel=1` **通过**：7 tasks，4 个无关依赖命中缓存；主治理审计、测试清单检查与治理工具测试实际执行。Nx 仍提示此前 test-system-v2:test 的 flaky 历史，本次退出 0。五个改动 Vue 文件的定向 ESLint 通过，0 errors / 0 warnings。提交范围含既有六处复核成果、版本/空目录修复、前序测试清单与 composable 命名修正；仅本地提交，未 push/发布或发起真实模型调用。
+
+## 第二轮：原生模型偏好的配置/账号上下文
+
+基线 77e087f382c，继续由同一 T3 线程 Codex Team 独占实施。先写回归，再实现：
+
+- 原生身份权威仍是各 Driver 的无推理初始化协议和已有 nativeIdentity；renderer 不从目录、套餐、路径或掩码邮箱猜身份。
+- 新增可选、严格格式的 modelVisibilityContext probe 字段。仅在协议提供可信账号身份时，服务端以 SHA-256（含用途/版本分域）组合 driver、executablePath、homePath 和已有 nativeIdentity 摘要；不将原始路径、邮箱、凭据或内部身份摘要输出到 renderer 存储。
+- 当前只对确认身份的 Codex ChatGPT / Claude 账号提供上下文；API-key-only、Pi/DSH 或未知身份不臆造上下文。无上下文时明确禁用偏好保存，目录仍正常显示，不套用旧上下文偏好。
+- localStorage v2 按 Profile + Instance + probe context 分区；v1 无法证明属于哪个账号，保留但不迁移/复用。相同上下文重启/重探测保留偏好；上下文变更默认显示当前真实目录。
+- 保留 renderer revision/storage event 的 Settings ↔ Composer 同步、已有 generation/Profile 失效，以及历史模型 ID/消息。上下文是只读 probe 快照，外部账号改变需重新检查才能观察，不新增轮询或付费探活。
+- 校验：可见性/Composer/Settings 回归、DTO/Driver 契约、AI/App-Vue typecheck 与改动 lint；只跑文档/契约必要治理，不扩大历史修复。
+
+### 第二轮证据与验收边界
+
+- 红测捕获旧 v1 复用/未知上下文保存问题（6 项失败）以及 Codex probe 缺少上下文（1 项失败），随后最小实现通过。
+- 最终 Native Agent：`pnpm nx run ai:test --skipNxCache -- src/server/local-agent`，11 文件 **88/88**。使用隔离 Native Home、清除测试子进程继承的提供商认证环境变量；协议/推理为假 RPC 子进程和 SDK fixture。身份测试使用临时目录中的合成凭据，验证账号 ID 改变与已识别 OAuth 刷新稳定性，没有访问用户 Native 凭据或真实付费推理。
+- Vue：`pnpm nx run app-vue:test --skipNxCache -- AISettings.spec.ts AISettings.provider-onboarding-v2.surface.spec.ts useAIChatView.lifecycle.spec.ts useLocalAssistantChoices.spec.ts native-model-visibility.spec.ts i18n-key-completeness.spec.ts`，6 文件 **66/66**。覆盖 v1 保留且不复用、同上下文重建、Profile/实例隔离、上下文变化/恢复、Settings ↔ Composer 即时同步、storage event、历史 modelId/选择不变、未知上下文的显式降级。
+- DTO：`pnpm nx run contracts:test --skipNxCache -- local-agent.dto.test.ts`，**9/9**。只在 ready probe 允许严格格式的 mvc1 SHA-256 摘要；路径/邮箱/任意字符串、失败态和 Connection 配置注入均拒绝。
+- `pnpm nx run-many -t typecheck -p ai app-vue --parallel=1` 通过：29 tasks（5 个无关依赖缓存），AI 与 App-Vue 当前类型检查实际运行。
+- 所有改动 .ts/.vue 的 `pnpm exec eslint --max-warnings=0` 通过：0 errors / 0 warnings。
+- 实施模型维持当前 T3 Codex harness `gpt-6.1-sol`；只使用本线程的只读 Issue 查询、本地文件编辑、pnpm/Nx/Vitest/ESLint 和普通 Git。没有其他 Agent/模型/原生 Agent CLI 重试，没有 push/PR/合并/部署/发布。
+
+当前实现以原生初始化报告的账号及现有会话身份指纹作为上下文来源，不声称账号在线授权、模型额度或真实推理可用。上下文不是权限。API-key-only、Pi/DSH 和缺失账号元数据暂不保存偏好；后续须提供该 Driver 可核验的身份来源后才能接入相同契约，禁止拿 model catalog、套餐或掩码邮箱替代。外部账号/Home 环境在 probe 之间改变时，需重新检查/现有配置刷新才能观察；本轮没有增加后台探活。Windows 安装版、真实多账号/Home 切换、真实 OAuth 刷新及旧会话消息的安装版回归仍待验收。历史消息存储及运行会话绑定没有变更。
+
+第二轮必要治理：`node tools/docs/check-docs-config.mjs` 与 `node tools/governance/public-surface-audit.mjs` 均通过；`git diff --check` 通过。没有重跑或扩大主治理门禁，测试文件集合未变。

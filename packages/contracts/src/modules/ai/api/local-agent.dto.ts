@@ -126,6 +126,11 @@ export const LocalAgentAccountSummarySchema = z
   .strict();
 export type LocalAgentAccountSummary = z.infer<typeof LocalAgentAccountSummarySchema>;
 
+/** Server-produced, domain-separated digest of a verified native account/configuration snapshot.
+ * Display preference partition only; never an authorization or execution capability.
+ */
+export const LocalAgentModelVisibilityContextSchema = z.string().regex(/^mvc1:[0-9a-f]{64}$/u);
+
 export const LocalAgentStatusSchema = z.discriminatedUnion('status', [
   z
     .object({
@@ -133,6 +138,7 @@ export const LocalAgentStatusSchema = z.discriminatedUnion('status', [
       models: z.array(LocalAgentModelSchema).max(2000),
       version: z.string().max(240).optional(),
       account: LocalAgentAccountSummarySchema.optional(),
+      modelVisibilityContext: LocalAgentModelVisibilityContextSchema.optional(),
     })
     .strict(),
   z

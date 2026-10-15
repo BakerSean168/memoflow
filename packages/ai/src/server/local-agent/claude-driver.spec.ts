@@ -358,3 +358,32 @@ it('reports the selected Claude executable version independently of the SDK cata
   });
   expect(probeNativeVersion).toHaveBeenLastCalledWith(connection, '/tmp');
 });
+
+it('scopes visibility only when SDK initialization reports an account identity', async () => {
+  async function probe(email?: string) {
+    const factory: ClaudeQueryFactory = () => ({
+      async initializationResult() {
+        return {
+          account: { tokenSource: 'oauth', ...(email ? { email } : {}) },
+          models: [{ value: 'sonnet', displayName: 'Sonnet' }],
+        };
+      },
+      async interrupt() {},
+      close() {},
+      async *[Symbol.asyncIterator]() {},
+    });
+    return new ClaudeDriver(connection, '/tmp', factory).probe();
+  }
+  const first = await probe('a@example.test');
+  expect(first.status).toBe('ready');
+  if (first.status !== 'ready') throw new Error('Expected catalog');
+  expect(first.modelVisibilityContext).toMatch(/^mvc1:[0-9a-f]{64}$/);
+  expect(await probe('a@example.test')).toHaveProperty(
+    'modelVisibilityContext',
+    first.modelVisibilityContext,
+  );
+  const changed = await probe('b@example.test');
+  if (changed.status !== 'ready') throw new Error('Expected catalog');
+  expect(changed.modelVisibilityContext).not.toBe(first.modelVisibilityContext);
+  expect(await probe()).not.toHaveProperty('modelVisibilityContext');
+});

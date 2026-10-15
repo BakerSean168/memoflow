@@ -35,7 +35,9 @@ const emit = defineEmits<{
 }>();
 const { t } = useI18n();
 const uid = `ai-native-${useId()}`;
-const modelVisibility = useNativeModelVisibility(useServerStateIdentityScope());
+const modelVisibility = useNativeModelVisibility(useServerStateIdentityScope(), () =>
+  props.status?.status === 'ready' ? props.status.modelVisibilityContext : undefined,
+);
 const visibilityInstanceId = computed(
   () =>
     props.identity?.instanceSlug ??
@@ -313,6 +315,13 @@ function save() {
       <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
         <p v-if="!models.length" class="text-xs leading-5 text-muted-foreground">
           {{ t('setting.ai.modelInventoryHint') }}
+        </p>
+        <p
+          v-if="models.length && !modelVisibility.canPersist.value"
+          data-testid="ai-native-model-visibility-unavailable"
+          class="mb-2 text-xs leading-5 text-muted-foreground"
+        >
+          {{ t('setting.ai.modelVisibilityContextUnavailable') }}
         </p>
         <div
           v-for="model in models"

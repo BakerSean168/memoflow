@@ -354,6 +354,7 @@ export default {
     "enableProvider": "Enable {name}",
     "displayName": "Display name",
     "credentialConfigured": "Credential configured",
+    "modelVisibilityContextUnavailable": "Model visibility preferences cannot be saved until the native account context is verified.",
     "modelInventoryHint": "Recheck to load the available models.",
     "modelReasoning": "Reasoning",
     "modelServiceTiers": "Service tier",

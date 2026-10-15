@@ -354,6 +354,7 @@ export default {
     "enableProvider": "启用 {name}",
     "displayName": "显示名称",
     "credentialConfigured": "已配置凭据",
+    "modelVisibilityContextUnavailable": "无法确认原生账号上下文，暂不能保存模型显示偏好。",
     "modelInventoryHint": "重新检查以加载可用模型。",
     "modelReasoning": "推理",
     "modelServiceTiers": "服务等级",

@@ -14,7 +14,7 @@ import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeEventQueue } from './native-event-queue';
 import { probeNativeVersion, resolveNativeExecutable } from './native-executable';
 import { nativeFailure } from './native-failure';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 const logger = createLogger('ClaudeLocalDriver');
 
 // Each MemoFlow MCP call is classified here rather than relying on Claude's
@@ -269,6 +269,7 @@ export class ClaudeDriver {
             : {}),
         })),
         fingerprint: await nativeIdentity('claude', this.connection.homePath, account),
+        hasAccountIdentity: z.email().safeParse(account.email).success,
       };
     } finally {
       if (timer) clearTimeout(timer);
@@ -282,6 +283,14 @@ export class ClaudeDriver {
       return {
         status: 'ready',
         models: init.models,
+        ...(init.hasAccountIdentity
+          ? {
+              modelVisibilityContext: nativeModelVisibilityContext(
+                this.connection,
+                init.fingerprint,
+              ),
+            }
+          : {}),
         ...(version ? { version } : {}),
       };
     } catch (error) {

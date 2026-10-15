@@ -13,10 +13,12 @@ export function useLocalAssistantChoices(
   choice: Ref<AssistantRuntimeChoice>,
   resolveIdentity: () => string = () => '',
 ) {
-  const modelVisibility = useNativeModelVisibility(resolveIdentity);
   const connections = ref<LocalAgentConnection[]>([]);
   const defaultChoice = ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' });
   const status = ref<LocalAgentStatus | null>(null);
+  const modelVisibility = useNativeModelVisibility(resolveIdentity, () =>
+    status.value?.status === 'ready' ? status.value.modelVisibilityContext : undefined,
+  );
   const loading = ref(false);
   const error = ref(false);
   let generation = 0;

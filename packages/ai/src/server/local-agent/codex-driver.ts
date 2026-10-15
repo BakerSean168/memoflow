@@ -19,7 +19,7 @@ import {
   type NativeServerRequest,
 } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { nativeFailure } from './native-failure';
 
 export type NativeAgentEvent =
@@ -164,7 +164,7 @@ export class CodexDriver {
 
   async probe(): Promise<LocalAgentStatus> {
     try {
-      await this.connect();
+      const fingerprint = await this.connect();
       const models: LocalAgentModel[] = [];
       let cursor: string | undefined;
       const cursors = new Set<string>();
@@ -213,6 +213,9 @@ export class CodexDriver {
       return {
         status: 'ready',
         models,
+        ...(this.account?.type === 'chatgpt' && this.account.email
+          ? { modelVisibilityContext: nativeModelVisibilityContext(this.connection, fingerprint) }
+          : {}),
         ...(this.version ? { version: this.version } : {}),
         ...(this.account ? { account: this.account } : {}),
       };

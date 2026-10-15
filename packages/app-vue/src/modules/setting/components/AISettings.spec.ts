@@ -510,6 +510,7 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     const { wrapper, localClient } = await setup({ native: true });
     localClient.probeDefaultDriver.mockResolvedValue({
       status: 'ready',
+      modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
       models: [
         { id: 'model-a', name: 'Model A' },
         { id: 'model-b', name: 'Model B' },
@@ -524,11 +525,39 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     await toggle.setValue(false);
     expect((toggle.element as HTMLInputElement).checked).toBe(false);
     expect(wrapper.findAll('[data-testid="ai-native-model"]')).toHaveLength(2);
-    expect(localStorage.getItem('ai:native-model-hidden:v1:desktop-profile-a:codex')).toBe(
-      '["model-a"]',
-    );
-    await toggle.setValue(true);
-    expect(localStorage.getItem('ai:native-model-hidden:v1:desktop-profile-a:codex')).toBe('[]');
+    expect(
+      localStorage.getItem(
+        'ai:native-model-hidden:v2:desktop-profile-a:codex:mvc1:' + 'a'.repeat(64),
+      ),
+    ).toBe('["model-a"]');
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [{ id: 'model-a', name: 'Model A' }],
+      modelVisibilityContext: 'mvc1:' + 'b'.repeat(64),
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(
+      (wrapper.get('[data-testid="ai-native-model-visible:model-a"]').element as HTMLInputElement)
+        .checked,
+    ).toBe(true);
+    localClient.probeDefaultDriver.mockResolvedValue({
+      status: 'ready',
+      models: [{ id: 'model-a', name: 'Model A' }],
+      modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+    });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    expect(
+      (wrapper.get('[data-testid="ai-native-model-visible:model-a"]').element as HTMLInputElement)
+        .checked,
+    ).toBe(false);
+    await wrapper.get('[data-testid="ai-native-model-visible:model-a"]').setValue(true);
+    expect(
+      localStorage.getItem(
+        'ai:native-model-hidden:v2:desktop-profile-a:codex:mvc1:' + 'a'.repeat(64),
+      ),
+    ).toBe('[]');
   });
 
   it('masks authenticated account identity until explicitly revealed', async () => {
@@ -743,4 +772,23 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
     expect(registry.execute).not.toHaveBeenCalled();
     expect(wrapper.findComponent(MastraAgentSettings).exists()).toBe(true);
   });
+});
+
+it('keeps an unverified native catalog readable but disables storing a contextless visibility preference', async () => {
+  const { wrapper, localClient } = await setup({ native: true });
+  localClient.probeDefaultDriver.mockResolvedValue({
+    status: 'ready',
+    models: [{ id: 'model-a', name: 'Model A' }],
+  });
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+  await flushPromises();
+  expect(
+    wrapper.get('[data-testid="ai-native-model-visible:model-a"]').attributes('disabled'),
+  ).toBeDefined();
+  expect(wrapper.get('[data-testid="ai-native-model-visibility-unavailable"]').text()).toContain(
+    'native account context',
+  );
+  expect(localStorage.length).toBe(0);
 });

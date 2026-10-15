@@ -34,8 +34,12 @@ function connection(name: string, enabled = true): LocalAgentConnection {
   });
 }
 
-function ready(modelId: string): LocalAgentStatus {
-  return { status: 'ready', models: [{ id: modelId, name: modelId }] };
+function ready(modelId: string): Extract<LocalAgentStatus, { status: 'ready' }> {
+  return {
+    status: 'ready',
+    models: [{ id: modelId, name: modelId }],
+    modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+  };
 }
 
 function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient {
@@ -56,9 +60,9 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
   };
 }
 
-describe('local assistant choices: profile and discovery isolation', () => {
-  afterEach(() => localStorage.clear());
+afterEach(() => localStorage.clear());
 
+describe('local assistant choices: profile and discovery isolation', () => {
   it('hiding an Agent model immediately blocks new sends without changing a saved conversation choice', async () => {
     const scope = ref('desktop-profile-a');
     const choice = ref<AssistantRuntimeChoice>({
@@ -72,7 +76,13 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(options.models.value.map((model) => model.id)).toEqual(['model-a']);
     expect(options.canSend.value).toBe(true);
 
-    const settings = useNativeModelVisibility(() => scope.value);
+    const settings = useNativeModelVisibility(
+      () => scope.value,
+      () =>
+        options.status.value?.status === 'ready'
+          ? options.status.value.modelVisibilityContext
+          : undefined,
+    );
     expect(settings.setVisible('shared-connection', 'model-a', false)).toBe(true);
     expect(options.models.value).toEqual([]);
     expect(options.canSend.value).toBe(false);
@@ -218,4 +228,41 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(options.connections.value).toEqual([]);
     expect(options.canSend.value).toBe(false);
   });
+});
+
+it('uses the current probe context and preserves the selected historical model across account changes', async () => {
+  const choice = ref<AssistantRuntimeChoice>({
+    runtimeKind: 'local_agent',
+    connectionId: 'shared-connection',
+    modelId: 'model-a',
+  });
+  const client = clientStub();
+  const options = useLocalAssistantChoices(client, choice, () => 'profile');
+  await options.refresh();
+  await Promise.resolve();
+  const visibility = useNativeModelVisibility(
+    () => 'profile',
+    () =>
+      options.status.value?.status === 'ready'
+        ? options.status.value.modelVisibilityContext
+        : undefined,
+  );
+  expect(visibility.setVisible('shared-connection', 'model-a', false)).toBe(true);
+  expect(options.canSend.value).toBe(false);
+  vi.mocked(client.probeConnection).mockResolvedValueOnce({
+    ...ready('model-a'),
+    modelVisibilityContext: 'mvc1:' + 'b'.repeat(64),
+  });
+  await options.probe('shared-connection');
+  expect(options.canSend.value).toBe(true);
+  expect(options.models.value.map((model) => model.id)).toEqual(['model-a']);
+  await options.probe('shared-connection');
+  expect(options.canSend.value).toBe(false);
+  expect(choice.value).toEqual({
+    runtimeKind: 'local_agent',
+    connectionId: 'shared-connection',
+    modelId: 'model-a',
+  });
+  expect(client.setDefaultChoice).not.toHaveBeenCalled();
+  expect(client.saveConnection).not.toHaveBeenCalled();
 });

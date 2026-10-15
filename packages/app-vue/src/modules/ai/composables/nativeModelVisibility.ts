@@ -1,14 +1,15 @@
+import { LocalAgentModelVisibilityContextSchema } from '@memoflow/contracts/ai';
 import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 
-const STORAGE_PREFIX = 'ai:native-model-hidden:v1';
+const STORAGE_PREFIX = 'ai:native-model-hidden:v2';
 const MAX_HIDDEN_MODELS = 200;
 // Shared within this renderer so a Settings toggle immediately invalidates
 // the Composer's discovered-model projection without another Agent probe.
 const revision = ref(0);
 
-function storageKey(identity: string, instanceId: string): string {
-  return identity && instanceId
-    ? `${STORAGE_PREFIX}:${encodeURIComponent(identity)}:${encodeURIComponent(instanceId)}`
+function storageKey(identity: string, instanceId: string, context: string | undefined): string {
+  return identity && instanceId && LocalAgentModelVisibilityContextSchema.safeParse(context).success
+    ? `${STORAGE_PREFIX}:${encodeURIComponent(identity)}:${encodeURIComponent(instanceId)}:${context}`
     : '';
 }
 
@@ -27,18 +28,28 @@ function readHidden(key: string): string[] {
 
 /**
  * Renderer-only display preference, scoped to the Desktop Profile and Agent
- * instance. It does not change the native model catalog, connection credentials,
- * or the model identity stored on an existing conversation.
+ * instance and verified probe context. Legacy v1 entries have no trustworthy
+ * native context and are deliberately not reused or migrated. This does not change
+ * the native model catalog, credentials, or an existing conversation model identity.
  */
-export function useNativeModelVisibility(resolveIdentity: () => string) {
-  const canPersist = computed(() => Boolean(resolveIdentity()));
+export function useNativeModelVisibility(
+  resolveIdentity: () => string,
+  resolveContext: () => string | undefined,
+) {
+  const canPersist = computed(
+    () =>
+      Boolean(resolveIdentity()) &&
+      LocalAgentModelVisibilityContextSchema.safeParse(resolveContext()).success,
+  );
   function isVisible(instanceId: string, modelId: string): boolean {
     // Reactive dependency shared by all mounted Settings and Composer consumers.
     void revision.value;
-    return !readHidden(storageKey(resolveIdentity(), instanceId)).includes(modelId);
+    return !readHidden(storageKey(resolveIdentity(), instanceId, resolveContext())).includes(
+      modelId,
+    );
   }
   function setVisible(instanceId: string, modelId: string, visible: boolean): boolean {
-    const key = storageKey(resolveIdentity(), instanceId);
+    const key = storageKey(resolveIdentity(), instanceId, resolveContext());
     if (!key || !modelId) return false;
     const hidden = readHidden(key);
     const next = visible

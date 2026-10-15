@@ -3,7 +3,7 @@ import { open } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
-import type { LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/contracts/ai';
 import { LocalAgentError } from '../../shared/local-agent-error';
 
 const record = z.record(z.string(), z.unknown());
@@ -108,4 +108,27 @@ export async function nativeIdentity(
       : ['OPENAI_API_KEY', 'OPENAI_BASE_URL'])
     hash.update(JSON.stringify([name, process.env[name] ?? null]));
   return hash.digest('hex');
+}
+
+/** Preference partition for a protocol-verified account; not a credential or permission.
+ * Keep the native identity digest private and bind the public digest to the exact executable/configuration.
+ */
+export function nativeModelVisibilityContext(
+  connection: LocalAgentConnection,
+  verifiedAccountFingerprint: string,
+): string {
+  return (
+    'mvc1:' +
+    createHash('sha256')
+      .update(
+        JSON.stringify([
+          'memoflow:native-model-visibility:v1',
+          connection.driver,
+          connection.executablePath,
+          connection.homePath ?? null,
+          verifiedAccountFingerprint,
+        ]),
+      )
+      .digest('hex')
+  );
 }

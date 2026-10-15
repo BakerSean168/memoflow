@@ -202,3 +202,37 @@ describe('local instance identity', () => {
     );
   });
 });
+
+it('accepts only an opaque native visibility context on a ready probe, never on saved configuration', () => {
+  const context = 'mvc1:' + 'a'.repeat(64);
+  expect(
+    LocalAgentStatusSchema.parse({ status: 'ready', models: [], modelVisibilityContext: context }),
+  ).toHaveProperty('modelVisibilityContext', context);
+  for (const modelVisibilityContext of [
+    '/private/home',
+    'alice@example.test',
+    'api-key',
+    'mvc1:bad',
+  ]) {
+    expect(
+      LocalAgentStatusSchema.safeParse({ status: 'ready', models: [], modelVisibilityContext })
+        .success,
+    ).toBe(false);
+  }
+  expect(
+    LocalAgentStatusSchema.safeParse({
+      status: 'unavailable',
+      message: 'Offline',
+      modelVisibilityContext: context,
+    }).success,
+  ).toBe(false);
+  expect(
+    LocalAgentConnectionInputSchema.safeParse({
+      driver: 'codex',
+      name: 'Codex',
+      executablePath: 'codex',
+      enabled: true,
+      modelVisibilityContext: context,
+    }).success,
+  ).toBe(false);
+});

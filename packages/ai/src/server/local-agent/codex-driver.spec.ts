@@ -14,7 +14,7 @@ const connection: LocalAgentConnection = {
   updatedAt: 1,
   writeScopes: [],
 };
-function driver(extra = '') {
+function driver(extra = '', config: LocalAgentConnection = connection) {
   const script = `
     const send = value => process.stdout.write(JSON.stringify(value) + '\\n');
     let initialized = false;
@@ -44,7 +44,7 @@ function driver(extra = '') {
     });
   `;
   return new CodexDriver(
-    connection,
+    config,
     process.cwd(),
     (options) =>
       new NativeRpcTransport({
@@ -204,4 +204,36 @@ describe('Codex native driver', () => {
     });
     await expect(run.next()).rejects.toMatchObject({ code: 'LOCAL_AGENT_SESSION_UNAVAILABLE' });
   });
+});
+
+it('partitions visibility by native executable, home and verified account without exposing their values', async () => {
+  const first = await driver().probe();
+  expect(first.status).toBe('ready');
+  if (first.status !== 'ready') throw new Error('Expected catalog');
+  expect(first.modelVisibilityContext).toMatch(/^mvc1:[0-9a-f]{64}$/);
+  const repeat = await driver().probe();
+  expect(repeat).toHaveProperty('modelVisibilityContext', first.modelVisibilityContext);
+  for (const changed of [
+    await driver('', { ...connection, executablePath: '/private/other/codex' }).probe(),
+    await driver('', { ...connection, homePath: '/nonexistent/memoflow-fixture-home' }).probe(),
+    await driver(`if(frame.method==='account/read') {
+      reply({account:{type:'chatgpt',email:'other@example.test'},requiresOpenaiAuth:true});return;
+    }`).probe(),
+  ]) {
+    expect(changed.status).toBe('ready');
+    if (changed.status !== 'ready') throw new Error('Expected catalog');
+    expect(changed.modelVisibilityContext).toMatch(/^mvc1:[0-9a-f]{64}$/);
+    expect(changed.modelVisibilityContext).not.toBe(first.modelVisibilityContext);
+    expect(changed.modelVisibilityContext).not.toContain('private');
+    expect(changed.modelVisibilityContext).not.toContain('example.test');
+  }
+});
+it('does not invent a stable visibility account for an API-key-only or absent account', async () => {
+  for (const account of [{ type: 'apiKey' }, null]) {
+    const status = await driver(`if(frame.method==='account/read') {
+      reply({account:${JSON.stringify(account)},requiresOpenaiAuth:false});return;
+    }`).probe();
+    expect(status.status).toBe('ready');
+    expect(status).not.toHaveProperty('modelVisibilityContext');
+  }
 });
