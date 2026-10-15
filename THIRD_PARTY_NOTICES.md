@@ -56,19 +56,24 @@ and claims no endorsement.
 
 - Project: Pi (coding agent) — Earendil Inc. & Contributors
 - Source: official press kit at https://pi.dev/press-kit (square badge mark `https://pi.dev/favicon.svg`)
-- License: MIT — the press-kit page states "Earendil Inc. & Contributors — Press Kit — MIT License"
+- License: MIT, declared on the press-kit page itself, which states: "Earendil Inc. & Contributors — Press Kit — MIT License"
 - Use: The three path segments of the monochrome square badge mark are copied verbatim into `packages/app-vue/src/modules/ai/components/agentBrandGlyphs.ts` for the `pi` driver of the `AgentDriverIcon` component (#457). The badge's original explicit light/dark fills are rendered with `currentColor` instead; the geometry is unmodified. Retrieval evidence and notes: [`AgentDriverIcon.SOURCES.md`](packages/app-vue/src/modules/ai/components/AgentDriverIcon.SOURCES.md).
 
-The press-kit page declares the MIT license but does not reprint the full
-license text there; the canonical MIT text of the same project (repository
-`earendil-works/pi`, `LICENSE`, Copyright (c) 2025 Mario Zechner) is
-reproduced verbatim below and applies to the press-kit assets as declared on
-that page:
+The press kit declares its assets MIT-licensed with the attribution above, but the
+page does not reprint the license text. To keep the full grant and disclaimer
+available, the standard MIT License terms are reproduced below as the terms the
+press kit invokes through its own MIT declaration. The attribution line follows the
+press kit's verifiable byline, "Earendil Inc. & Contributors" (the page states no
+copyright year). This is the standard MIT wording, not a verbatim copy of any
+press-kit document; the wording was cross-checked against the `earendil-works/pi`
+repository LICENSE, whose copyright line (Copyright (c) 2025 Mario Zechner) covers
+that repository's code and is not asserted here as the copyright of the press-kit
+artwork.
 
 ```text
 MIT License
 
-Copyright (c) 2025 Mario Zechner
+Copyright (c) Earendil Inc. & Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
