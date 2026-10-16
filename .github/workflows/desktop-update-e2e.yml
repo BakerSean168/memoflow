@@ -190,7 +190,7 @@ jobs:
           "base_installer=$($baseInstallers[0].FullName)" >> $env:GITHUB_OUTPUT
           "candidate_feed_dir=$candidateDir" >> $env:GITHUB_OUTPUT
 
-      - name: Run Windows packaged runtime smoke
+      - name: Run Windows packaged runtime and Providers UI smoke
         shell: pwsh
         env:
           MEMOFLOW_PACKAGED_EXECUTABLE: ${{ steps.fixtures.outputs.candidate_feed_dir }}\win-unpacked\memoflow.exe
