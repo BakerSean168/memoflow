@@ -53,7 +53,9 @@ test.describe('Task Plan CRUD Operations', () => {
     await taskTitleInput(page).fill(planTitle);
     await taskDescriptionInput(page).fill('Verifies checklist create and occurrence persistence.');
 
-    const dialogBodyBox = await dialog.getByTestId('product-dialog-body').boundingBox();
+    // The pane-scoped editor keeps its fixed-height workspace body scrollable
+    // through the pane dialog scroll host; the checklist must still reach its bottom.
+    const dialogBodyBox = await dialog.locator('[data-scroll-host="pane-dialog"]').boundingBox();
     const checklistBox = await dialog.getByTestId('task-checklist-editor').boundingBox();
     if (!dialogBodyBox || !checklistBox) {
       throw new Error('Expected Task workspace body and checklist geometry to be measurable');
